@@ -21,8 +21,9 @@ import sheets
 COLLAR_HIGHLIGHT = "#A7C7E8"  # spec section 5, L189: the rabbit sheet's lighter collar, shared by all four
 INNER_LINE_PT = 0.75  # spec section 5b: inner lines are 0.6-0.9 pt; the sheet's are too faint to resolve
 PALETTE_ORDER = ("fur", "marking", "dark", "blush", "shadow", "collar", "collarHighlight", "tag", "outline")
-# The right-facing views the turnaround never draws: mirrors of its left-facing ones (DECISIONS.md).
-MIRRORED = {"side.R": "side.L", "threeQuarter.R": "threeQuarter.L"}
+# The right-facing views the turnaround never draws: mirrors of its left-facing ones (DECISIONS.md 2).
+MIRROR_RULE = "negate x; swap .L and .R in every landmark name; swap sheetLeft and sheetRight; show the right side's markings"
+MIRRORED = {"side.R": {"from": "side.L", "rule": MIRROR_RULE}, "threeQuarter.R": {"from": "threeQuarter.L", "rule": MIRROR_RULE}}
 
 
 def mean_hex(values):
@@ -66,7 +67,7 @@ def build(species):
         "palette": {name: colours[name] for name in PALETTE_ORDER},
         "paletteProposed": proposed,
         "blush": {"restingLevel": palette["blush"]["turnaroundOpacity"],
-                  "note": "the printed blush's level on the turnaround's cheeks (spec L474: the blush is a level from 0 to 100%)"},
+                  "note": "the printed blush's level on the turnaround's cheeks, at the Grown stage the sheets draw (L663); spec L474 makes the blush a level from 0 to 100%"},
         "outline": {"outerPt": measured["outline"]["outerPt"], "innerPt": INNER_LINE_PT},
         "markings": plan["markings"],
         "crops": crops,

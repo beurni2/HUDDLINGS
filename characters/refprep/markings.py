@@ -9,7 +9,8 @@ clip box when it has one. Fails when a seed is not on tan, so a seed that misses
 its patch is caught rather than drawn. Writes ref/markings.json (each patch's
 area, centroid in the panel's pixels and dominant colour against the printed tan;
 run palette.py first) and ref/overlays/markings-<panel>.png: the panel beside the
-same panel with its patches coloured and named."""
+same panel with its patches coloured and named, and ref/overlays/markings-colours.png,
+each patch's colour where it shows against the printed tan."""
 import sys
 
 import numpy as np
@@ -54,10 +55,29 @@ def evidence(rgb, found, path):
     image = image.resize((image.width * ZOOM, image.height * ZOOM), Image.NEAREST)
     draw = ImageDraw.Draw(image)
     width = rgb.shape[1]
+    taken = []
     for name, mask in found.items():
         x, y = measure.centroid(mask)
-        draw.text(((x + width) * ZOOM + 4, y * ZOOM - 6), name, fill=(0, 0, 0))
+        left, top, right, bottom = draw.textbbox((0, 0), name)
+        w, h = right - left + 2, bottom - top + 2
+        tx, ty = (x + width) * ZOOM + 4, y * ZOOM - 6
+        # Move a name down past any name already drawn where it would land.
+        while any(tx < b[2] and b[0] < tx + w and ty < b[3] and b[1] < ty + h for b in taken):
+            ty += h + 1
+        taken.append((tx, ty, tx + w, ty + h))
+        draw.text((tx, ty - top), name, fill=(0, 0, 0), stroke_width=1, stroke_fill=(255, 255, 255))
     sheets.save_png(path, np.asarray(image))
+
+
+def colour_chart(plan, records, tan_printed, path):
+    """Each patch's colour where it shows, against the printed tan: one row per marking."""
+    rows = [("markings", [(None, "printed")] + [(None, "sightings, dE2000 to the printed tan")])]
+    for marking in plan["markings"]:
+        seen = [r for r in records if r["marking"] == marking["id"]]
+        cells = [(sheets.hex_to_rgb(tan_printed), tan_printed)]
+        cells += [(sheets.hex_to_rgb(r["dominant"]), f"{r['panel'].split('.')[-1].replace('main', 'hero')[:9]} {r['deltaE2000']}") for r in seen]
+        rows.append((marking["id"], cells))
+    palette.chip_image(rows, path)
 
 
 def show(species):
@@ -103,6 +123,7 @@ def show(species):
     missing = ids - shown
     if missing:
         raise SystemExit(f"markings: no panel shows {sorted(missing)}")
+    colour_chart(plan, records, tan_printed, ref / "overlays" / "markings-colours.png")
     result = {"species": species, "markings": plan["markings"], "evidence": records}
     sheets.write_json(ref / "markings.json", result)
     return result

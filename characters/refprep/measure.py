@@ -84,16 +84,25 @@ def middle_of_longest_run(row):
     return float((longest[0] + longest[-1]) / 2)
 
 
-def top_point(mask):
-    """The middle of the longest run of the mask's top row: on a tuft with two lobes, one of them, never the
-    gap between."""
-    top = int(np.nonzero(mask)[0].min())
-    return [middle_of_longest_run(mask[top]), float(top)]
+def head_top(sil):
+    """The middle of the longest run of the silhouette's top row: on a tuft with two lobes, one of them, never
+    the gap between."""
+    top = int(np.nonzero(sil)[0].min())
+    return [middle_of_longest_run(sil[top]), float(top)]
 
 
-def bottom_point(mask):
-    low = int(np.nonzero(mask)[0].max())
-    return [middle_of_longest_run(mask[low]), float(low)]
+def top_point(mask, rows=2):
+    """The middle of a region's top edge: the mean x of its top rows, which JPEG grain breaking one row into
+    pieces cannot move far."""
+    ys, xs = np.nonzero(mask)
+    top = ys.min()
+    return [float(xs[ys < top + rows].mean()), float(top)]
+
+
+def bottom_point(mask, rows=2):
+    ys, xs = np.nonzero(mask)
+    low = ys.max()
+    return [float(xs[ys > low - rows].mean()), float(low)]
 
 
 def eyes(cls, count):
@@ -199,8 +208,13 @@ def collar(cls):
 
 
 def tag(cls):
+    """The gold heart, and its top: the heart's middle (its centroid's x) on its top row, where it hangs from
+    its ring; a heart's top row is its two lobes, with the notch between."""
     found = components(cls.gold, 40)
-    return (found[0], top_point(found[0])) if found else (None, None)
+    if not found:
+        return None, None
+    top = float(np.nonzero(found[0])[0].min())
+    return found[0], [centroid(found[0])[0], top]
 
 
 def line_width(ink):
@@ -262,11 +276,15 @@ def check_hand(view, hand, sil):
             raise ValueError(f"{view}: the hand-placed {name} at {[x, y]} (crop px) is outside the silhouette")
 
 
-def check_required(view, points, required):
-    """Every landmark the view shows must have been found: a finder that comes back empty fails the run."""
+def check_required(view, points, required, hand=()):
+    """Every landmark the view shows must have been found, and every hand-placed point must be one of them or
+    the seat: a finder that comes back empty, or a misspelt hand point, fails the run."""
     missing = sorted(set(required) - set(points))
     if missing:
         raise ValueError(f"{view}: no {', '.join(missing)}; refmap/landmarks.json says this view shows them")
+    unknown = sorted(set(hand) - set(required) - {"seat"})
+    if unknown:
+        raise ValueError(f"{view}: the hand-placed {', '.join(unknown)} is not in this view's required set")
 
 
 def measure_view(view, rgb, hand):
@@ -280,7 +298,7 @@ def measure_view(view, rgb, hand):
         method[name] = how
 
     facing = {"front": "front", "back": "back"}.get(view, "left")
-    put("head.top", top_point(sil), "auto: the silhouette's topmost point")
+    put("head.top", head_top(sil), "auto: the middle of the longest run of the silhouette's top row")
     ground_y = float(ys.max())
     band, collar_points = collar(cls)
     for name, xy in collar_points.items():
@@ -289,6 +307,8 @@ def measure_view(view, rgb, hand):
     check_hand(view, hand, sil)
     hand = dict(hand)
     seat = hand.pop("seat", None)
+    if seat is None and facing == "left":
+        raise ValueError(f"{view}: no seat; a turned view's origin is the seat placed by hand (refmap/landmarks.json)")
     if seat is not None:
         put("ground", [seat[0], ground_y], "hand: the silhouette's lowest row, under the seat placed by hand (the haunch's underside)")
     else:
@@ -299,7 +319,7 @@ def measure_view(view, rgb, hand):
         put("ground", [centroid(body)[0], ground_y], "auto: the silhouette's lowest row, under the middle of the body below the collar")
     tag_mask, tag_top = tag(cls)
     if tag_top is not None:
-        put("tag.top", tag_top, "auto: the top of the gold heart, where it hangs from its ring")
+        put("tag.top", tag_top, "auto: the gold heart's top row, at its middle, where it hangs from its ring")
     eye_masks = []
     if view != "back":
         eye_masks = eyes(cls, 1 if view == "side.L" else 2)
@@ -427,7 +447,7 @@ def measure(species):
         # Hand points are written in the sheet's pixels; measurement works in the crop's.
         hand = {k: [v[0] - x0, v[1] - y0] for k, v in hand.items()}
         sil, cls, points, method, shape = measure_view(view, rgb, hand)
-        check_required(view, points, hand_file["required"][view])
+        check_required(view, points, hand_file["required"][view], hand)
         head = head_region(sil, shape["earMasks"], points["head.top"][1], shape["headBottom"])
         shape["headCentre"] = [round(v, 2) for v in centroid(head)]
         # The head's width is the front view's: elsewhere the ears or the turn hide its sides.

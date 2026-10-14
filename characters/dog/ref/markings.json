@@ -5,7 +5,7 @@
    "id": "head.patch.L",
    "part": "head.base",
    "side": "L",
-   "note": "Tan around the dog's left eye and down behind its outer side, rising into the left ear's root, which hides its upper edge. Painted a paler tan than the body's patches (DECISIONS 12, Q24). Shown wherever the left eye shows."
+   "note": "Tan around the dog's left eye and down behind its outer side, rising into the left ear's root, which hides its upper edge. Painted a paler tan than the body's patches (DECISIONS 18, Q24). Shown wherever the left eye shows."
   },
   {
    "id": "head.patch.R",
@@ -23,7 +23,7 @@
    "id": "back.patch.R",
    "part": "body.back",
    "side": "R",
-   "note": "The right half of the saddle: from the spine just behind the collar, where the back turnaround shows it crossing over, down the right flank toward the haunch, reaching lower than the left half (the front turnaround, the hero). In the motion sheet's right-side poses it reaches the topline at the rump."
+   "note": "The right half of the saddle: from the spine just behind the collar, where the back turnaround shows it crossing over, down the right flank toward the haunch, reaching lower than the left half (the front turnaround, the hero). In the motion sheet's right-side poses it reaches the topline at the rump. Sitting, the saddle runs down the sloping back to the haunch; standing, it lies along the level topline to the rump."
   },
   {
    "id": "tail.base",
@@ -35,7 +35,7 @@
    "id": "rump.patch.L",
    "part": "body.back",
    "side": "L",
-   "note": "A small tan spot on the rump at the tail's root, where the tail's tan crosses the body's outline (the side and three-quarter turnarounds). No right-side panel shows one."
+   "note": "A small soft spot on the rump at the tail's root, where the tail's tan crosses the body's outline, fading paler away from the outline (the side and three-quarter turnarounds). No right-side panel shows one."
   }
  ],
  "evidence": [
@@ -74,18 +74,18 @@
   {
    "panel": "master.hero.main",
    "marking": "head.patch.R",
-   "areaPx": 1482,
-   "centroidPx": [111.7, 136.5],
-   "dominant": "#F0BD92",
-   "deltaE2000": 6.72
+   "areaPx": 1937,
+   "centroidPx": [110.3, 144.5],
+   "dominant": "#F0BC91",
+   "deltaE2000": 6.5
   },
   {
    "panel": "master.hero.main",
    "marking": "head.patch.L",
-   "areaPx": 755,
-   "centroidPx": [226.9, 97.7],
-   "dominant": "#F0BC92",
-   "deltaE2000": 6.49
+   "areaPx": 1884,
+   "centroidPx": [246.8, 104.0],
+   "dominant": "#EFBB91",
+   "deltaE2000": 6.25
   },
   {
    "panel": "master.hero.main",
@@ -146,10 +146,10 @@
   {
    "panel": "master.turnaround.three-quarter",
    "marking": "rump.patch.L",
-   "areaPx": 56,
-   "centroidPx": [178.7, 188.0],
-   "dominant": "#E4B68B",
-   "deltaE2000": 5.2
+   "areaPx": 131,
+   "centroidPx": [180.8, 189.8],
+   "dominant": "#E6AA7D",
+   "deltaE2000": 2.65
   },
   {
    "panel": "master.turnaround.side",
@@ -178,10 +178,10 @@
   {
    "panel": "master.turnaround.side",
    "marking": "rump.patch.L",
-   "areaPx": 69,
-   "centroidPx": [149.4, 186.0],
-   "dominant": "#EABE9D",
-   "deltaE2000": 7.33
+   "areaPx": 113,
+   "centroidPx": [150.7, 186.5],
+   "dominant": "#E8B48A",
+   "deltaE2000": 4.48
   },
   {
    "panel": "master.turnaround.back",

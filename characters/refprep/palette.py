@@ -10,7 +10,7 @@ measure.py first). Writes ref/palette.json and the evidence image
 ref/overlays/palette.png: each swatch against its printed value, each region's
 dominant colour in every view against the printed value it is held to, and the
 blush's level on each cheek sampled; ref/overlays/palette-regions-<view>.png
-shows each region.
+shows each region, and ref/overlays/palette-blush.png each cheek's box.
 
 The printed values are the palette (spec section 5, L189: "the dog and rabbit
 values are their sheets' printed labels"); this records how far the sheet's own
@@ -113,6 +113,13 @@ def regions(rgb, sil, view):
     return {k: v for k, v in found.items() if v is not None and v.any()}
 
 
+def inside(box, outer):
+    """Whether a box [x, y, width, height] lies wholly inside another."""
+    x, y, w, h = box
+    ox, oy, ow, oh = outer
+    return ox <= x and oy <= y and x + w <= ox + ow and y + h <= oy + oh
+
+
 def blush(rgb, fur_hex, blush_hex):
     """The blush in a box drawn around a cheek: the reddest tenth of its light pixels (L* above 70, the eye
     and its lines left out), and how opaque the printed blush over the printed fur must be to give it,
@@ -184,13 +191,22 @@ def sample(species):
                 entry["heldTo"] = HELD_TO[role]
                 entry["deltaE2000"] = round(delta(colour, printed[HELD_TO[role]]), 2)
             views[view][role] = entry
-    cheeks = []
+    cheeks, tiles = [], []
     for where in plan["blush"]:
+        panel = panels[where["panel"]]
         x, y, w, h = where["box"]
-        alpha, peak = blush(sheets.load_sheet(species, panels[where["panel"]]["sheet"])[y:y + h, x:x + w],
-                            printed["fur"], printed["blush"])
+        px, py, pw, ph = panel["box"]
+        if not inside(where["box"], panel["box"]):
+            raise ValueError(f"the blush box {where['box']} is not inside {where['panel']} {panel['box']}")
+        sheet = sheets.load_sheet(species, panel["sheet"])
+        alpha, peak = blush(sheet[y:y + h, x:x + w], printed["fur"], printed["blush"])
         cheeks.append({"panel": where["panel"], "box": where["box"], "note": where["note"],
                        "peak": sheets.rgb_to_hex(peak), "opacity": round(alpha, 2)})
+        tile = Image.fromarray(sheet[py:py + ph, px:px + pw]).resize((pw * 2, ph * 2), Image.NEAREST)
+        draw = ImageDraw.Draw(tile)
+        draw.rectangle([(x - px) * 2, (y - py) * 2, (x - px + w) * 2 - 1, (y - py + h) * 2 - 1], outline=(0, 110, 255), width=2)
+        draw.text((4, 4), f"{where['panel']}: {alpha:.0%}", fill=(0, 60, 160), stroke_width=1, stroke_fill=(255, 255, 255))
+        tiles.append(np.asarray(tile))
     resting = [c["opacity"] for c in cheeks if c["panel"].startswith("master.turnaround.")]
     outline = [sheets.hex_to_rgb(v["outline"]["dominant"]) for v in views.values() if "outline" in v]
     result = {
@@ -215,6 +231,9 @@ def sample(species):
     rows.append(("blush (level)", [(sheets.hex_to_rgb(printed["blush"]), printed["blush"])] +
                  [(sheets.hex_to_rgb(c["peak"]), f"{c['opacity']:.0%}") for c in cheeks]))
     chip_image(rows, ref / "overlays" / "palette.png")
+    width = max(t.shape[1] for t in tiles)
+    sheets.save_png(ref / "overlays" / "palette-blush.png",
+                    np.concatenate([np.pad(t, ((0, 6), (0, width - t.shape[1]), (0, 0)), constant_values=255) for t in tiles]))
     for view, (rgb, found) in masks.items():
         tiles = []
         for role in HELD_TO:

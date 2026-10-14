@@ -222,9 +222,53 @@ class LandmarksOnTheSheetTest(unittest.TestCase):
                 if "seat" in hand:
                     self.assertEqual(points["ground"][0], hand["seat"][0])
 
-    def test_a_missing_landmark_fails(self):
+    # The automatic landmarks as reviewed on the overlays (crop px), so a change that moves one onto another
+    # feature (the nose into the mouth, a corner onto the jaw) fails here, not only in a diff.
+    REVIEWED = {
+        "front": {"head.top": [111.5, 5.0], "collar.line.sheetLeft": [77.0, 139.0], "collar.line.sheetRight": [146.0, 136.5],
+                  "tag.top": [111.1, 151.0], "eye.R": [79.3, 89.9], "eye.L": [138.5, 85.8], "nose": [110.2, 98.2],
+                  "mouth.R": [94.0, 108.0], "mouth.L": [127.0, 106.0], "ear.R.root": [58.8, 44.0], "ear.R.tip": [41.2, 137.0],
+                  "ear.L.root": [157.7, 38.0], "ear.L.tip": [176.5, 133.0], "chin": [110.0, 143.0]},
+        "threeQuarter.L": {"head.top": [120.5, 6.0], "collar.line.sheetLeft": [71.0, 144.5], "collar.line.sheetRight": [136.0, 142.0],
+                           "tag.top": [87.4, 157.0], "eye.R": [63.1, 84.0], "eye.L": [115.0, 96.5], "nose": [76.8, 100.7],
+                           "mouth.R": [64.0, 108.0], "mouth.L": [93.0, 113.0], "ear.R.root": [58.4, 35.0], "ear.R.tip": [31.7, 118.0],
+                           "ear.L.root": [163.5, 44.0], "ear.L.tip": [169.7, 144.0], "chin": [77.0, 144.0]},
+        "side.L": {"head.top": [82.5, 5.0], "collar.line.sheetLeft": [51.0, 144.0], "collar.line.sheetRight": [105.0, 137.5],
+                   "tag.top": [53.2, 150.0], "eye.L": [44.4, 86.9], "nose": [10.4, 94.8], "mouth.L": [22.0, 111.0],
+                   "ear.L.root": [114.4, 31.0], "ear.L.tip": [114.2, 135.0]},
+        "back": {"head.top": [86.5, 6.0], "collar.line.sheetLeft": [63.0, 131.5], "collar.line.sheetRight": [137.0, 131.5],
+                 "ear.L.root": [49.2, 29.0], "ear.L.tip": [35.9, 128.0], "ear.R.root": [147.2, 24.0], "ear.R.tip": [162.0, 126.0]},
+    }
+
+    def test_the_landmarks_are_where_they_were_reviewed(self):
+        for view, reviewed in self.REVIEWED.items():
+            points = self.views[view][2]
+            for name, (x, y) in reviewed.items():
+                with self.subTest(view=view, landmark=name):
+                    self.assertLessEqual(np.hypot(points[name][0] - x, points[name][1] - y), 2.5)
+
+    def test_the_tag_hangs_below_its_ring_and_the_ears_root_mid_edge(self):
+        for view, (classes, sil, points, _, _) in self.views.items():
+            with self.subTest(view=view):
+                if "tag.ring" in points:
+                    self.assertLessEqual(abs(points["tag.top"][0] - points["tag.ring"][0]), 2)
+        front = self.views["front"][2]
+        self.assertLess(front["eye.R"][0], front["nose"][0])
+        self.assertLess(front["nose"][0], front["eye.L"][0])
+        self.assertLess(front["nose"][1], min(front["mouth.R"][1], front["mouth.L"][1]))
+
+    def test_a_turned_view_without_its_seat_fails(self):
+        rgb = sheets.load_sheet("dog", "master")
+        x, y, w, h = [620, 65, 193, 224]
+        with self.assertRaises(ValueError):
+            measure.measure_view("side.L", rgb[y:y + h, x:x + w], {})
+
+    def test_a_missing_or_misspelt_landmark_fails(self):
         with self.assertRaises(ValueError):
             measure.check_required("front", {"nose": [0, 0]}, ["nose", "eye.L"])
+        with self.assertRaises(ValueError):
+            measure.check_required("front", {"nose": [0, 0]}, ["nose"], {"nsoe": [0, 0]})
+        measure.check_required("side.L", {"nose": [0, 0]}, ["nose"], {"seat": [0, 0], "nose": [0, 0]})
 
 
 class ModelTest(unittest.TestCase):
@@ -260,8 +304,18 @@ class CropTest(unittest.TestCase):
         self.assertLess(top + height, 618)
         x, y, w, h = crop.panel_box(rgb, ink, {"box": box})
         self.assertGreaterEqual(y + h, 619)
-        # The card's grey frame across the box's top is not a shadow.
-        self.assertEqual(y, 444)
+
+    def test_frames_and_tinted_bands_are_not_shadows(self):
+        # The Do card's light frame and the tinted band above the Mischievous assembly pass the colour test,
+        # but sit at a box's top; real shadows lie under the figure.
+        panel_map = crop.load_map("dog")
+        for sheet, panel in (("rigging", "rigging.do-avoid.do"), ("expressions", "expressions.assembly.mischievous"),
+                             ("motion", "motion.movement.jump")):
+            box = next(p for p in panel_map["sheets"][sheet] if p["id"] == panel)["box"]
+            x, y, w, h = box
+            found = crop.ground_shadows(sheets.load_sheet("dog", sheet), box)
+            with self.subTest(panel=panel):
+                self.assertFalse(found[y:y + h // 2, x:x + w].any())
 
     def test_a_box_off_the_sheet_fails(self):
         with self.assertRaises(SystemExit):
@@ -352,6 +406,10 @@ class PaletteTest(unittest.TestCase):
         ImageDraw.Draw(image).ellipse([5, 5, 55, 55], fill=(125, 183, 232))
         self.assertEqual(sheets.rgb_to_hex(palette.swatch(np.asarray(image))), "#7DB7E8")
         self.assertAlmostEqual(palette.delta(palette.swatch(np.asarray(image)), "#7DB7E8"), 0.0, places=6)
+
+    def test_a_blush_box_off_its_panel_fails(self):
+        self.assertTrue(palette.inside([10, 10, 5, 5], [0, 0, 20, 20]))
+        self.assertFalse(palette.inside([18, 10, 5, 5], [0, 0, 20, 20]))
 
     def test_a_wash_over_the_fur_gives_its_opacity(self):
         fur, blush = sheets.hex_to_rgb("#FFF4E8").astype(float), sheets.hex_to_rgb("#F7B3A6").astype(float)

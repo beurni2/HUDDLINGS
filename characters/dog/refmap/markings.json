@@ -1,11 +1,11 @@
 {
- "_about": "The proposed marking map (spec section 5b: proposed from the hero and the front turnaround, each side view used for its own side, approved at Gate A), and where each patch shows on the sheets. Each evidence entry names a panel and, per marking, one or more seed points in the sheet's pixels inside that patch's tan; markings.py colours the tan region holding each seed. A clip box [x, y, width, height] keeps a patch apart from tan it runs into with no line between: a head patch from its ear, a back patch from the tail's root, the two halves of the saddle at the spine. Ears, brows and the tongue are parts, not markings.",
+ "_about": "The proposed marking map (spec section 5b: proposed from the hero and the front turnaround, each side view used for its own side, approved at Gate A), and where each patch shows on the sheets. Each evidence entry names a panel and, per marking, one or more seed points in the sheet's pixels inside that patch's tan; markings.py colours the tan region holding each seed. A clip box [x, y, width, height] keeps a patch apart from tan it runs into with no line between: a head patch from its ear, the two halves of the saddle at the spine. Ears, brows and the tongue are parts, not markings.",
  "markings": [
   {
    "id": "head.patch.L",
    "part": "head.base",
    "side": "L",
-   "note": "Tan around the dog's left eye and down behind its outer side, rising into the left ear's root, which hides its upper edge. Painted a paler tan than the body's patches (DECISIONS 12, Q24). Shown wherever the left eye shows."
+   "note": "Tan around the dog's left eye and down behind its outer side, rising into the left ear's root, which hides its upper edge. Painted a paler tan than the body's patches (DECISIONS 18, Q24). Shown wherever the left eye shows."
   },
   {
    "id": "head.patch.R",
@@ -23,7 +23,7 @@
    "id": "back.patch.R",
    "part": "body.back",
    "side": "R",
-   "note": "The right half of the saddle: from the spine just behind the collar, where the back turnaround shows it crossing over, down the right flank toward the haunch, reaching lower than the left half (the front turnaround, the hero). In the motion sheet's right-side poses it reaches the topline at the rump."
+   "note": "The right half of the saddle: from the spine just behind the collar, where the back turnaround shows it crossing over, down the right flank toward the haunch, reaching lower than the left half (the front turnaround, the hero). In the motion sheet's right-side poses it reaches the topline at the rump. Sitting, the saddle runs down the sloping back to the haunch; standing, it lies along the level topline to the rump."
   },
   {
    "id": "tail.base",
@@ -35,7 +35,7 @@
    "id": "rump.patch.L",
    "part": "body.back",
    "side": "L",
-   "note": "A small tan spot on the rump at the tail's root, where the tail's tan crosses the body's outline (the side and three-quarter turnarounds). No right-side panel shows one."
+   "note": "A small soft spot on the rump at the tail's root, where the tail's tan crosses the body's outline, fading paler away from the outline (the side and three-quarter turnarounds). No right-side panel shows one."
   }
  ],
  "evidence": [
@@ -64,11 +64,11 @@
    "seeds": {
     "head.patch.R": {
      "seed": [145, 139],
-     "clip": [109, 128, 62, 45]
+     "clip": [109, 128, 62, 72]
     },
     "head.patch.L": {
      "seed": [245, 108],
-     "clip": [226, 92, 40, 62]
+     "clip": [226, 92, 75, 62]
     },
     "back.patch.R": {
      "seed": [128, 282]
@@ -96,12 +96,10 @@
      "seed": [1177, 217]
     },
     "tail.base": {
-     "seed": [1218, 250],
-     "clip": [1203, 225, 40, 50]
+     "seed": [1218, 250]
     },
     "rump.patch.L": {
-     "seed": [1200, 250],
-     "clip": [1190, 230, 13, 40]
+     "seed": [1200, 250]
     }
    }
   },
@@ -116,12 +114,10 @@
      "seed": [747, 221]
     },
     "tail.base": {
-     "seed": [785, 249],
-     "clip": [774, 225, 30, 50]
+     "seed": [785, 249]
     },
     "rump.patch.L": {
-     "seed": [769, 250],
-     "clip": [760, 235, 12, 35]
+     "seed": [769, 250]
     }
    }
   },

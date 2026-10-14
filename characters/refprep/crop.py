@@ -41,8 +41,9 @@ def load_map(species, path=None):
 
 def ground_shadows(rgb, box):
     """The soft ground shadows inside a box: patches of at least SHADOW_AREA pixels more than SHADOW_DELTA
-    from the card (the median of the box's border), warmer than the card by SHADOW_WARMER in C* and paler
-    than ink. The card's own frame and tints are as grey as the card, and the fur is lighter."""
+    from the card (the median of the box's border), warmer than the card by SHADOW_WARMER in C*, paler than
+    ink, and starting in the box's lower half, under the figure. A card's frame or a neighbouring tinted
+    band can pass the colour test, but sits along a box's top or sides."""
     x, y, w, h = box
     lab = sheets.to_lab(rgb[y:y + h, x:x + w])
     card = np.median(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]), axis=0)
@@ -50,9 +51,10 @@ def ground_shadows(rgb, box):
     soft = ((sheets.delta_e2000(lab, card[None, None, :]) > SHADOW_DELTA) & (C > np.hypot(card[1], card[2]) + SHADOW_WARMER)
             & (C < 14) & (lab[..., 0] >= 80) & (lab[..., 0] < 94))
     labels, count = ndimage.label(soft)
-    sizes = ndimage.sum(soft, labels, range(1, count + 1)) if count else np.array([])
+    keep = [index for index, where in enumerate(ndimage.find_objects(labels), start=1)
+            if where[0].start >= h / 2 and (labels[where] == index).sum() >= SHADOW_AREA]
     found = np.zeros(rgb.shape[:2], bool)
-    found[y:y + h, x:x + w] = np.isin(labels, 1 + np.nonzero(sizes >= SHADOW_AREA)[0])
+    found[y:y + h, x:x + w] = np.isin(labels, keep)
     return found
 
 
