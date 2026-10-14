@@ -128,6 +128,8 @@ jobs:
         with:
           name: spritekit-frames
           path: build/parity/spritekit
+      - name: What the SpriteKit render measured
+        run: cat build/parity/spritekit/notes.txt
       - name: Compare
         run: python3 tools/qa/parity.py build/parity/web build/parity/spritekit build/parity/report
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

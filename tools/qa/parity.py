@@ -108,12 +108,17 @@ def main(web, spritekit, out):
         a0, b0 = load(frames(web, run) / first), load(frames(spritekit, run) / first)
         report["runs"][run]["diagnosis of " + first] = diagnose(a0, b0)
         print(f"parity: {run}: diagnosis of {first}: {json.dumps(report['runs'][run]['diagnosis of ' + first])}")
-        if below:
-            # The first frame and the worst ones (web | SpriteKit | difference), readable from the log alone.
-            print(f"PARITY-SHEET-BEGIN {run}")
-            for line in sheet_text([np.concatenate([a0, b0, np.stack([np.clip(255 - np.abs(a0.astype(int) - b0.astype(int)).sum(axis=2) * 4, 0, 255).astype(np.uint8)] * 3, axis=2)], axis=1)] + rows[:2]):
-                print(line)
-            print(f"PARITY-SHEET-END {run}")
+        if below and "sheet" not in report:
+            # The first failing run's first frame and worst frame (web | SpriteKit | difference),
+            # readable from the log alone; printed last, after every run's numbers.
+            diff0 = np.stack([np.clip(255 - np.abs(a0.astype(int) - b0.astype(int)).sum(axis=2) * 4, 0, 255).astype(np.uint8)] * 3, axis=2)
+            report["sheet"] = (run, sheet_text([np.concatenate([a0, b0, diff0], axis=1)] + rows[:1]))
+    if "sheet" in report:
+        run, lines = report.pop("sheet")
+        print(f"PARITY-SHEET-BEGIN {run}")
+        for line in lines:
+            print(line)
+        print(f"PARITY-SHEET-END {run}")
     (out / "report.json").write_text(json.dumps(report, indent=1) + "\n")
     return 1 if failed else 0
 
