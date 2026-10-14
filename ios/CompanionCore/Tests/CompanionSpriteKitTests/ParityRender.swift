@@ -101,6 +101,7 @@ private final class Offscreen {
 private func pixelsPerScenePoint(_ offscreen: Offscreen) throws -> Int {
     let scene = SKScene(size: CGSize(width: offscreen.size, height: offscreen.size))
     scene.anchorPoint = .zero
+    scene.scaleMode = .fill
     scene.backgroundColor = SKColor(red: 1, green: 1, blue: 1, alpha: 1)
     let square = SKSpriteNode(color: SKColor(red: 1, green: 0, blue: 0, alpha: 1), size: CGSize(width: 8, height: 8))
     square.anchorPoint = .zero
@@ -163,7 +164,9 @@ final class ParityRender: XCTestCase {
             // Scene points are pixels / k, so the frame has exactly run.size pixels across, as on the web.
             let scene = SKScene(size: CGSize(width: Double(run.size) / k, height: Double(run.size) / k))
             scene.anchorPoint = .zero
-            scene.scaleMode = .resizeFill
+            // .fill maps the scene exactly onto the viewport. (.resizeFill resizes the scene to the
+            // viewport in screen points, so a 2x simulator drew everything twice the size.)
+            scene.scaleMode = .fill
             scene.backgroundColor = SKColor(red: 1, green: 1, blue: 1, alpha: 1)
             let textures = try AtlasTextures(set: set, folder: package)
             let companion = CompanionNode(rig: rig, textures: textures, pointScale: CGFloat(run.pixelsPerPoint / k))
