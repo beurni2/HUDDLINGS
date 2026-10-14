@@ -268,6 +268,8 @@ export const landmarks: Record<string, P> = {
   "paw.front.R": [-15.5, -5.4],
   "paw.hind.L": [37.6, -10.9],
   "paw.hind.R": [-37.6, -10.9],
-  "tag.ring": [0.4, -57.5],
-  seat: [0, -1.4],
+  // The ring's top as it shows below the chin; it swings from its hidden top, the tag's pivot at (0.4, −57.5).
+  "tag.ring": [0.4, -55.6],
+  // The seat: the body's lowest point on the midline is at −1.4; taken 0.6 pt inside, so it lies in the body's own pixels.
+  seat: [0, -2],
 };

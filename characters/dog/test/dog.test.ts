@@ -4,12 +4,15 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { Resvg } from "@resvg/resvg-js";
+import { PNG } from "pngjs";
 import type { AtlasSet, Clip, Rig } from "../../../runtime-web/src/format.ts";
 import { validate } from "../../../runtime-web/src/format.ts";
 import { compile, drawList, evaluatePose } from "../../../runtime-web/src/rig.ts";
 import { buildPackage, readSource } from "../../build/build.ts";
 import { restTransform, toBone } from "../../draw/frame.ts";
-import { front } from "../src/views/front.ts";
+import { scopeIds } from "../../draw/svg.ts";
+import { front, landmarks } from "../src/views/front.ts";
 
 const json = (path: string) => JSON.parse(readFileSync(new URL(path, import.meta.url), "utf8"));
 const rig = json("../src/rig.json") as Rig;
@@ -88,6 +91,23 @@ test("each marking is an overlay clipped to the part model.json gives it; head p
   assert.equal(rig.fakeTurn!.roles["head.patch.R"], "marking");
   // head.line is drawn after the head's clip group and is not clipped, so it covers the stencil's edge.
   assert.equal(parts.get("head.line")!.clipTo, undefined);
+});
+
+test("each placed landmark lies on its own part, the topmost there with alpha 0.5 or more", () => {
+  const owner: Record<string, string> = { "paw.front.L": "front.L", "paw.front.R": "front.R", "paw.hind.L": "hind.L", "paw.hind.R": "hind.R", "tag.ring": "tag", seat: "body.back" };
+  assert.deepEqual(Object.keys(landmarks).sort(), Object.keys(owner).sort());
+  const order = rig.drawOrder.front!.flatMap((e) => (e === "@head" ? rig.drawOrder["head.front"]! : [e]));
+  const pieces = new Map(front().map((d) => [d.part, d.piece]));
+  const alpha = new Map<string, (p: [number, number]) => number>();
+  for (const [part, p] of pieces) {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="190" viewBox="-100 -180 200 190">${scopeIds(p.svg, "p")}</svg>`;
+    const png = PNG.sync.read(new Resvg(svg, { fitTo: { mode: "zoom", value: 3 } }).render().asPng());
+    alpha.set(part, ([x, y]) => png.data[(Math.floor((y + 180) * 3) * png.width + Math.floor((x + 100) * 3)) * 4 + 3]! / 255);
+  }
+  for (const [name, p] of Object.entries(landmarks)) {
+    const top = order.filter((part) => part !== "shadow" && alpha.get(part)?.(p)! >= 0.5).at(-1);
+    assert.equal(top, owner[name], `${name} at (${p}) lies on ${top}`);
+  }
 });
 
 test("moving a pivot leaves the rest frame where it was", () => {

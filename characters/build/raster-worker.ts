@@ -8,7 +8,8 @@ const jobs = JSON.parse(readFileSync(process.argv[2]!, "utf8")) as Job[];
 for (const job of jobs) {
   // With the anchor at 0, 0 the raster's anchor is minus the trim's corner.
   const r = rasterize({ region: job.region, svg: job.svg, anchor: [0, 0] }, job.scale);
-  // Written aside and moved into place, so a half-written file is never read as a cached raster.
-  writeRaster(`${job.file}.part`, { w: r.w, h: r.h, minX: -r.anchorX, minY: -r.anchorY, data: r.data });
-  renameSync(`${job.file}.part`, job.file);
+  // Written aside and moved into place, so a half-written file is never read as a cached raster, even by another build.
+  const part = `${job.file}.${process.pid}.part`;
+  writeRaster(part, { w: r.w, h: r.h, minX: -r.anchorX, minY: -r.anchorY, data: r.data });
+  renameSync(part, job.file);
 }
