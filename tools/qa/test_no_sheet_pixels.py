@@ -38,8 +38,6 @@ class NoSheetPixels(unittest.TestCase):
         self.assertTrue(no_sheet_pixels.check([Path(self.tmp.name) / "nope"]))
 
 
-if __name__ == "__main__":
-    unittest.main()
 
 
 class PackageInApp(unittest.TestCase):
@@ -58,3 +56,6 @@ class PackageInApp(unittest.TestCase):
             (folder / "atlas@2x-0.png").write_bytes(b"recompressed")
             self.assertIn("test/atlas@2x-0.png: its bytes changed on the way into the app", package_in_app.check(Path(tmp) / "Huddlings.app"))
             self.assertTrue(package_in_app.check(Path(tmp) / "Empty.app"))
+
+if __name__ == "__main__":
+    unittest.main()

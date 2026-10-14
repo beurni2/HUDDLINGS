@@ -23,7 +23,9 @@ jobs:
       - name: Copy lint tests
         run: python3 -m unittest discover -s tools/copylint -v
       - name: QA tool tests
-        run: python3 -m unittest discover -s tools/qa -v
+        run: |
+          pip install -r tools/requirements.txt
+          python3 -m unittest discover -s tools/qa -v
 
   runtime-web:
     # The web runtime and the build tools: typecheck, tests, and the shared

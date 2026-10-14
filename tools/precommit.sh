@@ -11,6 +11,14 @@ trap 'rm -rf "$tmp"' EXIT
 git -C "$top" checkout-index -a --prefix="$tmp/"
 python3 "$tmp/tools/copylint/copylint.py"
 python3 -m unittest discover -s "$tmp/tools/copylint" -q
+# The app's code shows only catalogue copy outside the Lab.
+if [ -d "$tmp/ios/App" ]; then
+  python3 "$tmp/tools/copylint/strings_build.py" code "$tmp/ios"
+fi
+# The Visual QA tools' own tests (the E1 check and parity).
+if [ -d "$tmp/tools/qa" ]; then
+  python3 -m unittest discover -s "$tmp/tools/qa" -q
+fi
 
 # The runtime checks, wherever the committed tree has the runtime.
 [ -f "$tmp/package.json" ] || exit 0

@@ -1,12 +1,23 @@
 """Parity (spec section 5b, Visual QA): the SpriteKit frames against the WebGL
-frames of the same clip on the same clock, frame by frame, SSIM 0.95 or more.
+frames of the same clip on the same clock, frame by frame: SSIM 0.95 or more on
+the character, and no part drawn by one runtime and not the other.
 
 python3 tools/qa/parity.py <web folder> <spritekit folder> <report folder>
 
-Each folder holds one subfolder per run (full, small) of f0000.png ... frames,
-directly or in a frames/ folder (as runtime-web/lab/render.ts writes them).
+Each folder holds one subfolder per run (full and small, both required) of
+f0000.png ... frames, directly or in a frames/ folder (as runtime-web/lab/render.ts
+writes them). Both runtimes must have rendered the same frames, and every frame
+must show the character.
+
+"On the character": the SSIM map is averaged over the pixels either frame draws,
+grown by the SSIM window's radius, so an empty background cannot dilute a
+difference. A small part (the tag, an eye) missing from one render moves that
+average less than the threshold notices, so a frame also fails where the two
+renders disagree strongly over a patch at least BLOB pixels across: an edge drawn
+a pixel or two apart makes only thin lines, which the erosion removes (QUESTIONS.md E20).
+
 Writes report.json and a sheet of the worst frames side by side (web | SpriteKit
-| difference), and exits 1 if any frame is below the threshold or missing."""
+| difference), and exits 1 on any failure."""
 import base64
 import io
 import json
@@ -15,19 +26,64 @@ from pathlib import Path
 
 import numpy as np
 from PIL import Image
+from scipy import ndimage
 from skimage.metrics import structural_similarity
 
 THRESHOLD = 0.95
+RUNS = ("full", "small")
+# A pixel belongs to the drawing when a channel differs from the background by more than this.
+INK = 8
+# A channel difference larger than edge softening gives; a part missing or misplaced differs by far more.
+STRONG = 64
+# The smallest patch of strong disagreement that fails a frame, in pixels across.
+BLOB = 3
+# skimage's default SSIM window is 7 x 7.
+WINDOW_RADIUS = 3
 
 
 def load(path):
     return np.asarray(Image.open(path).convert("RGB"), dtype=np.uint8)
 
 
+def drawn(img, background):
+    """The pixels the drawing touches: those that differ from the background colour."""
+    return np.abs(img.astype(int) - background.astype(int)).max(axis=2) > INK
+
+
+def character_mask(a, b):
+    """Where either frame draws, grown by the SSIM window's radius; the background is the web frame's corner."""
+    background = a[0, 0]
+    union = drawn(a, background) | drawn(b, background)
+    return ndimage.binary_dilation(union, structure=np.ones((3, 3), bool), iterations=WINDOW_RADIUS)
+
+
+def ssim_on_character(a, b):
+    """The SSIM map averaged over the character, or None when neither frame draws anything."""
+    mask = character_mask(a, b)
+    if not mask.any():
+        return None
+    _, full = structural_similarity(a, b, channel_axis=2, data_range=255, full=True)
+    return float(full.mean(axis=2)[mask].mean())
+
+
+def disagreements(a, b):
+    """Patches at least BLOB pixels across where the two frames differ strongly, as (x0, y0, x1, y1) boxes."""
+    strong = np.abs(a.astype(int) - b.astype(int)).max(axis=2) > STRONG
+    core = ndimage.binary_erosion(strong, structure=np.ones((BLOB, BLOB), bool))
+    if not core.any():
+        return []
+    # Grow the surviving cores back within the strong pixels, so a box shows the whole patch.
+    patch = ndimage.binary_propagation(core, mask=strong)
+    labels, _ = ndimage.label(patch)
+    return [(int(s[1].start), int(s[0].start), int(s[1].stop - 1), int(s[0].stop - 1)) for s in ndimage.find_objects(labels)]
+
+
 def diagnose(a, b):
     """What kind of difference two frames show: where the drawing sits, its best shift, a flip, its colour."""
+    background = a[0, 0]
+
     def box(img):
-        ink = (img.astype(int).sum(axis=2) < 3 * 250).nonzero()
+        ink = drawn(img, background).nonzero()
         if len(ink[0]) == 0:
             return None, None
         return (int(ink[1].min()), int(ink[0].min()), int(ink[1].max()), int(ink[0].max())), (float(ink[1].mean()), float(ink[0].mean()))
@@ -41,11 +97,17 @@ def diagnose(a, b):
             if best is None or err < best[0]:
                 best = (err, dx, dy)
     flipped = structural_similarity(a, b[::-1], channel_axis=2, data_range=255)
-    ink = (a.astype(int).sum(axis=2) < 3 * 250) & (b.astype(int).sum(axis=2) < 3 * 250)
-    colour = (b.astype(float) - a.astype(float))[ink].mean(axis=0).round(1).tolist() if ink.any() else None
+    both = drawn(a, background) & drawn(b, background)
+    colour = (b.astype(float) - a.astype(float))[both].mean(axis=0).round(1).tolist() if both.any() else None
     return {"web box": box_a, "spritekit box": box_b, "web centre": centre_a, "spritekit centre": centre_b,
             "best shift moving spritekit (dx, dy)": best[1:], "mse at best shift": round(best[0], 1),
             "ssim if spritekit were flipped": round(float(flipped), 4), "mean colour difference where both draw": colour}
+
+
+def side_by_side(a, b):
+    diff = np.abs(a.astype(int) - b.astype(int)).sum(axis=2)
+    heat = np.clip(255 - diff * 4, 0, 255).astype(np.uint8)
+    return np.concatenate([a, b, np.stack([heat] * 3, axis=2)], axis=1)
 
 
 def sheet_text(rows):
@@ -63,64 +125,95 @@ def frames(root, run):
     return nested if nested.is_dir() else root / run
 
 
+def frame_names(root, run):
+    folder = frames(root, run)
+    return sorted(p.name for p in folder.glob("f*.png")) if folder.is_dir() else []
+
+
+def runs_in(root):
+    return sorted(p.name for p in root.iterdir() if p.is_dir()) if root.is_dir() else []
+
+
+def compare_run(web, spritekit, run, problems):
+    """Scores one run; returns its report entry, or None when it has nothing to score."""
+    web_names, sk_names = frame_names(web, run), frame_names(spritekit, run)
+    if not web_names:
+        problems.append(f"{run}: no web frames")
+    if not sk_names:
+        problems.append(f"{run}: no SpriteKit frames")
+    for name in sorted(set(web_names) - set(sk_names)):
+        problems.append(f"{run}/{name}: no SpriteKit frame")
+    for name in sorted(set(sk_names) - set(web_names)):
+        problems.append(f"{run}/{name}: no web frame")
+    scored = []
+    for name in sorted(set(web_names) & set(sk_names)):
+        a, b = load(frames(web, run) / name), load(frames(spritekit, run) / name)
+        if a.shape != b.shape:
+            problems.append(f"{run}/{name}: sizes differ, {a.shape} vs {b.shape}")
+            continue
+        background = a[0, 0]
+        for side, img in (("web", a), ("SpriteKit", b)):
+            if not drawn(img, background).any():
+                problems.append(f"{run}/{name}: the {side} frame shows no character")
+        score = ssim_on_character(a, b)
+        if score is None:
+            continue
+        patches = disagreements(a, b)
+        scored.append({"frame": name, "ssim": round(score, 4), "patches": patches[:4]})
+        if score < THRESHOLD:
+            problems.append(f"{run}/{name}: SSIM on the character {score:.4f}, below {THRESHOLD}")
+        if patches:
+            problems.append(f"{run}/{name}: the runtimes disagree over {len(patches)} patch(es), the first at {patches[0]} (x0, y0, x1, y1)")
+    if not scored:
+        return None
+    values = [s["ssim"] for s in scored]
+    worst = sorted(scored, key=lambda s: (not s["patches"], s["ssim"]))[:6]
+    return {"frames": len(scored), "min": min(values), "mean": round(float(np.mean(values)), 4),
+            "with patches": sum(1 for s in scored if s["patches"]), "worst": worst}
+
+
 def main(web, spritekit, out):
     web, spritekit, out = Path(web), Path(spritekit), Path(out)
     out.mkdir(parents=True, exist_ok=True)
-    report = {"threshold": THRESHOLD, "runs": {}}
-    failed = False
-    for run in sorted(p.name for p in web.iterdir() if p.is_dir()):
-        names = sorted(p.name for p in frames(web, run).glob("f*.png"))
-        if not names:
-            print(f"parity: {run}: no web frames")
-            failed = True
+    report = {"threshold": THRESHOLD, "runs": {}, "problems": []}
+    problems = report["problems"]
+    for side, root in (("web", web), ("SpriteKit", spritekit)):
+        for run in RUNS:
+            if run not in runs_in(root):
+                problems.append(f"{run}: the {side} render has no {run} run")
+        for run in runs_in(root):
+            if run not in RUNS:
+                problems.append(f"{run}: an unexpected {side} run (expected {', '.join(RUNS)})")
+    sheet = None
+    for run in RUNS:
+        before = len(problems)
+        entry = compare_run(web, spritekit, run, problems)
+        if entry is None:
             continue
-        scores = []
-        for name in names:
-            other = frames(spritekit, run) / name
-            if not other.exists():
-                print(f"parity: {run}/{name}: no SpriteKit frame")
-                failed = True
-                continue
-            a, b = load(frames(web, run) / name), load(other)
-            if a.shape != b.shape:
-                print(f"parity: {run}/{name}: sizes differ, {a.shape} vs {b.shape}")
-                failed = True
-                continue
-            score = structural_similarity(a, b, channel_axis=2, data_range=255)
-            scores.append((float(score), name))
-        if not scores:
-            continue
-        values = [s for s, _ in scores]
-        worst = sorted(scores)[:6]
-        below = [n for s, n in scores if s < THRESHOLD]
-        report["runs"][run] = {"frames": len(scores), "min": min(values), "mean": float(np.mean(values)), "worst": worst, "below": below}
-        print(f"parity: {run}: {len(scores)} frames, SSIM min {min(values):.4f}, mean {np.mean(values):.4f}, below {THRESHOLD}: {len(below)}")
-        if below:
-            failed = True
-        rows = []
-        for _, name in worst:
-            a, b = load(frames(web, run) / name), load(frames(spritekit, run) / name)
-            diff = np.abs(a.astype(int) - b.astype(int)).sum(axis=2)
-            heat = np.clip(255 - diff * 4, 0, 255).astype(np.uint8)
-            rows.append(np.concatenate([a, b, np.stack([heat] * 3, axis=2)], axis=1))
+        report["runs"][run] = entry
+        print(f"parity: {run}: {entry['frames']} frames, SSIM on the character min {entry['min']:.4f}, mean {entry['mean']:.4f}, "
+              f"frames with a part-sized disagreement: {entry['with patches']}")
+        rows = [side_by_side(load(frames(web, run) / w["frame"]), load(frames(spritekit, run) / w["frame"])) for w in entry["worst"]]
         Image.fromarray(np.concatenate(rows, axis=0)).save(out / f"{run}-worst.png")
-        first = names[0]
-        a0, b0 = load(frames(web, run) / first), load(frames(spritekit, run) / first)
-        report["runs"][run]["diagnosis of " + first] = diagnose(a0, b0)
-        print(f"parity: {run}: diagnosis of {first}: {json.dumps(report['runs'][run]['diagnosis of ' + first])}")
-        if below and "sheet" not in report:
-            # The first failing run's first frame and worst frame (web | SpriteKit | difference),
-            # readable from the log alone; printed last, after every run's numbers.
-            diff0 = np.stack([np.clip(255 - np.abs(a0.astype(int) - b0.astype(int)).sum(axis=2) * 4, 0, 255).astype(np.uint8)] * 3, axis=2)
-            report["sheet"] = (run, sheet_text([np.concatenate([a0, b0, diff0], axis=1)] + rows[:1]))
-    if "sheet" in report:
-        run, lines = report.pop("sheet")
+        first = entry["worst"][0]["frame"]
+        entry["diagnosis of " + first] = diagnose(load(frames(web, run) / first), load(frames(spritekit, run) / first))
+        print(f"parity: {run}: diagnosis of {first}: {json.dumps(entry['diagnosis of ' + first])}")
+        if len(problems) > before and sheet is None:
+            # The first failing run's worst frames (web | SpriteKit | difference), readable from the log alone.
+            sheet = (run, sheet_text(rows[:2]))
+    for problem in problems[:40]:
+        print(f"parity: {problem}")
+    if len(problems) > 40:
+        print(f"parity: ... and {len(problems) - 40} more (report.json)")
+    if sheet:
+        run, lines = sheet
         print(f"PARITY-SHEET-BEGIN {run}")
         for line in lines:
             print(line)
         print(f"PARITY-SHEET-END {run}")
     (out / "report.json").write_text(json.dumps(report, indent=1) + "\n")
-    return 1 if failed else 0
+    print("parity: green" if not problems else f"parity: {len(problems)} problem(s)")
+    return 1 if problems else 0
 
 
 if __name__ == "__main__":
