@@ -68,14 +68,24 @@ interface Placed {
   y: number;
 }
 
+export interface PageSize {
+  width: number;
+  height: number;
+}
+
 function nextPowerOfTwo(n: number): number {
   let p = 1;
   while (p < n) p *= 2;
   return p;
 }
 
-/** Shelf packing, tallest first, into the smallest square power-of-two pages that fit. */
-export function packRasters(rasters: Raster[]): { placed: Placed[]; sizes: number[] } {
+/**
+ * Shelf packing, tallest first, into the smallest square power-of-two pages
+ * that fit. When it takes several pages, the last is cut to the smallest
+ * power-of-two rectangle that holds its regions (texture memory is the budget,
+ * spec L717); a set that fits one page keeps its square page.
+ */
+export function packRasters(rasters: Raster[]): { placed: Placed[]; pages: PageSize[] } {
   const order = [...rasters].sort((a, b) => b.h - a.h || b.w - a.w || a.region.localeCompare(b.region));
   for (const r of order) {
     if (r.w + 2 * GAP > MAX_PAGE || r.h + 2 * GAP > MAX_PAGE) throw new Error(`region ${r.region} is too big for a ${MAX_PAGE} px page`);
@@ -85,7 +95,15 @@ export function packRasters(rasters: Raster[]): { placed: Placed[]; sizes: numbe
   let size = Math.min(MAX_PAGE, Math.max(64, nextPowerOfTwo(Math.ceil(Math.sqrt(area))), nextPowerOfTwo(widest)));
   for (;;) {
     const attempt = shelve(order, size);
-    if (attempt.pages === 1 || size === MAX_PAGE) return { placed: attempt.placed, sizes: Array(attempt.pages).fill(size) };
+    if (attempt.pages === 1 || size === MAX_PAGE) {
+      const pages: PageSize[] = Array.from({ length: attempt.pages }, () => ({ width: size, height: size }));
+      if (pages.length > 1) {
+        const last = attempt.placed.filter((p) => p.page === pages.length - 1);
+        const used = (end: (p: Placed) => number) => nextPowerOfTwo(Math.max(...last.map(end)) + GAP);
+        pages[pages.length - 1] = { width: used((p) => p.x + p.raster.w), height: used((p) => p.y + p.raster.h) };
+      }
+      return { placed: attempt.placed, pages };
+    }
     size *= 2;
   }
 }
@@ -113,8 +131,8 @@ function shelve(order: Raster[], size: number): { placed: Placed[]; pages: numbe
 }
 
 /** Writes the placed rasters into page images, extruding each region's edge pixels by EXTRUDE px. */
-export function paintPages(placed: Placed[], sizes: number[]): PNG[] {
-  const pages = sizes.map((size) => new PNG({ width: size, height: size }));
+export function paintPages(placed: Placed[], sizes: PageSize[]): PNG[] {
+  const pages = sizes.map((size) => new PNG({ width: size.width, height: size.height }));
   for (const page of pages) page.data.fill(0);
   for (const { raster: r, page, x, y } of placed) {
     const target = pages[page]!;
@@ -131,17 +149,21 @@ export function paintPages(placed: Placed[], sizes: number[]): PNG[] {
   return pages;
 }
 
-/** Rasterizes every drawing at a scale and packs them: the page images and their atlas set. */
-export function buildAtlas(name: string, drawings: Drawing[], scale: number, file: (page: number) => string): { atlas: AtlasSet; images: Buffer[] } {
-  const rasters = drawings.map((d) => rasterize(d, scale));
-  const { placed, sizes } = packRasters(rasters);
+/** Packs rasters made at one scale: the page images and their atlas set. */
+export function packAtlas(name: string, rasters: Raster[], scale: number, file: (page: number) => string): { atlas: AtlasSet; images: Buffer[] } {
+  const { placed, pages: sizes } = packRasters(rasters);
   const pages = paintPages(placed, sizes);
   const regions: Record<string, Region> = {};
   for (const { raster: r, page, x, y } of placed) {
     regions[r.region] = { page, x, y, w: r.w, h: r.h, anchorX: r.anchorX, anchorY: r.anchorY };
   }
   return {
-    atlas: { name, scale, pages: sizes.map((size, i) => ({ file: file(i), scale, width: size, height: size })), regions },
+    atlas: { name, scale, pages: sizes.map((size, i) => ({ file: file(i), scale, width: size.width, height: size.height })), regions },
     images: pages.map((p) => PNG.sync.write(p)),
   };
+}
+
+/** Rasterizes every drawing at a scale, in this process, and packs them. */
+export function buildAtlas(name: string, drawings: Drawing[], scale: number, file: (page: number) => string): { atlas: AtlasSet; images: Buffer[] } {
+  return packAtlas(name, drawings.map((d) => rasterize(d, scale)), scale, file);
 }
