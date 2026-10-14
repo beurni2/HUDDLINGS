@@ -1,17 +1,19 @@
 name: macOS tools, pinned
 description: >
-  Selects Xcode 16.4 and installs XcodeGen 2.46.0 from its release, checked by
+  Selects Xcode 26.3 (the iOS 26.2 SDK, which App Store Connect requires since
+  April 28, 2026) and installs XcodeGen 2.46.0 from its release, checked by
   SHA-256, so a runner image update cannot silently change the build, the
-  SpriteKit renders parity measures, or the generated project.
+  SpriteKit renders parity measures, or the generated project. The tested
+  build and the uploaded build use the same Xcode.
 runs:
   using: composite
   steps:
-    - name: Xcode 16.4 (16F6)
+    - name: Xcode 26.3 (17C529)
       shell: bash
       run: |
-        sudo xcode-select -s /Applications/Xcode_16.4.app
+        sudo xcode-select -s /Applications/Xcode_26.3.app
         xcodebuild -version
-        xcodebuild -version | grep -qx "Build version 16F6"
+        xcodebuild -version | grep -qx "Build version 17C529"
     - name: XcodeGen 2.46.0
       shell: bash
       run: |
