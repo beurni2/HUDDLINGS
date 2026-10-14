@@ -298,7 +298,7 @@ def best_shift(sil, sheet):
 
 
 def round2(values):
-    return [round(float(v), 2) for v in values]
+    return [round(float(v), 2) + 0.0 for v in values]  # + 0.0: a mirrored zero reads 0.0, not -0.0
 
 
 def in_part(still, indices, pt):
@@ -633,7 +633,7 @@ def match(species, still_dir, landmarks_path=None):
 
     score = iou(render.sil, sheet)
     shift, shifted_iou = best_shift(render.sil, sheet)
-    shift_out = [-shift[0], shift[1]] if frame.mirrored else shift
+    shift_out = [0.0 - shift[0], shift[1]] if frame.mirrored else shift
     result["alignment"] = {"rootOnCropGroundPlusHalf": True, "bestFitShiftPx": round2(shift_out),
                            "bestFitShiftPt": round2(np.multiply(shift_out, frame.k)), "iouAtBestWholePixelShift": round(shifted_iou, 4),
                            "thresholdPx": SHIFT_MAX_PX, "pass": float(np.hypot(*shift)) <= SHIFT_MAX_PX}
@@ -673,7 +673,7 @@ def mirror_rows(result):
         row = dict(row)
         for key in ("found", "model"):
             if key in row:
-                row[key] = [-row[key][0], row[key][1]]
+                row[key] = [0.0 - row[key][0], row[key][1]]
         rows[swap_sides(name)] = row
     result["landmarks"]["rows"] = rows
 
