@@ -62,6 +62,12 @@ test("a region's edge pixels are extruded by 2 px and the rest of the gap stays 
   assert.deepEqual(at(GAP - EXTRUDE, GAP), at(GAP, GAP));
   assert.deepEqual(at(GAP + 3 + 1, GAP + 1), at(GAP + 2, GAP + 1)); // right of the last column
   assert.deepEqual(at(GAP - EXTRUDE - 1, GAP), [0, 0, 0, 0]);
+  // Above the first row and below the last, the same.
+  assert.deepEqual(at(GAP + 1, GAP - 1), at(GAP + 1, GAP));
+  assert.deepEqual(at(GAP + 1, GAP - EXTRUDE), at(GAP + 1, GAP));
+  assert.deepEqual(at(GAP + 2, GAP + 2 + EXTRUDE - 1), at(GAP + 2, GAP + 1));
+  assert.deepEqual(at(GAP + 1, GAP - EXTRUDE - 1), [0, 0, 0, 0]);
+  assert.deepEqual(at(GAP + 1, GAP + 2 + EXTRUDE), [0, 0, 0, 0]);
 });
 
 test("buildAtlas writes page images whose regions hold the drawings", () => {

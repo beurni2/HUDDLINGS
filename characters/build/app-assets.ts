@@ -36,9 +36,8 @@ export async function iconPng(size = 1024): Promise<Buffer> {
     `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="-70 -116 140 140">` +
     `<rect x="-70" y="-116" width="140" height="140" fill="#7DB7E8"/>${parts.join("")}</svg>`;
   const rendered = PNG.sync.read(new Resvg(icon, { fitTo: { mode: "width", value: size } }).render().asPng());
-  // App icons are opaque.
-  for (let i = 3; i < rendered.data.length; i += 4) rendered.data[i] = 255;
-  return PNG.sync.write(rendered);
+  // App Store icons must be opaque and carry no alpha channel at all (RGB, colour type 2).
+  return PNG.sync.write(rendered, { colorType: 2 });
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

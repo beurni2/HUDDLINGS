@@ -262,3 +262,16 @@ test("a part that hangs down from its root bends the same way", () => {
   close(px, 30);
   close(py, -108);
 });
+
+test("a bend row exactly at a joint belongs to the child bone", () => {
+  // Three rows over the 60 pt tail put rows exactly at the joints 20 and 40 pt up the chain.
+  const joints: Rig = { ...rig, parts: rig.parts.map((p) => (p.name === "tail" ? { ...p, warp: { ...p.warp!, rows: 3 } } : p)) };
+  const cj = compile(joints);
+  const pose = evaluatePose(cj, { channels: { "tail.2": { rot: 30 } }, views: front });
+  const tail = drawList(cj, pose, atlas, { views: front, states: {} }).find((i) => i.part === "tail")!;
+  // Dense row 8 of 12 is control row 2, 20 pt up: tail.2's own pivot. Owned by tail.2, it turns with it.
+  const [lx, ly, rx, ry] = meshRows(tail.positions)[2 * WARP_SUBDIVISIONS]!;
+  close((lx + rx) / 2, 38, 1e-9, "the row stays centred on the joint");
+  close(ly + 48, -(ry + 48), 1e-9, "its ends tilt equally about the joint at y = −48");
+  assert.ok(Math.abs(ry - ly) > 3, `the row should turn with tail.2, its ends differ by ${(ry - ly).toFixed(3)} pt`);
+});
