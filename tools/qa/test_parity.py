@@ -5,6 +5,7 @@ import io
 import json
 import tempfile
 import unittest
+import unittest.mock
 from pathlib import Path
 
 import numpy as np
@@ -162,6 +163,16 @@ class Parity(unittest.TestCase):
         code, report, _ = self.check()
         self.assertEqual(1, code)
         self.assertTrue(any("sizes differ" in p for p in report["problems"]))
+
+    def test_each_run_leaves_an_evidence_strip_and_can_print_it(self):
+        self.both(count=5)
+        with unittest.mock.patch.dict("os.environ", {"PARITY_PRINT_EVIDENCE": "1"}):
+            code, report, printed = self.check()
+        self.assertEqual(0, code, printed)
+        strip = Image.open(self.root / "report" / "full-evidence.png")
+        self.assertEqual((5 * 200, 2 * 200 + 8), strip.size)
+        self.assertEqual(["f0000.png", "f0001.png", "f0002.png", "f0003.png", "f0004.png"], report["runs"]["full"]["evidence frames"])
+        self.assertIn("PARITY-EVIDENCE-BEGIN small", printed)
 
     def test_a_failure_prints_a_sheet_readable_from_the_log(self):
         self.both(spritekit={"full": {"leave_out": ("ear",)}})

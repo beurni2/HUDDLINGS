@@ -16,11 +16,14 @@ average less than the threshold notices, so a frame also fails where the two
 renders disagree strongly over a patch at least BLOB pixels across: an edge drawn
 a pixel or two apart makes only thin lines, which the erosion removes (QUESTIONS.md E20).
 
-Writes report.json and a sheet of the worst frames side by side (web | SpriteKit
-| difference), and exits 1 on any failure."""
+Writes report.json, a sheet of the worst frames side by side (web | SpriteKit
+| difference) and an evidence strip per run (five frames, web above SpriteKit),
+and exits 1 on any failure. With PARITY_PRINT_EVIDENCE=1 the strips are also
+printed as base64 JPEG, for logs where artifacts cannot be fetched."""
 import base64
 import io
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -120,6 +123,14 @@ def sheet_text(rows):
     return [text[i:i + 100] for i in range(0, len(text), 100)]
 
 
+def evidence(web, spritekit, run, names):
+    """Five frames spread across the run, web above SpriteKit."""
+    picks = [names[round(i * (len(names) - 1) / 4)] for i in range(5)]
+    rows = [np.concatenate([load(frames(root, run) / name) for name in picks], axis=1) for root in (web, spritekit)]
+    gap = np.full((8, rows[0].shape[1], 3), 255, np.uint8)
+    return Image.fromarray(np.concatenate([rows[0], gap, rows[1]], axis=0)), picks
+
+
 def frames(root, run):
     nested = root / run / "frames"
     return nested if nested.is_dir() else root / run
@@ -201,6 +212,23 @@ def main(web, spritekit, out):
         if len(problems) > before and sheet is None:
             # The first failing run's worst frames (web | SpriteKit | difference), readable from the log alone.
             sheet = (run, sheet_text(rows[:2]))
+    for run, entry in report["runs"].items():
+        names = sorted(set(frame_names(web, run)) & set(frame_names(spritekit, run)))
+        try:
+            strip, picks = evidence(web, spritekit, run, names)
+        except ValueError:
+            continue
+        strip.save(out / f"{run}-evidence.png")
+        entry["evidence frames"] = picks
+        if os.environ.get("PARITY_PRINT_EVIDENCE") == "1":
+            strip.thumbnail((1000, 1000))
+            buffer = io.BytesIO()
+            strip.save(buffer, format="JPEG", quality=85)
+            text = base64.b64encode(buffer.getvalue()).decode("ascii")
+            print(f"PARITY-EVIDENCE-BEGIN {run} {' '.join(picks)}")
+            for i in range(0, len(text), 100):
+                print(text[i:i + 100])
+            print(f"PARITY-EVIDENCE-END {run}")
     for problem in problems[:40]:
         print(f"parity: {problem}")
     if len(problems) > 40:
