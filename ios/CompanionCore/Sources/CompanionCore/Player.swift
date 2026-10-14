@@ -70,7 +70,8 @@ public final class Player {
     private var pending: [ClipEvent] = []
     private let defaultViews: Views
     private var lastStepViews: Views?
-    private var cutPending = false
+    /// Steps at which a jump first shows, which the springs must not feel: hard switches and the host's cuts.
+    private var cuts: [Int] = []
 
     public init(rig: CompiledRig, clips: [Clip]) {
         self.rig = rig
@@ -93,14 +94,23 @@ public final class Player {
         let blend = (blendMs ?? clip.blendInMs ?? defaultBlendMs) / 1000
         if let mixer {
             pending.append(contentsOf: collectEvents(mixer, t))
-            if blend <= 0 { cutPending = true }
+            if blend <= 0 { cuts.append(firstStepShowing(t)) }
         }
         mixer = Mixer(clip: clip, start: t, from: mixer, blendSeconds: mixer != nil ? blend : 0, firedTo: -.infinity)
     }
 
-    /// Tells the springs the companion jumped (placed somewhere new): they keep swinging but feel no kick.
-    public func cut() {
-        cutPending = true
+    /// Tells the springs the companion jumped at time t (placed somewhere new): they keep swinging but feel no kick.
+    public func cut(at t: Double) throws {
+        try checkTime(t)
+        cuts.append(firstStepShowing(t))
+    }
+
+    /// The first step that shows a change made at time t: at or after t, and not yet run.
+    private func firstStepShowing(_ t: Double) -> Int {
+        var n = Int((t * stepHz).rounded(.up))
+        while Double(n) / stepHz < t { n += 1 }
+        while n > 0 && Double(n - 1) / stepHz >= t { n -= 1 }
+        return max(n, steps + 1)
     }
 
     /// Runs the springs up to time t (seconds) and returns the frame to draw at t.
@@ -140,6 +150,8 @@ public final class Player {
     }
 
     private func evaluate(_ m: Mixer, _ t: Double) -> [String: Channels] {
+        // Before its start a clip shows nothing of its own; the clip it replaces still plays.
+        if let from = m.from, t < m.start { return evaluate(from, t) }
         let local = localTime(m.clip, (t - m.start) * 1000)
         var out: [String: Channels] = [:]
         for (bone, tracks) in m.clip.tracks ?? [:] {
@@ -179,7 +191,7 @@ public final class Player {
     /// The clip whose discrete tracks and draw order show at t: the newest once its weight reaches 0.5.
     private func discreteSource(_ t: Double) -> Mixer? {
         var m = mixer
-        while let current = m, let from = current.from, weight(current, t) < 0.5 { m = from }
+        while let current = m, let from = current.from, t < current.start || weight(current, t) < 0.5 { m = from }
         return m
     }
 
@@ -209,20 +221,29 @@ public final class Player {
         return fired.sorted { $0.at != $1.at ? $0.at < $1.at : $0.index < $1.index }.map { events[$0.index] }
     }
 
-    /// True when a channel jumps (a `step` key) between two step times in any clip that is mixing.
+    /// True when a channel jumps between two step times in a clip that shows at the later one:
+    /// a key with `step` easing, or a second key at the same time, that changes the value.
     private func stepKeyCrossed(_ mixer: Mixer?, _ from: Double, _ to: Double) -> Bool {
         var m = mixer
         while let current = m {
+            if let older = current.from, to < current.start {
+                m = older
+                continue
+            }
             let a = (from - current.start) * 1000
             let b = (to - current.start) * 1000
             for tracks in (current.clip.tracks ?? [:]).values {
                 for keys in tracks.values {
-                    let jumps = keys.filter { $0.easing == .step }.map(\.time)
+                    let jumps = keys.indices.filter { i in
+                        i > 0 && keys[i].value != keys[i - 1].value && (keys[i].easing == .step || keys[i].time == keys[i - 1].time)
+                    }.map { keys[$0].time }
                     var crossed = false
                     if !jumps.isEmpty { forEachCrossing(current.clip, jumps, a, b) { _, _ in crossed = true } }
                     if crossed { return true }
                 }
             }
+            // Older clips show only while this one is still blending in.
+            if current.from == nil || weight(current, to) >= 1 { return false }
             m = current.from
         }
         return false
@@ -233,8 +254,8 @@ public final class Player {
         if springs.isEmpty { return }
         let views = stateAt(s).views
         let viewsChanged = lastStepViews.map { $0 != views } ?? false
-        let cut = cutPending || viewsChanged || stepKeyCrossed(mixer, previous, s)
-        cutPending = false
+        let cut = cuts.contains(steps) || viewsChanged || stepKeyCrossed(mixer, previous, s)
+        cuts = cuts.filter { $0 > steps }
         lastStepViews = views
         // Bones come parents first, so a spring feels its parent's spring from this same step.
         _ = evaluatePose(rig, PoseInput(channels: channels(at: s), views: views)) { bone, pivot, parentAngle, rest, clipRot in

@@ -391,3 +391,71 @@ test("time never goes backwards", () => {
   assert.throws(() => p.advanceTo(0.5), /backwards/);
   assert.throws(() => p.play("lean", 0.9), /backwards/);
 });
+
+test("a hard switch lands on its own time, whatever the frame rate", () => {
+  // The slide is speeding up at 0.2 s when it is switched, with no blend, to hold: the
+  // steps just before 0.2 s must show the slide at every frame rate.
+  const run = (fps: number) => {
+    const p = new Player(c, clips);
+    p.play("slide", 0);
+    for (let i = 1; i / fps < 0.2; i++) p.advanceTo(i / fps);
+    p.play("hold", 0.2, 0);
+    for (let i = Math.ceil(0.2 * fps); i <= fps; i++) p.advanceTo(i / fps);
+    return p.advanceTo(1).pose.angle;
+  };
+  const a = run(60), b = run(24);
+  for (const name of ["tail.1", "tail.2", "tag"]) close(a[c.index.get(name)!]!, b[c.index.get(name)!]!, 1e-9, name);
+});
+
+test("a cut the host asks for lands on its own time, whatever the frame rate", () => {
+  const run = (fps: number) => {
+    const p = new Player(c, clips);
+    p.play("slide", 0);
+    for (let i = 1; i / fps < 0.2; i++) p.advanceTo(i / fps);
+    p.cut(0.2);
+    for (let i = Math.ceil(0.2 * fps); i <= fps; i++) p.advanceTo(i / fps);
+    return p.advanceTo(1).pose.angle;
+  };
+  const a = run(60), b = run(24);
+  close(a[c.index.get("tail.1")!]!, b[c.index.get("tail.1")!]!, 1e-9, "tail.1");
+});
+
+test("a finished blend's clip cuts nothing", () => {
+  // The old clip jumps at 305 ms, just after lean's 200 ms blend from it has ended at 0.3 s.
+  // At 120 fps a frame at 0.3 s retires it first; at 25 fps the next frame is at 0.32 s.
+  // Either way the jump belongs to a clip no longer shown, so it must not cut the springs.
+  const late: Clip[] = [...clips, { name: "lateJump", lengthMs: 1000, tracks: { body: { x: [[0, 0], [305, 20, "step"]] } } }];
+  const run = (fps: number) => {
+    const p = new Player(c, late);
+    p.play("lateJump", 0);
+    p.advanceTo(0.1);
+    p.play("lean", 0.1, 200);
+    for (let i = Math.ceil(0.1 * fps); i <= 1.2 * fps; i++) p.advanceTo(i / fps);
+    return p.advanceTo(1.2).pose.angle;
+  };
+  const a = run(120), b = run(25);
+  close(a[c.index.get("tail.1")!]!, b[c.index.get("tail.1")!]!, 1e-9, "tail.1 at 120 and 25 fps");
+});
+
+test("two keys at the same time are a jump, and a first key's step easing is not", () => {
+  const jumpClips: Clip[] = [
+    ...clips,
+    { name: "sameTime", lengthMs: 1000, tracks: { body: { x: [[0, 0], [250, 0, "linear"], [250, 30], [600, 30]] } } },
+    { name: "firstStep", lengthMs: 1000, tracks: { body: { x: [[0, 0, "step"], [400, 30, "linear"], [600, 30]] } } },
+  ];
+  const tagAt = (clip: string, t: number) => {
+    const p = new Player(c, jumpClips);
+    p.play(clip, 0);
+    for (let i = 1; i <= t * 120; i++) p.advanceTo(i / 120);
+    const pose = p.advanceTo(t).pose;
+    return pose.angle[c.index.get("tag")!]! - pose.angle[c.index.get("body")!]!;
+  };
+  // The jump at 250 ms must not fling the tag.
+  for (const t of [0.26, 0.3, 0.4]) assert.ok(Math.abs(tagAt("sameTime", t)) < 1e-9, `tag kicked at ${t} s`);
+  // A linear move from 0 swings the tag, and the first key's step easing must not reset that.
+  const p = new Player(c, jumpClips);
+  p.play("firstStep", 0);
+  const q = new Player(c, [...jumpClips, { name: "plain", lengthMs: 1000, tracks: { body: { x: [[0, 0], [400, 30, "linear"], [600, 30]] } } }]);
+  q.play("plain", 0);
+  for (let i = 1; i <= 120; i++) close(p.advanceTo(i / 120).pose.angle[c.index.get("tag")!]!, q.advanceTo(i / 120).pose.angle[c.index.get("tag")!]!, 1e-12, `frame ${i}`);
+});

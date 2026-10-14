@@ -29,7 +29,7 @@ Built packages are never edited by hand and are not committed; CI builds them fr
 
 ## Atlas
 
-- Each region is a part's drawing for one view and one state, rasterized at the page's scale, trimmed to its visible pixels.
+- Each region is a part's drawing for one view and one state, rasterized at the page's scale, trimmed to its visible pixels. A drawing must be a whole number of pixels at every scale it is built at; the build refuses one that is not, rather than stretch it.
 - Pages store **straight (non-premultiplied) alpha**, as PNG requires. Both runtimes premultiply when they upload the texture and blend premultiplied (source factor 1, destination factor 1 − source alpha). Section 5b's "premultiplied alpha" is met in memory; storing premultiplied pixels in a PNG would be premultiplied twice by SpriteKit.
 - Regions sit 16 px apart; the 2 px ring around each region repeats its edge pixels (extrusion), so filtering never reads a neighbour.
 - `atlas.json` holds one set of pages and regions per scale. Every set has the same region names; a runtime loads only the set it draws with.
@@ -39,7 +39,7 @@ Built packages are never edited by hand and are not committed; CI builds them fr
               "pages": [ { "file": "atlas@2x-0.png", "scale": 2, "width": 1024, "height": 1024 } ],
               "regions": { "ear.L/front": { "page": 0, "x": 18, "y": 18, "w": 64, "h": 90,
                                             "anchorX": 32.0, "anchorY": 6.0 } } },
-            { "name": "small", "scale": 0.75, "pages": [ ... ], "regions": { ... } } ] }
+            { "name": "small", "scale": 1, "pages": [ ... ], "regions": { ... } } ] }
 ```
 
 `anchorX` and `anchorY` are the region pixel that sits on the part's pivot, measured from the region's top-left corner. A region's size in points is its pixel size divided by its set's scale. Pages are numbered within their set (`atlas@2x-0.png`, `atlas@2x-1.png`).
@@ -73,7 +73,7 @@ Built packages are never edited by hand and are not committed; CI builds them fr
                 "farEye": { "positive": "eye.L", "negative": "eye.R" } } }
 ```
 
-- **Bones** are listed parent before child. `x`, `y` and the rest angle (`rest`, default 0) place the pivot in the parent's space. Limits (`rot`, `squash`, `scale`, `yaw`, `pitch`) bound what clips may key, and the validator refuses a clip that leaves them; a bone without a `rot`, `yaw` or `pitch` limit is never keyed on that channel. `rot` limits are around the rest angle and contain 0. The root never rotates or squashes.
+- **Bones** are listed parent before child. `x`, `y` and the rest angle (`rest`, default 0) place the pivot in the parent's space. Limits (`rot`, `squash`, `scale`, `yaw`, `pitch`) bound what clips may key, and the validator refuses a clip that leaves them, at its keys or between them where an easing overshoots; a bone without a `rot`, `yaw` or `pitch` limit is never keyed on that channel. `rot` limits are around the rest angle and contain 0. The root never rotates or squashes.
 - **Per-view placement:** a bone's `views` gives other `x`, `y` and `rest` values for a view whose drawing moves the pivot (the tail roots at the side in front view and at the back in side view). Values it leaves out keep the bone's own.
 - **The head bone** (`headBone`, default `head`) and every bone below it take the head's view; every other bone takes the body's view.
 - **Transforms:** each bone has a frame (rotation and translation) and its own scale. A bone's frame is its parent's frame × translate(S_parent · (x + dx, y + dy)) × rotate(rest + r + spring), where S_parent is the parent's own scale and `dx`, `dy` and `r` are the clip's offsets. A bone's parts are drawn with its frame × its own scale. So **a bone's scale reaches its parts and its children's pivot positions, never its children's own size or shape**: breathing lifts the head without scaling it, and a squashed body never shears a tilted head. The exception is the root, whose uniform `scale` is the whole companion's (its perspective, coming closer): it is part of the root's frame and reaches everything.
@@ -112,8 +112,8 @@ Built packages are never edited by hand and are not committed; CI builds them fr
 ## Playing, blending and the clock
 
 - **The clock:** the host gives the runtime absolute times in seconds; the runtime never reads a wall clock, and a time earlier than the last one given is an error. A clip's time is (T − its start) · 1000 ms, and **every comparison against a clip's time is exact** (keys, discrete tracks, events and cuts), so a jump, its cut and its event always land on the same step; only the step count allows 1e−9 s. **Springs run at a fixed 120 Hz** (section 5b): step n runs at exactly n/120 s and evaluates the clips at that time, so the same clock gives the same springs at any frame rate. The pose drawn at a frame time interpolates the spring angles between the last two steps.
+- **A clip starts at its own time:** before its start, a clip shows the clip it replaces, so a switch shows on the first step at or after the switch's time, whatever the frame rate.
 - **Blending:** switching clips blends every channel linearly from the old clip's pose to the new one's with an `easeInOut` weight, over the new clip's `blendInMs` (150 to 300 ms, section 5b; 200 by default) unless the switch names another time. The old clip keeps playing during the blend (held at its end if it does not loop). A channel one clip leaves alone blends from or to its rest value. Switching during a blend blends from the blend in progress, so a quick second switch never pops. Discrete tracks switch to the new clip when the weight reaches 0.5. Pictures are never cross-faded. A clip started with nothing playing shows at once, and a switch with a blend of 0 is a cut (Springs).
-- **Travel:** the host moves the companion through the root's `x` and `y` in points, so springs feel the journey; the stage (its place on screen and the scale from points to pixels) is only a camera.
 - **Deterministic mode** (section 5b, Controller API): a seeded random source and a clock that advances only by the steps the script gives. The random source is mulberry32: a 32-bit state `a`; each call does `a = (a + 0x6D2B79F5) mod 2³²`, `t = imul(a ^ (a >>> 15), 1 | a)`, `t = (t + imul(t ^ (t >>> 7), 61 | t)) ^ t`, and returns `((t ^ (t >>> 14)) >>> 0) / 2³²`. **Every consumer draws from its own named stream**, seeded with seed XOR FNV-1a(name) (32-bit FNV-1a over the name's UTF-8 bytes: start at 0x811C9DC5; for each byte, XOR it in, then multiply by 0x01000193 mod 2³²), for example `blink`, `gaze`, `ear.L.twitch` or `variation:head_tilt`. Adding a consumer never shifts another's draws.
 
 ## Springs
@@ -128,7 +128,7 @@ Ears, tails, tags, whiskers and tufts (section 5b, The rig). A spring adds an an
 - Integration: semi-implicit Euler with h = 1/120 s: θ′ += h·θ″, then θ += h·θ′, never clamped. φ″, ψ″ and a are second differences over the last three steps, x″ₙ = (xₙ − 2xₙ₋₁ + xₙ₋₂)/h², and zero until three steps are recorded.
 - Each step poses the bones parent first, at the step's own clip time, so a spring feels its parent's spring from the same step. Every spring starts at θ = 0, θ′ = 0.
 - **The soft limit:** the spring's share of the drawn rotation is θ through a soft limit within the room the clip's rotation r leaves inside the bone's `rot` limit [lo, hi]: on the positive side the room is hi − r, on the negative side r − lo. Up to 80% of the room θ is drawn as it is; past that, with k = 0.8·room, s = room − k and u = (|θ| − k)/s, it is drawn as k + s·u/(1 + u), which keeps the slope continuous, approaches the room and never reaches it. So the total never leaves the limit, the authored rotation is never altered, and a part driven hard into its limit eases in and swings back out instead of stopping dead.
-- **Cuts:** a jump is not a motion. When the body or head view changes, when any mixing clip crosses a `step` key, or at a switch with a blend of 0, every spring forgets its history (as after loading) and keeps its θ and θ′, so it feels no kick.
+- **Cuts:** a jump is not a motion. When the body or head view changes, when a clip that shows crosses a jump (a key with `step` easing, or a second key at the same time, that changes the value; a first key's easing never counts), at a switch with a blend of 0, or when the host calls `cut(t)` because it placed the companion somewhere new, every spring forgets its history (as after loading) and keeps its θ and θ′, so it feels no kick. A cut lands on the first step that shows the change: the first step at or after its time that has not run yet. A clip that has finished blending out cuts nothing.
 - Gravity and the phone's own movement (section 6) are added to a later (Arriving later).
 - Step times are counted, never summed: step n runs at exactly n/120 s, and a frame at time T runs every step with n/120 ≤ T (within 1e−9 s), then draws θ interpolated between steps n−1 and n by (T − n/120)·120, clamped to 0 to 1. The drawn spring is one step behind; in exchange every frame rate draws the same curve.
 
@@ -144,7 +144,7 @@ Each of these extends the contract, its vectors and both runtimes together, in t
 
 - **Phase 4, rigging the dog:** clip layers (`layer`: base, additive or override, with a bone `mask` and a `weight`) and which life behaviours a clip turns off, in a fixed per-step order (base blend, additive, overrides, look-at, fake turn, soft limit, stance lock, springs); the blink (a lid channel, a rig `blink` block, a clip's `blinks`) and the rule that views, face states and ear states swap inside a closed lid, with the 60–90 ms pop as the fallback; the three-quarter swap past 22° of yaw and back below 18°, decided on spring steps and deferred into a blink, with the three-quarter view's own fake turn (±15° around 45°); bone states (ear states) with their rest angles and a fixed 100–150 ms turn; the stance lock from `plant` and `lift`; look-at; micro-motion as a closed-form function of time; nested clips (the lid inside the eye inside the head); an `alpha` channel, the shadow rule and the hour's tint formula.
 - **Phase 5, the motions:** playback variation; loop regions and exit marks; stride length for gaits; gravity relative to the drawn rest.
-- **M1 and after:** the phone's movement in the springs; slots and props (M2); a bending part's own source positions (the kitty's tail, M5).
+- **M1 and after:** travel, with the host moving the root in points so springs feel the journey and the stage only a camera; the phone's movement in the springs; slots and props (M2); a bending part's own source positions (the kitty's tail, M5).
 
 ## Rendering
 

@@ -28,6 +28,13 @@ export interface Raster {
 
 /** Renders a drawing at a scale (pixels per point) and trims it to its visible pixels. */
 export function rasterize(drawing: Drawing, scale: number): Raster {
+  // resvg would stretch a drawing to a rounded canvas; refuse one that is not whole pixels at this scale.
+  const size = /<svg[^>]*\swidth="([\d.]+)"[^>]*\sheight="([\d.]+)"/.exec(drawing.svg);
+  if (size) {
+    for (const v of [Number(size[1]) * scale, Number(size[2]) * scale]) {
+      if (Math.abs(v - Math.round(v)) > 1e-9) throw new Error(`drawing ${drawing.region}: ${size[1]} × ${size[2]} pt at scale ${scale} is not a whole number of pixels`);
+    }
+  }
   // resvg's raw pixels are premultiplied; its PNG is straight alpha, as the atlas needs.
   const rendered = new Resvg(drawing.svg, { fitTo: { mode: "zoom", value: scale }, background: "rgba(0,0,0,0)" }).render();
   const png = PNG.sync.read(rendered.asPng());
@@ -74,7 +81,8 @@ export function packRasters(rasters: Raster[]): { placed: Placed[]; sizes: numbe
     if (r.w + 2 * GAP > MAX_PAGE || r.h + 2 * GAP > MAX_PAGE) throw new Error(`region ${r.region} is too big for a ${MAX_PAGE} px page`);
   }
   const area = order.reduce((sum, r) => sum + (r.w + GAP) * (r.h + GAP), 0);
-  let size = Math.min(MAX_PAGE, Math.max(64, nextPowerOfTwo(Math.ceil(Math.sqrt(area)))));
+  const widest = order.reduce((most, r) => Math.max(most, r.w + 2 * GAP, r.h + 2 * GAP), 0);
+  let size = Math.min(MAX_PAGE, Math.max(64, nextPowerOfTwo(Math.ceil(Math.sqrt(area))), nextPowerOfTwo(widest)));
   for (;;) {
     const attempt = shelve(order, size);
     if (attempt.pages === 1 || size === MAX_PAGE) return { placed: attempt.placed, sizes: Array(attempt.pages).fill(size) };
@@ -91,7 +99,7 @@ function shelve(order: Raster[], size: number): { placed: Placed[]; pages: numbe
       y += shelf + GAP;
       shelf = 0;
     }
-    if (y + r.h + GAP > size) {
+    if (x + r.w + GAP > size || y + r.h + GAP > size) {
       page++;
       x = GAP;
       y = GAP;

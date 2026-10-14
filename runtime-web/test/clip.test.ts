@@ -171,3 +171,11 @@ test("validation refuses a bezier key whose x1 or x2 leaves 0 to 1, as CSS does"
   expectProblem(problems, "key at 200 ms has a bezier with x1 or x2 outside 0 to 1");
   assert.ok(!problems.some((p) => p.includes("key at 400 ms")), "y1 and y2 may overshoot");
 });
+
+test("validation refuses an easing that overshoots a limit between keys", () => {
+  // easeOutBack from 0 to 17 overshoots to about 18.7, past the head's 18.
+  const over: Clip = { name: "over", lengthMs: 500, tracks: { head: { rot: [[0, 0], [400, 17, "easeOutBack"]] } } };
+  expectProblem(validate(rig, [over]), "head.rot overshoots to 18.");
+  const fine: Clip = { name: "fine", lengthMs: 500, tracks: { head: { rot: [[0, 0], [400, 16, "easeOutBack"]] } } };
+  assert.deepEqual(validate(rig, [fine]), []);
+});

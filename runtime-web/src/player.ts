@@ -60,7 +60,8 @@ export class Player {
   private pending: ClipEvent[] = [];
   private defaultViews: { body: string; head: string };
   private lastStepViews: { body: string; head: string } | undefined;
-  private cutPending = false;
+  /** Steps at which a jump first shows, which the springs must not feel: hard switches and the host's cuts. */
+  private cuts: number[] = [];
 
   constructor(rig: CompiledRig, clips: Clip[]) {
     this.rig = rig;
@@ -87,14 +88,23 @@ export class Player {
     const blend = (blendMs ?? clip.blendInMs ?? DEFAULT_BLEND_MS) / 1000;
     if (this.mixer) {
       this.pending.push(...this.collectEvents(this.mixer, t));
-      if (blend <= 0) this.cutPending = true;
+      if (blend <= 0) this.cuts.push(this.firstStepShowing(t));
     }
     this.mixer = { clip, start: t, from: this.mixer, blendSeconds: this.mixer ? blend : 0, firedTo: -Infinity };
   }
 
-  /** Tells the springs the companion jumped (placed somewhere new): they keep swinging but feel no kick. */
-  cut(): void {
-    this.cutPending = true;
+  /** Tells the springs the companion jumped at time t (placed somewhere new): they keep swinging but feel no kick. */
+  cut(t: number): void {
+    this.checkTime(t);
+    this.cuts.push(this.firstStepShowing(t));
+  }
+
+  /** The first step that shows a change made at time t: at or after t, and not yet run. */
+  private firstStepShowing(t: number): number {
+    let n = Math.ceil(t * STEP_HZ);
+    while (n / STEP_HZ < t) n++;
+    while (n > 0 && (n - 1) / STEP_HZ >= t) n--;
+    return Math.max(n, this.steps + 1);
   }
 
   /** Runs the springs up to time t (seconds) and returns the frame to draw at t. */
@@ -131,6 +141,8 @@ export class Player {
   }
 
   private evaluate(m: Mixer, t: number): Record<string, Channels> {
+    // Before its start a clip shows nothing of its own; the clip it replaces still plays.
+    if (m.from && t < m.start) return this.evaluate(m.from, t);
     const local = localTime(m.clip, (t - m.start) * 1000);
     const out: Record<string, Channels> = {};
     for (const [bone, tracks] of Object.entries(m.clip.tracks ?? {})) {
@@ -171,7 +183,7 @@ export class Player {
   /** The clip whose discrete tracks and draw order show at t: the newest once its weight reaches 0.5. */
   private discreteSource(t: number): Mixer | undefined {
     let m = this.mixer;
-    while (m && m.from && this.weight(m, t) < 0.5) m = m.from;
+    while (m && m.from && (t < m.start || this.weight(m, t) < 0.5)) m = m.from;
     return m;
   }
 
@@ -202,19 +214,29 @@ export class Player {
     return fired.sort((a, b) => a[0] - b[0] || a[1] - b[1]).map(([, , e]) => e);
   }
 
-  /** True when a channel jumps (a `step` key) between two step times in any clip that is mixing. */
+  /**
+   * True when a channel jumps between two step times in a clip that shows at the later one:
+   * a key with `step` easing, or a second key at the same time, that changes the value.
+   */
   private stepKeyCrossed(m: Mixer | undefined, from: number, to: number): boolean {
-    for (; m; m = m.from) {
+    while (m) {
+      if (m.from && to < m.start) {
+        m = m.from;
+        continue;
+      }
       const a = (from - m.start) * 1000;
       const b = (to - m.start) * 1000;
       for (const tracks of Object.values(m.clip.tracks ?? {})) {
         for (const keys of Object.values(tracks)) {
-          const jumps = keys!.filter((k) => k[2] === "step").map((k) => k[0]);
+          const jumps = keys!.filter((k, i) => i > 0 && k[1] !== keys![i - 1]![1] && (k[2] === "step" || k[0] === keys![i - 1]![0])).map((k) => k[0]);
           let crossed = false;
           if (jumps.length) forEachCrossing(m.clip, jumps, a, b, () => (crossed = true));
           if (crossed) return true;
         }
       }
+      // Older clips show only while this one is still blending in.
+      if (!m.from || this.weight(m, to) >= 1) return false;
+      m = m.from;
     }
     return false;
   }
@@ -224,8 +246,8 @@ export class Player {
     if (this.springs.length === 0) return;
     const views = this.stateAt(s).views;
     const viewsChanged = this.lastStepViews !== undefined && (views.body !== this.lastStepViews.body || views.head !== this.lastStepViews.head);
-    const cut = this.cutPending || viewsChanged || this.stepKeyCrossed(this.mixer, previous, s);
-    this.cutPending = false;
+    const cut = this.cuts.includes(this.steps) || viewsChanged || this.stepKeyCrossed(this.mixer, previous, s);
+    this.cuts = this.cuts.filter((n) => n > this.steps);
     this.lastStepViews = views;
     // Bones come parents first, so a spring feels its parent's spring from this same step.
     evaluatePose(this.rig, { channels: this.channelsAt(s), views }, (bone, pivot, parentAngle, rest, clipRot) => {

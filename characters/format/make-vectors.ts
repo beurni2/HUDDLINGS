@@ -202,7 +202,7 @@ const runClips: Clip[] = [
 ];
 const runProblems = validate(rig, runClips);
 if (runProblems.length) throw new Error(runProblems.join("\n"));
-const runScript: ({ play: string; t: number; blendMs?: number } | { frame: number } | { cut: true })[] = [];
+const runScript: ({ play: string; t: number; blendMs?: number } | { frame: number } | { cut: number })[] = [];
 const runPlays = new Map<number, { play: string; blendMs?: number }[]>([
   [0, [{ play: "loopEvents" }]],
   [1.3, [{ play: "jumps", blendMs: 0 }]],
@@ -221,7 +221,7 @@ for (const t of runPlays.keys()) runTimes.add(t);
 runTimes.add(2.4);
 for (const t of [...runTimes].sort((x, y) => x - y)) {
   for (const p of runPlays.get(t) ?? []) runScript.push({ ...p, t });
-  if (t === 2.4) runScript.push({ cut: true });
+  if (t === 2.4) runScript.push({ cut: 2.4 });
   runScript.push({ frame: t });
 }
 const runPlayer = new Player(c, runClips);
@@ -231,7 +231,7 @@ const runFrames = runScript.flatMap((step) => {
     return [];
   }
   if ("cut" in step) {
-    runPlayer.cut();
+    runPlayer.cut(step.cut);
     return [];
   }
   const f = runPlayer.advanceTo(step.frame);

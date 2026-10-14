@@ -141,13 +141,13 @@ final class EngineVectorTests: XCTestCase {
     }
 }
 
-/// A player vector's script step: {play, t, blendMs?}, {frame: t} or {cut: true}.
+/// A player vector's script step: {play, t, blendMs?}, {frame: t} or {cut: t}.
 private struct ScriptStep: Decodable {
     let play: String?
     let t: Double?
     let blendMs: Double?
     let frame: Double?
-    let cut: Bool?
+    let cut: Double?
 }
 
 /// What a player vector holds for one frame; `turn` is the fake turn bone's channels, or null.
@@ -174,8 +174,8 @@ private func runPlayer(_ name: String, _ c: CompiledRig, _ clips: [Clip], _ scri
             try player.play(clip, at: try XCTUnwrap(step.t), blendMs: step.blendMs)
             continue
         }
-        if step.cut == true {
-            player.cut()
+        if let t = step.cut {
+            try player.cut(at: t)
             continue
         }
         let t = try XCTUnwrap(step.frame)

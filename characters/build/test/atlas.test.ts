@@ -80,3 +80,14 @@ test("buildAtlas writes page images whose regions hold the drawings", () => {
   assert.equal(atlas.name, "2x");
   assert.equal(atlas.scale, 2);
 });
+
+test("a region wider than the area suggests still lands inside its page", () => {
+  const wide: Raster = { region: "wide", w: 900, h: 4, data: Buffer.alloc(900 * 4 * 4, 255), anchorX: 0, anchorY: 0 };
+  const small: Raster[] = Array.from({ length: 3 }, (_, i) => ({ region: `s${i}`, w: 4, h: 4, data: Buffer.alloc(64, 255), anchorX: 0, anchorY: 0 }));
+  const { placed, sizes } = packRasters([wide, ...small]);
+  for (const p of placed) assert.ok(p.x + p.raster.w + GAP <= sizes[p.page]!, `${p.raster.region} ends at ${p.x + p.raster.w} on a ${sizes[p.page]} px page`);
+});
+
+test("a drawing that is not a whole number of pixels at its scale is refused, never stretched", () => {
+  assert.throws(() => rasterize({ region: "odd", svg: rect(10, 21, "#000000"), anchor: [0, 0] }, 0.75), /not a whole number of pixels/);
+});

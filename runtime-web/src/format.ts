@@ -2,6 +2,7 @@
 // and the checks that refuse a package breaking it.
 
 import type { Easing } from "./math.ts";
+import { sampleKeys } from "./clip.ts";
 
 export const FORMAT = 1;
 
@@ -288,6 +289,20 @@ export function validate(rig: Rig, clips: Clip[], atlas?: AtlasSet): string[] {
             problems.push(`clip ${clip.name}: ${boneName}.${channel} ${v} leaves its limit [${bone[channel]![0]}, ${bone[channel]![1]}]`);
           if ((channel === "squash" || channel === "scale") && (!bone[channel] || v < bone[channel][0] || v > bone[channel][1]))
             problems.push(`clip ${clip.name}: ${boneName}.${channel} ${v} is not allowed (scale channels, section 5b)`);
+        }
+        // Between keys an easing can overshoot (easeOutBack, a bezier): sample each segment finely.
+        const limit = channel === "x" || channel === "y" ? undefined : bone[channel];
+        if (limit) {
+          for (let k = 1; k < keys.length; k++) {
+            const [t0, t1] = [keys[k - 1]![0], keys[k]![0]];
+            for (let i = 1; i < 256 && t1 > t0; i++) {
+              const v = sampleKeys(keys, t0 + ((t1 - t0) * i) / 256);
+              if (v < limit[0] - 1e-9 || v > limit[1] + 1e-9) {
+                problems.push(`clip ${clip.name}: ${boneName}.${channel} overshoots to ${v.toFixed(2)} between ${t0} and ${t1} ms, past its limit [${limit[0]}, ${limit[1]}]`);
+                break;
+              }
+            }
+          }
         }
       }
     }
