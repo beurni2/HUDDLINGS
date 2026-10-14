@@ -19,6 +19,8 @@ export const RASTER_VERSION = 1;
 const RESVG = (JSON.parse(readFileSync(join(here, "../../node_modules/@resvg/resvg-js/package.json"), "utf8")) as { version: string }).version;
 
 export interface Job {
+  /** The drawing's region, for the worker's own errors. */
+  region: string;
   svg: string;
   scale: number;
   /** Where the worker writes the raster. */
@@ -56,7 +58,7 @@ function run(jobs: Job[], folder: string, name: string): Promise<{ ok: boolean; 
     child.on("close", (code, signal) => {
       rmSync(list, { force: true });
       const lines = said.split("\n").map((l) => l.trim()).filter(Boolean);
-      const first = lines.find((l) => /panicked|Error/.test(l)) ?? lines[0] ?? "";
+      const first = lines.find((l) => /^(?:[A-Za-z]*Error:|thread .* panicked)/.test(l)) ?? lines[0] ?? "";
       done({ ok: code === 0, why: `${signal ? `killed by ${signal}` : `exit ${code}`}${first ? `: ${first}` : ""}` });
     });
   });
@@ -89,7 +91,7 @@ export async function rasterizeAll(drawings: Drawing[], scales: number[], opts: 
     const lane = async () => {
       for (let next = pending.shift(); next; next = pending.shift()) {
         const [i, batch] = next;
-        const jobs = (b: typeof batch) => b.map(({ d, scale, file }) => ({ svg: d.svg, scale, file }));
+        const jobs = (b: typeof batch) => b.map(({ d, scale, file }) => ({ region: d.region, svg: d.svg, scale, file }));
         if ((await run(jobs(batch), folder, `batch-${process.pid}-${i}`)).ok) continue;
         // The batch died: one drawing at a time names the culprit.
         for (const [k, one] of batch.entries()) {

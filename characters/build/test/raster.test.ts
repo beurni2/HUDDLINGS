@@ -39,6 +39,11 @@ test("a drawing that aborts resvg fails the build by name, and only it", async (
   });
 });
 
+test("a drawing the worker refuses is named with the worker's reason", async () => {
+  const odd: Drawing = { region: "odd/front", svg: good.svg.replace('width="80"', 'width="80.5"').replace("80 64", "80.5 64"), anchor: [0, 0] };
+  await assert.rejects(rasterizeAll([odd], [1]), /drawing odd\/front at 1x could not be drawn \(exit 1: Error: drawing odd\/front: 80.5 × 64 pt at scale 1 is not a whole number of pixels\)/);
+});
+
 test("rasters are cached by what makes them, and a cached raster is the one drawn", async () => {
   const cache = mkdtempSync(join(tmpdir(), "raster-cache-"));
   try {
