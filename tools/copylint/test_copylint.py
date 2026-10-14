@@ -463,8 +463,6 @@ class TheRepositorysCopy(unittest.TestCase):
         self.assertEqual([], [str(p) for p in problems])
 
 
-if __name__ == "__main__":
-    unittest.main()
 
 
 class AppStrings(unittest.TestCase):
@@ -515,7 +513,40 @@ class AppStrings(unittest.TestCase):
         path = self.xliff([("NSMicrophoneUsageDescription", "{mochi} listens")], original="Huddlings/InfoPlist.xcstrings")
         self.assertTrue(any("infoplist" in p for p in self.build.check_extracted(path)))
 
+    def swift(self, source):
+        folder = self.dir / "App"
+        folder.mkdir(exist_ok=True)
+        (folder / "View.swift").write_text(source, encoding="utf-8")
+        return self.build.check_code([folder])
+
+    def test_lab_code_may_show_anything(self):
+        self.assertEqual([], self.swift('#if LAB\nText(verbatim: "Diagnostics")\nButton("Export") {}\n#endif\n'))
+
+    def test_verbatim_text_outside_the_lab_fails(self):
+        problems = self.swift('#if LAB\nlet x = 1\n#else\nText(verbatim: "Hello")\n#endif\n')
+        self.assertTrue(any("verbatim" in p and ":4:" in p for p in problems), problems)
+
+    def test_every_branch_but_the_labs_is_checked(self):
+        problems = self.swift('#if DEBUG\nText(verbatim: "a")\n#elseif LAB\nText(verbatim: "b")\n#else\nText(verbatim: "c")\n#endif\n'
+                              '#if LAB\n#if DEBUG\nText(verbatim: "d")\n#endif\n#elseif os(iOS)\nText(verbatim: "e")\n#endif\n')
+        self.assertEqual([":2:", ":6:", ":13:"], [p[p.index(":"):p.index(":", p.index(":") + 1) + 1] for p in problems], problems)
+
+    def test_ui_literals_must_be_catalogue_keys(self):
+        self.assertEqual([], self.swift('Text("hatch.choose")\n'))
+        problems = self.swift('Text("hatch.choose")\nButton("Tap me") {}\n.navigationTitle("Home")\n')
+        self.assertEqual(2, len(problems), problems)
+
+    def test_text_from_a_string_fails(self):
+        problems = self.swift('let name = "x"\nText(name)\nText(LocalizedStringKey("hatch.choose"))\n')
+        self.assertEqual(1, len(problems), problems)
+
+    def test_the_apps_own_code_passes(self):
+        self.assertEqual([], self.build.check_code([spec_catalogue.ROOT / "ios"]))
+
     def test_nothing_to_check_is_a_failure(self):
         empty = self.dir / "empty"
         empty.mkdir()
         self.assertTrue(self.build.check_extracted(empty))
+
+if __name__ == "__main__":
+    unittest.main()

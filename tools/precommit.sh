@@ -1,9 +1,9 @@
 #!/bin/sh
 # Runs before every commit (spec section 5b, Guard rails) on exactly what is
 # being committed, the index, not the working tree: the copy lint and its
-# tests, the runtimes' typecheck and tests, and a check that the shared test
-# vectors match the code that writes them. A fast Visual QA subset joins once
-# a character package exists.
+# tests, the app code's strings, the QA tools' tests, the runtimes' typecheck
+# and tests, and a check that the shared test vectors match the code that
+# writes them. A fast Visual QA subset joins once a character package exists.
 set -e
 top=$(git rev-parse --show-toplevel)
 tmp=$(mktemp -d)

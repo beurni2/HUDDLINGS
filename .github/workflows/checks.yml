@@ -18,6 +18,8 @@ jobs:
           python-version: "3.11"
       - name: Copy lint
         run: python3 tools/copylint/copylint.py
+      - name: The app's code shows only catalogue copy outside the Lab
+        run: python3 tools/copylint/strings_build.py code ios
       - name: Copy lint tests
         run: python3 -m unittest discover -s tools/copylint -v
       - name: QA tool tests
