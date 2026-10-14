@@ -29,6 +29,29 @@ jobs:
           pip install -r tools/requirements.txt
           python3 -m unittest discover -s tools/qa -v
 
+  reference-prep:
+    # Spec section 5b, phase 2: the reference prep's tests, and each species'
+    # ref/ and model.json must be exactly what the scripts write from the
+    # sheets and its refmap/ (the founder approves the model at Gate A).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+      - run: pip install -r tools/requirements.txt
+      - name: Tests
+        run: python3 -m unittest discover -s characters/refprep -v
+      - name: References are current
+        run: |
+          for refmap in characters/*/refmap; do
+            species=$(basename "$(dirname "$refmap")")
+            python3 characters/refprep/prepare.py "$species"
+            # Changed, deleted or new files all count.
+            changes=$(git status --porcelain -- "characters/$species")
+            if [ -n "$changes" ]; then echo "$changes"; echo "::error::characters/$species is stale; run python3 characters/refprep/prepare.py $species"; exit 1; fi
+          done
+
   runtime-web:
     # The web runtime and the build tools: typecheck, tests, and the shared
     # test vectors both runtimes are held to (characters/format/README.md).
