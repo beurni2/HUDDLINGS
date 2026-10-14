@@ -13,7 +13,7 @@ import SpriteKit
 import UniformTypeIdentifiers
 import XCTest
 
-private let repository = URL(fileURLWithPath: #filePath)
+let repository = URL(fileURLWithPath: #filePath)
     .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
     .deletingLastPathComponent().deletingLastPathComponent()
 
@@ -33,7 +33,7 @@ private let fps = 30.0
 
 /// Draws SpriteKit scenes into an offscreen texture and reads them back (README, Rendering).
 @MainActor
-private final class Offscreen {
+final class Offscreen {
     let device: MTLDevice
     let queue: MTLCommandQueue
     let renderer: SKRenderer
@@ -98,7 +98,7 @@ private final class Offscreen {
 /// How many pixels SKRenderer draws per scene point. It follows the device's screen scale,
 /// so it is measured, never assumed: an 8-point red square from the bottom-left corner.
 @MainActor
-private func pixelsPerScenePoint(_ offscreen: Offscreen) throws -> Int {
+func pixelsPerScenePoint(_ offscreen: Offscreen) throws -> Int {
     let scene = SKScene(size: CGSize(width: offscreen.size, height: offscreen.size))
     scene.anchorPoint = .zero
     scene.scaleMode = .fill

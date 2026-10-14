@@ -1,0 +1,191 @@
+// Measures the two things the format contract pins WebGL to (characters/format/README.md,
+// Rendering; QUESTIONS.md E17), since Apple documents neither: which diagonal SpriteKit
+// splits a warp-grid cell along with subdivisionLevels 0, and how it filters between
+// mip levels. Each probe compares SpriteKit's pixels with exact predictions, writes
+// its numbers to build/parity/spritekit/probes.txt, and fails if SpriteKit does not
+// do what runtime-web/src/renderer.ts does.
+#if canImport(SpriteKit) && canImport(Metal)
+import Foundation
+import Metal
+import SpriteKit
+import XCTest
+
+@MainActor
+final class RenderProbes: XCTestCase {
+    private static var lines: [String] = []
+
+    /// Records a measurement beside the parity frames (xcodebuild -quiet hides test output).
+    private func note(_ line: String) {
+        print(line)
+        RenderProbes.lines.append(line)
+        let folder = repository.appendingPathComponent("build/parity/spritekit")
+        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        try? (RenderProbes.lines.joined(separator: "\n") + "\n").write(to: folder.appendingPathComponent("probes.txt"), atomically: true, encoding: .utf8)
+    }
+
+    private func makeOffscreen(_ size: Int) throws -> (Offscreen, Double) {
+        let device = try XCTUnwrap(MTLCreateSystemDefaultDevice(), "no Metal device: the probes cannot run here")
+        let queue = try XCTUnwrap(device.makeCommandQueue())
+        let offscreen = try Offscreen(device: device, queue: queue, size: size)
+        return (offscreen, Double(try pixelsPerScenePoint(offscreen)))
+    }
+
+    /// Draws nodes on white, positioned in pixels from the bottom-left corner, and returns RGBA, top row first.
+    private func draw(_ offscreen: Offscreen, _ k: Double, _ nodes: [SKNode]) throws -> [UInt8] {
+        let scene = SKScene(size: CGSize(width: Double(offscreen.size) / k, height: Double(offscreen.size) / k))
+        scene.anchorPoint = .zero
+        scene.scaleMode = .fill
+        scene.backgroundColor = SKColor(red: 1, green: 1, blue: 1, alpha: 1)
+        for node in nodes { scene.addChild(node) }
+        _ = try offscreen.render(scene, at: 0)
+        return try offscreen.render(scene, at: 1.0 / 60)
+    }
+
+    /// An opaque texture from a function of its data's column and row.
+    private func texture(_ width: Int, _ height: Int, mipmaps: Bool, _ colour: (Int, Int) -> (UInt8, UInt8, UInt8)) -> SKTexture {
+        var bytes = [UInt8](repeating: 255, count: width * height * 4)
+        for y in 0..<height {
+            for x in 0..<width {
+                let (r, g, b) = colour(x, y)
+                let i = 4 * (y * width + x)
+                bytes[i] = r
+                bytes[i + 1] = g
+                bytes[i + 2] = b
+            }
+        }
+        let texture = SKTexture(data: Data(bytes), size: CGSize(width: width, height: height))
+        texture.filteringMode = .linear
+        texture.usesMipmaps = mipmaps
+        return texture
+    }
+
+    private func sprite(_ texture: SKTexture, pixels: Double, at origin: Double, _ k: Double) -> SKSpriteNode {
+        let node = SKSpriteNode(texture: texture, size: CGSize(width: pixels / k, height: pixels / k))
+        node.anchorPoint = .zero
+        node.position = CGPoint(x: origin / k, y: origin / k)
+        return node
+    }
+
+    /// One cell, its top-right corner pulled out, filled with a texture whose colour is its own
+    /// coordinate: each diagonal predicts a different coordinate inside the cell.
+    func testWarpCellDiagonal() throws {
+        let size = 256, side = 160.0, origin = 40.0, n = 64
+        let (offscreen, k) = try makeOffscreen(size)
+        let gradient = texture(n, n, mipmaps: false) { x, y in
+            (UInt8(((Double(x) + 0.5) / Double(n) * 255).rounded()), UInt8(((Double(y) + 0.5) / Double(n) * 255).rounded()), 0)
+        }
+        // Which way up SpriteKit puts the data's rows: green grows towards its first row's opposite edge.
+        let plain = try draw(offscreen, k, [sprite(gradient, pixels: side, at: origin, k)])
+        let column = Int(origin + side / 2)
+        let nearTop = plain[4 * ((size - Int(origin + side) + 8) * size + column) + 1]
+        let nearBottom = plain[4 * ((size - Int(origin) - 8) * size + column) + 1]
+        let rowsUp = nearTop > nearBottom
+        note("probe: a texture's first row of data is drawn at its \(rowsUp ? "bottom" : "top")")
+
+        let source: [SIMD2<Float>] = [SIMD2(0, 0), SIMD2(1, 0), SIMD2(0, 1), SIMD2(1, 1)]
+        let destination: [SIMD2<Float>] = [SIMD2(0, 0), SIMD2(1, 0), SIMD2(0, 1), SIMD2(1.3, 1.25)]
+        let warped = sprite(gradient, pixels: side, at: origin, k)
+        warped.warpGeometry = SKWarpGeometryGrid(columns: 1, rows: 1, sourcePositions: source, destinationPositions: destination)
+        warped.subdivisionLevels = 0
+        let pixels = try draw(offscreen, k, [warped])
+
+        // Corners in grid order: 0 bottom-left, 1 bottom-right, 2 top-left, 3 top-right.
+        let splits: [(String, [[Int]])] = [
+            ("bottom-left to top-right", [[0, 1, 3], [0, 3, 2]]),
+            ("top-left to bottom-right", [[0, 1, 2], [1, 3, 2]]),
+        ]
+        func predict(_ q: SIMD2<Double>, _ triangles: [[Int]]) -> SIMD2<Double>? {
+            for t in triangles {
+                let a = SIMD2<Double>(destination[t[0]]), b = SIMD2<Double>(destination[t[1]]), c = SIMD2<Double>(destination[t[2]])
+                let det = (b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y)
+                let l1 = ((q.x - a.x) * (c.y - a.y) - (c.x - a.x) * (q.y - a.y)) / det
+                let l2 = ((b.x - a.x) * (q.y - a.y) - (q.x - a.x) * (b.y - a.y)) / det
+                let l0 = 1 - l1 - l2
+                if l0 >= -1e-9 && l1 >= -1e-9 && l2 >= -1e-9 {
+                    return l0 * SIMD2<Double>(source[t[0]]) + l1 * SIMD2<Double>(source[t[1]]) + l2 * SIMD2<Double>(source[t[2]])
+                }
+            }
+            return nil
+        }
+        var errors = [Double](repeating: 0, count: splits.count)
+        var count = 0
+        for row in 0..<size {
+            for x in 0..<size {
+                let i = 4 * (row * size + x)
+                // Only pixels wholly inside the cell: the background is white, the texture has no blue.
+                guard pixels[i + 2] < 8 else { continue }
+                let q = SIMD2((Double(x) + 0.5 - origin) / side, (Double(size - row) - 0.5 - origin) / side)
+                let predictions = splits.map { predict(q, $0.1) }
+                guard predictions.allSatisfy({ $0 != nil }) else { continue }
+                let green = Double(pixels[i + 1]) / 255
+                let measured = SIMD2(Double(pixels[i]) / 255, rowsUp ? green : 1 - green)
+                for (s, p) in predictions.enumerated() {
+                    let d = measured - p!
+                    errors[s] += abs(d.x) + abs(d.y)
+                }
+                count += 1
+            }
+        }
+        XCTAssertGreaterThan(count, 10_000, "too few pixels inside the cell to judge")
+        let means = errors.map { $0 / Double(max(count, 1)) }
+        let best = means[0] <= means[1] ? 0 : 1
+        note(String(format: "probe: warp cell (subdivisionLevels 0) over %d pixels: mean error %.4f if split %@, %.4f if split %@",
+                    count, means[0], splits[0].0, means[1], splits[1].0))
+        note("probe: SpriteKit splits a warp cell \(splits[best].0)" + (means[best] < 0.02 ? "" : ", but neither split fits: it may subdivide"))
+        // renderer.ts splits each row pair top-right to bottom-left in texture space: the same diagonal.
+        XCTAssertEqual(splits[best].0, "bottom-left to top-right", "SpriteKit splits warp cells the other way from the web renderer")
+        XCTAssertLessThan(means[best], 0.02, "neither split predicts SpriteKit's cell")
+    }
+
+    /// Noise drawn between two mip levels: least squares finds how much of the next level
+    /// SpriteKit blends in, from renders of level 0 alone and of level 1 alone at the same size.
+    func testMipFilter() throws {
+        let size = 256, n = 256, origin = 20.0
+        let (offscreen, k) = try makeOffscreen(size)
+        var seed: UInt32 = 20_261_014
+        var noise = [UInt8](repeating: 0, count: n * n)
+        for i in noise.indices {
+            seed = seed &* 1_664_525 &+ 1_013_904_223
+            noise[i] = UInt8(seed >> 24)
+        }
+        let level0 = texture(n, n, mipmaps: false) { x, y in let v = noise[y * n + x]; return (v, v, v) }
+        let mipmapped = texture(n, n, mipmaps: true) { x, y in let v = noise[y * n + x]; return (v, v, v) }
+        let level1 = texture(n / 2, n / 2, mipmaps: false) { x, y in
+            let sum = Int(noise[2 * y * n + 2 * x]) + Int(noise[2 * y * n + 2 * x + 1]) + Int(noise[(2 * y + 1) * n + 2 * x]) + Int(noise[(2 * y + 1) * n + 2 * x + 1])
+            let v = UInt8((sum + 2) / 4)
+            return (v, v, v)
+        }
+        for scale in [0.81, 0.62] {
+            let pixels = Double(n) * scale
+            let a = try draw(offscreen, k, [sprite(level0, pixels: pixels, at: origin, k)])
+            let b = try draw(offscreen, k, [sprite(level1, pixels: pixels, at: origin, k)])
+            let m = try draw(offscreen, k, [sprite(mipmapped, pixels: pixels, at: origin, k)])
+            var dot = 0.0, norm = 0.0
+            let inside = (Int(origin) + 3)..<(Int(origin + pixels) - 3)
+            for y in inside {
+                for x in inside {
+                    let i = 4 * ((size - 1 - y) * size + x)
+                    let (av, bv, mv) = (Double(a[i]), Double(b[i]), Double(m[i]))
+                    dot += (mv - av) * (bv - av)
+                    norm += (bv - av) * (bv - av)
+                }
+            }
+            let weight = dot / max(norm, 1)
+            var residual = 0.0
+            for y in inside {
+                for x in inside {
+                    let i = 4 * ((size - 1 - y) * size + x)
+                    residual += abs(Double(m[i]) - ((1 - weight) * Double(a[i]) + weight * Double(b[i])))
+                }
+            }
+            residual /= Double(inside.count * inside.count)
+            let level = log2(1 / scale)
+            note(String(format: "probe: mipmaps drawn at %.2f (level %.2f): SpriteKit blends %.3f of level 1 into level 0, residual %.2f of 255",
+                        scale, level, weight, residual))
+            // renderer.ts uses LINEAR_MIPMAP_LINEAR: the blend follows the level's fraction.
+            // LINEAR_MIPMAP_NEAREST would give 0 at level 0.30 and 1 at level 0.69.
+            XCTAssertEqual(weight, level, accuracy: 0.15, "SpriteKit does not blend mip levels as LINEAR_MIPMAP_LINEAR does")
+        }
+    }
+}
+#endif

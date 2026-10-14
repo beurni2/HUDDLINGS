@@ -73,6 +73,11 @@ jobs:
       - name: Engine and SpriteKit tests on the simulator (writes the parity frames)
         working-directory: ios/CompanionCore
         run: xcodebuild test -quiet -scheme CompanionCore-Package -destination "id=${{ steps.sim.outputs.udid }}" -resultBundlePath ../../build/results/package.xcresult 2>&1
+      - name: What the SpriteKit render and the probes measured
+        if: always()
+        run: |
+          cat build/parity/spritekit/notes.txt || true
+          cat build/parity/spritekit/probes.txt || true
       - name: Generate the project
         working-directory: ios
         run: xcodegen generate
@@ -130,9 +135,10 @@ jobs:
         with:
           name: spritekit-frames
           path: build/parity/spritekit
-      - name: What the SpriteKit render measured
-        run: cat build/parity/spritekit/notes.txt
       - name: Compare
+        # The evidence strips are printed too: artifacts cannot be fetched from every session.
+        env:
+          PARITY_PRINT_EVIDENCE: "1"
         run: python3 tools/qa/parity.py build/parity/web build/parity/spritekit build/parity/report
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
