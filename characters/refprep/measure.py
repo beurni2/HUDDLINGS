@@ -1,11 +1,13 @@
 """Measures the turnaround (spec section 5b, phase 2; Appendix F): landmarks per
 view, proportions and outline widths, in points at the companion's 164 pt
-sitting height, from the ground point under its body, y growing downward.
+sitting height, from the ground point under its seat (where the body bone sits,
+section 5b), y growing downward.
 
     python3 characters/refprep/measure.py dog
 
-Reads the crops listed in ref/panels.json (run crop.py first) and the hand-placed
-points in refmap/landmarks.json. Writes ref/measurements.json, the cut-out
+Reads the crops listed in ref/panels.json (run crop.py first), and the
+hand-placed points and each view's required landmark set in refmap/landmarks.json;
+fails when a view lacks one of its set or a hand point is off the drawing. Writes ref/measurements.json, the cut-out
 silhouettes ref/silhouettes/<view>.png and an overlay per view in
 ref/overlays/landmarks-<view>.png, every point drawn and named, to be checked by eye.
 
@@ -15,7 +17,6 @@ tag, the tan ears) and the silhouette; "hand" points were placed on a zoomed cro
 and are checked on the overlay like the rest. The rules are in the functions
 below, one per landmark."""
 import sys
-from pathlib import Path
 
 import numpy as np
 from PIL import Image, ImageDraw
@@ -51,8 +52,9 @@ class Classes:
         self.blue = sil & (b < -12)
         self.gold = sil & (b > 40) & (L > 65)
         self.tan = sil & (C > 20) & (hue > 40) & (hue < 80) & (L >= 64) & (L < 86)
-        # The tan in shade, as on the ears' lower half: darker, as saturated.
-        self.shaded_tan = sil & (C > 30) & (hue > 40) & (hue < 80) & (L >= 48) & (L < 86)
+        # The tan in shade, as on the ears' lower half: darker, as saturated, but lighter than an outline, so
+        # an ear's grown region stops at its bottom line instead of leaking into the tan below it.
+        self.shaded_tan = sil & (C > 30) & (hue > 40) & (hue < 80) & (L >= 55) & (L < 86)
 
 
 def disk(radius):
@@ -75,18 +77,23 @@ def centroid(mask):
     return [float(x), float(y)]
 
 
-def top_point(mask, rows=2):
-    ys, xs = np.nonzero(mask)
-    top = ys.min()
-    pick = ys < top + rows
-    return [float(xs[pick].mean()), float(top)]
+def middle_of_longest_run(row):
+    xs = np.nonzero(row)[0]
+    runs = np.split(xs, np.nonzero(np.diff(xs) > 1)[0] + 1)
+    longest = max(runs, key=len)
+    return float((longest[0] + longest[-1]) / 2)
 
 
-def bottom_point(mask, rows=2):
-    ys, xs = np.nonzero(mask)
-    low = ys.max()
-    pick = ys > low - rows
-    return [float(xs[pick].mean()), float(low)]
+def top_point(mask):
+    """The middle of the longest run of the mask's top row: on a tuft with two lobes, one of them, never the
+    gap between."""
+    top = int(np.nonzero(mask)[0].min())
+    return [middle_of_longest_run(mask[top]), float(top)]
+
+
+def bottom_point(mask):
+    low = int(np.nonzero(mask)[0].max())
+    return [middle_of_longest_run(mask[low]), float(low)]
 
 
 def eyes(cls, count):
@@ -170,6 +177,8 @@ def ears(cls, count, band):
     the ear's lower half (downward only, so the head's tan patches higher up never join it)."""
     above = above_collar(band)
     found = components(ndimage.binary_opening(cls.tan & above, np.ones((2, 2), bool)), 200)[:count]
+    if len(found) < count:
+        raise ValueError(f"found {len(found)} ear(s) of the {count} this view shows")
     found = sorted(found, key=lambda m: centroid(m)[0])
     grown = []
     for core in found:
@@ -253,6 +262,13 @@ def check_hand(view, hand, sil):
             raise ValueError(f"{view}: the hand-placed {name} at {[x, y]} (crop px) is outside the silhouette")
 
 
+def check_required(view, points, required):
+    """Every landmark the view shows must have been found: a finder that comes back empty fails the run."""
+    missing = sorted(set(required) - set(points))
+    if missing:
+        raise ValueError(f"{view}: no {', '.join(missing)}; refmap/landmarks.json says this view shows them")
+
+
 def measure_view(view, rgb, hand):
     sil = silhouette.cut_out(rgb)
     cls = Classes(rgb, sil)
@@ -270,14 +286,20 @@ def measure_view(view, rgb, hand):
     for name, xy in collar_points.items():
         put(name, xy, "auto: the blue band's centroid" if name == "collar" else "auto: the blue band's end on that side of the sheet")
     collar_top = int(np.nonzero(band)[0].min())
-    body = sil.copy()
-    body[:int(np.nonzero(band)[0].max()) + 1, :] = False
-    body_x = centroid(body)[0]
-    put("ground", [body_x, ground_y], "auto: the silhouette's lowest row, under the centroid of the body below the collar")
-    tag_mask, ring = tag(cls)
-    if ring is not None:
-        put("tag.ring", ring, "auto: the top of the gold tag, where its ring hangs from the collar")
-    features = cls.blue | cls.gold
+    check_hand(view, hand, sil)
+    hand = dict(hand)
+    seat = hand.pop("seat", None)
+    if seat is not None:
+        put("ground", [seat[0], ground_y], "hand: the silhouette's lowest row, under the seat placed by hand (the haunch's underside)")
+    else:
+        # Facing or turned away, the seat is on the body's midline: the middle of the body below the collar,
+        # which the tail does not shift in these views.
+        body = sil.copy()
+        body[:int(np.nonzero(band)[0].max()) + 1, :] = False
+        put("ground", [centroid(body)[0], ground_y], "auto: the silhouette's lowest row, under the middle of the body below the collar")
+    tag_mask, tag_top = tag(cls)
+    if tag_top is not None:
+        put("tag.top", tag_top, "auto: the top of the gold heart, where it hangs from its ring")
     eye_masks = []
     if view != "back":
         eye_masks = eyes(cls, 1 if view == "side.L" else 2)
@@ -289,9 +311,6 @@ def measure_view(view, rgb, hand):
         nose, mouth_open = nose_and_mouth(cls, eye_masks, facing)
         put("nose", centroid(nose), "auto: the centroid of the nose's dark blob, the lines that join it to the mouth left out")
         left, right = mouth_corners(cls, nose, mouth_open, eye_masks)
-        features = features | nose | cls.pink | np.any(eye_masks, axis=0)
-        if mouth_open is not None:
-            features |= ndimage.binary_dilation(mouth_open, iterations=3)
         if view == "side.L":
             put("mouth.L", right, "auto: the mouth line's back end (the profile shows one corner)")
         else:
@@ -307,9 +326,8 @@ def measure_view(view, rgb, hand):
     for side, mask, reach in zip(names, ear_masks, ear_reach):
         put(f"ear.{side}.root", top_point(mask), "auto: the ear's topmost point, where it comes out from behind the head")
         put(f"ear.{side}.tip", bottom_point(reach), "auto: the ear's lowest point, its shaded lower half included")
-    check_hand(view, hand, sil)
     for name, xy in hand.items():
-        put(name, xy, "hand: placed on the sheet zoomed six to nine times, checked on the overlay")
+        put(name, xy, "hand: placed on the sheet zoomed six to ten times, checked on the overlay")
     # The head runs from its top to the chin: the collar's top under the nose, where the chin overlaps the
     # collar. Where the collar doesn't pass under the nose (the profile, the back), the head is measured
     # down to the collar's top and no chin is recorded.
@@ -320,7 +338,7 @@ def measure_view(view, rgb, hand):
         if len(column):
             head_bottom = float(column.min())
             put("chin", [nose_x, head_bottom], "auto: the collar's top under the nose (the chin overlaps the collar)")
-    shape = {"earMasks": ear_reach, "headBottom": head_bottom, "features": features,
+    shape = {"earMasks": ear_reach, "headBottom": head_bottom,
              "eyeHeightsPx": [int(np.ptp(np.nonzero(m)[0]) + 1) for m in eye_masks]}
     return sil, cls, points, method, shape
 
@@ -336,12 +354,24 @@ def head_region(sil, ear_masks, top, bottom):
     return components(head)[0]
 
 
-def head_width(head):
-    """The head's widest row: on the dog's front view, the cheeks between the ears' inner outlines."""
+def head_width(sil, ear_masks, top, bottom, middle_x):
+    """The head's widest row, between its top and its bottom: on each row, the run of the drawing through the
+    face's middle (under the nose), stopped by the ears. On the dog's front view that is the cheeks, which
+    meet the ears' tan with no line between, so the ears are grown by one pixel only."""
+    blocked = ~sil
+    for ear in ear_masks:
+        blocked |= ndimage.binary_dilation(ndimage.binary_fill_holes(ear))
+    x = int(round(middle_x))
     widths = []
-    for row in np.unique(np.nonzero(head)[0]):
-        xs = np.nonzero(head[row])[0]
-        widths.append((int(xs.max() - xs.min() + 1), int(row), int(xs.min()), int(xs.max())))
+    for row in range(int(top), int(bottom)):
+        if blocked[row, x]:
+            continue
+        left = right = x
+        while left > 0 and not blocked[row, left - 1]:
+            left -= 1
+        while right < blocked.shape[1] - 1 and not blocked[row, right + 1]:
+            right += 1
+        widths.append((right - left + 1, row, left, right))
     return max(widths)
 
 
@@ -364,32 +394,45 @@ def overlay(rgb, sil, points, path, span=None):
         _, row, left, right = span
         y = row * zoom + zoom / 2
         draw.line([left * zoom, y, (right + 1) * zoom, y], fill=(0, 170, 60), width=2)
+    # Crosses first, then each name beside its cross where it overlaps no other name.
+    taken = []
     for name, (x, y) in points.items():
         cx, cy = x * zoom + zoom / 2, y * zoom + zoom / 2
         draw.line([cx - 6, cy, cx + 6, cy], fill=(230, 0, 60), width=2)
         draw.line([cx, cy - 6, cx, cy + 6], fill=(230, 0, 60), width=2)
-        draw.text((cx + 5, cy + 3), name, fill=(150, 0, 40))
+    for name, (x, y) in sorted(points.items(), key=lambda item: (item[1][1], item[1][0])):
+        cx, cy = x * zoom + zoom / 2, y * zoom + zoom / 2
+        left, top, right, bottom = draw.textbbox((0, 0), name)
+        w, h = right - left + 2, bottom - top + 2
+        for dx, dy in [(5, 3), (5, -h - 3), (-w - 5, 3), (-w - 5, -h - 3), (5, h + 4), (5, -2 * h - 4),
+                       (-w - 5, h + 4), (-w - 5, -2 * h - 4), (5, 2 * h + 6), (-w - 5, 2 * h + 6)]:
+            box = (cx + dx, cy + dy, cx + dx + w, cy + dy + h)
+            if not any(box[0] < b[2] and b[0] < box[2] and box[1] < b[3] and b[1] < box[3] for b in taken):
+                break
+        taken.append(box)
+        draw.text((box[0] + 1, box[1] - top + 1), name, fill=(150, 0, 40), stroke_width=1, stroke_fill=(255, 255, 255))
     sheets.save_png(path, np.asarray(image))
 
 
 def measure(species):
     ref = sheets.ROOT / "characters" / species / "ref"
     panels = {p["id"]: p for p in sheets.json.loads((ref / "panels.json").read_text())["panels"]}
-    hand_path = sheets.ROOT / "characters" / species / "refmap" / "landmarks.json"
-    hand_all = sheets.json.loads(hand_path.read_text()) if hand_path.exists() else {}
+    hand_file = sheets.json.loads((sheets.ROOT / "characters" / species / "refmap" / "landmarks.json").read_text())
     views, raw = {}, {}
     for view, panel_id in TURNAROUND.items():
         panel = panels[panel_id]
         x0, y0, w, h = panel["box"]
         rgb = sheets.load_sheet(species, panel["sheet"])[y0:y0 + h, x0:x0 + w]
-        hand = {k: v for k, v in hand_all.get(view, {}).items() if not k.startswith("_")}
+        hand = {k: v for k, v in hand_file["hand"].get(view, {}).items() if not k.startswith("_")}
         # Hand points are written in the sheet's pixels; measurement works in the crop's.
         hand = {k: [v[0] - x0, v[1] - y0] for k, v in hand.items()}
         sil, cls, points, method, shape = measure_view(view, rgb, hand)
+        check_required(view, points, hand_file["required"][view])
         head = head_region(sil, shape["earMasks"], points["head.top"][1], shape["headBottom"])
         shape["headCentre"] = [round(v, 2) for v in centroid(head)]
         # The head's width is the front view's: elsewhere the ears or the turn hide its sides.
-        span = head_width(head) if view == "front" else None
+        span = (head_width(sil, shape["earMasks"], points["head.top"][1], shape["headBottom"], points["nose"][0])
+                if view == "front" else None)
         sheets.save_png(ref / "silhouettes" / f"{view}.png", (sil * 255).astype(np.uint8))
         overlay(rgb, sil, points, ref / "overlays" / f"landmarks-{view}.png", span)
         raw[view] = (panel, sil, cls, points, method, shape, span)

@@ -1,22 +1,106 @@
 {
- "_about": "Landmarks placed by hand, in the master sheet's pixels (x right, y down), for what the sheet's colours cannot find: the paws, which the sheet draws with no line between paw and leg. Each point is the centre of the paw's rounded end: midway between its side outlines, and from the top of its toe lines to its sole. Placed on the sheet zoomed six to nine times with a 5 px grid; measure.py checks each one is inside the silhouette, and the overlays in ref/overlays show them all. The back view draws no paw: the haunches and the tail sit on the ground.",
- "front": {
-  "paw.front.R": [481, 273],
-  "paw.front.L": [518, 273],
-  "paw.hind.R": [452, 266],
-  "paw.hind.L": [549, 266],
-  "_note": "The front paws are the legs' rounded ends, side by side under the chest (sole y 279, toe lines from about y 267). The hind paws are the round ovals on each side, below the haunches' tan (y 257 to 275)."
+ "_about": "The landmarks the sheet's colours cannot find, placed by hand in the master sheet's pixels (x right, y down), and the landmark set each turnaround view must show. measure.py fails when a view lacks one of its set, or when a hand point is off the drawing; the overlays in ref/overlays show every point.",
+ "_required": "Section 5b's list (eye centres, nose, mouth corners, ear roots and tips, collar line, tag ring, paw centres, ground line), less what each view hides: the back shows no face, tag or paws; the profile shows one eye, one mouth corner and one ear, and neither shows the far hind paw.",
+ "required": {
+  "front": [
+   "head.top",
+   "ground",
+   "collar",
+   "collar.line.sheetLeft",
+   "collar.line.sheetRight",
+   "tag.top",
+   "tag.ring",
+   "eye.L",
+   "eye.R",
+   "nose",
+   "mouth.L",
+   "mouth.R",
+   "chin",
+   "ear.L.root",
+   "ear.L.tip",
+   "ear.R.root",
+   "ear.R.tip",
+   "paw.front.L",
+   "paw.front.R",
+   "paw.hind.L",
+   "paw.hind.R"
+  ],
+  "threeQuarter.L": [
+   "head.top",
+   "ground",
+   "collar",
+   "collar.line.sheetLeft",
+   "collar.line.sheetRight",
+   "tag.top",
+   "tag.ring",
+   "eye.L",
+   "eye.R",
+   "nose",
+   "mouth.L",
+   "mouth.R",
+   "chin",
+   "ear.L.root",
+   "ear.L.tip",
+   "ear.R.root",
+   "ear.R.tip",
+   "paw.front.L",
+   "paw.front.R",
+   "paw.hind.L"
+  ],
+  "side.L": [
+   "head.top",
+   "ground",
+   "collar",
+   "collar.line.sheetLeft",
+   "collar.line.sheetRight",
+   "tag.top",
+   "tag.ring",
+   "eye.L",
+   "nose",
+   "mouth.L",
+   "ear.L.root",
+   "ear.L.tip",
+   "paw.front.L",
+   "paw.front.R",
+   "paw.hind.L"
+  ],
+  "back": [
+   "head.top",
+   "ground",
+   "collar",
+   "collar.line.sheetLeft",
+   "collar.line.sheetRight",
+   "ear.L.root",
+   "ear.L.tip",
+   "ear.R.root",
+   "ear.R.tip"
+  ]
  },
- "side.L": {
-  "paw.front.L": [690, 272],
-  "paw.front.R": [664, 266],
-  "paw.hind.L": [742, 272],
-  "_note": "The near front paw (the dog's left) is the big one, x 669 to 711. The small paw ahead of it, sitting higher, is the far front paw (the dog's right): only its toe end shows, and the point is the centre of what shows. The near hind foot rests forward under the haunch, x 712 to 773. The far hind paw is hidden."
- },
- "threeQuarter.L": {
-  "paw.front.R": [1094, 268],
-  "paw.front.L": [1129, 273],
-  "paw.hind.L": [1171, 271],
-  "_note": "The dog turns to its right, so its left side is near. The far front paw (the dog's right) is on the sheet's left, its sole higher (y 277); the near front paw is lower and larger (sole y 281); the near hind paw follows (x 1148 to 1195). The far hind paw is hidden."
+ "_hand": "Paws: the sheet draws no line between a paw and its leg, so each point is the centre of the paw's rounded end, midway between its side outlines and from the top of its toe lines to its sole. Tag ring: the top of the ring (the bail) where it rests on the collar, from which the tag swings (section 5b); the turnaround paints it blue on the blue collar. Seat: the body bone sits at the centre of the seat, where the body meets the ground (section 5b), and every landmark is measured from the ground under it; facing or turned away it is on the body's midline, found by measure.py, and in the side and three-quarter views it is the middle of the haunch's underside, placed here. Placed on the sheet zoomed six to ten times with a 5 px grid.",
+ "hand": {
+  "front": {
+   "paw.front.R": [481, 273],
+   "paw.front.L": [518, 273],
+   "paw.hind.R": [452, 266],
+   "paw.hind.L": [549, 266],
+   "tag.ring": [501, 206],
+   "_note": "The front paws are the legs' rounded ends, side by side under the chest (sole y 279, toe lines from about y 267). The hind paws are the round ovals on each side, below the haunches' tan (y 257 to 275). The ring is the darker blue loop over the collar, x 499 to 504, from y 206 down to the heart."
+  },
+  "side.L": {
+   "paw.front.L": [690, 272],
+   "paw.front.R": [664, 266],
+   "paw.hind.L": [725, 273],
+   "tag.ring": [675, 206],
+   "seat": [751, 278],
+   "_note": "The near front paw (the dog's left) is the big one, x 669 to 711. The small paw ahead of it, sitting higher, is the far front paw (the dog's right): only its toe end shows, and the point is the centre of what shows. The near hind paw is the round stub at the front of the haunch, from its toe end at x 712 to where its top outline fades at about x 737, toe lines at x 716 and 724; behind it the line along the ground is the haunch's underside, not the paw. The far hind paw is hidden. The seat: the haunch's underside runs from the hind stub's end (x 737) to where the haunch curves up at its back (x 765). The ring: the loop over the collar above the heart, x 673 to 677."
+  },
+  "threeQuarter.L": {
+   "paw.front.R": [1094, 268],
+   "paw.front.L": [1129, 273],
+   "paw.hind.L": [1162, 273],
+   "tag.ring": [1110, 206],
+   "seat": [1188, 279],
+   "_note": "The dog turns to its right, so its left side is near. The far front paw (the dog's right) is on the sheet's left, its sole higher (y 277); the near front paw is lower and larger (sole y 281); the near hind paw is the stub from x 1148 to where its top outline fades at about x 1176, toe lines at x 1158 and 1166; the haunch's underside runs on behind it. The far hind paw is hidden. The seat: the haunch's underside runs from the hind stub's end (x 1176) to where it curves up into the tail's root (x 1200). The ring: the loop over the collar, x 1107 to 1112."
+  }
  }
 }

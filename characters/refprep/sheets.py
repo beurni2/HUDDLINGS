@@ -96,7 +96,7 @@ def write_json(path, value):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     text = NUMBERS.sub(lambda m: "[" + ", ".join(v.strip() for v in m.group(1).split(",")) + "]",
-                       json.dumps(value, indent=1, ensure_ascii=False))
+                       json.dumps(value, indent=1, ensure_ascii=False, allow_nan=False))
     path.write_text(text + "\n", encoding="utf-8")
 
 

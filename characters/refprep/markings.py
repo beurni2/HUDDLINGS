@@ -7,8 +7,9 @@ settles it, for the founder to judge at Gate A and for drawing the parts.
 A patch is the tan region (measure.Classes) holding its seed point, inside its
 clip box when it has one. Fails when a seed is not on tan, so a seed that misses
 its patch is caught rather than drawn. Writes ref/markings.json (each patch's
-area and centroid in the panel's pixels) and ref/overlays/markings-<panel>.png:
-the panel beside the same panel with its patches coloured and named."""
+area, centroid in the panel's pixels and dominant colour against the printed tan;
+run palette.py first) and ref/overlays/markings-<panel>.png: the panel beside the
+same panel with its patches coloured and named."""
 import sys
 
 import numpy as np
@@ -16,11 +17,12 @@ from PIL import Image, ImageDraw
 from scipy import ndimage
 
 import measure
+import palette
 import sheets
 import silhouette
 
 COLOURS = {"head.patch.L": (215, 50, 30), "head.patch.R": (30, 110, 215), "back.patch.L": (230, 120, 0),
-           "back.patch.R": (20, 150, 70), "tail.base": (150, 40, 170)}
+           "back.patch.R": (20, 150, 70), "tail.base": (150, 40, 170), "rump.patch.L": (0, 150, 160)}
 ZOOM = 2
 
 
@@ -63,6 +65,7 @@ def show(species):
     plan = sheets.json.loads((sheets.ROOT / "characters" / species / "refmap" / "markings.json").read_text())
     panels = {p["id"]: p for p in sheets.json.loads((ref / "panels.json").read_text())["panels"]}
     ids = {m["id"] for m in plan["markings"]}
+    tan_printed = sheets.json.loads((ref / "palette.json").read_text())["printed"]["marking"]
     problems, records = [], []
     for entry in plan["evidence"]:
         panel = panels[entry["panel"]]
@@ -70,19 +73,29 @@ def show(species):
         rgb = sheets.load_sheet(species, panel["sheet"])[y0:y0 + h, x0:x0 + w]
         area = tan(rgb)
         found = {}
-        for name, where in entry["seeds"].items():
+        for name, places in entry["seeds"].items():
             if name not in ids:
                 problems.append(f"{entry['panel']}: {name} is not in the marking map")
                 continue
-            seed = [where["seed"][0] - x0, where["seed"][1] - y0]
-            clip = [where["clip"][0] - x0, where["clip"][1] - y0, where["clip"][2], where["clip"][3]] if "clip" in where else None
-            mask = patch(area, seed, clip)
-            if mask is None:
-                problems.append(f"{entry['panel']}: the seed of {name} at {where['seed']} is not on tan")
+            # A patch can show as more than one region on a panel (a tail curling over it, a flank's edge).
+            mask = np.zeros(area.shape, bool)
+            for where in places if isinstance(places, list) else [places]:
+                seed = [where["seed"][0] - x0, where["seed"][1] - y0]
+                clip = [where["clip"][0] - x0, where["clip"][1] - y0, where["clip"][2], where["clip"][3]] if "clip" in where else None
+                region = patch(area, seed, clip)
+                if region is None:
+                    problems.append(f"{entry['panel']}: the seed of {name} at {where['seed']} is not on tan")
+                    continue
+                mask |= region
+            if not mask.any():
                 continue
             found[name] = mask
+            # Its colour away from its soft edge, against the printed tan.
+            core = ndimage.binary_erosion(mask)
+            colour, _ = palette.dominant(rgb, core if core.any() else mask)
             records.append({"panel": entry["panel"], "marking": name, "areaPx": int(mask.sum()),
-                            "centroidPx": [round(v, 1) for v in measure.centroid(mask)]})
+                            "centroidPx": [round(v, 1) for v in measure.centroid(mask)],
+                            "dominant": sheets.rgb_to_hex(colour), "deltaE2000": round(palette.delta(colour, tan_printed), 2)})
         evidence(rgb, found, ref / "overlays" / f"markings-{entry['panel']}.png")
     if problems:
         raise SystemExit("markings: " + "; ".join(problems))

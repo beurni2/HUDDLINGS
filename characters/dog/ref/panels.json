@@ -10,7 +10,7 @@
    "label": "HERO VIEW",
    "view": "front",
    "facing": "front",
-   "note": "The dog sits facing the viewer with the head tilted slightly; two pink hearts (top left, and right of the collar) and two pairs of short orange sparkle lines (left of the head, and under the right heart) sit inside the box, and the box holds the ground shadow (tighten off). Subtitle printed under the label, inside labelBox: 'Main character illustration (reference for style and appeal)'. The head faces front (the nose midway between the eyes) with a slight roll; the body is turned a little to the viewer's right, so the tail shows on the sheet's left and the dog's right flank is in view.",
+   "note": "The dog sits facing the viewer; two pink hearts (top left, and right of the collar) and two pairs of short orange sparkle lines (left of the head, and under the right heart) sit inside the box, and the box holds the ground shadow (tighten off). Subtitle printed under the label, inside labelBox: 'Main character illustration (reference for style and appeal)'. The head faces front (the nose midway between the eyes) but is rolled about 16 degrees toward the dog's right shoulder, so it is no untilted front reference; the body is turned a little to the viewer's right, so the tail shows on the sheet's left and the dog's right flank is in view.",
    "labelBox": [70, 394, 238, 79],
    "pixelsSha256": "3bc2d5f66012c87a7b51b3d1687afe3680c8b565ffc6da4efd003961c2613122"
   },
@@ -445,7 +445,7 @@
   {
    "id": "rigging.part.body-front",
    "sheet": "rigging",
-   "box": [431, 137, 162, 141],
+   "box": [431, 137, 163, 142],
    "kind": "part",
    "file": "panels/rigging/rigging.part.body-front.png",
    "label": "Front body / Chest",
@@ -453,18 +453,18 @@
    "facing": "front",
    "note": "Front body without the head, worn with the collar and heart tag.",
    "labelBox": [471, 283, 79, 34],
-   "pixelsSha256": "0ffcb9db7ea4025cecc00612324ab2ee6d1936f8922f748ce9f4c29a97897bc7"
+   "pixelsSha256": "6afc2011569aacaedcb1597414b735d811b6a936efac3729b2df138ede0ac8b2"
   },
   {
    "id": "rigging.part.body-back",
    "sheet": "rigging",
-   "box": [603, 158, 179, 118],
+   "box": [603, 158, 179, 119],
    "kind": "part",
    "file": "panels/rigging/rigging.part.body-back.png",
    "label": "Back body",
    "note": "The hindquarters with two hind paws, a marking patch on top and the tail curling up at the sheet's right, all inside the box. The sheet does not make clear whether it is seen from the front (the layer behind the front body) or from behind, so no view or facing is given. In the assembled front view and the pivot guide the tail sits at the sheet's left, while here it rises at the sheet's right.",
    "labelBox": [643, 283, 69, 22],
-   "pixelsSha256": "6e81f474e98be1052ede17e1cc4772c9a807c83d188b7623851688c841890dc3"
+   "pixelsSha256": "9ab2db84871b817b63a53471335ccebb2099d5653b8a44159ea4e30311ee6752"
   },
   {
    "id": "rigging.part.paw-front-left",
@@ -718,7 +718,7 @@
   {
    "id": "motion.key.blink",
    "sheet": "motion",
-   "box": [210, 178, 172, 177],
+   "box": [210, 178, 172, 178],
    "kind": "pose",
    "file": "panels/motion/motion.key.blink.png",
    "label": "Blink",
@@ -726,7 +726,7 @@
    "facing": "front",
    "note": "Eyes closed; two small yellow sparkle marks beside the ear on the sheet's right sit inside the box.",
    "labelBox": [271, 357, 41, 24],
-   "pixelsSha256": "af7fd06316ee19ef3946d50492e26e97ce5b51c86d97cb8727a8853cf92edfe3"
+   "pixelsSha256": "4b85a43c5b5b389aff371c067a840df5beb148f612661188fb2a99ce3f247100"
   },
   {
    "id": "motion.key.head-tilt-left",
@@ -770,19 +770,19 @@
   {
    "id": "motion.key.sit",
    "sheet": "motion",
-   "box": [907, 177, 157, 177],
+   "box": [907, 177, 157, 178],
    "kind": "pose",
    "file": "panels/motion/motion.key.sit.png",
    "label": "Sit",
    "view": "front",
    "facing": "front",
    "labelBox": [976, 358, 26, 23],
-   "pixelsSha256": "6b9cfe6cc9c0702959097108ceaa541b512f33c8f2afe71bf4222bb729418439"
+   "pixelsSha256": "81b6a42f51e0423c71d240f177c022432ae705a3a894abbe3040b48f80ec3ee1"
   },
   {
    "id": "motion.key.stand",
    "sheet": "motion",
-   "box": [1065, 178, 192, 176],
+   "box": [1065, 178, 192, 178],
    "kind": "pose",
    "file": "panels/motion/motion.key.stand.png",
    "label": "Stand",
@@ -790,7 +790,7 @@
    "facing": "left",
    "note": "Face almost to the front, body turned so the rump and tail are on the right of the sheet; facing is left by the body.",
    "labelBox": [1144, 358, 48, 23],
-   "pixelsSha256": "11bfdd62525358b06d286898c590a2afcc3c497eccd5205103a1d8f3a6104d1b"
+   "pixelsSha256": "f3eb33ddb406075d188e13b474006954db2c3dbfd6c2bbd9fbd0f11ddf488c3f"
   },
   {
    "id": "motion.movement.walk",
@@ -808,7 +808,7 @@
   {
    "id": "motion.movement.run",
    "sheet": "motion",
-   "box": [196, 480, 200, 137],
+   "box": [196, 480, 200, 141],
    "kind": "pose",
    "file": "panels/motion/motion.movement.run.png",
    "label": "Run (side)",
@@ -816,12 +816,12 @@
    "facing": "right",
    "note": "Speed lines behind the dog sit inside the box, except that the box starts at x 196 so as not to take in the walk dog's nose (which reaches x 195): the left 13 px of the speed line at y 586-587 (x 183-195) fall outside it, inside Walk's box.",
    "labelBox": [261, 622, 78, 25],
-   "pixelsSha256": "c7ed56aca30566f180cbdc4f9d34e2183d00dec4b45c1843ea7260ea1d4c79b8"
+   "pixelsSha256": "4406d4a82672313fa3f2bb610ae1dd5647f6cc49deb6f78756b45362788daa11"
   },
   {
    "id": "motion.movement.jump",
    "sheet": "motion",
-   "box": [398, 444, 166, 157],
+   "box": [398, 444, 166, 177],
    "kind": "pose",
    "file": "panels/motion/motion.movement.jump.png",
    "label": "Jump",
@@ -829,7 +829,7 @@
    "facing": "right",
    "note": "Motion lines under the tail sit inside the box.",
    "labelBox": [455, 622, 47, 25],
-   "pixelsSha256": "11a1af3d34d6ee991d918c9290bfe0fe946f8cb345e403a3db2f6de7e1277fdd"
+   "pixelsSha256": "b65c68e2211a7453a5cd91ff8afbcc489b0f2a739ebfab1e659306da0e8162f8"
   },
   {
    "id": "motion.movement.soft-landing",
@@ -951,7 +951,7 @@
   {
    "id": "motion.run.push",
    "sheet": "motion",
-   "box": [616, 731, 125, 100],
+   "box": [616, 731, 125, 101],
    "kind": "cycle",
    "file": "panels/motion/motion.run.push.png",
    "label": "Push",
@@ -959,12 +959,12 @@
    "facing": "right",
    "note": "Frame 2 of 4; the label box also holds the number badge 2 above the word.",
    "labelBox": [655, 832, 37, 47],
-   "pixelsSha256": "61387e8c99edf3935453105d777708d256ac60ae05dfaa6d9a9eb6c88e6dd53d"
+   "pixelsSha256": "cc65630d2a32f4f53be567a5577e8520ad300eaaca5d2fb3ba7d510092b46338"
   },
   {
    "id": "motion.run.airborne",
    "sheet": "motion",
-   "box": [755, 730, 138, 91],
+   "box": [755, 730, 138, 102],
    "kind": "cycle",
    "file": "panels/motion/motion.run.airborne.png",
    "label": "Airborne",
@@ -972,7 +972,7 @@
    "facing": "right",
    "note": "Frame 3 of 4; the label box also holds the number badge 3 above the word.",
    "labelBox": [786, 832, 63, 47],
-   "pixelsSha256": "722d46659f917c42984b0971c7f2764209d6030e99cceefa4815236773cdb3b9"
+   "pixelsSha256": "f39c35e8d452a9e275024be336b94c92f6722102b599912bc19e3de1c9c549e3"
   },
   {
    "id": "motion.run.land",
@@ -1003,13 +1003,13 @@
   {
    "id": "motion.extra.paw-stubs",
    "sheet": "motion",
-   "box": [1059, 818, 91, 45],
+   "box": [1059, 818, 91, 46],
    "kind": "part",
    "file": "panels/motion/motion.extra.paw-stubs.png",
    "label": "Paws are simple stubs. No individual toes.",
    "note": "Extra notes card. The picture is two paw stubs; the note's text sits to the right of the picture, not under it, and is in labelBox.",
    "labelBox": [1160, 815, 100, 45],
-   "pixelsSha256": "9cf3c938234ae3b69a924b12949f7e85ad4d66e0b0c1b8bccb6dde765a4f130d"
+   "pixelsSha256": "2d4e80dce25f3d750e2d2f8f2907fe6eee7ab6553dbd18d5e3cb4ccda3c914ca"
   },
   {
    "id": "motion.extra.simple-arcs",
@@ -1077,7 +1077,7 @@
   {
    "id": "expressions.expression.sleepy",
    "sheet": "expressions",
-   "box": [1002, 80, 248, 171],
+   "box": [1002, 80, 248, 172],
    "kind": "expression",
    "file": "panels/expressions/expressions.expression.sleepy.png",
    "label": "Sleepy",
@@ -1085,7 +1085,7 @@
    "facing": "front",
    "note": "lying down, chin on the front paws, eyes closed, with a soft ground shadow; head rolled about 10 degrees clockwise on the sheet (its right side on the sheet is lower); three blue z marks at the upper right sit inside the box",
    "labelBox": [1099, 254, 65, 23],
-   "pixelsSha256": "8c188cbab1c316ea6856dead456ab49df555012fdb7a554e44d837d7d318bec4"
+   "pixelsSha256": "e2356b3ad2d55625a67507746f32c97caa5e49f861d2788ba41df50520173f9f"
   },
   {
    "id": "expressions.expression.surprised",
@@ -1341,7 +1341,7 @@
    "label": "Sleepy (half-lid eyes + small smile + drooped ears)",
    "view": "front",
    "facing": "front",
-   "note": "the label pairs this face with drooped ears; R3 bans drooped ears for sorrow, so whether they may serve sleepiness needs a decision",
+   "note": "The label pairs this face with drooped ears. Drooped ears for sorrow are never used (R3); the sleepy face uses the lowered ear state of section 5b, never the Both drooped drawing (DECISIONS.md 22).",
    "labelBox": [790, 859, 152, 54],
    "pixelsSha256": "9e724ca96c30da11b37df0cfb40918165b2e2fde4d20bffd35857ac4edf82d55"
   },

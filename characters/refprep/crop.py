@@ -11,8 +11,10 @@ and ref/overlays/panels-<sheet>.jpg, every box drawn on its sheet for review.
 Fails when a box leaves its sheet, an id repeats, or a drawn item on a sheet
 belongs to no panel and no label: every panel is cropped.
 
-A panel's box is tightened to the ink inside it (plus PAD pixels) unless the
-map says "tighten": false, so a hand-drawn box need only enclose its panel."""
+A panel's box is tightened to what is drawn inside it (plus PAD pixels) unless
+the map says "tighten": false, so a hand-drawn box need only enclose its panel.
+What is drawn is the ink, and the soft ground shadow under a figure, which is
+too pale to count as ink but is an airborne pose's only ground line."""
 import sys
 from pathlib import Path
 
@@ -23,6 +25,9 @@ from scipy import ndimage
 import sheets
 
 PAD = 4
+SHADOW_DELTA = 3.0  # ΔE2000 from the card
+SHADOW_WARMER = 2.5  # C* above the card's
+SHADOW_AREA = 150  # px: smaller warm specks are JPEG noise
 # A drawn item this large (in pixels of ink) must belong to a panel or a label.
 MIN_ITEM = 40
 KINDS = {"hero", "view", "pose", "cycle", "expression", "face", "eyes", "mouth", "ears", "part", "feature",
@@ -34,6 +39,23 @@ def load_map(species, path=None):
     return sheets.json.loads(path.read_text(encoding="utf-8"))
 
 
+def ground_shadows(rgb, box):
+    """The soft ground shadows inside a box: patches of at least SHADOW_AREA pixels more than SHADOW_DELTA
+    from the card (the median of the box's border), warmer than the card by SHADOW_WARMER in C* and paler
+    than ink. The card's own frame and tints are as grey as the card, and the fur is lighter."""
+    x, y, w, h = box
+    lab = sheets.to_lab(rgb[y:y + h, x:x + w])
+    card = np.median(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]), axis=0)
+    C = np.hypot(lab[..., 1], lab[..., 2])
+    soft = ((sheets.delta_e2000(lab, card[None, None, :]) > SHADOW_DELTA) & (C > np.hypot(card[1], card[2]) + SHADOW_WARMER)
+            & (C < 14) & (lab[..., 0] >= 80) & (lab[..., 0] < 94))
+    labels, count = ndimage.label(soft)
+    sizes = ndimage.sum(soft, labels, range(1, count + 1)) if count else np.array([])
+    found = np.zeros(rgb.shape[:2], bool)
+    found[y:y + h, x:x + w] = np.isin(labels, 1 + np.nonzero(sizes >= SHADOW_AREA)[0])
+    return found
+
+
 def tighten(ink, box):
     x, y, w, h = box
     region = ink[y:y + h, x:x + w]
@@ -43,6 +65,13 @@ def tighten(ink, box):
     x0, x1 = max(x + cols.min() - PAD, x), min(x + cols.max() + PAD + 1, x + w)
     y0, y1 = max(y + rows.min() - PAD, y), min(y + rows.max() + PAD + 1, y + h)
     return [int(x0), int(y0), int(x1 - x0), int(y1 - y0)]
+
+
+def panel_box(rgb, ink, entry):
+    """A panel's final box: its hand-drawn box, tightened unless the map says not to."""
+    if not entry.get("tighten", True):
+        return list(entry["box"])
+    return tighten(ink | ground_shadows(rgb, entry["box"]), entry["box"])
 
 
 def check_box(box, shape, where):
@@ -86,7 +115,7 @@ def crop(species, map_path=None, only=None, out=None):
             if entry["kind"] not in KINDS:
                 raise SystemExit(f"crop: {where}: unknown kind {entry['kind']!r}")
             check_box(entry["box"], rgb.shape, where)
-            box = tighten(ink, entry["box"]) if entry.get("tighten", True) else list(entry["box"])
+            box = panel_box(rgb, ink, entry)
             x, y, w, h = box
             path = out / "panels" / sheet / f"{pid}.png"
             sheets.save_png(path, rgb[y:y + h, x:x + w])
@@ -127,6 +156,8 @@ def main(argv):
     parser.add_argument("--only", choices=sheets.SHEETS)
     parser.add_argument("--out")
     args = parser.parse_args(argv)
+    if args.only and not args.out:
+        parser.error("--only writes one sheet's index, so it needs --out (it would replace ref/panels.json)")
     index, problems = crop(args.species, args.map, args.only, args.out)
     for problem in problems:
         print(f"crop: {problem}")

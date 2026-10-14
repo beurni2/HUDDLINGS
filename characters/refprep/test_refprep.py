@@ -15,6 +15,7 @@ from scipy import ndimage
 import crop
 import markings
 import measure
+import model
 import palette
 import sheets
 import silhouette
@@ -137,8 +138,7 @@ class SilhouetteOnTheSheetTest(unittest.TestCase):
                 sheet = panel.split(".")[0]
                 rgb = sheets.load_sheet("dog", sheet)
                 entry = next(p for p in panel_map["sheets"][sheet] if p["id"] == panel)
-                box = crop.tighten(sheets.ink_mask(rgb), entry["box"]) if entry.get("tighten", True) else entry["box"]
-                x, y, w, h = box
+                x, y, w, h = crop.panel_box(rgb, sheets.ink_mask(rgb), entry)
                 cls.cut[panel] = ((x, y), silhouette.cut_out(rgb[y:y + h, x:x + w]))
 
     def inside(self, panel, point):
@@ -162,6 +162,80 @@ class SilhouetteOnTheSheetTest(unittest.TestCase):
                 self.assertFalse(self.inside(panel, point), f"{what} at {point} on {panel} was taken as the dog")
 
 
+class LandmarksOnTheSheetTest(unittest.TestCase):
+    """The automatic landmarks of the dog's turnaround land on what they name: eyes and nose on their dark
+    blobs, mouth corners on the smile's line, the collar on blue, the tag's top on gold, ears' tips below
+    their roots, the ground on the lowest row under the seat."""
+
+    @classmethod
+    def setUpClass(cls):
+        panel_map = crop.load_map("dog")
+        hand_file = json.loads((sheets.ROOT / "characters/dog/refmap/landmarks.json").read_text())
+        cls.views = {}
+        for view, panel in measure.TURNAROUND.items():
+            entry = next(p for p in panel_map["sheets"]["master"] if p["id"] == panel)
+            rgb = sheets.load_sheet("dog", "master")
+            x, y, w, h = crop.panel_box(rgb, sheets.ink_mask(rgb), entry)
+            hand = {k: [v[0] - x, v[1] - y] for k, v in hand_file["hand"].get(view, {}).items() if not k.startswith("_")}
+            crop_rgb = rgb[y:y + h, x:x + w]
+            sil, classes, points, _, _ = measure.measure_view(view, crop_rgb, hand)
+            cls.views[view] = (classes, sil, points, hand, hand_file["required"][view])
+
+    def at(self, mask, point, reach=0):
+        x, y = int(round(point[0])), int(round(point[1]))
+        return bool(mask[max(y - reach, 0):y + reach + 1, max(x - reach, 0):x + reach + 1].any())
+
+    def test_each_view_has_its_landmarks(self):
+        for view, (_, _, points, _, required) in self.views.items():
+            with self.subTest(view=view):
+                measure.check_required(view, points, required)
+
+    def test_the_face_lands_on_its_features(self):
+        for view, (classes, _, points, _, _) in self.views.items():
+            for name, xy in points.items():
+                with self.subTest(view=view, landmark=name):
+                    if name.startswith("eye.") or name == "nose":
+                        self.assertTrue(self.at(classes.L < 40, xy), f"{name} is not on its dark blob")
+                    if name.startswith("mouth."):
+                        self.assertTrue(self.at(classes.L < 70, xy, 1), f"{name} is not on the smile's line")
+
+    def test_the_collar_the_tag_and_the_ears(self):
+        for view, (classes, sil, points, _, _) in self.views.items():
+            with self.subTest(view=view):
+                self.assertTrue(self.at(classes.blue, points["collar"]))
+                if "tag.top" in points:
+                    self.assertTrue(self.at(classes.gold, points["tag.top"], 1))
+                    self.assertLess(points["tag.ring"][1], points["tag.top"][1])
+                for side in "LR":
+                    if f"ear.{side}.root" in points:
+                        self.assertGreater(points[f"ear.{side}.tip"][1] - points[f"ear.{side}.root"][1], 50)
+                        self.assertTrue(self.at(sil, points[f"ear.{side}.tip"]))
+                if "chin" in points:
+                    x, y = int(points["chin"][0]), int(points["chin"][1])
+                    self.assertTrue(classes.blue[y, x] and not classes.blue[y - 2, x], "the chin is not the collar's top")
+
+    def test_the_ground_is_under_the_seat(self):
+        for view, (_, sil, points, hand, _) in self.views.items():
+            with self.subTest(view=view):
+                self.assertEqual(points["ground"][1], float(np.nonzero(sil)[0].max()))
+                self.assertEqual(points["head.top"][1], float(np.nonzero(sil)[0].min()))
+                if "seat" in hand:
+                    self.assertEqual(points["ground"][0], hand["seat"][0])
+
+    def test_a_missing_landmark_fails(self):
+        with self.assertRaises(ValueError):
+            measure.check_required("front", {"nose": [0, 0]}, ["nose", "eye.L"])
+
+
+class ModelTest(unittest.TestCase):
+    def test_the_committed_model_is_what_the_scripts_write(self):
+        built = model.build("dog")
+        committed = json.loads((sheets.ROOT / "characters/dog/model.json").read_text())
+        self.assertEqual(json.loads(json.dumps(built)), committed)
+        for key in ("proportions", "landmarks", "palette", "outline", "markings", "crops"):
+            self.assertIn(key, committed)
+
+
 class CropTest(unittest.TestCase):
     def test_tighten_keeps_the_ink_and_its_margin(self):
         ink = np.zeros((100, 100), bool)
@@ -176,6 +250,18 @@ class CropTest(unittest.TestCase):
         ink[60:70, 60:70] = True
         self.assertEqual(crop.uncovered_items(ink, [[5, 5, 20, 20]]), [[60, 60, 10, 10]])
         self.assertEqual(crop.uncovered_items(ink, [[5, 5, 20, 20], [65, 65, 2, 2]]), [])
+
+    def test_an_airborne_pose_keeps_its_ground_shadow(self):
+        # The Jump floats: its pale shadow (sheet rows 601 to 618) is its only ground line.
+        rgb = sheets.load_sheet("dog", "motion")
+        box = [398, 444, 166, 177]
+        ink = sheets.ink_mask(rgb)
+        _, top, _, height = crop.tighten(ink, box)
+        self.assertLess(top + height, 618)
+        x, y, w, h = crop.panel_box(rgb, ink, {"box": box})
+        self.assertGreaterEqual(y + h, 619)
+        # The card's grey frame across the box's top is not a shadow.
+        self.assertEqual(y, 444)
 
     def test_a_box_off_the_sheet_fails(self):
         with self.assertRaises(SystemExit):
@@ -212,11 +298,18 @@ class MeasureTest(unittest.TestCase):
         ears = [((x - 30) ** 2 / 15 ** 2 + (y - 55) ** 2 / 30 ** 2) <= 1, ((x - 110) ** 2 / 15 ** 2 + (y - 55) ** 2 / 30 ** 2) <= 1]
         for ear in ears:
             sil |= ear
-        head = measure.head_region(sil, ears, 15, 90)
-        width, row, left, right = measure.head_width(head)
-        self.assertLessEqual(width, 61)
+        width, row, left, right = measure.head_width(sil, ears, 15, 90, 70)
+        # The head disc is 61 px wide at its middle row; the ears overlap its sides there.
         self.assertGreaterEqual(width, 50)
+        self.assertLessEqual(width, 61)
         self.assertGreater(left, 40)
+        self.assertLess(right, 100)
+        # A cheek meeting an ear with no line between is measured to the ear's edge, not short of it.
+        lone = np.zeros((40, 100), bool)
+        lone[5:35, 10:90] = True
+        ear = np.zeros_like(lone)
+        ear[5:35, 10:30] = True
+        self.assertEqual(measure.head_width(lone, [ear], 5, 35, 60)[0], 90 - 31)
 
     def test_points_are_in_points_from_the_ground_y_down(self):
         points = measure.to_points({"head.top": [100, 10], "ground": [100, 210]}, [100, 210], 0.82)
@@ -264,7 +357,8 @@ class PaletteTest(unittest.TestCase):
         fur, blush = sheets.hex_to_rgb("#FFF4E8").astype(float), sheets.hex_to_rgb("#F7B3A6").astype(float)
         rgb = np.zeros((10, 10, 3), np.uint8)
         rgb[:] = np.round(fur + 0.3 * (blush - fur)).astype(np.uint8)
-        alpha, _ = palette.blush_opacity(rgb, np.ones((10, 10), bool), "#FFF4E8", "#F7B3A6")
+        rgb[0, :] = (60, 30, 20)  # a line through the box, as the eye's lower lid would be
+        alpha, _ = palette.blush(rgb, "#FFF4E8", "#F7B3A6")
         self.assertAlmostEqual(alpha, 0.3, delta=0.02)
 
 
