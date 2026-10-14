@@ -53,7 +53,8 @@ jobs:
 
   swift-linux:
     # The SpriteKit runtime's pure engine, held to the same vectors. Its
-    # Apple-only parts build on the macOS job.
+    # Apple-only parts build on the macOS job. The image is the one LIMITATIONS.md
+    # runs locally, pinned by digest so a new Swift cannot change the result.
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -61,3 +62,4 @@ jobs:
         run: swift --version
       - name: Tests
         run: swift test --package-path ios/CompanionCore
+    container: swift:6.4.1@sha256:870edbd7f37b77dc01ebab7eb4e0475d16be82796a06734d0bdc010cd24ea32f

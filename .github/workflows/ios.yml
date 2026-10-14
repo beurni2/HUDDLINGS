@@ -52,22 +52,19 @@ jobs:
         run: |
           node characters/build/build.ts test
           node characters/build/app-assets.ts
-      - name: Tools
-        run: |
-          brew install xcodegen
-          xcodegen --version
-          xcodebuild -version
-      - name: Pick a simulator
+      - uses: ./.github/actions/macos-tools
+      - name: Pick the simulator (a fixed device and runtime, as earlier runs used)
         id: sim
         run: |
           udid=$(xcrun simctl list devices available -j | python3 -c '
-          import json, re, sys
+          import json, sys
+          name, runtime = sys.argv[1], sys.argv[2]
           devices = json.load(sys.stdin)["devices"]
-          found = [(tuple(int(n) for n in re.findall(r"\d+", runtime)), d["name"], d["udid"])
-                   for runtime, ds in devices.items() if "iOS" in runtime for d in ds if d["name"].startswith("iPhone")]
-          found.sort()
-          print(found[-1][2])
-          ')
+          found = [d["udid"] for d in devices.get(runtime, []) if d["name"] == name]
+          if not found:
+              sys.exit(f"no {name} on {runtime}; runtimes here: {sorted(devices)}")
+          print(found[0])
+          ' "iPhone SE (3rd generation)" "com.apple.CoreSimulator.SimRuntime.iOS-26-2")
           xcrun simctl list devices available | grep "$udid"
           echo "udid=$udid" >> "$GITHUB_OUTPUT"
       - name: Engine and SpriteKit tests on the simulator (writes the parity frames)

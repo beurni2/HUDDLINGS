@@ -29,5 +29,5 @@ python3 -m unittest discover -s tools/copylint
 python3 -m unittest discover -s tools/qa
 npm install && npm run typecheck && npm test
 # Swift: start dockerd in the background first
-docker run --rm -v "$PWD":/w -w /w swift:latest swift test --package-path ios/CompanionCore
+docker run --rm -v "$PWD":/w -w /w swift:6.4.1 swift test --package-path ios/CompanionCore
 ```

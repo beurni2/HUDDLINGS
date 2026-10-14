@@ -1,0 +1,22 @@
+name: macOS tools, pinned
+description: >
+  Selects Xcode 16.4 and installs XcodeGen 2.46.0 from its release, checked by
+  SHA-256, so a runner image update cannot silently change the build, the
+  SpriteKit renders parity measures, or the generated project.
+runs:
+  using: composite
+  steps:
+    - name: Xcode 16.4 (16F6)
+      shell: bash
+      run: |
+        sudo xcode-select -s /Applications/Xcode_16.4.app
+        xcodebuild -version
+        xcodebuild -version | grep -qx "Build version 16F6"
+    - name: XcodeGen 2.46.0
+      shell: bash
+      run: |
+        curl -sSfL -o "$RUNNER_TEMP/xcodegen.zip" https://github.com/yonaskolb/XcodeGen/releases/download/2.46.0/xcodegen.zip
+        echo "4d9e34b62172d645eed6457cac13fc222569974098ef4ee9c3368bedf0196806  $RUNNER_TEMP/xcodegen.zip" | shasum -a 256 -c
+        unzip -q "$RUNNER_TEMP/xcodegen.zip" -d "$RUNNER_TEMP"
+        echo "$RUNNER_TEMP/xcodegen/bin" >> "$GITHUB_PATH"
+        "$RUNNER_TEMP/xcodegen/bin/xcodegen" --version
