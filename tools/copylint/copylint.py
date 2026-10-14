@@ -78,8 +78,15 @@ PERSON_PLACEHOLDERS = {"sender", "name", "names"}
 
 SKIP_DIRS = {".git", "node_modules", ".build", "DerivedData", "Pods"}
 INFOPLIST_KEY = re.compile(r"^NS\w+UsageDescription$|^CFBundle(Display)?Name$")
-PROJECT_YML_COPY = re.compile(
-    r"^\s*(NS\w+UsageDescription|CFBundleDisplayName|CFBundleName)\s*:\s*(.+?)\s*$", re.M)
+PROJECT_YML_KEY = re.compile(
+    r"""^(\s*)(["']?)((?:INFOPLIST_KEY_)?(?:NS\w+UsageDescription|CFBundleDisplayName|CFBundleName))\2\s*:\s*(.*)$""")
+PROJECT_YML_FLOW = re.compile(r"\{[^}]*(?:UsageDescription|CFBundleDisplayName|CFBundleName)")
+
+# Unicode's default-ignorable code points: invisible, so they must not hide a word.
+IGNORABLE = [(0x00AD, 0x00AD), (0x034F, 0x034F), (0x061C, 0x061C), (0x115F, 0x1160), (0x17B4, 0x17B5),
+             (0x180B, 0x180F), (0x200B, 0x200F), (0x202A, 0x202E), (0x2060, 0x206F), (0x3164, 0x3164),
+             (0xFE00, 0xFE0F), (0xFEFF, 0xFEFF), (0xFFA0, 0xFFA0), (0xFFF0, 0xFFF8), (0x1BCA0, 0x1BCA3),
+             (0x1D173, 0x1D17A), (0xE0000, 0xE0FFF)]
 
 
 def _words_pattern(words):
@@ -97,10 +104,16 @@ MOCHI_RE = re.compile(r"(?<![A-Za-z0-9])mochi", re.IGNORECASE)
 FEATURE_RE = re.compile("(?:" + "|".join(re.escape(f) for f in FEATURE_NAMES) + r")(?![A-Za-z0-9])")
 
 
+def _invisible(ch):
+    code = ord(ch)
+    return unicodedata.category(ch) == "Cf" or any(low <= code <= high for low, high in IGNORABLE)
+
+
 def normalise(text):
-    """NFKC, with invisible format characters (soft hyphens, zero-width spaces) removed."""
+    """NFKC, with invisible characters (soft hyphens, zero-width spaces, variation selectors) removed."""
+    text = "".join(c for c in text if not _invisible(c))
     text = unicodedata.normalize("NFKC", text)
-    return "".join(c for c in text if unicodedata.category(c) != "Cf")
+    return "".join(c for c in text if not _invisible(c))
 
 
 def _is_exclamation(ch):
@@ -161,6 +174,8 @@ def lint_text(text, surfaces=("app",)):
     for p in placeholders:
         if p not in PLACEHOLDERS:
             problems.append(("placeholder", f"unknown placeholder {{{p}}}"))
+    if "{" in bare or "}" in bare:
+        problems.append(("placeholder", "a brace without its pair"))
     for m in PRINTF_RE.finditer(bare):
         problems.append(("placeholder", f"printf specifier {m.group(0)!r}; copy uses {{placeholders}}"))
     if "infoplist" in surfaces and placeholders:
@@ -317,11 +332,42 @@ def load_info_plist(path):
             for key, value in _plist_leaves(data) if INFOPLIST_KEY.match(key)]
 
 
+def _yml_scalar(value, where):
+    if value.startswith('"'):
+        m = re.match(r'"((?:[^"\\]|\\.)*)"\s*(#.*)?$', value)
+        if not m:
+            raise ValueError(f"{where}: cannot read the quoted value")
+        return _unescape(m.group(1))
+    if value.startswith("'"):
+        m = re.match(r"'((?:[^']|'')*)'\s*(#.*)?$", value)
+        if not m:
+            raise ValueError(f"{where}: cannot read the quoted value")
+        return m.group(1).replace("''", "'")
+    return re.split(r"\s+#", value, maxsplit=1)[0].strip()
+
+
 def load_project_yml(path):
-    text = Path(path).read_text(encoding="utf-8")
+    """The Info.plist copy in XcodeGen's project.yml. Anything this cannot read for sure is an error:
+    write such copy on one line, or keep it in InfoPlist.xcstrings."""
+    lines = Path(path).read_text(encoding="utf-8").splitlines()
     entries = []
-    for key, value in PROJECT_YML_COPY.findall(text):
-        value = value.strip().strip("'\"")
+    for i, line in enumerate(lines):
+        where = f"{path}:{i + 1}"
+        if PROJECT_YML_FLOW.search(line):
+            raise ValueError(f"{where}: Info.plist copy in a flow map; write one key per line")
+        m = PROJECT_YML_KEY.match(line)
+        if not m:
+            continue
+        indent, key, value = len(m.group(1)), m.group(3), m.group(4).strip()
+        if not value or value[0] in "|>":
+            raise ValueError(f"{where}: {key} spans several lines; write it on one line")
+        for following in lines[i + 1:]:
+            if not following.strip() or following.lstrip().startswith("#"):
+                continue
+            if len(following) - len(following.lstrip()) > indent:
+                raise ValueError(f"{where}: {key} continues on the next line; write it on one line")
+            break
+        value = _yml_scalar(value, where)
         if value.startswith("$("):
             continue  # a build setting reference, resolved from a string catalogue
         entries.append(Entry(str(path), key, value, ("infoplist",)))

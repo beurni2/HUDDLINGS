@@ -40,7 +40,7 @@ class BannedWords(unittest.TestCase):
                 self.assertIn("R7", rules(text))
 
     def test_phrases_match_across_spaces_line_breaks_and_hyphens(self):
-        for text in ["last   chance", "waiting\nfor you", "last chance", "a last-chance trip", "waiting‑for‑you"]:
+        for text in ["last   chance", "waiting\nfor you", "last\u00a0chance", "a last-chance trip", "waiting‑for‑you"]:
             with self.subTest(text=text):
                 self.assertIn("R7", rules(text))
 
@@ -53,7 +53,8 @@ class BannedWords(unittest.TestCase):
         self.assertIn("R7", rules("a die-hard fan"))
 
     def test_invisible_and_compatibility_characters_do_not_hide_a_word(self):
-        for text in ["so s­ad", "{mochi} will m​iss you", "wait⁠ing for you", "ＳＡＤ", "s﻿ad"]:
+        for text in ["so s\u00adad", "{mochi} will m\u200biss you", "wait\u2060ing for you", "ＳＡＤ", "s\ufeffad",
+                     "s\u034fad", "s\ufe0fad", "s\ufe00ad", "s\u180bad", "s\U000e0100ad", "s\u3164ad", "s\u1160ad"]:
             with self.subTest(text=text):
                 self.assertIn("R7", rules(text))
 
@@ -65,7 +66,7 @@ class BannedWords(unittest.TestCase):
 
 class ExclamationMarks(unittest.TestCase):
     def test_any_exclamation_mark_fails(self):
-        for text in ["Hello, friend!", "¡Hola", "Yay！", "Wow‼", "What⁉", "Hi❗", "Really‽", "Hugs ❣️", "Hi﹗", "Huh⁈"]:
+        for text in ["Hello, friend!", "¡Hola", "Yay！", "Wow‼", "What⁉", "Hi❗", "Really‽", "Hugs ❣\ufe0f", "Hi﹗", "Huh⁈"]:
             with self.subTest(text=text):
                 self.assertIn("R7", rules(text))
 
@@ -97,7 +98,7 @@ class Notifications(unittest.TestCase):
 
 class Names(unittest.TestCase):
     def test_literal_mochi_fails(self):
-        for text in ["Mochi is hungry", "Boop Mochi's nose", "Boop Mochi’s nose", "MOCHI", "with mochi",
+        for text in ["Mo\u034fchi is here", "Mochi is hungry", "Boop Mochi's nose", "Boop Mochi’s nose", "MOCHI", "with mochi",
                      "Say hi to all the Mochis", "Open the Mochi Camera", "Mochi Postcard", "mochi post"]:
             with self.subTest(text=text):
                 self.assertIn("names", rules(text))
@@ -121,7 +122,9 @@ class Placeholders(unittest.TestCase):
         self.assertNotIn("placeholder", rules(text))
 
     def test_unknown_placeholders_fail(self):
-        for text in ["{mocha} is here", "{Name} laughed.", "{}", "{friend}"]:
+        for text in ["{mocha} is here", "{Name} laughed.", "{}", "{friend}",
+                     "{visitor is here with something from {sender}", "On the way to {name \u00b7 {time}",
+                     "Something came home from {name}}"]:
             with self.subTest(text=text):
                 self.assertIn("placeholder", rules(text))
 
@@ -240,10 +243,22 @@ class Loaders(unittest.TestCase):
         path = self.write("ios/project.yml", "targets:\n  App:\n    info:\n      properties:\n"
                           "        NSCameraUsageDescription: \"Hurry, Mochi is starving!\"\n"
                           "        NSMicrophoneUsageDescription: $(MIC_TEXT)\n"
-                          "        CFBundleDisplayName: Huddlings\n")
+                          "        'NSPhotoLibraryAddUsageDescription': 'It''s saved'\n"
+                          "        CFBundleDisplayName: Huddlings  # never sad\n"
+                          "    settings:\n      INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: Last chance\n")
         entries = copylint.load(path)
-        self.assertEqual(["NSCameraUsageDescription", "CFBundleDisplayName"], [e.key for e in entries])
-        self.assertEqual("Hurry, Mochi is starving!", entries[0].text)
+        self.assertEqual(["NSCameraUsageDescription", "NSPhotoLibraryAddUsageDescription", "CFBundleDisplayName",
+                          "INFOPLIST_KEY_NSSpeechRecognitionUsageDescription"], [e.key for e in entries])
+        self.assertEqual(["Hurry, Mochi is starving!", "It's saved", "Huddlings", "Last chance"], [e.text for e in entries])
+
+    def test_project_yml_forms_the_lint_cannot_read_are_errors(self):
+        for body in ["NSCameraUsageDescription: >\n  Mochi is sad\n", "NSCameraUsageDescription: |-\n  sad\n",
+                     "NSCameraUsageDescription: Huddlings uses the camera so\n  you are never lonely\n",
+                     "properties: {NSCameraUsageDescription: sad}\n", "NSCameraUsageDescription:\n"]:
+            with self.subTest(body=body):
+                path = self.write("ios/project.yml", body)
+                with self.assertRaises(ValueError):
+                    copylint.load(path)
 
     def test_discover_finds_copy_files_and_skips_vendored_and_archived_ones(self):
         self.write("copy/catalogue.json", '{"strings": {}}')
@@ -289,8 +304,10 @@ class PreCommitHook(unittest.TestCase):
                     "tools/precommit.sh", ".githooks/pre-commit", "copy/catalogue.json", "docs/huddlings-spec.md"]:
             (self.repo / rel).parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(root / rel, self.repo / rel)
-        self.env = dict(os.environ, HUDDLINGS_SKIP_HOOK_TEST="1",
-                        GIT_AUTHOR_NAME="t", GIT_AUTHOR_EMAIL="t@t", GIT_COMMITTER_NAME="t", GIT_COMMITTER_EMAIL="t@t")
+        # Never inherit git's variables: inside a hook they point at the outer repository.
+        self.env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
+        self.env.update(HUDDLINGS_SKIP_HOOK_TEST="1", GIT_AUTHOR_NAME="t", GIT_AUTHOR_EMAIL="t@t",
+                        GIT_COMMITTER_NAME="t", GIT_COMMITTER_EMAIL="t@t")
         self.git("init", "-q")
         self.git("config", "core.hooksPath", ".githooks")
         self.git("add", "-A")
@@ -299,8 +316,8 @@ class PreCommitHook(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
 
-    def git(self, *args, check=True):
-        return subprocess.run(["git", *args], cwd=self.repo, env=self.env, capture_output=True, text=True, check=check)
+    def git(self, *args, check=True, cwd=None):
+        return subprocess.run(["git", *args], cwd=cwd or self.repo, env=self.env, capture_output=True, text=True, check=check)
 
     def test_staged_bad_copy_is_refused_even_when_the_working_copy_is_clean(self):
         strings = self.repo / "ios" / "App" / "Localizable.strings"
@@ -324,6 +341,26 @@ class PreCommitHook(unittest.TestCase):
         self.git("add", "-A")
         result = self.git("commit", "-q", "-m", "clean", check=False)
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
+    def test_commit_all_and_commit_a_path_go_through(self):
+        spec = self.repo / "docs" / "huddlings-spec.md"
+        spec.write_text(spec.read_text(encoding="utf-8") + "\n", encoding="utf-8")
+        result = self.git("commit", "-q", "-a", "-m", "all", check=False)
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        spec.write_text(spec.read_text(encoding="utf-8") + "\n", encoding="utf-8")
+        result = self.git("commit", "-q", "-m", "path", "docs/huddlings-spec.md", check=False)
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
+    def test_a_commit_from_a_linked_worktree_leaves_the_repository_intact(self):
+        tree = self.repo.parent / "tree"
+        self.git("worktree", "add", "-q", str(tree), "-b", "feature")
+        (tree / "note.txt").write_text("note\n", encoding="utf-8")
+        self.git("add", "note.txt", cwd=tree)
+        result = self.git("commit", "-q", "-m", "a note", check=False, cwd=tree)
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertEqual("false", self.git("config", "core.bare").stdout.strip())
+        self.assertEqual(2, len(self.git("log", "--oneline", "feature").stdout.splitlines()))
+        self.assertIn("note.txt", self.git("ls-files", cwd=tree).stdout)
 
 
 # The hook test above copies this file into a scratch repository and runs the
