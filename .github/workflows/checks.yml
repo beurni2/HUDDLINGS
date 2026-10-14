@@ -45,7 +45,9 @@ jobs:
       - name: Test vectors are current
         run: |
           npm run vectors
-          git diff --exit-code -- characters/format/vectors
+          # Changed, deleted or new files all count.
+          changes=$(git status --porcelain -- characters/format/vectors)
+          if [ -n "$changes" ]; then echo "$changes"; echo "::error::characters/format/vectors is stale; run npm run vectors"; exit 1; fi
 
   swift-linux:
     # The SpriteKit runtime's pure engine, held to the same vectors. Its

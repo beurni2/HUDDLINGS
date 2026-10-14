@@ -1,7 +1,7 @@
 // Writes the test vectors both runtimes must reproduce (characters/format/README.md,
 // Test vectors). The web runtime computes them; the SpriteKit runtime's tests
 // read them and must match within 1e-9. Run: npm run vectors
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { apply, catmullRom, compose, ease, fnv1a32, IDENTITY, mulberry32, randomStream, softLimit, type Easing } from "../../runtime-web/src/math.ts";
@@ -15,6 +15,8 @@ import { buildAtlas } from "../build/atlas.ts";
 const here = dirname(fileURLToPath(import.meta.url));
 const out = join(here, "vectors");
 mkdirSync(out, { recursive: true });
+// Start empty, so a vector file the code no longer writes cannot linger and pass for current.
+for (const file of readdirSync(out)) if (file.endsWith(".json")) rmSync(join(out, file));
 
 function write(name: string, data: unknown) {
   writeFileSync(join(out, `${name}.json`), JSON.stringify(data, null, 1) + "\n");
