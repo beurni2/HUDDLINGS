@@ -1,0 +1,3 @@
+#!/bin/sh
+# Enabled with: git config core.hooksPath .githooks (the SessionStart hook does it).
+exec "$(git rev-parse --show-toplevel)/tools/precommit.sh"

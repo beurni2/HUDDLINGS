@@ -1,0 +1,11 @@
+# Python production tools (spec section 5b, The agent's toolbox): reference prep,
+# the sheet match, motion graphs and Visual QA. Never shipped in the app.
+# The copy lint needs only the standard library.
+numpy==2.5.3
+pillow==12.3.0
+opencv-python-headless==5.0.0.93
+scikit-image==0.26.0
+scipy==1.18.1
+matplotlib==3.11.2
+# A faint placement guide under hand-placed Bezier paths, never kept as a part.
+vtracer==0.6.15

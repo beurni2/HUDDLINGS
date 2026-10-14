@@ -1,0 +1,19 @@
+name: checks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  copy-lint:
+    # Rule R7: the copy lint fails the build (spec sections 3 and 20).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Copy lint
+        run: python3 tools/copylint/copylint.py
+      - name: Copy lint tests
+        run: python3 -m unittest discover -s tools/copylint -v
