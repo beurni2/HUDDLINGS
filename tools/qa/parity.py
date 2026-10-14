@@ -11,10 +11,16 @@ must show the character.
 
 "On the character": the SSIM map is averaged over the pixels either frame draws,
 grown by the SSIM window's radius, so an empty background cannot dilute a
-difference. A small part (the tag, an eye) missing from one render moves that
-average less than the threshold notices, so a frame also fails where the two
-renders disagree strongly over a patch at least BLOB pixels across: an edge drawn
-a pixel or two apart makes only thin lines, which the erosion removes (QUESTIONS.md E20).
+difference. A part missing from one render can move that average too little to
+notice (the tag, the nose, the faint shadow), so a frame also fails on any patch
+where the renders disagree (QUESTIONS.md E20), in three ways:
+- strongly: a channel differs by more than STRONG over a patch BLOB px across;
+- in coverage: one frame draws and the other does not, over a patch BLOB px across;
+- faintly: a channel differs by more than FAINT over a patch FAINT_BLOB px across.
+Measured on the test character (renders shifted by a quarter or half a pixel, or
+blurred by half a pixel): edge softening makes only lines thinner than the
+patches, so none of those fail; a diagonal half-pixel shift at the small size
+already does. Missing shadow, tag and nose all fail at both sizes.
 
 Writes report.json, a sheet of the worst frames side by side (web | SpriteKit
 | difference) and an evidence strip per run (five frames, web above SpriteKit),
@@ -38,8 +44,11 @@ RUNS = ("full", "small")
 INK = 8
 # A channel difference larger than edge softening gives; a part missing or misplaced differs by far more.
 STRONG = 64
-# The smallest patch of strong disagreement that fails a frame, in pixels across.
+# The smallest patch of strong or coverage disagreement that fails a frame, in pixels across.
 BLOB = 3
+# A faint part (a shade, a shadow) missing over another part: a smaller difference over a larger patch.
+FAINT = 24
+FAINT_BLOB = 7
 # skimage's default SSIM window is 7 x 7.
 WINDOW_RADIUS = 3
 
@@ -69,16 +78,24 @@ def ssim_on_character(a, b):
     return float(full.mean(axis=2)[mask].mean())
 
 
-def disagreements(a, b):
-    """Patches at least BLOB pixels across where the two frames differ strongly, as (x0, y0, x1, y1) boxes."""
-    strong = np.abs(a.astype(int) - b.astype(int)).max(axis=2) > STRONG
-    core = ndimage.binary_erosion(strong, structure=np.ones((BLOB, BLOB), bool))
+def patches(mask, size):
+    """Patches of a mask at least size pixels across, as (x0, y0, x1, y1) boxes of their whole extent."""
+    core = ndimage.binary_erosion(mask, structure=np.ones((size, size), bool))
     if not core.any():
         return []
-    # Grow the surviving cores back within the strong pixels, so a box shows the whole patch.
-    patch = ndimage.binary_propagation(core, mask=strong)
-    labels, _ = ndimage.label(patch)
+    # Grow the surviving cores back within the mask, so a box shows the whole patch.
+    labels, _ = ndimage.label(ndimage.binary_propagation(core, mask=mask))
     return [(int(s[1].start), int(s[0].start), int(s[1].stop - 1), int(s[0].stop - 1)) for s in ndimage.find_objects(labels)]
+
+
+def disagreements(a, b):
+    """Every patch where the two frames disagree, as (kind, (x0, y0, x1, y1)): strong, coverage or faint."""
+    difference = np.abs(a.astype(int) - b.astype(int)).max(axis=2)
+    background = a[0, 0]
+    coverage = drawn(a, background) ^ drawn(b, background)
+    return ([("strong", box) for box in patches(difference > STRONG, BLOB)]
+            + [("coverage", box) for box in patches(coverage, BLOB)]
+            + [("faint", box) for box in patches(difference > FAINT, FAINT_BLOB)])
 
 
 def diagnose(a, b):
@@ -169,12 +186,13 @@ def compare_run(web, spritekit, run, problems):
         score = ssim_on_character(a, b)
         if score is None:
             continue
-        patches = disagreements(a, b)
-        scored.append({"frame": name, "ssim": round(score, 4), "patches": patches[:4]})
+        found = disagreements(a, b)
+        scored.append({"frame": name, "ssim": round(score, 4), "patches": [[kind, list(box)] for kind, box in found[:4]]})
         if score < THRESHOLD:
             problems.append(f"{run}/{name}: SSIM on the character {score:.4f}, below {THRESHOLD}")
-        if patches:
-            problems.append(f"{run}/{name}: the runtimes disagree over {len(patches)} patch(es), the first at {patches[0]} (x0, y0, x1, y1)")
+        if found:
+            kind, box = found[0]
+            problems.append(f"{run}/{name}: the runtimes disagree over {len(found)} patch(es), the first {kind} at {box} (x0, y0, x1, y1)")
     if not scored:
         return None
     values = [s["ssim"] for s in scored]
