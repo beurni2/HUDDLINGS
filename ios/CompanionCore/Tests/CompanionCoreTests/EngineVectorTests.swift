@@ -16,7 +16,7 @@ private let repository: URL = URL(fileURLWithPath: #filePath)
     .deletingLastPathComponent()  // repository
 
 /// Reads a JSON file by its path in the repository, as the vectors name them.
-private func load<T: Decodable>(_ path: String, as type: T.Type) throws -> T {
+private func loadVector<T: Decodable>(_ path: String, as type: T.Type) throws -> T {
     try JSONDecoder().decode(T.self, from: Data(contentsOf: repository.appendingPathComponent(path)))
 }
 
@@ -59,8 +59,8 @@ final class EngineVectorTests: XCTestCase {
             let angle: [Double]
         }
         struct File: Decodable { let rig: String; let cases: [Case] }
-        let file = try load("characters/format/vectors/poses.json", as: File.self)
-        let c = compile(try load(file.rig, as: Rig.self))
+        let file = try loadVector("characters/format/vectors/poses.json", as: File.self)
+        let c = compile(try loadVector(file.rig, as: Rig.self))
         XCTAssertFalse(file.cases.isEmpty)
         let compare = Comparison()
         for (n, x) in file.cases.enumerated() {
@@ -101,8 +101,8 @@ final class EngineVectorTests: XCTestCase {
             let items: [Item]
         }
         struct File: Decodable { let rig: String; let atlas: AtlasSet; let cases: [Case] }
-        let file = try load("characters/format/vectors/drawlists.json", as: File.self)
-        let c = compile(try load(file.rig, as: Rig.self))
+        let file = try loadVector("characters/format/vectors/drawlists.json", as: File.self)
+        let c = compile(try loadVector(file.rig, as: Rig.self))
         XCTAssertFalse(file.cases.isEmpty)
         let compare = Comparison()
         for (n, x) in file.cases.enumerated() {
@@ -127,16 +127,16 @@ final class EngineVectorTests: XCTestCase {
 
     func testPlayerRun() throws {
         struct File: Decodable { let rig: String; let clips: String; let script: [ScriptStep]; let frames: [PlayerFrame] }
-        let file = try load("characters/format/vectors/player.json", as: File.self)
-        let c = compile(try load(file.rig, as: Rig.self))
+        let file = try loadVector("characters/format/vectors/player.json", as: File.self)
+        let c = compile(try loadVector(file.rig, as: Rig.self))
         try runPlayer("player", c, try loadClips(file.clips), file.script, file.frames, checkTurn: false)
     }
 
     /// Step-key cuts, events and the order track on a loop, a blend from a blend from a blend, and a cut the host asks for.
     func testPlayerCutsRun() throws {
         struct File: Decodable { let rig: String; let clips: [Clip]; let script: [ScriptStep]; let frames: [PlayerFrame] }
-        let file = try load("characters/format/vectors/player-cuts.json", as: File.self)
-        let c = compile(try load(file.rig, as: Rig.self))
+        let file = try loadVector("characters/format/vectors/player-cuts.json", as: File.self)
+        let c = compile(try loadVector(file.rig, as: Rig.self))
         try runPlayer("player cuts", c, file.clips, file.script, file.frames, checkTurn: true)
     }
 }
@@ -246,7 +246,7 @@ final class EngineRuleTests: XCTestCase {
 
     /// README, Rig: a variant of another view is ignored, and the view's own order is drawn.
     func testOrderIgnoresAnotherViewsVariant() throws {
-        let c = compile(try load("characters/test/src/rig.json", as: Rig.self))
+        let c = compile(try loadVector("characters/test/src/rig.json", as: Rig.self))
         let variants = try XCTUnwrap(c.rig.drawOrderVariants)
         for (name, _) in variants {
             let view = String(name.split(separator: ":")[0])
@@ -261,7 +261,7 @@ final class EngineRuleTests: XCTestCase {
 
     /// README, The clock: a time earlier than the last one given is an error, and so is an unknown clip.
     func testClockNeverRunsBackwards() throws {
-        let c = compile(try load("characters/test/src/rig.json", as: Rig.self))
+        let c = compile(try loadVector("characters/test/src/rig.json", as: Rig.self))
         let player = Player(rig: c, clips: try loadClips("characters/test/src/clips"))
         try player.play("idle", at: 0)
         _ = try player.advance(to: 0.5)
@@ -278,7 +278,7 @@ final class EngineRuleTests: XCTestCase {
 
     /// README, The clock: looking ahead at the channels changes nothing (runtime-web/test/player.test.ts).
     func testLookingAheadAtTheChannelsChangesNothing() throws {
-        let c = compile(try load("characters/test/src/rig.json", as: Rig.self))
+        let c = compile(try loadVector("characters/test/src/rig.json", as: Rig.self))
         let clips = try JSONDecoder().decode([Clip].self, from: Data("""
         [ { "name": "hold", "lengthMs": 500, "tracks": { "body": { "rot": [[0, -10]], "x": [[0, 10]] } }, "states": { "eye.L": [[0, "closed"]] } },
           { "name": "lean", "lengthMs": 400, "tracks": { "body": { "rot": [[0, 0], [400, 20, "easeInOut"]] } } } ]

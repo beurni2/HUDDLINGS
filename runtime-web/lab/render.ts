@@ -4,6 +4,7 @@
 //
 // node runtime-web/lab/render.ts --clip test_dance --out qa/phase1/test_dance
 //   [--species test] [--fps 60] [--every 6] [--ppp 2] [--size 400] [--set 2x] [--seconds 4.2] [--frames all|sheet]
+//   [--frames-only]: PNG frames and the report, without the sheet and the MP4 (no ImageMagick or ffmpeg needed)
 import { spawnSync, spawn } from "node:child_process";
 import { createServer, type Server } from "node:http";
 import { mkdirSync, readFileSync, rmSync, writeFileSync, existsSync } from "node:fs";
@@ -28,6 +29,7 @@ const { values: args } = parseArgs({
     set: { type: "string" },
     seconds: { type: "string" },
     frames: { type: "string", default: "sheet" },
+    "frames-only": { type: "boolean", default: false },
   },
 });
 if (!args.clip || !args.out) {
@@ -92,7 +94,8 @@ try {
 
   rmSync(out, { recursive: true, force: true });
   mkdirSync(join(out, "frames"), { recursive: true });
-  const ffmpeg = spawn("ffmpeg", ["-loglevel", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgba", "-s", `${size}x${size}`, "-r", String(fps), "-i", "-",
+  const framesOnly = args["frames-only"]!;
+  const ffmpeg = framesOnly ? undefined : spawn("ffmpeg", ["-loglevel", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgba", "-s", `${size}x${size}`, "-r", String(fps), "-i", "-",
     "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "20", "-movflags", "+faststart", join(out, `${args.clip}.mp4`)], { stdio: ["pipe", "inherit", "inherit"] });
 
   await page.evaluate((name) => window.lab.play(name, 0), args.clip!);
@@ -103,7 +106,7 @@ try {
     const info = await page.evaluate((time) => window.lab.frame(time), t);
     log.push({ frame: i, ms: Math.round(t * 1000), events: info.events.map((e) => `${e.type}${e.name ? `:${e.name}` : ""}`), views: info.views, variant: info.variant });
     const rgba = Buffer.from(await page.evaluate(() => window.lab.pixels()), "base64");
-    if (!ffmpeg.stdin.write(rgba)) await new Promise((done) => ffmpeg.stdin.once("drain", done));
+    if (ffmpeg && !ffmpeg.stdin.write(rgba)) await new Promise((done) => ffmpeg.stdin.once("drain", done));
     if (args.frames === "all" || i % every === 0) {
       const png = new PNG({ width: size, height: size });
       rgba.copy(png.data);
@@ -112,15 +115,18 @@ try {
       if (i % every === 0) sheet.push(name);
     }
   }
-  ffmpeg.stdin.end();
-  await new Promise((done) => ffmpeg.on("close", done));
+  if (ffmpeg) {
+    ffmpeg.stdin.end();
+    const code = await new Promise((done) => ffmpeg.on("close", done));
+    if (code !== 0) throw new Error(`ffmpeg failed with ${code}`);
+  }
 
   // The contact sheet: every sheet frame labelled with its frame number and time.
   const labelled = sheet.flatMap((name) => {
     const frame = Number(name.slice(1, 5));
     return ["-label", `${frame}  ${Math.round((frame / fps) * 1000)} ms`, join(out, "frames", name)];
   });
-  const montage = spawnSync("montage", [...labelled, "-tile", "8x", "-geometry", "200x200+4+4", "-pointsize", "14", join(out, `${args.clip}-sheet.png`)], { stdio: "inherit" });
+  const montage = framesOnly ? { status: 0 } : spawnSync("montage", [...labelled, "-tile", "8x", "-geometry", "200x200+4+4", "-pointsize", "14", join(out, `${args.clip}-sheet.png`)], { stdio: "inherit" });
   if (montage.status !== 0) throw new Error("montage failed");
   writeFileSync(join(out, "report.json"), JSON.stringify({ clip: args.clip, fps, size, pixelsPerPoint: ppp, set: loaded.set, device, frames: log }, null, 1) + "\n");
   console.log(`rendered ${count + 1} frames of ${args.clip} (set ${loaded.set}, ${device}) into ${out}`);
