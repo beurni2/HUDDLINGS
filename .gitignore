@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+node_modules/
+.DS_Store
+# Large renders stay out of git; small evidence goes in qa/.
+/out/
+*.xcodeproj/
+DerivedData/
