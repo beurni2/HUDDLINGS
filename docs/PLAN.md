@@ -6,7 +6,7 @@ Spec version 3, section 5b phase 0: every milestone mapped to work, where each p
 
 - **Today:** reply `go` on the pull request. Nothing past phase 0 starts until you do.
 - **This week:** the TestFlight pieces (items 2 to 5 below), so the test character can reach your iPhone at the end of phase 1, in about 1.5 weeks. Web and runtime work starts without them.
-- **Can wait:** the questions in `QUESTIONS.md`. Each of Q1 to Q24 has a default in force, and I ask again when each is due.
+- **Can wait:** the questions in `QUESTIONS.md`. Each of Q1 to Q25 has a default in force, and I ask again when each is due.
 - **When:** M0, the living dog, takes about 6 weeks; the beta is about 25 weeks away, or about 20 with the other companions in parallel lanes (section 22).
 
 ## What carries over
@@ -41,7 +41,7 @@ The critical path: one dog that feels alive under your finger before anything el
 - Every part of the parts table, drawn in TypeScript that writes SVG: hand-placed Bézier paths with few nodes, cleaned with a curve fitter. An automatic trace may sit underneath as a faint guide and is never kept.
 - Flat fill, one soft shade, one soft highlight, light from the top left, a warm brown outline on outer edges only; painted at build time and rasterized into the atlases at 2x, 3x and 5x.
 - Four views (front, three-quarter and side in both facings, back), each facing with its own markings, and every face state.
-- The sheet match, automated: silhouette IoU (0.90 front and three-quarter, 0.85 side and back), landmarks within 3% of the head's width, palette within ΔE 3 (each region against its own value, `QUESTIONS.md` Q24 and E22), no marking outside its part. The face panels' crop records (view, facing, scale, anchors, and a mask without labels or marks) join `model.json` here, before Gate A, for the Faces check (phase 2's `DECISIONS.md` 14).
+- The sheet match, automated: silhouette IoU (0.90 front and three-quarter, 0.85 side and back), landmarks within 3% of the head's width, palette within ΔE 3 (each region against its own value, `QUESTIONS.md` Q24; the blush as a level, Q25), no marking outside its part. The face panels' crop records (view, facing, scale, anchors, and a mask without labels or marks) join `model.json` here, before Gate A, for the Faces check (phase 2's `DECISIONS.md` 14).
 - Before the full set, I post the front view beside its crop in a pull request, so you can stop me early if the look is wrong. It is not a gate.
 - **Gate A evidence:** each view beside its turnaround crop at the same size, every face preset beside its expression panel, the new hungry and huffy faces as labelled new drawings, the marking map, the collar blue, `model.json`, `DECISIONS.md`, the sheet-match numbers and three fresh reviewers' scores.
 
@@ -137,7 +137,7 @@ In the order they come up. Weeks count from your `go`. Secrets go in GitHub (Set
 
 **Around week 3:** allow `commons.wikimedia.org` and `upload.wikimedia.org` for Muybridge's plates, needed in phase 4 (Edit the environment, Network access: https://code.claude.com/docs/en/cloud-environments#network-access), or upload the plates. Slow-motion video of a real puppy helps too, if you have some. Nothing else is needed; I work around the other blocked sites (`LIMITATIONS.md`).
 
-**Around week 3 to 4, at Gate A:** approve the dog's look: the views, the faces, the marking map and the collar blue; answer Q2 (the dog's squeeze and sparkle eyes) and Q24 (the colours the sheet paints that its printed palette lacks); a first look at the new hungry and huffy faces. Q3 (four Visual QA checks) by phase 4.
+**Around week 3 to 4, at Gate A:** approve the dog's look: the views, the faces, the marking map and the collar blue; answer Q2 (the dog's squeeze and sparkle eyes) Q24 (the colours the sheet paints that its printed palette lacks) and Q25 (the blush checked as a level); a first look at the new hungry and huffy faces. Q3 (four Visual QA checks) by phase 4.
 
 **Around week 5, at Gate B:** answer Q4 (temporary licensed sounds are fine for Gate B).
 

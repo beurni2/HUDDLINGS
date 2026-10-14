@@ -9,7 +9,7 @@ Status: **proposed**. The model, the marking map and these decisions are locked 
 **1. The turnaround's side view is `side.L` and its three-quarter view is `threeQuarter.L`.** Both face the sheet's left, so the dog has turned to its right and shows its left side (format README: `.L` and `.R` are the companion's own sides). The motion sheet's side poses face right and show the right side, as section 5b says.
 Crops: `master.turnaround.side.png`, `master.turnaround.three-quarter.png`, `motion/motion.movement.walk.png`.
 
-**2. The right-facing views are the left-facing ones mirrored.** The turnaround draws no `side.R` or `threeQuarter.R` at rest, so their silhouette and landmarks are those of `side.L` and `threeQuarter.L` with x negated (`model.json`, `mirroredViews`), and they show the right side's patches (section 5b: each facing shows its own side's markings), as the hero and the motion sheet's right-side poses draw them.
+**2. The right-facing views are the left-facing ones mirrored.** The turnaround draws no `side.R` or `threeQuarter.R` at rest, so their silhouette and landmarks are those of `side.L` and `threeQuarter.L` mirrored: x negated, `.L` and `.R` swapped in every landmark name (the near eye of `side.R` is `eye.R`), `sheetLeft` and `sheetRight` swapped (`model.json`, `mirroredViews`). They show the right side's patches (section 5b: each facing shows its own side's markings), as the hero and the motion sheet's right-side poses draw them.
 Crops: `master.hero.main.png`, `motion/motion.movement.walk.png`.
 
 **3. The hero's head faces front but is rolled about 16° toward the dog's right shoulder** (the eye line rises 28 px over 95), and its body is turned a little to the sheet's right, so its tail shows on the sheet's left and its right flank is in view. It is evidence for the right side's markings, not an untilted front head.
@@ -34,7 +34,7 @@ Overlay: `landmarks-front.png`.
 
 ## Landmarks
 
-**9. The origin is the ground under the seat.** Section 5b puts the body bone at "the centre of the seat, where the body meets the ground", with the root under it, and Appendix F measures every landmark from that ground point. Facing or turned away, the seat is on the body's midline, the middle of the body below the collar. In the side and three-quarter views it is the middle of the haunch's underside, behind the hind paw, placed by hand: a centroid there would be pulled about 13 pt toward the tail.
+**9. The origin is the ground under the seat.** Section 5b puts the root on "the ground, under the body's centre" (L416) and the body bone at "the centre of the seat, where the body meets the ground" (L417), and Appendix F places the body bone straight above the root; so the root, and the point every landmark is measured from, is the ground under the seat. Facing or turned away, the seat is on the body's midline, the middle of the body below the collar. In the side and three-quarter views it is the middle of the haunch's underside, behind the hind paw, placed by hand, and a turned view without one fails the run: the body's centroid there lies over the hind paw, 15 to 21 pt ahead of the seat, even with the tail pulling it back.
 Overlays: `landmarks-side.L.png`, `landmarks-threeQuarter.L.png` (`ground`).
 
 **10. How each landmark is found** (each one's method is also in `ref/measurements.json`):
@@ -58,7 +58,7 @@ Overlays: `landmarks-front.png`, `landmarks-side.L.png`, `landmarks-threeQuarter
 
 ## Silhouettes
 
-**12. The cut-outs follow the outline and leave out the card, the ground shadow and the motion marks.** The cream fur is nearly the card's colour and the outline fades at the tuft and the tail's curl, so the method (`refprep/silhouette.py`) fills from the border with the outline as the wall, then puts the edge on the outline with a watershed. Each of its steps is tested on the point of the dog's sheets it exists for (`refprep/test_refprep.py`). A few card pixels remain where the edge cuts straight across a narrow notch, each pocket under 0.3% of the area: under the dog's right ear by the cheek in the front view, under the chin by the collar and under the ear's back corner in the side view, under the left ear from behind. No landmark sits there, and the silhouette check's thresholds (IoU 0.85 to 0.90) are far coarser; a rule that removed them leaked into the fur at the faded tuft.
+**12. The cut-outs follow the outline and leave out the card, the ground shadow and the motion marks.** The cream fur is nearly the card's colour and the outline fades at the tuft and the tail's curl, so the method (`refprep/silhouette.py`) fills from the border with the outline as the wall, then puts the edge on the outline with a watershed. Each of its steps is tested on the point of the dog's sheets it exists for (`refprep/test_refprep.py`). A few card pixels remain where the edge cuts straight across a narrow notch, each about 0.3% of the area or less (about 100 px at most): under the dog's right ear by the cheek in the front view, under the chin by the collar and under the ear's back corner in the side view, under the left ear from behind. No landmark sits there, and the silhouette check's thresholds (IoU 0.85 to 0.90) are far coarser; a rule that removed them leaked into the fur at the faded tuft.
 Silhouettes: `ref/silhouettes/*.png`; overlays `landmarks-*.png` (the blue edge).
 
 ## The panels
@@ -79,19 +79,19 @@ Overlay: `palette.png`; crops `master.palette.*.png`.
 
 **17. How the sheet's pixels compare with the printed values** (CIEDE2000, `ref/palette.json`):
 - The swatches, as the JPEG holds them, are 1.5 to 4.6 from their printed values; three are over 3: Eyes / Nose 4.6, Gold Tag 3.9, Collar Blue 3.1. The printed values stay.
-- In the drawn dog the fur (0.5 to 1.2), the ears' tan (2.8 to 2.9), the saddle (2.3 to 3.7 on the master sheet, 3.9 to 4.5 on the motion sheet's poses), the tail's root (2.2 to 2.8; 6.8 where it shows pale inside the curl from behind), the tag (3.0 to 3.4) and the ground shadow (1.9 to 3.0) are at or near the printed values. The printed Soft Shadow is the ground shadow's colour. The collar's most common colour is its shaded lower half in the front view (6.3) and its lit band elsewhere (2.6 to 4.7). The printed Eyes / Nose brown is the eye's lighter lower iris (2.8 in the front view).
-Overlays: `palette.png`, `palette-regions-*.png`.
+- In the drawn dog the fur (0.5 to 1.2), the ears' tan (2.8 to 2.9), the saddle (2.3 to 3.7 on the master sheet, 3.9 to 4.5 on the motion sheet's poses), the tail's root (2.2 to 2.8; 6.8 where it shows pale inside the curl from behind), the tag (3.0 to 3.4) and the ground shadow (1.9 to 3.0) are at or near the printed values. The printed Soft Shadow is the ground shadow's colour. The collar's most common colour is its shaded lower half in the front view (6.3) and its lit band elsewhere (2.6 to 4.7). The printed Eyes / Nose brown is nearest the eye's lighter lower iris in the front view (2.8; 5.4 and 8.0 in the side and three-quarter views).
+Overlays: `palette.png`, `palette-regions-*.png`, `markings-colours.png`; numbers in `ref/palette.json` and `ref/markings.json`.
 
-**18. Where the sheet paints colours the printed palette lacks**, the sampled values are proposed in `model.json` (`paletteProposed`) for the founder to decide at Gate A (`docs/QUESTIONS.md`, Q24):
-- the pupils, the upper iris and the nose: near-black `#200C02`, 8.5 to 9.6 from the printed `#3A2314` (the nose 4.2 to 14.6);
-- the head patches: a paler tan, `#F0BC92`, 6.5 to 7.7 from the printed `#D9A379`, on every panel that shows them;
-- the fur's soft shade: `#FDE3C8`, warmer than the printed Soft Shadow (6.2 to 7.5), which section 5b's "the fill 8–12% darker" would give;
+**18. Where the sheet paints colours the printed palette lacks**, the values sampled on the front view (the view on Home, first in priority) are proposed in `model.json` (`paletteProposed`) for the founder to decide at Gate A (`docs/QUESTIONS.md`, Q24):
+- the pupils and the upper iris: near-black `#200C02`, 8.5 to 9.6 from the printed `#3A2314`; the nose is as dark in the front and side views (4.2 to 14.6 from the printed value; its three-quarter view carries a large shine);
+- the head patches: a paler tan, `#F0BC92`, 6.3 to 7.7 from the printed `#D9A379` on every panel that shows them;
+- the fur's soft shade: `#FDE3C8`, 6.2 to 7.5 from the printed Soft Shadow. The printed value is the fur × 0.91 in every channel, exactly section 5b's "the fill 8–12% darker" (L507); the sheet's shade is a warmer hue instead;
 - the tongue: `#FB9A88`, 6.9 to 9.5 from the printed pink;
-- the open mouth's inside: `#9E241A`, which the sheet prints no value for.
-Overlays: `palette.png`, `palette-regions-front.png`, `markings-master.turnaround.front.png`.
+- the open mouth's inside: `#9E241A` in the front view, `#69190C` in the three-quarter (10.8 apart, one deep-red gradient sampled at two places); the sheet prints no value for it.
+Overlays: `palette.png`, `palette-regions-front.png`, `markings-colours.png`.
 
-**19. The blush is the printed pink at a level** (spec L474: the blush is a level from 0 to 100%, deepening with each stage and rising with touch). On the turnaround's cheeks it sits at 29 to 43%, 35% on average, which `model.json` records as its resting level; the hero shows it at 44 to 51%, the Blush cheeks close-up at 68%, and the rigging sheet's blush part is the pink itself. The palette check holds the blush part's own colour to `#F7B3A6` (`docs/QUESTIONS.md`, E22).
-Overlay: `palette.png` (the blush row); boxes in `refmap/palette.json`.
+**19. The blush is the printed pink at a level** (spec L474: the blush is a level from 0 to 100%, deepening with each stage and rising with touch). On the turnaround's cheeks it sits at 29 to 43%, 35% on average, which `model.json` records as its resting level at the Grown stage the sheets draw (L663); the hero shows it at 44 to 51%, the Blush cheeks close-up at 68%, and the rigging sheet's blush part is the pink itself. The levels of the Little and Growing stages belong to `rig.json`'s stages (phase 4). How the palette check treats a blush that is a level is `docs/QUESTIONS.md` Q25.
+Overlays: `palette-blush.png` (each cheek's box on its panel), `palette.png` (the blush row).
 
 ## Outline
 
@@ -109,11 +109,11 @@ Crops: `expressions/expressions.assembly.sleepy.png`, `expressions/expressions.e
 ## Markings (proposed, approved at Gate A)
 
 **23. Six patches, each clipped to its part:**
-- `head.patch.L` and `head.patch.R` on the head base: around each eye and down behind its outer side, rising into that ear's root, which hides their upper edge, in the paler tan of 18. The front view and the hero show both.
-- `back.patch.L` and `back.patch.R` on the back body: the two halves of a saddle over the back, just behind the collar. The left half lies high on the back and down to the top of the haunch (the side and three-quarter views, the motion sheet's Stand); the right half runs from the spine down the right flank toward the haunch, lower than the left (the front view, the hero), and reaches the topline at the rump in the motion sheet's right-side poses.
+- `head.patch.L` and `head.patch.R` on the head base: around each eye and down behind its outer side to the cheek, rising into that ear's root, which hides their upper edge, in the paler tan of 18. The front view and the hero show both.
+- `back.patch.L` and `back.patch.R` on the back body: the two halves of a saddle over the back, just behind the collar. The left half lies high on the back and down to the top of the haunch (the side and three-quarter views, the motion sheet's Stand); the right half runs from the spine down the right flank toward the haunch, lower than the left (the front view, the hero), and reaches the topline at the rump in the motion sheet's right-side poses: sitting, the saddle runs down the sloping back to the haunch; standing, it lies along the level topline to the rump.
 - `tail.base` on the tail: tan at its root; the curl stays cream.
-- `rump.patch.L` on the back body: a small, soft spot where the tail's tan crosses the body's outline at the tail's root, paler toward its edge (5.2 to 7.3 from the printed tan), in the side and three-quarter views; no right-side panel shows one.
-Each patch is coloured where it shows in `ref/overlays/markings-*.png`, from seed points in `refmap/markings.json`.
+- `rump.patch.L` on the back body: a small, soft spot where the tail's tan crosses the body's outline at the tail's root, fading paler away from the outline (2.7 to 4.5 from the printed tan), in the side and three-quarter views; no right-side panel shows one.
+Each patch is coloured where it shows in `ref/overlays/markings-*.png`, from seed points in `refmap/markings.json`, and its colours are in `markings-colours.png`.
 
 **24. How the views agree.** From behind, the saddle crosses the spine just behind the collar, its upper edge reaching as far to the dog's right as to its left; below that it lies left of the spine, and the tail's curl covers the rest. That fits a saddle whose right half runs down the flank, below what the back view sees, as the front view and the hero draw it.
 Overlays: `markings-master.turnaround.back.png`, `markings-master.turnaround.front.png`, `markings-master.hero.main.png`, `markings-motion.movement.walk.png`.

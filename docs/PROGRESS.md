@@ -10,8 +10,8 @@ Kept current every session (CLAUDE.md). One section per lane; each lane edits on
 
 **In review: phase 2, the dog's references** (section 5b; `PLAN.md`), on `claude/loving-bardeen-tg3wvd`
 - `characters/refprep/`: one command, `python3 characters/refprep/prepare.py dog`, crops all 116 panels of the four sheets, cuts out the turnaround, measures landmarks, proportions and outlines, samples the palette, shows the proposed marking map and writes `characters/dog/model.json`. Byte for byte reproducible; CI and the pre-commit hook rerun it.
-- `characters/dog/DECISIONS.md`: 25 decisions, each with its crop. One question for Gate A, Q24: the colours the sheet paints that its printed palette lacks (eyes and nose, head patches, the fur's shade, the tongue, the mouth's inside); and E22, the blush checked as a level.
-- Reviewed by four fresh reviewers, each finding checked by a refuting verifier; every confirmed finding is fixed or recorded.
+- `characters/dog/DECISIONS.md`: 25 decisions, each with its crop. Two questions for Gate A: Q24, the colours the sheet paints that its printed palette lacks (eyes and nose, head patches, the fur's shade, the tongue, the mouth's inside); Q25, the blush checked as a level.
+- Two review rounds of four fresh reviewers, each finding checked by a refuting verifier; every confirmed finding is fixed or recorded.
 - Deferred, on purpose: the face panels' crop records (phase 3, before Gate A) and the motion poses' (phase 4), each with its mask (`DECISIONS.md` 14).
 
 **Next: phase 3, drawing the dog** (section 5b), ending at Gate A: each view and every face state drawn as parts from `model.json`, beside the sheet crops, with the sheet match.
