@@ -13,12 +13,13 @@ Kept current every session (CLAUDE.md). One section per lane; each lane edits on
 - Nothing to archive (no spec version 2 or Mochi Post spec was here) and nothing carries over (no dog work existed).
 
 **In progress: phase 1** (draft https://github.com/beurni2/HUDDLINGS/pull/2, stacked on #1)
-- Done and tested here: the package format and contract (`characters/format/README.md`, reviewed by three fresh agents before coding); the web runtime (WebGL2, 120 Hz springs, blending, the fake turn, bends, events), 84 tests; the test character and the package build; the Lab page and `npm run render` (frames, contact sheets, MP4s); the Swift engine, held to the same vectors (15 tests, largest difference 6.4e-14); the copy checks for the app's strings and the E1 and package-in-app checks.
-- Written, waiting for the macOS runner: the SpriteKit adapter, the parity render, the app shell with the Lab's Diagnostics, and the `ios` workflow (it runs on the pull request).
-- Next: get the macOS job and parity green; fresh reviews of the phase; the evidence in `qa/phase1/`; the numbers in `LIMITATIONS.md`; then the PR is ready.
+- Done and tested here: the package format and contract (`characters/format/README.md`); the web runtime (WebGL2, 120 Hz springs, blending, the fake turn, bends, events); the test character and the package build; the Lab page, `npm run render` and `npm run render:all`; the Swift engine, held to the same vectors; the copy checks for the app's strings (extracted and in code); the E1 allowlist and the package-in-app check; parity scored on the character, with planted-failure tests.
+- On the macOS runner: the SpriteKit adapter, the app shell with the Lab's Diagnostics, UI tests, and parity, green on d98bf8c under the old whole-frame score (full min 0.995, small min 0.986). The Visual QA job renders every clip on every push.
+- Running now: the probes that measure SpriteKit's warp-cell diagonal and mip filter (E17), and parity on the character (E20), on pinned Xcode 16.4, XcodeGen 2.46.0 and Swift 6.4.1.
+- Next: record those results and the evidence in `qa/phase1/` and `LIMITATIONS.md`; mark the PR ready. Frame time, rig time and texture memory on your iPhone wait for TestFlight.
 
 **Blockers**
-- For TestFlight at the end of phase 1: the Apple pieces in `PLAN.md`, What I need from you.
+- For TestFlight at the end of phase 1: the Apple pieces in `PLAN.md`, What I need from you (Team ID, API key, your iPhone registered once, the app record and bundle ID).
 
 ## Verify at the start of every session
 

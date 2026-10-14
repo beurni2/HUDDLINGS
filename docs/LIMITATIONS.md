@@ -17,4 +17,11 @@ Every limit hit while building Huddlings, with the evidence and the workaround (
 
 ## Runtimes
 
-None measured yet. Phase 1 records here: texture memory with the test character, rig and frame times on the founder's iPhone, SpriteKit's warp-grid behaviour against the WebGL mesh, and any parity difference between the two runtimes, with frames.
+Phase 1, with the test character (`characters/test/`). Simulator figures come from GitHub's macOS runner: Xcode 16.4 (16F6) driving an iPhone SE (3rd generation) simulator on iOS 26.2, which draws with the Mac's GPU, not an iPhone's.
+
+| Limit or measurement | Evidence | Workaround or status |
+| --- | --- | --- |
+| Texture memory, computed from `atlas.json`: each set of the test character is one page. A 3x iPhone loads only the 3x set, 1024 × 1024 RGBA: 4 MiB, 5.3 MiB with mipmaps. Below 35% the small set's 512 × 512 page adds 1.3 MiB. The budget is 48 MB with a visitor (5b). | `build/characters/test/atlas.json`; the Lab's Diagnostics shows the same figure ("Atlas textures") beside all of the app's Metal memory | Measured on your iPhone with the first TestFlight build. |
+| Frame time and rig time on your iPhone | none yet | Blocked on the TestFlight pieces in `PLAN.md` (What I need from you, items 2 to 4). The Lab's Diagnostics records both as histograms and exports JSON. |
+| `SKRenderer` resizes a scene whose `scaleMode` is `.resizeFill` to the viewport measured in screen points, not pixels: on the 2x simulator a 400-pixel target gave a 200-point scene, so everything came out twice the size, from the bottom-left corner. | the parity job on d96758d: SSIM 0.715 (full) and 0.654 (small), the SpriteKit drawing at twice the web's size | Offscreen renders use `.fill`, which maps the scene exactly onto the target (d98bf8c); the app's own scene, shown by an `SKView`, keeps `.resizeFill`. |
+| The first frame `SKRenderer` draws can come out blank | the parity job on 0d1e057: frame 0 had no drawn pixels | The parity render draws its first frame twice. |
