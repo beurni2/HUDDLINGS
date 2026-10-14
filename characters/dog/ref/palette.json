@@ -1,0 +1,208 @@
+{
+ "species": "dog",
+ "printed": {
+  "fur": "#FFF4E8",
+  "marking": "#D9A379",
+  "dark": "#3A2314",
+  "blush": "#F7B3A6",
+  "collar": "#7DB7E8",
+  "tag": "#F4C542",
+  "shadow": "#E8DED4"
+ },
+ "swatches": {
+  "fur": {
+   "panel": "master.palette.cream-fur",
+   "printed": "#FFF4E8",
+   "sampled": "#FEEFDC",
+   "deltaE2000": 2.95
+  },
+  "marking": {
+   "panel": "master.palette.tan-fur",
+   "printed": "#D9A379",
+   "sampled": "#DCA074",
+   "deltaE2000": 1.48
+  },
+  "dark": {
+   "panel": "master.palette.eyes-nose",
+   "printed": "#3A2314",
+   "sampled": "#4B2B19",
+   "deltaE2000": 4.59
+  },
+  "blush": {
+   "panel": "master.palette.blush",
+   "printed": "#F7B3A6",
+   "sampled": "#F8A99A",
+   "deltaE2000": 2.81
+  },
+  "collar": {
+   "panel": "master.palette.collar-blue",
+   "printed": "#7DB7E8",
+   "sampled": "#8CBBDF",
+   "deltaE2000": 3.05
+  },
+  "tag": {
+   "panel": "master.palette.gold-tag",
+   "printed": "#F4C542",
+   "sampled": "#FAC253",
+   "deltaE2000": 3.86
+  },
+  "shadow": {
+   "panel": "master.palette.soft-shadow",
+   "printed": "#E8DED4",
+   "sampled": "#E5D7C9",
+   "deltaE2000": 2.5
+  }
+ },
+ "views": {
+  "front": {
+   "fur": {
+    "dominant": "#FEF4E6",
+    "pixels": 13248,
+    "deltaE2000": 1.18
+   },
+   "marking": {
+    "dominant": "#E09E6E",
+    "pixels": 7060,
+    "deltaE2000": 2.83
+   },
+   "dark": {
+    "dominant": "#200C02",
+    "pixels": 954,
+    "deltaE2000": 8.71
+   },
+   "collar": {
+    "dominant": "#65A3CE",
+    "pixels": 515,
+    "deltaE2000": 6.32
+   },
+   "tag": {
+    "dominant": "#FAC657",
+    "pixels": 258,
+    "deltaE2000": 3.04
+   },
+   "blush": {
+    "dominant": "#FEE2D3",
+    "pixels": 110,
+    "deltaE2000": 13.98
+   },
+   "outline": {
+    "dominant": "#996D4C",
+    "pixels": 364
+   },
+   "shadow": {
+    "dominant": "#F0E4D7",
+    "pixels": 831,
+    "deltaE2000": 1.89
+   }
+  },
+  "threeQuarter.L": {
+   "fur": {
+    "dominant": "#FEF4E6",
+    "pixels": 15020,
+    "deltaE2000": 1.18
+   },
+   "marking": {
+    "dominant": "#DF9D6D",
+    "pixels": 8140,
+    "deltaE2000": 2.92
+   },
+   "dark": {
+    "dominant": "#200C01",
+    "pixels": 843,
+    "deltaE2000": 8.53
+   },
+   "collar": {
+    "dominant": "#7CBBE0",
+    "pixels": 475,
+    "deltaE2000": 3.82
+   },
+   "tag": {
+    "dominant": "#FBC556",
+    "pixels": 243,
+    "deltaE2000": 3.42
+   },
+   "blush": {
+    "dominant": "#FEE9DB",
+    "pixels": 81,
+    "deltaE2000": 16.62
+   },
+   "outline": {
+    "dominant": "#8A6649",
+    "pixels": 351
+   },
+   "shadow": {
+    "dominant": "#F2E3D3",
+    "pixels": 1057,
+    "deltaE2000": 2.98
+   }
+  },
+  "side.L": {
+   "fur": {
+    "dominant": "#FEF3E6",
+    "pixels": 11225,
+    "deltaE2000": 0.51
+   },
+   "marking": {
+    "dominant": "#E09E6E",
+    "pixels": 8170,
+    "deltaE2000": 2.83
+   },
+   "dark": {
+    "dominant": "#261008",
+    "pixels": 388,
+    "deltaE2000": 8.07
+   },
+   "collar": {
+    "dominant": "#82BDDE",
+    "pixels": 448,
+    "deltaE2000": 4.71
+   },
+   "tag": {
+    "dominant": "#FBC657",
+    "pixels": 176,
+    "deltaE2000": 3.24
+   },
+   "outline": {
+    "dominant": "#8A6649",
+    "pixels": 292
+   },
+   "shadow": {
+    "dominant": "#F0E5D8",
+    "pixels": 848,
+    "deltaE2000": 1.99
+   }
+  },
+  "back": {
+   "fur": {
+    "dominant": "#FEF3E5",
+    "pixels": 14206,
+    "deltaE2000": 0.93
+   },
+   "marking": {
+    "dominant": "#E09E6E",
+    "pixels": 7147,
+    "deltaE2000": 2.83
+   },
+   "collar": {
+    "dominant": "#85BCE3",
+    "pixels": 776,
+    "deltaE2000": 2.57
+   },
+   "outline": {
+    "dominant": "#976C4A",
+    "pixels": 315
+   },
+   "shadow": {
+    "dominant": "#F0E5D7",
+    "pixels": 624,
+    "deltaE2000": 2.28
+   }
+  }
+ },
+ "outline": "#91694A",
+ "blush": {
+  "peak": "#FFDED0",
+  "opacityOverFur": 0.34,
+  "peakDeltaE2000": 12.15
+ }
+}

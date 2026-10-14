@@ -1,0 +1,109 @@
+"""Shows the proposed marking map on the sheets (spec section 5b, phase 2): each
+patch of refmap/markings.json coloured where it appears on each panel that
+settles it, for the founder to judge at Gate A and for drawing the parts.
+
+    python3 characters/refprep/markings.py dog
+
+A patch is the tan region (measure.Classes) holding its seed point, inside its
+clip box when it has one. Fails when a seed is not on tan, so a seed that misses
+its patch is caught rather than drawn. Writes ref/markings.json (each patch's
+area and centroid in the panel's pixels) and ref/overlays/markings-<panel>.png:
+the panel beside the same panel with its patches coloured and named."""
+import sys
+
+import numpy as np
+from PIL import Image, ImageDraw
+from scipy import ndimage
+
+import measure
+import sheets
+import silhouette
+
+COLOURS = {"head.patch.L": (215, 50, 30), "head.patch.R": (30, 110, 215), "back.patch.L": (230, 120, 0),
+           "back.patch.R": (20, 150, 70), "tail.base": (150, 40, 170)}
+ZOOM = 2
+
+
+def tan(rgb):
+    """The tan areas of a panel's drawing, with specks and one-pixel bridges opened away."""
+    cls = measure.Classes(rgb, silhouette.cut_out(rgb))
+    return ndimage.binary_opening(cls.tan, np.ones((3, 3), bool))
+
+
+def patch(area, seed, clip):
+    x, y = seed
+    region = area.copy()
+    if clip:
+        cx, cy, cw, ch = clip
+        inside = np.zeros_like(area)
+        inside[max(cy, 0):cy + ch, max(cx, 0):cx + cw] = True
+        region &= inside
+    if not (0 <= y < region.shape[0] and 0 <= x < region.shape[1] and region[y, x]):
+        return None
+    labels, _ = ndimage.label(region)
+    return labels == labels[y, x]
+
+
+def evidence(rgb, found, path):
+    tinted = (rgb * 0.45 + 140).astype(np.uint8)
+    for name, mask in found.items():
+        tinted[mask] = COLOURS.get(name, (90, 90, 90))
+    image = Image.fromarray(np.concatenate([rgb, tinted], axis=1))
+    image = image.resize((image.width * ZOOM, image.height * ZOOM), Image.NEAREST)
+    draw = ImageDraw.Draw(image)
+    width = rgb.shape[1]
+    for name, mask in found.items():
+        x, y = measure.centroid(mask)
+        draw.text(((x + width) * ZOOM + 4, y * ZOOM - 6), name, fill=(0, 0, 0))
+    sheets.save_png(path, np.asarray(image))
+
+
+def show(species):
+    ref = sheets.ROOT / "characters" / species / "ref"
+    plan = sheets.json.loads((sheets.ROOT / "characters" / species / "refmap" / "markings.json").read_text())
+    panels = {p["id"]: p for p in sheets.json.loads((ref / "panels.json").read_text())["panels"]}
+    ids = {m["id"] for m in plan["markings"]}
+    problems, records = [], []
+    for entry in plan["evidence"]:
+        panel = panels[entry["panel"]]
+        x0, y0, w, h = panel["box"]
+        rgb = sheets.load_sheet(species, panel["sheet"])[y0:y0 + h, x0:x0 + w]
+        area = tan(rgb)
+        found = {}
+        for name, where in entry["seeds"].items():
+            if name not in ids:
+                problems.append(f"{entry['panel']}: {name} is not in the marking map")
+                continue
+            seed = [where["seed"][0] - x0, where["seed"][1] - y0]
+            clip = [where["clip"][0] - x0, where["clip"][1] - y0, where["clip"][2], where["clip"][3]] if "clip" in where else None
+            mask = patch(area, seed, clip)
+            if mask is None:
+                problems.append(f"{entry['panel']}: the seed of {name} at {where['seed']} is not on tan")
+                continue
+            found[name] = mask
+            records.append({"panel": entry["panel"], "marking": name, "areaPx": int(mask.sum()),
+                            "centroidPx": [round(v, 1) for v in measure.centroid(mask)]})
+        evidence(rgb, found, ref / "overlays" / f"markings-{entry['panel']}.png")
+    if problems:
+        raise SystemExit("markings: " + "; ".join(problems))
+    shown = {name for record in records for name in [record["marking"]]}
+    missing = ids - shown
+    if missing:
+        raise SystemExit(f"markings: no panel shows {sorted(missing)}")
+    result = {"species": species, "markings": plan["markings"], "evidence": records}
+    sheets.write_json(ref / "markings.json", result)
+    return result
+
+
+def main(argv):
+    if len(argv) != 1:
+        print(__doc__)
+        return 2
+    result = show(argv[0])
+    print(f"markings: {len(result['markings'])} patches proposed, {len(result['evidence'])} sightings on "
+          f"{len({r['panel'] for r in result['evidence']})} panels")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

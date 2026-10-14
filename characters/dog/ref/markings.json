@@ -1,0 +1,157 @@
+{
+ "species": "dog",
+ "markings": [
+  {
+   "id": "head.patch.L",
+   "part": "head.base",
+   "side": "L",
+   "note": "Tan around the dog's left eye, rising into the left ear's root, which hides its upper edge. Shown wherever the left eye shows."
+  },
+  {
+   "id": "head.patch.R",
+   "part": "head.base",
+   "side": "R",
+   "note": "The mirror of head.patch.L around the right eye, as the front turnaround and the hero draw it."
+  },
+  {
+   "id": "back.patch.L",
+   "part": "body.back",
+   "side": "L",
+   "note": "The left half of the saddle: high on the back behind the collar, down to the top of the haunch. Shown on the dog's left side (side.L, threeQuarter.L) and, smaller, at the far edge of the front view."
+  },
+  {
+   "id": "back.patch.R",
+   "part": "body.back",
+   "side": "R",
+   "note": "The right half of the saddle: from behind the collar diagonally down the flank toward the haunch, larger than the left half. Shown on the dog's right side (the hero, the motion sheet's side poses) and at the near edge of the front view."
+  },
+  {
+   "id": "tail.base",
+   "part": "tail",
+   "side": "both",
+   "note": "Tan at the root of the tail; the tail's curl stays cream. In the back view it joins the saddle."
+  }
+ ],
+ "evidence": [
+  {
+   "panel": "master.turnaround.front",
+   "marking": "head.patch.R",
+   "areaPx": 720,
+   "centroidPx": [65.3, 79.3]
+  },
+  {
+   "panel": "master.turnaround.front",
+   "marking": "head.patch.L",
+   "areaPx": 716,
+   "centroidPx": [151.2, 72.2]
+  },
+  {
+   "panel": "master.turnaround.front",
+   "marking": "back.patch.R",
+   "areaPx": 374,
+   "centroidPx": [57.9, 179.6]
+  },
+  {
+   "panel": "master.turnaround.front",
+   "marking": "back.patch.L",
+   "areaPx": 97,
+   "centroidPx": [156.5, 166.9]
+  },
+  {
+   "panel": "master.hero.main",
+   "marking": "head.patch.R",
+   "areaPx": 1482,
+   "centroidPx": [111.7, 136.5]
+  },
+  {
+   "panel": "master.hero.main",
+   "marking": "head.patch.L",
+   "areaPx": 755,
+   "centroidPx": [226.9, 97.7]
+  },
+  {
+   "panel": "master.hero.main",
+   "marking": "back.patch.R",
+   "areaPx": 1333,
+   "centroidPx": [107.7, 269.7]
+  },
+  {
+   "panel": "master.hero.main",
+   "marking": "back.patch.L",
+   "areaPx": 225,
+   "centroidPx": [273.9, 306.6]
+  },
+  {
+   "panel": "master.hero.main",
+   "marking": "tail.base",
+   "areaPx": 1033,
+   "centroidPx": [58.9, 321.4]
+  },
+  {
+   "panel": "master.turnaround.three-quarter",
+   "marking": "head.patch.R",
+   "areaPx": 432,
+   "centroidPx": [56.8, 71.7]
+  },
+  {
+   "panel": "master.turnaround.three-quarter",
+   "marking": "head.patch.L",
+   "areaPx": 1002,
+   "centroidPx": [133.7, 83.2]
+  },
+  {
+   "panel": "master.turnaround.three-quarter",
+   "marking": "back.patch.L",
+   "areaPx": 414,
+   "centroidPx": [155.3, 158.4]
+  },
+  {
+   "panel": "master.turnaround.three-quarter",
+   "marking": "tail.base",
+   "areaPx": 406,
+   "centroidPx": [195.8, 191.5]
+  },
+  {
+   "panel": "master.turnaround.side",
+   "marking": "head.patch.L",
+   "areaPx": 1043,
+   "centroidPx": [66.3, 73.8]
+  },
+  {
+   "panel": "master.turnaround.side",
+   "marking": "back.patch.L",
+   "areaPx": 642,
+   "centroidPx": [127.4, 156.2]
+  },
+  {
+   "panel": "master.turnaround.side",
+   "marking": "tail.base",
+   "areaPx": 386,
+   "centroidPx": [164.9, 184.3]
+  },
+  {
+   "panel": "master.turnaround.back",
+   "marking": "back.patch.L",
+   "areaPx": 1296,
+   "centroidPx": [92.9, 158.9]
+  },
+  {
+   "panel": "motion.movement.walk",
+   "marking": "back.patch.R",
+   "areaPx": 780,
+   "centroidPx": [44.3, 85.3]
+  },
+  {
+   "panel": "motion.key.stand",
+   "marking": "back.patch.L",
+   "areaPx": 474,
+   "centroidPx": [131.8, 103.7]
+  },
+  {
+   "panel": "motion.key.stand",
+   "marking": "tail.base",
+   "areaPx": 330,
+   "centroidPx": [161.6, 101.9]
+  }
+ ]
+}

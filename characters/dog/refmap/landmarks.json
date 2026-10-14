@@ -1,0 +1,22 @@
+{
+ "_about": "Landmarks placed by hand, in the master sheet's pixels (x right, y down), for what the sheet's colours cannot find: the paws, which the sheet draws with no line between paw and leg. Each point is the centre of the paw's rounded end: midway between its side outlines, and from the top of its toe lines to its sole. Placed on the sheet zoomed six to nine times with a 5 px grid; measure.py checks each one is inside the silhouette, and the overlays in ref/overlays show them all. The back view draws no paw: the haunches and the tail sit on the ground.",
+ "front": {
+  "paw.front.R": [481, 273],
+  "paw.front.L": [518, 273],
+  "paw.hind.R": [452, 266],
+  "paw.hind.L": [549, 266],
+  "_note": "The front paws are the legs' rounded ends, side by side under the chest (sole y 279, toe lines from about y 267). The hind paws are the round ovals on each side, below the haunches' tan (y 257 to 275)."
+ },
+ "side.L": {
+  "paw.front.L": [690, 272],
+  "paw.front.R": [664, 266],
+  "paw.hind.L": [742, 272],
+  "_note": "The near front paw (the dog's left) is the big one, x 669 to 711. The small paw ahead of it, sitting higher, is the far front paw (the dog's right): only its toe end shows, and the point is the centre of what shows. The near hind foot rests forward under the haunch, x 712 to 773. The far hind paw is hidden."
+ },
+ "threeQuarter.L": {
+  "paw.front.R": [1094, 268],
+  "paw.front.L": [1129, 273],
+  "paw.hind.L": [1171, 271],
+  "_note": "The dog turns to its right, so its left side is near. The far front paw (the dog's right) is on the sheet's left, its sole higher (y 277); the near front paw is lower and larger (sole y 281); the near hind paw follows (x 1148 to 1195). The far hind paw is hidden."
+ }
+}

@@ -1,0 +1,39 @@
+{
+ "_about": "The proposed marking map (spec section 5b: proposed from the hero and the front turnaround, each side view used for its own side, approved at Gate A), and where each patch shows on the sheets. Each evidence entry names a panel and, per marking, a seed point in the sheet's pixels inside that patch's tan; markings.py colours the tan region holding the seed. A clip box [x, y, width, height] keeps a head patch apart from the ear it runs into, since no line divides them. Ears, brows and the tongue are parts, not markings.",
+ "markings": [
+  {"id": "head.patch.L", "part": "head.base", "side": "L", "note": "Tan around the dog's left eye, rising into the left ear's root, which hides its upper edge. Shown wherever the left eye shows."},
+  {"id": "head.patch.R", "part": "head.base", "side": "R", "note": "The mirror of head.patch.L around the right eye, as the front turnaround and the hero draw it."},
+  {"id": "back.patch.L", "part": "body.back", "side": "L", "note": "The left half of the saddle: high on the back behind the collar, down to the top of the haunch. Shown on the dog's left side (side.L, threeQuarter.L) and, smaller, at the far edge of the front view."},
+  {"id": "back.patch.R", "part": "body.back", "side": "R", "note": "The right half of the saddle: from behind the collar diagonally down the flank toward the haunch, larger than the left half. Shown on the dog's right side (the hero, the motion sheet's side poses) and at the near edge of the front view."},
+  {"id": "tail.base", "part": "tail", "side": "both", "note": "Tan at the root of the tail; the tail's curl stays cream. In the back view it joins the saddle."}
+ ],
+ "evidence": [
+  {"panel": "master.turnaround.front", "seeds": {
+   "head.patch.R": {"seed": [460, 133], "clip": [444, 122, 38, 54]},
+   "head.patch.L": {"seed": [530, 128], "clip": [514, 116, 40, 58]},
+   "back.patch.R": {"seed": [448, 244]},
+   "back.patch.L": {"seed": [547, 231]}}},
+  {"panel": "master.hero.main", "seeds": {
+   "head.patch.R": {"seed": [145, 139], "clip": [109, 128, 62, 45]},
+   "head.patch.L": {"seed": [245, 108], "clip": [226, 92, 40, 62]},
+   "back.patch.R": {"seed": [128, 282]},
+   "back.patch.L": {"seed": [294, 319]},
+   "tail.base": {"seed": [79, 333]}}},
+  {"panel": "master.turnaround.three-quarter", "seeds": {
+   "head.patch.R": {"seed": [1079, 131]},
+   "head.patch.L": {"seed": [1152, 134], "clip": [1117, 114, 55, 50]},
+   "back.patch.L": {"seed": [1177, 217]},
+   "tail.base": {"seed": [1218, 250]}}},
+  {"panel": "master.turnaround.side", "seeds": {
+   "head.patch.L": {"seed": [680, 127], "clip": [655, 112, 50, 44]},
+   "back.patch.L": {"seed": [747, 221]},
+   "tail.base": {"seed": [785, 249]}}},
+  {"panel": "master.turnaround.back", "note": "From behind, the saddle shows as one patch a little to the dog's left, curving into the tail's root. The right half lies lower on the flank and does not show from here.", "seeds": {
+   "back.patch.L": {"seed": [906, 227]}}},
+  {"panel": "motion.movement.walk", "seeds": {
+   "back.patch.R": {"seed": [66, 556]}}},
+  {"panel": "motion.key.stand", "seeds": {
+   "back.patch.L": {"seed": [1197, 282]},
+   "tail.base": {"seed": [1227, 280]}}}
+ ]
+}

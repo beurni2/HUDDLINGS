@@ -1,0 +1,2452 @@
+{
+ "_about": "Every panel of the dog's four sheets, as boxes in each sheet's pixels [x, y, width, height], with its kind, printed label, view and facing; and the boxes of the sheets' own titles and labels, which belong to no panel. crop.py reads it. Mapped by agents from the sheets, each sheet's map checked by a second agent; every choice they made is in the panel's note.",
+ "sheets": {
+  "master": [
+   {
+    "id": "master.hero.main",
+    "kind": "hero",
+    "label": "HERO VIEW",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     20,
+     12,
+     358,
+     378
+    ],
+    "tighten": false,
+    "labelBox": [
+     70,
+     394,
+     238,
+     79
+    ],
+    "note": "The dog sits facing the viewer with the head tilted slightly; two pink hearts (top left, and right of the collar) and two pairs of short orange sparkle lines (left of the head, and under the right heart) sit inside the box, and the box holds the ground shadow (tighten off). Subtitle printed under the label, inside labelBox: 'Main character illustration (reference for style and appeal)'. The head faces front (the nose midway between the eyes) with a slight roll; the body is turned a little to the viewer's right, so the tail shows on the sheet's left and the dog's right flank is in view."
+   },
+   {
+    "id": "master.turnaround.front",
+    "kind": "view",
+    "label": "Front",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     390,
+     64,
+     218,
+     225
+    ],
+    "tighten": false,
+    "labelBox": [
+     439,
+     296,
+     117,
+     30
+    ],
+    "note": "Ground shadow included (tighten off)."
+   },
+   {
+    "id": "master.turnaround.side",
+    "kind": "view",
+    "label": "Side",
+    "view": "side",
+    "facing": "left",
+    "box": [
+     620,
+     65,
+     193,
+     224
+    ],
+    "tighten": false,
+    "labelBox": [
+     660,
+     296,
+     112,
+     30
+    ],
+    "note": "Ground shadow included (tighten off). The tail tip reaches x 812 and the back view's left ear starts at x 813, so the box ends exactly at x 812 with no margin on the right."
+   },
+   {
+    "id": "master.turnaround.back",
+    "kind": "view",
+    "label": "Back",
+    "view": "back",
+    "facing": "back",
+    "box": [
+     813,
+     68,
+     203,
+     222
+    ],
+    "tighten": false,
+    "labelBox": [
+     862,
+     296,
+     116,
+     30
+    ],
+    "note": "Ground shadow included (tighten off). The left ear starts at x 813, right next to the side view's tail tip (x 812), so the box starts exactly at x 813 with no margin on the left."
+   },
+   {
+    "id": "master.turnaround.three-quarter",
+    "kind": "view",
+    "label": "Three-quarter",
+    "view": "threeQuarter",
+    "facing": "left",
+    "box": [
+     1022,
+     59,
+     234,
+     231
+    ],
+    "tighten": false,
+    "labelBox": [
+     1066,
+     296,
+     167,
+     30
+    ],
+    "note": "Ground shadow included (tighten off)."
+   },
+   {
+    "id": "master.proportion.figure",
+    "kind": "guide",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     378,
+     384,
+     176,
+     131
+    ],
+    "note": "The small front-view figure with the vertical Head/Body bracket and its printed text 'Head ~2/3' and 'Body ~1/3' inside the box; faint dashed guide lines cross it. No label under it (the section title 'PROPORTION GUIDE (CHIBI)' is in labels)."
+   },
+   {
+    "id": "master.proportion.front-silhouette",
+    "kind": "guide",
+    "label": "Front silhouette",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     556,
+     396,
+     106,
+     115
+    ],
+    "labelBox": [
+     561,
+     511,
+     95,
+     14
+    ],
+    "note": "Flat grey-brown silhouette; faint dashed guide lines (not ink) cross it."
+   },
+   {
+    "id": "master.proportion.side-silhouette",
+    "kind": "guide",
+    "label": "Side silhouette",
+    "view": "side",
+    "facing": "left",
+    "box": [
+     676,
+     396,
+     101,
+     114
+    ],
+    "labelBox": [
+     679,
+     511,
+     89,
+     14
+    ],
+    "note": "Flat grey-brown silhouette, nose to the left, tail to the right; faint dashed guide lines (not ink) cross it."
+   },
+   {
+    "id": "master.palette.cream-fur",
+    "kind": "swatch",
+    "label": "Cream Fur #FFF4E8",
+    "box": [
+     825,
+     402,
+     61,
+     65
+    ],
+    "tighten": false,
+    "labelBox": [
+     831,
+     469,
+     48,
+     45
+    ],
+    "note": "Swatch is paler than the ink threshold, so the box is hand-sized (tighten off). Label is printed over several lines (name, then hex); joined here with spaces."
+   },
+   {
+    "id": "master.palette.tan-fur",
+    "kind": "swatch",
+    "label": "Tan Fur #D9A379",
+    "box": [
+     886,
+     402,
+     63,
+     65
+    ],
+    "tighten": false,
+    "labelBox": [
+     888,
+     469,
+     55,
+     45
+    ],
+    "note": "Label is printed over several lines (name, then hex); joined here with spaces."
+   },
+   {
+    "id": "master.palette.eyes-nose",
+    "kind": "swatch",
+    "label": "Eyes / Nose #3A2314",
+    "box": [
+     949,
+     402,
+     61,
+     65
+    ],
+    "tighten": false,
+    "labelBox": [
+     945,
+     469,
+     68,
+     32
+    ],
+    "note": "Label is printed over several lines (name, then hex); joined here with spaces."
+   },
+   {
+    "id": "master.palette.blush",
+    "kind": "swatch",
+    "label": "Blush #F7B3A6",
+    "box": [
+     1011,
+     402,
+     60,
+     65
+    ],
+    "tighten": false,
+    "labelBox": [
+     1013,
+     469,
+     55,
+     32
+    ],
+    "note": "Label is printed over several lines (name, then hex); joined here with spaces."
+   },
+   {
+    "id": "master.palette.collar-blue",
+    "kind": "swatch",
+    "label": "Collar Blue #7DB7E8",
+    "box": [
+     1071,
+     402,
+     62,
+     67
+    ],
+    "tighten": false,
+    "labelBox": [
+     1072,
+     469,
+     57,
+     48
+    ],
+    "note": "Label is printed over several lines (name, then hex); joined here with spaces."
+   },
+   {
+    "id": "master.palette.gold-tag",
+    "kind": "swatch",
+    "label": "Gold Tag #F4C542",
+    "box": [
+     1133,
+     401,
+     61,
+     66
+    ],
+    "tighten": false,
+    "labelBox": [
+     1136,
+     469,
+     54,
+     32
+    ],
+    "note": "Label is printed over several lines (name, then hex); joined here with spaces."
+   },
+   {
+    "id": "master.palette.soft-shadow",
+    "kind": "swatch",
+    "label": "Soft Shadow #E8DED4",
+    "box": [
+     1195,
+     402,
+     62,
+     65
+    ],
+    "tighten": false,
+    "labelBox": [
+     1195,
+     469,
+     68,
+     33
+    ],
+    "note": "Swatch is paler than the ink threshold, so the box is hand-sized (tighten off). Label is printed over several lines (name, then hex); joined here with spaces."
+   },
+   {
+    "id": "master.feature.oversized-head",
+    "kind": "feature",
+    "label": "Oversized head",
+    "box": [
+     18,
+     566,
+     137,
+     137
+    ],
+    "tighten": false,
+    "labelBox": [
+     23,
+     703,
+     131,
+     52
+    ],
+    "note": "Close-up inside a pale circular frame (outer radius about 66 px); the box holds the whole circle (tighten off). Description printed under the label, inside labelBox: 'Head is large and round for maximum cuteness.'",
+    "view": "front",
+    "facing": "front"
+   },
+   {
+    "id": "master.feature.floppy-ears",
+    "kind": "feature",
+    "label": "Floppy ears",
+    "box": [
+     159,
+     566,
+     137,
+     137
+    ],
+    "tighten": false,
+    "labelBox": [
+     169,
+     703,
+     121,
+     52
+    ],
+    "note": "Close-up inside a pale circular frame (outer radius about 66 px); the box holds the whole circle (tighten off). Description printed under the label, inside labelBox: 'Simple droplet shape. Soft and rounded.'"
+   },
+   {
+    "id": "master.feature.large-glossy-eyes",
+    "kind": "feature",
+    "label": "Large glossy eyes",
+    "box": [
+     303,
+     565,
+     137,
+     137
+    ],
+    "tighten": false,
+    "labelBox": [
+     305,
+     703,
+     134,
+     53
+    ],
+    "note": "Close-up inside a pale circular frame (outer radius about 66 px); the box holds the whole circle (tighten off). Description printed under the label, inside labelBox: 'Big, dark brown eyes with multiple highlights.'"
+   },
+   {
+    "id": "master.feature.blush-cheeks",
+    "kind": "feature",
+    "label": "Blush cheeks",
+    "box": [
+     445,
+     566,
+     137,
+     137
+    ],
+    "tighten": false,
+    "labelBox": [
+     446,
+     703,
+     135,
+     52
+    ],
+    "note": "Close-up inside a pale circular frame (outer radius about 66 px); the box holds the whole circle (tighten off). Description printed under the label, inside labelBox: 'Soft pink blush adds warmth and charm.'"
+   },
+   {
+    "id": "master.feature.stubby-paws",
+    "kind": "feature",
+    "label": "Stubby paws",
+    "box": [
+     588,
+     566,
+     137,
+     137
+    ],
+    "tighten": false,
+    "labelBox": [
+     599,
+     703,
+     118,
+     52
+    ],
+    "note": "Close-up inside a pale circular frame (outer radius about 66 px); the box holds the whole circle (tighten off). Description printed under the label, inside labelBox: 'Short, rounded paws with simple toe lines.'"
+   },
+   {
+    "id": "master.shape.head-oval",
+    "kind": "shape",
+    "label": "Head oval (large)",
+    "box": [
+     755,
+     612,
+     125,
+     104
+    ],
+    "labelBox": [
+     781,
+     718,
+     69,
+     39
+    ],
+    "note": "Label is printed on two lines (name, then the bracketed qualifier); joined here with a space."
+   },
+   {
+    "id": "master.shape.body-bean",
+    "kind": "shape",
+    "label": "Body bean (small)",
+    "box": [
+     884,
+     640,
+     99,
+     81
+    ],
+    "labelBox": [
+     895,
+     721,
+     72,
+     36
+    ],
+    "note": "Label is printed on two lines (name, then the bracketed qualifier); joined here with a space."
+   },
+   {
+    "id": "master.shape.ear-droplet",
+    "kind": "shape",
+    "label": "Ear droplet (left/right)",
+    "box": [
+     986,
+     615,
+     78,
+     103
+    ],
+    "labelBox": [
+     990,
+     719,
+     72,
+     38
+    ],
+    "note": "Label is printed on two lines (name, then the bracketed qualifier); joined here with a space."
+   },
+   {
+    "id": "master.shape.paw-stub",
+    "kind": "shape",
+    "label": "Paw stub (with toe lines)",
+    "box": [
+     1076,
+     638,
+     77,
+     70
+    ],
+    "labelBox": [
+     1075,
+     713,
+     85,
+     37
+    ],
+    "note": "Label is printed on two lines (name, then the bracketed qualifier); joined here with a space."
+   },
+   {
+    "id": "master.shape.tail-curve",
+    "kind": "shape",
+    "label": "Tail curve (fluffy curl)",
+    "box": [
+     1168,
+     624,
+     92,
+     90
+    ],
+    "labelBox": [
+     1180,
+     716,
+     66,
+     38
+    ],
+    "note": "Label is printed on two lines (name, then the bracketed qualifier); joined here with a space."
+   },
+   {
+    "id": "master.expression.happy",
+    "kind": "expression",
+    "label": "Happy",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     18,
+     798,
+     143,
+     118
+    ],
+    "labelBox": [
+     66,
+     917,
+     47,
+     22
+    ]
+   },
+   {
+    "id": "master.expression.excited",
+    "kind": "expression",
+    "label": "Excited",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     161,
+     798,
+     133,
+     118
+    ],
+    "labelBox": [
+     202,
+     917,
+     52,
+     22
+    ],
+    "note": "Two pink excitement marks sit inside the box at top left. The right ear reaches x 293, where the Laughing head's lowest motion line starts (x 291), so a 3 x 5 px tip of that orange line (x 291-293, y 827-831) is unavoidably inside this box at the top right."
+   },
+   {
+    "id": "master.expression.laughing",
+    "kind": "expression",
+    "label": "Laughing",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     294,
+     798,
+     140,
+     118
+    ],
+    "labelBox": [
+     334,
+     916,
+     64,
+     23
+    ],
+    "note": "Three orange motion lines sit inside the box at top left. The box starts at x 294, right after the Excited head's ear (x 293), so the leftmost 3 px of the lowest motion line (x 291-293) fall outside it, inside the Excited box."
+   },
+   {
+    "id": "master.expression.curious",
+    "kind": "expression",
+    "label": "Curious",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     434,
+     796,
+     129,
+     120
+    ],
+    "labelBox": [
+     469,
+     917,
+     54,
+     22
+    ],
+    "note": "Head tilted (its left side, viewer's right, is lower); a blue question mark sits inside the box at top right."
+   },
+   {
+    "id": "master.expression.sleepy",
+    "kind": "expression",
+    "label": "Sleepy",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     563,
+     798,
+     136,
+     118
+    ],
+    "labelBox": [
+     604,
+     917,
+     49,
+     22
+    ],
+    "note": "Lying down with the chin on both front paws, eyes closed; a pale ground shadow is under it."
+   },
+   {
+    "id": "master.expression.surprised",
+    "kind": "expression",
+    "label": "Surprised",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     699,
+     798,
+     134,
+     118
+    ],
+    "labelBox": [
+     736,
+     917,
+     66,
+     22
+    ],
+    "note": "Yellow surprise marks sit inside the box at top right."
+   },
+   {
+    "id": "master.expression.winking",
+    "kind": "expression",
+    "label": "Winking",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     834,
+     798,
+     141,
+     118
+    ],
+    "labelBox": [
+     878,
+     917,
+     57,
+     22
+    ],
+    "note": "The dog's left eye (viewer's right) is closed in a wink."
+   },
+   {
+    "id": "master.expression.cheeky",
+    "kind": "expression",
+    "label": "Cheeky",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     975,
+     798,
+     140,
+     118
+    ],
+    "labelBox": [
+     1022,
+     917,
+     53,
+     22
+    ],
+    "note": "Tongue out, the dog's left eye (viewer's right) closed."
+   },
+   {
+    "id": "master.expression.content",
+    "kind": "expression",
+    "label": "Content",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     1115,
+     798,
+     145,
+     118
+    ],
+    "labelBox": [
+     1157,
+     917,
+     58,
+     22
+    ],
+    "note": "Both eyes closed in happy arcs, small smile."
+   }
+  ],
+  "rigging": [
+   {
+    "id": "rigging.part.head-base",
+    "kind": "part",
+    "label": "Head base",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     23,
+     141,
+     195,
+     141
+    ],
+    "labelBox": [
+     86,
+     285,
+     70,
+     20
+    ],
+    "note": "The head base drawn complete with its ears, eyes, nose and open mouth, front view. The head sits in a dashed card; the box stops just inside that dashed frame so the crop holds only the drawing."
+   },
+   {
+    "id": "rigging.part.ear-left",
+    "kind": "part",
+    "label": "Left ear (flipped)",
+    "box": [
+     223,
+     156,
+     82,
+     112
+    ],
+    "labelBox": [
+     240,
+     274,
+     58,
+     38
+    ],
+    "note": "Drawn as the mirror image of rigging.part.ear-right, as its label says (flipped): its tip curls toward the sheet's right. This sheet names left and right as seen on the sheet: the pivot guide puts the left ear and left leg pivots on the sheet's left."
+   },
+   {
+    "id": "rigging.part.ear-right",
+    "kind": "part",
+    "label": "Right ear",
+    "box": [
+     338,
+     156,
+     84,
+     110
+    ],
+    "labelBox": [
+     343,
+     274,
+     62,
+     22
+    ]
+   },
+   {
+    "id": "rigging.part.body-front",
+    "kind": "part",
+    "label": "Front body / Chest",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     430,
+     136,
+     164,
+     143
+    ],
+    "labelBox": [
+     471,
+     283,
+     79,
+     34
+    ],
+    "note": "Front body without the head, worn with the collar and heart tag."
+   },
+   {
+    "id": "rigging.part.body-back",
+    "kind": "part",
+    "label": "Back body",
+    "box": [
+     602,
+     157,
+     181,
+     120
+    ],
+    "labelBox": [
+     643,
+     283,
+     69,
+     22
+    ],
+    "note": "The hindquarters with two hind paws, a marking patch on top and the tail curling up at the sheet's right, all inside the box. The sheet does not make clear whether it is seen from the front (the layer behind the front body) or from behind, so no view or facing is given. In the assembled front view and the pivot guide the tail sits at the sheet's left, while here it rises at the sheet's right."
+   },
+   {
+    "id": "rigging.part.paw-front-left",
+    "kind": "part",
+    "label": "Left paw (front)",
+    "box": [
+     30,
+     318,
+     77,
+     82
+    ],
+    "labelBox": [
+     43,
+     400,
+     60,
+     37
+    ]
+   },
+   {
+    "id": "rigging.part.paw-front-right",
+    "kind": "part",
+    "label": "Right paw (front)",
+    "box": [
+     139,
+     318,
+     76,
+     81
+    ],
+    "labelBox": [
+     143,
+     400,
+     68,
+     37
+    ]
+   },
+   {
+    "id": "rigging.part.paw-back-left-1",
+    "kind": "part",
+    "label": "Back paw (left)",
+    "box": [
+     227,
+     333,
+     68,
+     66
+    ],
+    "labelBox": [
+     271,
+     400,
+     64,
+     37
+    ],
+    "note": "The sheet draws two separate back paws above the one label 'Back paw (left)'; this is the first (left on the sheet), rigging.part.paw-back-left-2 is the second. Both panels share the label box."
+   },
+   {
+    "id": "rigging.part.paw-back-left-2",
+    "kind": "part",
+    "label": "Back paw (left)",
+    "box": [
+     305,
+     338,
+     66,
+     60
+    ],
+    "labelBox": [
+     271,
+     400,
+     64,
+     37
+    ],
+    "note": "The second of the two separate back paws drawn above the one label 'Back paw (left)' (right on the sheet); see rigging.part.paw-back-left-1. Both panels share the label box."
+   },
+   {
+    "id": "rigging.part.paw-back-right",
+    "kind": "part",
+    "label": "Back paw (right)",
+    "box": [
+     391,
+     333,
+     67,
+     66
+    ],
+    "labelBox": [
+     389,
+     401,
+     65,
+     37
+    ]
+   },
+   {
+    "id": "rigging.part.tail",
+    "kind": "part",
+    "label": "Tail",
+    "box": [
+     493,
+     324,
+     80,
+     75
+    ],
+    "labelBox": [
+     518,
+     401,
+     28,
+     19
+    ]
+   },
+   {
+    "id": "rigging.part.body-patch",
+    "kind": "part",
+    "label": "Body patch (separate, if needed)",
+    "box": [
+     641,
+     342,
+     72,
+     58
+    ],
+    "tighten": false,
+    "labelBox": [
+     617,
+     400,
+     129,
+     36
+    ],
+    "note": "Optional part, in a dashed card titled 'Optional (body patch)' (that title is in the sheet's labels). The patch's lower edge fades softly into the paper, so the box is not tightened and keeps the whole fade."
+   },
+   {
+    "id": "rigging.part.eye-open",
+    "kind": "part",
+    "label": "Eye open (left/right)",
+    "box": [
+     32,
+     470,
+     58,
+     64
+    ],
+    "labelBox": [
+     29,
+     535,
+     65,
+     35
+    ],
+    "note": "One eye drawing used for both sides."
+   },
+   {
+    "id": "rigging.part.eye-closed",
+    "kind": "part",
+    "label": "Eye closed (left/right)",
+    "box": [
+     118,
+     480,
+     70,
+     50
+    ],
+    "labelBox": [
+     119,
+     535,
+     66,
+     35
+    ],
+    "note": "One closed-eye arc used for both sides."
+   },
+   {
+    "id": "rigging.part.nose",
+    "kind": "part",
+    "label": "Nose",
+    "box": [
+     215,
+     480,
+     52,
+     50
+    ],
+    "labelBox": [
+     222,
+     535,
+     36,
+     18
+    ]
+   },
+   {
+    "id": "rigging.part.mouth-smile",
+    "kind": "part",
+    "label": "Mouth smile (closed mouth)",
+    "box": [
+     290,
+     480,
+     68,
+     50
+    ],
+    "labelBox": [
+     282,
+     535,
+     90,
+     34
+    ]
+   },
+   {
+    "id": "rigging.part.mouth-open",
+    "kind": "part",
+    "label": "Mouth open (happy)",
+    "box": [
+     380,
+     476,
+     68,
+     55
+    ],
+    "labelBox": [
+     384,
+     535,
+     76,
+     36
+    ]
+   },
+   {
+    "id": "rigging.part.blush-left",
+    "kind": "part",
+    "label": "Blush spots (left/right)",
+    "box": [
+     476,
+     488,
+     41,
+     37
+    ],
+    "labelBox": [
+     486,
+     535,
+     71,
+     36
+    ],
+    "note": "The pair of blush spots is drawn as two separate ovals above one label; this is the one on the sheet's left (left and right here are sheet positions, the sheet does not say which cheek each belongs to). Shares the label box with rigging.part.blush-right."
+   },
+   {
+    "id": "rigging.part.blush-right",
+    "kind": "part",
+    "label": "Blush spots (left/right)",
+    "box": [
+     523,
+     488,
+     41,
+     37
+    ],
+    "labelBox": [
+     486,
+     535,
+     71,
+     36
+    ],
+    "note": "The blush oval on the sheet's right, the second of the pair above one label; see rigging.part.blush-left."
+   },
+   {
+    "id": "rigging.part.collar",
+    "kind": "part",
+    "label": "Collar",
+    "box": [
+     580,
+     468,
+     107,
+     48
+    ],
+    "labelBox": [
+     610,
+     531,
+     43,
+     18
+    ]
+   },
+   {
+    "id": "rigging.part.heart-tag",
+    "kind": "part",
+    "label": "Heart tag",
+    "box": [
+     698,
+     470,
+     54,
+     57
+    ],
+    "labelBox": [
+     693,
+     531,
+     64,
+     18
+    ]
+   },
+   {
+    "id": "rigging.pivot.guide",
+    "kind": "guide",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     806,
+     132,
+     462,
+     452
+    ],
+    "note": "Front view of the dog with nine coloured pivot dots, dashed leader lines and their printed names inside the box: Head pivot (keep mostly rigid), Left and Right ear pivot (swing softly), Tail pivot (small wag arc), Tag pivot (lag slightly), Left and Right front leg pivot and Left and Right back leg pivot (simple hinge). Left and right are as seen on the sheet (the left ear and left leg pivots are on the sheet's left). Section title 'Skeleton / Pivot guide' and its subtitle are sheet labels."
+   },
+   {
+    "id": "rigging.draw-order.layer-stack",
+    "kind": "text",
+    "box": [
+     22,
+     660,
+     252,
+     266
+    ],
+    "note": "The numbered layer list from 12 (Tail, back) to 1 (Facial features, front), with a dashed divider between 6 and 5. Section title 'Draw order / Layer stack (front view)' and its subtitle are sheet labels."
+   },
+   {
+    "id": "rigging.draw-order.assembled-front",
+    "kind": "assembly",
+    "label": "Assembled (front view)",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     276,
+     660,
+     224,
+     236
+    ],
+    "labelBox": [
+     319,
+     904,
+     150,
+     21
+    ],
+    "note": "All parts assembled in the draw order, sitting front view, with its ground shadow."
+   },
+   {
+    "id": "rigging.rules.animation",
+    "kind": "text",
+    "box": [
+     532,
+     662,
+     322,
+     276
+    ],
+    "note": "The five numbered animation rules: Keep head and body mostly rigid; Ears swing softly; Tag lags slightly; Tail has a small wag arc; Keep motions simple and cute. Section title 'Animation rules' and its subtitle are sheet labels."
+   },
+   {
+    "id": "rigging.do-avoid.do",
+    "kind": "text",
+    "box": [
+     876,
+     654,
+     190,
+     282
+    ],
+    "note": "The Do column: its green 'Do' header pill with a tick sits at the top inside the box, then five ticked rules, each with a small thumbnail of the dog to its right (inside the box)."
+   },
+   {
+    "id": "rigging.do-avoid.avoid",
+    "kind": "text",
+    "box": [
+     1066,
+     654,
+     200,
+     290
+    ],
+    "note": "The Avoid column: its red 'Avoid' header pill with a cross sits at the top inside the box, then five crossed rules, each with a small thumbnail of an off-model dog to its right (inside the box); those thumbnails show what not to draw."
+   }
+  ],
+  "motion": [
+   {
+    "id": "motion.notes.general",
+    "kind": "text",
+    "box": [
+     626,
+     18,
+     636,
+     106
+    ],
+    "note": "The whole General notes card: its heading 'GENERAL NOTES (for developers / animators)' and seven bullets in two columns. Text: Keep the same design and simple shapes as the reference. / Side view is easiest for motion and most animations. / Keep paws as simple stubs (no individual toes). / Use small squash/stretch only (stay cute and consistent). / Keep forms clean and readable. / Maintain the same proportions, colors and expressions. / Use simple arcs for motion. Avoid complex details."
+   },
+   {
+    "id": "motion.key.idle-breathing",
+    "kind": "pose",
+    "label": "Idle / breathing",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     30,
+     170,
+     178,
+     187
+    ],
+    "labelBox": [
+     55,
+     357,
+     115,
+     24
+    ],
+    "note": "Breathing marks (small curved lines) at both hips sit inside the box."
+   },
+   {
+    "id": "motion.key.blink",
+    "kind": "pose",
+    "label": "Blink",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     208,
+     170,
+     176,
+     187
+    ],
+    "labelBox": [
+     271,
+     357,
+     41,
+     24
+    ],
+    "note": "Eyes closed; two small yellow sparkle marks beside the ear on the sheet's right sit inside the box."
+   },
+   {
+    "id": "motion.key.head-tilt-left",
+    "kind": "pose",
+    "label": "Head tilt (left)",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     384,
+     170,
+     174,
+     187
+    ],
+    "labelBox": [
+     422,
+     357,
+     109,
+     24
+    ],
+    "note": "The head tilts toward the sheet's left; red motion marks above the ear on the sheet's left sit inside the box."
+   },
+   {
+    "id": "motion.key.head-tilt-right",
+    "kind": "pose",
+    "label": "Head tilt (right)",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     565,
+     170,
+     170,
+     187
+    ],
+    "labelBox": [
+     584,
+     357,
+     121,
+     25
+    ],
+    "note": "The head tilts toward the sheet's right; red motion marks above the ear on the sheet's right sit inside the box."
+   },
+   {
+    "id": "motion.key.ear-twitch",
+    "kind": "pose",
+    "label": "Ear twitch",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     737,
+     170,
+     168,
+     187
+    ],
+    "labelBox": [
+     784,
+     357,
+     79,
+     24
+    ],
+    "note": "Twitch marks above both ears sit inside the box."
+   },
+   {
+    "id": "motion.key.sit",
+    "kind": "pose",
+    "label": "Sit",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     905,
+     170,
+     160,
+     187
+    ],
+    "labelBox": [
+     976,
+     358,
+     26,
+     23
+    ]
+   },
+   {
+    "id": "motion.key.stand",
+    "kind": "pose",
+    "label": "Stand",
+    "view": "threeQuarter",
+    "facing": "left",
+    "box": [
+     1065,
+     170,
+     193,
+     187
+    ],
+    "labelBox": [
+     1144,
+     358,
+     48,
+     23
+    ],
+    "note": "Face almost to the front, body turned so the rump and tail are on the right of the sheet; facing is left by the body."
+   },
+   {
+    "id": "motion.movement.walk",
+    "kind": "pose",
+    "label": "Walk (side)",
+    "view": "side",
+    "facing": "right",
+    "box": [
+     22,
+     444,
+     175,
+     177
+    ],
+    "labelBox": [
+     61,
+     622,
+     88,
+     25
+    ],
+    "note": "Unavoidable overlap: the walk dog's nose reaches x 195 (y 528-543) while Run's lowest-but-one speed line spans x 183-209 (y 586-587), so the left 14 px of that speed line (x 183-196) sit inside this box at its lower right edge."
+   },
+   {
+    "id": "motion.movement.run",
+    "kind": "pose",
+    "label": "Run (side)",
+    "view": "side",
+    "facing": "right",
+    "box": [
+     196,
+     444,
+     201,
+     177
+    ],
+    "labelBox": [
+     261,
+     622,
+     78,
+     25
+    ],
+    "note": "Speed lines behind the dog sit inside the box, except that the box starts at x 196 so as not to take in the walk dog's nose (which reaches x 195): the left 13 px of the speed line at y 586-587 (x 183-195) fall outside it, inside Walk's box."
+   },
+   {
+    "id": "motion.movement.jump",
+    "kind": "pose",
+    "label": "Jump",
+    "view": "side",
+    "facing": "right",
+    "box": [
+     398,
+     444,
+     166,
+     177
+    ],
+    "labelBox": [
+     455,
+     622,
+     47,
+     25
+    ],
+    "note": "Motion lines under the tail sit inside the box."
+   },
+   {
+    "id": "motion.movement.soft-landing",
+    "kind": "pose",
+    "label": "Soft landing",
+    "view": "threeQuarter",
+    "facing": "right",
+    "box": [
+     564,
+     444,
+     180,
+     177
+    ],
+    "labelBox": [
+     608,
+     622,
+     98,
+     26
+    ],
+    "note": "Body side-on, head turned toward the viewer with eyes closed; impact lines at the rear and front paws sit inside the box."
+   },
+   {
+    "id": "motion.movement.curious-lean",
+    "kind": "pose",
+    "label": "Curious lean",
+    "view": "side",
+    "facing": "right",
+    "box": [
+     752,
+     482,
+     170,
+     140
+    ],
+    "labelBox": [
+     780,
+     622,
+     97,
+     25
+    ],
+    "note": "The blue question mark above the head sits inside the box. Unavoidable overlap: the outline of the far ear (on the right of the head) reaches x 921, where Happy bounce's ear on the sheet's left reaches x 920 (y 470-479), so a 2 px sliver of this ear's outline (x 920-921, y 564-582) also falls inside Happy bounce's box. This box starts at y 482 so that the happy ear stays out of it."
+   },
+   {
+    "id": "motion.movement.happy-bounce",
+    "kind": "pose",
+    "label": "Happy bounce",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     920,
+     424,
+     150,
+     177
+    ],
+    "labelBox": [
+     948,
+     622,
+     110,
+     26
+    ],
+    "note": "Front view, although the section is titled side view. Bounce lines under the paws sit inside the box. Unavoidable overlap: the ear on the sheet's left reaches x 920 (y 470-479) while the outline of Curious lean's far ear reaches x 921, so a 2 px sliver of that ear's outline (x 920-921, y 564-582) sits at this box's left edge."
+   },
+   {
+    "id": "motion.movement.envelope-carry",
+    "kind": "pose",
+    "label": "Envelope carry",
+    "view": "side",
+    "facing": "right",
+    "box": [
+     1071,
+     444,
+     186,
+     177
+    ],
+    "labelBox": [
+     1119,
+     622,
+     113,
+     27
+    ],
+    "note": "The envelope held in the mouth and the motion lines behind the head sit inside the box."
+   },
+   {
+    "id": "motion.walk.contact",
+    "kind": "cycle",
+    "label": "Contact",
+    "view": "side",
+    "facing": "right",
+    "box": [
+     22,
+     722,
+     114,
+     110
+    ],
+    "labelBox": [
+     46,
+     832,
+     55,
+     46
+    ],
+    "note": "Frame 1 of 4; the label box also holds the number badge 1 above the word."
+   },
+   {
+    "id": "motion.walk.passing",
+    "kind": "cycle",
+    "label": "Passing",
+    "view": "side",
+    "facing": "right",
+    "box": [
+     136,
+     722,
+     107,
+     110
+    ],
+    "labelBox": [
+     160,
+     832,
+     52,
+     47
+    ],
+    "note": "Frame 2 of 4; the label box also holds the number badge 2 above the word."
+   },
+   {
+    "id": "motion.walk.lift",
+    "kind": "cycle",
+    "label": "Lift",
+    "view": "side",
+    "facing": "right",
+    "box": [
+     243,
+     722,
+     112,
+     110
+    ],
+    "labelBox": [
+     281,
+     832,
+     29,
+     46
+    ],
+    "note": "Frame 3 of 4; the label box also holds the number badge 3 above the word."
+   },
+   {
+    "id": "motion.walk.reach",
+    "kind": "cycle",
+    "label": "Reach",
+    "view": "side",
+    "facing": "right",
+    "box": [
+     355,
+     722,
+     114,
+     110
+    ],
+    "labelBox": [
+     387,
+     832,
+     44,
+     46
+    ],
+    "note": "Frame 4 of 4; the label box also holds the number badge 4 above the word."
+   },
+   {
+    "id": "motion.run.gather",
+    "kind": "cycle",
+    "label": "Gather",
+    "view": "side",
+    "facing": "right",
+    "box": [
+     497,
+     722,
+     118,
+     110
+    ],
+    "labelBox": [
+     526,
+     832,
+     51,
+     47
+    ],
+    "note": "Frame 1 of 4; the label box also holds the number badge 1 above the word."
+   },
+   {
+    "id": "motion.run.push",
+    "kind": "cycle",
+    "label": "Push",
+    "view": "side",
+    "facing": "right",
+    "box": [
+     615,
+     722,
+     133,
+     110
+    ],
+    "labelBox": [
+     655,
+     832,
+     37,
+     47
+    ],
+    "note": "Frame 2 of 4; the label box also holds the number badge 2 above the word."
+   },
+   {
+    "id": "motion.run.airborne",
+    "kind": "cycle",
+    "label": "Airborne",
+    "view": "side",
+    "facing": "right",
+    "box": [
+     748,
+     722,
+     152,
+     110
+    ],
+    "labelBox": [
+     786,
+     832,
+     63,
+     47
+    ],
+    "note": "Frame 3 of 4; the label box also holds the number badge 3 above the word."
+   },
+   {
+    "id": "motion.run.land",
+    "kind": "cycle",
+    "label": "Land",
+    "view": "side",
+    "facing": "right",
+    "box": [
+     900,
+     722,
+     127,
+     110
+    ],
+    "labelBox": [
+     945,
+     832,
+     38,
+     47
+    ],
+    "note": "Frame 4 of 4; the label box also holds the number badge 4 above the word."
+   },
+   {
+    "id": "motion.extra.squash-stretch",
+    "kind": "guide",
+    "label": "Use small squash / stretch only. Keep the shape simple and consistent.",
+    "view": "side",
+    "facing": "right",
+    "box": [
+     1054,
+     710,
+     114,
+     96
+    ],
+    "labelBox": [
+     1177,
+     718,
+     84,
+     74
+    ],
+    "note": "Extra notes card. The picture is a small standing dog with a red up arrow behind it and a red down arrow in front of it; the note's text sits to the right of the picture, not under it, and is in labelBox."
+   },
+   {
+    "id": "motion.extra.paw-stubs",
+    "kind": "part",
+    "label": "Paws are simple stubs. No individual toes.",
+    "box": [
+     1058,
+     816,
+     92,
+     48
+    ],
+    "labelBox": [
+     1160,
+     815,
+     100,
+     45
+    ],
+    "note": "Extra notes card. The picture is two paw stubs; the note's text sits to the right of the picture, not under it, and is in labelBox."
+   },
+   {
+    "id": "motion.extra.simple-arcs",
+    "kind": "guide",
+    "label": "Use simple arcs for motion.",
+    "box": [
+     1058,
+     868,
+     92,
+     46
+    ],
+    "labelBox": [
+     1161,
+     878,
+     82,
+     34
+    ],
+    "note": "Extra notes card. The picture is two orange arc arrows; the note's text sits to the right of the picture, not under it, and is in labelBox."
+   }
+  ],
+  "expressions": [
+   {
+    "id": "expressions.expression.happy",
+    "kind": "expression",
+    "label": "Happy",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     14,
+     60,
+     262,
+     194
+    ],
+    "labelBox": [
+     116,
+     254,
+     62,
+     23
+    ],
+    "note": "head rolled about 12 degrees counter-clockwise on the sheet (its left side on the sheet is lower)"
+   },
+   {
+    "id": "expressions.expression.excited",
+    "kind": "expression",
+    "label": "Excited",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     277,
+     60,
+     248,
+     194
+    ],
+    "labelBox": [
+     374,
+     254,
+     69,
+     20
+    ],
+    "note": "eyes closed in happy arcs; head rolled about 13 degrees counter-clockwise on the sheet (its left side on the sheet is lower); two red excitement marks at the upper left sit inside the box"
+   },
+   {
+    "id": "expressions.expression.laughing",
+    "kind": "expression",
+    "label": "Laughing",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     526,
+     60,
+     240,
+     194
+    ],
+    "labelBox": [
+     611,
+     254,
+     86,
+     23
+    ],
+    "note": "eyes closed in happy arcs; head rolled about 20 degrees counter-clockwise on the sheet (its left side on the sheet is lower); one paw raised at the mouth; three blue laugh lines at the upper left sit inside the box"
+   },
+   {
+    "id": "expressions.expression.curious",
+    "kind": "expression",
+    "label": "Curious",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     767,
+     52,
+     234,
+     202
+    ],
+    "labelBox": [
+     842,
+     254,
+     71,
+     20
+    ],
+    "note": "head rolled about 21 degrees clockwise on the sheet (its right side on the sheet is lower) and turned very slightly toward the sheet's left; a blue question mark above the head sits inside the box"
+   },
+   {
+    "id": "expressions.expression.sleepy",
+    "kind": "expression",
+    "label": "Sleepy",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     1002,
+     78,
+     252,
+     176
+    ],
+    "labelBox": [
+     1099,
+     254,
+     65,
+     23
+    ],
+    "note": "lying down, chin on the front paws, eyes closed, with a soft ground shadow; head rolled about 10 degrees clockwise on the sheet (its right side on the sheet is lower); three blue z marks at the upper right sit inside the box"
+   },
+   {
+    "id": "expressions.expression.surprised",
+    "kind": "expression",
+    "label": "Surprised",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     20,
+     279,
+     252,
+     191
+    ],
+    "labelBox": [
+     102,
+     470,
+     89,
+     24
+    ],
+    "note": "two yellow surprise marks at the upper left sit inside the box"
+   },
+   {
+    "id": "expressions.expression.shy",
+    "kind": "expression",
+    "label": "Shy",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     274,
+     279,
+     247,
+     191
+    ],
+    "labelBox": [
+     384,
+     470,
+     36,
+     25
+    ],
+    "note": "head turned slightly toward the sheet's left and rolled about 9 degrees counter-clockwise on the sheet; paws held up under the chin; pink blush on the cheeks"
+   },
+   {
+    "id": "expressions.expression.proud",
+    "kind": "expression",
+    "label": "Proud",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     521,
+     279,
+     245,
+     191
+    ],
+    "labelBox": [
+     626,
+     471,
+     55,
+     21
+    ],
+    "note": "chin raised, eyes closed in happy arcs; head rolled about 11 degrees counter-clockwise on the sheet (its left side on the sheet is lower); two yellow sparkles at the upper left and two small yellow marks at the right sit inside the box"
+   },
+   {
+    "id": "expressions.expression.sad",
+    "kind": "expression",
+    "label": "Sad",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     766,
+     279,
+     239,
+     191
+    ],
+    "labelBox": [
+     863,
+     472,
+     37,
+     20
+    ],
+    "note": "teary eyes; R3: the Sad face is never drawn or used"
+   },
+   {
+    "id": "expressions.expression.mischievous",
+    "kind": "expression",
+    "label": "Mischievous",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     1005,
+     279,
+     252,
+     192
+    ],
+    "labelBox": [
+     1088,
+     472,
+     111,
+     20
+    ],
+    "note": "winking (the eye on the sheet's left is closed); head turned toward the sheet's right: the nose sits about 65% of the way from the left eye to the right eye, against 42-58% in the other heads on this sheet and 24% (76% mirrored) in the master sheet's Three-quarter view; about halfway to three-quarter, so it is kept as a front view; two red marks at the upper right sit inside the box"
+   },
+   {
+    "id": "expressions.eyes.open",
+    "kind": "eyes",
+    "label": "Open (normal)",
+    "box": [
+     32,
+     552,
+     112,
+     62
+    ],
+    "labelBox": [
+     57,
+     619,
+     63,
+     38
+    ]
+   },
+   {
+    "id": "expressions.eyes.happy-crescent",
+    "kind": "eyes",
+    "label": "Happy crescent",
+    "box": [
+     154,
+     552,
+     108,
+     62
+    ],
+    "labelBox": [
+     174,
+     619,
+     63,
+     35
+    ]
+   },
+   {
+    "id": "expressions.eyes.closed",
+    "kind": "eyes",
+    "label": "Closed",
+    "box": [
+     270,
+     552,
+     96,
+     62
+    ],
+    "labelBox": [
+     293,
+     619,
+     51,
+     18
+    ]
+   },
+   {
+    "id": "expressions.eyes.sleepy-half-lid",
+    "kind": "eyes",
+    "label": "Sleepy half-lid",
+    "box": [
+     380,
+     552,
+     106,
+     62
+    ],
+    "labelBox": [
+     407,
+     619,
+     52,
+     35
+    ]
+   },
+   {
+    "id": "expressions.eyes.surprised-round",
+    "kind": "eyes",
+    "label": "Surprised round",
+    "box": [
+     500,
+     549,
+     112,
+     65
+    ],
+    "labelBox": [
+     524,
+     619,
+     70,
+     35
+    ]
+   },
+   {
+    "id": "expressions.eyes.side-glance",
+    "kind": "eyes",
+    "label": "Side glance (left / right)",
+    "box": [
+     634,
+     549,
+     114,
+     65
+    ],
+    "labelBox": [
+     647,
+     619,
+     88,
+     38
+    ],
+    "note": "both pupils sit toward the sheet's right; the label says the state serves either side"
+   },
+   {
+    "id": "expressions.mouth.small-smile",
+    "kind": "mouth",
+    "label": "Small smile",
+    "box": [
+     788,
+     552,
+     64,
+     62
+    ],
+    "labelBox": [
+     799,
+     619,
+     42,
+     35
+    ],
+    "note": "drawn with the nose"
+   },
+   {
+    "id": "expressions.mouth.open-happy",
+    "kind": "mouth",
+    "label": "Open happy",
+    "box": [
+     880,
+     552,
+     76,
+     64
+    ],
+    "labelBox": [
+     895,
+     619,
+     47,
+     38
+    ],
+    "note": "drawn with the nose"
+   },
+   {
+    "id": "expressions.mouth.laughing",
+    "kind": "mouth",
+    "label": "Laughing",
+    "box": [
+     976,
+     552,
+     85,
+     64
+    ],
+    "labelBox": [
+     986,
+     620,
+     68,
+     21
+    ],
+    "note": "drawn with the nose"
+   },
+   {
+    "id": "expressions.mouth.tiny-o",
+    "kind": "mouth",
+    "label": "Tiny o",
+    "box": [
+     1094,
+     552,
+     40,
+     62
+    ],
+    "labelBox": [
+     1092,
+     621,
+     48,
+     20
+    ],
+    "note": "drawn with the nose"
+   },
+   {
+    "id": "expressions.mouth.pout",
+    "kind": "mouth",
+    "label": "Pout",
+    "box": [
+     1185,
+     552,
+     45,
+     48
+    ],
+    "labelBox": [
+     1189,
+     621,
+     38,
+     17
+    ],
+    "note": "drawn with the nose; R3: the Pout face is never drawn or used"
+   },
+   {
+    "id": "expressions.ears.neutral",
+    "kind": "ears",
+    "label": "Neutral (default)",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     16,
+     730,
+     150,
+     108
+    ],
+    "labelBox": [
+     60,
+     853,
+     64,
+     37
+    ],
+    "note": "head only, drawn without eyes, nose or mouth"
+   },
+   {
+    "id": "expressions.ears.lifted-slightly",
+    "kind": "ears",
+    "label": "Lifted slightly",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     166,
+     735,
+     146,
+     102
+    ],
+    "labelBox": [
+     189,
+     853,
+     101,
+     22
+    ],
+    "note": "head only, drawn without eyes, nose or mouth; this drawing's right ear tip and the One ear perked drawing's left ear interleave in sheet columns 310-311, so the box keeps its whole ear and its right edge holds a 2 px sliver of the neighbour's ear outline (rows 802-817)"
+   },
+   {
+    "id": "expressions.ears.one-ear-perked",
+    "kind": "ears",
+    "label": "One ear perked (left or right)",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     310,
+     722,
+     139,
+     114
+    ],
+    "labelBox": [
+     327,
+     853,
+     115,
+     38
+    ],
+    "note": "head only, drawn without eyes, nose or mouth; the ear on the sheet's right is perked; this drawing's left ear and the Lifted slightly drawing's right ear tip interleave in sheet columns 310-311, so the box keeps its whole ear and its left edge holds a 2 px sliver of the neighbour's ear tip (rows 771-786)"
+   },
+   {
+    "id": "expressions.ears.both-drooped",
+    "kind": "ears",
+    "label": "Both drooped (lower)",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     449,
+     735,
+     160,
+     102
+    ],
+    "labelBox": [
+     483,
+     853,
+     99,
+     37
+    ],
+    "note": "head only, drawn without eyes, nose or mouth; R3: drooped ears for sorrow are never drawn or used"
+   },
+   {
+    "id": "expressions.assembly.happy",
+    "kind": "assembly",
+    "label": "Happy (open eyes + open mouth + neutral ears)",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     620,
+     736,
+     164,
+     122
+    ],
+    "labelBox": [
+     631,
+     859,
+     148,
+     54
+    ]
+   },
+   {
+    "id": "expressions.assembly.sleepy",
+    "kind": "assembly",
+    "label": "Sleepy (half-lid eyes + small smile + drooped ears)",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     784,
+     736,
+     161,
+     122
+    ],
+    "labelBox": [
+     790,
+     859,
+     152,
+     54
+    ],
+    "note": "the label pairs this face with drooped ears; R3 bans drooped ears for sorrow, so whether they may serve sleepiness needs a decision"
+   },
+   {
+    "id": "expressions.assembly.surprised",
+    "kind": "assembly",
+    "label": "Surprised (round eyes + tiny o + lifted ears)",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     945,
+     734,
+     155,
+     124
+    ],
+    "labelBox": [
+     966,
+     859,
+     117,
+     54
+    ],
+    "note": "small yellow surprise marks at both upper corners sit inside the box"
+   },
+   {
+    "id": "expressions.assembly.mischievous",
+    "kind": "assembly",
+    "label": "Mischievous (wink + open mouth + one ear perked)",
+    "view": "front",
+    "facing": "front",
+    "box": [
+     1100,
+     723,
+     152,
+     135
+    ],
+    "labelBox": [
+     1125,
+     859,
+     119,
+     55
+    ],
+    "note": "winking (the eye on the sheet's left is closed); head turned slightly toward the sheet's right, as in the Mischievous expression (nose about 61% of the way from the left eye to the right eye), kept as a front view; the perked ear rises into the card's green header band, so the top rows of the crop show the band's pale green behind the ear"
+   }
+  ]
+ },
+ "labels": {
+  "master": [
+   [
+    396,
+    20,
+    275,
+    32
+   ],
+   [
+    964,
+    12,
+    290,
+    40
+   ],
+   [
+    396,
+    349,
+    236,
+    27
+   ],
+   [
+    648,
+    351,
+    144,
+    34
+   ],
+   [
+    837,
+    354,
+    148,
+    25
+   ],
+   [
+    38,
+    536,
+    154,
+    25
+   ],
+   [
+    215,
+    537,
+    226,
+    20
+   ],
+   [
+    771,
+    549,
+    261,
+    25
+   ],
+   [
+    771,
+    576,
+    374,
+    24
+   ],
+   [
+    39,
+    774,
+    324,
+    24
+   ]
+  ],
+  "rigging": [
+   [
+    18,
+    8,
+    573,
+    62
+   ],
+   [
+    598,
+    12,
+    284,
+    50
+   ],
+   [
+    928,
+    18,
+    320,
+    40
+   ],
+   [
+    18,
+    78,
+    45,
+    45
+   ],
+   [
+    72,
+    84,
+    398,
+    27
+   ],
+   [
+    72,
+    110,
+    440,
+    19
+   ],
+   [
+    614,
+    321,
+    133,
+    19
+   ],
+   [
+    804,
+    78,
+    44,
+    45
+   ],
+   [
+    856,
+    84,
+    213,
+    27
+   ],
+   [
+    857,
+    110,
+    324,
+    19
+   ],
+   [
+    18,
+    605,
+    45,
+    45
+   ],
+   [
+    72,
+    611,
+    350,
+    28
+   ],
+   [
+    72,
+    637,
+    429,
+    20
+   ],
+   [
+    525,
+    606,
+    45,
+    44
+   ],
+   [
+    581,
+    612,
+    147,
+    23
+   ],
+   [
+    580,
+    636,
+    269,
+    16
+   ],
+   [
+    877,
+    605,
+    45,
+    45
+   ],
+   [
+    931,
+    609,
+    104,
+    23
+   ],
+   [
+    931,
+    634,
+    305,
+    20
+   ]
+  ],
+  "motion": [
+   [
+    24,
+    19,
+    547,
+    56
+   ],
+   [
+    42,
+    75,
+    531,
+    33
+   ],
+   [
+    24,
+    127,
+    295,
+    36
+   ],
+   [
+    38,
+    416,
+    305,
+    30
+   ],
+   [
+    26,
+    676,
+    333,
+    38
+   ],
+   [
+    513,
+    683,
+    304,
+    27
+   ],
+   [
+    1053,
+    674,
+    150,
+    34
+   ],
+   [
+    30,
+    890,
+    434,
+    22
+   ],
+   [
+    504,
+    889,
+    515,
+    23
+   ]
+  ],
+  "expressions": [
+   [
+    16,
+    4,
+    334,
+    54
+   ],
+   [
+    366,
+    22,
+    421,
+    22
+   ],
+   [
+    36,
+    510,
+    225,
+    30
+   ],
+   [
+    786,
+    502,
+    256,
+    42
+   ],
+   [
+    17,
+    684,
+    594,
+    37
+   ],
+   [
+    640,
+    686,
+    266,
+    46
+   ]
+  ]
+ }
+}

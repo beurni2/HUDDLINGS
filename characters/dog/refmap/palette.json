@@ -1,0 +1,12 @@
+{
+ "_about": "The role in model.json's palette of each swatch the master sheet prints, by panel id. The printed value comes from the swatch's own label in ref/panels.json.",
+ "swatches": {
+  "master.palette.cream-fur": "fur",
+  "master.palette.tan-fur": "marking",
+  "master.palette.eyes-nose": "dark",
+  "master.palette.blush": "blush",
+  "master.palette.collar-blue": "collar",
+  "master.palette.gold-tag": "tag",
+  "master.palette.soft-shadow": "shadow"
+ }
+}
