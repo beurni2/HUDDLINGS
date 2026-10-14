@@ -300,7 +300,7 @@ class PreCommitHook(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.repo = Path(self.tmp.name) / "repo"
         root = spec_catalogue.ROOT
-        for rel in ["tools/copylint/copylint.py", "tools/copylint/spec_catalogue.py", "tools/copylint/test_copylint.py",
+        for rel in ["tools/copylint/copylint.py", "tools/copylint/spec_catalogue.py", "tools/copylint/test_copylint.py", "tools/copylint/strings_build.py",
                     "tools/precommit.sh", ".githooks/pre-commit", "copy/catalogue.json", "docs/huddlings-spec.md"]:
             (self.repo / rel).parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(root / rel, self.repo / rel)
@@ -462,6 +462,91 @@ class TheRepositorysCopy(unittest.TestCase):
         self.assertGreater(count, 250)
         self.assertEqual([], [str(p) for p in problems])
 
+
+
+
+class AppStrings(unittest.TestCase):
+    """The app's catalogue is generated from copy/catalogue.json, and the strings a build extracts must come from it."""
+
+    def setUp(self):
+        import strings_build
+        self.build = strings_build
+        self.tmp = tempfile.TemporaryDirectory()
+        self.dir = Path(self.tmp.name)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def xliff(self, units, original="Huddlings/Localizable.xcstrings"):
+        body = "".join(f'<trans-unit id="{k}"><source>{v}</source></trans-unit>' for k, v in units)
+        path = self.dir / "en.xliff"
+        path.write_text(
+            '<?xml version="1.0" encoding="UTF-8"?><xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">'
+            f'<file original="{original}" source-language="en" datatype="plaintext"><body>{body}</body></file></xliff>',
+            encoding="utf-8")
+        return path
+
+    def test_the_generated_catalogue_holds_every_app_string_and_passes_the_lint(self):
+        out = self.dir / "Localizable.xcstrings"
+        count = self.build.make_catalogue(out)
+        expected = self.build.app_strings(spec_catalogue.ROOT / "copy" / "catalogue.json")
+        self.assertEqual(count, len(expected))
+        self.assertGreater(count, 100)
+        document = json.loads(out.read_text(encoding="utf-8"))
+        self.assertEqual(expected["hatch.choose"], document["strings"]["hatch.choose"]["localizations"]["en"]["stringUnit"]["value"])
+        self.assertEqual([], copylint.lint_paths([out])[1])
+
+    def test_catalogue_strings_pass(self):
+        self.assertEqual([], self.build.check_extracted(self.xliff([("hatch.choose", "Choose your Huddling")])))
+
+    def test_a_string_written_in_code_fails(self):
+        problems = self.build.check_extracted(self.xliff([("Tap to start", "Tap to start")]))
+        self.assertTrue(any("is not in copy/catalogue.json" in p for p in problems), problems)
+
+    def test_extracted_copy_is_linted(self):
+        problems = self.build.check_extracted(self.xliff([("hatch.choose", "Hurry, last chance")]))
+        self.assertTrue(any("banned word" in p for p in problems), problems)
+
+    def test_infoplist_strings_are_linted_as_infoplist_copy_without_a_key_check(self):
+        path = self.xliff([("CFBundleDisplayName", "Huddlings")], original="Huddlings/InfoPlist.xcstrings")
+        self.assertEqual([], self.build.check_extracted(path))
+        path = self.xliff([("NSMicrophoneUsageDescription", "{mochi} listens")], original="Huddlings/InfoPlist.xcstrings")
+        self.assertTrue(any("infoplist" in p for p in self.build.check_extracted(path)))
+
+    def swift(self, source):
+        folder = self.dir / "App"
+        folder.mkdir(exist_ok=True)
+        (folder / "View.swift").write_text(source, encoding="utf-8")
+        return self.build.check_code([folder])
+
+    def test_lab_code_may_show_anything(self):
+        self.assertEqual([], self.swift('#if LAB\nText(verbatim: "Diagnostics")\nButton("Export") {}\n#endif\n'))
+
+    def test_verbatim_text_outside_the_lab_fails(self):
+        problems = self.swift('#if LAB\nlet x = 1\n#else\nText(verbatim: "Hello")\n#endif\n')
+        self.assertTrue(any("verbatim" in p and ":4:" in p for p in problems), problems)
+
+    def test_every_branch_but_the_labs_is_checked(self):
+        problems = self.swift('#if DEBUG\nText(verbatim: "a")\n#elseif LAB\nText(verbatim: "b")\n#else\nText(verbatim: "c")\n#endif\n'
+                              '#if LAB\n#if DEBUG\nText(verbatim: "d")\n#endif\n#elseif os(iOS)\nText(verbatim: "e")\n#endif\n')
+        self.assertEqual([":2:", ":6:", ":13:"], [p[p.index(":"):p.index(":", p.index(":") + 1) + 1] for p in problems], problems)
+
+    def test_ui_literals_must_be_catalogue_keys(self):
+        self.assertEqual([], self.swift('Text("hatch.choose")\n'))
+        problems = self.swift('Text("hatch.choose")\nButton("Tap me") {}\n.navigationTitle("Home")\n')
+        self.assertEqual(2, len(problems), problems)
+
+    def test_text_from_a_string_fails(self):
+        problems = self.swift('let name = "x"\nText(name)\nText(LocalizedStringKey("hatch.choose"))\n')
+        self.assertEqual(1, len(problems), problems)
+
+    def test_the_apps_own_code_passes(self):
+        self.assertEqual([], self.build.check_code([spec_catalogue.ROOT / "ios"]))
+
+    def test_nothing_to_check_is_a_failure(self):
+        empty = self.dir / "empty"
+        empty.mkdir()
+        self.assertTrue(self.build.check_extracted(empty))
 
 if __name__ == "__main__":
     unittest.main()

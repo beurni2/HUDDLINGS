@@ -1,0 +1,13 @@
+{
+  "name": "idle",
+  "lengthMs": 3000,
+  "loop": true,
+  "tracks": {
+    "body": { "scale": [[0, 1], [1400, 1.02], [3000, 1]] },
+    "head": { "rot": [[0, 0], [1500, 2], [3000, 0]] }
+  },
+  "states": {
+    "eye.L": [[0, "open"], [2000, "closed"], [2140, "open"]],
+    "eye.R": [[0, "open"], [2000, "closed"], [2140, "open"]]
+  }
+}
