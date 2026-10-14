@@ -300,7 +300,7 @@ class PreCommitHook(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.repo = Path(self.tmp.name) / "repo"
         root = spec_catalogue.ROOT
-        for rel in ["tools/copylint/copylint.py", "tools/copylint/spec_catalogue.py", "tools/copylint/test_copylint.py",
+        for rel in ["tools/copylint/copylint.py", "tools/copylint/spec_catalogue.py", "tools/copylint/test_copylint.py", "tools/copylint/strings_build.py",
                     "tools/precommit.sh", ".githooks/pre-commit", "copy/catalogue.json", "docs/huddlings-spec.md"]:
             (self.repo / rel).parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(root / rel, self.repo / rel)
@@ -465,3 +465,57 @@ class TheRepositorysCopy(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class AppStrings(unittest.TestCase):
+    """The app's catalogue is generated from copy/catalogue.json, and the strings a build extracts must come from it."""
+
+    def setUp(self):
+        import strings_build
+        self.build = strings_build
+        self.tmp = tempfile.TemporaryDirectory()
+        self.dir = Path(self.tmp.name)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def xliff(self, units, original="Huddlings/Localizable.xcstrings"):
+        body = "".join(f'<trans-unit id="{k}"><source>{v}</source></trans-unit>' for k, v in units)
+        path = self.dir / "en.xliff"
+        path.write_text(
+            '<?xml version="1.0" encoding="UTF-8"?><xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">'
+            f'<file original="{original}" source-language="en" datatype="plaintext"><body>{body}</body></file></xliff>',
+            encoding="utf-8")
+        return path
+
+    def test_the_generated_catalogue_holds_every_app_string_and_passes_the_lint(self):
+        out = self.dir / "Localizable.xcstrings"
+        count = self.build.make_catalogue(out)
+        expected = self.build.app_strings(spec_catalogue.ROOT / "copy" / "catalogue.json")
+        self.assertEqual(count, len(expected))
+        self.assertGreater(count, 100)
+        document = json.loads(out.read_text(encoding="utf-8"))
+        self.assertEqual(expected["hatch.choose"], document["strings"]["hatch.choose"]["localizations"]["en"]["stringUnit"]["value"])
+        self.assertEqual([], copylint.lint_paths([out])[1])
+
+    def test_catalogue_strings_pass(self):
+        self.assertEqual([], self.build.check_extracted(self.xliff([("hatch.choose", "Choose your Huddling")])))
+
+    def test_a_string_written_in_code_fails(self):
+        problems = self.build.check_extracted(self.xliff([("Tap to start", "Tap to start")]))
+        self.assertTrue(any("is not in copy/catalogue.json" in p for p in problems), problems)
+
+    def test_extracted_copy_is_linted(self):
+        problems = self.build.check_extracted(self.xliff([("hatch.choose", "Hurry, last chance")]))
+        self.assertTrue(any("banned word" in p for p in problems), problems)
+
+    def test_infoplist_strings_are_linted_as_infoplist_copy_without_a_key_check(self):
+        path = self.xliff([("CFBundleDisplayName", "Huddlings")], original="Huddlings/InfoPlist.xcstrings")
+        self.assertEqual([], self.build.check_extracted(path))
+        path = self.xliff([("NSMicrophoneUsageDescription", "{mochi} listens")], original="Huddlings/InfoPlist.xcstrings")
+        self.assertTrue(any("infoplist" in p for p in self.build.check_extracted(path)))
+
+    def test_nothing_to_check_is_a_failure(self):
+        empty = self.dir / "empty"
+        empty.mkdir()
+        self.assertTrue(self.build.check_extracted(empty))
