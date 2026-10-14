@@ -62,6 +62,7 @@ export function lintDrawing(d: Drawing, rules: LintRules = {}): string[] {
   for (const [tag] of svg.matchAll(/<mask\b[^>]*>/g)) {
     const a = attrs(tag);
     if (a.maskUnits !== "userSpaceOnUse" || !bounded(a)) say(`mask ${a.id} needs an explicit userSpaceOnUse region bounded to the part`);
+    if (a["color-interpolation"] !== "sRGB") say(`mask ${a.id} needs color-interpolation="sRGB"`);
   }
   for (const [tag] of svg.matchAll(/<rect\b[^>]*>/g)) {
     if (!bounded(attrs(tag))) say(`a rect reaches far past the canvas: ${tag.slice(0, 80)}`);

@@ -81,9 +81,9 @@ export function blur(id: string, box: Box, sd: number): string {
   return filter(id, box, `<feGaussianBlur stdDeviation="${num(sd)}"/>`);
 }
 
-/** A luminance mask over a bounded region. */
+/** A luminance mask over a bounded region, its luminance taken in sRGB. */
 export function mask(id: string, box: Box, content: string): string {
-  return `<mask id="${id}" maskUnits="userSpaceOnUse" ${region(box)}>${content}</mask>`;
+  return `<mask id="${id}" maskUnits="userSpaceOnUse" ${region(box)} color-interpolation="sRGB">${content}</mask>`;
 }
 
 /**

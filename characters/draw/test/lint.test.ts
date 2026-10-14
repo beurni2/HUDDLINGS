@@ -58,6 +58,7 @@ test("a filter or mask without an explicit, bounded sRGB region fails, and so do
   assert.match(lintOf(raw(`<filter id="f" filterUnits="userSpaceOnUse" x="-500" y="-500" width="1000" height="1000" color-interpolation-filters="sRGB"/>`)).join("\n"), /bounded/);
   assert.deepEqual(lintOf(raw(blur("f", [-30, -30, 60, 60], 2))), []);
   assert.match(lintOf(raw(`<mask id="m"><rect x="-30" y="-30" width="60" height="60" fill="#FFFFFF"/></mask>`)).join("\n"), /mask m needs an explicit userSpaceOnUse region/);
+  assert.match(lintOf(raw(`<mask id="m" maskUnits="userSpaceOnUse" x="-30" y="-30" width="60" height="60"/>`)).join("\n"), /mask m needs color-interpolation="sRGB"/);
   // The shape of the SVG that aborts resvg 2.6.2: a huge rect under a filtered mask.
   assert.match(lintOf(raw(`<rect x="-500" y="-500" width="1000" height="1000" fill="#FDEDDC"/>`)).join("\n"), /rect reaches far past the canvas/);
 });
