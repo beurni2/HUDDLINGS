@@ -9,7 +9,7 @@ The test vectors in `vectors/` are the arbiter: both runtimes must reproduce the
 - Lengths are points (pt) at the companion's Grown height of 164 pt (section 5). Times are milliseconds in files and seconds inside the runtimes.
 - **y grows downward**, as in Appendix F: a point above the ground has a negative y. +x is the viewer's right. `.L` and `.R` are the companion's own sides, so in the front view `.L` has a positive x.
 - **Angles are degrees in files. A positive angle turns +x toward +y**, which is clockwise on screen. SpriteKit's y-up, counter-clockwise convention is converted in its adapter only.
-- The `root` bone sits on the ground under the body's centre and never rotates.
+- The `root` bone sits on the ground under the body's centre, read as the body bone's pivot, the centre of the seat (section 5b: the body bone sits straight above the root), and never rotates. It is `model.json`'s origin: on the midline in front and back views, under the haunch in turned views (the dog: `characters/dog/DECISIONS.md` 9).
 
 ## Files
 

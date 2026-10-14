@@ -1,0 +1,243 @@
+{
+ "species": "dog",
+ "markings": [
+  {
+   "id": "head.patch.L",
+   "part": "head.base",
+   "side": "L",
+   "note": "Tan around the dog's left eye and down behind its outer side, rising into the left ear's root, which hides its upper edge. Painted a paler tan than the body's patches (DECISIONS 18, Q24). Shown wherever the left eye shows."
+  },
+  {
+   "id": "head.patch.R",
+   "part": "head.base",
+   "side": "R",
+   "note": "The mirror of head.patch.L around the right eye, as the front turnaround and the hero draw it."
+  },
+  {
+   "id": "back.patch.L",
+   "part": "body.back",
+   "side": "L",
+   "note": "The left half of a saddle over the back, just behind the collar: from the spine down the left side to the top of the haunch. From behind it is the larger half, reaching down to the tail's root (the back turnaround); on the left side it sits high on the back (side and three-quarter turnarounds, the motion sheet's Stand)."
+  },
+  {
+   "id": "back.patch.R",
+   "part": "body.back",
+   "side": "R",
+   "note": "The right half of the saddle: from the spine just behind the collar, where the back turnaround shows it crossing over, down the right flank toward the haunch, reaching lower than the left half (the front turnaround, the hero). In the motion sheet's right-side poses it reaches the topline at the rump. Sitting, the saddle runs down the sloping back to the haunch; standing, it lies along the level topline to the rump."
+  },
+  {
+   "id": "tail.base",
+   "part": "tail",
+   "side": "both",
+   "note": "Tan at the root of the tail; the curl stays cream."
+  },
+  {
+   "id": "rump.patch.L",
+   "part": "body.back",
+   "side": "L",
+   "note": "A small soft spot on the rump at the tail's root, where the tail's tan crosses the body's outline, fading paler away from the outline (the side and three-quarter turnarounds). No right-side panel shows one."
+  }
+ ],
+ "evidence": [
+  {
+   "panel": "master.turnaround.front",
+   "marking": "head.patch.R",
+   "areaPx": 720,
+   "centroidPx": [65.3, 79.3],
+   "dominant": "#EFBC92",
+   "deltaE2000": 6.47
+  },
+  {
+   "panel": "master.turnaround.front",
+   "marking": "head.patch.L",
+   "areaPx": 716,
+   "centroidPx": [151.2, 72.2],
+   "dominant": "#F0BC92",
+   "deltaE2000": 6.49
+  },
+  {
+   "panel": "master.turnaround.front",
+   "marking": "back.patch.R",
+   "areaPx": 374,
+   "centroidPx": [57.9, 179.6],
+   "dominant": "#EAAF81",
+   "deltaE2000": 3.73
+  },
+  {
+   "panel": "master.turnaround.front",
+   "marking": "back.patch.L",
+   "areaPx": 97,
+   "centroidPx": [156.5, 166.9],
+   "dominant": "#CE9C73",
+   "deltaE2000": 2.46
+  },
+  {
+   "panel": "master.hero.main",
+   "marking": "head.patch.R",
+   "areaPx": 1937,
+   "centroidPx": [110.3, 144.5],
+   "dominant": "#F0BC91",
+   "deltaE2000": 6.5
+  },
+  {
+   "panel": "master.hero.main",
+   "marking": "head.patch.L",
+   "areaPx": 1884,
+   "centroidPx": [246.8, 104.0],
+   "dominant": "#EFBB91",
+   "deltaE2000": 6.25
+  },
+  {
+   "panel": "master.hero.main",
+   "marking": "back.patch.R",
+   "areaPx": 1333,
+   "centroidPx": [107.7, 269.7],
+   "dominant": "#E5A575",
+   "deltaE2000": 2.6
+  },
+  {
+   "panel": "master.hero.main",
+   "marking": "back.patch.L",
+   "areaPx": 225,
+   "centroidPx": [273.9, 306.6],
+   "dominant": "#E19F71",
+   "deltaE2000": 2.75
+  },
+  {
+   "panel": "master.hero.main",
+   "marking": "tail.base",
+   "areaPx": 735,
+   "centroidPx": [58.7, 313.6],
+   "dominant": "#E4A87C",
+   "deltaE2000": 2.22
+  },
+  {
+   "panel": "master.turnaround.three-quarter",
+   "marking": "head.patch.R",
+   "areaPx": 432,
+   "centroidPx": [56.8, 71.7],
+   "dominant": "#F5C197",
+   "deltaE2000": 7.71
+  },
+  {
+   "panel": "master.turnaround.three-quarter",
+   "marking": "head.patch.L",
+   "areaPx": 1142,
+   "centroidPx": [134.1, 86.3],
+   "dominant": "#F0BD93",
+   "deltaE2000": 6.72
+  },
+  {
+   "panel": "master.turnaround.three-quarter",
+   "marking": "back.patch.L",
+   "areaPx": 414,
+   "centroidPx": [155.3, 158.4],
+   "dominant": "#E8A677",
+   "deltaE2000": 3.11
+  },
+  {
+   "panel": "master.turnaround.three-quarter",
+   "marking": "tail.base",
+   "areaPx": 406,
+   "centroidPx": [195.8, 191.5],
+   "dominant": "#E09E6E",
+   "deltaE2000": 2.83
+  },
+  {
+   "panel": "master.turnaround.three-quarter",
+   "marking": "rump.patch.L",
+   "areaPx": 131,
+   "centroidPx": [180.8, 189.8],
+   "dominant": "#E6AA7D",
+   "deltaE2000": 2.65
+  },
+  {
+   "panel": "master.turnaround.side",
+   "marking": "head.patch.L",
+   "areaPx": 1361,
+   "centroidPx": [67.3, 79.2],
+   "dominant": "#F1BD92",
+   "deltaE2000": 6.74
+  },
+  {
+   "panel": "master.turnaround.side",
+   "marking": "back.patch.L",
+   "areaPx": 642,
+   "centroidPx": [127.4, 156.2],
+   "dominant": "#E6A575",
+   "deltaE2000": 2.8
+  },
+  {
+   "panel": "master.turnaround.side",
+   "marking": "tail.base",
+   "areaPx": 386,
+   "centroidPx": [164.9, 184.3],
+   "dominant": "#E5A97C",
+   "deltaE2000": 2.43
+  },
+  {
+   "panel": "master.turnaround.side",
+   "marking": "rump.patch.L",
+   "areaPx": 113,
+   "centroidPx": [150.7, 186.5],
+   "dominant": "#E8B48A",
+   "deltaE2000": 4.48
+  },
+  {
+   "panel": "master.turnaround.back",
+   "marking": "back.patch.L",
+   "areaPx": 982,
+   "centroidPx": [84.4, 162.2],
+   "dominant": "#E5A57A",
+   "deltaE2000": 2.7
+  },
+  {
+   "panel": "master.turnaround.back",
+   "marking": "back.patch.R",
+   "areaPx": 375,
+   "centroidPx": [108.7, 149.9],
+   "dominant": "#E4A97C",
+   "deltaE2000": 2.26
+  },
+  {
+   "panel": "master.turnaround.back",
+   "marking": "tail.base",
+   "areaPx": 72,
+   "centroidPx": [91.5, 184.8],
+   "dominant": "#F0BC8B",
+   "deltaE2000": 6.78
+  },
+  {
+   "panel": "motion.movement.walk",
+   "marking": "back.patch.R",
+   "areaPx": 500,
+   "centroidPx": [52.0, 84.3],
+   "dominant": "#EAB083",
+   "deltaE2000": 3.85
+  },
+  {
+   "panel": "motion.movement.walk",
+   "marking": "tail.base",
+   "areaPx": 252,
+   "centroidPx": [29.9, 87.8],
+   "dominant": "#D9A36F",
+   "deltaE2000": 2.84
+  },
+  {
+   "panel": "motion.key.stand",
+   "marking": "back.patch.L",
+   "areaPx": 474,
+   "centroidPx": [131.8, 103.7],
+   "dominant": "#E7B48B",
+   "deltaE2000": 4.47
+  },
+  {
+   "panel": "motion.key.stand",
+   "marking": "tail.base",
+   "areaPx": 330,
+   "centroidPx": [161.6, 101.9],
+   "dominant": "#E6B283",
+   "deltaE2000": 4.25
+  }
+ ]
+}

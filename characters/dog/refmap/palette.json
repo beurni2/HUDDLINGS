@@ -1,0 +1,54 @@
+{
+ "_about": "The role in model.json's palette of each swatch the master sheet prints, by panel id (the printed value comes from the swatch's own label in ref/panels.json), and boxes drawn by hand around the blushing cheeks, in the sheet's pixels, below the eye and clear of its lines, where palette.py measures the blush's level.",
+ "swatches": {
+  "master.palette.cream-fur": "fur",
+  "master.palette.tan-fur": "marking",
+  "master.palette.eyes-nose": "dark",
+  "master.palette.blush": "blush",
+  "master.palette.collar-blue": "collar",
+  "master.palette.gold-tag": "tag",
+  "master.palette.soft-shadow": "shadow"
+ },
+ "blush": [
+  {
+   "panel": "master.turnaround.front",
+   "box": [452, 166, 26, 16],
+   "note": "the dog's right cheek"
+  },
+  {
+   "panel": "master.turnaround.front",
+   "box": [522, 162, 26, 16],
+   "note": "the dog's left cheek"
+  },
+  {
+   "panel": "master.turnaround.three-quarter",
+   "box": [1128, 170, 28, 16],
+   "note": "the near (left) cheek"
+  },
+  {
+   "panel": "master.turnaround.side",
+   "box": [662, 166, 28, 16],
+   "note": "the left cheek"
+  },
+  {
+   "panel": "master.hero.main",
+   "box": [140, 186, 30, 24],
+   "note": "the dog's right cheek"
+  },
+  {
+   "panel": "master.hero.main",
+   "box": [261, 153, 30, 24],
+   "note": "the dog's left cheek"
+  },
+  {
+   "panel": "master.feature.blush-cheeks",
+   "box": [532, 610, 40, 34],
+   "note": "the Blush cheeks close-up"
+  },
+  {
+   "panel": "rigging.part.blush-left",
+   "box": [482, 495, 29, 23],
+   "note": "the rigging sheet's blush part itself"
+  }
+ ]
+}

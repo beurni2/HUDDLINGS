@@ -1,0 +1,238 @@
+{
+ "species": "dog",
+ "status": "proposed; locked when the founder approves it at Gate A",
+ "sheets": "characters/reference/dog",
+ "unit": "pt",
+ "height": 164,
+ "proportions": {
+  "headShareOfHeight": 0.654,
+  "headWidth": 93.3,
+  "headHeight": 107.3,
+  "eyeSpacingShareOfHead": 0.493,
+  "eyeHeightShareOfHead": 0.181,
+  "eyeLineShareOfHead": 0.6
+ },
+ "landmarks": {
+  "front": {
+   "chin": [-0.3, -56.7],
+   "collar": [1.3, -55.8],
+   "collar.line.sheetLeft": [-26.0, -59.8],
+   "collar.line.sheetRight": [27.6, -61.8],
+   "ear.L.root": [36.7, -138.4],
+   "ear.L.tip": [51.3, -64.5],
+   "ear.R.root": [-40.1, -133.7],
+   "ear.R.tip": [-53.8, -61.4],
+   "eye.L": [21.8, -101.2],
+   "eye.R": [-24.2, -98.0],
+   "ground": [0.0, 0.0],
+   "head.top": [0.8, -164.0],
+   "mouth.L": [12.9, -85.5],
+   "mouth.R": [-12.8, -83.9],
+   "nose": [-0.2, -91.6],
+   "paw.front.L": [13.7, -5.4],
+   "paw.front.R": [-15.1, -5.4],
+   "paw.hind.L": [37.8, -10.9],
+   "paw.hind.R": [-37.6, -10.9],
+   "tag.ring": [0.4, -57.5],
+   "tag.top": [0.6, -50.5]
+  },
+  "threeQuarter.L": {
+   "chin": [-67.3, -59.7],
+   "collar": [-47.9, -55.6],
+   "collar.line.sheetLeft": [-71.8, -59.3],
+   "collar.line.sheetRight": [-22.7, -61.2],
+   "ear.L.root": [-1.9, -135.3],
+   "ear.L.tip": [2.8, -59.7],
+   "ear.R.root": [-81.3, -142.1],
+   "ear.R.tip": [-101.5, -79.4],
+   "eye.L": [-38.5, -95.6],
+   "eye.R": [-77.8, -105.0],
+   "ground": [0.0, 0.0],
+   "head.top": [-34.4, -164.0],
+   "mouth.L": [-55.2, -83.1],
+   "mouth.R": [-77.1, -86.9],
+   "nose": [-67.4, -92.4],
+   "paw.front.L": [-44.6, -6.8],
+   "paw.front.R": [-71.0, -10.6],
+   "paw.hind.L": [-19.6, -6.8],
+   "tag.ring": [-58.9, -57.4],
+   "tag.top": [-59.4, -49.9]
+  },
+  "side.L": {
+   "collar": [-41.5, -57.0],
+   "collar.line.sheetLeft": [-62.2, -56.0],
+   "collar.line.sheetRight": [-20.2, -61.0],
+   "ear.L.root": [-12.9, -143.8],
+   "ear.L.tip": [-13.0, -63.0],
+   "eye.L": [-67.3, -100.4],
+   "ground": [0.0, 0.0],
+   "head.top": [-37.7, -164.0],
+   "mouth.L": [-84.7, -81.6],
+   "nose": [-93.7, -94.2],
+   "paw.front.L": [-47.4, -7.0],
+   "paw.front.R": [-67.6, -11.7],
+   "paw.hind.L": [-20.2, -6.2],
+   "tag.ring": [-59.1, -58.3],
+   "tag.top": [-60.5, -51.3]
+  },
+  "back": {
+   "collar": [0.6, -68.9],
+   "collar.line.sheetLeft": [-28.1, -65.5],
+   "collar.line.sheetRight": [30.0, -65.5],
+   "ear.L.root": [-38.9, -146.0],
+   "ear.L.tip": [-49.3, -68.3],
+   "ear.R.root": [38.0, -149.9],
+   "ear.R.tip": [49.6, -69.8],
+   "ground": [0.0, 0.0],
+   "head.top": [-9.6, -164.0]
+  }
+ },
+ "mirroredViews": {
+  "side.R": {
+   "from": "side.L",
+   "rule": "negate x; swap .L and .R in every landmark name; swap sheetLeft and sheetRight; show the right side's markings"
+  },
+  "threeQuarter.R": {
+   "from": "threeQuarter.L",
+   "rule": "negate x; swap .L and .R in every landmark name; swap sheetLeft and sheetRight; show the right side's markings"
+  }
+ },
+ "palette": {
+  "fur": "#FFF4E8",
+  "marking": "#D9A379",
+  "dark": "#3A2314",
+  "blush": "#F7B3A6",
+  "shadow": "#E8DED4",
+  "collar": "#7DB7E8",
+  "collarHighlight": "#A7C7E8",
+  "tag": "#F4C542",
+  "outline": "#91694A"
+ },
+ "palettePainted": {
+  "eyeDark": {
+   "value": "#200C02",
+   "for": "the pupils, the upper iris and the nose, which the sheet paints near-black; the printed dark stays for the lighter lower iris"
+  },
+  "markingLight": {
+   "value": "#F0BC92",
+   "for": "the head patches, which the sheet paints paler than its other tan"
+  },
+  "furShade": {
+   "value": "#FDE3C8",
+   "for": "the fur's soft shade, warmer on the sheet than the printed Soft Shadow, which matches the ground shadow"
+  },
+  "tongue": {
+   "value": "#FB9A88",
+   "for": "the tongue, deeper on the sheet than the printed pink"
+  },
+  "mouthInside": {
+   "value": "#9E241A",
+   "for": "the open mouth's inside, which the sheet prints no value for"
+  }
+ },
+ "blush": {
+  "restingLevel": 0.35,
+  "restingSpread": [0.29, 0.43],
+  "note": "the printed pink's level over the fur on the turnaround's cheeks, at the Grown stage the sheets draw (L663): their mean and their range. Spec L474 makes the blush a level from 0 to 100%. The palette check holds the blush part's colour to the printed pink and a resting cheek's level to this range (docs/QUESTIONS.md, Q25)"
+ },
+ "outline": {
+  "outerPt": 1.54,
+  "innerPt": 0.75
+ },
+ "markings": [
+  {
+   "id": "head.patch.L",
+   "part": "head.base",
+   "side": "L",
+   "note": "Tan around the dog's left eye and down behind its outer side, rising into the left ear's root, which hides its upper edge. Painted a paler tan than the body's patches (DECISIONS 18, Q24). Shown wherever the left eye shows."
+  },
+  {
+   "id": "head.patch.R",
+   "part": "head.base",
+   "side": "R",
+   "note": "The mirror of head.patch.L around the right eye, as the front turnaround and the hero draw it."
+  },
+  {
+   "id": "back.patch.L",
+   "part": "body.back",
+   "side": "L",
+   "note": "The left half of a saddle over the back, just behind the collar: from the spine down the left side to the top of the haunch. From behind it is the larger half, reaching down to the tail's root (the back turnaround); on the left side it sits high on the back (side and three-quarter turnarounds, the motion sheet's Stand)."
+  },
+  {
+   "id": "back.patch.R",
+   "part": "body.back",
+   "side": "R",
+   "note": "The right half of the saddle: from the spine just behind the collar, where the back turnaround shows it crossing over, down the right flank toward the haunch, reaching lower than the left half (the front turnaround, the hero). In the motion sheet's right-side poses it reaches the topline at the rump. Sitting, the saddle runs down the sloping back to the haunch; standing, it lies along the level topline to the rump."
+  },
+  {
+   "id": "tail.base",
+   "part": "tail",
+   "side": "both",
+   "note": "Tan at the root of the tail; the curl stays cream."
+  },
+  {
+   "id": "rump.patch.L",
+   "part": "body.back",
+   "side": "L",
+   "note": "A small soft spot on the rump at the tail's root, where the tail's tan crosses the body's outline, fading paler away from the outline (the side and three-quarter turnarounds). No right-side panel shows one."
+  }
+ ],
+ "crops": {
+  "front": {
+   "crop": "master.turnaround.front",
+   "sheet": "master",
+   "boxSheetPx": [390, 64, 218, 225],
+   "view": "front",
+   "facing": "front",
+   "ptPerCropPx": 0.77725,
+   "anchorsCropPx": {
+    "ground": [110.43, 216.0],
+    "headTop": [111.5, 5.0],
+    "headCentre": [108.93, 80.79]
+   },
+   "mask": "ref/silhouettes/front.png"
+  },
+  "threeQuarter.L": {
+   "crop": "master.turnaround.three-quarter",
+   "sheet": "master",
+   "boxSheetPx": [1022, 59, 234, 231],
+   "view": "threeQuarter",
+   "facing": "left",
+   "ptPerCropPx": 0.75576,
+   "anchorsCropPx": {
+    "ground": [166.0, 223.0],
+    "headTop": [120.5, 6.0],
+    "headCentre": [96.35, 78.56]
+   },
+   "mask": "ref/silhouettes/threeQuarter.L.png"
+  },
+  "side.L": {
+   "crop": "master.turnaround.side",
+   "sheet": "master",
+   "boxSheetPx": [620, 65, 193, 224],
+   "view": "side",
+   "facing": "left",
+   "ptPerCropPx": 0.77725,
+   "anchorsCropPx": {
+    "ground": [131.0, 216.0],
+    "headTop": [82.5, 5.0],
+    "headCentre": [55.17, 71.5]
+   },
+   "mask": "ref/silhouettes/side.L.png"
+  },
+  "back": {
+   "crop": "master.turnaround.back",
+   "sheet": "master",
+   "boxSheetPx": [813, 68, 203, 222],
+   "view": "back",
+   "facing": "back",
+   "ptPerCropPx": 0.78469,
+   "anchorsCropPx": {
+    "ground": [98.75, 215.0],
+    "headTop": [86.5, 6.0],
+    "headCentre": [98.44, 66.5]
+   },
+   "mask": "ref/silhouettes/back.png"
+  }
+ }
+}

@@ -1,0 +1,356 @@
+{
+ "species": "dog",
+ "printed": {
+  "fur": "#FFF4E8",
+  "marking": "#D9A379",
+  "dark": "#3A2314",
+  "blush": "#F7B3A6",
+  "collar": "#7DB7E8",
+  "tag": "#F4C542",
+  "shadow": "#E8DED4"
+ },
+ "swatches": {
+  "fur": {
+   "panel": "master.palette.cream-fur",
+   "printed": "#FFF4E8",
+   "sampled": "#FEEFDC",
+   "deltaE2000": 2.95
+  },
+  "marking": {
+   "panel": "master.palette.tan-fur",
+   "printed": "#D9A379",
+   "sampled": "#DCA074",
+   "deltaE2000": 1.48
+  },
+  "dark": {
+   "panel": "master.palette.eyes-nose",
+   "printed": "#3A2314",
+   "sampled": "#4B2B19",
+   "deltaE2000": 4.59
+  },
+  "blush": {
+   "panel": "master.palette.blush",
+   "printed": "#F7B3A6",
+   "sampled": "#F8A99A",
+   "deltaE2000": 2.81
+  },
+  "collar": {
+   "panel": "master.palette.collar-blue",
+   "printed": "#7DB7E8",
+   "sampled": "#8CBBDF",
+   "deltaE2000": 3.05
+  },
+  "tag": {
+   "panel": "master.palette.gold-tag",
+   "printed": "#F4C542",
+   "sampled": "#FAC253",
+   "deltaE2000": 3.86
+  },
+  "shadow": {
+   "panel": "master.palette.soft-shadow",
+   "printed": "#E8DED4",
+   "sampled": "#E5D7C9",
+   "deltaE2000": 2.5
+  }
+ },
+ "views": {
+  "front": {
+   "fur": {
+    "dominant": "#FEF4E6",
+    "pixels": 13248,
+    "heldTo": "fur",
+    "deltaE2000": 1.18
+   },
+   "furShade": {
+    "dominant": "#FDE3C8",
+    "pixels": 746,
+    "heldTo": "shadow",
+    "deltaE2000": 7.46
+   },
+   "ears": {
+    "dominant": "#E09E6E",
+    "pixels": 7233,
+    "heldTo": "marking",
+    "deltaE2000": 2.83
+   },
+   "eyes": {
+    "dominant": "#200C02",
+    "pixels": 840,
+    "heldTo": "dark",
+    "deltaE2000": 8.71
+   },
+   "lowerIris": {
+    "dominant": "#442816",
+    "pixels": 124,
+    "heldTo": "dark",
+    "deltaE2000": 2.79
+   },
+   "nose": {
+    "dominant": "#0B0301",
+    "pixels": 114,
+    "heldTo": "dark",
+    "deltaE2000": 14.58
+   },
+   "tongue": {
+    "dominant": "#FB9A88",
+    "pixels": 168,
+    "heldTo": "blush",
+    "deltaE2000": 6.87
+   },
+   "mouthInside": {
+    "dominant": "#9E241A",
+    "pixels": 130
+   },
+   "collar": {
+    "dominant": "#65A3CE",
+    "pixels": 515,
+    "heldTo": "collar",
+    "deltaE2000": 6.32
+   },
+   "tag": {
+    "dominant": "#FAC657",
+    "pixels": 258,
+    "heldTo": "tag",
+    "deltaE2000": 3.04
+   },
+   "groundShadow": {
+    "dominant": "#F0E4D7",
+    "pixels": 831,
+    "heldTo": "shadow",
+    "deltaE2000": 1.89
+   },
+   "outline": {
+    "dominant": "#996D4C",
+    "pixels": 364
+   }
+  },
+  "threeQuarter.L": {
+   "fur": {
+    "dominant": "#FEF4E6",
+    "pixels": 15020,
+    "heldTo": "fur",
+    "deltaE2000": 1.18
+   },
+   "furShade": {
+    "dominant": "#FBE4CD",
+    "pixels": 1034,
+    "heldTo": "shadow",
+    "deltaE2000": 6.16
+   },
+   "ears": {
+    "dominant": "#DF9D6D",
+    "pixels": 7569,
+    "heldTo": "marking",
+    "deltaE2000": 2.92
+   },
+   "eyes": {
+    "dominant": "#200C01",
+    "pixels": 722,
+    "heldTo": "dark",
+    "deltaE2000": 8.53
+   },
+   "lowerIris": {
+    "dominant": "#593420",
+    "pixels": 106,
+    "heldTo": "dark",
+    "deltaE2000": 7.98
+   },
+   "nose": {
+    "dominant": "#2B180A",
+    "pixels": 121,
+    "heldTo": "dark",
+    "deltaE2000": 4.19
+   },
+   "tongue": {
+    "dominant": "#FC8E81",
+    "pixels": 207,
+    "heldTo": "blush",
+    "deltaE2000": 9.48
+   },
+   "mouthInside": {
+    "dominant": "#69190C",
+    "pixels": 92
+   },
+   "collar": {
+    "dominant": "#7CBBE0",
+    "pixels": 475,
+    "heldTo": "collar",
+    "deltaE2000": 3.82
+   },
+   "tag": {
+    "dominant": "#FBC556",
+    "pixels": 243,
+    "heldTo": "tag",
+    "deltaE2000": 3.42
+   },
+   "groundShadow": {
+    "dominant": "#F2E3D3",
+    "pixels": 1057,
+    "heldTo": "shadow",
+    "deltaE2000": 2.98
+   },
+   "outline": {
+    "dominant": "#8A6649",
+    "pixels": 351
+   }
+  },
+  "side.L": {
+   "fur": {
+    "dominant": "#FEF3E6",
+    "pixels": 11225,
+    "heldTo": "fur",
+    "deltaE2000": 0.51
+   },
+   "furShade": {
+    "dominant": "#FCE3C8",
+    "pixels": 969,
+    "heldTo": "shadow",
+    "deltaE2000": 7.27
+   },
+   "ears": {
+    "dominant": "#E09E6E",
+    "pixels": 7579,
+    "heldTo": "marking",
+    "deltaE2000": 2.83
+   },
+   "eyes": {
+    "dominant": "#230A03",
+    "pixels": 326,
+    "heldTo": "dark",
+    "deltaE2000": 9.56
+   },
+   "lowerIris": {
+    "dominant": "#441F0E",
+    "pixels": 49,
+    "heldTo": "dark",
+    "deltaE2000": 5.44
+   },
+   "nose": {
+    "dominant": "#200D04",
+    "pixels": 62,
+    "heldTo": "dark",
+    "deltaE2000": 8.78
+   },
+   "collar": {
+    "dominant": "#82BDDE",
+    "pixels": 448,
+    "heldTo": "collar",
+    "deltaE2000": 4.71
+   },
+   "tag": {
+    "dominant": "#FBC657",
+    "pixels": 176,
+    "heldTo": "tag",
+    "deltaE2000": 3.24
+   },
+   "groundShadow": {
+    "dominant": "#F0E5D8",
+    "pixels": 848,
+    "heldTo": "shadow",
+    "deltaE2000": 1.99
+   },
+   "outline": {
+    "dominant": "#8A6649",
+    "pixels": 292
+   }
+  },
+  "back": {
+   "fur": {
+    "dominant": "#FEF3E5",
+    "pixels": 14206,
+    "heldTo": "fur",
+    "deltaE2000": 0.93
+   },
+   "furShade": {
+    "dominant": "#FCE3C8",
+    "pixels": 1204,
+    "heldTo": "shadow",
+    "deltaE2000": 7.27
+   },
+   "ears": {
+    "dominant": "#E09E6E",
+    "pixels": 6661,
+    "heldTo": "marking",
+    "deltaE2000": 2.83
+   },
+   "collar": {
+    "dominant": "#85BCE3",
+    "pixels": 776,
+    "heldTo": "collar",
+    "deltaE2000": 2.57
+   },
+   "groundShadow": {
+    "dominant": "#F0E5D7",
+    "pixels": 624,
+    "heldTo": "shadow",
+    "deltaE2000": 2.28
+   },
+   "outline": {
+    "dominant": "#976C4A",
+    "pixels": 315
+   }
+  }
+ },
+ "outline": "#91694A",
+ "blush": {
+  "turnaroundOpacity": 0.35,
+  "cheeks": [
+   {
+    "panel": "master.turnaround.front",
+    "box": [452, 166, 26, 16],
+    "note": "the dog's right cheek",
+    "peak": "#FCDFCD",
+    "opacity": 0.37
+   },
+   {
+    "panel": "master.turnaround.front",
+    "box": [522, 162, 26, 16],
+    "note": "the dog's left cheek",
+    "peak": "#FCDFD2",
+    "opacity": 0.33
+   },
+   {
+    "panel": "master.turnaround.three-quarter",
+    "box": [1128, 170, 28, 16],
+    "note": "the near (left) cheek",
+    "peak": "#FCE2D4",
+    "opacity": 0.29
+   },
+   {
+    "panel": "master.turnaround.side",
+    "box": [662, 166, 28, 16],
+    "note": "the left cheek",
+    "peak": "#FADBC8",
+    "opacity": 0.43
+   },
+   {
+    "panel": "master.hero.main",
+    "box": [140, 186, 30, 24],
+    "note": "the dog's right cheek",
+    "peak": "#FBD5C4",
+    "opacity": 0.51
+   },
+   {
+    "panel": "master.hero.main",
+    "box": [261, 153, 30, 24],
+    "note": "the dog's left cheek",
+    "peak": "#FED9C9",
+    "opacity": 0.44
+   },
+   {
+    "panel": "master.feature.blush-cheeks",
+    "box": [532, 610, 40, 34],
+    "note": "the Blush cheeks close-up",
+    "peak": "#FECAB8",
+    "opacity": 0.68
+   },
+   {
+    "panel": "rigging.part.blush-left",
+    "box": [482, 495, 29, 23],
+    "note": "the rigging sheet's blush part itself",
+    "peak": "#F1B0A0",
+    "opacity": 1.0
+   }
+  ]
+ }
+}

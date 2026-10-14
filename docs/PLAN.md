@@ -6,7 +6,7 @@ Spec version 3, section 5b phase 0: every milestone mapped to work, where each p
 
 - **Today:** reply `go` on the pull request. Nothing past phase 0 starts until you do.
 - **This week:** the TestFlight pieces (items 2 to 5 below), so the test character can reach your iPhone at the end of phase 1, in about 1.5 weeks. Web and runtime work starts without them.
-- **Can wait:** the questions in `QUESTIONS.md`. Each of Q1 to Q23 has a default in force, and I ask again when each is due.
+- **Can wait:** the questions in `QUESTIONS.md`. Q24 and Q25 are decided (Oct 14); each of the others has a default in force, and I ask again when each is due.
 - **When:** M0, the living dog, takes about 6 weeks; the beta is about 25 weeks away, or about 20 with the other companions in parallel lanes (section 22).
 
 ## What carries over
@@ -41,13 +41,13 @@ The critical path: one dog that feels alive under your finger before anything el
 - Every part of the parts table, drawn in TypeScript that writes SVG: hand-placed Bézier paths with few nodes, cleaned with a curve fitter. An automatic trace may sit underneath as a faint guide and is never kept.
 - Flat fill, one soft shade, one soft highlight, light from the top left, a warm brown outline on outer edges only; painted at build time and rasterized into the atlases at 2x, 3x and 5x.
 - Four views (front, three-quarter and side in both facings, back), each facing with its own markings, and every face state.
-- The sheet match, automated: silhouette IoU (0.90 front and three-quarter, 0.85 side and back), landmarks within 3% of the head's width, palette within ΔE 3, no marking outside its part.
+- The sheet match, automated: silhouette IoU (0.90 front and three-quarter, 0.85 side and back), landmarks within 3% of the head's width, palette within ΔE 3 (each region against its own value, `QUESTIONS.md` Q24; the blush as a level, Q25), no marking outside its part. The face panels' crop records (view, facing, scale, anchors, and a mask without labels or marks) join `model.json` here, before Gate A, for the Faces check (phase 2's `DECISIONS.md` 14).
 - Before the full set, I post the front view beside its crop in a pull request, so you can stop me early if the look is wrong. It is not a gate.
 - **Gate A evidence:** each view beside its turnaround crop at the same size, every face preset beside its expression panel, the new hungry and huffy faces as labelled new drawings, the marking map, the collar blue, `model.json`, `DECISIONS.md`, the sheet-match numbers and three fresh reviewers' scores.
 
 **Phase 4, rigging the dog (about 1 week).**
 - Pivots at the joints, the draw order per view, springs on ears, tail, tag and tuft, the stance lock (planted paws never slide), look-at (eyes, then head, then chest), the fake turn and the swaps to three-quarter, postures and every transition, and the life layer (breathing, blinking, gaze, ear twitches, tail mood, weight shifts, seeded micro-motion, the hour's light).
-- The pose library from the motion sheet, each pose passing its pose match (IoU 0.80).
+- The pose library from the motion sheet, each pose passing its pose match (IoU 0.80). The motion poses' crop records (view, facing, scale, ground line, body centre, and a mask without props, motion lines or the neighbours' slivers) are added to the model approved at Gate A; only comparison data, never the look.
 - Visual QA's checks, each proven by a clip with a planted failure: holes and seams, stretch, sliding and floating paws, snaps, even spacing, twinning, straight paths, dead holds, draw order, face, on-model, collar and tag, life, touch response, sound and haptic sync, parity, and approved frames (the goldens) from the first approved motion. A fast subset joins the pre-commit hook. Four of the checks may need narrowing (`QUESTIONS.md` Q3).
 
 **Phase 5, the demo, then the 16 core motions (about 1.5 weeks), ending at Gates B and C.**
