@@ -1,0 +1,69 @@
+{
+  "format": 1,
+  "species": "test",
+  "version": "0.1.0",
+  "height": 164,
+  "bones": [
+    { "name": "root" },
+    { "name": "body", "parent": "root", "y": -4, "rot": [-30, 30], "squash": [0.93, 1.07], "scale": [1, 1.03] },
+    { "name": "head", "parent": "body", "y": -58, "rot": [-18, 18], "yaw": [-60, 60], "pitch": [-12, 12],
+      "views": { "side.R": { "x": 16, "y": -56 } } },
+    { "name": "ear.L", "parent": "head", "x": 34, "y": -74, "rot": [-30, 30],
+      "spring": { "hz": 2.5, "damping": 0.3, "com": [0, 22], "follow": 0.8, "selfFollow": 0.5, "inertia": 1 },
+      "views": { "side.R": { "x": -16, "y": -78 } } },
+    { "name": "ear.R", "parent": "head", "x": -34, "y": -74, "rot": [-30, 30],
+      "spring": { "hz": 2.5, "damping": 0.3, "com": [0, 22], "follow": 0.8, "selfFollow": 0.5, "inertia": 1 },
+      "views": { "side.R": { "x": -2, "y": -74 } } },
+    { "name": "collar", "parent": "body", "y": -60, "views": { "side.R": { "x": 12, "y": -58 } } },
+    { "name": "tag", "parent": "collar", "y": 3, "rot": [-25, 25],
+      "spring": { "hz": 2.5, "damping": 0.35, "com": [0, 8], "follow": 0.6, "inertia": 1 },
+      "views": { "side.R": { "x": 6, "y": 3 } } },
+    { "name": "tail.1", "parent": "body", "x": 30, "y": -16, "rest": 25, "rot": [-30, 30],
+      "views": { "side.R": { "x": -46, "y": -22, "rest": -50 } } },
+    { "name": "tail.2", "parent": "tail.1", "y": -20, "rot": [-30, 30],
+      "spring": { "hz": 3, "damping": 0.3, "com": [0, -10], "follow": 0.8, "inertia": 1 } },
+    { "name": "tail.3", "parent": "tail.2", "y": -20, "rot": [-30, 30],
+      "spring": { "hz": 3.5, "damping": 0.3, "com": [0, -10], "follow": 0.8, "inertia": 1 } },
+    { "name": "paw.L", "parent": "root", "x": 18, "y": -7, "views": { "side.R": { "x": 30, "y": -7 } } },
+    { "name": "paw.R", "parent": "root", "x": -18, "y": -7, "views": { "side.R": { "x": 40, "y": -6 } } }
+  ],
+  "views": ["front", "side.R"],
+  "headBone": "head",
+  "parts": [
+    { "name": "shadow", "bone": "root", "group": "body", "regions": { "front": "shadow/front", "side.R": "shadow/side.R" } },
+    { "name": "tail", "bone": "tail.1", "group": "body", "regions": { "front": "tail/front", "side.R": "tail/side.R" },
+      "warp": { "chain": ["tail.1", "tail.2", "tail.3"], "columns": 1, "rows": 5 } },
+    { "name": "body", "bone": "body", "group": "body", "regions": { "front": "body/front", "side.R": "body/side.R" } },
+    { "name": "collar", "bone": "collar", "group": "body", "regions": { "front": "collar/front", "side.R": "collar/side.R" } },
+    { "name": "tag", "bone": "tag", "group": "body", "regions": { "front": "tag/front", "side.R": "tag/side.R" } },
+    { "name": "paw.L", "bone": "paw.L", "group": "body", "regions": { "front": "paw.L/front", "side.R": "paw.L/side.R" } },
+    { "name": "paw.R", "bone": "paw.R", "group": "body", "regions": { "front": "paw.R/front", "side.R": "paw.R/side.R" } },
+    { "name": "ear.L", "bone": "ear.L", "group": "head", "regions": { "front": "ear.L/front", "side.R": "ear.L/side.R" } },
+    { "name": "ear.R", "bone": "ear.R", "group": "head", "regions": { "front": "ear.R/front", "side.R": "ear.R/side.R" } },
+    { "name": "head.base", "bone": "head", "group": "head", "regions": { "front": "head.base/front", "side.R": "head.base/side.R" } },
+    { "name": "head.marking", "bone": "head", "group": "head", "clipTo": "head.base",
+      "regions": { "front": "head.marking/front", "side.R": "head.marking/side.R" } },
+    { "name": "eye.L", "bone": "head", "group": "head", "clipTo": "head.base", "defaultState": "open",
+      "regions": { "front:open": "eye.L/front:open", "front:closed": "eye.L/front:closed" } },
+    { "name": "eye.R", "bone": "head", "group": "head", "clipTo": "head.base", "defaultState": "open",
+      "regions": { "front:open": "eye.R/front:open", "front:closed": "eye.R/front:closed",
+                   "side.R:open": "eye.R/side.R:open", "side.R:closed": "eye.R/side.R:closed" } },
+    { "name": "nose", "bone": "head", "group": "head", "clipTo": "head.base", "regions": { "front": "nose/front", "side.R": "nose/side.R" } }
+  ],
+  "drawOrder": {
+    "front": ["shadow", "tail", "body", "collar", "tag", "@head", "paw.L", "paw.R"],
+    "side.R": ["shadow", "paw.L", "tail", "body", "collar", "tag", "@head", "paw.R"],
+    "head.front": ["ear.L", "ear.R", "head.base", "head.marking", "eye.L", "eye.R", "nose"],
+    "head.side.R": ["ear.L", "head.base", "head.marking", "eye.R", "nose", "ear.R"]
+  },
+  "drawOrderVariants": {
+    "front:pawsBack": ["shadow", "paw.L", "paw.R", "tail", "body", "collar", "tag", "@head"]
+  },
+  "fakeTurn": {
+    "bone": "head", "yawDeg": 20, "pitchDeg": 12,
+    "faceShift": 0.06, "markingShift": 0.03, "earShift": 0.03, "nodShift": 0.05, "farEyeNarrow": 0.06,
+    "views": { "front": { "size": [92, 92] } },
+    "roles": { "eye.L": "face", "eye.R": "face", "nose": "face", "head.marking": "marking", "ear.L": "ear", "ear.R": "ear" },
+    "farEye": { "positive": "eye.L", "negative": "eye.R" }
+  }
+}

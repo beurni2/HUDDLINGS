@@ -2,6 +2,8 @@
 // feature is easy to see in a frame: the banded tail shows its bend, the
 // stripe and the eyes show the clip to the head, the ears and the tag swing on
 // springs, the paws swap draw order, and every part has a front and a side view.
+// Every drawing is in its bone's own space (points, y down), with the bone's
+// pivot at (0, 0): the face sits on the head bone, whose pivot is at the neck.
 import type { Drawing } from "../../build/atlas.ts";
 
 const OUTLINE = "#6B4A35";
@@ -40,11 +42,11 @@ function tail(region: string, far: boolean): Drawing {
     `<g clip-path="url(#t)">${bands}${tint}</g><rect x="-7" y="-60" width="14" height="60" rx="7" fill="none"/>`);
 }
 
-function eye(region: string, state: "open" | "closed"): Drawing {
+function eye(region: string, state: "open" | "closed", cx: number, cy: number): Drawing {
   if (state === "closed") {
-    return part(region, [-10, -6, 20, 10], `<path d="M -7 0 Q 0 4 7 0" fill="none" stroke-width="2" stroke="${COLOURS.dark}"/>`);
+    return part(region, [cx - 10, cy - 6, 20, 10], `<path d="M ${cx - 7} ${cy} Q ${cx} ${cy + 4} ${cx + 7} ${cy}" fill="none" stroke-width="2" stroke="${COLOURS.dark}"/>`);
   }
-  return part(region, [-10, -10, 20, 20], circle(0, 0, 7, COLOURS.dark, `stroke="none"`) + circle(-2.5, -2.5, 2.4, "#FFFFFF", `stroke="none"`));
+  return part(region, [cx - 10, cy - 10, 20, 20], circle(cx, cy, 7, COLOURS.dark, `stroke="none"`) + circle(cx - 2.5, cy - 2.5, 2.4, "#FFFFFF", `stroke="none"`));
 }
 
 /** Every region the test character uses, front and side (facing right). */
@@ -80,13 +82,14 @@ export function drawings(): Drawing[] {
     // The stripe and the face are clipped to the head base.
     part("head.marking/front", [-64, -88, 128, 14], `<rect x="-62" y="-86" width="124" height="10" fill="${COLOURS.pink}" stroke="none"/>`),
     part("head.marking/side.R", [-64, -88, 128, 14], `<rect x="-62" y="-86" width="124" height="10" fill="${COLOURS.pink}" stroke="none"/>`),
-    eye("eye.L/front:open", "open"),
-    eye("eye.L/front:closed", "closed"),
-    eye("eye.R/front:open", "open"),
-    eye("eye.R/front:closed", "closed"),
-    eye("eye.R/side.R:open", "open"),
-    eye("eye.R/side.R:closed", "closed"),
-    part("nose/front", [-7, -5, 14, 10], ellipse(0, 0, 5, 3.5, COLOURS.dark, `stroke="none"`)),
-    part("nose/side.R", [-7, -5, 14, 10], ellipse(0, 0, 4.5, 3.5, COLOURS.dark, `stroke="none"`)),
+    // .L is the companion's left: on the viewer's right in the front view.
+    eye("eye.L/front:open", "open", 18, -50),
+    eye("eye.L/front:closed", "closed", 18, -50),
+    eye("eye.R/front:open", "open", -18, -50),
+    eye("eye.R/front:closed", "closed", -18, -50),
+    eye("eye.R/side.R:open", "open", 28, -50),
+    eye("eye.R/side.R:closed", "closed", 28, -50),
+    part("nose/front", [-7, -41, 14, 10], ellipse(0, -36, 5, 3.5, COLOURS.dark, `stroke="none"`)),
+    part("nose/side.R", [37, -44, 14, 10], ellipse(44, -39, 4.5, 3.5, COLOURS.dark, `stroke="none"`)),
   ];
 }

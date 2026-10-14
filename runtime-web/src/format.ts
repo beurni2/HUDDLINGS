@@ -82,6 +82,8 @@ export interface FakeTurn {
 export interface Rig {
   format: number;
   species: string;
+  /** The character's version, written into the package. */
+  version?: string;
   height: number;
   bones: Bone[];
   views: string[];
