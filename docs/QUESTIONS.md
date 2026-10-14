@@ -182,6 +182,15 @@ Decided by me under CLAUDE.md ("decide everything else and note it"). Tell me if
 - **E12. The M0 file-system audit covers the app's writable folders** (Documents, Library, tmp, the App Group). The spec says "no audio files" (L2140), but Mochi's own sounds ship inside the app; the audit is about recordings.
 - **E13. Catalogue keys I named** where the spec's table combines several strings: `treats.wearPlural`, `treats.takeOffPlural`, `report.reasons.*`, `prop.*`, `species.*`, `share.tagline`, `note.speed.*`. The speeds use "×", as sections 11, 14 and 22 write them.
 
+From phase 1 (the runtimes), each pinned in `characters/format/README.md` and held by tests in both runtimes:
+
+- **E14. A bone's squash or scale never changes its children's size or shape.** It moves where they attach, and scales only its own parts. So breathing lifts the head without growing it, and a squashed body never skews a tilted head (5b: heads stay rigid). The root's scale, the companion's perspective, still scales everything.
+- **E15. Springs never stop dead at a limit.** A spring driven past its room eases into the limit and swings back out, and it never changes the motion a clip keys. A jump (a view swap, a cut in a clip) moves a part without flinging its spring. (5b: overshoot up to the limit; CLAUDE.md: nothing stops dead.)
+- **E16. Keys ease in and out unless they say otherwise;** linear motion has to be asked for (5b: nothing robotic or evenly spaced).
+- **E17. Bends: both runtimes draw the same dense mesh.** Section 5b says to set SpriteKit's `subdivisionLevels` "to match the WebGL mesh", but Apple never documents how SpriteKit subdivides, so I expand the bend grid myself, identically in both, and tell SpriteKit not to subdivide. Proposed in the phase 1 PR.
+- **E18. SpriteKit draws one sprite per part, placed by the shared engine,** rather than a node per bone as `PLAN.md` first said. The two runtimes then compute every position the same way, and SpriteKit never has to represent a skewed node.
+- **E19. A marking on a bending part is painted into that part**, not laid over it (the kitty's tail patch, M5). SpriteKit cannot clip to a bent part or bend an overlay with its part reliably; painted in, the patch still moves with the tail and never crosses its outline, which is what 5b asks for. In format version 1 clips also do not nest; the lids inside the eyes inside the head (phase 4) add nesting.
+
 ## From the spec (section 24)
 
 The spec's own open questions, with where each stands. Owners are the spec's; where a default or a timing is mine, it says so.

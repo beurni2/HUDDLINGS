@@ -1,9 +1,10 @@
 name: testflight
 
 # An internal build of the app (with the Lab, QUESTIONS.md E1) to the founder's
-# internal TestFlight group. Run by hand. It needs these repository secrets, which
-# only the founder adds: ASC_KEY_ID, ASC_ISSUER_ID and ASC_KEY_P8 (an App Store
-# Connect API key) and APPLE_TEAM_ID. Nothing here prints them.
+# internal TestFlight group. Run by hand. It needs the repository secrets
+# ASC_KEY_ID, ASC_ISSUER_ID and ASC_KEY_P8 (an App Store Connect API key), which
+# only the founder adds, and the Team ID, which is not a secret: the repository
+# variable APPLE_TEAM_ID (docs/PLAN.md, What I need from you). Nothing here prints them.
 on:
   workflow_dispatch:
 
@@ -18,7 +19,7 @@ jobs:
       ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
       ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
       ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
-      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
     steps:
       - name: The secrets are there
         run: |
@@ -27,7 +28,7 @@ jobs:
             [ -n "${!name}" ] || missing="$missing $name"
           done
           if [ -n "$missing" ]; then
-            echo "::error::TestFlight needs these repository secrets, which only the founder can add:$missing"
+            echo "::error::TestFlight needs these, which only the founder can add (secrets, and the variable APPLE_TEAM_ID):$missing"
             exit 1
           fi
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

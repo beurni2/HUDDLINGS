@@ -117,3 +117,25 @@ public func sampleDiscrete(_ keys: [DiscreteKey], _ t: Double) -> String {
     }
     return value
 }
+
+/// The order track's variant at time t, sampled as `sampleDiscrete` does; nil is the view's own order.
+public func sampleOrder(_ keys: [OrderKey], _ t: Double) -> String? {
+    guard let first = keys.first else { preconditionFailure("a discrete track needs at least one key") }
+    var value = first.variant
+    for key in keys {
+        if key.time <= t { value = key.variant } else { break }
+    }
+    return value
+}
+
+/// The value a channel has when a clip does not key it.
+public func restValue(_ channel: Channel) -> Double {
+    channel == .squash || channel == .scale ? 1 : 0
+}
+
+/// A clip's local time for a time since it started, wrapping when it loops.
+public func localTime(_ clip: Clip, _ elapsedMs: Double) -> Double {
+    if clip.loop != true { return min(max(elapsedMs, 0), clip.lengthMs) }
+    let t = elapsedMs.truncatingRemainder(dividingBy: clip.lengthMs)
+    return t < 0 ? t + clip.lengthMs : t
+}

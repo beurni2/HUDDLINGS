@@ -153,6 +153,16 @@ public struct Affine: Equatable, Sendable {
     public func apply(_ x: Double, _ y: Double) -> (Double, Double) {
         (a * x + c * y + tx, b * x + d * y + ty)
     }
+
+    /// The inverse transform. Rig transforms always have a non-zero determinant.
+    public func inverted() -> Affine {
+        let det = a * d - b * c
+        let ia = d / det
+        let ib = -b / det
+        let ic = -c / det
+        let id = a / det
+        return Affine(a: ia, b: ib, c: ic, d: id, tx: -(ia * tx + ic * ty), ty: -(ib * tx + id * ty))
+    }
 }
 
 /// Catmull–Rom interpolation through p1 and p2 at t in 0...1, with p0 and p3 as neighbours.
