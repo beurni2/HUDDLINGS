@@ -24,14 +24,28 @@ class NoSheetPixels(unittest.TestCase):
         self.package.mkdir(parents=True)
         (self.package / "atlas@2x-0.png").write_bytes(b"\x89PNG a page")
         (self.package / "rig.json").write_text("{}")
-        files = {name: hashlib.sha256((self.package / name).read_bytes()).hexdigest() for name in ["atlas@2x-0.png", "rig.json"]}
-        (self.package / "package.json").write_text(json.dumps({"files": files}))
+        (self.package / "atlas.json").write_text(json.dumps({"sets": [{"name": "2x", "scale": 2, "pages": [{"file": "atlas@2x-0.png", "width": 4, "height": 4}], "regions": {}}]}))
+        self.list_package()
         (self.app / "AppIcon60x60@2x.png").write_bytes(b"\x89PNG an icon")
-        (self.app / "Assets.car").write_bytes(b"car")
+        (self.app / "Assets.car").write_bytes(b"BOMStore car")
+        # What else Xcode writes into an app: none of it is an image.
+        (self.app / "Info.plist").write_bytes(b"bplist00\xd1\x01\x02")
+        (self.app / "PkgInfo").write_bytes(b"APPL????")
+        (self.app / "Huddlings").write_bytes(b"\xcf\xfa\xed\xfe" + bytes(64))
+        (self.app / "embedded.mobileprovision").write_bytes(b"0\x82\x10\x00" + bytes(64))
+        (self.app / "_CodeSignature").mkdir()
+        (self.app / "_CodeSignature" / "CodeResources").write_text("<?xml version=\"1.0\"?><plist/>")
+        (self.app / "Base.lproj").mkdir()
+        (self.app / "Base.lproj" / "LaunchScreen.storyboardc").write_bytes(b"NIBArchive" + bytes(32))
         self.sheet = next(p for p in no_sheet_pixels.sheet_files() if p.suffix == ".jpg")
 
     def tearDown(self):
         self.tmp.cleanup()
+
+    def list_package(self):
+        """Lists every file of the package in package.json, with its SHA-256."""
+        files = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in self.package.iterdir() if p.name != "package.json"}
+        (self.package / "package.json").write_text(json.dumps({"files": files}))
 
     def check(self, builds=None):
         return no_sheet_pixels.check(builds or [self.app], catalogue_names=only_the_icon)
@@ -52,12 +66,30 @@ class NoSheetPixels(unittest.TestCase):
             image.save(self.package / "page.png")
             image.crop((0, 0, image.width // 2, image.height // 2)).save(self.app / "crop.png")
         problems = self.check()
-        self.assertTrue(any("characters/test/page.png: an image no character package lists" in p for p in problems), problems)
-        self.assertTrue(any("crop.png: an image no character package lists" in p for p in problems), problems)
+        self.assertTrue(any("characters/test/page.png: an image that is neither" in p for p in problems), problems)
+        self.assertTrue(any("crop.png: an image that is neither" in p for p in problems), problems)
+
+    def test_a_sheet_in_another_format_or_under_another_name_is_caught(self):
+        with Image.open(self.sheet) as image:
+            small = image.convert("RGB").resize((64, 48))
+        small.save(self.app / "sheet.avif")
+        small.save(self.app / "sheet.jp2")
+        small.save(self.app / "sheet.tga")
+        small.save(self.package / "notes.bin", format="PNG")
+        problems = self.check()
+        for name in ["sheet.avif", "sheet.jp2", "sheet.tga", "characters/test/notes.bin"]:
+            self.assertTrue(any(f"{name}: an image" in p for p in problems), (name, problems))
+
+    def test_a_listed_image_must_be_an_atlas_page(self):
+        with Image.open(self.sheet) as image:
+            image.convert("RGB").resize((64, 48)).save(self.package / "overlay.png")
+        self.list_package()
+        problems = self.check()
+        self.assertTrue(any("characters/test/overlay.png: an image that is neither" in p for p in problems), problems)
 
     def test_a_listed_page_that_changed_is_caught(self):
         (self.package / "atlas@2x-0.png").write_bytes(b"\x89PNG another page")
-        self.assertTrue(any("differs from the one its package lists" in p for p in self.check()))
+        self.assertTrue(any("an atlas page that differs from the one its package lists" in p for p in self.check()))
 
     def test_only_the_bundle_root_may_hold_app_icons(self):
         (self.package / "AppIcon-sheet.png").write_bytes(b"x")
