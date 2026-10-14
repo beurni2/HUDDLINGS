@@ -90,10 +90,16 @@ jobs:
         run: |
           xcodebuild -exportLocalizations -project ios/Huddlings.xcodeproj -localizationPath build/loc -exportLanguage en
           python3 tools/copylint/strings_build.py check build/loc
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        if: ${{ !cancelled() && steps.sim.outcome == 'success' }}
+        with:
+          python-version: "3.11"
       - name: Nothing from the sheets in the app, and the packages arrive byte for byte
         # Runs even when a test above failed, so one run reports everything.
         if: ${{ !cancelled() && steps.sim.outcome == 'success' }}
         run: |
+          # The E1 check reads images with Pillow, at the version tools/requirements.txt pins.
+          python3 -m pip install --quiet "$(grep -i '^pillow==' tools/requirements.txt)"
           app=$(find build/derived/Build/Products -name Huddlings.app -path '*iphonesimulator*' | head -1)
           python3 tools/qa/no_sheet_pixels.py "$app"
           python3 tools/qa/package_in_app.py "$app"

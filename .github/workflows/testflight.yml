@@ -80,8 +80,14 @@ jobs:
             -allowProvisioningUpdates -authenticationKeyPath "$RUNNER_TEMP/AuthKey.p8" \
             -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
             DEVELOPMENT_TEAM="$APPLE_TEAM_ID" CODE_SIGN_STYLE=Automatic CURRENT_PROJECT_VERSION="${{ github.run_number }}"
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
       - name: Nothing from the sheets in the build
-        run: python3 tools/qa/no_sheet_pixels.py build/Huddlings.xcarchive
+        run: |
+          # The E1 check reads images with Pillow, at the version tools/requirements.txt pins.
+          python3 -m pip install --quiet "$(grep -i '^pillow==' tools/requirements.txt)"
+          python3 tools/qa/no_sheet_pixels.py build/Huddlings.xcarchive
       - name: Upload to TestFlight, internal testing only
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
