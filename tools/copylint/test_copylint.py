@@ -439,6 +439,7 @@ class TheRepositorysCopy(unittest.TestCase):
         self.assertEqual(6, sum(k.startswith("preview.") for k in strings))
         self.assertEqual(12, sum(k.startswith("treats.hint.") for k in strings))
         self.assertEqual("Send your voice. Get their laugh back.", strings["share.tagline"]["text"])
+        self.assertEqual(["store"], strings["share.tagline"]["surfaces"])
 
     def test_surfaces_follow_the_spec(self):
         strings = self.catalogue["strings"]

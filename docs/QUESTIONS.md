@@ -1,8 +1,8 @@
 # Questions
 
-Where the spec is silent or contradicts itself, I don't invent the answer. The question goes here with the safest reversible default, which holds until you decide (CLAUDE.md). They come from a review of the whole spec by fresh reviewers, each finding checked by a second reviewer who tried to refute it; the record is in `qa/phase0/spec-audit.md`.
+Where the spec is silent or contradicts itself, I don't invent the answer. The question goes here with the safest reversible default, which holds until you decide (CLAUDE.md). Most come from a review of the whole spec by fresh reviewers, each finding checked by a second reviewer who tried to refute it; where each entry came from is listed in `qa/phase0/spec-audit.md`. Where the copy catalogue holds a string a question may change, it keeps the spec's own text until you answer.
 
-**How to answer:** in the pull request, write the number and your choice ("Q3: use the library", "Q4: default OK"). Silence keeps the default. Line numbers (L) refer to `docs/huddlings-spec.md`.
+**How to answer:** in the pull request, write the number and your choice ("Q4: use the library", "Q3: default OK"). Silence keeps the default. Line numbers (L) refer to `docs/huddlings-spec.md`.
 
 ## Decided
 
@@ -14,7 +14,7 @@ Where the spec is silent or contradicts itself, I don't invent the answer. The q
 ### Q1. Which iPhone will measure the speed budgets?
 - **The spec says:** L716 "at most 2 ms of CPU per frame on an iPhone 12"; L723 "Measured on a real iPhone before Gate B"; L2141 (M1) "60 fps on an iPhone 12 with device motion running"; L2143 (M3) "a link opens on the web on an iPhone 12 in Safari over slow 4G".
 - **Why it matters:** a pass on a newer iPhone does not prove the iPhone 12 budget, and the M1 and M3 gates name an iPhone 12.
-- **Default:** tell me your iPhone's model and iOS version. Gate B is judged on your phone, with the iPhone 12 budget marked "not yet verified" in `LIMITATIONS.md`, never "met". An iPhone 12, owned or borrowed, is needed by the M1 gate.
+- **Default:** until you tell me, Gate B is judged on whichever iPhone you test TestFlight builds on, and the iPhone 12 budget is marked "not yet verified" in `LIMITATIONS.md`, never "met". An iPhone 12, owned or borrowed, is needed by the M1 gate. Telling me your iPhone's model and iOS version (`PLAN.md`, item 5) helps me set the measurements up.
 - **Owner:** founder
 
 ## Needed by Gate A (the dog's look)
@@ -25,22 +25,24 @@ Where the spec is silent or contradicts itself, I don't invent the answer. The q
 - **Default:** for the dog (and later the rabbit), squeeze becomes the happy crescents, as L482 already allows for excited, and sparkle becomes happy crescents with star particles beside the head, as the dog's Proud panel draws. At Gate A I also show a dog-style `> <` and star eye, labelled "not on the dog sheet", so you can choose.
 - **Owner:** founder
 
-## Needed by Gate B (the dog alive on your iPhone)
+## Needed by phase 4 (the rig and Visual QA)
 
-### Q3. Can Gate B use temporary licensed sounds?
-- **The spec says:** L612 Gate B "passes when ... its sounds and haptics land on their frames"; L807 "Animate the demo first, with its first sounds and haptics (Gate B)"; L2199 "Mochi's sound set per species: a sound designer or a licensed library. Before Gate C."; L884 "never words and never generated (rule R8)".
-- **Why it matters:** Gate B can't pass without sounds, R8 forbids generated ones, and the sound set is only due a gate later.
-- **Default:** until you choose a designer or a library, Gate B uses a few recorded sounds under CC0 or a licence that allows shipping inside an app, listed with their sources in `characters/dog/sounds/LICENSES.md` and marked temporary. Your set replaces them at Gate C.
-- **Owner:** founder
-
-### Q4. As the spec words them, four Visual QA checks would fail good animation. May I narrow them?
+### Q3. As the spec words them, four Visual QA checks would fail good animation. May I narrow them?
 - **The spec says:** L697 Twinning: "left and right parts (ears, paws, eyes) follow the same curve ... for more than 300 ms"; L704 Life: "8 s pass awake without a blink"; L695 Snaps: "a bone's angular speed jumps above 4× its 3-frame average"; L696 Even spacing: "a moving bone keeps a constant speed (within 5%) for more than 6 frames".
 - **Why it matters:** CLAUDE.md says never to loosen a check without asking. Each change below makes its check flag less often:
   1. **Twinning:** leave out the eyes. Both eyes always aim at one point, and the Face check still catches crossed eyes.
   2. **Life:** pause the 8 s blink timer while the eyes are closed, for example during a long, contented pat.
   3. **Snaps:** flag a jump only when it is 4× faster and also above a minimum speed. From stillness the average is zero, so any start of a move would be a "snap".
   4. **Even spacing:** don't apply it to travel across the hill. Sliding paws, straight paths and the body's own bones still check the gaits.
-- **Default:** the checks run as the spec words them. At Gate B I list every flag they raise on motion that looks right, with my reading of it, for you to judge.
+- **Default:** the checks run and block as the spec words them. If one blocks motion that looks right, I stop and show you the frames with my reading, rather than loosening it.
+- **Owner:** founder
+
+## Needed by Gate B (the dog alive on your iPhone)
+
+### Q4. Can Gate B use temporary licensed sounds?
+- **The spec says:** L612 Gate B "passes when ... its sounds and haptics land on their frames"; L807 "Animate the demo first, with its first sounds and haptics (Gate B)"; L2199 "Mochi's sound set per species: a sound designer or a licensed library. Before Gate C."; L884 "never words and never generated (rule R8)".
+- **Why it matters:** Gate B can't pass without sounds, R8 forbids generated ones, and the sound set is only due a gate later.
+- **Default:** until you choose a designer or a library, Gate B uses a few recorded sounds under CC0 or a licence that allows shipping inside an app, listed with their sources in `characters/dog/sounds/LICENSES.md` and marked temporary. Your set replaces them at Gate C.
 - **Owner:** founder
 
 ## M1: Home alive
@@ -88,7 +90,7 @@ Where the spec is silent or contradicts itself, I don't invent the answer. The q
 ### Q11. Can you provide the accounts and assets section 24 doesn't list?
 - **The spec says:** L1169 links live at `https://huddlings.app/p/{token}`; L1221 "`{safetyEmail}`, safety@huddlings.app"; L2099 "TelemetryDeck or PostHog"; L1514 "the small Huddlings mark". Nothing describes the app icon.
 - **Why it matters:** links and the preview spike need the domain; reports need a watched mailbox; every TestFlight upload needs an app icon.
-- **Default:** the domain and the safety address are single settings. The M3 spikes run on the edge host's own subdomain, and the M1 Safari spike on a temporary HTTPS host. Until your icon arrives, a placeholder drawn in code from the dog's parts, never sheet pixels. Needed: the domain and its DNS and Supabase staging and production (M3); the safety mailbox, who watches it, and a channel to alert you about reports (M3); the analytics account (before the beta); your icon (before any build reaches anyone but you); the Huddlings mark (M7).
+- **Default:** the domain and the safety address are single settings. The M3 spikes run on the edge host's own subdomain, and the M1 Safari spike on a temporary HTTPS host. Until your icon arrives, a placeholder drawn in code from the test character's plain shapes (the dog's parts after Gate A), never sheet pixels. Needed: the domain and its DNS and Supabase staging and production (M3); the safety mailbox, who watches it, and a channel to alert you about reports (M3); the analytics account (before the beta); your icon (before any build reaches anyone but you); the Huddlings mark (M7).
 - **Owner:** founder
 
 ### Q12. How soon should I alert you about a report nobody has reviewed?
@@ -105,7 +107,7 @@ Where the spec is silent or contradicts itself, I don't invent the answer. The q
 ### Q14. Are the "before the beta" legal items also due before the optional early test after M3?
 - **The spec says:** L2136 "a dog-only TestFlight build with Giggle and Hug, given to 20 people"; L2193 "The Terms and the Privacy policy. Before the beta."; L1914 Terms "ship with the first send (rule P10)".
 - **Why it matters:** outsiders would record and send before the Terms, the Privacy policy and the consent wording exist.
-- **Default:** every outsider-facing legal item is due before the first build that reaches anyone but you; until then, M3 builds go to internal testers only.
+- **Default:** every outsider-facing legal item is due before anyone but you uses a build, and drafts are enough until then; M3 builds go only to your own Apple IDs.
 - **Owner:** founder with counsel
 
 ### Q15. Should a returning person be able to restore their Huddling before hatching a new one?
@@ -127,7 +129,7 @@ Where the spec is silent or contradicts itself, I don't invent the answer. The q
 
 ### Q18. Does "Send your voice. Get their laugh back." go into the share texts?
 - **The spec says:** L40 "The line for the App Store and every share"; L1164 the link's share text is `{mochi} is bringing you something from {sender}.`; L1545 Mochi Cam's is `Made with {mochi} on Huddlings`.
-- **Default:** the share texts stay as sections 9 and 13 give them, and the line is used on the App Store. It is in the catalogue as `share.tagline`.
+- **Default:** the share texts stay as sections 9 and 13 give them, and the line is used on the App Store. It is in the catalogue as `share.tagline`, marked for the store.
 - **Owner:** founder
 
 ### Q19. May beta analytics link the events of one visit?
@@ -159,7 +161,7 @@ Where the spec is silent or contradicts itself, I don't invent the answer. The q
 ### Q23. Should the M7 Settings text also change its camera sentence?
 - **The spec says:** L2048 the M7 text is "The same, with its first sentence as: ...", so it keeps "The camera only looks for the treat you chose and keeps no picture."
 - **Why it matters:** once Mochi Cam films, that sentence is untrue (R6).
-- **Default:** from M7 that sentence is replaced by the spec's own M7 camera text (L2056): `Huddlings uses the camera to spot the treat you chose for your Huddling, and to film with Mochi Cam when you open it. No picture is kept unless you save or share a video.`
+- **Default:** from M7 that sentence is replaced by the spec's own M7 camera text (L2056); the catalogue keeps the spec's text until then: `Huddlings uses the camera to spot the treat you chose for your Huddling, and to film with Mochi Cam when you open it. No picture is kept unless you save or share a video.`
 - **Owner:** founder
 
 ## Engineering decisions taken
@@ -176,13 +178,13 @@ Decided by me under CLAUDE.md ("decide everything else and note it"). Tell me if
 - **E8. Mochi's own sounds are muted while anything records** (S3, scene sound paths, Mochi Cam), so they never end up in a voice note; haptics and motion continue.
 - **E9. The send flow gets a back step**, and closing it keeps what was recorded or typed as the one draft; only `Delete` discards it. When the recipient is fixed (a reply, a friend's envelope), S3c shows only that person.
 - **E10. A souvenir is marked shown only after its sound has finished;** a show cut short plays again next time. (L1457.)
-- **E11. The copy lint also refuses other forms of the R7 words** (misses, missing, died, forget, hurrying, sadly, streaks and so on; in notifications also hunger, fed, feeding, treats), as the safest reading of R7. No string in the spec is affected. Tell me if you want only the exact listed words.
+- **E11. The copy lint also refuses other forms of the R7 words** (misses, missing, died, forget, hurrying, sadly, streaks and so on; in notifications also hunger, fed, feeding, treats). The spec lists exact words; refusing their other forms is my stricter choice, and no string in the spec is affected. Tell me if you want only the exact listed words.
 - **E12. The M0 file-system audit covers the app's writable folders** (Documents, Library, tmp, the App Group). The spec says "no audio files" (L2140), but Mochi's own sounds ship inside the app; the audit is about recordings.
 - **E13. Catalogue keys I named** where the spec's table combines several strings: `treats.wearPlural`, `treats.takeOffPlural`, `report.reasons.*`, `prop.*`, `species.*`, `share.tagline`, `note.speed.*`. The speeds use "×", as sections 11, 14 and 22 write them.
 
 ## From the spec (section 24)
 
-The spec's own open questions, with where each stands. Owners and timings are the spec's; where a default is mine, it says so.
+The spec's own open questions, with where each stands. Owners are the spec's; where a default or a timing is mine, it says so.
 
 | Question | Default until decided | Owner | Needed by |
 | --- | --- | --- | --- |
@@ -191,14 +193,14 @@ The spec's own open questions, with where each stands. Owners and timings are th
 | Should link visits always run, whatever the energy | no | founder | two beta weeks |
 | Energy numbers (cost 15, thresholds 40 and 15, trot 15 min, walk 60 min, treat 35, no daytime refill) | launch-test settings | product | two beta weeks |
 | Voice notes up to 5 minutes, web replies up to 2 | as specified | founder | after the beta |
-| Teens in states with app store accountability laws | Apple's age range wherever available (L1728) | founder with counsel | the beta |
-| The Terms and the Privacy policy | none (see Q14) | founder with counsel | the beta (see Q14) |
-| The edge host for the visit page | Cloudflare Workers or similar | engineering, approved by the founder | M3 |
-| Recording consent wording | none (see Q14) | founder | the beta (see Q14) |
+| Teens in states with app store accountability laws | Apple's age range wherever available (L1729) | founder with counsel | the beta |
+| The Terms and the Privacy policy | drafts for builds only you use (Q14) | founder with counsel | before anyone but you uses a build (Q14) |
+| The edge host for the visit page | Cloudflare Workers or similar | engineering, approved by the founder | before M3 |
+| Counsel on recording consent wording for voice notes and souvenirs | none | founder | the beta, or earlier (Q14) |
 | Moderation: hand review in the beta, a service or staffing before public launch | hand review | founder | public launch |
-| The word list's source and the stricter teen list | none | founder | M3 |
-| The twelve foods after the recognition test | the twelve | engineering, approved by the founder | M2 |
-| Mochi's sound set per species | none (see Q3) | founder | Gate C (see Q3) |
+| The word list's source and additions, and the stricter teen list | none | founder | M3 (mine: the filter ships with the first send, P10) |
+| The twelve foods after the recognition test | the twelve | engineering, approved by the founder | the beta (L977) |
+| Mochi's sound set per species | none (see Q4) | founder | Gate C (see Q4) |
 | Build environment for iOS and the Apple Developer account | the macOS runner (CLAUDE.md) | founder | phase 1 (`PLAN.md`) |
 | Each companion's marking map | proposed at Gate A | founder | each Gate A |
 | The shared collar blue | `#7DB7E8` | founder | the dog's Gate A |

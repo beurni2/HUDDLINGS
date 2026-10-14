@@ -1813,7 +1813,6 @@
     "share.tagline": {
       "text": "Send your voice. Get their laugh back.",
       "surfaces": [
-        "share",
         "store"
       ],
       "section": "1",

@@ -66,7 +66,7 @@ def surfaces_for(key):
     if key == "web.previewTitle" or key.startswith("preview."):
         return ["preview"]
     if key == "share.tagline":
-        return ["share", "store"]
+        return ["store"]  # the spec says "and every share"; see docs/QUESTIONS.md Q18
     if key in ("send.shareText", "send.shareTime", "cam.shareText"):
         return ["share"]
     if key.startswith("prop."):
