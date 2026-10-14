@@ -15,6 +15,9 @@ if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
   exit 0
 fi
 
+# The web runtime, the build tools and Playwright (Chromium is preinstalled).
+npm install --silent --no-audit --no-fund || warn "npm install failed; the runtime checks will not run"
+
 # Python tools: reference prep, the sheet match, motion graphs, Visual QA.
 pip install --break-system-packages --root-user-action=ignore -q -r tools/requirements.txt \
   || warn "pip install failed; the section 5b Python tools may be missing"

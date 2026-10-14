@@ -20,3 +20,34 @@ jobs:
         run: python3 tools/copylint/copylint.py
       - name: Copy lint tests
         run: python3 -m unittest discover -s tools/copylint -v
+
+  runtime-web:
+    # The web runtime and the build tools: typecheck, tests, and the shared
+    # test vectors both runtimes are held to (characters/format/README.md).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22.22"
+      - name: Install
+        run: npm ci --no-audit --no-fund
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Tests
+        run: npm test
+      - name: Test vectors are current
+        run: |
+          npm run vectors
+          git diff --exit-code -- characters/format/vectors
+
+  swift-linux:
+    # The SpriteKit runtime's pure engine, held to the same vectors. Its
+    # Apple-only parts build on the macOS job.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Swift version
+        run: swift --version
+      - name: Tests
+        run: swift test --package-path ios/CompanionCore
