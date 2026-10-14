@@ -8,9 +8,13 @@ export const FORMAT = 1;
 export interface Spring {
   hz: number;
   damping: number;
-  /** The part's centre of mass in the bone's own space, in points. */
+  /** The part's centre of mass in the bone's own space, in points; at least 2 pt from the pivot. */
   com: [number, number];
+  /** How much the part lags its parent's turns. */
   follow: number;
+  /** How much the part lags its own clip rotation (an ear turning to a new state); 0 by default. */
+  selfFollow?: number;
+  /** How much the pivot's acceleration swings the part. */
   inertia: number;
 }
 
@@ -20,12 +24,15 @@ export interface Bone {
   x?: number;
   y?: number;
   rest?: number;
-  /** Rotation limits in degrees, around the rest angle. */
+  /** Rotation limits in degrees, around the rest angle: for the clip's rotation and, with a spring, for the total. */
   rot?: [number, number];
-  /** Volume-keeping squash: y scale s, x scale 1/s. */
+  /** Volume-keeping squash: y scale s, x scale 1/s. Never on the root. */
   squash?: [number, number];
-  /** Uniform scale. */
+  /** Uniform scale. On the root it scales the whole companion (perspective); elsewhere only the bone's own parts. */
   scale?: [number, number];
+  /** Limits of the fake turn's channels, on the fake turn's bone. */
+  yaw?: [number, number];
+  pitch?: [number, number];
   spring?: Spring;
   /** Rest placement in other views, where the drawing moves the pivot (a tail roots at the side in front view, at the back in side view). */
   views?: Record<string, { x?: number; y?: number; rest?: number }>;
@@ -49,12 +56,27 @@ export interface Part {
   defaultState?: string;
 }
 
-/** The fake turn (section 5b): the head's yaw and pitch slide face parts by up to these offsets, in points. */
+export type TurnRole = "face" | "marking" | "ear";
+
+/** The fake turn (section 5b, The rig; Appendix F's fakeTurn). */
 export interface FakeTurn {
+  /** The bone whose yaw and pitch channels drive it. */
   bone: string;
-  yaw: number;
-  pitch: number;
-  parts: Record<string, [number, number]>;
+  /** The yaw and pitch at which the front drawing's shifts are full. */
+  yawDeg: number;
+  pitchDeg: number;
+  /** Shares of the head's width (face, marking, ear) and height (nod) a part slides at full yaw or pitch. */
+  faceShift: number;
+  markingShift: number;
+  earShift: number;
+  nodShift: number;
+  /** How much the far eye narrows at full yaw, as a share of its width. */
+  farEyeNarrow: number;
+  /** The head views the fake turn acts in, with the head's width and height there, in points. */
+  views: Record<string, { size: [number, number] }>;
+  roles: Record<string, TurnRole>;
+  /** The eye that narrows when yaw is positive, and when it is negative. */
+  farEye: { positive: string; negative: string };
 }
 
 export interface Rig {
@@ -65,6 +87,7 @@ export interface Rig {
   views: string[];
   parts: Part[];
   drawOrder: Record<string, string[]>;
+  /** Other body orders a clip's order track can choose, named "<view>:<variant>". */
   drawOrderVariants?: Record<string, string[]>;
   /** The bone whose subtree takes the head's view; "head" by default. */
   headBone?: string;
@@ -77,7 +100,7 @@ export type Channel = "rot" | "x" | "y" | "squash" | "scale" | "yaw" | "pitch";
 
 export interface ClipEvent {
   at: number;
-  type: "keyPose" | "sound" | "haptic" | "order" | "effect" | "plant" | "lift" | "footstep";
+  type: "keyPose" | "sound" | "haptic" | "effect" | "plant" | "lift" | "footstep";
   name?: string;
 }
 
@@ -85,10 +108,14 @@ export interface Clip {
   name: string;
   lengthMs: number;
   loop?: boolean;
+  /** How long switching to this clip blends, 150 to 300 ms; 200 by default. */
+  blendInMs?: number;
   interruptAt?: number[];
   tracks?: Record<string, Partial<Record<Channel, Key[]>>>;
   states?: Record<string, DiscreteKey[]>;
   views?: Partial<Record<"body" | "head", DiscreteKey[]>>;
+  /** The body's draw-order variant over time; null is the view's own order. */
+  order?: [number, string | null][];
   events?: ClipEvent[];
 }
 
@@ -115,6 +142,12 @@ export interface Atlas {
 }
 
 const CHANNELS: Channel[] = ["rot", "x", "y", "squash", "scale", "yaw", "pitch"];
+const LIMITED: ("rot" | "squash" | "scale" | "yaw" | "pitch")[] = ["rot", "squash", "scale", "yaw", "pitch"];
+
+/** The body orders a rig can draw: each view's own order and every variant. */
+function bodyOrders(rig: Rig): [string, string[]][] {
+  return [...Object.entries(rig.drawOrder).filter(([name]) => !name.startsWith("head.")), ...Object.entries(rig.drawOrderVariants ?? {})];
+}
 
 /** Every problem with a rig and its clips, as readable lines. An empty list means the package is sound. */
 export function validate(rig: Rig, clips: Clip[], atlas?: AtlasSet): string[] {
@@ -125,15 +158,16 @@ export function validate(rig: Rig, clips: Clip[], atlas?: AtlasSet): string[] {
     if (bones.has(bone.name)) problems.push(`bone ${bone.name}: listed twice`);
     if (bone.parent !== undefined && !bones.has(bone.parent)) problems.push(`bone ${bone.name}: parent ${bone.parent} must come first`);
     if (bone.parent === undefined && bone.name !== "root") problems.push(`bone ${bone.name}: only root has no parent`);
-    if (bone.name === "root" && (bone.rot || bone.spring)) problems.push("bone root: never rotates");
-    for (const key of ["rot", "squash", "scale"] as const) {
+    if (bone.name === "root" && (bone.rot || bone.spring || bone.squash || bone.rest)) problems.push("bone root: never rotates or squashes");
+    for (const key of LIMITED) {
       const range = bone[key];
       if (range && !(range[0] <= range[1])) problems.push(`bone ${bone.name}: ${key} range is reversed`);
     }
+    if (bone.rot && !(bone.rot[0] <= 0 && bone.rot[1] >= 0)) problems.push(`bone ${bone.name}: rot limits must contain the rest angle (0)`);
     if (bone.spring) {
       const s = bone.spring;
       if (!(s.hz > 0) || !(s.damping >= 0)) problems.push(`bone ${bone.name}: spring needs hz > 0 and damping >= 0`);
-      if (s.com[0] === 0 && s.com[1] === 0) problems.push(`bone ${bone.name}: spring com cannot be the pivot`);
+      if (!(Math.hypot(s.com[0], s.com[1]) >= 2)) problems.push(`bone ${bone.name}: spring com must be at least 2 pt from the pivot`);
       if (!bone.rot) problems.push(`bone ${bone.name}: a spring needs a rot limit`);
     }
     bones.set(bone.name, bone);
@@ -161,12 +195,20 @@ export function validate(rig: Rig, clips: Clip[], atlas?: AtlasSet): string[] {
       if (part.warp.columns !== 1 || part.warp.rows < 1) problems.push(`part ${part.name}: a warp grid is 1 column by n rows`);
     }
   }
+
+  // Clipping (README, Rig: clipTo and clip groups).
   for (const part of rig.parts) {
-    if (part.clipTo && !parts.has(part.clipTo)) problems.push(`part ${part.name}: clipTo ${part.clipTo} is not a part`);
+    if (!part.clipTo) continue;
+    const mask = parts.get(part.clipTo);
+    if (!mask) {
+      problems.push(`part ${part.name}: clipTo ${part.clipTo} is not a part`);
+      continue;
+    }
+    if (mask.clipTo) problems.push(`part ${part.name}: its mask ${mask.name} is itself clipped; clips do not nest in version 1`);
+    if (part.warp || mask.warp) problems.push(`part ${part.name}: a bending part can neither be clipped nor be a mask in version 1`);
   }
 
-  const orders = { ...rig.drawOrder, ...(rig.drawOrderVariants ?? {}) };
-  for (const [name, order] of Object.entries(orders)) {
+  for (const [name, order] of Object.entries({ ...rig.drawOrder, ...(rig.drawOrderVariants ?? {}) })) {
     for (const entry of order) {
       if (entry === "@head") continue;
       if (!parts.has(entry)) problems.push(`draw order ${name}: unknown part ${entry}`);
@@ -175,8 +217,51 @@ export function validate(rig: Rig, clips: Clip[], atlas?: AtlasSet): string[] {
   for (const view of rig.views) {
     if (!rig.drawOrder[view]) problems.push(`draw order: none for view ${view}`);
   }
+  for (const name of Object.keys(rig.drawOrderVariants ?? {})) {
+    const [view, variant] = name.split(":");
+    if (!variant || !rig.views.includes(view!)) problems.push(`draw order variant ${name}: must be named <view>:<variant>`);
+  }
+  // Each clip group (the parts sharing a mask) is contiguous and drawn after its mask, in every order the rig can draw.
+  const heads = Object.entries(rig.drawOrder).filter(([name]) => name.startsWith("head."));
+  for (const [bodyName, body] of bodyOrders(rig)) {
+    for (const [headName, head] of heads.length ? heads : [["(no head order)", []] as [string, string[]]]) {
+      const order = body.flatMap((entry) => (entry === "@head" ? head : [entry]));
+      const where = `${bodyName} with ${headName}`;
+      const seen = new Set<string>();
+      let open: string | undefined;
+      for (const entry of order) {
+        const mask = parts.get(entry)?.clipTo;
+        if (mask !== open && mask !== undefined && seen.has(`group:${mask}`)) problems.push(`draw order ${where}: the parts clipped to ${mask} are not together`);
+        if (mask !== undefined) {
+          seen.add(`group:${mask}`);
+          if (order.includes(mask) && !seen.has(mask)) problems.push(`draw order ${where}: ${entry} comes before its mask ${mask}`);
+        }
+        open = mask;
+        seen.add(entry);
+      }
+    }
+  }
+
+  const ft = rig.fakeTurn;
+  if (ft) {
+    if (!bones.has(ft.bone)) problems.push(`fake turn: unknown bone ${ft.bone}`);
+    if (!(ft.yawDeg > 0) || !(ft.pitchDeg > 0)) problems.push("fake turn: yawDeg and pitchDeg must be positive");
+    for (const [view, { size }] of Object.entries(ft.views)) {
+      if (!rig.views.includes(view)) problems.push(`fake turn: unknown view ${view}`);
+      if (!(size[0] > 0 && size[1] > 0)) problems.push(`fake turn: the head size in ${view} must be positive`);
+    }
+    for (const [name, role] of Object.entries(ft.roles)) {
+      const part = parts.get(name);
+      if (!part) problems.push(`fake turn: unknown part ${name}`);
+      else if (role !== "ear" && !part.clipTo) problems.push(`fake turn: ${name} slides with the face, so it must be clipped (section 5b)`);
+    }
+    for (const eye of [ft.farEye.positive, ft.farEye.negative]) {
+      if (ft.roles[eye] !== "face") problems.push(`fake turn: far eye ${eye} must be a face part`);
+    }
+  }
 
   for (const clip of clips) {
+    if (clip.blendInMs !== undefined && !(clip.blendInMs >= 150 && clip.blendInMs <= 300)) problems.push(`clip ${clip.name}: blendInMs ${clip.blendInMs} is outside 150 to 300 ms (section 5b)`);
     for (const [boneName, channels] of Object.entries(clip.tracks ?? {})) {
       const bone = bones.get(boneName);
       if (!bone) {
@@ -185,29 +270,32 @@ export function validate(rig: Rig, clips: Clip[], atlas?: AtlasSet): string[] {
       }
       for (const [channel, keys] of Object.entries(channels) as [Channel, Key[]][]) {
         if (!CHANNELS.includes(channel)) problems.push(`clip ${clip.name}: ${boneName} has unknown channel ${channel}`);
+        if ((channel === "yaw" || channel === "pitch") && boneName !== ft?.bone) problems.push(`clip ${clip.name}: ${boneName}.${channel}: only the fake turn's bone has ${channel}`);
         let last = -Infinity;
         for (const key of keys) {
           if (key[0] < last) problems.push(`clip ${clip.name}: ${boneName}.${channel} keys out of order at ${key[0]} ms`);
           if (key[0] < 0 || key[0] > clip.lengthMs) problems.push(`clip ${clip.name}: ${boneName}.${channel} key at ${key[0]} ms is outside the clip`);
           last = key[0];
           const v = key[1];
-          if (channel === "rot" && bone.rot && (v < bone.rot[0] || v > bone.rot[1]))
-            problems.push(`clip ${clip.name}: ${boneName}.rot ${v} leaves its limit [${bone.rot[0]}, ${bone.rot[1]}]`);
-          if (channel === "squash" && (!bone.squash || v < bone.squash[0] || v > bone.squash[1]))
-            problems.push(`clip ${clip.name}: ${boneName}.squash ${v} is not allowed (scale channels, section 5b)`);
-          if (channel === "scale" && (!bone.scale || v < bone.scale[0] || v > bone.scale[1]))
-            problems.push(`clip ${clip.name}: ${boneName}.scale ${v} is not allowed (scale channels, section 5b)`);
+          if ((channel === "rot" || channel === "yaw" || channel === "pitch") && !bone[channel])
+            problems.push(`clip ${clip.name}: ${boneName} has no ${channel} limit, so it cannot be keyed`);
+          else if ((channel === "rot" || channel === "yaw" || channel === "pitch") && (v < bone[channel]![0] || v > bone[channel]![1]))
+            problems.push(`clip ${clip.name}: ${boneName}.${channel} ${v} leaves its limit [${bone[channel]![0]}, ${bone[channel]![1]}]`);
+          if ((channel === "squash" || channel === "scale") && (!bone[channel] || v < bone[channel][0] || v > bone[channel][1]))
+            problems.push(`clip ${clip.name}: ${boneName}.${channel} ${v} is not allowed (scale channels, section 5b)`);
         }
       }
     }
     for (const event of clip.events ?? []) {
       if (event.at < 0 || event.at > clip.lengthMs) problems.push(`clip ${clip.name}: event ${event.type} at ${event.at} ms is outside the clip`);
-      if (event.type === "order" && event.name !== undefined && !rig.drawOrderVariants?.[event.name])
-        problems.push(`clip ${clip.name}: order event names an unknown variant ${event.name}`);
       if (clip.loop && event.at === clip.lengthMs) problems.push(`clip ${clip.name}: on a loop, an event at ${clip.lengthMs} ms is the event at 0 ms; put it at 0`);
     }
     for (const [group, keys] of Object.entries(clip.views ?? {})) {
       for (const [, view] of keys ?? []) if (!rig.views.includes(view)) problems.push(`clip ${clip.name}: ${group} view ${view} is unknown`);
+    }
+    for (const [, variant] of clip.order ?? []) {
+      if (variant !== null && !rig.views.some((view) => rig.drawOrderVariants?.[`${view}:${variant}`]))
+        problems.push(`clip ${clip.name}: order variant ${variant} exists in no view`);
     }
   }
   return problems;

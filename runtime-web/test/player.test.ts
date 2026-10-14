@@ -16,13 +16,15 @@ const rig: Rig = {
   bones: [
     { name: "root" },
     { name: "body", parent: "root", y: -8, rot: [-30, 30], squash: [0.9, 1.1] },
-    { name: "tail.1", parent: "body", x: 38, y: -20, rot: [-40, 40], spring },
+    { name: "tail.1", parent: "body", x: 38, y: -20, rot: [-40, 40], spring, views: { "side.R": { x: -40, y: -24 } } },
     { name: "tail.2", parent: "tail.1", y: -20, rot: [-40, 40], spring: { ...spring, com: [0, -10] } },
     { name: "tag", parent: "body", y: -40, rot: [-5, 5], spring: { ...spring, hz: 4, com: [0, 12] } },
     // On the body's own pivot, so turning the body cannot move it: only follow acts.
     { name: "tuft", parent: "body", rot: [-20, 20], spring: { ...spring, com: [0, -10] } },
     // Turned 90° at rest, so its mass lies along x, in line with a sideways push.
     { name: "flag", parent: "body", x: 10, y: -30, rest: 90, rot: [-30, 30], spring: { ...spring, follow: 0, com: [0, -20] } },
+    // Feels only its own clip rotation.
+    { name: "ear", parent: "body", x: 20, y: -50, rot: [-40, 40], spring: { ...spring, follow: 0, inertia: 0, selfFollow: 0.8, com: [0, -15] } },
   ],
   views: ["front", "side.R"],
   parts: [
@@ -41,20 +43,26 @@ const clips: Clip[] = [
   { name: "hold", lengthMs: 500, tracks: { body: { rot: [[0, -10]], x: [[0, 10]] } }, states: { eye: [[0, "closed"]] } },
   // The body speeds up for 200 ms, then glides at a steady speed: the push ends at once.
   { name: "push", lengthMs: 400, tracks: { body: { x: [[0, 0], [200, 60, "easeIn"], [400, 240]] } } },
-  { name: "jolt", lengthMs: 200, tracks: { body: { x: [[0, 0], [16, 30, "step"], [33, -30, "step"], [50, 30, "step"], [66, -30, "step"], [83, 0, "step"]] } } },
+  // The body jumps sideways between steps: a cut, not a push.
+  { name: "jump", lengthMs: 200, tracks: { body: { x: [[0, 0], [16, 30, "step"], [33, -30, "step"], [50, 30, "step"], [66, -30, "step"], [83, 0, "step"]] } } },
+  // The same shake as real motion, as fast as it can be.
+  { name: "shake", lengthMs: 200, tracks: { body: { x: [[0, 0], [16, 30, "linear"], [33, -30, "linear"], [50, 30, "linear"], [66, -30, "linear"], [83, 0, "linear"]] } } },
+  { name: "turn", lengthMs: 1000, views: { body: [[0, "front"], [500, "side.R"]] }, order: [[0, "tailFront"]] },
+  { name: "perk", lengthMs: 1000, tracks: { ear: { rot: [[0, 0], [120, -30, "easeOut"]] } } },
+  { name: "slow", lengthMs: 500, blendInMs: 300, tracks: { body: { rot: [[0, 20]] } } },
   {
     name: "loop",
     lengthMs: 1000,
     loop: true,
     states: { eye: [[0, "open"], [600, "closed"]] },
+    order: [[0, null], [250, "tailFront"], [750, null]],
     events: [
       { at: 0, type: "keyPose" },
-      { at: 250, type: "order", name: "front:tailFront" },
+      { at: 250, type: "haptic", name: "tap" },
       { at: 500, type: "sound", name: "hm" },
-      { at: 750, type: "order" },
+      { at: 750, type: "effect", name: "sparkle" },
     ],
   },
-  { name: "front", lengthMs: 1000, loop: true, events: [{ at: 500, type: "order", name: "front:tailFront" }] },
   { name: "once", lengthMs: 300, events: [{ at: 0, type: "sound", name: "start" }, { at: 300, type: "sound", name: "end" }] },
 ];
 
@@ -170,27 +178,81 @@ test("follow alone makes a part on its parent's pivot lag the turn", () => {
   assert.ok(Math.max(...late) > 0.5, `the tuft should overshoot as the lean slows, most θ ${Math.max(...late).toFixed(3)}°`);
 });
 
-test("a spring at its limit loses its speed, so it comes off the limit as soon as the push ends", () => {
+test("a spring pushed past its room eases into the limit, never reaches it, and is never frozen", () => {
   const p = new Player(c, clips);
   p.play("push", 0);
-  const tag = (t: number) => p.advanceTo(t).pose.angle[c.index.get("tag")!]!;
-  close(tag(24 / 120), 5, 1e-12, "pinned at the limit while pushed");
-  // The push ends at step 24; from step 26 the second difference no longer sees it.
-  assert.ok(tag(27 / 120) < 5 - 0.1, "the tag should leave its limit within two steps of the push ending");
+  let last: number | undefined;
+  let deepest = 0;
+  for (let i = 0; i <= 120; i++) {
+    const tag = p.advanceTo(i / 120).pose.angle[c.index.get("tag")!]!;
+    assert.ok(Math.abs(tag) < 5, `tag at ${tag}° at frame ${i}`);
+    deepest = Math.max(deepest, Math.abs(tag));
+    // The first steps after load feel no push (README, Springs), so start looking at frame 5.
+    if (i >= 5 && i <= 30 && last !== undefined) assert.notEqual(tag, last, `the tag froze at frame ${i}`);
+    last = tag;
+  }
+  assert.ok(deepest > 4.5, `the push should drive the tag deep into its knee, deepest ${deepest.toFixed(3)}°`);
+  // Once the push is over it swings back out of the knee and settles.
+  const later = Array.from({ length: 60 }, (_, i) => Math.abs(p.advanceTo(1 + (i + 1) / 120).pose.angle[c.index.get("tag")!]!));
+  assert.ok(Math.min(...later) < 4, "the tag should come back out of its knee");
 });
 
-test("a violent jolt never takes a spring past its limit", () => {
+test("a violent shake keeps every spring inside its limit", () => {
   const p = new Player(c, clips);
-  p.play("jolt", 0);
-  let hitLimit = false;
+  p.play("shake", 0);
+  let deepest = 0;
   for (let i = 0; i <= 120; i++) {
     const f = p.advanceTo(i / 120);
-    const body = f.pose.angle[c.index.get("body")!]!;
-    const tag = f.pose.angle[c.index.get("tag")!]! - body;
-    assert.ok(tag >= -5 - 1e-12 && tag <= 5 + 1e-12, `tag at ${tag}° at frame ${i}`);
-    if (Math.abs(Math.abs(tag) - 5) < 1e-12) hitLimit = true;
+    for (const name of ["tag", "tail.1", "tail.2"]) {
+      const bone = c.index.get(name)!;
+      const own = f.pose.angle[bone]! - f.pose.angle[c.rig.bones[bone]!.parent === "body" ? c.index.get("body")! : c.index.get("tail.1")!]!;
+      const limit = c.rig.bones[bone]!.rot!;
+      assert.ok(own > limit[0] && own < limit[1], `${name} at ${own}° at frame ${i}`);
+    }
+    deepest = Math.max(deepest, Math.abs(f.pose.angle[c.index.get("tag")!]!));
   }
-  assert.ok(hitLimit, "the jolt should be strong enough to reach the tag's limit");
+  assert.ok(deepest > 4.5, "the shake should reach deep into the tag's knee");
+});
+
+test("a jump between steps (a step key) moves the body without kicking the springs", () => {
+  const p = new Player(c, clips);
+  p.play("jump", 0);
+  for (let i = 0; i <= 60; i++) {
+    const f = p.advanceTo(i / 120);
+    assert.equal(f.pose.angle[c.index.get("tag")!], 0, `frame ${i}`);
+    assert.equal(f.pose.angle[c.index.get("tail.1")!], 0, `frame ${i}`);
+  }
+});
+
+test("a view swap that moves a pivot does not kick its spring", () => {
+  const p = new Player(c, clips);
+  p.play("turn", 0);
+  for (let i = 0; i <= 120; i++) assert.equal(p.advanceTo(i / 120).pose.angle[c.index.get("tail.1")!], 0, `frame ${i}`);
+});
+
+test("a switch with no blend jumps the pose without kicking the springs", () => {
+  const p = new Player(c, clips);
+  p.play("hold", 0);
+  p.advanceTo(0.5);
+  // The body jumps from x = 10, −10° to the slide's start. The springs were at rest,
+  // so from here they must swing exactly as they do when the slide starts fresh.
+  p.play("slide", 0.5, 0);
+  const fresh = new Player(c, clips);
+  fresh.play("slide", 0);
+  for (let i = 1; i <= 60; i++) {
+    const a = p.advanceTo(0.5 + i / 120).pose.angle;
+    const b = fresh.advanceTo(i / 120).pose.angle;
+    for (const name of ["tail.1", "tail.2", "tag"]) close(a[c.index.get(name)!]!, b[c.index.get(name)!]!, 1e-9, `${name} at step ${i}`);
+  }
+});
+
+test("selfFollow makes a part overshoot its own clip turn, then settle on it", () => {
+  const p = new Player(c, clips);
+  p.play("perk", 0);
+  const ear = (t: number) => p.advanceTo(t).pose.angle[c.index.get("ear")!]!;
+  const after = Array.from({ length: 48 }, (_, i) => ear((i + 15) / 120));
+  assert.ok(Math.min(...after) < -31, `the ear should swing past −30°, least ${Math.min(...after).toFixed(3)}°`);
+  close(ear(2.5), -30, 0.05, "and settle on −30°");
 });
 
 test("the frame draws springs between the last two steps", () => {
@@ -236,6 +298,13 @@ test("a channel the new clip leaves alone blends back to rest", () => {
   close(x(0.3), 0);
 });
 
+test("a clip's own blend time is used when the switch names none", () => {
+  const p = new Player(c, clips);
+  p.play("hold", 0);
+  p.play("slow", 1);
+  close(p.channelsAt(1.15).body!.rot!, 5, 1e-12, "halfway through a 300 ms blend");
+});
+
 test("discrete tracks switch to the new clip when its weight reaches 0.5", () => {
   const p = new Player(c, clips);
   p.play("hold", 0);
@@ -251,7 +320,7 @@ test("events fire once each, in order, across loop wraps, whatever the frame rat
     return times.flatMap((t) => p.advanceTo(t).events.map((e) => `${e.type}:${e.name ?? ""}`));
   };
   const frames = (fps: number) => Array.from({ length: 2.6 * fps + 1 }, (_, i) => i / fps);
-  const expected = ["keyPose:", "order:front:tailFront", "sound:hm", "order:", "keyPose:", "order:front:tailFront", "sound:hm", "order:", "keyPose:", "order:front:tailFront", "sound:hm"];
+  const expected = ["keyPose:", "haptic:tap", "sound:hm", "effect:sparkle", "keyPose:", "haptic:tap", "sound:hm", "effect:sparkle", "keyPose:", "haptic:tap", "sound:hm"];
   assert.deepEqual(collect(frames(120)), expected);
   assert.deepEqual(collect(frames(30)), expected);
   assert.deepEqual(collect(frames(7)), expected);
@@ -269,7 +338,7 @@ test("a clip's events up to a switch still arrive, and a new clip fires its own 
   assert.deepEqual(p.advanceTo(0.35).events.map((e) => `${e.type}:${e.name ?? ""}`), ["sound:end", "keyPose:"]);
 });
 
-test("an order event sets the draw-order variant, an unnamed one restores it, across loops", () => {
+test("the order track picks the body's draw-order variant for the current view, and wraps with the loop", () => {
   const p = new Player(c, clips);
   p.play("loop", 0);
   const variant = (t: number) => p.advanceTo(t).state.variant;
@@ -278,11 +347,11 @@ test("an order event sets the draw-order variant, an unnamed one restores it, ac
   assert.equal(variant(0.8), undefined);
   assert.equal(variant(1.1), undefined);
   assert.equal(variant(1.3), "front:tailFront");
-  // A variant set late in a loop holds through the wrap until the clip sets it again.
+  // A variant the new view lacks falls back to that view's own order.
   const q = new Player(c, clips);
-  q.play("front", 0);
-  assert.equal(q.advanceTo(0.4).state.variant, undefined);
-  assert.equal(q.advanceTo(1.1).state.variant, "front:tailFront");
+  q.play("turn", 0);
+  assert.equal(q.advanceTo(0.2).state.variant, "front:tailFront");
+  assert.equal(q.advanceTo(0.6).state.variant, undefined);
 });
 
 test("time never goes backwards", () => {

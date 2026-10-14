@@ -139,3 +139,41 @@ export function catmullRom(p0: number, p1: number, p2: number, p3: number, t: nu
   const t3 = t2 * t;
   return 0.5 * (2 * p1 + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 + (-p0 + 3 * p1 - 3 * p2 + p3) * t3);
 }
+
+/** FNV-1a (32 bits) over a name's UTF-8 bytes: what separates one named random stream from another. */
+export function fnv1a32(name: string): number {
+  let h = 0x811c9dc5;
+  for (const byte of new TextEncoder().encode(name)) {
+    h ^= byte;
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h;
+}
+
+/** A named random stream: each consumer (blinks, gaze, an idle choice) draws from its own. */
+export function randomStream(seed: number, name: string): () => number {
+  return mulberry32((seed ^ fnv1a32(name)) >>> 0);
+}
+
+/** Where the soft limit's knee starts, as a share of the room on each side. */
+export const KNEE = 0.8;
+
+/**
+ * The soft limit (characters/format/README.md, Springs): x unchanged up to 80% of
+ * the room on its side, then a smooth knee that approaches the room and never
+ * passes it. lo ≤ 0 ≤ hi; a side with no room holds x at 0.
+ */
+export function softLimit(x: number, lo: number, hi: number): number {
+  if (x > 0) return knee(x, Math.max(hi, 0));
+  if (x < 0) return -knee(-x, Math.max(-lo, 0));
+  return 0;
+}
+
+function knee(x: number, room: number): number {
+  const k = KNEE * room;
+  if (x <= k) return x;
+  const span = room - k;
+  if (!(span > 0)) return room;
+  const u = (x - k) / span;
+  return k + (span * u) / (1 + u);
+}

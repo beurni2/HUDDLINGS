@@ -1,20 +1,26 @@
 // Evaluating a pose: bone world transforms from channel values, springs and
 // views, and the draw list both renderers draw (characters/format/README.md).
 import type { AtlasSet, Bone, Channel, Part, Rig } from "./format.ts";
-import { apply, catmullRom, compose, IDENTITY, invert, type Affine } from "./math.ts";
+import { apply, catmullRom, compose, IDENTITY, invert, softLimit, type Affine } from "./math.ts";
 
 export type Channels = Partial<Record<Channel, number>>;
 
 export interface PoseInput {
   /** The clip's channel values per bone; missing channels are at rest. */
   channels: Record<string, Channels>;
-  /** Spring angles per bone, in degrees. */
+  /** Spring angles θ per bone, in degrees, before the soft limit. */
   springs?: Record<string, number>;
   views: { body: string; head: string };
 }
 
 export interface Pose {
+  /**
+   * Each bone's frame in world points: rotation and translation, and the root's
+   * uniform scale. A bone's own squash and scale never reach its children's frames.
+   */
   world: Affine[];
+  /** Each bone's own x and y scale, from squash and scale: it scales the bone's parts and its children's pivot offsets. */
+  scale: [number, number][];
   /** Each bone's world angle: the sum of the rotations along its chain, in degrees. */
   angle: number[];
 }
@@ -48,25 +54,61 @@ export function restOf(bone: Bone, view: string): { x: number; y: number; rest: 
   return { x: o?.x ?? bone.x ?? 0, y: o?.y ?? bone.y ?? 0, rest: o?.rest ?? bone.rest ?? 0 };
 }
 
-export function evaluatePose(c: CompiledRig, input: PoseInput): Pose {
+/**
+ * Supplies a spring's θ while a pose is built, bone by bone, parents first: the
+ * player integrates there, given the pivot's world position, the parent's world
+ * angle, and the bone's rest angle and clip rotation.
+ */
+export type SpringSource = (bone: number, pivot: [number, number], parentAngle: number, rest: number, clipRot: number) => number;
+
+export function evaluatePose(c: CompiledRig, input: PoseInput, springSource?: SpringSource): Pose {
   const n = c.rig.bones.length;
   const world: Affine[] = new Array(n);
+  const scale: [number, number][] = new Array(n);
   const angle: number[] = new Array(n);
   for (let i = 0; i < n; i++) {
     const bone = c.rig.bones[i]!;
     const ch = input.channels[bone.name] ?? {};
-    const view = c.inHead[i] ? input.views.head : input.views.body;
-    const rest = restOf(bone, view);
-    const spring = input.springs?.[bone.name] ?? 0;
-    const rot = rest.rest + (ch.rot ?? 0) + spring;
-    const squash = ch.squash ?? 1;
-    const scale = ch.scale ?? 1;
+    const rest = restOf(bone, c.inHead[i] ? input.views.head : input.views.body);
+    const x = rest.x + (ch.x ?? 0);
+    const y = rest.y + (ch.y ?? 0);
+    const clipRot = ch.rot ?? 0;
     const p = c.parent[i]!;
-    const parentWorld = p >= 0 ? world[p]! : IDENTITY;
-    world[i] = compose(parentWorld, rest.x + (ch.x ?? 0), rest.y + (ch.y ?? 0), rot, scale / squash, scale * squash);
-    angle[i] = (p >= 0 ? angle[p]! : 0) + rot;
+    if (p < 0) {
+      // The root: its uniform scale is the whole companion's (perspective), so its frame carries it.
+      const s = ch.scale ?? 1;
+      world[i] = compose(IDENTITY, x, y, 0, s, s);
+      scale[i] = [1, 1];
+      angle[i] = 0;
+      continue;
+    }
+    const [psx, psy] = scale[p]!;
+    let rot = rest.rest + clipRot;
+    if (bone.spring && bone.rot) {
+      const theta = springSource
+        ? springSource(i, apply(world[p]!, psx * x, psy * y), angle[p]!, rest.rest, clipRot)
+        : (input.springs?.[bone.name] ?? 0);
+      rot += springAngle(theta, clipRot, bone.rot);
+    }
+    const squash = ch.squash ?? 1;
+    const s = ch.scale ?? 1;
+    world[i] = compose(world[p]!, psx * x, psy * y, rot, 1, 1);
+    scale[i] = [s / squash, s * squash];
+    angle[i] = angle[p]! + rot;
   }
-  return { world, angle };
+  return { world, scale, angle };
+}
+
+/** The spring's share of a bone's rotation: θ through the soft limit, in the room the clip's rotation leaves. */
+export function springAngle(theta: number, clipRot: number, limit: [number, number]): number {
+  return softLimit(theta, limit[0] - clipRot, limit[1] - clipRot);
+}
+
+/** The transform a bone's parts are drawn with: its frame and its own scale. */
+export function partMatrix(pose: Pose, bone: number): Affine {
+  const m = pose.world[bone]!;
+  const [sx, sy] = pose.scale[bone]!;
+  return { a: m.a * sx, b: m.b * sx, c: m.c * sy, d: m.d * sy, tx: m.tx, ty: m.ty };
 }
 
 export interface DrawItem {
@@ -103,39 +145,65 @@ export interface FrameState {
   views: { body: string; head: string };
   /** Discrete part states, such as an eye's "closed". */
   states: Record<string, string>;
-  /** The draw-order variant a clip's order event set, if any. */
+  /** The body's draw-order variant ("front:sniff"), when the clip's order track names one this view has. */
   variant?: string;
   /** The channels of the fake turn's bone (yaw, pitch), when the rig has one. */
   turn?: Channels;
 }
 
-/** How far the fake turn slides each face part, in points (section 5b, The rig). */
-export function faceShift(rig: Rig, turn: Channels | undefined): Record<string, [number, number]> {
-  const shifts: Record<string, [number, number]> = {};
+export interface TurnEffect {
+  /** How far each part slides, in points, in the fake turn bone's space. */
+  shift: Record<string, [number, number]>;
+  /** The far eye's x scale about its centre. */
+  narrow: Record<string, number>;
+}
+
+const clamp1 = (v: number) => Math.min(Math.max(v, -1), 1);
+
+/**
+ * The fake turn (section 5b): at full yaw the face slides toward the turn by faceShift
+ * of the head's width, markings by markingShift, the ears the other way by earShift,
+ * and the far eye narrows by farEyeNarrow; full pitch slides the face by nodShift of
+ * the head's height. Positive yaw slides toward +x, positive pitch toward +y (down).
+ * Beyond full yaw or pitch the shifts hold. Nothing moves in a view the turn does not list.
+ */
+export function fakeTurn(rig: Rig, headView: string, turn: Channels | undefined): TurnEffect {
+  const effect: TurnEffect = { shift: {}, narrow: {} };
   const ft = rig.fakeTurn;
-  if (!ft || !turn) return shifts;
-  const yaw = (turn.yaw ?? 0) / ft.yaw;
-  const pitch = (turn.pitch ?? 0) / ft.pitch;
-  for (const [name, [fx, fy]] of Object.entries(ft.parts)) shifts[name] = [yaw * fx, pitch * fy];
-  return shifts;
+  const view = ft?.views[headView];
+  if (!ft || !view || !turn) return effect;
+  const u = clamp1((turn.yaw ?? 0) / ft.yawDeg);
+  const v = clamp1((turn.pitch ?? 0) / ft.pitchDeg);
+  const [w, h] = view.size;
+  for (const [part, role] of Object.entries(ft.roles)) {
+    if (role === "face") effect.shift[part] = [ft.faceShift * w * u, ft.nodShift * h * v];
+    else if (role === "marking") effect.shift[part] = [ft.markingShift * w * u, 0];
+    else effect.shift[part] = [-ft.earShift * w * u, 0];
+  }
+  if (u > 0) effect.narrow[ft.farEye.positive] = 1 - ft.farEyeNarrow * u;
+  if (u < 0) effect.narrow[ft.farEye.negative] = 1 + ft.farEyeNarrow * u;
+  return effect;
 }
 
 export function drawList(c: CompiledRig, pose: Pose, atlas: AtlasSet, frame: FrameState): DrawItem[] {
   const items: DrawItem[] = [];
   const indexOfPart = new Map<string, number>();
-  const shifts = faceShift(c.rig, frame.turn);
+  const turn = fakeTurn(c.rig, frame.views.head, frame.turn);
+  const turnFrame = c.rig.fakeTurn ? pose.world[c.index.get(c.rig.fakeTurn.bone)!]! : IDENTITY;
   for (const name of orderFor(c.rig, frame.views, frame.variant)) {
     const part = c.parts.get(name)!;
     const view = part.group === "head" ? frame.views.head : frame.views.body;
     const regionName = regionFor(part, view, frame.states[name]);
     if (!regionName) continue;
+    // A clipped part shows only inside its mask: no mask drawn, nothing shown.
+    const mask = part.clipTo === undefined ? undefined : indexOfPart.get(part.clipTo);
+    if (part.clipTo !== undefined && mask === undefined) continue;
     const region = atlas.regions[regionName]!;
     const page = atlas.pages[region.page]!;
     const s = page.scale;
     // The region's rectangle in the part's bone space: its anchor sits on the pivot.
-    const shift = shifts[name] ?? [0, 0];
-    const left = -region.anchorX / s + shift[0];
-    const top = -region.anchorY / s + shift[1];
+    const left = -region.anchorX / s;
+    const top = -region.anchorY / s;
     const width = region.w / s;
     const height = region.h / s;
     const u0 = region.x / page.width;
@@ -150,16 +218,25 @@ export function drawList(c: CompiledRig, pose: Pose, atlas: AtlasSet, frame: Fra
         item.uvs.push(u0, v, u1, v);
       }
     } else {
-      const m = pose.world[c.index.get(part.bone)!]!;
+      const m = partMatrix(pose, c.index.get(part.bone)!);
+      const n = turn.narrow[name] ?? 1;
+      const cx = left + width / 2;
       for (const [x, y] of [[left, top], [left + width, top], [left, top + height], [left + width, top + height]] as const) {
-        item.positions.push(...apply(m, x, y));
+        item.positions.push(...apply(m, cx + (x - cx) * n, y));
       }
       item.uvs.push(u0, v0, u1, v0, u0, v1, u1, v1);
     }
-    if (part.clipTo !== undefined) {
-      const mask = indexOfPart.get(part.clipTo);
-      if (mask !== undefined) item.clipTo = mask;
+    const shift = turn.shift[name];
+    if (shift) {
+      // The slide is in the turn bone's space: turn it into the world and move every vertex.
+      const dx = turnFrame.a * shift[0] + turnFrame.c * shift[1];
+      const dy = turnFrame.b * shift[0] + turnFrame.d * shift[1];
+      for (let k = 0; k < item.positions.length; k += 2) {
+        item.positions[k]! += dx;
+        item.positions[k + 1]! += dy;
+      }
     }
+    if (mask !== undefined) item.clipTo = mask;
     indexOfPart.set(name, items.length);
     items.push(item);
   }
@@ -202,7 +279,7 @@ function warpMesh(
     const d = along(centre, y);
     let k = 0;
     for (let j = 1; j < chain.length; j++) if (along(restRel[j]!.tx, restRel[j]!.ty) <= d) k = j;
-    const m = pose.world[chain[k]!]!;
+    const m = partMatrix(pose, chain[k]!);
     const inv = inverses[k]!;
     const row: [number, number][] = [];
     for (const x of [left, left + width]) {

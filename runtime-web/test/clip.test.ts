@@ -22,8 +22,15 @@ test("a key's easing shapes the segment that ends at it", () => {
   assert.ok(lowest < -16.5, `easeOutBack should overshoot −16, lowest was ${lowest}`);
   // 1200 → 1620 uses easeInOut: at the midpoint it is exactly halfway.
   close(sampleKeys(headTilt, 1410), (-16 + 14) / 2);
-  // A key without an easing is linear: 420 → 1200 holds −16.
+  // Equal values hold whatever the easing: 420 → 1200 holds −16.
   close(sampleKeys(headTilt, 800), -16);
+});
+
+test("a key without an easing eases in and out; linear has to be asked for", () => {
+  const keys: Key[] = [[0, 0], [100, 10]];
+  close(sampleKeys(keys, 25), 10 * 4 * 0.25 * 0.25 * 0.25);
+  close(sampleKeys(keys, 50), 5);
+  close(sampleKeys([[0, 0], [100, 10, "linear"]], 25), 2.5);
 });
 
 test("keys land exactly on their values", () => {
@@ -37,7 +44,7 @@ test("a step key holds the previous value until its time", () => {
 });
 
 test("two keys at the same time jump without dividing by zero", () => {
-  const keys: Key[] = [[0, 0], [100, 1], [100, 3], [200, 3]];
+  const keys: Key[] = [[0, 0], [100, 1, "linear"], [100, 3], [200, 3]];
   close(sampleKeys(keys, 100), 3);
   close(sampleKeys(keys, 99), 0.99);
 });
@@ -68,21 +75,25 @@ const rig: Rig = {
     { name: "body", parent: "root", y: -10, rot: [-30, 30], squash: [0.93, 1.07] },
     { name: "head", parent: "body", y: -60, rot: [-18, 18] },
     { name: "ear.L", parent: "head", x: 20, y: -40, rot: [-14, 14], spring: { hz: 3, damping: 0.5, com: [0, 20], follow: 1, inertia: 1 } },
+    { name: "tail.1", parent: "body", rot: [-20, 20] },
+    { name: "tail.2", parent: "tail.1", y: -20, rot: [-20, 20] },
   ],
   views: ["front"],
   parts: [
     { name: "body", bone: "body", group: "body", regions: { front: "body/front" } },
     { name: "head.base", bone: "head", group: "head", regions: { front: "head/front" } },
     { name: "eye.L", bone: "head", group: "head", clipTo: "head.base", regions: { front: "eye.L/front", "front:closed": "eye.L/front/closed" } },
+    { name: "eye.R", bone: "head", group: "head", clipTo: "head.base", regions: { front: "eye.R/front" } },
     { name: "ear.L", bone: "ear.L", group: "head", regions: { front: "ear.L/front" } },
+    { name: "tail", bone: "tail.1", group: "body", regions: { front: "tail" }, warp: { chain: ["tail.1", "tail.2"], columns: 1, rows: 5 } },
   ],
-  drawOrder: { front: ["body", "@head"], "head.front": ["ear.L", "head.base", "eye.L"] },
-  drawOrderVariants: { "front:low": ["@head", "body"] },
+  drawOrder: { front: ["tail", "body", "@head"], "head.front": ["ear.L", "head.base", "eye.L", "eye.R"] },
+  drawOrderVariants: { "front:low": ["@head", "tail", "body"] },
 };
 
 test("a sound rig and clip pass validation", () => {
   const clip: Clip = { name: "ok", lengthMs: 1000, tracks: { body: { squash: [[0, 1], [500, 0.95]] }, head: { rot: [[0, 0], [500, 12]] } },
-    events: [{ at: 500, type: "order", name: "front:low" }], views: { body: [[0, "front"]] } };
+    order: [[0, null], [500, "low"]], views: { body: [[0, "front"]] }, blendInMs: 150 };
   assert.deepEqual(validate(rig, [clip]), []);
 });
 
@@ -101,9 +112,55 @@ test("validation refuses broken structure", () => {
     parts: [...rig.parts, { name: "x", bone: "ghost", group: "body", regions: { side: "x" }, clipTo: "missing" }],
     drawOrder: { front: ["body", "@head", "phantom"] },
   };
-  const problems = validate(broken, [{ name: "c", lengthMs: 100, events: [{ at: 200, type: "sound" }, { at: 10, type: "order", name: "nope" }] }]);
+  const problems = validate(broken, [{ name: "c", lengthMs: 100, events: [{ at: 200, type: "sound" }], order: [[10, "nope"]], blendInMs: 50 }]);
   for (const expected of ["parent nope must come first", "bone body: listed twice", "unknown bone ghost", "unknown view side",
-    "clipTo missing is not a part", "unknown part phantom", "outside the clip", "unknown variant nope"]) {
+    "clipTo missing is not a part", "unknown part phantom", "outside the clip", "order variant nope exists in no view", "blendInMs 50"]) {
     assert.ok(problems.some((p) => p.includes(expected)), `expected "${expected}" in:\n${problems.join("\n")}`);
   }
+});
+
+function expectProblem(problems: string[], expected: string) {
+  assert.ok(problems.some((p) => p.includes(expected)), `expected "${expected}" in:\n${problems.join("\n")}`);
+}
+
+test("validation refuses rotating a bone that declares no rotation", () => {
+  const problems = validate(rig, [{ name: "c", lengthMs: 100, tracks: { root: { rot: [[0, 5]] }, "tail.2": { rot: [[0, 1]] } } }]);
+  expectProblem(problems, "root has no rot limit, so it cannot be keyed");
+  assert.ok(!problems.some((p) => p.includes("tail.2")), problems.join("\n"));
+});
+
+test("validation refuses a root that squashes, and a spring whose mass sits on its pivot", () => {
+  const bones = rig.bones.map((b) =>
+    b.name === "root" ? { ...b, squash: [0.9, 1.1] as [number, number] } : b.name === "ear.L" ? { ...b, spring: { ...b.spring!, com: [1, 1] as [number, number] } } : b);
+  const problems = validate({ ...rig, bones }, []);
+  expectProblem(problems, "bone root: never rotates or squashes");
+  expectProblem(problems, "spring com must be at least 2 pt from the pivot");
+});
+
+test("validation keeps each clip group together and after its mask, in every order", () => {
+  expectProblem(validate({ ...rig, drawOrder: { ...rig.drawOrder, "head.front": ["head.base", "eye.L", "ear.L", "eye.R"] } }, []),
+    "the parts clipped to head.base are not together");
+  expectProblem(validate({ ...rig, drawOrder: { ...rig.drawOrder, "head.front": ["ear.L", "eye.L", "eye.R", "head.base"] } }, []),
+    "eye.L comes before its mask head.base");
+  // A variant is checked with every head order too.
+  expectProblem(validate({ ...rig, drawOrderVariants: { "front:low": ["eye.L", "body", "@head"] } }, []), "front:low with head.front");
+});
+
+test("validation refuses nested clips and clips on bending parts, for now", () => {
+  const parts = rig.parts.map((p) => (p.name === "eye.R" ? { ...p, clipTo: "eye.L" } : p.name === "ear.L" ? { ...p, clipTo: "tail" } : p));
+  const problems = validate({ ...rig, parts }, []);
+  expectProblem(problems, "its mask eye.L is itself clipped");
+  expectProblem(problems, "a bending part can neither be clipped nor be a mask");
+});
+
+test("validation checks the fake turn: its parts, its views, and that face parts are clipped", () => {
+  const fakeTurn = {
+    bone: "head", yawDeg: 20, pitchDeg: 12, faceShift: 0.06, markingShift: 0.03, earShift: 0.03, nodShift: 0.05, farEyeNarrow: 0.06,
+    views: { front: { size: [100, 80] as [number, number] }, back: { size: [0, 80] as [number, number] } },
+    roles: { "eye.L": "face" as const, "ear.L": "face" as const, ghost: "marking" as const },
+    farEye: { positive: "eye.L", negative: "eye.R" },
+  };
+  const problems = validate({ ...rig, fakeTurn }, [{ name: "c", lengthMs: 100, tracks: { body: { yaw: [[0, 5]] } } }]);
+  for (const expected of ["fake turn: unknown view back", "the head size in back must be positive", "ear.L slides with the face, so it must be clipped",
+    "unknown part ghost", "far eye eye.R must be a face part", "body.yaw: only the fake turn's bone has yaw"]) expectProblem(problems, expected);
 });

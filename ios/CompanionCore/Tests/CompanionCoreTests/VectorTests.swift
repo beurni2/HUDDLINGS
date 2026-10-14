@@ -47,6 +47,28 @@ final class VectorTests: XCTestCase {
         }
     }
 
+    func testRandomStreams() throws {
+        struct Case: Decodable { let seed: UInt32; let name: String; let hash: UInt32; let values: [Double] }
+        let cases = try load("streams", as: [Case].self)
+        XCTAssertFalse(cases.isEmpty)
+        for c in cases {
+            XCTAssertEqual(fnv1a32(c.name), c.hash, "hash of \(c.name)")
+            var random = Mulberry32(seed: c.seed, stream: c.name)
+            for (i, expected) in c.values.enumerated() {
+                XCTAssertEqual(random.next(), expected, "seed \(c.seed), stream \(c.name), value \(i)")
+            }
+        }
+    }
+
+    func testSoftLimit() throws {
+        struct Case: Decodable { let x: Double; let lo: Double; let hi: Double; let value: Double }
+        let cases = try load("soft-limit", as: [Case].self)
+        XCTAssertFalse(cases.isEmpty)
+        for c in cases {
+            assertClose(softLimit(c.x, c.lo, c.hi), c.value, "soft limit of \(c.x) in [\(c.lo), \(c.hi)]")
+        }
+    }
+
     func testTransforms() throws {
         struct Case: Decodable { let chain: [[Double]]; let point: [Double]; let result: [Double] }
         for (i, c) in try load("transform", as: [Case].self).enumerated() {

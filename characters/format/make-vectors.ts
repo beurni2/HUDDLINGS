@@ -4,7 +4,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { apply, catmullRom, compose, ease, IDENTITY, mulberry32, type Easing } from "../../runtime-web/src/math.ts";
+import { apply, catmullRom, compose, ease, fnv1a32, IDENTITY, mulberry32, randomStream, softLimit, type Easing } from "../../runtime-web/src/math.ts";
 import { sampleDiscrete, sampleKeys } from "../../runtime-web/src/clip.ts";
 import type { DiscreteKey, Key } from "../../runtime-web/src/format.ts";
 
@@ -30,6 +30,13 @@ write("random", seeds.map((seed) => {
   return { seed, values: Array.from({ length: 64 }, () => next()) };
 }));
 
+// Named random streams: FNV-1a of the name, XORed into the seed.
+const names = ["blink", "gaze", "ear.L.twitch", "variation:head_tilt", "", "é and ü"];
+write("streams", seeds.flatMap((seed) => names.map((name) => {
+  const next = randomStream(seed, name);
+  return { seed, name, hash: fnv1a32(name), values: Array.from({ length: 16 }, () => next()) };
+})));
+
 const transforms: { chain: [number, number, number, number, number][]; point: [number, number]; result: [number, number] }[] = [];
 const rng = mulberry32(7);
 for (let i = 0; i < 40; i++) {
@@ -54,14 +61,28 @@ const catmull = Array.from({ length: 30 }, (_, i) => {
 });
 write("catmull", catmull);
 
+// The soft limit, across and far beyond the knee, with rooms on both sides and none.
+const limits = [[-40, 40], [-10, 25], [0, 14], [-14, 0], [-0.5, 0.5]] as const;
+const limited: { x: number; lo: number; hi: number; value: number }[] = [];
+for (const [lo, hi] of limits) {
+  for (const share of [-50, -1.2, -1, -0.95, -0.8, -0.5, 0, 0.3, 0.8, 0.81, 0.9, 1, 1.5, 50]) {
+    const x = share * (share < 0 ? -lo : hi) || share * 10;
+    limited.push({ x, lo, hi, value: softLimit(x, lo, hi) });
+  }
+}
+write("soft-limit", limited);
+
 const headTilt: Key[] = [[0, 0, "easeInOut"], [420, -16, "easeOutBack"], [1200, -16], [1620, 14, "easeInOut"], [2200, 14], [2600, 0, "easeInOut"]];
 const bezierKeys: Key[] = [[0, 1], [150, 0.95, ["bezier", 0.25, 0.1, 0.25, 1]], [300, 1.04, "easeOut"], [500, 1, "step"], [500, 1.02], [800, 1]];
+// Keys that name no easing ease in and out; linear has to be asked for.
+const plainKeys: Key[] = [[0, 0], [300, 10], [600, -5, "linear"], [900, 3]];
 const times = Array.from({ length: 141 }, (_, i) => i * 20 - 10);
 const discrete: DiscreteKey[] = [[0, "open"], [1200, "closed"], [1340, "open"]];
 write("keys", {
   channels: [
     { keys: headTilt, t: times, value: times.map((t) => sampleKeys(headTilt, t)) },
     { keys: bezierKeys, t: times, value: times.map((t) => sampleKeys(bezierKeys, t)) },
+    { keys: plainKeys, t: times, value: times.map((t) => sampleKeys(plainKeys, t)) },
   ],
   discrete: [{ keys: discrete, t: times, value: times.map((t) => sampleDiscrete(discrete, t)) }],
 });

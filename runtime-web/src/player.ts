@@ -3,14 +3,15 @@
 // Springs). The host gives absolute times; the player never reads a wall clock.
 import type { Channel, Clip, ClipEvent, Spring } from "./format.ts";
 import { localTime, restValue, sampleDiscrete, sampleKeys } from "./clip.ts";
-import { apply, compose, DEG, ease, IDENTITY, type Affine } from "./math.ts";
-import { evaluatePose, restOf, type Channels, type CompiledRig, type FrameState, type Pose } from "./rig.ts";
+import { DEG, ease } from "./math.ts";
+import { evaluatePose, springAngle, type Channels, type CompiledRig, type FrameState, type Pose } from "./rig.ts";
 
 export const STEP_HZ = 120;
 const H = 1 / STEP_HZ;
 const CHANNELS: Channel[] = ["rot", "x", "y", "squash", "scale", "yaw", "pitch"];
 /** Times closer than this (seconds) count as equal, so n/120 computed two ways still matches. */
 const EPS = 1e-9;
+export const DEFAULT_BLEND_MS = 200;
 
 interface Mixer {
   clip: Clip;
@@ -31,9 +32,10 @@ interface SpringState {
   theta: number;
   velocity: number;
   previousTheta: number;
-  /** The pivot's world position and the parent's world angle over the last three steps, newest last. */
+  /** Over the last three steps, newest last: the pivot's world position, the parent's world angle, the bone's own rest + clip angle. */
   pivots: [number, number][];
-  angles: number[];
+  parentAngles: number[];
+  ownAngles: number[];
 }
 
 export interface Frame {
@@ -50,31 +52,45 @@ export class Player {
   private steps = 0;
   private now = 0;
   private springs: SpringState[];
+  private springOf: Map<number, SpringState>;
   private pending: ClipEvent[] = [];
   private defaultViews: { body: string; head: string };
+  private lastStepViews: { body: string; head: string } | undefined;
+  private cutPending = false;
 
   constructor(rig: CompiledRig, clips: Clip[]) {
     this.rig = rig;
     this.clips = new Map(clips.map((c) => [c.name, c]));
     this.springs = rig.rig.bones.flatMap((bone, i) =>
       bone.spring && bone.rot
-        ? [{ bone: i, spring: bone.spring, limit: bone.rot, theta: 0, velocity: 0, previousTheta: 0, pivots: [], angles: [] }]
+        ? [{ bone: i, spring: bone.spring, limit: bone.rot, theta: 0, velocity: 0, previousTheta: 0, pivots: [], parentAngles: [], ownAngles: [] }]
         : [],
     );
+    this.springOf = new Map(this.springs.map((sp) => [sp.bone, sp]));
     const first = rig.rig.views[0]!;
     this.defaultViews = { body: first, head: first };
   }
 
   /**
-   * Starts a clip at time t (seconds), blending from whatever plays over blendMs.
-   * The old clip's events up to t still reach the next frame; after t only the new clip's fire.
+   * Starts a clip at time t (seconds), blending from whatever plays over blendMs
+   * (the clip's blendInMs, else 200 ms). The old clip's events up to t still reach
+   * the next frame; after t only the new clip's fire.
    */
-  play(name: string, t: number, blendMs = 200): void {
+  play(name: string, t: number, blendMs?: number): void {
     const clip = this.clips.get(name);
     if (!clip) throw new Error(`no clip named ${name}`);
     this.checkTime(t);
-    if (this.mixer) this.pending.push(...this.collectEvents(this.mixer, t));
-    this.mixer = { clip, start: t, from: this.mixer, blendSeconds: this.mixer ? blendMs / 1000 : 0, firedTo: -Infinity };
+    const blend = (blendMs ?? clip.blendInMs ?? DEFAULT_BLEND_MS) / 1000;
+    if (this.mixer) {
+      this.pending.push(...this.collectEvents(this.mixer, t));
+      if (blend <= 0) this.cutPending = true;
+    }
+    this.mixer = { clip, start: t, from: this.mixer, blendSeconds: this.mixer ? blend : 0, firedTo: -Infinity };
+  }
+
+  /** Tells the springs the companion jumped (placed somewhere new): they keep swinging but feel no kick. */
+  cut(): void {
+    this.cutPending = true;
   }
 
   /** Runs the springs up to time t (seconds) and returns the frame to draw at t. */
@@ -82,7 +98,7 @@ export class Player {
     this.checkTime(t);
     while ((this.steps + 1) / STEP_HZ <= t + EPS) {
       this.steps++;
-      this.step(this.steps / STEP_HZ);
+      this.step(this.steps / STEP_HZ, (this.steps - 1) / STEP_HZ);
     }
     const alpha = Math.min(Math.max((t - this.steps / STEP_HZ) * STEP_HZ, 0), 1);
     const springs: Record<string, number> = {};
@@ -162,12 +178,12 @@ export class Player {
     const m = this.discreteSource(t);
     let variant: string | undefined;
     if (m) {
-      const elapsed = (t - m.start) * 1000;
-      const local = localTime(m.clip, elapsed);
+      const local = localTime(m.clip, (t - m.start) * 1000);
       if (m.clip.views?.body) views.body = sampleDiscrete(m.clip.views.body, local);
       if (m.clip.views?.head) views.head = sampleDiscrete(m.clip.views.head, local);
       for (const [part, keys] of Object.entries(m.clip.states ?? {})) states[part] = sampleDiscrete(keys, local);
-      variant = variantAt(m.clip, elapsed);
+      const order = m.clip.order ? sampleDiscrete(m.clip.order, local) : null;
+      if (order !== null && this.rig.rig.drawOrderVariants?.[`${views.body}:${order}`]) variant = `${views.body}:${order}`;
     }
     return { views, states, variant };
   }
@@ -177,93 +193,96 @@ export class Player {
     const events = m.clip.events ?? [];
     const to = (t - m.start) * 1000 + EPS * 1000;
     if (events.length === 0 || to <= m.firedTo) return [];
-    const length = m.clip.lengthMs;
     const fired: [number, number, ClipEvent][] = [];
-    const firstLoop = m.clip.loop && length > 0 ? Math.max(0, Math.floor(m.firedTo / length)) : 0;
-    const lastLoop = m.clip.loop && length > 0 ? Math.floor(to / length) : 0;
-    for (let k = firstLoop; k <= lastLoop; k++) {
-      events.forEach((e, i) => {
-        const at = k * length + e.at;
-        if (at > m.firedTo && at <= to) fired.push([at, i, e]);
-      });
-    }
+    forEachCrossing(m.clip, events.map((e) => e.at), m.firedTo, to, (at, i) => fired.push([at, i, events[i]!]));
     m.firedTo = to;
     return fired.sort((a, b) => a[0] - b[0] || a[1] - b[1]).map(([, , e]) => e);
   }
 
-  /** One spring step at time s: the springs feel their parents' motion in this step's pose. */
-  private step(s: number): void {
-    if (this.springs.length === 0) return;
-    const c = this.rig;
-    const channels = this.channelsAt(s);
-    const views = this.stateAt(s).views;
-    const bones = c.rig.bones;
-    const world: Affine[] = new Array(bones.length);
-    const angle: number[] = new Array(bones.length);
-    const springOf = new Map(this.springs.map((sp) => [sp.bone, sp]));
-    // Bones come parents first, so a spring feels its parent's spring from this same step.
-    for (let i = 0; i < bones.length; i++) {
-      const bone = bones[i]!;
-      const ch = channels[bone.name] ?? {};
-      const rest = restOf(bone, c.inHead[i] ? views.head : views.body);
-      const p = c.parent[i]!;
-      const parentWorld = p >= 0 ? world[p]! : IDENTITY;
-      const parentAngle = p >= 0 ? angle[p]! : 0;
-      const x = rest.x + (ch.x ?? 0);
-      const y = rest.y + (ch.y ?? 0);
-      const clipRot = rest.rest + (ch.rot ?? 0);
-      const sp = springOf.get(i);
-      if (sp) integrate(sp, apply(parentWorld, x, y), parentAngle, clipRot);
-      const rot = clipRot + (sp ? sp.theta : 0);
-      const squash = ch.squash ?? 1;
-      const scale = ch.scale ?? 1;
-      world[i] = compose(parentWorld, x, y, rot, scale / squash, scale * squash);
-      angle[i] = parentAngle + rot;
+  /** True when a channel jumps (a `step` key) between two step times in any clip that is mixing. */
+  private stepKeyCrossed(m: Mixer | undefined, from: number, to: number): boolean {
+    for (; m; m = m.from) {
+      const a = (from - m.start) * 1000 + EPS * 1000;
+      const b = (to - m.start) * 1000 + EPS * 1000;
+      for (const tracks of Object.values(m.clip.tracks ?? {})) {
+        for (const keys of Object.values(tracks)) {
+          const jumps = keys!.filter((k) => k[2] === "step").map((k) => k[0]);
+          let crossed = false;
+          if (jumps.length) forEachCrossing(m.clip, jumps, a, b, () => (crossed = true));
+          if (crossed) return true;
+        }
+      }
     }
+    return false;
+  }
+
+  /** One spring step at time s: the springs feel their parents' motion in this step's pose. */
+  private step(s: number, previous: number): void {
+    if (this.springs.length === 0) return;
+    const views = this.stateAt(s).views;
+    const viewsChanged = this.lastStepViews !== undefined && (views.body !== this.lastStepViews.body || views.head !== this.lastStepViews.head);
+    const cut = this.cutPending || viewsChanged || this.stepKeyCrossed(this.mixer, previous, s);
+    this.cutPending = false;
+    this.lastStepViews = views;
+    // Bones come parents first, so a spring feels its parent's spring from this same step.
+    evaluatePose(this.rig, { channels: this.channelsAt(s), views }, (bone, pivot, parentAngle, rest, clipRot) => {
+      const sp = this.springOf.get(bone)!;
+      integrate(sp, cut, pivot, parentAngle, rest, clipRot);
+      return sp.theta;
+    });
   }
 }
 
-/** The draw-order variant at elapsed ms: the last order event passed, carried across a loop's wrap. */
-function variantAt(clip: Clip, elapsed: number): string | undefined {
-  const orders = (clip.events ?? []).filter((e) => e.type === "order").sort((a, b) => a.at - b.at);
-  if (orders.length === 0) return undefined;
-  const local = localTime(clip, elapsed);
-  let last: ClipEvent | undefined;
-  for (const e of orders) if (e.at <= local + EPS * 1000) last = e;
-  if (!last && clip.loop && elapsed >= clip.lengthMs) last = orders[orders.length - 1];
-  return last?.name;
+/**
+ * Calls back for each time in `times` (ms within the clip) whose elapsed position
+ * lies in (from, to], counting a looping clip's every pass.
+ */
+function forEachCrossing(clip: Clip, times: number[], from: number, to: number, hit: (at: number, index: number) => void): void {
+  const length = clip.lengthMs;
+  const loops = clip.loop && length > 0;
+  const first = loops ? Math.max(0, Math.floor(from / length)) : 0;
+  const last = loops ? Math.floor(to / length) : 0;
+  for (let k = first; k <= last; k++) {
+    times.forEach((time, i) => {
+      const at = k * length + time;
+      if (at > from && at <= to) hit(at, i);
+    });
+  }
+}
+
+function push<T>(history: T[], value: T, cut: boolean): void {
+  if (cut) history.length = 0;
+  history.push(value);
+  if (history.length > 3) history.shift();
+}
+
+/** Second difference over the last three steps, per second squared; zero until there are three. */
+function accel(h: number[]): number {
+  return h.length === 3 ? (h[2]! - 2 * h[1]! + h[0]!) / (H * H) : 0;
 }
 
 /** Semi-implicit Euler for one spring (README, Springs). */
-function integrate(sp: SpringState, pivot: [number, number], parentAngle: number, clipRot: number): void {
-  sp.pivots.push(pivot);
-  sp.angles.push(parentAngle);
-  if (sp.pivots.length > 3) {
-    sp.pivots.shift();
-    sp.angles.shift();
-  }
-  let ax = 0, ay = 0, parentAccel = 0;
-  if (sp.pivots.length === 3) {
-    const [p0, p1, p2] = sp.pivots as [[number, number], [number, number], [number, number]];
-    ax = (p2[0] - 2 * p1[0] + p0[0]) / (H * H);
-    ay = (p2[1] - 2 * p1[1] + p0[1]) / (H * H);
-    const [a0, a1, a2] = sp.angles as [number, number, number];
-    parentAccel = (a2 - 2 * a1 + a0) / (H * H);
-  }
-  // The centre of mass in world space, turned by the bone's world angle (parent + clip + spring).
+function integrate(sp: SpringState, cut: boolean, pivot: [number, number], parentAngle: number, rest: number, clipRot: number): void {
+  push(sp.pivots, pivot, cut);
+  push(sp.parentAngles, parentAngle, cut);
+  push(sp.ownAngles, rest + clipRot, cut);
+  const ax = accel(sp.pivots.map((p) => p[0]));
+  const ay = accel(sp.pivots.map((p) => p[1]));
   const { spring } = sp;
-  const turn = (parentAngle + clipRot + sp.theta) * DEG;
+  // The centre of mass in world space, turned by the bone's drawn world angle before this step.
+  const turn = (parentAngle + rest + clipRot + springAngle(sp.theta, clipRot, sp.limit)) * DEG;
   const cos = Math.cos(turn), sin = Math.sin(turn);
   const rx = cos * spring.com[0] - sin * spring.com[1];
   const ry = sin * spring.com[0] + cos * spring.com[1];
   const swing = (-(rx * ay - ry * ax) / (rx * rx + ry * ry)) / DEG;
   const omega = 2 * Math.PI * spring.hz;
-  const accel = -omega * omega * sp.theta - 2 * spring.damping * omega * sp.velocity - spring.follow * parentAccel + spring.inertia * swing;
+  const thetaAccel =
+    -omega * omega * sp.theta -
+    2 * spring.damping * omega * sp.velocity -
+    spring.follow * accel(sp.parentAngles) -
+    (spring.selfFollow ?? 0) * accel(sp.ownAngles) +
+    spring.inertia * swing;
   sp.previousTheta = sp.theta;
-  sp.velocity += H * accel;
+  sp.velocity += H * thetaAccel;
   sp.theta += H * sp.velocity;
-  if (sp.theta < sp.limit[0] || sp.theta > sp.limit[1]) {
-    sp.theta = Math.min(Math.max(sp.theta, sp.limit[0]), sp.limit[1]);
-    sp.velocity = 0;
-  }
 }

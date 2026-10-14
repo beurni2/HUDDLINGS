@@ -89,6 +89,9 @@ public struct DiscreteKey: Codable, Equatable, Sendable {
     }
 }
 
+/// The easing of a key that names none: motion is never evenly spaced unless a key asks for linear.
+public let defaultEasing = Easing.easeInOut
+
 /// A channel's value at time t (ms). A key's easing shapes the segment that ends
 /// at it; before the first key and after the last, the channel holds.
 public func sampleKeys(_ keys: [Key], _ t: Double) -> Double {
@@ -100,7 +103,7 @@ public func sampleKeys(_ keys: [Key], _ t: Double) -> Double {
             let from = keys[i - 1]
             let span = to.time - from.time
             let u = span > 0 ? (t - from.time) / span : 1
-            return from.value + (to.value - from.value) * ease(to.easing, u)
+            return from.value + (to.value - from.value) * ease(to.easing ?? defaultEasing, u)
         }
     }
     return keys[keys.count - 1].value

@@ -83,6 +83,42 @@ public struct Mulberry32: Sendable {
     }
 }
 
+/// FNV-1a (32 bits) over a name's UTF-8 bytes: what separates one named random stream from another.
+public func fnv1a32(_ name: String) -> UInt32 {
+    var h: UInt32 = 0x811C_9DC5
+    for byte in name.utf8 {
+        h ^= UInt32(byte)
+        h = h &* 0x0100_0193
+    }
+    return h
+}
+
+extension Mulberry32 {
+    /// A named random stream: each consumer (blinks, gaze, an idle choice) draws from its own.
+    public init(seed: UInt32, stream name: String) { self.init(seed: seed ^ fnv1a32(name)) }
+}
+
+/// Where the soft limit's knee starts, as a share of the room on each side.
+public let knee = 0.8
+
+/// The soft limit (characters/format/README.md, Springs): x unchanged up to 80% of
+/// the room on its side, then a smooth knee that approaches the room and never
+/// passes it. lo ≤ 0 ≤ hi; a side with no room holds x at 0.
+public func softLimit(_ x: Double, _ lo: Double, _ hi: Double) -> Double {
+    if x > 0 { return kneed(x, max(hi, 0)) }
+    if x < 0 { return -kneed(-x, max(-lo, 0)) }
+    return 0
+}
+
+private func kneed(_ x: Double, _ room: Double) -> Double {
+    let k = knee * room
+    if x <= k { return x }
+    let span = room - k
+    if !(span > 0) { return room }
+    let u = (x - k) / span
+    return k + (span * u) / (1 + u)
+}
+
 public let degrees = Double.pi / 180
 
 /// A 2D affine transform: (x, y) maps to (a·x + c·y + tx, b·x + d·y + ty). y grows downward.

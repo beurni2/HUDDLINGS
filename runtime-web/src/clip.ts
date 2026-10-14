@@ -1,7 +1,10 @@
 // Sampling a clip's keys at a time (characters/format/README.md, Clips).
 
-import type { Channel, Clip, DiscreteKey, Key } from "./format.ts";
+import type { Channel, Clip, Key } from "./format.ts";
 import { ease } from "./math.ts";
+
+/** The easing of a key that names none: motion is never evenly spaced unless a key asks for linear. */
+export const DEFAULT_EASING = "easeInOut";
 
 /**
  * A channel's value at time t (ms). A key's easing shapes the segment that ends
@@ -17,16 +20,16 @@ export function sampleKeys(keys: readonly Key[], t: number): number {
       const from = keys[i - 1]!;
       const span = to[0] - from[0];
       const u = span > 0 ? (t - from[0]) / span : 1;
-      return from[1] + (to[1] - from[1]) * ease(to[2], u);
+      return from[1] + (to[1] - from[1]) * ease(to[2] ?? DEFAULT_EASING, u);
     }
   }
   return keys[keys.length - 1]![1];
 }
 
 /** A discrete track's value at time t: each value holds from its key until the next. */
-export function sampleDiscrete(keys: readonly DiscreteKey[], t: number): string {
-  let value = keys[0]?.[1];
-  if (value === undefined) throw new Error("a discrete track needs at least one key");
+export function sampleDiscrete<T = string>(keys: readonly (readonly [number, T])[], t: number): T {
+  if (keys.length === 0) throw new Error("a discrete track needs at least one key");
+  let value = keys[0]![1];
   for (const [time, v] of keys) {
     if (time <= t) value = v;
     else break;

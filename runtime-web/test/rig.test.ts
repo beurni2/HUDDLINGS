@@ -2,8 +2,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { AtlasSet, Rig } from "../src/format.ts";
-import { compile, drawList, evaluatePose, faceShift, orderFor, regionFor, WARP_SUBDIVISIONS } from "../src/rig.ts";
+import { compile, drawList, evaluatePose, fakeTurn, orderFor, partMatrix, regionFor, WARP_SUBDIVISIONS } from "../src/rig.ts";
 import { apply } from "../src/math.ts";
+import { validate } from "../src/format.ts";
 
 const close = (a: number, b: number, eps = 1e-9, what = "") => assert.ok(Math.abs(a - b) <= eps, `${what} ${a} vs ${b}`);
 
@@ -13,10 +14,10 @@ const rig: Rig = {
   height: 164,
   bones: [
     { name: "root" },
-    { name: "body", parent: "root", y: -8, rot: [-30, 30], squash: [0.9, 1.1] },
-    { name: "head", parent: "body", y: -60, rot: [-18, 18] },
+    { name: "body", parent: "root", y: -8, rot: [-30, 30], squash: [0.9, 1.1], scale: [1, 1.05] },
+    { name: "head", parent: "body", y: -60, rot: [-18, 18], yaw: [-60, 60], pitch: [-12, 12] },
     { name: "tail.1", parent: "body", x: 38, y: -20, rot: [-40, 40], views: { "side.R": { x: -40, y: -24, rest: -20 } } },
-    { name: "tail.2", parent: "tail.1", y: -20, rot: [-40, 40] },
+    { name: "tail.2", parent: "tail.1", y: -20, rot: [-40, 40], spring: { hz: 3, damping: 0.4, com: [0, -10], follow: 0.5, inertia: 1 } },
     { name: "tail.3", parent: "tail.2", y: -20, rot: [-40, 40] },
     { name: "ear.1", parent: "head", x: 30, y: -40, rot: [-40, 40] },
     { name: "ear.2", parent: "ear.1", y: 15, rot: [-40, 40] },
@@ -28,11 +29,15 @@ const rig: Rig = {
     { name: "tail", bone: "tail.1", group: "body", regions: { front: "tail", "side.R": "tail" }, warp: { chain: ["tail.1", "tail.2", "tail.3"], columns: 1, rows: 5 } },
     { name: "head.base", bone: "head", group: "head", regions: { front: "head", "side.R": "head" } },
     { name: "eye", bone: "head", group: "head", clipTo: "head.base", defaultState: "open", regions: { "front:open": "eye/open", "front:closed": "eye/closed" } },
+    { name: "eye.R", bone: "head", group: "head", clipTo: "head.base", regions: { front: "eye/open" } },
     { name: "ear", bone: "ear.1", group: "head", regions: { front: "ear" }, warp: { chain: ["ear.1", "ear.2", "ear.3"], columns: 1, rows: 5 } },
   ],
-  drawOrder: { front: ["tail", "body", "@head"], "side.R": ["body", "tail", "@head"], "head.front": ["ear", "head.base", "eye"], "head.side.R": ["head.base"] },
+  drawOrder: { front: ["tail", "body", "@head"], "side.R": ["body", "tail", "@head"], "head.front": ["ear", "head.base", "eye", "eye.R"], "head.side.R": ["head.base"] },
   drawOrderVariants: { "front:tailFront": ["body", "tail", "@head"] },
-  fakeTurn: { bone: "head", yaw: 20, pitch: 12, parts: { eye: [6, 4] } },
+  fakeTurn: {
+    bone: "head", yawDeg: 20, pitchDeg: 12, faceShift: 0.06, markingShift: 0.03, earShift: 0.03, nodShift: 0.05, farEyeNarrow: 0.06,
+    views: { front: { size: [100, 80] } }, roles: { eye: "face", "eye.R": "face", ear: "ear" }, farEye: { positive: "eye", negative: "eye.R" },
+  },
 };
 
 // A 2x atlas: every region's anchor is where its drawing's pivot sits.
@@ -60,17 +65,60 @@ test("a pose at rest places each bone by its offsets along the chain", () => {
   close(pose.angle[c.index.get("tail.3")!]!, 0);
 });
 
-test("squash keeps the area: x scales by 1/s while y scales by s", () => {
+test("the rig and its fake turn pass validation", () => {
+  assert.deepEqual(validate(rig, []), []);
+});
+
+test("squash keeps the area: the bone's parts scale x by 1/s and y by s", () => {
   const pose = evaluatePose(c, { channels: { body: { squash: 0.9 } }, views: front });
-  const m = pose.world[c.index.get("body")!]!;
+  const m = partMatrix(pose, c.index.get("body")!);
   close(m.a, 1 / 0.9);
   close(m.d, 0.9);
   close(m.a * m.d - m.b * m.c, 1, 1e-12, "area");
 });
 
+test("a bone's scale moves its children's pivots but never scales or shears their parts", () => {
+  // Breathing: the body grows 5%; the head rides up with it and stays its own size.
+  const breath = evaluatePose(c, { channels: { body: { scale: 1.05 } }, views: front });
+  const head = partMatrix(breath, c.index.get("head")!);
+  close(head.ty, -8 - 60 * 1.05);
+  close(head.a, 1);
+  close(head.d, 1);
+  // Squash under a tilted head: the head's axes stay square and its size is kept.
+  const tilted = evaluatePose(c, { channels: { body: { squash: 0.93 }, head: { rot: 16 } }, views: front });
+  const m = partMatrix(tilted, c.index.get("head")!);
+  close(m.a * m.c + m.b * m.d, 0, 1e-12, "axes at 90°");
+  close(Math.hypot(m.a, m.b), 1, 1e-12, "x axis length");
+  close(Math.hypot(m.c, m.d), 1, 1e-12, "y axis length");
+  close(m.ty, -8 - 60 * 0.93, 1e-12, "the head sits on the squashed body");
+});
+
+test("the root's scale scales the whole companion", () => {
+  const far = evaluatePose(c, { channels: { root: { scale: 0.5 } }, views: front });
+  const head = partMatrix(far, c.index.get("head")!);
+  close(head.ty, -34);
+  close(head.a, 0.5);
+  close(head.d, 0.5);
+});
+
 test("rotations add up the chain into the world angle, springs included", () => {
   const pose = evaluatePose(c, { channels: { body: { rot: 10 }, "tail.1": { rot: 5 } }, springs: { "tail.2": 3 }, views: front });
   close(pose.angle[c.index.get("tail.2")!]!, 18);
+});
+
+test("a spring's angle goes through the soft limit, in the room the clip's rotation leaves", () => {
+  const angle = (theta: number, clipRot: number) =>
+    evaluatePose(c, { channels: { "tail.2": { rot: clipRot } }, springs: { "tail.2": theta }, views: front }).angle[c.index.get("tail.2")!]!;
+  close(angle(31, 0), 31, 1e-12, "below 80% of the room nothing changes");
+  // Clip at 30°, limit 40°: 10° of room, the knee starts at 8°.
+  close(angle(9, 30), 30 + 8 + (2 * 0.5) / 1.5, 1e-12, "inside the knee, short of the room");
+  close(angle(100, 30), 30 + 8 + (2 * 46) / 47, 1e-12, "far past the room");
+  assert.ok(angle(1e9, 30) < 40, "never reaches the limit");
+  close(angle(-50, 30), 30 - 50, 1e-12, "the other side has 70° of room");
+  // Smooth through the knee: the slope stays continuous.
+  const slope = (x: number) => (angle(x + 1e-6, 30) - angle(x - 1e-6, 30)) / 2e-6;
+  close(slope(8 - 1e-4), 1, 1e-3);
+  close(slope(8 + 1e-4), 1, 1e-3);
 });
 
 test("a bone takes its view's rest placement; the head's subtree follows the head's view", () => {
@@ -82,8 +130,8 @@ test("a bone takes its view's rest placement; the head's subtree follows the hea
 });
 
 test("the head's order is placed where @head stands, and a variant replaces the body's order", () => {
-  assert.deepEqual(orderFor(rig, front), ["tail", "body", "ear", "head.base", "eye"]);
-  assert.deepEqual(orderFor(rig, front, "front:tailFront"), ["body", "tail", "ear", "head.base", "eye"]);
+  assert.deepEqual(orderFor(rig, front), ["tail", "body", "ear", "head.base", "eye", "eye.R"]);
+  assert.deepEqual(orderFor(rig, front, "front:tailFront"), ["body", "tail", "ear", "head.base", "eye", "eye.R"]);
   assert.deepEqual(orderFor(rig, { body: "side.R", head: "side.R" }), ["body", "tail", "head.base"]);
 });
 
@@ -105,12 +153,43 @@ test("a quad's anchor sits on the bone's pivot, and clipped parts point at their
   assert.equal(items[eye.clipTo!]!.part, "head.base");
 });
 
-test("the fake turn slides face parts in proportion to yaw and pitch", () => {
-  assert.deepEqual(faceShift(rig, { yaw: 10, pitch: -12 }), { eye: [3, -4] });
-  const pose = evaluatePose(c, { channels: {}, views: front });
-  const still = drawList(c, pose, atlas, { views: front, states: {} }).find((i) => i.part === "eye")!;
-  const turned = drawList(c, pose, atlas, { views: front, states: {}, turn: { yaw: 20 } }).find((i) => i.part === "eye")!;
-  close(turned.positions[0]! - still.positions[0]!, 6);
+test("the fake turn: the face slides toward the turn, the ears the other way, the far eye narrows", () => {
+  // Half yaw, full upward pitch, on a head 100 × 80 pt.
+  const half = fakeTurn(rig, "front", { yaw: 10, pitch: -12 });
+  assert.deepEqual(half.shift.eye, [3, -4]); // 6% of 100 × 0.5, 5% of 80 × −1
+  assert.deepEqual(half.shift.ear, [-1.5, 0]);
+  assert.deepEqual(half.narrow, { eye: 0.97 });
+  // Past full yaw the shifts hold, and the other eye narrows when the yaw turns the other way.
+  const past = fakeTurn(rig, "front", { yaw: -45 });
+  assert.deepEqual(past.shift.eye, [-6, 0]);
+  close(past.narrow["eye.R"]!, 0.94, 1e-15);
+  // No turn in a view it does not list.
+  assert.deepEqual(fakeTurn(rig, "side.R", { yaw: 20 }), { shift: {}, narrow: {} });
+});
+
+test("the fake turn moves the drawn quads in the head's space, and narrows the far eye about its centre", () => {
+  const pose = evaluatePose(c, { channels: { head: { rot: 90 } }, views: front });
+  const draw = (turn: { yaw: number }) => drawList(c, pose, atlas, { views: front, states: {}, turn });
+  const still = draw({ yaw: 0 });
+  const turned = draw({ yaw: 20 });
+  // The head is turned 90° clockwise, so its +x points down the screen.
+  const ear0 = still.find((i) => i.part === "ear")!.positions;
+  const ear1 = turned.find((i) => i.part === "ear")!.positions;
+  close(ear1[0]! - ear0[0]!, 0, 1e-12, "ear x");
+  close(ear1[1]! - ear0[1]!, -3, 1e-12, "ear y");
+  const eye0 = still.find((i) => i.part === "eye")!.positions;
+  const eye1 = turned.find((i) => i.part === "eye")!.positions;
+  const centre = (p: number[]) => [(p[0]! + p[2]! + p[4]! + p[6]!) / 4, (p[1]! + p[3]! + p[5]! + p[7]!) / 4];
+  close(centre(eye1)[1]! - centre(eye0)[1]!, 6, 1e-12, "eye slides 6 pt");
+  const width = (p: number[]) => Math.hypot(p[2]! - p[0]!, p[3]! - p[1]!);
+  close(width(eye1) / width(eye0), 0.94, 1e-12, "the far eye narrows 6%");
+  close(width(turned.find((i) => i.part === "eye.R")!.positions) / width(still.find((i) => i.part === "eye.R")!.positions), 1, 1e-12, "the near eye keeps its width");
+});
+
+test("a clipped part whose mask is not drawn is not drawn", () => {
+  const noMask: Rig = { ...rig, drawOrder: { ...rig.drawOrder, "head.front": ["ear", "eye"] } };
+  const items = drawList(compile(noMask), evaluatePose(compile(noMask), { channels: {}, views: front }), atlas, { views: front, states: {} });
+  assert.equal(items.find((i) => i.part === "eye"), undefined);
 });
 
 function meshRows(positions: number[]): [number, number, number, number][] {
