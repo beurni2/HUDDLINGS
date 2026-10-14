@@ -9,10 +9,10 @@
     { "name": "head", "parent": "body", "y": -58, "rot": [-18, 18], "yaw": [-60, 60], "pitch": [-12, 12],
       "views": { "side.R": { "x": 16, "y": -56 } } },
     { "name": "ear.L", "parent": "head", "x": 34, "y": -74, "rot": [-30, 30],
-      "spring": { "hz": 2.5, "damping": 0.3, "com": [0, 22], "follow": 0.8, "selfFollow": 0.5, "inertia": 1 },
+      "spring": { "hz": 3.2, "damping": 0.45, "com": [0, 22], "follow": 0.6, "selfFollow": 0.5, "inertia": 0.7 },
       "views": { "side.R": { "x": -16, "y": -78 } } },
     { "name": "ear.R", "parent": "head", "x": -34, "y": -74, "rot": [-30, 30],
-      "spring": { "hz": 2.5, "damping": 0.3, "com": [0, 22], "follow": 0.8, "selfFollow": 0.5, "inertia": 1 },
+      "spring": { "hz": 3.2, "damping": 0.45, "com": [0, 22], "follow": 0.6, "selfFollow": 0.5, "inertia": 0.7 },
       "views": { "side.R": { "x": -2, "y": -74 } } },
     { "name": "collar", "parent": "body", "y": -60, "views": { "side.R": { "x": 12, "y": -58 } } },
     { "name": "tag", "parent": "collar", "y": 3, "rot": [-25, 25],
@@ -24,8 +24,8 @@
       "spring": { "hz": 3, "damping": 0.3, "com": [0, -10], "follow": 0.8, "inertia": 1 } },
     { "name": "tail.3", "parent": "tail.2", "y": -20, "rot": [-30, 30],
       "spring": { "hz": 3.5, "damping": 0.3, "com": [0, -10], "follow": 0.8, "inertia": 1 } },
-    { "name": "paw.L", "parent": "root", "x": 18, "y": -7, "views": { "side.R": { "x": 30, "y": -7 } } },
-    { "name": "paw.R", "parent": "root", "x": -18, "y": -7, "views": { "side.R": { "x": 40, "y": -6 } } }
+    { "name": "paw.L", "parent": "body", "x": 18, "y": -3, "views": { "side.R": { "x": 30, "y": -3 } } },
+    { "name": "paw.R", "parent": "body", "x": -18, "y": -3, "views": { "side.R": { "x": 40, "y": -2 } } }
   ],
   "views": ["front", "side.R"],
   "headBone": "head",
