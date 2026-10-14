@@ -6,7 +6,7 @@ Only the founder passes a gate (CLAUDE.md, spec section 5b). Each approval is re
 
 | Step | Status | Evidence | Approved |
 | --- | --- | --- | --- |
-| Phase 0: the plan (section 5b phase 0) | waiting for the founder | `docs/PLAN.md`, `docs/QUESTIONS.md`, `qa/phase0/spec-audit.md` | |
+| Phase 0: the plan (section 5b phase 0) | approved | `docs/PLAN.md`, `docs/QUESTIONS.md`, `qa/phase0/spec-audit.md`, https://github.com/beurni2/HUDDLINGS/pull/1 | Founder, Oct 14, 2026, in the session: "Go on the PR" |
 
 ## Companion gates
 
@@ -23,7 +23,7 @@ Gate D is passed per milestone (spec section 5b, Gates): the dog's for Home and 
 
 | Milestone | Status | Approved |
 | --- | --- | --- |
-| M0 Foundations and the living dog | in progress (phase 0) | |
+| M0 Foundations and the living dog | in progress (phase 1) | |
 | M1 Home alive | not started | |
 | M2 Treats | not started | |
 | M3 Sending, the trip, Giggle and Hug | not started | |
