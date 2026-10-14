@@ -12,8 +12,10 @@ Kept current every session (CLAUDE.md). One section per lane; each lane edits on
 - A SessionStart hook prepares cloud sessions (the section 5b Python tools, Deno and the Supabase CLI) and turns on the pre-commit hook.
 - Nothing to archive (no spec version 2 or Mochi Post spec was here) and nothing carries over (no dog work existed).
 
-**In progress**
-- Phase 1: the character package format, both runtimes, the test character, CI with Visual QA and parity, the TestFlight lane, the Lab's Diagnostics in an internal-only build, the generated string catalogues and a placeholder icon.
+**In progress: phase 1** (draft https://github.com/beurni2/HUDDLINGS/pull/2, stacked on #1)
+- Done and tested here: the package format and contract (`characters/format/README.md`, reviewed by three fresh agents before coding); the web runtime (WebGL2, 120 Hz springs, blending, the fake turn, bends, events), 84 tests; the test character and the package build; the Lab page and `npm run render` (frames, contact sheets, MP4s); the Swift engine, held to the same vectors (15 tests, largest difference 6.4e-14); the copy checks for the app's strings and the E1 and package-in-app checks.
+- Written, waiting for the macOS runner: the SpriteKit adapter, the parity render, the app shell with the Lab's Diagnostics, and the `ios` workflow (it runs on the pull request).
+- Next: get the macOS job and parity green; fresh reviews of the phase; the evidence in `qa/phase1/`; the numbers in `LIMITATIONS.md`; then the PR is ready.
 
 **Blockers**
 - For TestFlight at the end of phase 1: the Apple pieces in `PLAN.md`, What I need from you.
@@ -24,4 +26,8 @@ Kept current every session (CLAUDE.md). One section per lane; each lane edits on
 git log --oneline -10
 python3 tools/copylint/copylint.py
 python3 -m unittest discover -s tools/copylint
+python3 -m unittest discover -s tools/qa
+npm install && npm run typecheck && npm test
+# Swift: start dockerd in the background first
+docker run --rm -v "$PWD":/w -w /w swift:latest swift test --package-path ios/CompanionCore
 ```
