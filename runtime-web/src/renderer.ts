@@ -103,8 +103,8 @@ export class Renderer {
 
   /**
    * Uploads a set's pages, premultiplied, without colour conversion, sampled linearly
-   * without mipmaps: SpriteKit asked for mipmaps used none (RenderProbes.swift), and
-   * both runtimes must draw the same pixels.
+   * without mipmaps: SpriteKit, even asked for mipmaps, used none (RenderProbes.swift),
+   * so both runtimes filter the same way.
    */
   loadPages(images: TexImageSource[]): void {
     const gl = this.gl;

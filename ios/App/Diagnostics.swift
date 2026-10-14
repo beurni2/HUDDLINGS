@@ -15,7 +15,7 @@ final class Diagnostics {
     private(set) var frames = 0
     private(set) var metalBytes = 0
     var atlasSet = ""
-    /// The atlas pages' size in GPU memory, computed from their dimensions (RGBA with mipmaps).
+    /// The atlas pages' size in GPU memory, computed from their dimensions (RGBA, no mipmaps).
     var atlasBytes = 0
     @ObservationIgnored private var pendingFrames = [Int](repeating: 0, count: 51)
     @ObservationIgnored private var pendingRig = [Int](repeating: 0, count: 101)

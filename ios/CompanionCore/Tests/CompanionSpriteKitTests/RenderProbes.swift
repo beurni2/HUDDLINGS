@@ -73,8 +73,11 @@ final class RenderProbes: XCTestCase {
         return node
     }
 
-    /// One cell, its top-right corner pulled out, filled with a texture whose colour is its own
-    /// coordinate: each diagonal predicts a different coordinate inside the cell.
+    /// One cell with a corner pulled out, filled with a texture whose colour is its own
+    /// coordinate: each diagonal predicts a different coordinate inside the cell. Two cells,
+    /// so a fixed split can be told from a split along the longer diagonal: pulling the
+    /// top-right corner makes bottom-left to top-right the longer one, pulling the
+    /// bottom-right corner makes it the shorter.
     func testWarpCellDiagonal() throws {
         let size = 256, side = 160.0, origin = 40.0, n = 64
         let (offscreen, k) = try makeOffscreen(size)
@@ -89,59 +92,63 @@ final class RenderProbes: XCTestCase {
         let rowsUp = nearTop > nearBottom
         note("probe: a texture's first row of data is drawn at its \(rowsUp ? "bottom" : "top")")
 
-        let source: [SIMD2<Float>] = [SIMD2(0, 0), SIMD2(1, 0), SIMD2(0, 1), SIMD2(1, 1)]
-        let destination: [SIMD2<Float>] = [SIMD2(0, 0), SIMD2(1, 0), SIMD2(0, 1), SIMD2(1.3, 1.25)]
-        let warped = sprite(gradient, pixels: side, at: origin, k)
-        warped.warpGeometry = SKWarpGeometryGrid(columns: 1, rows: 1, sourcePositions: source, destinationPositions: destination)
-        warped.subdivisionLevels = 0
-        let pixels = try draw(offscreen, k, [warped])
-
         // Corners in grid order: 0 bottom-left, 1 bottom-right, 2 top-left, 3 top-right.
+        let source: [SIMD2<Float>] = [SIMD2(0, 0), SIMD2(1, 0), SIMD2(0, 1), SIMD2(1, 1)]
+        let cells: [(String, [SIMD2<Float>])] = [
+            ("top-right corner pulled out", [SIMD2(0, 0), SIMD2(1, 0), SIMD2(0, 1), SIMD2(1.3, 1.25)]),
+            ("bottom-right corner pulled out", [SIMD2(0, 0), SIMD2(1.25, -0.2), SIMD2(0, 1), SIMD2(1, 1)]),
+        ]
         let splits: [(String, [[Int]])] = [
             ("bottom-left to top-right", [[0, 1, 3], [0, 3, 2]]),
             ("top-left to bottom-right", [[0, 1, 2], [1, 3, 2]]),
         ]
-        func predict(_ q: SIMD2<Double>, _ triangles: [[Int]]) -> SIMD2<Double>? {
-            for t in triangles {
-                let a = SIMD2<Double>(destination[t[0]]), b = SIMD2<Double>(destination[t[1]]), c = SIMD2<Double>(destination[t[2]])
-                let det = (b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y)
-                let l1 = ((q.x - a.x) * (c.y - a.y) - (c.x - a.x) * (q.y - a.y)) / det
-                let l2 = ((b.x - a.x) * (q.y - a.y) - (q.x - a.x) * (b.y - a.y)) / det
-                let l0 = 1 - l1 - l2
-                if l0 >= -1e-9 && l1 >= -1e-9 && l2 >= -1e-9 {
-                    return l0 * SIMD2<Double>(source[t[0]]) + l1 * SIMD2<Double>(source[t[1]]) + l2 * SIMD2<Double>(source[t[2]])
+        for (cell, destination) in cells {
+            func predict(_ q: SIMD2<Double>, _ triangles: [[Int]]) -> SIMD2<Double>? {
+                for t in triangles {
+                    let a = SIMD2<Double>(destination[t[0]]), b = SIMD2<Double>(destination[t[1]]), c = SIMD2<Double>(destination[t[2]])
+                    let det = (b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y)
+                    let l1 = ((q.x - a.x) * (c.y - a.y) - (c.x - a.x) * (q.y - a.y)) / det
+                    let l2 = ((b.x - a.x) * (q.y - a.y) - (q.x - a.x) * (b.y - a.y)) / det
+                    let l0 = 1 - l1 - l2
+                    if l0 >= -1e-9 && l1 >= -1e-9 && l2 >= -1e-9 {
+                        return l0 * SIMD2<Double>(source[t[0]]) + l1 * SIMD2<Double>(source[t[1]]) + l2 * SIMD2<Double>(source[t[2]])
+                    }
+                }
+                return nil
+            }
+            let warped = sprite(gradient, pixels: side, at: origin, k)
+            warped.warpGeometry = SKWarpGeometryGrid(columns: 1, rows: 1, sourcePositions: source, destinationPositions: destination)
+            warped.subdivisionLevels = 0
+            let pixels = try draw(offscreen, k, [warped])
+            var errors = [Double](repeating: 0, count: splits.count)
+            var count = 0
+            for row in 0..<size {
+                for x in 0..<size {
+                    let i = 4 * (row * size + x)
+                    // Only pixels wholly inside the cell: the background is white, the texture has no blue.
+                    guard pixels[i + 2] < 8 else { continue }
+                    let q = SIMD2((Double(x) + 0.5 - origin) / side, (Double(size - row) - 0.5 - origin) / side)
+                    let predictions = splits.map { predict(q, $0.1) }
+                    guard predictions.allSatisfy({ $0 != nil }) else { continue }
+                    let green = Double(pixels[i + 1]) / 255
+                    let measured = SIMD2(Double(pixels[i]) / 255, rowsUp ? green : 1 - green)
+                    for (s, p) in predictions.enumerated() {
+                        let d = measured - p!
+                        errors[s] += abs(d.x) + abs(d.y)
+                    }
+                    count += 1
                 }
             }
-            return nil
+            XCTAssertGreaterThan(count, 10_000, "too few pixels inside the \(cell) cell to judge")
+            let means = errors.map { $0 / Double(max(count, 1)) }
+            let best = means[0] <= means[1] ? 0 : 1
+            note(String(format: "probe: warp cell, %@ (subdivisionLevels 0), over %d pixels: mean error %.4f if split %@, %.4f if split %@",
+                        cell, count, means[0], splits[0].0, means[1], splits[1].0))
+            note("probe: SpriteKit splits the \(cell) cell \(splits[best].0)" + (means[best] < 0.02 ? "" : ", but neither split fits: it may subdivide"))
+            // renderer.ts splits each row pair top-right to bottom-left in texture space: the same diagonal.
+            XCTAssertEqual(splits[best].0, "bottom-left to top-right", "SpriteKit splits the \(cell) cell the other way from the web renderer")
+            XCTAssertLessThan(means[best], 0.02, "neither split predicts SpriteKit's \(cell) cell")
         }
-        var errors = [Double](repeating: 0, count: splits.count)
-        var count = 0
-        for row in 0..<size {
-            for x in 0..<size {
-                let i = 4 * (row * size + x)
-                // Only pixels wholly inside the cell: the background is white, the texture has no blue.
-                guard pixels[i + 2] < 8 else { continue }
-                let q = SIMD2((Double(x) + 0.5 - origin) / side, (Double(size - row) - 0.5 - origin) / side)
-                let predictions = splits.map { predict(q, $0.1) }
-                guard predictions.allSatisfy({ $0 != nil }) else { continue }
-                let green = Double(pixels[i + 1]) / 255
-                let measured = SIMD2(Double(pixels[i]) / 255, rowsUp ? green : 1 - green)
-                for (s, p) in predictions.enumerated() {
-                    let d = measured - p!
-                    errors[s] += abs(d.x) + abs(d.y)
-                }
-                count += 1
-            }
-        }
-        XCTAssertGreaterThan(count, 10_000, "too few pixels inside the cell to judge")
-        let means = errors.map { $0 / Double(max(count, 1)) }
-        let best = means[0] <= means[1] ? 0 : 1
-        note(String(format: "probe: warp cell (subdivisionLevels 0) over %d pixels: mean error %.4f if split %@, %.4f if split %@",
-                    count, means[0], splits[0].0, means[1], splits[1].0))
-        note("probe: SpriteKit splits a warp cell \(splits[best].0)" + (means[best] < 0.02 ? "" : ", but neither split fits: it may subdivide"))
-        // renderer.ts splits each row pair top-right to bottom-left in texture space: the same diagonal.
-        XCTAssertEqual(splits[best].0, "bottom-left to top-right", "SpriteKit splits warp cells the other way from the web renderer")
-        XCTAssertLessThan(means[best], 0.02, "neither split predicts SpriteKit's cell")
     }
 
     /// An opaque page encoded as PNG and decoded with ImageIO, as AtlasTextures loads a package's pages.

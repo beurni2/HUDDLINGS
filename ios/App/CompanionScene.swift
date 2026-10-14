@@ -51,8 +51,8 @@ final class CompanionScene: SKScene {
         addChild(companion)
         try player.play("idle", at: 0)
         diagnostics.atlasSet = set.name
-        // Each page in memory: RGBA, plus a third for its mipmaps.
-        diagnostics.atlasBytes = set.pages.reduce(0) { $0 + Int($1.width * $1.height * 4 * 4 / 3) }
+        // Each page in memory: RGBA, no mipmaps (QUESTIONS.md E21).
+        diagnostics.atlasBytes = set.pages.reduce(0) { $0 + Int($1.width * $1.height * 4) }
     }
 
     @available(*, unavailable)
