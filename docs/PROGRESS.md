@@ -14,9 +14,9 @@ Kept current every session (CLAUDE.md). One section per lane; each lane edits on
 
 **In progress: phase 1** (draft https://github.com/beurni2/HUDDLINGS/pull/2, stacked on #1)
 - Done and tested here: the package format and contract (`characters/format/README.md`); the web runtime (WebGL2, 120 Hz springs, blending, the fake turn, bends, events); the test character and the package build; the Lab page, `npm run render` and `npm run render:all`; the Swift engine, held to the same vectors; the copy checks for the app's strings (extracted and in code); the E1 allowlist and the package-in-app check; parity scored on the character, with planted-failure tests.
-- On the macOS runner, green on 063de9a: the SpriteKit adapter, the app shell with the Lab's Diagnostics and its UI test, the extracted strings, E1 and the packages byte for byte, and **parity on the character: full size min 0.986, small min 0.979, no part missing** (`qa/phase1/parity/`). The Visual QA job renders every clip on every push.
-- Measured on the simulator (`RenderProbes.swift`): SpriteKit splits warp cells as the web does, and uses no mipmaps, so the web now draws without them too (E21).
-- Next: a last fresh review of these fixes, then the PR is ready. Frame time, rig time and texture memory on your iPhone wait for TestFlight.
+- On the macOS runner with Xcode 26.3 (which App Store Connect requires), green on 0ceaeef: the SpriteKit adapter, the app shell with the Lab's Diagnostics and its UI test, the extracted strings, E1 and the packages byte for byte, and **parity on the character: full size min 0.986, small min 0.979, no part missing** (`qa/phase1/parity/`). The Visual QA job renders every clip on every push.
+- Measured on the simulator (`RenderProbes.swift`): SpriteKit splits warp cells as the web does, and uses no mipmaps even when asked, so neither runtime uses them now (E21, with a proposal for trips).
+- A last fresh review found parity blind to a missing faint shadow and E1 blind to renamed or re-encoded images: both fixed, with tests. Next: the PR is ready once CI confirms. Frame time, rig time and texture memory on your iPhone wait for TestFlight.
 
 **Blockers**
 - For TestFlight at the end of phase 1: the Apple pieces in `PLAN.md`, What I need from you (Team ID, API key, your iPhone registered once, the app record and bundle ID).
