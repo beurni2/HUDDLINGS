@@ -25,6 +25,18 @@ Where the spec is silent or contradicts itself, I don't invent the answer. The q
 - **Default:** for the dog (and later the rabbit), squeeze becomes the happy crescents, as L482 already allows for excited, and sparkle becomes happy crescents with star particles beside the head, as the dog's Proud panel draws. At Gate A I also show a dog-style `> <` and star eye, labelled "not on the dog sheet", so you can choose.
 - **Owner:** founder
 
+### Q24. The sheet paints the dog's eyes and nose near-black, darker than its printed Eyes / Nose colour. Which wins?
+- **The spec says:** L184 "Dark | `#3A2314`: eyes, nose"; L189 "The dog and rabbit values are their sheets' printed labels"; L504 "Each part's silhouette, the eye size and spacing ... match the sheet"; L524 the palette check, "the dominant colour of each region ... eyes ... ΔE2000 of 3 or less against the palette".
+- **Why it matters:** measured on all three turnaround views that show a face, the eyes and nose are mostly `#200C02`, 8 to 10 ΔE2000 from `#3A2314`, which shows only low in the iris (`characters/dog/ref/overlays/palette.png`, DECISIONS 12). Painted in the printed colour, the eyes look lighter and browner than the sheet's; painted like the sheet, they fail the palette check against the printed value.
+- **Default:** the palette keeps the printed `#3A2314` as the eyes' and nose's colour, and phase 3 draws them as the sheet does, darkening it toward `#200C02` at the top of the iris and the pupil as their one soft shade; the palette check compares the eyes against both. At Gate A I show both versions side by side with the sheet.
+- **Owner:** founder
+
+### Q25. The sheet's blush is a faint wash, far paler than its printed Blush colour. Which wins?
+- **The spec says:** L183 "Pink | `#F7B3A6`: blush, tongue"; L524 the palette check on the blush region.
+- **Why it matters:** at its reddest the cheeks' blush is `#FFDED0`, 12 ΔE2000 from `#F7B3A6`: the printed pink over the fur at 34% opacity (DECISIONS 12). A blush in solid `#F7B3A6` would look like two bright spots the sheet doesn't have.
+- **Default:** the blush part keeps `#F7B3A6` as its colour and is drawn as a soft spot at about 34% opacity over the fur, so the result matches the sheet; the palette check compares the blush part's own colour, not the cheek's pixels. Shown at Gate A beside the sheet.
+- **Owner:** founder
+
 ## Needed by phase 4 (the rig and Visual QA)
 
 ### Q3. As the spec words them, four Visual QA checks would fail good animation. May I narrow them?
