@@ -32,6 +32,8 @@ jobs:
           node-version: "22.22"
       - name: Install
         run: npm ci --no-audit --no-fund
+      - name: Chromium for the renderer tests
+        run: npx playwright install --with-deps chromium
       - name: Typecheck
         run: npm run typecheck
       - name: Tests

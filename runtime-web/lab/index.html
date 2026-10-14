@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Animation Lab</title>
+<style>
+  :root { color-scheme: light dark; --bg: #f4efe8; --fg: #3a2314; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #1f1a17; --fg: #f4efe8; } }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 15px system-ui, sans-serif; }
+  main { padding: 16px; display: grid; gap: 12px; justify-items: start; }
+  canvas { background: #fff; max-width: 100%; }
+</style>
+</head>
+<body>
+<main>
+  <canvas id="stage" width="400" height="400"></canvas>
+  <div id="status">Loading</div>
+</main>
+<script type="module" src="lab.js"></script>
+</body>
+</html>

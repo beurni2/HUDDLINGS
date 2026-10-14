@@ -7,7 +7,8 @@
     "typecheck": "tsc -p tsconfig.json",
     "test": "node --test --test-reporter=dot \"runtime-web/test/*.test.ts\" \"characters/build/test/*.test.ts\"",
     "vectors": "node characters/format/make-vectors.ts",
-    "build:test-character": "node characters/build/build.ts test"
+    "build:test-character": "node characters/build/build.ts test",
+    "render": "node runtime-web/lab/render.ts"
   },
   "devDependencies": {
     "@resvg/resvg-js": "2.6.2",
