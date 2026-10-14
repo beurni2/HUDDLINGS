@@ -164,3 +164,10 @@ test("validation checks the fake turn: its parts, its views, and that face parts
   for (const expected of ["fake turn: unknown view back", "the head size in back must be positive", "ear.L slides with the face, so it must be clipped",
     "unknown part ghost", "far eye eye.R must be a face part", "body.yaw: only the fake turn's bone has yaw"]) expectProblem(problems, expected);
 });
+
+test("validation refuses a bezier key whose x1 or x2 leaves 0 to 1, as CSS does", () => {
+  const clip: Clip = { name: "c", lengthMs: 500, tracks: { head: { rot: [[0, 0], [200, 5, ["bezier", 1.2, 0, 0.5, 1]], [400, 0, ["bezier", 0.2, 3, 0.8, -2]]] } } };
+  const problems = validate(rig, [clip]);
+  expectProblem(problems, "key at 200 ms has a bezier with x1 or x2 outside 0 to 1");
+  assert.ok(!problems.some((p) => p.includes("key at 400 ms")), "y1 and y2 may overshoot");
+});

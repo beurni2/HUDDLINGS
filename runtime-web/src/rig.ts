@@ -264,11 +264,11 @@ function warpMesh(
     const r = restOf(c.rig.bones[i]!, c.inHead[i] ? views.head : views.body);
     restRel.push(compose(restRel[k - 1]!, r.x, r.y, r.rest, 1, 1));
   }
+  // A place along the chain is a projection on the line from its first pivot to its
+  // last; it needs no unit length, since only its order matters. A row exactly at a
+  // joint belongs to the child bone.
   const last = restRel[restRel.length - 1]!;
-  const length = Math.hypot(last.tx, last.ty);
-  const axisX = last.tx / length;
-  const axisY = last.ty / length;
-  const along = (x: number, y: number) => x * axisX + y * axisY;
+  const along = (x: number, y: number) => x * last.tx + y * last.ty;
   const inverses = restRel.map(invert);
   const centre = left + width / 2;
 

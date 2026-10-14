@@ -45,6 +45,8 @@ const clips: Clip[] = [
   { name: "push", lengthMs: 400, tracks: { body: { x: [[0, 0], [200, 60, "easeIn"], [400, 240]] } } },
   // The body jumps sideways between steps: a cut, not a push.
   { name: "jump", lengthMs: 200, tracks: { body: { x: [[0, 0], [16, 30, "step"], [33, -30, "step"], [50, 30, "step"], [66, -30, "step"], [83, 0, "step"]] } } },
+  // Jumps on step boundaries (250 ms is 30 steps), where clip times land a hair short.
+  { name: "jumpOnSteps", lengthMs: 1000, tracks: { body: { x: [[0, 0], [250, 30, "step"], [500, -30, "step"], [750, 0, "step"]] } } },
   // The same shake as real motion, as fast as it can be.
   { name: "shake", lengthMs: 200, tracks: { body: { x: [[0, 0], [16, 30, "linear"], [33, -30, "linear"], [50, 30, "linear"], [66, -30, "linear"], [83, 0, "linear"]] } } },
   { name: "turn", lengthMs: 1000, views: { body: [[0, "front"], [500, "side.R"]] }, order: [[0, "tailFront"]] },
@@ -221,6 +223,23 @@ test("a jump between steps (a step key) moves the body without kicking the sprin
     const f = p.advanceTo(i / 120);
     assert.equal(f.pose.angle[c.index.get("tag")!], 0, `frame ${i}`);
     assert.equal(f.pose.angle[c.index.get("tail.1")!], 0, `frame ${i}`);
+  }
+});
+
+test("a jump's cut lands on the very step the jump does, wherever the clip started", () => {
+  // Clips started on 60 fps frames: clip times like (1.4 − 0.9) · 1000 = 499.99999999999994 ms
+  // must neither cut a step early nor jump a step late.
+  for (let i = 0; i < 240; i++) {
+    const start = i / 60;
+    const p = new Player(c, clips);
+    p.play("hold", 0);
+    p.advanceTo(start);
+    p.play("jumpOnSteps", start, 0);
+    for (let f = 1; f <= 60; f++) {
+      const pose = p.advanceTo(start + f / 60).pose;
+      const tag = pose.angle[c.index.get("tag")!]! - pose.angle[c.index.get("body")!]!;
+      assert.ok(Math.abs(tag) < 1e-9, `started at ${start} s, frame ${f}: the tag was kicked to ${tag}°`);
+    }
   }
 });
 

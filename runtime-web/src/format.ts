@@ -10,12 +10,12 @@ export interface Spring {
   damping: number;
   /** The part's centre of mass in the bone's own space, in points; at least 2 pt from the pivot. */
   com: [number, number];
-  /** How much the part lags its parent's turns. */
-  follow: number;
+  /** How much the part lags its parent's turns; 1 by default. */
+  follow?: number;
   /** How much the part lags its own clip rotation (an ear turning to a new state); 0 by default. */
   selfFollow?: number;
-  /** How much the pivot's acceleration swings the part. */
-  inertia: number;
+  /** How much the pivot's acceleration swings the part; 1 by default. */
+  inertia?: number;
 }
 
 export interface Bone {
@@ -276,6 +276,9 @@ export function validate(rig: Rig, clips: Clip[], atlas?: AtlasSet): string[] {
           if (key[0] < last) problems.push(`clip ${clip.name}: ${boneName}.${channel} keys out of order at ${key[0]} ms`);
           if (key[0] < 0 || key[0] > clip.lengthMs) problems.push(`clip ${clip.name}: ${boneName}.${channel} key at ${key[0]} ms is outside the clip`);
           last = key[0];
+          const easing = key[2];
+          if (Array.isArray(easing) && easing[0] === "bezier" && !(easing[1] >= 0 && easing[1] <= 1 && easing[3] >= 0 && easing[3] <= 1))
+            problems.push(`clip ${clip.name}: ${boneName}.${channel} key at ${key[0]} ms has a bezier with x1 or x2 outside 0 to 1`);
           const v = key[1];
           if ((channel === "rot" || channel === "yaw" || channel === "pitch") && !bone[channel])
             problems.push(`clip ${clip.name}: ${boneName} has no ${channel} limit, so it cannot be keyed`);

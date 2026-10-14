@@ -9,7 +9,11 @@ import { evaluatePose, springAngle, type Channels, type CompiledRig, type FrameS
 export const STEP_HZ = 120;
 const H = 1 / STEP_HZ;
 const CHANNELS: Channel[] = ["rot", "x", "y", "squash", "scale", "yaw", "pitch"];
-/** Times closer than this (seconds) count as equal, so n/120 computed two ways still matches. */
+/**
+ * The one slack (seconds): a frame time within it of a step's time runs that step.
+ * Every comparison against a clip's own time (keys, tracks, events, cuts) is exact,
+ * so a jump, its cut and its event always land on the same step.
+ */
 const EPS = 1e-9;
 export const DEFAULT_BLEND_MS = 200;
 
@@ -191,7 +195,7 @@ export class Player {
   /** The clip's events with elapsed time in (firedTo, t], in time order, counting each loop. */
   private collectEvents(m: Mixer, t: number): ClipEvent[] {
     const events = m.clip.events ?? [];
-    const to = (t - m.start) * 1000 + EPS * 1000;
+    const to = (t - m.start) * 1000;
     if (events.length === 0 || to <= m.firedTo) return [];
     const fired: [number, number, ClipEvent][] = [];
     forEachCrossing(m.clip, events.map((e) => e.at), m.firedTo, to, (at, i) => fired.push([at, i, events[i]!]));
@@ -202,8 +206,8 @@ export class Player {
   /** True when a channel jumps (a `step` key) between two step times in any clip that is mixing. */
   private stepKeyCrossed(m: Mixer | undefined, from: number, to: number): boolean {
     for (; m; m = m.from) {
-      const a = (from - m.start) * 1000 + EPS * 1000;
-      const b = (to - m.start) * 1000 + EPS * 1000;
+      const a = (from - m.start) * 1000;
+      const b = (to - m.start) * 1000;
       for (const tracks of Object.values(m.clip.tracks ?? {})) {
         for (const keys of Object.values(tracks)) {
           const jumps = keys!.filter((k) => k[2] === "step").map((k) => k[0]);
@@ -279,9 +283,9 @@ function integrate(sp: SpringState, cut: boolean, pivot: [number, number], paren
   const thetaAccel =
     -omega * omega * sp.theta -
     2 * spring.damping * omega * sp.velocity -
-    spring.follow * accel(sp.parentAngles) -
+    (spring.follow ?? 1) * accel(sp.parentAngles) -
     (spring.selfFollow ?? 0) * accel(sp.ownAngles) +
-    spring.inertia * swing;
+    (spring.inertia ?? 1) * swing;
   sp.previousTheta = sp.theta;
   sp.velocity += H * thetaAccel;
   sp.theta += H * sp.velocity;

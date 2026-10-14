@@ -22,7 +22,15 @@ const easings: Easing[] = [
   "linear", "step", "easeIn", "easeOut", "easeInOut", "easeOutBack", ["easeOutBack", 0.5], ["easeOutBack", 2.5],
   ["bezier", 0.42, 0, 0.58, 1], ["bezier", 0.34, 1.56, 0.64, 1], ["bezier", 0, 0.5, 1, 0.5], ["bezier", 0.9, 0.1, 0.1, 0.9],
 ];
-write("easing", easings.map((easing) => ({ easing, u: us, value: us.map((u) => ease(easing, u)) })));
+write("easing", [
+  ...easings.map((easing) => ({ easing, u: us, value: us.map((u) => ease(easing, u)) })),
+  // Curves where Newton gives up and bisection finishes the solve.
+  ...([[0.8388511836528778, 1.525847083888948, 0.9993032873608172, -0.20658456766977906, 0.9958772968966514],
+    [1, 0, 1, 1, 0.999], [0, 0, 0, 1, 0.001], [0.95, 0, 1, 1, 0.97], [0, 1, 0.05, 1, 0.02]] as const).map(([x1, y1, x2, y2, u]) => {
+    const easing: Easing = ["bezier", x1, y1, x2, y2];
+    return { easing, u: [u], value: [ease(easing, u)] };
+  }),
+]);
 
 const seeds = [0, 1, 42, 0xdeadbeef, 0xffffffff];
 write("random", seeds.map((seed) => {
