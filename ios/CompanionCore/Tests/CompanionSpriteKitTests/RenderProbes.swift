@@ -3,7 +3,8 @@
 // splits a warp-grid cell along with subdivisionLevels 0, and how it filters between
 // mip levels. Each probe compares SpriteKit's pixels with exact predictions, writes
 // its numbers to build/parity/spritekit/probes.txt, and fails if SpriteKit does not
-// do what runtime-web/src/renderer.ts does.
+// do what runtime-web/src/renderer.ts does. Measured on the iOS 26.2 simulator through
+// SKRenderer: cells split bottom-left to top-right, and no mipmaps used.
 #if canImport(SpriteKit) && canImport(Metal)
 import Foundation
 import ImageIO
@@ -12,8 +13,9 @@ import SpriteKit
 import UniformTypeIdentifiers
 import XCTest
 
-/// The filter between mip levels runtime-web/src/renderer.ts uses (TEXTURE_MIN_FILTER).
-private let webMipFilter = "LINEAR_MIPMAP_LINEAR"
+/// The minification filter runtime-web/src/renderer.ts uses (TEXTURE_MIN_FILTER): no mipmaps,
+/// because this probe found SpriteKit using none.
+private let webMipFilter = "LINEAR"
 
 @MainActor
 final class RenderProbes: XCTestCase {
@@ -233,7 +235,7 @@ final class RenderProbes: XCTestCase {
             // What each filter predicts at levels 0.30 and 0.69.
             let filter: String
             if abs(weights[0]) < 0.1 && abs(weights[1]) < 0.1 {
-                filter = "LINEAR (no mipmaps used)"
+                filter = "LINEAR"
             } else if abs(weights[0] - log2(1 / 0.81)) < 0.15 && abs(weights[1] - log2(1 / 0.62)) < 0.15 {
                 filter = "LINEAR_MIPMAP_LINEAR"
             } else if abs(weights[0]) < 0.1 && abs(weights[1] - 1) < 0.1 {
@@ -242,7 +244,7 @@ final class RenderProbes: XCTestCase {
                 filter = "unclassified"
             }
             found[name] = filter
-            note("probe: mipmaps, \(name): SpriteKit filters as \(filter)")
+            note("probe: mipmaps, \(name): SpriteKit filters as \(filter)" + (filter == "LINEAR" ? ", using no mipmaps although asked to" : ""))
         }
         XCTAssertEqual(found["PNG page, one region"], webMipFilter, "SpriteKit filters the atlas's pages differently from the web renderer")
     }

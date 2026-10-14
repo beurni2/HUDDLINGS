@@ -1,7 +1,8 @@
 // Draws a draw list with WebGL2 (characters/format/README.md, Rendering):
-// premultiplied textures with mipmaps, single-sample, one quad or dense mesh per
-// part, and clip groups through the stencil buffer, keeping mask pixels whose
-// alpha is 0.05 or more, as SKCropNode does.
+// premultiplied textures sampled linearly without mipmaps (as SpriteKit was
+// measured to draw them), single-sample, one quad or dense mesh per part, and
+// clip groups through the stencil buffer, keeping mask pixels whose alpha is
+// 0.05 or more, as SKCropNode does.
 import type { AtlasSet } from "./format.ts";
 import type { DrawItem } from "./rig.ts";
 
@@ -100,7 +101,11 @@ export class Renderer {
     if (!gl.getContextAttributes()?.stencil) throw new Error("the renderer needs a stencil buffer (CONTEXT_ATTRIBUTES)");
   }
 
-  /** Uploads a set's pages, premultiplied, with mipmaps, without colour conversion. */
+  /**
+   * Uploads a set's pages, premultiplied, without colour conversion, sampled linearly
+   * without mipmaps: SpriteKit asked for mipmaps used none (RenderProbes.swift), and
+   * both runtimes must draw the same pixels.
+   */
   loadPages(images: TexImageSource[]): void {
     const gl = this.gl;
     for (const t of this.textures) gl.deleteTexture(t);
@@ -111,8 +116,7 @@ export class Renderer {
       const texture = gl.createTexture()!;
       gl.bindTexture(gl.TEXTURE_2D, texture);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE, image);
-      gl.generateMipmap(gl.TEXTURE_2D);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);

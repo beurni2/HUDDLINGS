@@ -1,6 +1,6 @@
 // An atlas set's pages as SpriteKit textures (characters/format/README.md, Rendering):
 // loaded with ImageIO from the package's folder, never from an asset catalogue,
-// mipmapped, and cut into one sub-texture per region.
+// asked for mipmaps, and cut into one sub-texture per region.
 #if canImport(SpriteKit)
 import CompanionCore
 import Foundation
@@ -34,6 +34,7 @@ public final class AtlasTextures {
             else { throw PackageError.unreadable(url) }
             let texture = SKTexture(cgImage: image)
             // Before any sub-texture is made or drawn (README, Rendering). Pages are powers of two.
+            // Phase 1 measured SpriteKit using no mipmaps even so (QUESTIONS.md E21); a device may differ.
             texture.usesMipmaps = true
             texture.filteringMode = .linear
             pages.append(texture)
