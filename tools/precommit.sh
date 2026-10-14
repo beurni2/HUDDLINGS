@@ -3,7 +3,7 @@
 # being committed, the index, not the working tree: the copy lint and its
 # tests, the app code's strings, the QA tools' tests, the runtimes' typecheck
 # and tests, and a check that the shared test vectors match the code that
-# writes them. A fast Visual QA subset joins once a character package exists.
+# writes them. A fast Visual QA subset joins in phase 4, with the checks (PLAN.md).
 set -e
 top=$(git rev-parse --show-toplevel)
 tmp=$(mktemp -d)

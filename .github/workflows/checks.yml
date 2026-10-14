@@ -51,15 +51,43 @@ jobs:
           changes=$(git status --porcelain -- characters/format/vectors)
           if [ -n "$changes" ]; then echo "$changes"; echo "::error::characters/format/vectors is stale; run npm run vectors"; exit 1; fi
 
+  visual-qa:
+    # Phase 1's Visual QA job (spec section 5b): every clip of every package
+    # rendered on WebGL on the fixed clock, as a contact sheet at 8 frames per
+    # second and an MP4. Parity runs in the ios workflow; the other checks join
+    # in phase 4, each proven by a planted failure (docs/PLAN.md).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22.22"
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: ffmpeg and ImageMagick
+        run: sudo apt-get install -y --no-install-recommends ffmpeg imagemagick
+      - name: Build the test character
+        run: node characters/build/build.ts test
+      - name: Render every clip
+        run: node runtime-web/lab/render-all.ts --out build/qa/web
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: visual-qa-web
+          path: |
+            build/qa/web/**/*-sheet.png
+            build/qa/web/**/*.mp4
+            build/qa/web/**/report.json
+          retention-days: 14
+
   swift-linux:
     # The SpriteKit runtime's pure engine, held to the same vectors. Its
     # Apple-only parts build on the macOS job. The image is the one LIMITATIONS.md
     # runs locally, pinned by digest so a new Swift cannot change the result.
     runs-on: ubuntu-24.04
+    container: swift:6.4.1@sha256:870edbd7f37b77dc01ebab7eb4e0475d16be82796a06734d0bdc010cd24ea32f
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Swift version
         run: swift --version
       - name: Tests
         run: swift test --package-path ios/CompanionCore
-    container: swift:6.4.1@sha256:870edbd7f37b77dc01ebab7eb4e0475d16be82796a06734d0bdc010cd24ea32f
