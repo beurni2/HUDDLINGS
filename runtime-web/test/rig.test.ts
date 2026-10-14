@@ -133,6 +133,8 @@ test("the head's order is placed where @head stands, and a variant replaces the 
   assert.deepEqual(orderFor(rig, front), ["tail", "body", "ear", "head.base", "eye", "eye.R"]);
   assert.deepEqual(orderFor(rig, front, "front:tailFront"), ["body", "tail", "ear", "head.base", "eye", "eye.R"]);
   assert.deepEqual(orderFor(rig, { body: "side.R", head: "side.R" }), ["body", "tail", "head.base"]);
+  // A front variant means nothing in the side view.
+  assert.deepEqual(orderFor(rig, { body: "side.R", head: "side.R" }, "front:tailFront"), ["body", "tail", "head.base"]);
 });
 
 test("a part draws its state's region, its default state, or nothing in a view it lacks", () => {

@@ -6,7 +6,11 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { apply, catmullRom, compose, ease, fnv1a32, IDENTITY, mulberry32, randomStream, softLimit, type Easing } from "../../runtime-web/src/math.ts";
 import { sampleDiscrete, sampleKeys } from "../../runtime-web/src/clip.ts";
-import type { DiscreteKey, Key } from "../../runtime-web/src/format.ts";
+import type { Clip, DiscreteKey, Key, Rig } from "../../runtime-web/src/format.ts";
+import { compile, drawList, evaluatePose, type Channels, type FrameState } from "../../runtime-web/src/rig.ts";
+import { Player } from "../../runtime-web/src/player.ts";
+import { readSource } from "../build/build.ts";
+import { buildAtlas } from "../build/atlas.ts";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const out = join(here, "vectors");
@@ -94,3 +98,88 @@ write("keys", {
   ],
   discrete: [{ keys: discrete, t: times, value: times.map((t) => sampleDiscrete(discrete, t)) }],
 });
+
+// Whole poses, draw lists and player runs of the test character (characters/test/src):
+// the Swift engine reads the same rig and clips and must match every number.
+const source = await readSource("test");
+const rig: Rig = source.rig;
+const c = compile(rig);
+const { atlas } = buildAtlas("2x", source.drawings, 2, (i) => `atlas@2x-${i}.png`);
+const poseRng = mulberry32(2026);
+const pick = <T,>(list: readonly T[]) => list[Math.floor(poseRng() * list.length)]!;
+const within = ([lo, hi]: readonly [number, number]) => lo + (hi - lo) * poseRng();
+
+function randomInput() {
+  const channels: Record<string, Channels> = {};
+  const springs: Record<string, number> = {};
+  for (const bone of rig.bones) {
+    const ch: Channels = {};
+    if (bone.rot) ch.rot = within(bone.rot);
+    if (bone.squash) ch.squash = within(bone.squash);
+    if (bone.scale) ch.scale = within(bone.scale);
+    if (bone.yaw) ch.yaw = within(bone.yaw);
+    if (bone.pitch) ch.pitch = within(bone.pitch);
+    if (poseRng() < 0.5) ch.x = within([-10, 10]);
+    if (poseRng() < 0.5) ch.y = within([-10, 10]);
+    channels[bone.name] = ch;
+    if (bone.spring) springs[bone.name] = within([-60, 60]);
+  }
+  const views = { body: pick(rig.views), head: pick(rig.views) };
+  return { channels, springs, views };
+}
+
+const flat = (m: { a: number; b: number; c: number; d: number; tx: number; ty: number }) => [m.a, m.b, m.c, m.d, m.tx, m.ty];
+write("poses", {
+  rig: "characters/test/src/rig.json",
+  cases: Array.from({ length: 24 }, () => {
+    const input = randomInput();
+    const pose = evaluatePose(c, input);
+    return { ...input, world: pose.world.map(flat), scale: pose.scale, angle: pose.angle };
+  }),
+});
+
+write("drawlists", {
+  rig: "characters/test/src/rig.json",
+  atlas,
+  cases: Array.from({ length: 24 }, () => {
+    const input = randomInput();
+    const pose = evaluatePose(c, input);
+    const state: FrameState = {
+      views: input.views,
+      states: { "eye.L": pick(["open", "closed"]), "eye.R": pick(["open", "closed"]) },
+      variant: pick([undefined, "front:pawsBack"]),
+      turn: input.channels.head,
+    };
+    return { ...input, state: { ...state, variant: state.variant ?? null }, items: drawList(c, pose, atlas, state).map((i) => ({ ...i, clipTo: i.clipTo ?? null })) };
+  }),
+});
+
+// A player run: switches with a blend, a hard switch, and frames at uneven times.
+const clips: Clip[] = source.clips;
+const script: ({ play: string; t: number; blendMs?: number } | { frame: number })[] = [{ play: "test_dance", t: 0 }];
+const gaps = [1 / 60, 1 / 60, 1 / 30, 0.005, 1 / 24, 1 / 120, 0.021];
+let now = 0;
+for (let i = 0; now < 7.6; i++) {
+  script.push({ frame: now });
+  if (now < 2 && now + gaps[i % gaps.length]! >= 2) script.push({ play: "idle", t: 2, blendMs: 250 }), (now = 2);
+  else if (now < 3.2 && now + gaps[i % gaps.length]! >= 3.2) script.push({ play: "test_dance", t: 3.2, blendMs: 0 }), (now = 3.2);
+  else now += gaps[i % gaps.length]!;
+}
+const player = new Player(c, clips);
+const frames = script.flatMap((step) => {
+  if ("play" in step) {
+    player.play(step.play, step.t, step.blendMs);
+    return [];
+  }
+  const f = player.advanceTo(step.frame);
+  return [{
+    t: step.frame,
+    angle: f.pose.angle,
+    world: f.pose.world.map(flat),
+    views: f.state.views,
+    states: f.state.states,
+    variant: f.state.variant ?? null,
+    events: f.events.map((e) => `${e.type}${e.name ? `:${e.name}` : ""}`),
+  }];
+});
+write("player", { rig: "characters/test/src/rig.json", clips: "characters/test/src/clips", script, frames });

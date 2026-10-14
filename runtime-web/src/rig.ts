@@ -134,9 +134,10 @@ export function regionFor(part: Part, view: string, state: string | undefined): 
   return part.regions[view] ?? part.regions[`${view}:${part.defaultState ?? "open"}`];
 }
 
-/** The parts in drawing order for the current views and draw-order variant. */
+/** The parts in drawing order for the current views and draw-order variant (a variant of another view is ignored). */
 export function orderFor(rig: Rig, views: { body: string; head: string }, variant?: string): string[] {
-  const body = (variant && rig.drawOrderVariants?.[variant]) || rig.drawOrder[views.body] || [];
+  const own = variant?.startsWith(`${views.body}:`) ? rig.drawOrderVariants?.[variant] : undefined;
+  const body = own ?? rig.drawOrder[views.body] ?? [];
   const head = rig.drawOrder[`head.${views.head}`] ?? [];
   return body.flatMap((entry) => (entry === "@head" ? head : [entry]));
 }
