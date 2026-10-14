@@ -202,8 +202,9 @@ export function validate(rig: Rig, clips: Clip[], atlas?: AtlasSet): string[] {
     }
     for (const event of clip.events ?? []) {
       if (event.at < 0 || event.at > clip.lengthMs) problems.push(`clip ${clip.name}: event ${event.type} at ${event.at} ms is outside the clip`);
-      if (event.type === "order" && !(event.name && rig.drawOrderVariants?.[event.name]))
+      if (event.type === "order" && event.name !== undefined && !rig.drawOrderVariants?.[event.name])
         problems.push(`clip ${clip.name}: order event names an unknown variant ${event.name}`);
+      if (clip.loop && event.at === clip.lengthMs) problems.push(`clip ${clip.name}: on a loop, an event at ${clip.lengthMs} ms is the event at 0 ms; put it at 0`);
     }
     for (const [group, keys] of Object.entries(clip.views ?? {})) {
       for (const [, view] of keys ?? []) if (!rig.views.includes(view)) problems.push(`clip ${clip.name}: ${group} view ${view} is unknown`);
