@@ -5,6 +5,8 @@ name: ios
 on:
   pull_request:
   workflow_dispatch:
+  # The TestFlight lane runs every one of these checks before it uploads.
+  workflow_call:
 
 permissions:
   contents: read

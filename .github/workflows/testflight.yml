@@ -12,16 +12,21 @@ permissions:
   contents: read
 
 jobs:
+  checks:
+    # Everything the pull request runs (tests, parity, strings, no sheet pixels) must pass first.
+    uses: ./.github/workflows/ios.yml
+
   upload:
+    needs: checks
     runs-on: macos-15
     timeout-minutes: 60
-    env:
-      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
-      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
-      ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
-      APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
     steps:
       - name: The secrets are there
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+          APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
         run: |
           missing=""
           for name in ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_P8 APPLE_TEAM_ID; do
@@ -35,6 +40,7 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: "22.22"
+      # No secret is in the environment of these steps: package scripts and Homebrew never see the key.
       - run: npm ci --no-audit --no-fund
       - name: Build the test character and the app's generated assets
         run: |
@@ -45,10 +51,16 @@ jobs:
           brew install xcodegen
           cd ios && xcodegen generate
       - name: The API key, readable only by this job
+        env:
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
         run: |
           umask 077
           printf '%s' "$ASC_KEY_P8" > "$RUNNER_TEMP/AuthKey.p8"
       - name: Archive the internal build
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
         run: |
           xcodebuild archive -project ios/Huddlings.xcodeproj -scheme Huddlings -configuration Internal \
             -destination 'generic/platform=iOS' -archivePath build/Huddlings.xcarchive \
@@ -58,6 +70,10 @@ jobs:
       - name: Nothing from the sheets in the build
         run: python3 tools/qa/no_sheet_pixels.py build/Huddlings.xcarchive
       - name: Upload to TestFlight, internal testing only
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
         run: |
           cat > "$RUNNER_TEMP/ExportOptions.plist" <<PLIST
           <?xml version="1.0" encoding="UTF-8"?>
