@@ -1,28 +1,40 @@
 """The copy lint: rule R7 and the copy rules of spec section 20.
 
-It reads every user-visible string in the repository (the copy catalogue,
-Xcode string catalogues and .strings files, InfoPlist.strings included) and
-fails when one breaks a rule:
+It reads every user-visible string in the repository and fails when one
+breaks a rule:
 
 - a banned word or phrase (R7), as a whole word, ignoring case;
-- an exclamation mark, anywhere;
+- an exclamation mark, in any form;
 - in a notification: hungry, peckish, energy, feed or treat (sections 16, 20),
   or a placeholder other than a first name or a Huddling name;
 - the literal word Mochi outside the feature names (section 20, Names);
-- a placeholder that section 20 does not define;
+- a placeholder section 20 does not define, or a printf specifier (%@, %d):
+  copy uses {placeholders} only;
 - a placeholder in InfoPlist copy, where no companion name is known;
 - a friend's name on the Lock Screen (section 6, Widgets).
 
-User-written text never passes through it: it only reads copy files.
+Text is normalised first (NFKC, invisible characters removed), so a soft
+hyphen or a full-width letter cannot hide a word.
+
+Where copy lives: `copy/catalogue.json` is the single source of every
+user-visible string. The app's string catalogues, the notification templates
+and the web page's copy are generated from it as each is built, and the lint
+also reads what an iOS build could carry: *.xcstrings, *.strings,
+*.stringsdict, Info.plist files and the Info.plist properties in XcodeGen's
+project.yml. User-written text never passes through it. The default name
+Mochi is configuration, not copy.
 
     python3 tools/copylint/copylint.py [paths...]
 
-With no paths it scans the whole repository. It exits 1 when anything fails.
+With no paths it scans the repository it lives in. It exits 1 when anything
+fails or a copy file cannot be read.
 """
 
 import json
+import plistlib
 import re
 import sys
+import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -36,7 +48,7 @@ BANNED = [
 
 # Other forms of the same words. R7 says "whole words", which would let
 # "misses", "died" or "hurrying" through; this list refuses them too, as the
-# safest default until the founder decides (docs/QUESTIONS.md, the copy lint).
+# safest default until the founder decides (docs/QUESTIONS.md, Q2).
 BANNED_FORMS = [
     "misses", "missing", "lonelier", "loneliest", "loneliness",
     "forget", "forgets", "forgetting", "died", "dies", "sadder", "saddest",
@@ -47,10 +59,9 @@ BANNED_FORMS = [
 # Section 16: notification templates also refuse these, with their forms.
 NOTIFICATION_BANNED = ["hungry", "peckish", "energy", "feed", "treat"]
 NOTIFICATION_BANNED_FORMS = [
-    "hungrier", "hungriest", "feeds", "fed", "feeding", "treats", "treated", "treating",
+    "hungrier", "hungriest", "hunger", "peckishness", "energetic",
+    "feeds", "fed", "feeding", "treats", "treated", "treating",
 ]
-
-EXCLAMATIONS = "!¡！‼⁉❗❕"
 
 # Section 20, Names: the literal word Mochi only in the feature names.
 FEATURE_NAMES = ["Film with Mochi", "Mochi Post", "Mochi Treats", "Mochi Cam"]
@@ -65,11 +76,15 @@ NOTIFICATION_PLACEHOLDERS = {"mochi", "visitor", "sender", "name", "names"}
 # Section 6: Lock Screen widgets never show a friend's name.
 PERSON_PLACEHOLDERS = {"sender", "name", "names"}
 
-SKIP_DIRS = {".git", "node_modules", ".build", "DerivedData", "Pods", "archive"}
+SKIP_DIRS = {".git", "node_modules", ".build", "DerivedData", "Pods"}
+INFOPLIST_KEY = re.compile(r"^NS\w+UsageDescription$|^CFBundle(Display)?Name$")
+PROJECT_YML_COPY = re.compile(
+    r"^\s*(NS\w+UsageDescription|CFBundleDisplayName|CFBundleName)\s*:\s*(.+?)\s*$", re.M)
 
 
 def _words_pattern(words):
-    parts = [r"\s+".join(re.escape(w) for w in phrase.split()) for phrase in words]
+    sep = r"[\s\-‐‑]+"
+    parts = [sep.join(re.escape(w) for w in phrase.split()) for phrase in words]
     return re.compile(r"(?<![A-Za-z0-9])(?:" + "|".join(parts) + r")(?![A-Za-z0-9])", re.IGNORECASE)
 
 
@@ -77,8 +92,20 @@ BANNED_RE = _words_pattern(BANNED)
 BANNED_FORMS_RE = _words_pattern(BANNED_FORMS)
 NOTIFICATION_RE = _words_pattern(NOTIFICATION_BANNED + NOTIFICATION_BANNED_FORMS)
 PLACEHOLDER_RE = re.compile(r"\{([^{}]*)\}")
-MOCHI_RE = re.compile(r"(?<![A-Za-z0-9])mochi(?![A-Za-z0-9])", re.IGNORECASE)
-FEATURE_RE = re.compile("|".join(re.escape(f) for f in FEATURE_NAMES))
+PRINTF_RE = re.compile(r"%#@\w+@|%(?:\d+\$)?[#0\-+']*\d*(?:\.\d+)?(?:hh|h|ll|l|q|L|z|j|t)?[@dDiuUxXoOfFeEgGaAcCsSp]")
+MOCHI_RE = re.compile(r"(?<![A-Za-z0-9])mochi", re.IGNORECASE)
+FEATURE_RE = re.compile("(?:" + "|".join(re.escape(f) for f in FEATURE_NAMES) + r")(?![A-Za-z0-9])")
+
+
+def normalise(text):
+    """NFKC, with invisible format characters (soft hyphens, zero-width spaces) removed."""
+    text = unicodedata.normalize("NFKC", text)
+    return "".join(c for c in text if unicodedata.category(c) != "Cf")
+
+
+def _is_exclamation(ch):
+    name = unicodedata.name(ch, "")
+    return ch in "!¡" or "EXCLAMATION" in name or "INTERROBANG" in name
 
 
 @dataclass
@@ -96,15 +123,20 @@ class Problem:
     message: str
 
     def __str__(self):
-        path = Path(self.entry.path)
-        if path.is_absolute() and path.is_relative_to(ROOT):
-            path = path.relative_to(ROOT)
-        return f"{path}: {self.entry.key}: {self.rule}: {self.message}  [{self.entry.text!r}]"
+        return f"{_display(self.entry.path)}: {self.entry.key}: {self.rule}: {self.message}  [{self.entry.text!r}]"
+
+
+def _display(path):
+    path = Path(path)
+    if path.is_absolute() and path.is_relative_to(ROOT):
+        return str(path.relative_to(ROOT))
+    return str(path)
 
 
 def lint_text(text, surfaces=("app",)):
     """Return (rule, message) pairs for one string shown on the given surfaces."""
     problems = []
+    text = normalise(text)
     placeholders = PLACEHOLDER_RE.findall(text)
     bare = PLACEHOLDER_RE.sub(" ", text)
 
@@ -112,10 +144,9 @@ def lint_text(text, surfaces=("app",)):
         problems.append(("R7", f"banned word {m.group(0)!r}"))
     for m in BANNED_FORMS_RE.finditer(bare):
         problems.append(("R7 (other form)", f"a form of a banned word: {m.group(0)!r}"))
-    for ch in EXCLAMATIONS:
-        if ch in text:
-            problems.append(("R7", f"exclamation mark {ch!r}"))
-            break
+    marks = [ch for ch in text if _is_exclamation(ch)]
+    if marks:
+        problems.append(("R7", f"exclamation mark {marks[0]!r}"))
 
     if "notification" in surfaces:
         for m in NOTIFICATION_RE.finditer(bare):
@@ -130,6 +161,8 @@ def lint_text(text, surfaces=("app",)):
     for p in placeholders:
         if p not in PLACEHOLDERS:
             problems.append(("placeholder", f"unknown placeholder {{{p}}}"))
+    for m in PRINTF_RE.finditer(bare):
+        problems.append(("placeholder", f"printf specifier {m.group(0)!r}; copy uses {{placeholders}}"))
     if "infoplist" in surfaces and placeholders:
         problems.append(("infoplist", "no companion name is known here; say 'your Huddling'"))
     if "lockscreen" in surfaces:
@@ -139,12 +172,18 @@ def lint_text(text, surfaces=("app",)):
     return problems
 
 
+def _relative_parts(path):
+    path = Path(path).resolve()
+    if path.is_relative_to(ROOT):
+        return path.relative_to(ROOT).parts
+    return path.parts[-3:]
+
+
 def _surfaces_from_name(path, key):
     surfaces = ["app"]
-    name = Path(path).name
-    if name.startswith("InfoPlist."):
+    if Path(path).name.startswith("InfoPlist.") or Path(path).name.endswith("Info.plist"):
         surfaces = ["infoplist"]
-    if key.startswith("push.") or "Notification" in str(path):
+    if key.startswith("push.") or any("Notification" in part for part in _relative_parts(path)[:-1]):
         surfaces.append("notification")
     if key.endswith("Lock"):
         surfaces.append("lockscreen")
@@ -174,8 +213,7 @@ def load_xcstrings(path):
     entries = []
     for key, item in data.get("strings", {}).items():
         surfaces = _surfaces_from_name(path, key)
-        if item.get("shouldTranslate") is False:
-            continue
+        # "Don't translate" strings are still shown, so they are linted too.
         values = list(_xcstrings_values(item.get("localizations", {})))
         # With no localization yet, the key is the English text.
         for value in values or [key]:
@@ -183,8 +221,28 @@ def load_xcstrings(path):
     return entries
 
 
-STRINGS_LINE = re.compile(r'"((?:[^"\\]|\\.)*)"\s*=\s*"((?:[^"\\]|\\.)*)"\s*;')
-STRINGS_ESCAPE = re.compile(r'\\(U[0-9A-Fa-f]{4}|u[0-9A-Fa-f]{4}|.)')
+def _decode_text_file(path):
+    raw = Path(path).read_bytes()
+    for bom, encoding in ((b"\xef\xbb\xbf", "utf-8-sig"), (b"\xff\xfe", "utf-16"), (b"\xfe\xff", "utf-16")):
+        if raw.startswith(bom):
+            return raw.decode(encoding)
+    if b"\x00" in raw:
+        # UTF-16 without a byte-order mark: ASCII leaves its zero byte on the odd side in little-endian.
+        odd_zeros = raw[1::2].count(0)
+        even_zeros = raw[0::2].count(0)
+        return raw.decode("utf-16-le" if odd_zeros >= even_zeros else "utf-16-be")
+    return raw.decode("utf-8")
+
+
+STRINGS_TOKEN = re.compile(r'''
+    (?P<ws>\s+)
+  | (?P<block>/\*.*?\*/)
+  | (?P<line>//[^\n]*)
+  | "(?P<quoted>(?:[^"\\]|\\.)*)"
+  | (?P<bare>[A-Za-z0-9_.$:/\-]+)
+  | (?P<punct>[=;])
+''', re.S | re.X)
+STRINGS_ESCAPE = re.compile(r'\\(U[0-9A-Fa-f]{4}|u[0-9A-Fa-f]{4}|.)', re.S)
 SIMPLE_ESCAPES = {"n": "\n", "t": "\t", "r": "\r", '"': '"', "\\": "\\", "'": "'"}
 
 
@@ -197,35 +255,98 @@ def _unescape(value):
     return STRINGS_ESCAPE.sub(repl, value)
 
 
-def _read_strings_file(path):
-    raw = Path(path).read_bytes()
-    for encoding in ("utf-8-sig", "utf-16"):
-        try:
-            return raw.decode(encoding)
-        except UnicodeDecodeError:
-            continue
-    raise ValueError(f"{path}: not UTF-8 or UTF-16")
+def _strings_tokens(text, path):
+    pos = 0
+    while pos < len(text):
+        m = STRINGS_TOKEN.match(text, pos)
+        if not m:
+            raise ValueError(f"{path}: cannot read the .strings file at character {pos}: {text[pos:pos + 30]!r}")
+        pos = m.end()
+        if m.group("quoted") is not None:
+            yield ("str", _unescape(m.group("quoted")))
+        elif m.group("bare") is not None:
+            yield ("str", m.group("bare"))
+        elif m.group("punct") is not None:
+            yield (m.group("punct"), None)
 
 
 def load_strings(path):
-    text = _read_strings_file(path)
-    text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
+    """Old-style .strings: `key = value;`, quoted or bare, and the `"key";` shorthand. Anything else is an error."""
+    tokens = list(_strings_tokens(_decode_text_file(path), path))
     entries = []
-    for key, value in STRINGS_LINE.findall(text):
-        key = _unescape(key)
-        entries.append(Entry(str(path), key, _unescape(value), _surfaces_from_name(path, key)))
+    i = 0
+    while i < len(tokens):
+        kind, key = tokens[i]
+        if kind != "str":
+            raise ValueError(f"{path}: expected a key, found {kind!r}")
+        if i + 1 < len(tokens) and tokens[i + 1][0] == ";":
+            value, i = key, i + 2
+        elif i + 3 < len(tokens) and tokens[i + 1][0] == "=" and tokens[i + 2][0] == "str" and tokens[i + 3][0] == ";":
+            value, i = tokens[i + 2][1], i + 4
+        else:
+            raise ValueError(f"{path}: malformed entry for key {key!r}")
+        entries.append(Entry(str(path), key, value, _surfaces_from_name(path, key)))
     return entries
 
 
+def _plist_leaves(node, key=""):
+    if isinstance(node, dict):
+        for k, v in node.items():
+            yield from _plist_leaves(v, k)
+    elif isinstance(node, list):
+        for v in node:
+            yield from _plist_leaves(v, key)
+    elif isinstance(node, str):
+        yield key, node
+
+
+def load_stringsdict(path):
+    data = plistlib.loads(Path(path).read_bytes())
+    entries = []
+    for top_key, item in data.items():
+        for key, value in _plist_leaves(item, top_key):
+            if key in ("NSStringFormatSpecTypeKey", "NSStringFormatValueTypeKey"):
+                continue  # format metadata, not copy
+            entries.append(Entry(str(path), top_key, value, _surfaces_from_name(path, top_key)))
+    return entries
+
+
+def load_info_plist(path):
+    data = plistlib.loads(Path(path).read_bytes())
+    return [Entry(str(path), key, value, ("infoplist",))
+            for key, value in _plist_leaves(data) if INFOPLIST_KEY.match(key)]
+
+
+def load_project_yml(path):
+    text = Path(path).read_text(encoding="utf-8")
+    entries = []
+    for key, value in PROJECT_YML_COPY.findall(text):
+        value = value.strip().strip("'\"")
+        if value.startswith("$("):
+            continue  # a build setting reference, resolved from a string catalogue
+        entries.append(Entry(str(path), key, value, ("infoplist",)))
+    return entries
+
+
+def _is_copy_file(rel):
+    name = rel.name
+    if rel.parts[0] == "copy" and rel.suffix == ".json":
+        return True
+    if rel.suffix in (".xcstrings", ".strings", ".stringsdict"):
+        return True
+    if name == "Info.plist" or name.endswith("-Info.plist"):
+        return True
+    return rel.parts[0] == "ios" and name in ("project.yml", "project.yaml")
+
+
 def discover(root):
+    root = Path(root)
     found = []
-    for path in sorted(Path(root).rglob("*")):
-        if any(part in SKIP_DIRS for part in path.parts) or not path.is_file():
-            continue
+    for path in sorted(root.rglob("*")):
         rel = path.relative_to(root)
-        if rel.parts[0] == "copy" and path.suffix == ".json":
-            found.append(path)
-        elif path.suffix in (".xcstrings", ".strings"):
+        if any(part in SKIP_DIRS for part in rel.parts) or rel.parts[:2] == ("docs", "archive"):
+            continue
+        if path.is_file() and _is_copy_file(rel):
             found.append(path)
     return found
 
@@ -238,6 +359,12 @@ def load(path):
         return load_xcstrings(path)
     if path.suffix == ".strings":
         return load_strings(path)
+    if path.suffix == ".stringsdict":
+        return load_stringsdict(path)
+    if path.suffix == ".plist":
+        return load_info_plist(path)
+    if path.suffix in (".yml", ".yaml"):
+        return load_project_yml(path)
     raise ValueError(f"{path}: not a copy file")
 
 
@@ -254,7 +381,11 @@ def lint_paths(paths):
 
 def main(argv):
     paths = [Path(p) for p in argv] or discover(ROOT)
-    count, problems = lint_paths(paths)
+    try:
+        count, problems = lint_paths(paths)
+    except (ValueError, KeyError, json.JSONDecodeError, plistlib.InvalidFileException, UnicodeDecodeError) as error:
+        print(f"copy lint: {error}")
+        return 1
     for problem in problems:
         print(problem)
     if problems:
