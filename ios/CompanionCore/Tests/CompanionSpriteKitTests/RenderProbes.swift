@@ -6,9 +6,14 @@
 // do what runtime-web/src/renderer.ts does.
 #if canImport(SpriteKit) && canImport(Metal)
 import Foundation
+import ImageIO
 import Metal
 import SpriteKit
+import UniformTypeIdentifiers
 import XCTest
+
+/// The filter between mip levels runtime-web/src/renderer.ts uses (TEXTURE_MIN_FILTER).
+private let webMipFilter = "LINEAR_MIPMAP_LINEAR"
 
 @MainActor
 final class RenderProbes: XCTestCase {
@@ -137,8 +142,37 @@ final class RenderProbes: XCTestCase {
         XCTAssertLessThan(means[best], 0.02, "neither split predicts SpriteKit's cell")
     }
 
+    /// An opaque page encoded as PNG and decoded with ImageIO, as AtlasTextures loads a package's pages.
+    private func pngTexture(_ width: Int, _ height: Int, mipmaps: Bool, _ grey: (Int, Int) -> UInt8) throws -> SKTexture {
+        var bytes = [UInt8](repeating: 255, count: width * height * 4)
+        for y in 0..<height {
+            for x in 0..<width {
+                let v = grey(x, y), i = 4 * (y * width + x)
+                bytes[i] = v
+                bytes[i + 1] = v
+                bytes[i + 2] = v
+            }
+        }
+        let provider = try XCTUnwrap(CGDataProvider(data: Data(bytes) as CFData))
+        let image = try XCTUnwrap(CGImage(width: width, height: height, bitsPerComponent: 8, bitsPerPixel: 32, bytesPerRow: width * 4,
+                                          space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue),
+                                          provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent))
+        let png = NSMutableData()
+        let destination = try XCTUnwrap(CGImageDestinationCreateWithData(png as CFMutableData, UTType.png.identifier as CFString, 1, nil))
+        CGImageDestinationAddImage(destination, image, nil)
+        XCTAssertTrue(CGImageDestinationFinalize(destination))
+        let source = try XCTUnwrap(CGImageSourceCreateWithData(png as CFData, nil))
+        let decoded = try XCTUnwrap(CGImageSourceCreateImageAtIndex(source, 0, [kCGImageSourceShouldCache: true] as CFDictionary))
+        let texture = SKTexture(cgImage: decoded)
+        texture.usesMipmaps = mipmaps
+        texture.filteringMode = .linear
+        return texture
+    }
+
     /// Noise drawn between two mip levels: least squares finds how much of the next level
     /// SpriteKit blends in, from renders of level 0 alone and of level 1 alone at the same size.
+    /// Measured for a texture made from bytes and for the atlas's own path: a PNG page,
+    /// mipmapped, drawn through a sub-texture of one region.
     func testMipFilter() throws {
         let size = 256, n = 256, origin = 20.0
         let (offscreen, k) = try makeOffscreen(size)
@@ -148,44 +182,69 @@ final class RenderProbes: XCTestCase {
             seed = seed &* 1_664_525 &+ 1_013_904_223
             noise[i] = UInt8(seed >> 24)
         }
-        let level0 = texture(n, n, mipmaps: false) { x, y in let v = noise[y * n + x]; return (v, v, v) }
-        let mipmapped = texture(n, n, mipmaps: true) { x, y in let v = noise[y * n + x]; return (v, v, v) }
-        let level1 = texture(n / 2, n / 2, mipmaps: false) { x, y in
+        let grey0 = { (x: Int, y: Int) -> UInt8 in noise[y * n + x] }
+        let grey1 = { (x: Int, y: Int) -> UInt8 in
             let sum = Int(noise[2 * y * n + 2 * x]) + Int(noise[2 * y * n + 2 * x + 1]) + Int(noise[(2 * y + 1) * n + 2 * x]) + Int(noise[(2 * y + 1) * n + 2 * x + 1])
-            let v = UInt8((sum + 2) / 4)
-            return (v, v, v)
+            return UInt8((sum + 2) / 4)
         }
-        for scale in [0.81, 0.62] {
-            let pixels = Double(n) * scale
-            let a = try draw(offscreen, k, [sprite(level0, pixels: pixels, at: origin, k)])
-            let b = try draw(offscreen, k, [sprite(level1, pixels: pixels, at: origin, k)])
-            let m = try draw(offscreen, k, [sprite(mipmapped, pixels: pixels, at: origin, k)])
-            var dot = 0.0, norm = 0.0
-            let inside = (Int(origin) + 3)..<(Int(origin + pixels) - 3)
-            for y in inside {
-                for x in inside {
-                    let i = 4 * ((size - 1 - y) * size + x)
-                    let (av, bv, mv) = (Double(a[i]), Double(b[i]), Double(m[i]))
-                    dot += (mv - av) * (bv - av)
-                    norm += (bv - av) * (bv - av)
-                }
-            }
-            let weight = dot / max(norm, 1)
-            var residual = 0.0
-            for y in inside {
-                for x in inside {
-                    let i = 4 * ((size - 1 - y) * size + x)
-                    residual += abs(Double(m[i]) - ((1 - weight) * Double(a[i]) + weight * Double(b[i])))
-                }
-            }
-            residual /= Double(inside.count * inside.count)
-            let level = log2(1 / scale)
-            note(String(format: "probe: mipmaps drawn at %.2f (level %.2f): SpriteKit blends %.3f of level 1 into level 0, residual %.2f of 255",
-                        scale, level, weight, residual))
-            // renderer.ts uses LINEAR_MIPMAP_LINEAR: the blend follows the level's fraction.
-            // LINEAR_MIPMAP_NEAREST would give 0 at level 0.30 and 1 at level 0.69.
-            XCTAssertEqual(weight, level, accuracy: 0.15, "SpriteKit does not blend mip levels as LINEAR_MIPMAP_LINEAR does")
+        func rgb(_ grey: @escaping (Int, Int) -> UInt8) -> (Int, Int) -> (UInt8, UInt8, UInt8) {
+            { x, y in let v = grey(x, y); return (v, v, v) }
         }
+        // The region: the page's middle quarter, 128 texels across at level 0.
+        let region = CGRect(x: 0.25, y: 0.25, width: 0.5, height: 0.5)
+        let paths: [(String, SKTexture, SKTexture, SKTexture, Double)] = [
+            ("bytes, whole texture", texture(n, n, mipmaps: false, rgb(grey0)), texture(n / 2, n / 2, mipmaps: false, rgb(grey1)),
+             texture(n, n, mipmaps: true, rgb(grey0)), Double(n)),
+            ("PNG page, one region", SKTexture(rect: region, in: try pngTexture(n, n, mipmaps: false, grey0)),
+             SKTexture(rect: region, in: try pngTexture(n / 2, n / 2, mipmaps: false, grey1)),
+             SKTexture(rect: region, in: try pngTexture(n, n, mipmaps: true, grey0)), Double(n) / 2),
+        ]
+        var found: [String: String] = [:]
+        for (name, level0, level1, mipmapped, texels) in paths {
+            var weights: [Double] = []
+            for scale in [0.81, 0.62] {
+                let pixels = texels * scale
+                let a = try draw(offscreen, k, [sprite(level0, pixels: pixels, at: origin, k)])
+                let b = try draw(offscreen, k, [sprite(level1, pixels: pixels, at: origin, k)])
+                let m = try draw(offscreen, k, [sprite(mipmapped, pixels: pixels, at: origin, k)])
+                var dot = 0.0, norm = 0.0
+                let inside = (Int(origin) + 3)..<(Int(origin + pixels) - 3)
+                for y in inside {
+                    for x in inside {
+                        let i = 4 * ((size - 1 - y) * size + x)
+                        let (av, bv, mv) = (Double(a[i]), Double(b[i]), Double(m[i]))
+                        dot += (mv - av) * (bv - av)
+                        norm += (bv - av) * (bv - av)
+                    }
+                }
+                let weight = dot / max(norm, 1)
+                var residual = 0.0
+                for y in inside {
+                    for x in inside {
+                        let i = 4 * ((size - 1 - y) * size + x)
+                        residual += abs(Double(m[i]) - ((1 - weight) * Double(a[i]) + weight * Double(b[i])))
+                    }
+                }
+                residual /= Double(inside.count * inside.count)
+                weights.append(weight)
+                note(String(format: "probe: mipmaps, %@, drawn at %.2f (level %.2f): SpriteKit blends %.3f of level 1 into level 0, residual %.2f of 255",
+                            name, scale, log2(1 / scale), weight, residual))
+            }
+            // What each filter predicts at levels 0.30 and 0.69.
+            let filter: String
+            if abs(weights[0]) < 0.1 && abs(weights[1]) < 0.1 {
+                filter = "LINEAR (no mipmaps used)"
+            } else if abs(weights[0] - log2(1 / 0.81)) < 0.15 && abs(weights[1] - log2(1 / 0.62)) < 0.15 {
+                filter = "LINEAR_MIPMAP_LINEAR"
+            } else if abs(weights[0]) < 0.1 && abs(weights[1] - 1) < 0.1 {
+                filter = "LINEAR_MIPMAP_NEAREST"
+            } else {
+                filter = "unclassified"
+            }
+            found[name] = filter
+            note("probe: mipmaps, \(name): SpriteKit filters as \(filter)")
+        }
+        XCTAssertEqual(found["PNG page, one region"], webMipFilter, "SpriteKit filters the atlas's pages differently from the web renderer")
     }
 }
 #endif

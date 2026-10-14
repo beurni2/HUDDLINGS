@@ -76,15 +76,23 @@ jobs:
           cat build/parity/spritekit/notes.txt || true
           cat build/parity/spritekit/probes.txt || true
       - name: Generate the project
+        # Runs even when a test above failed, so one run reports everything.
+        if: ${{ !cancelled() && steps.sim.outcome == 'success' }}
         working-directory: ios
         run: xcodegen generate
       - name: Build the app and run its UI tests
+        # Runs even when a test above failed, so one run reports everything.
+        if: ${{ !cancelled() && steps.sim.outcome == 'success' }}
         run: xcodebuild test -quiet -project ios/Huddlings.xcodeproj -scheme Huddlings -destination "id=${{ steps.sim.outputs.udid }}" -derivedDataPath build/derived CODE_SIGNING_ALLOWED=NO -resultBundlePath build/results/app.xcresult 2>&1
       - name: The strings the build extracts are catalogue copy
+        # Runs even when a test above failed, so one run reports everything.
+        if: ${{ !cancelled() && steps.sim.outcome == 'success' }}
         run: |
           xcodebuild -exportLocalizations -project ios/Huddlings.xcodeproj -localizationPath build/loc -exportLanguage en
           python3 tools/copylint/strings_build.py check build/loc
       - name: Nothing from the sheets in the app, and the packages arrive byte for byte
+        # Runs even when a test above failed, so one run reports everything.
+        if: ${{ !cancelled() && steps.sim.outcome == 'success' }}
         run: |
           app=$(find build/derived/Build/Products -name Huddlings.app -path '*iphonesimulator*' | head -1)
           python3 tools/qa/no_sheet_pixels.py "$app"
@@ -117,6 +125,9 @@ jobs:
   parity:
     # Section 5b: the same frames on the web and on the simulator, SSIM 0.95 or more.
     needs: [web-frames, ios]
+    # Also when the ios job failed after rendering (a probe, a UI test): parity
+    # fails on its own if the SpriteKit frames are missing.
+    if: ${{ !cancelled() && needs.web-frames.result == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
