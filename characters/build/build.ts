@@ -1,13 +1,17 @@
 // Builds a character package (characters/format/README.md, Files) from
-// characters/<species>/src: checks the rig, clips and drawings, rasterizes the
-// drawings into atlas sets, and writes build/characters/<species>/.
+// characters/<species>/src: checks the rig, clips and drawings, lints the
+// drawings, rasterizes them into atlas sets, and writes
+// build/characters/<species>/. Beside the package, in dev/ (never part of it),
+// it writes a build report and the landmarks the species' drawings place.
 // Run: node characters/build/build.ts <species> [out folder]
 import { createHash } from "node:crypto";
 import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { FORMAT, validate, type AtlasSet, type Clip, type Rig } from "../../runtime-web/src/format.ts";
-import { buildAtlas, type Drawing } from "./atlas.ts";
+import { lint, type LintRules } from "../draw/lint.ts";
+import { packAtlas, type Drawing } from "./atlas.ts";
+import { rasterizeAll, type RasterOptions } from "./raster.ts";
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -37,18 +41,28 @@ export interface Source {
   clips: Clip[];
   params: unknown;
   drawings: Drawing[];
+  /** The drawing lint's palette and exceptions, for a species drawn with characters/draw. */
+  lint?: LintRules;
+  /** Points the sheet has no finder for (paws, the tag's ring, the seat), per view, in model space. */
+  landmarks?: Record<string, Record<string, [number, number]>>;
 }
 
 export async function readSource(species: string): Promise<Source> {
   const src = join(repo, "characters", species, "src");
   const json = (path: string) => JSON.parse(readFileSync(path, "utf8"));
   const clipFiles = readdirSync(join(src, "clips")).filter((f) => f.endsWith(".json")).sort();
-  const module = (await import(pathToFileURL(join(src, "drawings.ts")).href)) as { drawings(): Drawing[] };
+  const module = (await import(pathToFileURL(join(src, "drawings.ts")).href)) as {
+    drawings(): Drawing[];
+    lint?: LintRules;
+    landmarks?(): Record<string, Record<string, [number, number]>>;
+  };
   return {
     rig: json(join(src, "rig.json")),
     clips: clipFiles.map((f) => json(join(src, "clips", f))),
     params: json(join(src, "params.json")),
     drawings: module.drawings(),
+    ...(module.lint ? { lint: module.lint } : {}),
+    ...(module.landmarks ? { landmarks: module.landmarks() } : {}),
   };
 }
 
@@ -56,10 +70,36 @@ export interface Package {
   /** Every file of the package by name, as bytes. */
   files: Map<string, Buffer>;
   atlas: { sets: AtlasSet[] };
+  /** Development output written beside the package in dev/, never part of it. */
+  dev: Map<string, Buffer>;
+  report: Report;
+}
+
+export interface Report {
+  /** Hand nodes per part, per region. */
+  nodes: Record<string, Record<string, number>>;
+  /** How much of each set's page area its regions fill. */
+  pageShare: Record<string, { pages: string[]; share: number }>;
+}
+
+function report(drawings: Drawing[], sets: AtlasSet[]): Report {
+  const nodes: Report["nodes"] = {};
+  for (const d of drawings) {
+    const count = (d.meta?.shapes ?? []).reduce((sum, s) => sum + s.nodes, 0);
+    if (!d.meta) continue;
+    (nodes[d.region.split("/")[0]!] ??= {})[d.region] = count;
+  }
+  const pageShare: Report["pageShare"] = {};
+  for (const set of sets) {
+    const used = Object.values(set.regions).reduce((sum, r) => sum + r.w * r.h, 0);
+    const total = set.pages.reduce((sum, p) => sum + p.width * p.height, 0);
+    pageShare[set.name] = { pages: set.pages.map((p) => `${p.width}×${p.height}`), share: Math.round((used / total) * 1000) / 1000 };
+  }
+  return { nodes, pageShare };
 }
 
 /** Builds a package in memory; throws with every problem found. */
-export function buildPackage(source: Source): Package {
+export async function buildPackage(source: Source, opts: RasterOptions = {}): Promise<Package> {
   const { rig, clips, params, drawings } = source;
   const problems: string[] = [];
   const drawn = new Set<string>();
@@ -75,12 +115,15 @@ export function buildPackage(source: Source): Package {
     if (names.has(clip.name)) problems.push(`clip ${clip.name}: two files have this name`);
     names.add(clip.name);
   }
+  // Every drawing gets the lint's structural checks; a species drawn with the kit gets its palette and art rules too.
+  problems.push(...lint(drawings, source.lint));
   if (problems.length) throw new Error(problems.join("\n"));
 
+  const rasters = await rasterizeAll(drawings, SETS.map((s) => s.scale), opts);
   const files = new Map<string, Buffer>();
   const sets: AtlasSet[] = [];
   for (const set of SETS) {
-    const { atlas, images } = buildAtlas(set.name, drawings, set.scale, set.file);
+    const { atlas, images } = packAtlas(set.name, drawings.map((d) => rasters.get(`${set.scale}:${d.region}`)!), set.scale, set.file);
     problems.push(...validate(rig, clips, atlas));
     images.forEach((image, i) => {
       const bad = pngChunks(image).filter((c) => COLOUR_CHUNKS.includes(c));
@@ -99,15 +142,22 @@ export function buildPackage(source: Source): Package {
   const hashes: Record<string, string> = {};
   for (const name of [...files.keys()].sort()) hashes[name] = createHash("sha256").update(files.get(name)!).digest("hex");
   files.set("package.json", text({ format: FORMAT, species: rig.species, version: rig.version ?? "0.0.0", minRuntime: FORMAT, files: hashes }));
-  return { files, atlas: { sets } };
+  const built = report(drawings, sets);
+  // Only a species drawn with the kit gets dev/, so the test character's folder stays exactly the package.
+  const dev = new Map<string, Buffer>();
+  if (source.lint || source.landmarks) dev.set("report.json", text(built));
+  if (source.landmarks) dev.set("landmarks.json", text(source.landmarks));
+  return { files, atlas: { sets }, dev, report: built };
 }
 
 export function writePackage(pkg: Package, out: string): void {
   rmSync(out, { recursive: true, force: true });
-  for (const [name, bytes] of pkg.files) {
+  const write = (name: string, bytes: Buffer) => {
     mkdirSync(dirname(join(out, name)), { recursive: true });
     writeFileSync(join(out, name), bytes);
-  }
+  };
+  for (const [name, bytes] of pkg.files) write(name, bytes);
+  for (const [name, bytes] of pkg.dev) write(join("dev", name), bytes);
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
@@ -118,10 +168,12 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   }
   const out = resolve(process.argv[3] ?? join(repo, "build", "characters", species));
   try {
-    const pkg = buildPackage(await readSource(species));
+    const pkg = await buildPackage(await readSource(species), { cache: join(repo, "build", "cache") });
     writePackage(pkg, out);
-    const pages = pkg.atlas.sets.map((s) => `${s.name}: ${s.pages.map((p) => `${p.width}²`).join(" + ")}`).join(", ");
+    const pages = Object.entries(pkg.report.pageShare).map(([set, p]) => `${set}: ${p.pages.join(" + ")} (${Math.round(p.share * 100)}% filled)`).join(", ");
     console.log(`built ${species} into ${out} (${pkg.files.size} files; pages ${pages})`);
+    const nodes = Object.entries(pkg.report.nodes).map(([part, regions]) => `${part} ${Object.values(regions).join("/")}`);
+    if (nodes.length) console.log(`hand nodes: ${nodes.join(", ")}`);
   } catch (error) {
     console.error(`build of ${species} failed:\n${(error as Error).message}`);
     process.exit(1);
