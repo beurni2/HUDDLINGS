@@ -115,10 +115,12 @@ export class Player {
     const events = this.pending;
     if (this.mixer) events.push(...this.collectEvents(this.mixer, t));
     this.pending = [];
+    // Time only moves forward, so a blend that is over at this frame is over for good.
+    for (let m = this.mixer; m; m = m.from) if (m.from && this.weight(m, t) >= 1) m.from = undefined;
     return { pose, state, events };
   }
 
-  /** The clip channels at time t, blended. */
+  /** The clip channels at time t, blended. It changes nothing, so a host may look ahead. */
   channelsAt(t: number): Record<string, Channels> {
     return this.mixer ? this.evaluate(this.mixer, t) : {};
   }
@@ -141,10 +143,7 @@ export class Player {
     }
     if (!m.from) return out;
     const w = this.weight(m, t);
-    if (w >= 1) {
-      m.from = undefined; // time only moves forward, so the blend is over for good
-      return out;
-    }
+    if (w >= 1) return out;
     const from = this.evaluate(m.from, t);
     const blended: Record<string, Channels> = {};
     for (const bone of new Set([...Object.keys(from), ...Object.keys(out)])) {

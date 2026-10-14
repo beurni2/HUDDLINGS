@@ -6,7 +6,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { apply, catmullRom, compose, ease, fnv1a32, IDENTITY, mulberry32, randomStream, softLimit, type Easing } from "../../runtime-web/src/math.ts";
 import { sampleDiscrete, sampleKeys } from "../../runtime-web/src/clip.ts";
-import type { Clip, DiscreteKey, Key, Rig } from "../../runtime-web/src/format.ts";
+import { validate, type Clip, type DiscreteKey, type Key, type Rig } from "../../runtime-web/src/format.ts";
 import { compile, drawList, evaluatePose, type Channels, type FrameState } from "../../runtime-web/src/rig.ts";
 import { Player } from "../../runtime-web/src/player.ts";
 import { readSource } from "../build/build.ts";
@@ -183,3 +183,67 @@ const frames = script.flatMap((step) => {
   }];
 });
 write("player", { rig: "characters/test/src/rig.json", clips: "characters/test/src/clips", script, frames });
+
+// A second run on clips written here, for what the test character's clips never do:
+// jumps on step keys (cuts), events and the order track on a looping clip, a blend
+// from a blend from a blend, and a cut the host asks for. The clips are in the file.
+const runClips: Clip[] = [
+  { name: "jumps", lengthMs: 1000, tracks: { body: { x: [[0, 0], [250, 12, "step"], [500, -12, "step"], [750, 0, "step"]], rot: [[0, 0], [1000, 10, "linear"]] } } },
+  {
+    name: "loopEvents", lengthMs: 600, loop: true,
+    tracks: { "tail.1": { rot: [[0, -15], [300, 15], [600, -15]] }, head: { yaw: [[0, -25], [300, 25], [600, -25]] } },
+    states: { "eye.L": [[0, "open"], [450, "closed"], [520, "open"]] },
+    order: [[0, null], [300, "pawsBack"]],
+    events: [{ at: 0, type: "keyPose" }, { at: 200, type: "sound", name: "tick" }, { at: 200, type: "haptic", name: "tick" }, { at: 400, type: "effect", name: "spark" }],
+  },
+  { name: "a", lengthMs: 1000, tracks: { body: { rot: [[0, 0], [1000, 20, "linear"]] } } },
+  { name: "b", lengthMs: 1000, blendInMs: 300, tracks: { body: { rot: [[0, -15]], squash: [[0, 0.95]] } } },
+  { name: "c", lengthMs: 1000, tracks: { body: { rot: [[0, 10]] }, head: { rot: [[0, 12]], pitch: [[0, -12]] } } },
+];
+const runProblems = validate(rig, runClips);
+if (runProblems.length) throw new Error(runProblems.join("\n"));
+const runScript: ({ play: string; t: number; blendMs?: number } | { frame: number } | { cut: true })[] = [];
+const runPlays = new Map<number, { play: string; blendMs?: number }[]>([
+  [0, [{ play: "loopEvents" }]],
+  [1.3, [{ play: "jumps", blendMs: 0 }]],
+  [2.5, [{ play: "a" }]],
+  [2.6, [{ play: "b" }]],
+  [2.65, [{ play: "c", blendMs: 200 }]],
+  [3.5, [{ play: "loopEvents", blendMs: 150 }]],
+]);
+const runGaps = [1 / 60, 0.013, 1 / 30, 1 / 120, 0.029, 1 / 60, 0.004];
+const runTimes = new Set<number>();
+for (let t = 0, i = 0; t < 4.6; i++) {
+  runTimes.add(Math.round(t * 1e9) / 1e9);
+  t += runGaps[i % runGaps.length]!;
+}
+for (const t of runPlays.keys()) runTimes.add(t);
+runTimes.add(2.4);
+for (const t of [...runTimes].sort((x, y) => x - y)) {
+  for (const p of runPlays.get(t) ?? []) runScript.push({ ...p, t });
+  if (t === 2.4) runScript.push({ cut: true });
+  runScript.push({ frame: t });
+}
+const runPlayer = new Player(c, runClips);
+const runFrames = runScript.flatMap((step) => {
+  if ("play" in step) {
+    runPlayer.play(step.play, step.t, step.blendMs);
+    return [];
+  }
+  if ("cut" in step) {
+    runPlayer.cut();
+    return [];
+  }
+  const f = runPlayer.advanceTo(step.frame);
+  return [{
+    t: step.frame,
+    angle: f.pose.angle,
+    world: f.pose.world.map(flat),
+    views: f.state.views,
+    states: f.state.states,
+    variant: f.state.variant ?? null,
+    turn: f.state.turn ?? null,
+    events: f.events.map((e) => `${e.type}${e.name ? `:${e.name}` : ""}`),
+  }];
+});
+write("player-cuts", { rig: "characters/test/src/rig.json", clips: runClips, script: runScript, frames: runFrames });

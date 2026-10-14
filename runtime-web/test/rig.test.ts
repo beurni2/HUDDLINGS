@@ -188,6 +188,15 @@ test("the fake turn moves the drawn quads in the head's space, and narrows the f
   close(width(turned.find((i) => i.part === "eye.R")!.positions) / width(still.find((i) => i.part === "eye.R")!.positions), 1, 1e-12, "the near eye keeps its width");
 });
 
+test("the fake turn's slide grows with the head's own scale, as its face does", () => {
+  const eyeCentre = (scale: number, yaw: number) => {
+    const pose = evaluatePose(c, { channels: { head: { scale } }, views: front });
+    const p = drawList(c, pose, atlas, { views: front, states: {}, turn: { yaw } }).find((i) => i.part === "eye.R")!.positions;
+    return (p[0]! + p[2]!) / 2;
+  };
+  close(eyeCentre(2, 20) - eyeCentre(2, 0), 2 * 6, 1e-12);
+});
+
 test("a clipped part whose mask is not drawn is not drawn", () => {
   const noMask: Rig = { ...rig, drawOrder: { ...rig.drawOrder, "head.front": ["ear", "eye"] } };
   const items = drawList(compile(noMask), evaluatePose(compile(noMask), { channels: {}, views: front }), atlas, { views: front, states: {} });

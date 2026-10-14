@@ -190,7 +190,7 @@ export function drawList(c: CompiledRig, pose: Pose, atlas: AtlasSet, frame: Fra
   const items: DrawItem[] = [];
   const indexOfPart = new Map<string, number>();
   const turn = fakeTurn(c.rig, frame.views.head, frame.turn);
-  const turnFrame = c.rig.fakeTurn ? pose.world[c.index.get(c.rig.fakeTurn.bone)!]! : IDENTITY;
+  const turnFrame = c.rig.fakeTurn ? partMatrix(pose, c.index.get(c.rig.fakeTurn.bone)!) : IDENTITY;
   for (const name of orderFor(c.rig, frame.views, frame.variant)) {
     const part = c.parts.get(name)!;
     const view = part.group === "head" ? frame.views.head : frame.views.body;
@@ -229,7 +229,7 @@ export function drawList(c: CompiledRig, pose: Pose, atlas: AtlasSet, frame: Fra
     }
     const shift = turn.shift[name];
     if (shift) {
-      // The slide is in the turn bone's space: turn it into the world and move every vertex.
+      // The slide is in the turn bone's space, its frame and own scale: carry it into the world and move every vertex.
       const dx = turnFrame.a * shift[0] + turnFrame.c * shift[1];
       const dy = turnFrame.b * shift[0] + turnFrame.d * shift[1];
       for (let k = 0; k < item.positions.length; k += 2) {

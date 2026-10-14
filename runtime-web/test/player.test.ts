@@ -373,6 +373,17 @@ test("the order track picks the body's draw-order variant for the current view, 
   assert.equal(q.advanceTo(0.6).state.variant, undefined);
 });
 
+test("looking ahead at the channels changes nothing", () => {
+  const plain = new Player(c, clips);
+  const peeking = new Player(c, clips);
+  for (const p of [plain, peeking]) {
+    p.play("hold", 0);
+    p.play("lean", 0.1, 200);
+  }
+  peeking.channelsAt(5); // long after the blend has ended
+  for (const t of [0.15, 0.2, 0.25]) assert.deepEqual(peeking.advanceTo(t).pose.angle, plain.advanceTo(t).pose.angle, `at ${t} s`);
+});
+
 test("time never goes backwards", () => {
   const p = new Player(c, clips);
   p.play("slide", 0);
