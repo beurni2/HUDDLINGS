@@ -4,7 +4,7 @@ Kept current every session (CLAUDE.md). One section per lane; each lane edits on
 
 ## Lead: platform and the dog (M0)
 
-**Ready for your review: phase 0** (spec section 5b)
+**Ready for your review: phase 0** (spec section 5b), in https://github.com/beurni2/HUDDLINGS/pull/1 (reply `go` there)
 - `PLAN.md`, `QUESTIONS.md` (23 questions with defaults, 13 engineering decisions), `LIMITATIONS.md`, `GATES.md` and this file.
 - The copy lint (R7, section 20): `copy/catalogue.json` holds the 298 strings the spec words, derived from the spec and checked against it; 48 tests; the pre-commit hook lints the staged files; CI runs both on every push: https://github.com/beurni2/HUDDLINGS/actions?query=branch%3Aclaude%2Floving-bardeen-tg3wvd
 - The review record (the spec audit and two review rounds of this work): `qa/phase0/spec-audit.md`.
