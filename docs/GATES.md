@@ -24,7 +24,7 @@ Gate D is passed per milestone (spec section 5b, Gates): the dog's for Home and 
 
 | Milestone | Status | Approved |
 | --- | --- | --- |
-| M0 Foundations and the living dog | in progress (phases 0 and 1 done; phase 2 next) | |
+| M0 Foundations and the living dog | in progress (phases 0 and 1 done; phase 2 in review) | |
 | M1 Home alive | not started | |
 | M2 Treats | not started | |
 | M3 Sending, the trip, Giggle and Hug | not started | |

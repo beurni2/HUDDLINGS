@@ -6,7 +6,7 @@ Spec version 3, section 5b phase 0: every milestone mapped to work, where each p
 
 - **Today:** reply `go` on the pull request. Nothing past phase 0 starts until you do.
 - **This week:** the TestFlight pieces (items 2 to 5 below), so the test character can reach your iPhone at the end of phase 1, in about 1.5 weeks. Web and runtime work starts without them.
-- **Can wait:** the questions in `QUESTIONS.md`. Each of Q1 to Q25 has a default in force, and I ask again when each is due.
+- **Can wait:** the questions in `QUESTIONS.md`. Q24 and Q25 are decided (Oct 14); each of the others has a default in force, and I ask again when each is due.
 - **When:** M0, the living dog, takes about 6 weeks; the beta is about 25 weeks away, or about 20 with the other companions in parallel lanes (section 22).
 
 ## What carries over
@@ -137,7 +137,7 @@ In the order they come up. Weeks count from your `go`. Secrets go in GitHub (Set
 
 **Around week 3:** allow `commons.wikimedia.org` and `upload.wikimedia.org` for Muybridge's plates, needed in phase 4 (Edit the environment, Network access: https://code.claude.com/docs/en/cloud-environments#network-access), or upload the plates. Slow-motion video of a real puppy helps too, if you have some. Nothing else is needed; I work around the other blocked sites (`LIMITATIONS.md`).
 
-**Around week 3 to 4, at Gate A:** approve the dog's look: the views, the faces, the marking map and the collar blue; answer Q2 (the dog's squeeze and sparkle eyes), Q24 (the colours the sheet paints that its printed palette lacks) and Q25 (the blush checked as a level); a first look at the new hungry and huffy faces. Q3 (four Visual QA checks) by phase 4.
+**Around week 3 to 4, at Gate A:** approve the dog's look: the views, the faces, the marking map and the collar blue; answer Q2 (the dog's squeeze and sparkle eyes); a first look at the new hungry and huffy faces. Q3 (four Visual QA checks) by phase 4.
 
 **Around week 5, at Gate B:** answer Q4 (temporary licensed sounds are fine for Gate B).
 

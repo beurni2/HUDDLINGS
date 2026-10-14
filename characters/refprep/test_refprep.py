@@ -276,8 +276,15 @@ class ModelTest(unittest.TestCase):
         built = model.build("dog")
         committed = json.loads((sheets.ROOT / "characters/dog/model.json").read_text())
         self.assertEqual(json.loads(json.dumps(built)), committed)
-        for key in ("proportions", "landmarks", "palette", "outline", "markings", "crops"):
+        for key in ("proportions", "landmarks", "palette", "palettePainted", "blush", "outline", "markings", "crops"):
             self.assertIn(key, committed)
+
+    def test_the_blush_rests_within_the_turnaround_cheeks_alone(self):
+        # Q25: a resting cheek is held to the turnaround's range; the hero's (44 to 51%), the
+        # close-up's (68%) and the rigging part's (100%) are not resting levels.
+        blush = model.build("dog")["blush"]
+        self.assertEqual(blush["restingSpread"], [0.29, 0.43])
+        self.assertTrue(blush["restingSpread"][0] <= blush["restingLevel"] <= blush["restingSpread"][1])
 
 
 class CropTest(unittest.TestCase):

@@ -10,7 +10,8 @@ Kept current every session (CLAUDE.md). One section per lane; each lane edits on
 
 **In review: phase 2, the dog's references** (section 5b; `PLAN.md`), https://github.com/beurni2/HUDDLINGS/pull/3
 - `characters/refprep/`: one command, `python3 characters/refprep/prepare.py dog`, crops all 116 panels of the four sheets, cuts out the turnaround, measures landmarks, proportions and outlines, samples the palette, shows the proposed marking map and writes `characters/dog/model.json`. Byte for byte reproducible; CI and the pre-commit hook rerun it.
-- `characters/dog/DECISIONS.md`: 25 decisions, each with its crop. Two questions for Gate A: Q24, the colours the sheet paints that its printed palette lacks (eyes and nose, head patches, the fur's shade, the tongue, the mouth's inside); Q25, the blush checked as a level.
+- `characters/dog/DECISIONS.md`: 25 decisions, each with its crop. Q24 and Q25 decided by you on Oct 14, both the default: the dog is drawn in the colours its sheet paints (eyes and nose, head patches, the fur's shade, the tongue, the mouth's inside), and the blush is checked as a level.
+- I'm watching the pull request for CI failures and review comments, at your request.
 - Two review rounds of four fresh reviewers, each finding checked by a refuting verifier; every confirmed finding is fixed or recorded.
 - Deferred, on purpose: the face panels' crop records (phase 3, before Gate A) and the motion poses' (phase 4), each with its mask (`DECISIONS.md` 14).
 

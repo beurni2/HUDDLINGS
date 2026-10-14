@@ -7,11 +7,11 @@ Reads ref/measurements.json, ref/palette.json, ref/markings.json and
 refmap/markings.json (run measure.py, palette.py and markings.py first).
 Landmarks are in points at the 164 pt height, from the ground point under the
 seat, y down. The palette is the sheet's printed values (spec section 5, L189),
-with the outline sampled from the linework; paletteProposed holds the colours
-the sheet paints that the printed palette lacks, for the founder to decide at
-Gate A. Each crop record keeps its box in sheet pixels and its anchors in crop
-pixels, with the crop's scale in points per crop pixel. The model is a proposal
-until the founder approves it at Gate A."""
+with the outline sampled from the linework; palettePainted holds the colours
+the sheet paints that the printed palette lacks, each for its own region, as
+the founder decided (docs/QUESTIONS.md, Q24). Each crop record keeps its box
+in sheet pixels and its anchors in crop pixels, with the crop's scale in points
+per crop pixel. The model is a proposal until the founder approves it at Gate A."""
 import sys
 
 import numpy as np
@@ -40,13 +40,14 @@ def build(species):
     front = palette["views"]["front"]
     head_patches = [s["dominant"] for s in sightings
                     if s["panel"] == "master.turnaround.front" and s["marking"].startswith("head.patch")]
-    proposed = {
+    painted = {
         "eyeDark": {"value": front["eyes"]["dominant"], "for": "the pupils, the upper iris and the nose, which the sheet paints near-black; the printed dark stays for the lighter lower iris"},
         "markingLight": {"value": mean_hex(head_patches), "for": "the head patches, which the sheet paints paler than its other tan"},
         "furShade": {"value": front["furShade"]["dominant"], "for": "the fur's soft shade, warmer on the sheet than the printed Soft Shadow, which matches the ground shadow"},
         "tongue": {"value": front["tongue"]["dominant"], "for": "the tongue, deeper on the sheet than the printed pink"},
         "mouthInside": {"value": front["mouthInside"]["dominant"], "for": "the open mouth's inside, which the sheet prints no value for"},
     }
+    resting = [c["opacity"] for c in palette["blush"]["cheeks"] if c["panel"].startswith("master.turnaround.")]
     landmarks, crops = {}, {}
     for view, record in measured["views"].items():
         landmarks[view] = {name: record["landmarks"][name] for name in sorted(record["landmarks"])}
@@ -65,9 +66,9 @@ def build(species):
         "landmarks": landmarks,
         "mirroredViews": MIRRORED,
         "palette": {name: colours[name] for name in PALETTE_ORDER},
-        "paletteProposed": proposed,
-        "blush": {"restingLevel": palette["blush"]["turnaroundOpacity"],
-                  "note": "the printed blush's level on the turnaround's cheeks, at the Grown stage the sheets draw (L663); spec L474 makes the blush a level from 0 to 100%"},
+        "palettePainted": painted,
+        "blush": {"restingLevel": palette["blush"]["turnaroundOpacity"], "restingSpread": [min(resting), max(resting)],
+                  "note": "the printed pink's level over the fur on the turnaround's cheeks, at the Grown stage the sheets draw (L663): their mean and their range. Spec L474 makes the blush a level from 0 to 100%. The palette check holds the blush part's colour to the printed pink and a resting cheek's level to this range (docs/QUESTIONS.md, Q25)"},
         "outline": {"outerPt": measured["outline"]["outerPt"], "innerPt": INNER_LINE_PT},
         "markings": plan["markings"],
         "crops": crops,

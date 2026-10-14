@@ -108,7 +108,7 @@
   "tag": "#F4C542",
   "outline": "#91694A"
  },
- "paletteProposed": {
+ "palettePainted": {
   "eyeDark": {
    "value": "#200C02",
    "for": "the pupils, the upper iris and the nose, which the sheet paints near-black; the printed dark stays for the lighter lower iris"
@@ -132,7 +132,8 @@
  },
  "blush": {
   "restingLevel": 0.35,
-  "note": "the printed blush's level on the turnaround's cheeks, at the Grown stage the sheets draw (L663); spec L474 makes the blush a level from 0 to 100%"
+  "restingSpread": [0.29, 0.43],
+  "note": "the printed pink's level over the fur on the turnaround's cheeks, at the Grown stage the sheets draw (L663): their mean and their range. Spec L474 makes the blush a level from 0 to 100%. The palette check holds the blush part's colour to the printed pink and a resting cheek's level to this range (docs/QUESTIONS.md, Q25)"
  },
  "outline": {
   "outerPt": 1.54,
