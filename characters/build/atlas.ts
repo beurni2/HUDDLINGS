@@ -4,6 +4,7 @@
 import { Resvg } from "@resvg/resvg-js";
 import { PNG } from "pngjs";
 import type { AtlasSet, Region } from "../../runtime-web/src/format.ts";
+import type { Meta } from "../draw/svg.ts";
 
 export const GAP = 16;
 export const EXTRUDE = 2;
@@ -14,6 +15,8 @@ export interface Drawing {
   region: string;
   svg: string;
   anchor: [number, number];
+  /** What the drawing kit knows about it (characters/draw), for the lint. */
+  meta?: Meta;
 }
 
 export interface Raster {
