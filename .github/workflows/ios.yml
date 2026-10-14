@@ -70,12 +70,12 @@ jobs:
           echo "udid=$udid" >> "$GITHUB_OUTPUT"
       - name: Engine and SpriteKit tests on the simulator (writes the parity frames)
         working-directory: ios/CompanionCore
-        run: xcodebuild test -scheme CompanionCore-Package -destination "id=${{ steps.sim.outputs.udid }}" -resultBundlePath ../../build/results/package.xcresult
+        run: xcodebuild test -quiet -scheme CompanionCore-Package -destination "id=${{ steps.sim.outputs.udid }}" -resultBundlePath ../../build/results/package.xcresult 2>&1
       - name: Generate the project
         working-directory: ios
         run: xcodegen generate
       - name: Build the app and run its UI tests
-        run: xcodebuild test -project ios/Huddlings.xcodeproj -scheme Huddlings -destination "id=${{ steps.sim.outputs.udid }}" -derivedDataPath build/derived CODE_SIGNING_ALLOWED=NO -resultBundlePath build/results/app.xcresult
+        run: xcodebuild test -quiet -project ios/Huddlings.xcodeproj -scheme Huddlings -destination "id=${{ steps.sim.outputs.udid }}" -derivedDataPath build/derived CODE_SIGNING_ALLOWED=NO -resultBundlePath build/results/app.xcresult 2>&1
       - name: The strings the build extracts are catalogue copy
         run: |
           xcodebuild -exportLocalizations -project ios/Huddlings.xcodeproj -localizationPath build/loc -exportLanguage en
@@ -85,6 +85,18 @@ jobs:
           app=$(find build/derived/Build/Products -name Huddlings.app -path '*iphonesimulator*' | head -1)
           python3 tools/qa/no_sheet_pixels.py "$app"
           python3 tools/qa/package_in_app.py "$app"
+      - name: What failed, from the result bundles
+        if: failure()
+        run: |
+          for bundle in build/results/*.xcresult; do
+            [ -d "$bundle" ] || continue
+            echo "::group::$bundle: build issues"
+            xcrun xcresulttool get build-results --path "$bundle" --compact || true
+            echo "::endgroup::"
+            echo "::group::$bundle: test summary"
+            xcrun xcresulttool get test-results summary --path "$bundle" --compact || true
+            echo "::endgroup::"
+          done
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
