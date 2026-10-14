@@ -1,127 +1,146 @@
 # Plan
 
-Spec version 3, section 5b phase 0. This plan maps every milestone to work, says where each piece runs, names the three hardest problems and how each is retired early, and lists what I need from you. Nothing past phase 0 starts until you give the go-ahead (`docs/GATES.md`).
+Spec version 3, section 5b phase 0: every milestone mapped to work, where each piece runs, the three hardest problems and how each is retired early, and what I need from you.
 
-## In short
+## Your move
 
-- **M0 is the dog.** Six weeks, five phases: the runtimes and the pipeline to your iPhone first (with a test character of plain shapes), then the dog's references, the drawing (Gate A), the rig and the demo (Gate B), and the 16 core motions (Gate C).
-- **Linux does the art and motion; the Mac runner does the iPhone; your iPhone judges the feel.** Every runtime risk is proven with the test character in phase 1, on your phone, before any dog art exists.
-- **What I need first:** your go-ahead, the Apple Developer and App Store Connect pieces for TestFlight, and answers to `QUESTIONS.md` Q1 to Q4 when you can (below). The repository's visibility and license are decided (`QUESTIONS.md`, D1 and D2).
+- **Today:** reply `go` on the pull request. Nothing past phase 0 starts until you do.
+- **This week:** the TestFlight pieces (items 2 to 5 below), so the test character can reach your iPhone at the end of phase 1, in about 1.5 weeks. Web and runtime work starts without them.
+- **Can wait:** everything in `QUESTIONS.md`. Each question has a default in force, and I ask again when it is due.
+- **When:** M0, the living dog, takes about 6 weeks; the beta is about 25 weeks away, or about 20 with the other companions in parallel lanes (section 22).
 
 ## What carries over
 
-Nothing. The repository held only a LICENSE (MIT, now replaced by all rights reserved at your request), and the starter pack holds the spec, CLAUDE.md and the 16 master sheets. No dog work under section 5b exists yet (no references, model, parts, rig or poses), and no spec version 2 or Mochi Post spec exists, so `docs/archive/` is not needed.
+Nothing. The repository held only a LICENSE (MIT, now replaced by all rights reserved at your request, `QUESTIONS.md` D2), and the starter pack holds the spec, CLAUDE.md and the 16 master sheets. No dog work under section 5b exists yet, and no spec version 2 or Mochi Post spec exists, so `docs/archive/` is not needed.
 
 ## Where the work runs
 
-| Where | What runs there |
-| --- | --- |
-| Linux cloud sessions (here) | reference prep, the sheet match, drawing the parts in TypeScript, the atlas build, the web runtime and the Animation Lab in headless Chromium, Visual QA on the web runtime, contact sheets, MP4s and motion graphs, the TypeScript twins of the pure engines, the copy lint, the backend with a local Supabase in Docker, the edge functions in Deno, the visit page and its Playwright tests |
-| GitHub Actions macOS runner | XcodeGen and the app build, Swift unit tests for the pure engines (no Swift toolchain is reachable here, see `LIMITATIONS.md`), UI tests (the microphone test of R1, the no-chat walk of R15), snapshot tests, the SpriteKit runtime's deterministic renders for the parity check, simulator recordings, the Vision label test of section 7, TestFlight uploads. Run on pull requests and before TestFlight builds, not on every push |
-| Your iPhone, through TestFlight | everything only a phone can judge: touch, haptics and sounds on their frames, frame rate and rig time (the Lab's Diagnostics export them as JSON), texture memory, the camera and food recognition, the sound fixtures, the earpiece, widgets and notifications |
+- **Here (Linux cloud sessions):** the dog's references and the sheet match; drawing the parts; the atlas build; the web runtime and the Animation Lab in headless Chromium; Visual QA on the web runtime; contact sheets, MP4s and motion graphs; the copy lint; the pure engines' tests (Swift on GitHub's Ubuntu runner, which ships Swift 6.4, and the TypeScript twins of the scene director and the energy arithmetic); the backend with a local Supabase; the visit page and its Playwright tests; the web classifier fed the sound fixtures directly.
+- **GitHub's Mac (the macOS runner):** the app build from XcodeGen; Swift and UI tests (the R1 microphone test, the R15 no-chat walk); snapshot tests; Visual QA on the simulator's frames and the parity check against the web; simulator recordings; the Vision label test (section 7); the app's sound classifier fed the fixtures directly; TestFlight uploads. It runs on pull requests and before TestFlight builds, not on every push.
+- **Your iPhone (TestFlight):** what only a phone can judge: touch, sounds and haptics on their frames, frame rate, rig time and texture memory (exported by the Lab's Diagnostics), the camera and food recognition, the sound fixtures played across a room, the earpiece, widgets and notifications.
 
 ## M0: foundations and the living dog (about 6 weeks)
 
-The critical path. One dog that feels alive under your finger before anything else.
+The critical path: one dog that feels alive under your finger before anything else.
 
-**Phase 0, this pull request.** The environment checked and completed, the repository skeleton, the spec and the sheets in place, `PLAN.md`, `PROGRESS.md`, `QUESTIONS.md`, `LIMITATIONS.md` and `GATES.md`, and the copy lint (R7), which fails the build from this first pull request: a pre-commit hook and a CI job. Stop for your go-ahead.
+**Phase 0, this pull request.** The environment checked and completed, the repository skeleton, the spec and the sheets in place, these docs, and the copy lint (R7), which fails the build from this first pull request through a pre-commit hook and a CI job.
 
 **Phase 1, the package and both runtimes (about 1.5 weeks).**
 - The character package format of Appendix F, with a validator: power-of-two atlas pages with premultiplied alpha, 16 px apart with extruded edges; `atlas.json`, `rig.json`, `clips/`, `params.json`, `package.json`.
-- The web runtime (TypeScript, WebGL2): the bone tree, keyframe curves with easing, damped springs at a fixed 120 Hz with substeps, clip blending, draw order per view with marked swaps, a clipping mask for the fake turn, a warp mesh for bending parts, events, and a deterministic mode (seeded random source, fixed clock).
-- The SpriteKit runtime, mirroring it: a node tree per bone, sprites from the atlas, `SKCropNode` for the clip, `SKWarpGeometryGrid` with matching `subdivisionLevels` for bends, the same springs and curves. The math is shared through test vectors (curves, springs, blends) that both runtimes must reproduce.
-- An app shell generated by XcodeGen that shows the test character in SpriteKit, with the first piece of the Lab: Diagnostics (frame-time and rig-time histograms, texture memory) exported as JSON. The Lab compiles only into an internal configuration for your internal TestFlight group, and the iOS Lab has no sheet overlay (that lives in the web Lab, run from the repository); a CI check fails if anything from `characters/reference/` or `characters/*/ref/` reaches the app (`QUESTIONS.md`, E1).
-- The app's string catalogues generated from `copy/catalogue.json`, so every string on screen passes the copy lint; and a placeholder app icon drawn in code, clearly marked, until yours arrives (`QUESTIONS.md`, Q10).
-- CI: the Linux job (copy lint, web runtime tests, Visual QA on WebGL) and the macOS job (build, Swift tests, deterministic SpriteKit frames). The parity check compares the two (SSIM 0.95 or more on the character).
+- The web runtime (TypeScript, WebGL2): the bone tree, keyframe curves with easing, damped springs at a fixed 120 Hz, clip blending, draw order per view with marked swaps, a clipping mask for the fake turn, a warp mesh for bending parts, events, and a deterministic mode (a seeded random source and a fixed clock).
+- The SpriteKit runtime, mirroring it: a node per bone, sprites from the atlas, `SKCropNode` for the clip, `SKWarpGeometryGrid` with matching subdivisions for bends, the same springs and curves. Shared test vectors (curves, springs, blends) keep the two runtimes' maths identical.
+- An app shell generated by XcodeGen that shows the test character, with the first piece of the Lab: Diagnostics (frame-time and rig-time histograms, texture memory) exported as JSON. The Lab compiles only into an internal build for your internal TestFlight group; the iOS Lab has no sheet overlay, and a CI check fails if anything from `characters/reference/` or `characters/*/ref/` reaches the app (`QUESTIONS.md` E1).
+- The app's string catalogues generated from `copy/catalogue.json`, and a placeholder app icon drawn in code until yours arrives (`QUESTIONS.md` Q11).
+- CI: the Linux job (the copy lint, the web runtime's tests, Visual QA on WebGL, the Swift pure-engine tests) and the macOS job (the build, Swift and UI tests, Visual QA on the simulator's frames, and the parity check: SSIM 0.95 or more on the character).
 - A TestFlight lane, so the test character reaches your iPhone.
-- **Proof:** a test character made of plain shapes, with every risky feature on it (a clipped fake turn, a bending part on a warp grid, springs, a draw-order swap, a small atlas page below 35% scale), dances the same on the web and in the simulator, and runs on your iPhone with its frame and rig times and texture memory recorded in `LIMITATIONS.md`.
+- **Proof:** a test character made of plain shapes, carrying every risky feature (a clipped fake turn, a bending part on a warp grid, springs, a draw-order swap, a small atlas page below 35% scale), dances the same on the web and in the simulator, and runs on your iPhone with its frame time, rig time and texture memory recorded in `LIMITATIONS.md`.
 
-**Phase 2, the dog's references (about 0.5 week).** A script crops every panel of the four dog sheets into `characters/dog/ref/` at its original size; cuts out the turnaround silhouettes (a flood fill from the page colour, with the outline as the wall); measures proportions and landmarks per view; samples the palette and checks it against the printed values (ΔE2000); proposes the marking map from the hero and the front turnaround. Writes `model.json` and `DECISIONS.md` (every new decision with the crop that settled it).
+**Phase 2, the dog's references (about 0.5 week).** A script crops every panel of the four dog sheets into `characters/dog/ref/` at its original size, cuts out the turnaround silhouettes, measures proportions and landmarks per view, samples the palette against the printed values (ΔE2000), and proposes the marking map. It writes `model.json` and `DECISIONS.md`, each decision with the crop that settled it.
 
 **Phase 3, drawing the dog (about 1.5 weeks), ending at Gate A.**
-- Every part of the parts table drawn in TypeScript that writes SVG, as hand-placed Bézier paths with few nodes, cleaned with a curve fitter; an automatic trace may sit underneath as a faint guide and is never kept. Flat fill, one soft shade, one soft highlight, light from the top left, a warm brown outline 1.2 to 1.8 pt on outer edges only, painted at build time and rasterized into the atlases at 2x, 3x and 5x.
-- Four views (front, three-quarter and side in both facings, back), each facing with its own markings; every face state: eyes, mouths, ears (with the one-perked drawing), brows, blush.
-- The sheet match, automated: silhouette IoU (0.90 front and three-quarter, 0.85 side and back), landmarks within 3% of the head's width, palette within ΔE 3, markings never outside their part.
-- Before the full set, I post the front view beside its crop in the pull request, so you can stop me early if the look is wrong. It is not a gate.
-- **Gate A evidence:** each view's still beside its turnaround crop at the same size, every face preset beside its expression panel, the marking map, `model.json`, `DECISIONS.md`, the sheet-match numbers and the three fresh reviewers' scores. Nothing moves before you approve.
+- Every part of the parts table, drawn in TypeScript that writes SVG: hand-placed Bézier paths with few nodes, cleaned with a curve fitter. An automatic trace may sit underneath as a faint guide and is never kept.
+- Flat fill, one soft shade, one soft highlight, light from the top left, a warm brown outline on outer edges only; painted at build time and rasterized into the atlases at 2x, 3x and 5x.
+- Four views (front, three-quarter and side in both facings, back), each facing with its own markings, and every face state.
+- The sheet match, automated: silhouette IoU (0.90 front and three-quarter, 0.85 side and back), landmarks within 3% of the head's width, palette within ΔE 3, no marking outside its part.
+- Before the full set, I post the front view beside its crop in a pull request, so you can stop me early if the look is wrong. It is not a gate.
+- **Gate A evidence:** each view beside its turnaround crop at the same size, every face preset beside its expression panel, the new hungry and huffy faces as labelled new drawings, the marking map, the collar blue, `model.json`, `DECISIONS.md`, the sheet-match numbers and three fresh reviewers' scores.
 
-**Phase 4, rigging the dog (about 1 week).** Pivots at the joints; the draw order per view; springs on ears, tail, tag and tuft; the stance lock (planted paws never slide); look-at (eyes, then head, then chest); the fake turn and the swaps to three-quarter; postures and every transition (sit, stand, lie, sleep); the life layer (breathing, blinking, gaze, ear twitches, tail mood, weight shifts, seeded micro-motion, the hour's light). The pose library from the motion sheet (idle, blink, head tilts, ear twitch, sit, stand, walk, run, jump, soft landing, curious lean, happy bounce, envelope carry, and the cycle frames), each passing its pose match (IoU 0.80). Visual QA's automated checks: holes and seams, stretch, sliding and floating paws, snaps, even spacing, twinning, straight paths, dead holds, draw order, face, on-model, collar and tag, life, touch response, sound and haptic sync, parity.
+**Phase 4, rigging the dog (about 1 week).**
+- Pivots at the joints, the draw order per view, springs on ears, tail, tag and tuft, the stance lock (planted paws never slide), look-at (eyes, then head, then chest), the fake turn and the swaps to three-quarter, postures and every transition, and the life layer (breathing, blinking, gaze, ear twitches, tail mood, weight shifts, seeded micro-motion, the hour's light).
+- The pose library from the motion sheet, each pose passing its pose match (IoU 0.80).
+- Visual QA's checks, each proven by a clip with a planted failure: holes and seams, stretch, sliding and floating paws, snaps, even spacing, twinning, straight paths, dead holds, draw order, face, on-model, collar and tag, life, touch response, sound and haptic sync, parity, and approved frames (the goldens) from the first approved motion. A fast subset joins the pre-commit hook. How four of the checks read is `QUESTIONS.md` Q4.
 
 **Phase 5, the demo, then the 16 core motions (about 1.5 weeks), ending at Gates B and C.**
-- The touch path the gates need, moved forward from M1: hit testing on each part's drawn outline, the boop, pat, chin scratch, tickle and hug recognisers with the section 6 thresholds, the controller calls the core motions use, and the FX player for sounds and haptics (`QUESTIONS.md`, E2). The rest of section 6 stays in M1.
-- The 30-second demo of section 5b first, with its first sounds and haptics on their frames (temporary licensed sounds if your set isn't chosen yet, `QUESTIONS.md` Q4), and boop and pat working under your finger on the iPhone. **Gate B** on your iPhone.
-- Then the 16 core motions, each with an MP4, a contact sheet beside its sheet poses, motion graphs and a wedge where a value is a judgement call. **Gate C** on your iPhone, with the dog's sounds and haptics.
-- Also in M0: the hatch skeleton (section 22), in internal builds only until the age screen arrives in M1 (`QUESTIONS.md`, E6).
+- The touch path the gates need, moved forward from M1: hit testing on each part's drawn outline, the boop, pat, chin scratch, tickle and hug recognisers with the section 6 thresholds, the controller calls the core motions use, and the FX player for sounds and haptics (`QUESTIONS.md` E2).
+- The 30-second demo of section 5b, with its first sounds and haptics on their frames (temporary licensed sounds until yours are chosen, Q3), and boop and pat under your finger. **Gate B** on your iPhone.
+- Then the 16 core motions, each with an MP4, a contact sheet beside its sheet poses, motion graphs, a wedge where a value is a judgement call, and its small Reduce Motion version. **Gate C** on your iPhone, with the dog's sounds and haptics.
+- Also in M0: the hatch skeleton (section 22), in internal builds only until the age screen arrives in M1 (E4).
 
-**M0 is done** when the dog passes Gates A to C on your iPhone with Visual QA and the sheet match green, the hatch runs on a device, and a file-system audit finds no recorded audio.
+**M0 is done** (section 22) when the hatch runs on a device, the dog passes Gates A to C with Visual QA and the sheet match green, and a file-system audit finds no audio files (in the app's writable folders, E12).
 
 ## M1: Home alive (about 3 weeks)
 
-- Touch: the gesture classifier as a pure engine, tested on recorded touch traces (95% or better, the second tap into `show_off` included); hit testing on each part's drawn outline in the current pose.
-- FX: Core Haptics patterns (AHAP) and Mochi's sounds on the ambient session, on their frames.
-- The phone's movement (CoreMotion at 30 Hz into the springs, tilt parallax, `dizzy`), Mochi's day and the night sky, sleep and waking, the greeting by time away.
-- The age screen (S0a), the local half of Settings (S7), the widget (pose images the app renders into the App Group, the timeline, the boop intent).
-- The dog's Home clips by the same rules (Gate D for Home, completed with Treats in M2).
-- **Spike, on your iPhone:** a small test page over HTTPS that unlocks audio on the first tap, opens the microphone, runs the laugh classifier (MediaPipe Tasks Audio with YAMNet in WebAssembly) and plays a voice back at full volume after it, in Safari and in the in-app browsers.
+- Section 5b phase 6: the full controller API with its priorities, interruptions and no-restart rule; touch handling for every gesture of section 6; the FX module.
+- The gesture classifier as a pure engine, tested on recorded touch traces (95% or better). You record the traces on your iPhone through the Lab, and I add mine from the simulator.
+- The phone's movement, Mochi's day and the night sky, sleep and waking, the greeting, Low Power Mode.
+- The age screen (S0a), the local half of Settings (S7), the widget (pose images the app renders, the timeline, the boop intent).
+- The dog's Home clips by the same rules, and the rig completeness test (R13).
+- **Spike, on your iPhone:** a small test page over HTTPS that unlocks audio on the first tap, opens the microphone, runs the laugh classifier (MediaPipe with YAMNet) and plays a voice at full volume after it, in Safari and in the in-app browsers.
+- **Gate:** section 22's M1 criteria, measured on an iPhone 12 (Q1).
 
 ## M2: Treats (about 2.5 weeks)
 
-- **First, the riskiest unknown:** banana, apple and orange through Vision's `VNClassifyImageRequest` (revision pinned), their labels checked against `supportedIdentifiers()` in a simulator test, and the recognition test (90% of positives within 3 s, at most 3% of negatives) run on your iPhone through the Lab's Diagnostics. The other nine foods wait for it.
-- Then the twelve foods as props in four views, the shared eating set, the gags, the keepsakes on their slots, the first treat, and local energy and growth as pure engines with fake clocks.
-- The dog's Gate D for Home and Treats. From this gate, kitty, bear and rabbit may start as parallel lanes.
+- **First, the riskiest unknown:** banana, apple and orange through Vision's classifier (revision pinned), their labels checked in a simulator test, and the recognition test (90% of positives within 3 s, at most 3% of negatives) run on your iPhone through the Lab. The other nine foods wait for it.
+- Then the twelve foods as props in four views, the shared eating set, the gags, the keepsakes, the first treat, and local energy and growth as pure engines with fake clocks.
+- **Gate:** section 22's M2 criteria and the dog's Gate D for Home and Treats. From here, kitty, bear and rabbit may start as parallel lanes.
 
 ## M3: sending, the trip, Giggle and Hug (about 5 weeks)
 
-- **First week, three spikes:** Sign in with Apple through Supabase with the name scope only; APNs over HTTP/2 straight from a Deno edge function; the visit page's edge worker writing per-link preview tags.
-- The backend: the schema with row-level security and no client policies, one locked Postgres function per change, the edge functions, storage, the scheduled jobs, and contract tests against a local Supabase (races, limits, what each function reveals, expiry with no orphan file).
-- Sign-in, friends (only through a reply and `Add {name}`), `MicBroker` and the audio coordinator, voice notes and drafts, links, energy and trips on the server, the road view, arrivals and notifications with the Notification Service Extension, the visit page on the web runtime, Giggle and Hug end to end with their souvenirs and shows (`post_fetch`, `home_laugh`, `home_hug`), captions, and every safety tool (report, block, the filter, the limits, closing a link, expiry, pausing).
+- **First week, three spikes:** Sign in with Apple through Supabase without the email scope; APNs over HTTP/2 from a Deno edge function; the visit page's edge worker writing per-link preview tags.
+- The backend: the schema with row-level security and no client policies, one locked Postgres function per change, the edge functions, storage, the scheduled jobs, and contract tests against a local Supabase.
+- Sign-in, friends (only through a reply and `Add {name}`), `MicBroker`, voice notes and drafts, links, energy and trips on the server, the road view, arrivals and notifications, the visit page on the web runtime, Giggle and Hug end to end with their souvenirs and shows, captions, and every safety tool.
+- The sound fixtures: fed directly to both classifiers in CI, and played phone to phone in a quiet room and in café noise.
+- **Gate:** section 22's M3 criteria (with a second iPhone for the two-phone tests and an iPhone 12 for the web page over slow 4G), and the dog's Gate D for the trip, Giggle, Hug, `post_fetch`, `home_laugh` and `home_hug`.
 
 ## M4: every scene (about 4 weeks)
 
-Royal, Secret Agent (the earpiece and proximity), Grumpy (the huffy face, approved by you) and Hungry (the hungry face), in the app and on the web; the other souvenir shows and the bag; group links at full scale; the load test.
+- Royal, Secret Agent (the earpiece and proximity), Grumpy (the huffy face) and Hungry (the hungry face), in the app and on the web; the other souvenir shows and the bag; group links at full scale; the load test.
+- **Gate:** section 22's M4 criteria and the dog's Gate D for the new scenes and shows.
 
 ## M5: kitty, bear and rabbit (about 5 weeks, parallel lanes)
 
-Phases 2 to 7 for each, reusing the rig, the tools and QA: Gates A to D for everything built so far. The bending parts (the rabbit's ears, the kitty's tail) were proven on the test character in phase 1.
+- Phases 2 to 7 of section 5b for each species, reusing the rig, the tools and QA: Gates A to D for everything built so far. The bending parts (the rabbit's ears, the kitty's tail) were proven on the test character in phase 1.
+- The short guide to adding a part, a motion, a scene, a food, a keepsake and a species (5b deliverable 7), written as the second species starts.
+- **Gate:** all four pass Gates A to D, with rig completeness green. From here, every milestone's clips pass on all four species before its gate.
 
 ## M6: the beta (4 weeks)
 
-About 60 people in 10 friend groups, weekly fixes, and the section 21 targets decide go, fix or stop.
+- Section 5b phase 9 first: the performance pass on an iPhone 12, fixing anything over budget.
+- About 60 people in 10 friend groups, weekly fixes; the section 21 targets decide go, fix or stop.
 
 ## M7: Mochi Cam (about 4 weeks, after the beta decision)
 
-The Lock Screen spike first, then capture, live reactions, the export and Share and Save.
+The Lock Screen spike first, then capture, live reactions, the export, Share and Save, on all four species.
 
 ## The three hardest problems, and how each is retired early
 
-1. **A dog drawn in code that you recognise at once and believe is alive.** This is where two earlier attempts failed. Retired by: measuring the sheets into a locked model before drawing; painting each part at build time (gradients, soft shades, noise) so the finish matches the sheets' soft painted look; an automated sheet match on every build; showing you the front view early in a pull request, before the full Gate A set; the life layer under everything before any clip; the three fresh reviewers before every gate; and, if two rounds of Gate A feedback are not enough, the illustrator option of section 5b.
-2. **The same frames on two runtimes, on budget on an iPhone 12, built from a Linux machine that never touches the phone.** Retired in phase 1, before any art: the test character carries every risky runtime feature (clipping, a warp-grid bend, springs, draw-order swaps, mipmaps at small scale); the macOS runner checks parity frame by frame; and a TestFlight build measures frame time, rig time and texture memory on your iPhone through the Lab's Diagnostics.
-3. **Feel and recognition that only a real iPhone can judge.** Touch timing, haptic and sound sync, food recognition and laugh recognition cannot be proven in a simulator or a headless browser. Retired by: the TestFlight lane in phase 1; touch-response and sync checks in Visual QA from phase 4; the Safari microphone and classifier spike in M1; banana, apple and orange through the recognition test before any other food in M2; and runners in the Lab's Diagnostics so you can run the food and sound tests on your phone without a Mac.
+1. **A dog drawn in code that you recognise at once and believe is alive.** Two earlier attempts failed here.
+   - The sheets are measured into a locked model before anything is drawn.
+   - Each part is painted at build time, so its finish can match the sheets' soft painted look.
+   - The sheet match runs on every build, and you see the front view early, before Gate A.
+   - The life layer runs under everything before any clip exists.
+   - Three fresh reviewers score every gate first; the illustrator option of section 5b stays open if two rounds of Gate A are not enough.
+2. **The same frames on two runtimes, on budget on an iPhone 12, built on a Linux machine that never touches a phone.**
+   - In phase 1, before any art, the test character carries every risky runtime feature.
+   - The macOS runner checks parity frame by frame.
+   - A TestFlight build measures frame time, rig time and texture memory on your iPhone, and on an iPhone 12 by the M1 gate.
+3. **Feel and recognition that only a real iPhone can judge.**
+   - The TestFlight lane exists from phase 1.
+   - Touch response and sound and haptic sync are Visual QA checks from phase 4.
+   - The Safari microphone and classifier spike comes in M1.
+   - Banana, apple and orange pass the recognition test before any other food is built.
+   - The Lab's Diagnostics run the food and sound tests on your phone, so no Mac needs to be near it.
 
 ## What I need from you
 
 **Now**
-1. Your go-ahead on this plan.
-2. `QUESTIONS.md` Q2 (the copy lint's strictness) if you disagree with the default; the lint runs with it from this pull request.
+1. Your go-ahead on this plan: reply `go` on the pull request.
 
-**Before phase 1 starts (TestFlight)**
-3. Apple Developer Program membership and its Team ID.
-4. An App Store Connect API key with the App Manager role, added as GitHub secrets `ASC_KEY_ID`, `ASC_ISSUER_ID` and `ASC_KEY_P8` (never in chat or in the repository).
-5. The bundle ID. I suggest `app.huddlings.ios`, with `app.huddlings.ios.widget` and `app.huddlings.ios.notifications` for the extensions; it cannot be changed once the app record exists. Then an app record named Huddlings in App Store Connect and an internal TestFlight group with your Apple ID.
-6. Your iPhone's model and iOS version, and whether an iPhone 12 can measure the budgets before Gate B (`QUESTIONS.md` Q1).
+**This week: TestFlight** (secrets go in GitHub, never in chat or in the repository)
+2. Apple Developer Program membership and its Team ID.
+3. An App Store Connect API key for the macOS runner, added as GitHub secrets `ASC_KEY_ID`, `ASC_ISSUER_ID` and `ASC_KEY_P8`. Either an **Admin** key, which lets Xcode sign in Apple's cloud with nothing else, or an **App Manager** key plus your Apple Distribution certificate exported as a `.p12`, as secrets `DIST_CERT_P12` and `DIST_CERT_PASSWORD`. I confirm which one works when I build the lane, before you need to act on it.
+4. The bundle ID. I suggest `app.huddlings.ios`, with `app.huddlings.ios.widget` and `app.huddlings.ios.notifications` for the extensions; it cannot change once the app record exists. Then an app record named Huddlings in App Store Connect and an internal TestFlight group with your Apple ID.
+5. Your iPhone's model and iOS version (Q1).
 
-The repository stays public (your decision), which keeps GitHub's macOS runners free for it.
+**By Gate A:** the dog's squeeze and sparkle eyes (Q2), the marking map, the collar blue, and a first look at the hungry and huffy faces.
 
-**By Gate A and Gate B**
-7. The dog's squeeze and sparkle eyes (`QUESTIONS.md` Q3), at Gate A.
-8. Sounds: a licensed library or a sound designer. Section 24 says before Gate C, but Gate B already needs sounds on their frames; until then I use temporary licensed sounds (`QUESTIONS.md` Q4).
+**By Gate B:** sounds, from a licensed library or a sound designer (Q3); temporary licensed sounds until then.
 
-**Network access for this environment** (Edit the environment, Network access; the steps are at https://code.claude.com/docs/en/cloud-environments#network-access)
-9. Allow `commons.wikimedia.org` and `upload.wikimedia.org` for Muybridge's plates (phase 4), or upload them. Optional, if you want them: `download.swift.org` (Swift tests on Linux), `supabase.com` (its documentation), `public.ecr.aws` (Supabase's local images; Docker Hub works instead). Slow-motion footage of a real puppy, if you have some, helps the gaits.
+**By phase 4:** allow `commons.wikimedia.org` and `upload.wikimedia.org` for Muybridge's plates (Edit the environment, Network access; https://code.claude.com/docs/en/cloud-environments#network-access), or upload the plates. Slow-motion video of a real puppy helps too, if you have some. Nothing else is needed; I work around the other blocked sites (`LIMITATIONS.md`).
 
 **Later**
-- M1: a public HTTPS place for the Safari spike page (GitHub Pages works while the repository is public).
+- M1: an iPhone 12, owned or borrowed, for the M1 gate (Q1); a public HTTPS place for the Safari spike page.
 - M2: photos and short videos for the recognition test, at least 50 per food plus the negative set (section 7).
-- M3: Supabase staging and production projects, the `huddlings.app` domain and its DNS, the edge host (section 24), an APNs key, Sign in with Apple set up, the safety mailbox and who watches it, a channel to alert you about reports, the Terms and the Privacy policy, and the word lists (`QUESTIONS.md` Q10).
-- Before any build reaches anyone but you: the final app icon and the legal items of `QUESTIONS.md` Q12.
+- M3: a second iPhone with a second Apple ID (or a second internal tester) for the two-phone tests; Supabase staging and production, the `huddlings.app` domain and its DNS, the edge host, an APNs key, Sign in with Apple, the safety mailbox and who watches it, and a channel for report alerts (Q11); the Terms, the Privacy policy and the word lists (`QUESTIONS.md`, From the spec).
+- Before any build reaches anyone but you: your app icon and the legal items of Q14.
 - Before the beta: an analytics account (TelemetryDeck or PostHog).

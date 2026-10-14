@@ -4,23 +4,20 @@ Kept current every session (CLAUDE.md). One section per lane; each lane edits on
 
 ## Lead: platform and the dog (M0)
 
-**Done**
-- Phase 0 (section 5b): the environment checked and completed; the spec, CLAUDE.md and the 16 master sheets in place, unchanged; the repository skeleton; `PLAN.md`, `QUESTIONS.md`, `LIMITATIONS.md`, `GATES.md`.
-- `LICENSE`: all rights reserved, replacing MIT before the first push (your decision, `QUESTIONS.md` D2). The repository stays public (D1).
-- A full audit of the spec by fresh reviewers, each finding checked by a skeptic: 20 questions for you and 13 engineering decisions in `QUESTIONS.md`.
-- The copy lint (R7, section 20) and `copy/catalogue.json`: the 298 user-visible strings the spec words, derived from the spec and checked against it by the tests. It fails the build through the git pre-commit hook (on the staged files) and the `checks` workflow. 45 tests.
-- A SessionStart hook that prepares cloud sessions (the section 5b Python tools, Deno and the Supabase CLI from npm) and turns on the pre-commit hook.
-- Nothing to archive: no spec version 2 or Mochi Post spec was in the repository. Nothing carries over: no dog work under section 5b existed.
-
-**In progress**
-- Waiting for your go-ahead on `PLAN.md`.
+**Ready for your review: phase 0** (spec section 5b)
+- `PLAN.md`, `QUESTIONS.md` (23 questions with defaults, 13 engineering decisions), `LIMITATIONS.md`, `GATES.md` and this file.
+- The copy lint (R7, section 20): `copy/catalogue.json` holds the 298 strings the spec words, derived from the spec and checked against it; 48 tests; the pre-commit hook lints the staged files; CI runs both on every push: https://github.com/beurni2/HUDDLINGS/actions?query=branch%3Aclaude%2Floving-bardeen-tg3wvd
+- The review record (the spec audit and two review rounds of this work): `qa/phase0/spec-audit.md`.
+- `LICENSE`: all rights reserved, replacing MIT before the first push (`QUESTIONS.md` D2). The repository stays public (D1).
+- A SessionStart hook prepares cloud sessions (the section 5b Python tools, Deno and the Supabase CLI) and turns on the pre-commit hook.
+- Nothing to archive (no spec version 2 or Mochi Post spec was here) and nothing carries over (no dog work existed).
 
 **Next**
-- Phase 1: the character package format, the web runtime, the SpriteKit runtime, the test character, CI with Visual QA and parity, the TestFlight lane, the Lab's Diagnostics in an internal-only configuration, the generated string catalogues and a placeholder icon.
+- Phase 1: the character package format, both runtimes, the test character, CI with Visual QA and parity, the TestFlight lane, the Lab's Diagnostics in an internal-only build, the generated string catalogues and a placeholder icon.
 
 **Blockers**
-- The go-ahead on the plan.
-- Before phase 1 can reach the iPhone: the Apple Developer and App Store Connect pieces in `PLAN.md`, What I need from you.
+- Your go-ahead on the plan.
+- For TestFlight at the end of phase 1: the Apple pieces in `PLAN.md`, What I need from you.
 
 ## Verify at the start of every session
 

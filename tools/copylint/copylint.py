@@ -48,7 +48,7 @@ BANNED = [
 
 # Other forms of the same words. R7 says "whole words", which would let
 # "misses", "died" or "hurrying" through; this list refuses them too, as the
-# safest default until the founder decides (docs/QUESTIONS.md, Q2).
+# safest reading of R7 (docs/QUESTIONS.md, E11).
 BANNED_FORMS = [
     "misses", "missing", "lonelier", "loneliest", "loneliness",
     "forget", "forgets", "forgetting", "died", "dies", "sadder", "saddest",

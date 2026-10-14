@@ -6,7 +6,7 @@ Only the founder passes a gate (CLAUDE.md, spec section 5b). Each approval is re
 
 | Step | Status | Evidence | Approved |
 | --- | --- | --- | --- |
-| Phase 0: the plan (section 5b phase 0) | waiting for the founder | `docs/PLAN.md` | |
+| Phase 0: the plan (section 5b phase 0) | waiting for the founder | `docs/PLAN.md`, `docs/QUESTIONS.md`, `qa/phase0/spec-audit.md` | |
 
 ## Companion gates
 
@@ -17,7 +17,7 @@ Only the founder passes a gate (CLAUDE.md, spec section 5b). Each approval is re
 | Bear | not started | not started | not started | not started |
 | Rabbit | not started | not started | not started | not started |
 
-Gate D is passed per milestone: the dog's for Home and Treats by the M2 gate, then again for each later milestone's clips, on all four species.
+Gate D is passed per milestone (spec section 5b, Gates): the dog's for Home and Treats by the M2 gate, then the dog's M3 and M4 clips by those gates; kitty, bear and rabbit pass A to D in M5 for everything built by then; after M5, each milestone's clips pass on all four species before its gate.
 
 ## Milestone gates
 
