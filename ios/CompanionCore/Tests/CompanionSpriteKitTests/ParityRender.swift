@@ -182,7 +182,13 @@ final class ParityRender: XCTestCase {
                 if i == 0 { _ = try offscreen.render(scene, at: t) }
                 let pixels = try offscreen.render(scene, at: t + (i == 0 ? 1.0 / 120 : 0))
                 if i % 30 == 0 {
-                    let ink = stride(from: 0, to: pixels.count, by: 4).filter { Int(pixels[$0]) + Int(pixels[$0 + 1]) + Int(pixels[$0 + 2]) < 750 }.count
+                    var ink = 0
+                    var p = 0
+                    while p < pixels.count {
+                        let sum: Int = Int(pixels[p]) + Int(pixels[p + 1]) + Int(pixels[p + 2])
+                        if sum < 750 { ink += 1 }
+                        p += 4
+                    }
                     note("parity: \(run.name): frame \(i) has \(ink) drawn pixels")
                 }
                 try writePNG(pixels, size: run.size, to: out.appendingPathComponent(String(format: "f%04d.png", i)))
