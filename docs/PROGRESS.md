@@ -4,20 +4,11 @@ Kept current every session (CLAUDE.md). One section per lane; each lane edits on
 
 ## Lead: platform and the dog (M0)
 
-**Done: phase 0** (spec section 5b), approved Oct 14, 2026 (`GATES.md`); https://github.com/beurni2/HUDDLINGS/pull/1 waits for your merge
-- `PLAN.md`, `QUESTIONS.md` (23 questions with defaults, 13 engineering decisions), `LIMITATIONS.md`, `GATES.md` and this file.
-- The copy lint (R7, section 20): `copy/catalogue.json` holds the 298 strings the spec words, derived from the spec and checked against it; 48 tests; the pre-commit hook lints the staged files; CI runs both on every push: https://github.com/beurni2/HUDDLINGS/actions?query=branch%3Aclaude%2Floving-bardeen-tg3wvd
-- The review record (the spec audit and three review rounds of this work): `qa/phase0/spec-audit.md`.
-- `LICENSE`: all rights reserved, replacing MIT before the first push (`QUESTIONS.md` D2). The repository stays public (D1).
-- A SessionStart hook prepares cloud sessions (the section 5b Python tools, Deno and the Supabase CLI) and turns on the pre-commit hook.
-- Nothing to archive (no spec version 2 or Mochi Post spec was here) and nothing carries over (no dog work existed).
+**Done: phases 0 and 1** (spec section 5b), both merged into main on Oct 14, 2026 at your request (`GATES.md`)
+- Phase 0, https://github.com/beurni2/HUDDLINGS/pull/1: `PLAN.md`, `QUESTIONS.md`, `LIMITATIONS.md`, `GATES.md`, the copy lint and its catalogue, `LICENSE` (all rights reserved), the session hook.
+- Phase 1, https://github.com/beurni2/HUDDLINGS/pull/2: the package format and contract (`characters/format/README.md`); the web runtime (WebGL2) and the Swift engine with its SpriteKit adapter, held to the same vectors; the test character; the app shell with the Lab's Diagnostics; CI on Linux and on GitHub's Mac (Xcode 26.3); the Visual QA render job; parity green on the character (full 0.986, small 0.979, `qa/phase1/parity/`); SpriteKit's warp split and mipmaps measured (E17, E21); the TestFlight lane, gated on every check.
 
-**Phase 1 ready for your review:** https://github.com/beurni2/HUDDLINGS/pull/2 (stacked on #1), every check green on 5bc207a
-- Done and tested here: the package format and contract (`characters/format/README.md`); the web runtime (WebGL2, 120 Hz springs, blending, the fake turn, bends, events); the test character and the package build; the Lab page, `npm run render` and `npm run render:all`; the Swift engine, held to the same vectors; the copy checks for the app's strings (extracted and in code); the E1 allowlist and the package-in-app check; parity scored on the character, with planted-failure tests.
-- On the macOS runner with Xcode 26.3 (which App Store Connect requires), green on 5bc207a: the SpriteKit adapter, the app shell with the Lab's Diagnostics and its UI test, the extracted strings, E1 and the packages byte for byte, and **parity on the character: full size min 0.986, small min 0.979, no part missing** (`qa/phase1/parity/`). The Visual QA job renders every clip on every push.
-- Measured on the simulator (`RenderProbes.swift`): SpriteKit splits warp cells as the web does, and uses no mipmaps even when asked, so neither runtime uses them now (E21, with a proposal for trips).
-- A last fresh review found parity blind to a missing faint shadow and E1 blind to renamed or re-encoded images: both fixed, with tests.
-- Next: your review of the PR; TestFlight as soon as the Apple pieces arrive, then frame time, rig time and texture memory on your iPhone into `LIMITATIONS.md`. Phase 2 (the dog's reference prep) starts after your go.
+**Next: phase 2, the dog's references** (section 5b; `PLAN.md`): every panel of the four dog sheets cropped into `characters/dog/ref/`, the turnaround silhouettes cut out, proportions, landmarks and palette measured, the marking map proposed, and `model.json` and `DECISIONS.md` written, each decision with the crop that settled it. Then phase 3, drawing the dog, ends at Gate A.
 
 **Blockers**
 - For TestFlight at the end of phase 1: the Apple pieces in `PLAN.md`, What I need from you (Team ID, API key, your iPhone registered once, the app record and bundle ID).
