@@ -1,5 +1,5 @@
 {
- "_about": "The proposed marking map (spec section 5b: proposed from the hero and the front turnaround, each side view used for its own side, approved at Gate A), and where each patch shows on the sheets. Each evidence entry names a panel and, per marking, one or more seed points in the sheet's pixels inside that patch's tan; markings.py colours the tan region holding each seed. A clip box [x, y, width, height] keeps a patch apart from tan it runs into with no line between: a head patch from its ear, the two halves of the saddle at the spine. Ears, brows and the tongue are parts, not markings.",
+ "_about": "The proposed marking map (spec section 5b: proposed from the hero and the front turnaround, each side view used for its own side, approved at Gate A), and where each patch shows on the sheets. Each evidence entry names a panel and, per marking, one or more seed points in the sheet's pixels inside that patch's tan; markings.py colours the tan region holding each seed. A clip box [x, y, width, height] keeps a patch apart from tan it runs into with no line between: a head patch from its ear, a back patch from the tail's root, the two halves of the saddle at the spine. Ears, brows and the tongue are parts, not markings.",
  "markings": [
   {
    "id": "head.patch.L",

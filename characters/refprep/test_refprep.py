@@ -225,18 +225,18 @@ class LandmarksOnTheSheetTest(unittest.TestCase):
     # The automatic landmarks as reviewed on the overlays (crop px), so a change that moves one onto another
     # feature (the nose into the mouth, a corner onto the jaw) fails here, not only in a diff.
     REVIEWED = {
-        "front": {"head.top": [111.5, 5.0], "collar.line.sheetLeft": [77.0, 139.0], "collar.line.sheetRight": [146.0, 136.5],
+        "front": {"head.top": [111.5, 5.0], "ground": [110.4, 216.0], "collar": [112.1, 144.2], "collar.line.sheetLeft": [77.0, 139.0], "collar.line.sheetRight": [146.0, 136.5],
                   "tag.top": [111.1, 151.0], "eye.R": [79.3, 89.9], "eye.L": [138.5, 85.8], "nose": [110.2, 98.2],
                   "mouth.R": [94.0, 108.0], "mouth.L": [127.0, 106.0], "ear.R.root": [58.8, 44.0], "ear.R.tip": [41.2, 137.0],
                   "ear.L.root": [157.7, 38.0], "ear.L.tip": [176.5, 133.0], "chin": [110.0, 143.0]},
-        "threeQuarter.L": {"head.top": [120.5, 6.0], "collar.line.sheetLeft": [71.0, 144.5], "collar.line.sheetRight": [136.0, 142.0],
+        "threeQuarter.L": {"head.top": [120.5, 6.0], "collar": [102.6, 149.5], "collar.line.sheetLeft": [71.0, 144.5], "collar.line.sheetRight": [136.0, 142.0],
                            "tag.top": [87.4, 157.0], "eye.R": [63.1, 84.0], "eye.L": [115.0, 96.5], "nose": [76.8, 100.7],
                            "mouth.R": [64.0, 108.0], "mouth.L": [93.0, 113.0], "ear.R.root": [58.4, 35.0], "ear.R.tip": [31.7, 118.0],
                            "ear.L.root": [163.5, 44.0], "ear.L.tip": [169.7, 144.0], "chin": [77.0, 144.0]},
-        "side.L": {"head.top": [82.5, 5.0], "collar.line.sheetLeft": [51.0, 144.0], "collar.line.sheetRight": [105.0, 137.5],
+        "side.L": {"head.top": [82.5, 5.0], "collar": [77.7, 142.7], "collar.line.sheetLeft": [51.0, 144.0], "collar.line.sheetRight": [105.0, 137.5],
                    "tag.top": [53.2, 150.0], "eye.L": [44.4, 86.9], "nose": [10.4, 94.8], "mouth.L": [22.0, 111.0],
                    "ear.L.root": [114.4, 31.0], "ear.L.tip": [114.2, 135.0]},
-        "back": {"head.top": [86.5, 6.0], "collar.line.sheetLeft": [63.0, 131.5], "collar.line.sheetRight": [137.0, 131.5],
+        "back": {"head.top": [86.5, 6.0], "ground": [98.8, 215.0], "collar": [99.5, 127.2], "collar.line.sheetLeft": [63.0, 131.5], "collar.line.sheetRight": [137.0, 131.5],
                  "ear.L.root": [49.2, 29.0], "ear.L.tip": [35.9, 128.0], "ear.R.root": [147.2, 24.0], "ear.R.tip": [162.0, 126.0]},
     }
 
@@ -247,7 +247,7 @@ class LandmarksOnTheSheetTest(unittest.TestCase):
                 with self.subTest(view=view, landmark=name):
                     self.assertLessEqual(np.hypot(points[name][0] - x, points[name][1] - y), 2.5)
 
-    def test_the_tag_hangs_below_its_ring_and_the_ears_root_mid_edge(self):
+    def test_the_tag_hangs_under_its_ring_and_the_face_is_in_order(self):
         for view, (classes, sil, points, _, _) in self.views.items():
             with self.subTest(view=view):
                 if "tag.ring" in points:
@@ -408,8 +408,10 @@ class PaletteTest(unittest.TestCase):
         self.assertAlmostEqual(palette.delta(palette.swatch(np.asarray(image)), "#7DB7E8"), 0.0, places=6)
 
     def test_a_blush_box_off_its_panel_fails(self):
-        self.assertTrue(palette.inside([10, 10, 5, 5], [0, 0, 20, 20]))
-        self.assertFalse(palette.inside([18, 10, 5, 5], [0, 0, 20, 20]))
+        panels = {"p": {"box": [0, 0, 20, 20]}}
+        self.assertEqual(palette.check_blush_box({"panel": "p", "box": [10, 10, 5, 5]}, panels), panels["p"])
+        with self.assertRaises(ValueError):
+            palette.check_blush_box({"panel": "p", "box": [18, 10, 5, 5]}, panels)
 
     def test_a_wash_over_the_fur_gives_its_opacity(self):
         fur, blush = sheets.hex_to_rgb("#FFF4E8").astype(float), sheets.hex_to_rgb("#F7B3A6").astype(float)

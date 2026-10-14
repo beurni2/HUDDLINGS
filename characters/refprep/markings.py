@@ -75,7 +75,7 @@ def colour_chart(plan, records, tan_printed, path):
     for marking in plan["markings"]:
         seen = [r for r in records if r["marking"] == marking["id"]]
         cells = [(sheets.hex_to_rgb(tan_printed), tan_printed)]
-        cells += [(sheets.hex_to_rgb(r["dominant"]), f"{r['panel'].split('.')[-1].replace('main', 'hero')[:9]} {r['deltaE2000']}") for r in seen]
+        cells += [(sheets.hex_to_rgb(r["dominant"]), f"{r['panel'].split('.')[-1].replace('main', 'hero').replace('three-quarter', '3/4')} {r['deltaE2000']}") for r in seen]
         rows.append((marking["id"], cells))
     palette.chip_image(rows, path)
 

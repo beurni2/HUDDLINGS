@@ -113,6 +113,14 @@ def regions(rgb, sil, view):
     return {k: v for k, v in found.items() if v is not None and v.any()}
 
 
+def check_blush_box(where, panels):
+    """A cheek box must lie inside the panel it names, so a box moved onto another panel fails."""
+    panel = panels[where["panel"]]
+    if not inside(where["box"], panel["box"]):
+        raise ValueError(f"the blush box {where['box']} is not inside {where['panel']} {panel['box']}")
+    return panel
+
+
 def inside(box, outer):
     """Whether a box [x, y, width, height] lies wholly inside another."""
     x, y, w, h = box
@@ -193,19 +201,22 @@ def sample(species):
             views[view][role] = entry
     cheeks, tiles = [], []
     for where in plan["blush"]:
-        panel = panels[where["panel"]]
+        panel = check_blush_box(where, panels)
         x, y, w, h = where["box"]
         px, py, pw, ph = panel["box"]
-        if not inside(where["box"], panel["box"]):
-            raise ValueError(f"the blush box {where['box']} is not inside {where['panel']} {panel['box']}")
         sheet = sheets.load_sheet(species, panel["sheet"])
         alpha, peak = blush(sheet[y:y + h, x:x + w], printed["fur"], printed["blush"])
         cheeks.append({"panel": where["panel"], "box": where["box"], "note": where["note"],
                        "peak": sheets.rgb_to_hex(peak), "opacity": round(alpha, 2)})
-        tile = Image.fromarray(sheet[py:py + ph, px:px + pw]).resize((pw * 2, ph * 2), Image.NEAREST)
-        draw = ImageDraw.Draw(tile)
+        crop = Image.fromarray(sheet[py:py + ph, px:px + pw]).resize((pw * 2, ph * 2), Image.NEAREST)
+        draw = ImageDraw.Draw(crop)
         draw.rectangle([(x - px) * 2, (y - py) * 2, (x - px + w) * 2 - 1, (y - py + h) * 2 - 1], outline=(0, 110, 255), width=2)
-        draw.text((4, 4), f"{where['panel']}: {alpha:.0%}", fill=(0, 60, 160), stroke_width=1, stroke_fill=(255, 255, 255))
+        # The label goes above the panel, on a strip as wide as it needs.
+        label = f"{where['panel']}: {alpha:.0%}"
+        width = max(crop.width, int(draw.textlength(label)) + 8)
+        tile = Image.new("RGB", (width, crop.height + 16), (255, 255, 255))
+        tile.paste(crop, (0, 16))
+        ImageDraw.Draw(tile).text((4, 2), label, fill=(0, 60, 160))
         tiles.append(np.asarray(tile))
     resting = [c["opacity"] for c in cheeks if c["panel"].startswith("master.turnaround.")]
     outline = [sheets.hex_to_rgb(v["outline"]["dominant"]) for v in views.values() if "outline" in v]
