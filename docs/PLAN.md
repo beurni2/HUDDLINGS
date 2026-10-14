@@ -131,7 +131,7 @@ In the order they come up. Weeks count from your `go`. Secrets go in GitHub (Set
 
 **This week (TestFlight)**
 2. Your Apple Developer Program Team ID.
-3. An App Store Connect API key with the Admin role, added as the secrets `ASC_KEY_ID`, `ASC_ISSUER_ID` and `ASC_KEY_P8`, and your Team ID as the repository variable `APPLE_TEAM_ID` (Settings, Secrets and variables, Actions, Variables). With it the Mac runner signs the app in Apple's cloud and uploads it, with nothing else to set up. If Apple refuses it when I build the lane, I'll ask for your distribution certificate instead.
+3. An App Store Connect API key with the Admin role, added as the secrets `ASC_KEY_ID`, `ASC_ISSUER_ID` and `ASC_KEY_P8`, and your Team ID as the repository variable `APPLE_TEAM_ID` (Settings, Secrets and variables, Actions, Variables). Also register your iPhone once under Certificates, Identifiers & Profiles, Devices, at developer.apple.com: Xcode's automatic signing makes a development profile when it archives, and Apple makes one only for a team with a registered device. The UDID shows in Finder (or Apple Devices on Windows) when the phone is plugged into a computer. With these the Mac runner signs the app through Apple's cloud and uploads it. If Apple still refuses on the first run, I'll show you exactly what it asked for.
 4. Approve the bundle ID `app.huddlings.ios` (with `app.huddlings.ios.widget` and `app.huddlings.ios.notifications` for the extensions; it cannot change once the app record exists), then create an app record named Huddlings in App Store Connect and an internal TestFlight group with your Apple ID.
 5. Your iPhone's model and iOS version (Q1).
 
