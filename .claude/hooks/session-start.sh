@@ -1,6 +1,7 @@
 #!/bin/bash
 # Prepares a session to work on Huddlings: the pre-commit checks everywhere,
-# and in cloud sessions the production tools of spec section 5b. Each step
+# and in cloud sessions the production tools of spec section 5b (vtracer, from
+# tools/requirements.txt, is the one auto-tracer: a placement guide, never kept). Each step
 # warns instead of stopping, so one failed download never skips the others.
 set -uo pipefail
 cd "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel)}" || exit 0
@@ -29,8 +30,4 @@ if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
   echo "export PATH=\"$TOOLS/node_modules/.bin:\$PATH\"" >> "$CLAUDE_ENV_FILE"
 fi
 
-# potrace: a faint placement guide only, never kept as a part.
-if ! command -v potrace >/dev/null 2>&1; then
-  (apt-get update -qq && apt-get install -y -qq potrace) >/dev/null 2>&1 || warn "potrace not installed"
-fi
 exit 0
