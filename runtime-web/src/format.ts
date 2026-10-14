@@ -27,6 +27,8 @@ export interface Bone {
   /** Uniform scale. */
   scale?: [number, number];
   spring?: Spring;
+  /** Rest placement in other views, where the drawing moves the pivot (a tail roots at the side in front view, at the back in side view). */
+  views?: Record<string, { x?: number; y?: number; rest?: number }>;
 }
 
 export interface Warp {
@@ -43,6 +45,16 @@ export interface Part {
   regions: Record<string, string>;
   clipTo?: string;
   warp?: Warp;
+  /** The state drawn when no clip sets one (for parts whose regions are all "view:state"). */
+  defaultState?: string;
+}
+
+/** The fake turn (section 5b): the head's yaw and pitch slide face parts by up to these offsets, in points. */
+export interface FakeTurn {
+  bone: string;
+  yaw: number;
+  pitch: number;
+  parts: Record<string, [number, number]>;
 }
 
 export interface Rig {
@@ -54,6 +66,9 @@ export interface Rig {
   parts: Part[];
   drawOrder: Record<string, string[]>;
   drawOrderVariants?: Record<string, string[]>;
+  /** The bone whose subtree takes the head's view; "head" by default. */
+  headBone?: string;
+  fakeTurn?: FakeTurn;
 }
 
 export type Key = [number, number] | [number, number, Easing];
@@ -87,15 +102,22 @@ export interface Region {
   anchorY: number;
 }
 
-export interface Atlas {
+/** The regions at one scale: 2x, 3x, 5x or the small page. */
+export interface AtlasSet {
+  name: string;
+  scale: number;
   pages: { file: string; scale: number; width: number; height: number }[];
   regions: Record<string, Region>;
+}
+
+export interface Atlas {
+  sets: AtlasSet[];
 }
 
 const CHANNELS: Channel[] = ["rot", "x", "y", "squash", "scale", "yaw", "pitch"];
 
 /** Every problem with a rig and its clips, as readable lines. An empty list means the package is sound. */
-export function validate(rig: Rig, clips: Clip[], atlas?: Atlas): string[] {
+export function validate(rig: Rig, clips: Clip[], atlas?: AtlasSet): string[] {
   const problems: string[] = [];
   const bones = new Map<string, Bone>();
   if (rig.format !== FORMAT) problems.push(`rig: format ${rig.format}, expected ${FORMAT}`);
@@ -129,7 +151,13 @@ export function validate(rig: Rig, clips: Clip[], atlas?: Atlas): string[] {
       if (atlas && !atlas.regions[region]) problems.push(`part ${part.name}: region ${region} is not in the atlas`);
     }
     if (part.warp) {
-      for (const b of part.warp.chain) if (!bones.has(b)) problems.push(`part ${part.name}: warp chain bone ${b} is unknown`);
+      const chain = part.warp.chain;
+      for (const b of chain) if (!bones.has(b)) problems.push(`part ${part.name}: warp chain bone ${b} is unknown`);
+      if (chain[0] !== part.bone) problems.push(`part ${part.name}: a warp chain starts at the part's bone`);
+      for (let k = 1; k < chain.length; k++) {
+        if (bones.get(chain[k]!)?.parent !== chain[k - 1]) problems.push(`part ${part.name}: warp chain bone ${chain[k]} must be a child of ${chain[k - 1]}`);
+      }
+      if (chain.length < 2) problems.push(`part ${part.name}: a warp chain needs at least two bones`);
       if (part.warp.columns !== 1 || part.warp.rows < 1) problems.push(`part ${part.name}: a warp grid is 1 column by n rows`);
     }
   }

@@ -123,6 +123,16 @@ export function apply(m: Affine, x: number, y: number): [number, number] {
   return [m.a * x + m.c * y + m.tx, m.b * x + m.d * y + m.ty];
 }
 
+/** The inverse transform. Rig transforms always have a non-zero determinant. */
+export function invert(m: Affine): Affine {
+  const det = m.a * m.d - m.b * m.c;
+  const a = m.d / det;
+  const b = -m.b / det;
+  const c = -m.c / det;
+  const d = m.a / det;
+  return { a, b, c, d, tx: -(a * m.tx + c * m.ty), ty: -(b * m.tx + d * m.ty) };
+}
+
 /** Catmull–Rom interpolation through p1 and p2 at t in 0..1, with p0 and p3 as neighbours. */
 export function catmullRom(p0: number, p1: number, p2: number, p3: number, t: number): number {
   const t2 = t * t;

@@ -66,6 +66,7 @@ test("a region's edge pixels are extruded by 2 px and the rest of the gap stays 
 
 test("buildAtlas writes page images whose regions hold the drawings", () => {
   const { atlas, images } = buildAtlas(
+    "2x",
     [{ region: "a", svg: rect(20, 10, "#00ff00"), anchor: [10, 5] }, { region: "b", svg: rect(8, 30, "#0000ff"), anchor: [4, 0] }],
     2,
     (i) => `atlas@2x-${i}.png`,
@@ -76,4 +77,6 @@ test("buildAtlas writes page images whose regions hold the drawings", () => {
   const centre = ((a.y + Math.floor(a.h / 2)) * page.width + a.x + Math.floor(a.w / 2)) * 4;
   assert.deepEqual(Array.from(page.data.subarray(centre, centre + 4)), [0, 255, 0, 255]);
   assert.equal(atlas.pages[0]!.width, page.width);
+  assert.equal(atlas.name, "2x");
+  assert.equal(atlas.scale, 2);
 });

@@ -3,7 +3,7 @@
 // up to 2048 px, regions 16 px apart with a 2 px extruded ring.
 import { Resvg } from "@resvg/resvg-js";
 import { PNG } from "pngjs";
-import type { Atlas, Region } from "../../runtime-web/src/format.ts";
+import type { AtlasSet, Region } from "../../runtime-web/src/format.ts";
 
 export const GAP = 16;
 export const EXTRUDE = 2;
@@ -123,8 +123,8 @@ export function paintPages(placed: Placed[], sizes: number[]): PNG[] {
   return pages;
 }
 
-/** Rasterizes every drawing at a scale and packs them: the page images and their atlas entries. */
-export function buildAtlas(drawings: Drawing[], scale: number, file: (page: number) => string): { atlas: Atlas; images: Buffer[] } {
+/** Rasterizes every drawing at a scale and packs them: the page images and their atlas set. */
+export function buildAtlas(name: string, drawings: Drawing[], scale: number, file: (page: number) => string): { atlas: AtlasSet; images: Buffer[] } {
   const rasters = drawings.map((d) => rasterize(d, scale));
   const { placed, sizes } = packRasters(rasters);
   const pages = paintPages(placed, sizes);
@@ -133,7 +133,7 @@ export function buildAtlas(drawings: Drawing[], scale: number, file: (page: numb
     regions[r.region] = { page, x, y, w: r.w, h: r.h, anchorX: r.anchorX, anchorY: r.anchorY };
   }
   return {
-    atlas: { pages: sizes.map((size, i) => ({ file: file(i), scale, width: size, height: size })), regions },
+    atlas: { name, scale, pages: sizes.map((size, i) => ({ file: file(i), scale, width: size, height: size })), regions },
     images: pages.map((p) => PNG.sync.write(p)),
   };
 }
