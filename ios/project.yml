@@ -19,6 +19,9 @@ settings:
     # The atlas pages must reach the app byte for byte (characters/format/README.md, Rendering).
     COMPRESS_PNG_FILES: NO
     STRIP_PNG_TEXT: NO
+    # Strings written in Swift reach -exportLocalizations, so the catalogue check sees them.
+    SWIFT_EMIT_LOC_STRINGS: YES
+    LOCALIZATION_PREFERS_STRING_CATALOGS: YES
   configs:
     Debug:
       SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG LAB

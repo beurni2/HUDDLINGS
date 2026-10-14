@@ -9,6 +9,11 @@ on:
 permissions:
   contents: read
 
+# A newer push to the same pull request replaces a run still in progress.
+concurrency:
+  group: ios-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   web-frames:
     # The WebGL side of parity: the test dance at 30 fps, full size and small.

@@ -31,6 +31,8 @@ private let runs = [
 ]
 private let fps = 30.0
 
+// SpriteKit nodes belong to the main actor.
+@MainActor
 final class ParityRender: XCTestCase {
     func testRenderTheDanceForParity() throws {
         let package = repository.appendingPathComponent("build/characters/test")
