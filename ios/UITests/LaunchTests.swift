@@ -6,7 +6,9 @@ final class LaunchTests: XCTestCase {
     func testTheCompanionIsOnStage() throws {
         let app = XCUIApplication()
         app.launch()
-        XCTAssertTrue(app.otherElements["companion"].waitForExistence(timeout: 10) || app.windows.firstMatch.waitForExistence(timeout: 10))
+        let companion = app.descendants(matching: .any).matching(identifier: "companion").firstMatch
+        XCTAssertTrue(companion.waitForExistence(timeout: 15), "the companion never appeared")
+        XCTAssertFalse(app.descendants(matching: .any).matching(identifier: "companion-failed").firstMatch.exists, "the companion failed to load")
         sleep(2)
         XCTAssertEqual(app.state, .runningForeground)
         let shot = XCTAttachment(screenshot: app.screenshot())

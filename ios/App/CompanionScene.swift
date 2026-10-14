@@ -21,6 +21,9 @@ final class CompanionScene: SKScene {
     private var last: TimeInterval?
     private var now: Double = 0
     private var idleAt: Double?
+    /// A longer gap than this between frames is a pause (the app was away): the companion's clock skips it
+    /// rather than running every spring step of the gap in one frame.
+    private let longestFrame: TimeInterval = 0.25
 
     /// Loads the character package bundled at characters/test.
     static func load(species: String = "test") throws -> CompanionScene {
@@ -48,6 +51,8 @@ final class CompanionScene: SKScene {
         addChild(companion)
         try player.play("idle", at: 0)
         diagnostics.atlasSet = set.name
+        // Each page in memory: RGBA, plus a third for its mipmaps.
+        diagnostics.atlasBytes = set.pages.reduce(0) { $0 + Int($1.width * $1.height * 4 * 4 / 3) }
     }
 
     @available(*, unavailable)
@@ -59,6 +64,7 @@ final class CompanionScene: SKScene {
 
     override func update(_ currentTime: TimeInterval) {
         if start == nil { start = currentTime }
+        if let last, currentTime - last > longestFrame { start! += currentTime - last - 1.0 / 60 }
         now = currentTime - start!
         let began = CACurrentMediaTime()
         do {

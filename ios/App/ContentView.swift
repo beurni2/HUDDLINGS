@@ -14,8 +14,9 @@ struct ContentView: View {
             Color(red: 1, green: 0.97, blue: 0.93).ignoresSafeArea()
             switch stage {
             case .success(let scene):
-                SpriteView(scene: scene, preferredFramesPerSecond: 120, options: [.ignoresSiblingOrder])
+                SpriteView(scene: scene, preferredFramesPerSecond: 120, options: [.ignoresSiblingOrder, .shouldCullNonVisibleNodes])
                     .ignoresSafeArea()
+                    .accessibilityElement(children: .ignore)
                     .accessibilityIdentifier("companion")
                 #if LAB
                 Button { showingDiagnostics = true } label: { Text(verbatim: "Diagnostics") }
@@ -25,9 +26,9 @@ struct ContentView: View {
                 #endif
             case .failure(let error):
                 #if LAB
-                Text(verbatim: "\(error)").padding()
+                Text(verbatim: "\(error)").padding().accessibilityIdentifier("companion-failed")
                 #else
-                Color.clear.onAppear { assertionFailure("\(error)") }
+                Color.clear.accessibilityIdentifier("companion-failed").onAppear { assertionFailure("\(error)") }
                 #endif
             }
         }

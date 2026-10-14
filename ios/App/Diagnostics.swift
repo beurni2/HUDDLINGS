@@ -15,6 +15,8 @@ final class Diagnostics {
     private(set) var frames = 0
     private(set) var metalBytes = 0
     var atlasSet = ""
+    /// The atlas pages' size in GPU memory, computed from their dimensions (RGBA with mipmaps).
+    var atlasBytes = 0
     @ObservationIgnored private var pendingFrames = [Int](repeating: 0, count: 51)
     @ObservationIgnored private var pendingRig = [Int](repeating: 0, count: 101)
     @ObservationIgnored private var pendingCount = 0
@@ -58,6 +60,7 @@ final class Diagnostics {
             "rigTimeTenthMsBins": rigTimes,
             "frameTimeP95Ms": percentile(frameTimes, 0.95, binMs: 1),
             "rigTimeP95Ms": percentile(rigTimes, 0.95, binMs: 0.1),
+            "atlasTextureBytes": atlasBytes,
             "metalAllocatedBytes": metalBytes,
         ]
         let data = (try? JSONSerialization.data(withJSONObject: report, options: [.prettyPrinted, .sortedKeys])) ?? Data()
@@ -80,7 +83,10 @@ struct DiagnosticsView: View {
                     Histogram(bins: diagnostics.rigTimes)
                     Text(verbatim: String(format: "Rig time p95: %.1f ms", diagnostics.percentile(diagnostics.rigTimes, 0.95, binMs: 0.1)))
                 }
-                Section { Text(verbatim: String(format: "Metal memory: %.1f MB", Double(diagnostics.metalBytes) / 1_048_576)) }
+                Section {
+                    Text(verbatim: String(format: "Atlas textures: %.1f MB", Double(diagnostics.atlasBytes) / 1_048_576))
+                    Text(verbatim: String(format: "All of the app's Metal memory: %.1f MB", Double(diagnostics.metalBytes) / 1_048_576))
+                }
                 Section { ShareLink(item: diagnostics.json()) { Text(verbatim: "Export JSON") } }
             }
             .navigationTitle(Text(verbatim: "Diagnostics"))
@@ -107,6 +113,7 @@ private struct Histogram: View {
 @MainActor
 final class Diagnostics {
     var atlasSet = ""
+    var atlasBytes = 0
     func record(frameInterval: Double?, rigTime: Double) {}
 }
 #endif
