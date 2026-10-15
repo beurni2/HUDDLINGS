@@ -93,6 +93,7 @@ REGIONS = {
     "tag": (("tag*",), ("palette", "tag")),
 }
 BLUSH_PARTS = ("blush*",)
+BLUSH_MIN_PX = 6  # crop px: a blush part covering less is a speck, not a cheek
 # The part each source landmark must lie on: the spec's part names, then the art prototype's.
 SOURCE_PARTS = {
     "paw.front.L": ("front.L", "paw.front.L"), "paw.front.R": ("front.R", "paw.front.R"),
@@ -541,26 +542,35 @@ def check_palette(frame, render, still):
 def check_blush(frame, render, still):
     """The blush as a level (Q25): each cheek fitted as palette.py fits the sheet's, in a box around the blush part,
     within the sheet's resting spread; and the blush part's own colour, the cheek carried along the fitted blend
-    from the fur to full strength, within ΔE2000 3 of the printed pink."""
+    from the fur to full strength, within ΔE2000 3 of the printed pink. As many cheeks blush as the sheet's crop
+    shows (phase 2's blush boxes for it, refmap/palette.json)."""
     fur_hex, pink_hex = frame.model["palette"]["fur"], frame.model["palette"]["blush"]
     lo, hi = frame.model["blush"]["restingSpread"]
     fur, pink = sheets.hex_to_rgb(fur_hex).astype(float), sheets.hex_to_rgb(pink_hex).astype(float)
     cheeks = []
     names, mask = masks_for(render, still, BLUSH_PARTS)
-    for blob in measure.components(mask, 6):
+    for blob in measure.components(mask, BLUSH_MIN_PX):
         ys, xs = np.nonzero(blob)
         box = render.rgb[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
+        centre = round2(measure.centroid(blob))
+        # palette.blush fits the box's light pixels (L* over 70, chroma under 30); a box with none has no level.
+        lab = sheets.to_lab(box.reshape(-1, 3))
+        if not ((lab[:, 0] > 70) & (np.hypot(lab[:, 1], lab[:, 2]) < 30)).any():
+            cheeks.append({"centrePx": centre, "problem": "no light pixels in its box, so no level can be fitted", "pass": False})
+            continue
         level, peak = palette.blush(box, fur_hex, pink_hex)
         core = fur + (peak - fur) / level if level > 0.05 else peak
         de = palette.delta(np.clip(core, 0, 255), pink_hex)
-        cheeks.append({"centrePx": round2(measure.centroid(blob)), "level": round(level, 3), "peak": sheets.rgb_to_hex(peak),
+        cheeks.append({"centrePx": centre, "level": round(level, 3), "peak": sheets.rgb_to_hex(peak),
                        "coreColour": sheets.rgb_to_hex(np.clip(core, 0, 255)), "coreDeltaE2000": round(de, 2),
                        "pass": lo <= level <= hi and de <= DELTA_E_MAX})
     plan = json.loads((frame.folder / "refmap" / "palette.json").read_text())
-    wanted = any(b["panel"] == frame.rec["crop"] for b in plan["blush"])
+    boxes = [b for b in plan["blush"] if b["panel"] == frame.rec["crop"]]
     result = {"parts": names, "restingSpread": [lo, hi], "heldTo": pink_hex, "thresholdDeltaE2000": DELTA_E_MAX,
-              "cheeks": cheeks, "sheetShowsBlush": wanted}
-    result["pass"] = all(c["pass"] for c in cheeks) and (bool(cheeks) or not wanted)
+              "cheeks": cheeks, "sheetShowsBlush": bool(boxes), "sheetCheeks": len(boxes)}
+    if len(cheeks) < len(boxes):
+        result["problem"] = f"{len(cheeks)} cheek{'' if len(cheeks) == 1 else 's'} blush; the sheet shows {len(boxes)}"
+    result["pass"] = all(c["pass"] for c in cheeks) and len(cheeks) >= len(boxes)
     return result
 
 
@@ -749,7 +759,9 @@ def compare_image(result, parts, path):
                  f"within {lm['thresholdPt']} pt" + (f"; {lm['error']}" if "error" in lm else ""))
     pal = result["palette"]["rows"]
     lines.append("palette: " + ", ".join(f"{k} {v.get('deltaE2000', 'missing')}" + ("" if v["pass"] else " FAIL") for k, v in pal.items()))
-    lines.append("blush: " + (", ".join(f"{c['level']:.0%} core dE {c['coreDeltaE2000']}" for c in result["blush"]["cheeks"]) or "none")
+    blush = result["blush"]
+    lines.append("blush: " + (", ".join(f"{c['level']:.0%} core dE {c['coreDeltaE2000']}" if "level" in c else c["problem"] for c in blush["cheeks"]) or "none")
+                 + (f" ({blush['problem']})" if "problem" in blush else "")
                  + f"; markings shown {result['markings']['shown']} expected {result['markings']['expected']}")
     strip = Image.new("RGB", (image.width, 16 * len(lines) + 6), "white")
     sd = ImageDraw.Draw(strip)

@@ -532,6 +532,25 @@ class PlantedTest(unittest.TestCase):
             self.assertLessEqual(cheek["coreDeltaE2000"], 3)
         self.assertFailed(result, ["blush"])
 
+    def test_fewer_cheeks_than_the_sheet_shows_fails(self):
+        fixture = self.fixture()
+        fixture.relabel("blush.R", "head.base", hexes(("palette", "fur")))
+        result = self.run_still(fixture, "one-cheek")
+        # The cheek that is left passes on its own; before, that was the whole check.
+        self.assertEqual([c["pass"] for c in result["blush"]["cheeks"]], [True])
+        self.assertEqual(result["blush"]["sheetCheeks"], 2)
+        self.assertEqual(result["blush"]["problem"], "1 cheek blush; the sheet shows 2")
+        self.assertFailed(result, ["blush"])
+
+    def test_a_cheek_with_no_light_pixels_fails_with_its_reason(self):
+        fixture = self.fixture()
+        ys, xs = np.nonzero(fixture.part == fixture.names.index("blush.L"))
+        fixture.rgb[ys.min():ys.max() + 1, xs.min():xs.max() + 1] = hexes(("palettePainted", "eyeDark"))
+        result = self.run_still(fixture, "dark-cheek")
+        problems = [c["problem"] for c in result["blush"]["cheeks"] if "problem" in c]
+        self.assertEqual(problems, ["no light pixels in its box, so no level can be fitted"])
+        self.assertIn("blush", result["failed"])
+
     def test_a_silhouette_scaled_5_percent_fails(self):
         result = self.run_still(self.fixture(), "scaled", scale=1.05)
         self.assertIn("landmarks", result["failed"])
