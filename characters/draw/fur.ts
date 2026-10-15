@@ -21,9 +21,11 @@ export interface Lock {
  * Replaces the span of a closed shape between the path points nearest `from`
  * and `to` (in path order, not wrapping past its start) with fur locks.
  * `tipRound` sets how round a tip is, as a share of its lock's width. `onLock`
- * hears each lock's tip and root, for fur strokes drawn inside the edge.
+ * hears each lock's tip, its root (the base curve under the tip) and the two
+ * notches it rises between, in path order, for fur strokes and shades drawn
+ * inside the edge.
  */
-export function furEdge(base: Shape, from: string | P, to: string | P, locks: Lock[], tipRound = 0.3, onLock?: (tip: P, root: P) => void): Shape {
+export function furEdge(base: Shape, from: string | P, to: string | P, locks: Lock[], tipRound = 0.3, onLock?: (tip: P, root: P, notches: [P, P]) => void): Shape {
   const place = (at: string | P): P => (typeof at === "string" ? nodeAt(base, at) : at);
   const per = 64;
   const samples: { i: number; t: number; p: P; s: number }[] = [];
@@ -63,7 +65,7 @@ export function furEdge(base: Shape, from: string | P, to: string | P, locks: Lo
     const angle = Math.atan2(mid.tan[1], mid.tan[0]) + (cw ? -1 : 1) * lean * 0.5;
     const tt: P = [Math.cos(angle), Math.sin(angle)];
     const h = w * tipRound;
-    onLock?.(tip, mid.p);
+    onLock?.(tip, mid.p, [v0.p, v1.p]);
     out.push([v0.p, v.add(v0.p, v.add(v.mul(n0, l.len * 0.55), v.mul(v0.tan, w * 0.05))), v.sub(tip, v.mul(tt, h)), tip]);
     out.push([tip, v.add(tip, v.mul(tt, h)), v.add(v1.p, v.sub(v.mul(n1, l.len * 0.55), v.mul(v1.tan, w * 0.05))), v1.p]);
     s += w;

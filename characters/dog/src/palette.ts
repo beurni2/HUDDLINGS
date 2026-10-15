@@ -47,13 +47,25 @@ export const C = {
   earDeeper: multiply(multiply(marking, furShadeBy), furShadeBy),
   /** The ear's lowest clumps, its deeper shade 8% darker: about #C48253 against the sheet's #C17D50. */
   earLow: darken(multiply(multiply(marking, furShadeBy), furShadeBy), 0.08),
+  /** The ear's lowest clumps, browner: its deeper shade 30% of the way to the warm line, about #BA7D51 against the
+   * sheet's #BC7847 to #C48359. */
+  earFoot: mix(darken(multiply(multiply(marking, furShadeBy), furShadeBy), 0.08), mix(outline, mix(darken(multiply(marking, marking), 0.12), marking, 0.33), 0.4), 0.3),
   /** The lighter line on fur spans. */
   furLine: mix(outline, fur, 0.14),
+  /** The crown's and the topknot's one light warm line: the outline 30% of the way to the cream, #B29379 against the
+   * sheet's #B29576 on the crown. */
+  crownLine: mix(outline, fur, 0.3),
   /** The faint line round the cheeks' fluff and the topknot, which the sheet barely outlines. */
   fluffLine: mix(outline, fur, 0.45),
   /** The outline warmed toward the ears' deep brown: the sheet's line round the haunches, the paws and under the
    * chin, #9F6D4A against the sheet's #A06D48 to #A36E4F there. */
   warmLine: mix(outline, mix(darken(multiply(marking, marking), 0.12), marking, 0.33), 0.4),
+  /** The line round the paws and their soles: the outline 15% of the way to the soft shadow, a greyer brown,
+   * #9E7B5F against the sheet's #9A7B5E to #977C61. */
+  pawLine: mix(outline, need(printed, "shadow"), 0.15),
+  /** The line round the haunches: the outline 35% of the way to the soft shadow, #B39479 against the sheet's
+   * #BB9370 to #BE997E. */
+  haunchLine: mix(outline, need(printed, "shadow"), 0.35),
   /** The faint line where one part lies over another (a leg over the haunch, a hind paw's top): the warm line
    * halfway to the fur's shade, #CEA889 against the sheet's #CCAB8C to #D6AE8B. */
   softLine: mix(mix(outline, mix(darken(multiply(marking, marking), 0.12), marking, 0.33), 0.4), furShade, 0.5),
@@ -67,6 +79,9 @@ export const C = {
   /** A contact shadow under a paw: the ground shadow 8% darker. */
   contact: darken(need(printed, "shadow"), 0.08),
   collarLine: darken(collar, 0.25),
+  /** The collar's dark rim: its blue 30% darker and a quarter of the way to the outline's brown, #647789 against the
+   * sheet's #597C8F. */
+  collarRim: mix(darken(collar, 0.3), outline, 0.25),
   /** The tag's edge: the outline's brown warmed toward the gold, as the sheet draws it, not a darker olive gold. */
   tagLine: mix(outline, tag, 0.35),
   /** The tag's shade: its own gold at 40% multiplied in, toward orange as the sheet's gold darkens. */
@@ -76,6 +91,14 @@ export const C = {
   /** The warm light low in the iris: the printed iris brown a fifth of the way to the mouth's red and a tenth
    * toward the gold, #5F331A against the sheet's #5B3119. */
   irisWarm: mix(mix(dark, mouthInside, 0.2), tag, 0.1),
+  /** The upper lip over the open mouth: the mouth's red a little over halfway to the near-black, #591710 against
+   * the sheet's #581A0F. */
+  lipLine: mix(mouthInside, eyeDark, 0.55),
+  /** The nose's sheen: the printed dark brown 15% toward the light, #584437 against the hero's #594338. */
+  noseSheen: mix(dark, light, 0.15),
+  /** The lower iris's warm light near its foot: the iris's warm brown a tenth of the way to the light, #6F4731
+   * against the turnaround's #694632 there. */
+  irisLight: mix(mix(mix(dark, mouthInside, 0.2), tag, 0.1), light, 0.1),
   /** The mouth's inside in its own shade under the lip and in the corners: a quarter darker. */
   mouthDeep: darken(mouthInside, 0.25),
   /** The thin rim round the opening's sides: the mouth's inside halfway to the printed dark brown, #6C2417. */
