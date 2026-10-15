@@ -172,10 +172,10 @@
    },
    "nose": {
     "how": "finder",
-    "found": [-0.58, -91.64],
+    "found": [-0.72, -91.61],
     "model": [-0.2, -91.6],
-    "errPt": 0.38,
-    "errShareOfHead": 0.004,
+    "errPt": 0.52,
+    "errShareOfHead": 0.006,
     "pass": true
    },
    "paw.front.L": {
@@ -248,7 +248,7 @@
     "heldTo": "#FFF4E8",
     "heldBy": "palette.fur",
     "deltaE2000": 0.0,
-    "pixels": 14812,
+    "pixels": 14815,
     "pass": true
    },
    "furShade": {
@@ -276,27 +276,27 @@
     "pass": true
    },
    "nose": {
-    "dominant": "#200C02",
+    "dominant": "#210D03",
     "heldTo": "#200C02",
     "heldBy": "palettePainted.eyeDark",
-    "deltaE2000": 0.0,
-    "pixels": 113,
+    "deltaE2000": 0.41,
+    "pixels": 117,
     "pass": true
    },
    "tongue": {
-    "dominant": "#FB9987",
+    "dominant": "#FA9A89",
     "heldTo": "#FB9A88",
     "heldBy": "palettePainted.tongue",
-    "deltaE2000": 0.24,
-    "pixels": 179,
+    "deltaE2000": 0.36,
+    "pixels": 205,
     "pass": true
    },
    "mouthInside": {
-    "dominant": "#9E241A",
+    "dominant": "#98231A",
     "heldTo": "#9E241A",
     "heldBy": "palettePainted.mouthInside",
-    "deltaE2000": 0.0,
-    "pixels": 135,
+    "deltaE2000": 1.27,
+    "pixels": 103,
     "pass": true
    },
    "ears": {
