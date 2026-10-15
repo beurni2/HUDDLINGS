@@ -21,7 +21,11 @@ export type Side = "L" | "R";
 /** A name seen in a mirror: .L and .R swap (model.json's mirror rule). */
 export const swapSides = (name: string) => name.replace(/\.(L|R)\b/g, (_m, s: string) => (s === "L" ? ".R" : ".L"));
 
-/** Path data reflected about the line x = about: absolute x mirrored, relative dx negated, each arc's turn and sweep flipped. */
+/**
+ * Path data reflected about the line x = about: absolute x mirrored, relative dx negated, each arc's turn and sweep
+ * flipped. A path's first moveto is absolute even when written `m` (SVG 1.1, 8.3.2), its later pairs relative
+ * linetos, so a leading `m` comes out as `M` and an `l`.
+ */
 export function reflectPath(d: string, about: number): string {
   const tokens = d.match(/[A-Za-z]|[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?/g) ?? [];
   const per: Record<string, number> = { m: 2, l: 2, t: 2, h: 1, v: 1, c: 6, s: 4, q: 4, a: 7, z: 0 };
@@ -29,22 +33,30 @@ export function reflectPath(d: string, about: number): string {
   let command = "";
   const fmt = (n: number) => (Math.round(n * 1000) / 1000).toString();
   for (let i = 0; i < tokens.length; ) {
+    const leading = i === 0;
     if (/[A-Za-z]/.test(tokens[i]!)) {
       command = tokens[i++]!;
       out.push(command);
       if (/z/i.test(command)) continue;
     }
-    const lower = command.toLowerCase(), abs = command !== lower, n = per[lower];
+    const lower = command.toLowerCase(), n = per[lower];
+    // SVG reads a leading m's first pair as absolute and any pairs after it as relative linetos.
+    const absolute = command !== lower || (leading && command === "m");
     if (n === undefined || n === 0) throw new Error(`reflectPath: cannot read ${d}`);
     const args = tokens.slice(i, i + n).map(Number);
     if (args.length < n || args.some((x) => !Number.isFinite(x))) throw new Error(`reflectPath: cannot read ${d}`);
     i += n;
-    const x = (k: number) => (abs ? 2 * about - args[k]! : -args[k]!);
+    const x = (k: number) => (absolute ? 2 * about - args[k]! : -args[k]!);
     const mirrored = lower === "a" ? [args[0]!, args[1]!, -args[2]!, args[3]!, 1 - args[4]!, x(5), args[6]!]
       : lower === "h" ? [x(0)]
       : lower === "v" ? args
       : args.map((a, k) => (k % 2 === 0 ? x(k) : a));
     out.push(mirrored.map(fmt).join(" "));
+    if (leading && command === "m") {
+      out[out.length - 2] = "M";
+      command = "l";
+      if (i < tokens.length && !/[A-Za-z]/.test(tokens[i]!)) out.push("l");
+    }
   }
   return out.join(" ");
 }

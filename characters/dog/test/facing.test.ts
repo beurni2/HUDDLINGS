@@ -201,6 +201,18 @@ test("a light typed by hand is reflected across its feature's middle, arcs inclu
   assert.ok(differ <= 4, `${differ} pixels differ from the mirror`);
 });
 
+test("a path's leading relative moveto is reflected as SVG reads it, absolute, about a line off the middle", () => {
+  // SVG reads a path's first m as absolute and the pairs after it as relative linetos (SVG 1.1, 8.3.2).
+  assert.equal(reflectPath("m10 0 l5 0", 20), "M 30 0 l -5 0");
+  assert.equal(reflectPath("m10 0 5 5 3 1z m2 2 l1 1", 20), "M 30 0 l -5 5 -3 1 z m -2 2 l -1 1");
+  // Drawn, the reflection about x = 7 is the drawing mirrored about that line.
+  const d = "m-20 -40 c4 -8 14 -10 18 -2 l-2 9 a3 2 20 1 0 -6 1z m-30 4 l6 -6 4 6z";
+  const a = raster(`<g transform="matrix(-1 0 0 1 14 0)"><path d="${d}" fill="#000000"/></g>`, 2), b = raster(`<path d="${reflectPath(d, 7)}" fill="#000000"/>`, 2);
+  let differ = 0, cover = 0;
+  for (let k = 3; k < a.data.length; k += 4) (differ += +(Math.abs(a.data[k]! - b.data[k]!) > 64), (cover += +(a.data[k]! > 128)));
+  assert.ok(cover > 400 && differ <= 4, `${differ} pixels differ from the mirror about x = 7, of ${cover} covered`);
+});
+
 test("each right-facing view's placed landmarks are the left-facing view's mirrored, each on its own part", () => {
   const all = placed();
   for (const kind of KINDS) {
