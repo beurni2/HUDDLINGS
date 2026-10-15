@@ -198,11 +198,11 @@ const backPaint: Paint = {
   // The haunch's underside and its back, away from the light; and under the ear and the collar's back end, where the
   // ear hangs over the neck.
   shade: furShade(bodyGroup, ["M-30 -66 L-8 -66 L-10 -56 C-16 -54 -24 -56 -30 -58Z"]),
-  // The topline in the lighter warm line the sheet draws over the back (#B08769), round the rump and the haunch's back
-  // in the warm line, along the underside in the paws' line, and up the haunch's front a faint soft line that fades out
-  // upward, as the sheet draws it.
+  // The topline and the rump in the warm line the sheet draws round the back (#9C673F to #A86C47 at its core), along
+  // the underside in the paws' line, and up the haunch's front a fainter line that fades out upward, as the sheet draws
+  // it.
   outline: { ...OUTLINE, colour: C.haunchLine, width: 1.3, taper: 6, spans: [
-    { from: [-11, -62.4], to: [16.6, -33.6] },
+    { from: [-11, -62.4], to: [16.6, -33.6], colour: C.warmLine },
     { from: [15.2, -37.6], to: [12, -4.6], width: 1.4, colour: C.warmLine },
     { from: [14.6, -6.6], to: [-6, -1.6], width: 1.4, colour: C.pawLine },
     { from: [-27.6, -13], to: [-22, -29.4], width: 1.25 },
@@ -215,7 +215,7 @@ const chestPaint: Paint = {
   shade: furShade(bodyGroup, ["M-60 -54 C-48 -48 -32 -48 -20 -54 L-20 -60 L-60 -60Z"]),
   under: belly(),
   // Only its front edge between the tag's foot and the near leg shows, a line as the sheet draws it over the far leg.
-  outline: { ...OUTLINE, colour: C.haunchLine, width: THIN, taper: 3, spans: [{ from: [-55.8, -25], to: [-62.8, -34] }] },
+  outline: { ...OUTLINE, colour: C.softLine, width: THIN, taper: 3, spans: [{ from: [-55.8, -25], to: [-62.8, -34] }] },
 };
 
 /**
@@ -254,7 +254,7 @@ function legNearPaint(): Paint {
     // sole to the heel, the paw's line.
     outline: { ...OUTLINE, colour: C.pawLine, width: 1.35, taper: 5, spans: [
       { from: [-54, -32.4], to: [-60, -15.4], width: THIN, colour: `url(#${fade})` },
-      { from: [-58.6, -16.4], to: [-35.6, -6.4], width: 1.4 },
+      { from: [-58.6, -16.4], to: [-35.6, -6.4], width: 1.4, colour: C.outline },
     ] },
     // Its top fades in on the chest, so it comes out of the chest's fur with no edge.
     feather: { from: [-44, -42], to: [-46, -36] },
@@ -283,7 +283,7 @@ function hindPaint(): Paint {
     // off into the haunch, as the sheet draws it.
     outline: { ...OUTLINE, colour: C.pawLine, width: 1.4, taper: 4, spans: [
       { from: [-29.8, -13.4], to: [-11.4, -15.6], width: THIN, colour: C.softLine },
-      { from: [-10.6, -1.6], to: [-29.6, -12.2] },
+      { from: [-10.6, -1.6], to: [-29.6, -12.2], colour: C.outline },
     ] },
     feather: { from: [-8.4, -9], to: [-12.6, -9] },
   };
@@ -323,9 +323,10 @@ const headPaint: Paint = {
 };
 
 /**
- * The head's line, where the sheet draws one: the crown's light warm line over the forehead's fur and the crown's
- * back above the ear; round the nose's front the nose's own near-black, so the nose's edge is its own; down the lip,
- * the chin and the jaw the outline's brown; and along the collar's top, under the chin's fur, a soft warm line.
+ * The head's line, where the sheet draws one: the bridge and the stop in the outline's brown; the crown's light warm
+ * line over the forehead's fur and the crown's back above the ear; round the nose's front the nose's own near-black, so
+ * the nose's edge is its own; down the lip, the chin and the jaw a lighter brown, the fur line (the sheet's #A9876C at
+ * its core). Along the collar's top, under the chin's fur, the collar's own contact rim (collarContact).
  */
 const headLine: Outline = { ...OUTLINE, taper: 4, blur: 0.15, spans: [
   // The bridge and the stop in the outline's brown; up the forehead the crown's light line, broken above the first
@@ -334,7 +335,7 @@ const headLine: Outline = { ...OUTLINE, taper: 4, blur: 0.15, spans: [
   { from: [-84.6, -108.4], to: foreLocks[0]!.tip, width: THIN, colour: C.crownLine },
   { from: foreLocks[1]!.notches[0], to: [-63.4, -151], width: THIN, colour: C.crownLine },
   { from: [-3.6, -148.4], to: [3.6, -142.2], width: THIN, colour: C.fluffLine },
-  { from: [-61, -59], to: [-95.8, -88], width: 1.3 },
+  { from: [-61, -59], to: [-95.8, -88], width: 1.3, colour: C.furLine },
 ] };
 /** The nose's front, on the head's edge: a line in the nose's own colour, so the stencil's hard edge is covered. */
 const noseEdge: Outline = { colour: C.eyeDark, width: THIN, taper: 1.5, blur: 0.15, spans: [{ from: [-95.6, -87.8], to: [-91, -100.4] }] };
