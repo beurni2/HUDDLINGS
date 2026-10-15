@@ -484,6 +484,26 @@
      },
      "pass": true
     }
+   },
+   "rump.patch.L": {
+    "part": "rump.patch.L",
+    "shownPt2": 0.0,
+    "shows": false,
+    "expected": false,
+    "host": "body.back",
+    "clipTo": "body.back",
+    "clipped": true,
+    "pass": true
+   },
+   "tail.base": {
+    "part": "tail.base",
+    "shownPt2": 0.0,
+    "shows": false,
+    "expected": false,
+    "host": "tail",
+    "clipTo": "tail",
+    "clipped": true,
+    "pass": true
    }
   },
   "unexpectedTan": [],
@@ -524,9 +544,9 @@
   "atlas": {
    "set": "3x",
    "pages": 1,
-   "pageAreaPx": 1048576,
-   "allRegionsShare": 0.507,
-   "thisStillShare": 0.507
+   "pageAreaPx": 4194304,
+   "allRegionsShare": 0.249,
+   "thisStillShare": 0.127
   }
  },
  "failed": [],
