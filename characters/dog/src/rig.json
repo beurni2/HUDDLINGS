@@ -63,7 +63,8 @@
     { "name": "front.L", "bone": "front.L", "group": "body", "regions": { "front": "front.L/front", "threeQuarter.L": "front.L/threeQuarter.L", "side.L": "front.L/side.L" } },
     { "name": "front.R", "bone": "front.R", "group": "body", "regions": { "front": "front.R/front", "threeQuarter.L": "front.R/threeQuarter.L", "side.L": "front.R/side.L" } },
     { "name": "shadow.ear.L", "bone": "ear.L", "group": "head", "clipTo": "head.base", "regions": { "back": "shadow.ear.L/back" } },
-    { "name": "shadow.ear.R", "bone": "ear.R", "group": "head", "clipTo": "head.base", "regions": { "back": "shadow.ear.R/back" } }
+    { "name": "shadow.ear.R", "bone": "ear.R", "group": "head", "clipTo": "head.base", "regions": { "back": "shadow.ear.R/back" } },
+    { "name": "shadow.tail", "bone": "tail", "group": "body", "clipTo": "body.back", "regions": { "back": "shadow.tail/back" } }
   ],
   "drawOrder": {
     "front": ["shadow", "tail", "body.back", "back.patch.R", "back.patch.L", "hind.L", "hind.R", "body.front", "shadow.chin", "collar", "shadow.chin.collar", "tag", "@head", "front.L", "front.R"],
@@ -72,7 +73,7 @@
     "head.threeQuarter.L": ["ear.R", "shadow.head.R", "ear.L", "shadow.head.L", "head.base", "head.patch.L", "head.patch.R", "blush.L", "eye.L", "eye.R", "brow.L", "brow.R", "nose", "mouth", "head.line", "tuft"],
     "side.L": ["shadow", "tail", "tail.base", "front.R", "body.front", "body.back", "back.patch.L", "rump.patch.L", "hind.L", "front.L", "collar", "tag", "@head"],
     "head.side.L": ["head.base", "head.patch.L", "blush.L", "eye.L", "brow.L", "nose", "mouth", "head.line", "ear.L", "tuft"],
-    "back": ["shadow", "hind.L", "hind.R", "@head", "body.back", "back.patch.L", "back.patch.R", "tail", "tail.base", "collar"],
+    "back": ["shadow", "hind.L", "hind.R", "@head", "body.back", "back.patch.L", "back.patch.R", "shadow.tail", "tail", "tail.base", "collar"],
     "head.back": ["ear.L", "ear.R", "head.base", "shadow.ear.L", "shadow.ear.R", "head.line", "tuft"]
   },
   "fakeTurn": {
