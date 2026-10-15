@@ -446,8 +446,11 @@ function earPaint(side: "L" | "R"): Paint {
     `<linearGradient id="${strand}" gradientUnits="userSpaceOnUse" x1="0" y1="-66" x2="0" y2="-80">` +
     `<stop offset="0" stop-color="${C.earLine}" stop-opacity="0.5"/><stop offset="1" stop-color="${C.earLine}" stop-opacity="0"/></linearGradient>` +
     // Its top a little lighter where it comes out from under the crown's fur, in the head patches' paler tan.
-    `<linearGradient id="${top}" gradientUnits="userSpaceOnUse" x1="0" y1="-146" x2="0" y2="-132">` +
-    `<stop offset="0" stop-color="${C.patch}" stop-opacity="0.15"/><stop offset="1" stop-color="${C.patch}" stop-opacity="0"/></linearGradient></defs>` +
+    // Its upper third a little lighter, in the head patches' paler tan, as the sheet paints it (#E8A878 there against
+    // the printed #D9A379), fading out by y -108, where the ear begins to deepen toward its foot.
+    `<linearGradient id="${top}" gradientUnits="userSpaceOnUse" x1="0" y1="-146" x2="0" y2="-108">` +
+    `<stop offset="0" stop-color="${C.patch}" stop-opacity="0.4"/><stop offset="0.45" stop-color="${C.patch}" stop-opacity="0.25"/>` +
+    `<stop offset="1" stop-color="${C.patch}" stop-opacity="0"/></linearGradient></defs>` +
     `<rect x="${fmt(ex0)}" y="${fmt(ey0)}" width="${fmt(ex1 - ex0)}" height="${fmt(ey1 - ey0)}" fill="url(#${deep})"/>` +
     `<rect x="${fmt(ex0)}" y="${fmt(ey0)}" width="${fmt(ex1 - ex0)}" height="${fmt(ey1 - ey0)}" fill="url(#${top})"/>` +
     `<g filter="url(#${soft1})"><path d="${fine(light, 0.9, 21)}" fill="${C.patch}" opacity="0.22"/>` +
