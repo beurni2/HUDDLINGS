@@ -34,6 +34,8 @@ const r3 = (n: number) => Math.round(n * 1000) / 1000;
 
 /** The ear's paint: fill, the painted fur under the shade, the shade and the light. Its line is the line rule's (parts/lines.ts). */
 export function earFur(e: EarFur): Paint {
+  if (e.locks.length < 4 || e.locks.length > 7) throw new Error(`an ear carries 4 to 7 locks, not ${e.locks.length}`);
+  if (e.dips.length < 1 || e.dips.length > 2) throw new Error(`an ear's lower edge is 2 or 3 clumps, not ${e.dips.length + 1}`);
   const [x0, y0, x1, y1] = e.ear.segs.flat().reduce((b, [x, y]) => [Math.min(b[0], x), Math.min(b[1], y), Math.max(b[2], x), Math.max(b[3], y)], [Infinity, Infinity, -Infinity, -Infinity]);
   const box: Box = pad([x0, y0, x1 - x0, y1 - y0], 2);
   const [d0, d1] = e.deepen ?? [0.3, 0.95];

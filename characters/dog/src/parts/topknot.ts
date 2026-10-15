@@ -43,6 +43,7 @@ export function curlShapes(curls: Curl[]): Shape[] {
  * line and its hooks.
  */
 export function topknot(curls: Curl[], paint: Paint): Piece {
+  if (curls.length < 3 || curls.length > 5) throw new Error(`a topknot is 3 to 5 curls, not ${curls.length}`);
   const shapes = curlShapes(curls);
   const hookTone = LINES.cream[2]!;
   return join(...curls.map((c, k) => {

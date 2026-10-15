@@ -26,7 +26,7 @@ export interface EyeSpec {
    * width, and how far it swells out past the ball over the outer top corner (`flick`, in points).
    */
   lid: { from: number; to: number; width: number; flick: number };
-  /** The white: widest (`width`, in points) at `at` degrees round from the outer side, fading to nothing `span` degrees either side. */
+  /** The white: widest (`width`, in points) at `at` degrees round from the outer side, fading to nothing a little past `span` degrees either side (the opening being smaller than the iris, about 10° past for the views' eyes). */
   white: { at: number; width: number; span: number };
   /** The catchlight: `at` toward the nose and up from the ball's centre, and its radius, in points. */
   shine: { at: [number, number]; r: number };
@@ -48,7 +48,7 @@ export function eyeGeometry(e: EyeSpec) {
   // The opening: the ball less its rim, which is heavier over the top than along the foot.
   const open = { u: 0, w: (rim.top - rim.foot) / 2, a: e.rx - rim.side, b: e.ry - (rim.top + rim.foot) / 2 };
   // The iris: the opening grown by `grow` and moved `shift` away from the white's widest point, so the white is a
-  // crescent `width` wide there that runs out to nothing `span` degrees either side, crisp along the iris's edge.
+  // crescent `width` wide there that runs out to nothing a little past `span` degrees either side, crisp along the iris's edge.
   const span = (e.white.span * Math.PI) / 180, at = (e.white.at * Math.PI) / 180;
   const shift = e.white.width / (1 - Math.cos(span)), grow = shift * Math.cos(span);
   const iris = { u: open.u + shift * Math.cos(at), w: open.w + shift * Math.sin(at), a: open.a + grow, b: open.b + grow };
