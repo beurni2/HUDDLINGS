@@ -61,6 +61,10 @@ export const C = {
   /** The outline warmed toward the ears' deep brown: the sheet's line round the haunches, the paws and under the
    * chin, #9F6D4A against the sheet's #A06D48 to #A36E4F there. */
   warmLine: mix(outline, mix(darken(multiply(marking, marking), 0.12), marking, 0.33), 0.4),
+  /** The line round the back view's haunches: the outline 35% of the way to the soft shadow, #B39479 against the
+   * sheet's #BB9370 to #BE997E. Only the back view still draws its own lines; it moves onto parts/lines.ts's rule
+   * (DECISIONS 74) before Gate A. */
+  haunchLine: mix(outline, need(printed, "shadow"), 0.35),
   /** The line under the paws' soles, the darkest of the outer lines, where the light is furthest: the warm line a
    * fifth of the way to the printed dark brown, #8B5E3F (L* 44) against the sheet's L* 37 to 51 under the paws
    * (#876144, #89644A, #9A7250 in front, #7F5338 to #855C3E in the turned views), whose soft line peaks lighter than
@@ -117,6 +121,18 @@ export const C = {
    * #BB7362 against the sheet's #BA7766. */
   tongueRim: mix(tongue, dark, 0.33),
   tongueShine: mix(tongue, light, 0.5),
+  // The back view's lines (DECISIONS 96), each from the colours above by a rule.
+  /** The crown's line from behind: the faint fluff line a quarter of the way to the ears' outline, #C09B7F (the
+   * sheet's crown line reads #C7A387 at its darkest at the crop's scale; the fluff line alone, #C6AC96, is greyer). */
+  crownWarm: mix(mix(outline, fur, 0.45), mix(darken(multiply(marking, marking), 0.12), marking, 0.33), 0.25),
+  /** The haunches' line on the side away from the light: a third of the way to the warm line, #AA876C (the sheet's
+   * right haunch reads #AF896F at its darkest at the crop's scale, its left #B79B85). */
+  haunchShadeLine: mix(mix(outline, need(printed, "shadow"), 0.35), mix(outline, mix(darken(multiply(marking, marking), 0.12), marking, 0.33), 0.4), 0.3),
+  /** Where the crown's line runs over an ear's root (DECISIONS 89): the crown's light warm line halfway to the
+   * printed tan, #C59B79 against the sheet's #C2A07B and #CAA27F there. */
+  rootTan: mix(mix(outline, fur, 0.3), marking, 0.5),
+  /** The ears' feet from behind: the ears' line halfway to the soles' line, #925936 against the sheet's #8E5837. */
+  earFootLine: mix(darken(multiply(marking, marking), 0.12), mix(mix(outline, mix(darken(multiply(marking, marking), 0.12), marking, 0.33), 0.4), dark, 0.3), 0.5),
 };
 
 /** Stops evenly spaced along a chain of colours, each pair mixed channel by channel. */
