@@ -27,6 +27,12 @@ const OUTLINE: Outline = { colour: C.outline, width: OUTER, taper: 6, blur: 0.45
 const other = (nodes: Node[]) => smooth(mirrorX(nodes));
 /** Outline spans typed for the dog's right side (the viewer's left), mirrored for its left. */
 const bySide = (side: "L" | "R", spans: Span[]) => (side === "R" ? spans : mirrorSpans(spans));
+/**
+ * A part's canvas grown to hold its shade where the light group reaches past
+ * the part, so the part rasterized on its own canvas matches the whole frame
+ * (the hind paws, whose light group's rim and blur reach past their edges).
+ */
+const roomy = (p: Piece, by: number): Piece => ({ ...p, box: pad(p.box, by) });
 /** Inner lines typed for the dog's right side, mirrored for its left. */
 const flipX = (pts: P[], side: "L" | "R") => (side === "R" ? pts : pts.map(([x, y]): P => [-x, y]));
 
@@ -317,14 +323,14 @@ export function front(): Drawn[] {
   add("back.patch.L", marking("back.patch.L", { shape: back, paint: backPaint }, saddleL, { fill: C.marking, blur: 1.2, clip: true }));
   for (const side of ["R", "L"] as const) {
     const sx = side === "R" ? -1 : 1, cx = sx * 38.8, cy = -11.4;
-    add(`hind.${side}`, part(`hind.${side}`, hind[side], {
+    add(`hind.${side}`, roomy(part(`hind.${side}`, hind[side], {
       fill: C.fur,
       shade: furShade(hipGroup, [], [`M${cx - 12} ${cy - 12} L${cx + 12} ${cy - 12} L${cx + 12} ${cy - 3} L${cx - 12} ${cy - 3}Z`]),
       // Round the outside, over the top and down the inner side to the front paw.
       // A lighter line over the top, where the paw lies on the haunch; the dark line round the outside and the sole.
       outline: { ...OUTLINE, width: 1.4, taper: 4, spans: bySide(side, [{ from: [-48.4, -15.2], to: [-30.4, -12.6], width: THIN, colour: C.furLine }, { from: [-29.8, -10.8], to: [-48.6, -13] }]) },
       inner: [[[-41.2, -11], [-41.5, -7.4], [-41.8, -3.8]], [[-35.2, -11.2], [-35.2, -7.6], [-35.2, -3.6]]].map((pts) => ({ pts: flipX(pts as P[], side), width: 0.8, colour: C.outline, opacity: 0.75 })),
-    }));
+    }), 6));
   }
   add("body.front", part("body.front", chest, {
     fill: C.fur,
@@ -402,7 +408,7 @@ export function front(): Drawn[] {
       inner: [
         // The toes, and the soft line down the leg's inner side where it presses on the other leg.
         ...[[[-20, -10.6], [-20.3, -5.6], [-20.6, -1.2]], [[-9.8, -10.8], [-10.1, -5.8], [-10.4, -1]]].map((pts) => ({ pts: flipX(pts as P[], side), width: 0.85, colour: C.outline, opacity: 0.8 })),
-        { pts: flipX([[-4.6, -29], [-3.4, -19], [-2.2, -9], [-1.8, -5]], side), width: 0.8, colour: C.outline, opacity: 0.6 },
+        { pts: flipX([[-8.6, -34.6], [-5.8, -30], [-4, -22], [-2.6, -12], [-1.9, -5]], side), width: 0.75, colour: C.outline, opacity: 0.4 },
       ],
       // Up the inner side from the toes, round the paw and up the outer side, where the line lightens toward the chest.
       outline: { ...OUTLINE, width: 1.4, spans: bySide(side, [{ from: [-1.7, -9], to: [-30.2, -13] }, { from: [-30.4, -14], to: [-34.2, -35], width: THIN, colour: C.furLine }]), taper: 5 },
