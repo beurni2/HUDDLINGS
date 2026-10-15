@@ -1,0 +1,599 @@
+{
+ "species": "dog",
+ "headWidthPt": 93.3,
+ "records": {
+  "expressions.expression.happy": {
+   "crop": "expressions.expression.happy",
+   "sheet": "expressions",
+   "boxSheetPx": [15, 64, 258, 190],
+   "presets": [
+    "neutral",
+    "happy",
+    "singing"
+   ],
+   "view": "front",
+   "facing": "front",
+   "headWidthCropPx": 137.45,
+   "headWidthEndsCropPx": [
+    [65.83, 134.02],
+    [200.38, 105.94]
+   ],
+   "headWidthHandCropPx": [
+    [66, 134],
+    [200, 106]
+   ],
+   "ptPerCropPx": 0.67881,
+   "rollDeg": -11.79,
+   "anchorsCropPx": {
+    "head.top": [123.5, 4.6],
+    "nose": [131.92, 106.97],
+    "eye.R": [95.03, 101.48],
+    "eye.L": [161.44, 87.62],
+    "mouth.R": [115.29, 120.4],
+    "mouth.L": [151.07, 113.49]
+   },
+   "handCropPx": {
+    "head.top": [123, 5],
+    "nose": [132, 107],
+    "eye.R": [95, 101],
+    "eye.L": [161, 88],
+    "mouth.R": [115, 120],
+    "mouth.L": [151, 113]
+   },
+   "drawn": {
+    "eyes": "open",
+    "mouth": "open"
+   },
+   "gates": {
+    "neutral": [
+     "eye.R",
+     "eye.L"
+    ],
+    "happy": [
+     "eye.R",
+     "eye.L",
+     "mouth.R",
+     "mouth.L"
+    ],
+    "singing": []
+   },
+   "mask": "ref/faces/expressions.expression.happy.png"
+  },
+  "expressions.expression.excited": {
+   "crop": "expressions.expression.excited",
+   "sheet": "expressions",
+   "boxSheetPx": [277, 62, 248, 192],
+   "presets": [
+    "excited",
+    "ticklish"
+   ],
+   "view": "front",
+   "facing": "front",
+   "headWidthCropPx": 136.47,
+   "headWidthEndsCropPx": [
+    [62.93, 139.23],
+    [196.35, 110.54]
+   ],
+   "headWidthHandCropPx": [
+    [63, 138],
+    [195, 110]
+   ],
+   "ptPerCropPx": 0.68367,
+   "rollDeg": -12.13,
+   "anchorsCropPx": {
+    "head.top": [119.36, 4.64],
+    "nose": [131.42, 109.41],
+    "eye.R": [92.43, 108.58],
+    "eye.L": [163.11, 93.38],
+    "mouth.R": [112.37, 122.84],
+    "mouth.L": [151.71, 114.33]
+   },
+   "handCropPx": {
+    "head.top": [119, 5],
+    "nose": [132, 109],
+    "eye.R": [93, 109],
+    "eye.L": [163, 93],
+    "mouth.R": [113, 123],
+    "mouth.L": [152, 114]
+   },
+   "drawn": {
+    "eyes": "happy",
+    "mouth": "open"
+   },
+   "gates": {
+    "excited": [
+     "eye.R",
+     "eye.L",
+     "mouth.R",
+     "mouth.L"
+    ],
+    "ticklish": [
+     "eye.R",
+     "eye.L"
+    ]
+   },
+   "mask": "ref/faces/expressions.expression.excited.png"
+  },
+  "expressions.expression.laughing": {
+   "crop": "expressions.expression.laughing",
+   "sheet": "expressions",
+   "boxSheetPx": [526, 62, 238, 190],
+   "presets": [
+    "laughing",
+    "singing",
+    "ticklish"
+   ],
+   "view": "front",
+   "facing": "front",
+   "headWidthCropPx": 132.85,
+   "headWidthEndsCropPx": [
+    [61.55, 140.04],
+    [186.38, 94.58]
+   ],
+   "headWidthHandCropPx": [
+    [62, 137],
+    [184, 93]
+   ],
+   "ptPerCropPx": 0.70232,
+   "rollDeg": -20.01,
+   "anchorsCropPx": {
+    "head.top": [100.71, 4.59],
+    "nose": [121.57, 103.43],
+    "eye.R": [85.09, 108.74],
+    "eye.L": [152.25, 84.28],
+    "mouth.R": [104.7, 118.13],
+    "mouth.L": [142.83, 104.95]
+   },
+   "handCropPx": {
+    "head.top": [101, 5],
+    "nose": [122, 103],
+    "eye.R": [85, 109],
+    "eye.L": [152, 84],
+    "mouth.R": [105, 118],
+    "mouth.L": [143, 105]
+   },
+   "drawn": {
+    "eyes": "happy",
+    "mouth": "laugh"
+   },
+   "gates": {
+    "laughing": [
+     "eye.R",
+     "eye.L",
+     "mouth.R",
+     "mouth.L"
+    ],
+    "singing": [
+     "eye.R",
+     "eye.L"
+    ],
+    "ticklish": [
+     "eye.R",
+     "eye.L",
+     "mouth.R",
+     "mouth.L"
+    ]
+   },
+   "mask": "ref/faces/expressions.expression.laughing.png"
+  },
+  "expressions.expression.curious": {
+   "crop": "expressions.expression.curious",
+   "sheet": "expressions",
+   "boxSheetPx": [767, 53, 229, 201],
+   "presets": [
+    "curious"
+   ],
+   "view": "front",
+   "facing": "front",
+   "headWidthCropPx": 127.14,
+   "headWidthEndsCropPx": [
+    [40.86, 117.77],
+    [159.44, 163.64]
+   ],
+   "headWidthHandCropPx": [
+    [42, 118],
+    [160, 163]
+   ],
+   "ptPerCropPx": 0.73381,
+   "rollDeg": 21.15,
+   "anchorsCropPx": {
+    "head.top": [110.82, 29.65],
+    "nose": [94.55, 128.84],
+    "eye.R": [75.6, 105.67],
+    "eye.L": [133.51, 128.08]
+   },
+   "handCropPx": {
+    "head.top": [111, 30],
+    "nose": [95, 129],
+    "eye.R": [76, 106],
+    "eye.L": [133, 128]
+   },
+   "drawn": {
+    "eyes": "open",
+    "mouth": "downturned"
+   },
+   "gates": {
+    "curious": [
+     "eye.R",
+     "eye.L"
+    ]
+   },
+   "mask": "ref/faces/expressions.expression.curious.png"
+  },
+  "expressions.expression.sleepy": {
+   "crop": "expressions.expression.sleepy",
+   "sheet": "expressions",
+   "boxSheetPx": [1002, 80, 248, 172],
+   "presets": [
+    "sleepy"
+   ],
+   "view": "front",
+   "facing": "front",
+   "headWidthCropPx": 132.85,
+   "headWidthFrom": "expressions",
+   "ptPerCropPx": 0.7023,
+   "rollDeg": 9.54,
+   "anchorsCropPx": {
+    "head.top": [131.5, 22.6],
+    "nose": [104.67, 130.72],
+    "eye.R": [75.23, 116.93],
+    "eye.L": [144.25, 128.54]
+   },
+   "handCropPx": {
+    "head.top": [132, 22],
+    "nose": [105, 131],
+    "eye.R": [75, 117],
+    "eye.L": [144, 129]
+   },
+   "drawn": {
+    "eyes": "closed",
+    "mouth": "downturned"
+   },
+   "gates": {
+    "sleepy": [
+     "eye.R",
+     "eye.L"
+    ]
+   },
+   "mask": "ref/faces/expressions.expression.sleepy.png"
+  },
+  "expressions.expression.surprised": {
+   "crop": "expressions.expression.surprised",
+   "sheet": "expressions",
+   "boxSheetPx": [20, 279, 250, 191],
+   "presets": [
+    "surprised"
+   ],
+   "view": "front",
+   "facing": "front",
+   "headWidthCropPx": 131.59,
+   "headWidthEndsCropPx": [
+    [61.7, 125.19],
+    [193.14, 118.81]
+   ],
+   "headWidthHandCropPx": [
+    [62, 125],
+    [193, 118]
+   ],
+   "ptPerCropPx": 0.709,
+   "rollDeg": -2.78,
+   "anchorsCropPx": {
+    "head.top": [123.31, 8.69],
+    "nose": [126.84, 109.96],
+    "eye.R": [94.07, 98.74],
+    "eye.L": [157.27, 95.67],
+    "mouth.R": [121.52, 130.67],
+    "mouth.L": [133.37, 129.6]
+   },
+   "handCropPx": {
+    "head.top": [124, 9],
+    "nose": [127, 111],
+    "eye.R": [94, 99],
+    "eye.L": [157, 96],
+    "mouth.R": [121, 132],
+    "mouth.L": [134, 129]
+   },
+   "drawn": {
+    "eyes": "wide",
+    "mouth": "o"
+   },
+   "gates": {
+    "surprised": [
+     "eye.R",
+     "eye.L",
+     "mouth.R",
+     "mouth.L"
+    ]
+   },
+   "mask": "ref/faces/expressions.expression.surprised.png"
+  },
+  "expressions.expression.shy": {
+   "crop": "expressions.expression.shy",
+   "sheet": "expressions",
+   "boxSheetPx": [277, 287, 234, 183],
+   "presets": [
+    "shy"
+   ],
+   "view": "front",
+   "facing": "front",
+   "headWidthCropPx": 132.85,
+   "headWidthFrom": "expressions",
+   "ptPerCropPx": 0.7023,
+   "rollDeg": -9.49,
+   "anchorsCropPx": {
+    "head.top": [99.28, 4.67],
+    "nose": [97.52, 118.83],
+    "eye.R": [67.83, 106.9],
+    "eye.L": [132.75, 96.04]
+   },
+   "handCropPx": {
+    "head.top": [99, 5],
+    "nose": [99, 119],
+    "eye.R": [68, 107],
+    "eye.L": [133, 96]
+   },
+   "drawn": {
+    "eyes": "open",
+    "mouth": "downturned"
+   },
+   "gates": {
+    "shy": [
+     "eye.R",
+     "eye.L"
+    ]
+   },
+   "mask": "ref/faces/expressions.expression.shy.png"
+  },
+  "expressions.expression.proud": {
+   "crop": "expressions.expression.proud",
+   "sheet": "expressions",
+   "boxSheetPx": [521, 283, 237, 187],
+   "presets": [
+    "proud"
+   ],
+   "view": "front",
+   "facing": "front",
+   "headWidthCropPx": 132.11,
+   "headWidthEndsCropPx": [
+    [64.57, 129.19],
+    [194.4, 104.75]
+   ],
+   "headWidthHandCropPx": [
+    [65, 131],
+    [194, 107]
+   ],
+   "ptPerCropPx": 0.70625,
+   "rollDeg": -10.66,
+   "anchorsCropPx": {
+    "head.top": [131.67, 4.67],
+    "nose": [137.55, 90.88],
+    "eye.R": [97.08, 92.89],
+    "eye.L": [166.05, 79.91],
+    "mouth.R": [119.59, 104.85],
+    "mouth.L": [155.55, 98.75]
+   },
+   "handCropPx": {
+    "head.top": [132, 5],
+    "nose": [138, 91],
+    "eye.R": [97, 93],
+    "eye.L": [166, 80],
+    "mouth.R": [120, 105],
+    "mouth.L": [156, 98]
+   },
+   "drawn": {
+    "eyes": "happy",
+    "mouth": "smile"
+   },
+   "gates": {
+    "proud": [
+     "eye.R",
+     "eye.L",
+     "mouth.R",
+     "mouth.L"
+    ]
+   },
+   "mask": "ref/faces/expressions.expression.proud.png"
+  },
+  "expressions.expression.mischievous": {
+   "crop": "expressions.expression.mischievous",
+   "sheet": "expressions",
+   "boxSheetPx": [1005, 292, 252, 179],
+   "presets": [
+    "mischievous",
+    "sly"
+   ],
+   "view": "front",
+   "facing": "front",
+   "headWidthCropPx": 134.38,
+   "headWidthEndsCropPx": [
+    [70.59, 128.26],
+    [202.13, 100.8]
+   ],
+   "headWidthHandCropPx": [
+    [71, 128],
+    [202, 101]
+   ],
+   "ptPerCropPx": 0.69432,
+   "rollDeg": -11.79,
+   "anchorsCropPx": {
+    "head.top": [137.56, 4.66],
+    "nose": [150.47, 107.47],
+    "eye.R": [107.4, 101.18],
+    "eye.L": [172.15, 87.67],
+    "mouth.R": [126.59, 117.61],
+    "mouth.L": [166.57, 113.66]
+   },
+   "handCropPx": {
+    "head.top": [137, 5],
+    "nose": [151, 107],
+    "eye.R": [107, 101],
+    "eye.L": [172, 88],
+    "mouth.R": [127, 118],
+    "mouth.L": [167, 113]
+   },
+   "drawn": {
+    "eyes": "wink",
+    "mouth": "cheeky"
+   },
+   "gates": {
+    "mischievous": [
+     "eye.R",
+     "eye.L",
+     "mouth.R",
+     "mouth.L"
+    ],
+    "sly": [
+     "eye.R",
+     "eye.L",
+     "mouth.R",
+     "mouth.L"
+    ]
+   },
+   "mask": "ref/faces/expressions.expression.mischievous.png"
+  },
+  "expressions.ears.lifted-slightly": {
+   "crop": "expressions.ears.lifted-slightly",
+   "sheet": "expressions",
+   "boxSheetPx": [166, 740, 146, 95],
+   "presets": [
+    "listening"
+   ],
+   "view": "front",
+   "facing": "front",
+   "headWidthCropPx": 90.0,
+   "headWidthEndsCropPx": [
+    [29, 70],
+    [119, 70]
+   ],
+   "headWidthHandCropPx": [
+    [29, 70],
+    [119, 70]
+   ],
+   "headWidthFrom": "hand: the head's outline",
+   "ptPerCropPx": 1.03667,
+   "rollDeg": 0.0,
+   "anchorsCropPx": {
+    "head.top": [80.15, 4.69]
+   },
+   "handCropPx": {
+    "head.top": [80, 5]
+   },
+   "drawn": {
+    "eyes": "none",
+    "mouth": "none"
+   },
+   "gates": {
+    "listening": []
+   },
+   "mask": "ref/faces/expressions.ears.lifted-slightly.png"
+  }
+ },
+ "presets": {
+  "neutral": {
+   "panels": [
+    "expressions.expression.happy"
+   ],
+   "note": "Happy (default): the Happy expression. Idle is the motion sheet's Idle / breathing, not an expression-sheet panel, so it is compared by phase 4's Poses check, not here. The panel draws an open mouth and neutral's is the smile: its eyes are held, its mouth reported."
+  },
+  "happy": {
+   "panels": [
+    "expressions.expression.happy"
+   ],
+   "note": ""
+  },
+  "excited": {
+   "panels": [
+    "expressions.expression.excited"
+   ],
+   "note": ""
+  },
+  "laughing": {
+   "panels": [
+    "expressions.expression.laughing"
+   ],
+   "note": ""
+  },
+  "curious": {
+   "panels": [
+    "expressions.expression.curious"
+   ],
+   "note": "The panel's mouth is a short 人 under the nose, its ends below its middle; the spec gives curious an o or a smile, so its eyes are held and its mouth judged by eye."
+  },
+  "surprised": {
+   "panels": [
+    "expressions.expression.surprised"
+   ],
+   "note": ""
+  },
+  "shy": {
+   "panels": [
+    "expressions.expression.shy"
+   ],
+   "note": "The panel's mouth is a small ∩; shy's is a smile, so its eyes are held and its mouth judged by eye. The panel's head is turned a little toward the sheet's left and its far ear hangs across the right cheek, so its width is the expressions' median."
+  },
+  "proud": {
+   "panels": [
+    "expressions.expression.proud"
+   ],
+   "note": "The panel raises the chin: its crescents sit 4 pt above the nose against the turnaround's open eyes 8 pt above."
+  },
+  "mischievous": {
+   "panels": [
+    "expressions.expression.mischievous"
+   ],
+   "note": "The panel winks the dog's right eye (the sheet's left) and turns the head about halfway to three-quarter (panels.json), so the nose sits off the eyes' middle: 28.4 pt from the right eye and 17.5 pt from the left, against the turnaround's 23.5 and 22.6."
+  },
+  "content": {
+   "panels": [],
+   "note": "No record: the dog's expression sheet (and every species' sheet) draws no Content panel. The one panel with content's happy eyes and smile is Proud, which raises the chin; holding content to it would hold a level face to a raised one. Judged by eye at Gate A until the founder names a panel (question for QUESTIONS.md)."
+  },
+  "sleepy": {
+   "panels": [
+    "expressions.expression.sleepy"
+   ],
+   "note": "The Sleepy expression (lying, chin on its paws, eyes closed): sleepy's 'then closed' eyes are held. Its mouth is a short 人, judged by eye. Not the Sleepy face assembly, whose label pairs it with drooped ears (R3)."
+  },
+  "listening": {
+   "panels": [
+    "expressions.ears.lifted-slightly"
+   ],
+   "note": "Lifted slightly is the dog's lifted ears (Forward and Perked are the other species' names). It draws a head with no face, so nothing is held: the record places the render beside it, on the head's top, for the eyes of the agent and the founder."
+  },
+  "tender": {
+   "panels": [],
+   "note": "No record: no Content panel (see content). The only panel with half-lid eyes and a smile is the Sleepy face assembly, which R3 keeps out. Judged by eye at Gate A."
+  },
+  "singing": {
+   "panels": [
+    "expressions.expression.laughing",
+    "expressions.expression.happy"
+   ],
+   "note": "Laughing's crescents are singing's happy eyes and are held; Happy's open eyes and both panels' open mouths are not singing's states, so they are reported."
+  },
+  "blissful": {
+   "panels": [],
+   "note": "No record: no Content panel (see content). Judged by eye at Gate A."
+  },
+  "ticklish": {
+   "panels": [
+    "expressions.expression.laughing",
+    "expressions.expression.excited"
+   ],
+   "note": "Squeeze is the happy crescent (Q2): held to both panels' eyes, and to Laughing's mouth; Excited's open mouth is reported."
+  },
+  "hungry": {
+   "panels": [],
+   "note": "A new drawing the founder approves (L497, R3); no panel."
+  },
+  "huffy": {
+   "panels": [],
+   "note": "A new drawing the founder approves (L498, R3); never the sheets' Angry or Pout; no panel."
+  },
+  "sly": {
+   "panels": [
+    "expressions.expression.mischievous"
+   ],
+   "note": ""
+  }
+ }
+}
