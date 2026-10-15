@@ -122,9 +122,11 @@ const chest = symmetric([[0, -66], [-16, -65.4], [-25.6, -63.2], [-28, -60], [-2
 // -30.7 at y -11.2 outside, -3.4 at -6.4 inside), its outer corner well
 // rounded, its sole convex and dipping a little at the two toe lines (concave
 // corners), so it rests on the ground in three round toes, as the sheet's does.
-const legR: Node[] = [[-1.6, -36], [-1.8, -30], [-3.1, -22], [-4.5, -14.6], [-4.7, -10.6], [-3.4, -6.4], [-4.4, -2.9], [-8, -0.75], [-11.4, -1], [-16, -0.1],
+// Its top, hidden in the chest's fur, stays under the tag's point and clear of
+// the heart's sides, so the tag hangs in front of the chest whole.
+const legR: Node[] = [[-1.6, -33.4], [-1.8, -30], [-3.1, -22], [-4.5, -14.6], [-4.7, -10.6], [-3.4, -6.4], [-4.2, -2.9], [-7.6, -0.9], [-11.4, -1], [-16, -0.1],
   [-20.6, -1.05], [-24.2, -1.3], [-27.8, -3.2], [-30, -6.8], [-30.7, -11.2], [-30, -15.8], [-32.2, -21], [-33.8, -28], [-34.8, -35], [-35.2, -41],
-  [-33, -47], [-26, -44], [-15, -40], [-5, -40]];
+  [-33, -47], [-26, -44], [-15, -40.4], [-6.8, -37.4]];
 /** The sole's dips at the toe lines (concave, so no corner rule applies). */
 const FRONT_TOES = [8, 10];
 const legs = { R: smooth(legR, { corners: FRONT_TOES }), L: smooth(mirrorX(legR), { corners: FRONT_TOES.map((j) => (legR.length - j) % legR.length) }) };
@@ -280,7 +282,9 @@ const clumps: { tip: P; root: P; notches: [P, P] }[] = [];
 const noteClump = (tip: P, root: P, notches: [P, P]) => clumps.push({ tip, root, notches });
 head = furEdge(head, cheekRoll([-45.4, -91.8]), cheekRoll([-36.4, -68.8]), cheekLocks.R, 0.42, noteClump);
 head = furEdge(head, cheekRoll([36.4, -68.8]), cheekRoll([45.4, -91.8]), lefthandOf(cheekLocks.L), 0.42, noteClump);
-head = furEdge(head, cheekRoll([-32.4, -65.4]), cheekRoll([32.4, -65.4]), chinLocks, 0.36);
+/** The chin's tufts' notches, in path order, for their lines. */
+const chinTufts: [P, P][] = [];
+head = furEdge(head, cheekRoll([-32.4, -65.4]), cheekRoll([32.4, -65.4]), chinLocks, 0.36, (_tip, _root, notches) => chinTufts.push(notches));
 // The crown's fur where it overhangs each ear's root is a lock of fur, its tip a fur span, so the crown's line can
 // run on round it into the ear's own line, unbroken, as the sheet draws it. Between the topknot and each ear the
 // crown's outline breaks over a small lock of fur, as the sheet's does.
@@ -396,12 +400,15 @@ const crownLine: Outline = { ...headLine, taper: 1.4, spans: [
  * The cheeks' lines, as the sheet draws them: a thin warm line round each clump, from the notch above it over its
  * tip and down into the notch below, tapering out at both, so the line breaks where the fur parts and the edge
  * reads as clumps of fur, not a cookie-cutter row; lighter on the upper clumps, where they lie on the ear's lit
- * tan, deeper on the lower ones over its shaded foot (the sheet's #B17546 above to #A26842 below). And in each of
- * the fuller clumps one fine fur stroke, combed with it from inside the cheek out toward its tip.
+ * tan, deeper on the lower ones over its shaded foot (the sheet's #B17546 above to #A26842 below); and a fainter
+ * one round each of the chin's tufts where they lie on the collar. And in each of the fuller clumps one fine fur
+ * stroke, combed with it from inside the cheek out toward its tip.
  */
 const CHEEK = uid("cheek");
 function cheekLines(): { outline: Outline; strokes: P[][] } {
   const spans: Span[] = clumps.filter(({ tip, root }) => v.len(v.sub(tip, root)) >= 1.2).map(({ notches }) => ({ from: fracAt(head, notches[0]), to: fracAt(head, notches[1]), colour: `url(#${CHEEK})` }));
+  // The chin's tufts where they lie on the collar, each with its own faint line, lighter than the cheeks'.
+  spans.push(...chinTufts.slice(1, -1).map(([a, b]) => ({ from: fracAt(head, a), to: fracAt(head, b), colour: C.fluffLine })));
   const strokes = clumps.filter(({ tip, root }) => v.len(v.sub(tip, root)) >= 1.9).map(({ tip, root, notches }) => {
     // The path runs down the right cheek and up the left, so a clump's lower notch is its second on the right.
     const below = tip[0] < 0 ? notches[1] : notches[0];
@@ -635,9 +642,10 @@ function blush(sx: number): Piece {
 
 /**
  * The tag and the ring it swings from, which the turnaround paints blue on the blue collar. The heart is
- * painted as the sheet paints it: a flat matte gold, a slightly darker gold rim inside its line, one soft light
- * high on its left lobe, and the smaller heart embossed in it, its rim one faint warm line and its upper left
- * lobe catching the light: no bevel, no glint.
+ * painted as the sheet paints it: a flat matte gold inside a dark gold-brown line, a soft shade along its lower
+ * right, one soft light high on its left lobe, and the smaller heart embossed in it: its edge a slightly deeper
+ * gold, lit along its upper left lobe where the raised edge catches the light. No bevel, no glint, no second
+ * line round the rim.
  */
 function tagPiece(): Piece {
   // The ring's edge is a plain stroke, drawn exactly as wide as it is declared.
@@ -651,13 +659,13 @@ function tagPiece(): Piece {
   const lit = uid("blur"), raised = sample(innerHeart.segs, 10).filter(([x, y]) => x < TAG_X && y < -43.8);
   return join(ring, part("tag", heart, {
     fill: C.tag,
-    shade: { multiply: C.tagShadeBy, rim: { inset: 1.3, toLight: 1.3 }, blur: 1 },
-    under: `<defs>${blur(lit, [-8, -51, 10, 10], 0.35)}</defs><path d="${strokeOf(raised, 0.9, { taper: 1.6, tip: 0.2 }).d}" fill="${C.tagShine}" opacity="0.7" filter="url(#${lit})"/>`,
+    shade: { multiply: C.tagShadeBy, rim: { inset: 1, toLight: 1.8 }, blur: 1.2 },
+    under: `<defs>${blur(lit, [-8, -51, 10, 10], 0.35)}</defs><path d="${strokeOf(raised, 0.9, { taper: 1.6, tip: 0.2 }).d}" fill="${C.tagShine}" opacity="0.75" filter="url(#${lit})"/>`,
     // A soft matte light on the upper left lobe, not a bevel's glint.
     highlight: { d: "M-7.2 -48.4 a2.8 1.8 -35 1 0 5.6 0 a2.8 1.8 -35 1 0 -5.6 0", colour: C.tagShine, opacity: 0.45, blur: 1.4 },
-    // The embossed heart's own rim, a little darker than the tag's gold.
-    inner: [{ pts: emboss, width: 0.7, colour: C.tagLine, opacity: 0.6 }],
-    outline: { colour: C.tagLine, width: 1.3, taper: 2, blur: 0.2 },
+    // The embossed heart's edge, a little deeper than the tag's gold.
+    inner: [{ pts: emboss, width: 0.75, colour: C.tagEmboss, opacity: 0.9 }],
+    outline: { colour: C.tagRim, width: 1.3, taper: 2, blur: 0.2 },
   }));
 }
 
@@ -805,8 +813,10 @@ export function front(): Drawn[] {
   // at the top. The chin's shadow on it is its own part (chinOnCollar), cast by the head.
   add("collar", part("collar", collar, {
     fill: C.collar,
-    shade: { multiply: C.shadeBy, shapes: ["M-32 -57.4 C-16 -49.4 16 -49.4 32 -58.4 L32 -46 L-32 -46Z"], blur: 0.9 },
-    highlight: { d: "M-21 -57.6 C-11 -54.4 10 -54.4 21 -58.8 L21 -56.6 C10 -52.4 -11 -52.4 -21 -55.6Z", colour: C.collarHighlight, opacity: 0.3, blur: 0.9 },
+    // The band's lower part in its shade, turning under toward the chest, and a lighter band along its top where
+    // it faces the light, as the sheet paints it; its blue between them.
+    shade: { multiply: C.shadeBy, shapes: ["M-32 -58.6 C-16 -50.4 16 -50.4 32 -59.6 L32 -46 L-32 -46Z"], blur: 1.5 },
+    highlight: { d: "M-22 -61.4 C-11 -58.4 10 -58.4 22 -62.8 L22 -60.2 C10 -56.2 -11 -56.2 -22 -59Z", colour: C.collarHighlight, opacity: 0.35, blur: 0.8 },
     under: `<rect x="-1.5" y="-60" width="4.4" height="10.4" rx="1.2" fill="${C.collarLine}" opacity="0.3"/>`,
     outline: { colour: C.collarRim, width: THIN, taper: 3, blur: 0.2, spans: [{ from: [26.2, -64], to: [-26.2, -62.7] }] },
   }));

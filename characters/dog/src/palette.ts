@@ -87,6 +87,10 @@ export const C = {
   collarRim: mix(darken(collar, 0.3), outline, 0.25),
   /** The tag's edge: the outline's brown warmed toward the gold, as the sheet draws it, not a darker olive gold. */
   tagLine: mix(outline, tag, 0.35),
+  /** The tag's rim: its gold 45% of the way to the printed dark brown, #A07C2D against the sheet's #A2782A. */
+  tagRim: mix(tag, dark, 0.45),
+  /** The embossed heart's edge: the gold a tenth of the way to the dark brown, #E2B53D against the sheet's #E7AE42. */
+  tagEmboss: mix(tag, dark, 0.1),
   /** The tag's shade: its own gold at 40% multiplied in, toward orange as the sheet's gold darkens. */
   tagShadeBy: mix(light, tag, 0.4),
   tagShine: mix(tag, light, 0.6),
