@@ -41,45 +41,45 @@
  },
  "alignment": {
   "rootOnCropGroundPlusHalf": true,
-  "bestFitShiftPx": [0.3, -0.13],
-  "bestFitShiftPt": [0.24, -0.1],
-  "iouAtBestWholePixelShift": 0.9659,
+  "bestFitShiftPx": [0.26, -0.13],
+  "bestFitShiftPt": [0.2, -0.1],
+  "iouAtBestWholePixelShift": 0.966,
   "thresholdPx": 2.0,
   "pass": true
  },
  "silhouette": {
-  "iou": 0.9659,
+  "iou": 0.966,
   "threshold": 0.85,
   "groundShadowLeftOut": true,
   "pass": true,
-  "iouHeadAligned": 0.9644,
-  "headCentreOffsetPt": [0.44, -0.24]
+  "iouHeadAligned": 0.9646,
+  "headCentreOffsetPt": [0.44, -0.63]
  },
  "landmarks": {
   "thresholdPt": 2.8,
   "rows": {
    "collar": {
     "how": "finder",
-    "found": [0.74, -69.42],
+    "found": [0.82, -69.19],
     "model": [0.6, -68.9],
-    "errPt": 0.54,
-    "errShareOfHead": 0.006,
+    "errPt": 0.36,
+    "errShareOfHead": 0.004,
     "pass": true
    },
    "collar.line.sheetLeft": {
     "how": "finder",
-    "found": [-28.84, -65.91],
+    "found": [-28.05, -65.91],
     "model": [-28.1, -65.5],
-    "errPt": 0.85,
-    "errShareOfHead": 0.009,
+    "errPt": 0.42,
+    "errShareOfHead": 0.004,
     "pass": true
    },
    "collar.line.sheetRight": {
     "how": "finder",
-    "found": [30.01, -66.31],
+    "found": [30.01, -65.91],
     "model": [30.0, -65.5],
-    "errPt": 0.81,
-    "errShareOfHead": 0.009,
+    "errPt": 0.41,
+    "errShareOfHead": 0.004,
     "pass": true
    },
    "ear.L.root": {
@@ -116,9 +116,9 @@
    },
    "ground": {
     "how": "finder",
-    "found": [-0.54, -0.78],
+    "found": [-0.55, -0.78],
     "model": [0.0, 0.0],
-    "errPt": 0.95,
+    "errPt": 0.96,
     "errShareOfHead": 0.01,
     "pass": true
    },
@@ -141,7 +141,7 @@
     "heldTo": "#FFF4E8",
     "heldBy": "palette.fur",
     "deltaE2000": 0.0,
-    "pixels": 15373,
+    "pixels": 15344,
     "pass": true
    },
    "furShade": {
@@ -149,7 +149,7 @@
     "heldTo": "#FDE3C8",
     "heldBy": "palettePainted.furShade",
     "deltaE2000": 0.44,
-    "pixels": 1496,
+    "pixels": 1470,
     "pass": true
    },
    "ears": {
@@ -169,11 +169,11 @@
     "pass": true
    },
    "collar": {
-    "dominant": "#7BB2E0",
+    "dominant": "#86BAE7",
     "heldTo": "#7DB7E8",
     "heldBy": "palette.collar",
-    "deltaE2000": 1.48,
-    "pixels": 728,
+    "deltaE2000": 1.38,
+    "pixels": 745,
     "pass": true
    }
   },
@@ -303,7 +303,7 @@
  },
  "advisory": {
   "edgeDistance": {
-   "meanRenderToSheetPt": 1.12,
+   "meanRenderToSheetPt": 1.11,
    "p95RenderToSheetPt": 3.92,
    "meanSheetToRenderPt": 0.91,
    "p95SheetToRenderPt": 2.35,
@@ -312,9 +312,9 @@
   },
   "partIoU": {
    "collar": {
-    "iou": 0.789,
+    "iou": 0.855,
     "target": 0.85,
-    "meetsTarget": false
+    "meetsTarget": true
    },
    "ear.L": {
     "iou": 0.865,

@@ -139,11 +139,12 @@ const earShadow = {
 };
 
 // The collar from behind: a band round the back of the neck, arching up over
-// the nape (its top 75.3 pt high at the middle, its foot 66.3), about 9 pt deep
-// at the middle and 8 at its ends, which turn round the neck as small rounded
-// squares, the right reaching a little further out, as the sheet draws it.
-const collar = smooth([[-28.6, -70.4], [-25, -72.6], [-18, -74], [-9, -75], [0, -75.3], [9, -75], [17, -74.2], [24.6, -72.6], [29.4, -70.8], [30.4, -66.2],
-  [29.8, -62.4], [24, -63.2], [16, -64.9], [6, -66], [-6, -66.1], [-16, -65.4], [-23.6, -63.8], [-28.8, -62], [-29.4, -66.2]]);
+// the nape (its top 75.3 pt high at the middle, its foot 65.5), about 10 pt deep
+// at the middle and 8 at its ends, which drop as they turn round the neck and
+// end round, widest halfway down, the right reaching a little further out, as
+// the sheet draws it.
+const collar = smooth([[-27.8, -69.8], [-24.8, -71.8], [-18, -73.8], [-9, -75], [0, -75.3], [9, -75], [17, -74], [24.4, -71.9], [29, -70.2], [30.6, -66],
+  [29.4, -62.4], [24, -63.2], [16, -64.6], [6, -65.5], [-6, -65.5], [-16, -64.8], [-23.6, -63.2], [-27.8, -61.9], [-28.9, -66]]);
 
 // The body from behind: the shoulders come out from under the collar's ends
 // and run down and out, breaking into a small lock under each collar end, to a
@@ -507,7 +508,7 @@ export function back(): Drawn[] {
   add("collar", part("collar", collar, {
     fill: C.collar,
     // Its lower part in shade, where it turns under toward the shoulders: about two fifths of the band, as the sheet paints it.
-    shade: { multiply: C.shadeBy, shapes: ["M-32 -67.4 C-16 -69.8 16 -69.8 32 -67.4 L32 -58 L-32 -58Z"], blur: 0.8 },
+    shade: { multiply: C.shadeBy, shapes: ["M-32 -66.6 C-16 -69.6 16 -69.6 32 -66.6 L32 -58 L-32 -58Z"], blur: 0.8 },
     highlight: { d: "M-26 -71.4 C-15 -73.8 0 -74.4 16 -73.8 L16 -70.8 C0 -71.6 -15 -71.2 -26 -68.8Z", colour: C.collarHighlight, opacity: 0.5, blur: 1 },
     outline: { colour: C.collarLine, width: THIN, taper: 3, blur: 0.2 },
   }));
