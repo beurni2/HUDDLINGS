@@ -39,7 +39,7 @@
     { "name": "hind.L", "bone": "hind.L", "group": "body", "regions": { "front": "hind.L/front", "threeQuarter.L": "hind.L/threeQuarter.L" } },
     { "name": "hind.R", "bone": "hind.R", "group": "body", "regions": { "front": "hind.R/front" } },
     { "name": "body.front", "bone": "chest", "group": "body", "regions": { "front": "body.front/front", "threeQuarter.L": "body.front/threeQuarter.L" } },
-    { "name": "shadow.chin", "bone": "head", "group": "head", "clipTo": "body.front", "regions": { "front": "shadow.chin/front" } },
+    { "name": "shadow.chin", "bone": "head", "group": "head", "clipTo": "body.front", "regions": { "front": "shadow.chin/front", "threeQuarter.L": "shadow.chin/threeQuarter.L" } },
     { "name": "collar", "bone": "collar", "group": "body", "regions": { "front": "collar/front", "threeQuarter.L": "collar/threeQuarter.L" } },
     { "name": "tag", "bone": "tag", "group": "body", "regions": { "front": "tag/front", "threeQuarter.L": "tag/threeQuarter.L" } },
     { "name": "ear.L", "bone": "ear.L", "group": "head", "regions": { "front": "ear.L/front", "threeQuarter.L": "ear.L/threeQuarter.L" } },
@@ -63,7 +63,7 @@
   "drawOrder": {
     "front": ["shadow", "tail", "body.back", "back.patch.R", "back.patch.L", "hind.L", "hind.R", "body.front", "shadow.chin", "collar", "tag", "@head", "front.L", "front.R"],
     "head.front": ["ear.L", "ear.R", "head.base", "head.patch.L", "head.patch.R", "blush.L", "blush.R", "eye.L", "eye.R", "brow.L", "brow.R", "nose", "mouth", "head.line", "tuft"],
-    "threeQuarter.L": ["shadow", "tail", "tail.base", "body.back", "back.patch.L", "rump.patch.L", "hind.L", "front.R", "body.front", "collar", "tag", "@head", "front.L"],
+    "threeQuarter.L": ["shadow", "tail", "tail.base", "body.back", "back.patch.L", "rump.patch.L", "hind.L", "front.R", "body.front", "shadow.chin", "collar", "tag", "@head", "front.L"],
     "head.threeQuarter.L": ["ear.R", "ear.L", "head.base", "head.patch.L", "head.patch.R", "blush.L", "eye.L", "eye.R", "brow.L", "brow.R", "nose", "mouth", "head.line", "tuft"]
   },
   "fakeTurn": {

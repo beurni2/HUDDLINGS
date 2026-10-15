@@ -172,8 +172,8 @@ const headGroup = [head, tuft];
 
 const backPaint: Paint = {
   fill: C.fur,
-  // The haunch's rear and its underside away from the light, and under the near ear, which overhangs the back.
-  shade: furShade(hipGroup, ["M-20 -66 C-10 -64 2 -60 14 -56 L14 -50 C2 -53 -8 -56 -20 -60Z"]),
+  // The haunch's rear and its underside, away from the light.
+  shade: furShade(hipGroup),
   // The back's line, from under the ear down the sloping back and round the rump to the ground, in the outline's
   // brown the sheet draws there (#865C43 to #86512F), lighter where it comes out from under the ear; along the
   // ground under the haunch, the same line, deepening.
@@ -449,7 +449,7 @@ export function threeQuarter(): Drawn[] {
       [x - r, -2.4, 2 * r, 3.6], C.contact, 1.2, 0.7))));
   add("tail", part("tail", tail, {
     fill: C.fur,
-    shade: furShade([tail], ["M4 -40 C10 -30 12 -20 10 -8 L0 -8 L0 -40Z"], ["M16 -64 L48 -64 L48 -46 L16 -46Z"]),
+    shade: furShade([tail], [], ["M16 -64 L48 -64 L48 -46 L16 -46Z"]),
     // The tail's line, light where its fur curls over at the top and down its far side, the outline's brown
     // round its foot (the sheet's #CABB9C on the curl, #BC9E7C down its side and #916F49 at its foot).
     outline: { ...OUTLINE, colour: C.crownLine, width: THIN, taper: 4, spans: [{ from: [14.2, -34.6], to: [44.6, -40] , colour: C.fluffLine },
@@ -486,14 +486,19 @@ export function threeQuarter(): Drawn[] {
   }));
   add("body.front", roomy(part("body.front", chest, {
     fill: C.fur,
-    // Under the collar, where the head's shade falls, and down the chest's far side away from the light.
-    shade: furShade(bodyGroup, ["M-76 -58 C-60 -52 -40 -50 -22 -54 L-22 -62 L-76 -62Z"]),
+    // Down the chest's far side, away from the light; the jaw's shadow on it is shadow.chin's, which turns with the head.
+    shade: furShade(bodyGroup),
     under: between(),
     // The chest's front edge, the silhouette from the collar down to the far leg, a light warm line (the sheet's
     // #B89778); and down the slot, the far leg's line where it comes out from under the chest.
     outline: { ...OUTLINE, colour: C.crownLine, width: THIN, taper: 4, spans: [{ from: [-77.2, -35.6], to: [-74.8, -55] },
       { from: [-56.6, -17.2], to: [-63.6, -31.2], colour: C.softLine }] },
   }), 1));
+  // The jaw's shadow on the chest, cast by the head (spec L396): a soft band under the jaw's edge, about 3 pt deep,
+  // falling on the chest beside the collar's ends (the collar hides the middle of it).
+  const jawShade: P[] = [[-14, -68], [-26, -63.2], [-43, -59.6], [-62, -61.6], [-74, -64.2], [-82, -69], [-80, -64.4], [-72, -59.2], [-62, -56.4],
+    [-43, -54.6], [-26, -58.2], [-15, -63.4]];
+  add("shadow.chin", soft(pathD(smooth(jawShade, { corners: [0, 5] }).segs), [-83, -70, 70, 16], C.furShade, 1.3));
   add("collar", part("collar", collar, {
     fill: C.collar,
     shade: { multiply: C.shadeBy, shapes: ["M-76 -55 C-60 -49 -40 -48 -18 -57 L-18 -46 L-76 -46Z"], blur: 0.9 },
