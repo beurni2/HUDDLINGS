@@ -151,7 +151,7 @@ const patchR = smooth([[-95, -137], [-86.6, -137], [-83.4, -133.4], [-82.4, -126
 const saddleL = smooth([[-24, -64.6], [-17, -62.6], [-10, -58], [-2, -52], [5, -46.5], [9.6, -41], [10.4, -38.2], [7, -38.8], [2, -41.6], [-4, -44.6],
   [-10, -48.2], [-15, -51.8], [-19.6, -55.6], [-24, -59]]);
 const rumpL = smooth([[14, -33.6], [17, -28], [17, -21], [13.6, -18.4], [10.4, -20], [8.6, -25], [9.6, -30.6]]);
-const tailBase = smooth([[11, -38.2], [20.2, -37.8], [26.6, -33.2], [30.8, -25.2], [31.6, -17.4], [28.2, -12.2], [20.2, -11], [12.6, -11.6], [9.6, -24.8]]);
+const tailBase = smooth([[11.6, -36.4], [20.6, -36], [26.6, -31.4], [30.4, -23.6], [30.8, -16], [27, -11.2], [19, -10], [12.4, -10.6], [9.6, -23.6]]);
 
 // The tail: a fluffy curl rising behind the haunch, its root hidden behind the rump; its upper edge breaks into
 // soft clumps of fur where it curls over, and it rounds down the far side to its foot behind the haunch.
@@ -160,6 +160,9 @@ let tail = smooth([[6, -32], [13.6, -34.4], [16.4, -37.4], [18.2, -43], [17.8, -
   [18.6, -8.2], [13.6, -10.2], [8, -16], [5.6, -24]]);
 const tailLocks: Lock[] = [{ len: 1.2, w: 1, lean: 0.25 }, { len: 1.6, w: 1.2, lean: 0.3 }, { len: 1.1, w: 0.9, lean: 0.35 }, { len: 1.4, w: 1.1, lean: 0.3 }];
 tail = furEdge(tail, [18.4, -52.6], [39, -52.8], tailLocks, 0.3);
+// Down its far side the plume breaks into a few soft clumps, as the sheet draws it.
+const plumeLocks: Lock[] = [{ len: 0.9, w: 1, lean: 0.3 }, { len: 1.2, w: 1.2, lean: 0.35 }, { len: 0.8, w: 0.9, lean: 0.3 }, { len: 1, w: 1.1, lean: 0.3 }];
+tail = furEdge(tail, [46.6, -40], [40.4, -17.4], plumeLocks, 0.3);
 
 // Paint.
 
@@ -469,7 +472,7 @@ export function threeQuarter(): Drawn[] {
     outline: { ...OUTLINE, colour: C.crownLine, width: THIN, taper: 4, spans: [{ from: [14.2, -34.6], to: [44.6, -40] , colour: C.fluffLine },
       { from: [46, -44], to: [33, -11.4] }, { from: [37.6, -14.2], to: [13.6, -10.2], width: 1.4, colour: C.outline }] },
   }));
-  add("tail.base", marking("tail.base", { shape: tail, paint: { fill: C.fur, shade: furShade([tail]) } }, tailBase, { fill: C.marking, blur: 1.6, clip: true }));
+  add("tail.base", marking("tail.base", { shape: tail, paint: { fill: C.fur, shade: furShade([tail]) } }, tailBase, { fill: C.marking, blur: 2.4, clip: true, fade: { from: [20, -20], to: [30, -46] } }));
   add("body.back", part("body.back", back, backPaint));
   add("back.patch.L", marking("back.patch.L", { shape: back, paint: backPaint }, saddleL, { fill: C.marking, blur: 1.2, clip: true }));
   add("rump.patch.L", marking("rump.patch.L", { shape: back, paint: backPaint }, rumpL, { fill: C.marking, blur: 1.4, clip: true }));
