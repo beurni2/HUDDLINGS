@@ -1,29 +1,29 @@
 # The front view: fresh reviewers' scores
 
-Three fresh reviewers, one lens each, scored the front view against its turnaround crop (spec 5b's rubric, 1 to 5; every line must reach 4 before Gate A). They had not seen earlier rounds.
+Three fresh reviewers, one lens each, scored the front view against its turnaround crop after the finish pass (spec 5b's rubric, 1 to 5; every line must reach 4 before Gate A). They had not seen earlier rounds.
 
 | Reviewer | On-model | Face | Charm |
 | --- | --- | --- | --- |
-| Character designer (the model, part by part) | 3.5 | 3 | 3 |
-| First-time viewer (charm on an iPhone) | 4 | 4 | 3 |
-| Illustrator (the painted finish) | 4 | 3.5 | 3 |
+| Character designer (the model, part by part) | 3.5 | 3.5 | 3 |
+| First-time viewer (charm on an iPhone) | 3.5 | 4 | 3 |
+| Illustrator (the painted finish) | 3 | 3 | 3 |
 
 ## What they still want, most important first
 
 **Character designer (the model, part by part):**
-- Eyes (biggest face problem): on the sheet, a dark lash rim goes all the way round each eye, heaviest on top
-- Front legs: the sheet keeps the chest as one fluffy mass
-- Front paws: the sheet draws round buns a little wider than the leg, with a smooth bottom and two toe lines
-- Hind paws: the sheet draws puffy oval buns sitting in front of the haunch, with a closed outline and two toe lines
+- Front legs and chest (biggest problem): the render draws two straight-sided columns
+- Front paws: in the render, leg and paw are one column of the same width with a flat bottom
+- Eyes: the render draws perfect near-black circles with a thin, even rim
+- Mouth: the render's opening is widest at the very top (51 px at 3x) and narrows steadily to a point, like a shield
 
 **First-time viewer (charm on an iPhone):**
-- Front legs and chest: they read as two parallel pillars
-- Outline on cream fur (crown, head sides, cheeks, chest, flanks): too dark and too grey, so it looks like a sticker cut-line
-- Cheek ruffs: the outer edge is a sawtooth with two sharp V notches per side
-- Head patches and ear roots: the tan patches are about 26% too large (markings areaRatio 1.26 on both) and have hard, straight top edges with a sharp corner at the temple
+- Front legs and chest (the biggest charm killer)
+- Head patches. Both tan patches are squared bands. Their tops are bumpy, near-horizontal edges that run from the ear root inward to above the eye and reach up into the forehead (render-only tan above the sheet's patch, worst on the viewer's…
+- Ear roots. Both ears end at the top in a straight-cut edge with a sharp corner. In phone.png that is about x 640-677, y 121 on the viewer's left and about x 867-900, y 105-110 on the right. A pale airbrush smear runs down the inner top of…
+- Outline and fur finish on the cream parts (crown, head sides, cheeks, chest sides, legs)
 
 **Illustrator (the painted finish):**
-- Cheek fluff, both sides: now a flat cream shape whose outer edge is 3-4 angular paper-cut notches, with two hairline strokes inside and no volume
-- Chest and forelegs: the two brown inner leg lines run at full strength from just under the tag down to the paws, and two pairs of diagonal crease strokes sit beside the tag
-- Ears: a smooth light-to-dark airbrush gradient with two hairline strokes, and a bottom edge with a single notch (two lobes) under a heavy, even outline
-- Jaw and head underside: between each collar end and the bottom of the ear, the lower cheek and chin have no outline
+- Cheek tufts (both sides): the edge is a chipped, stepped 'torn paper' line, with grey-brown line bits and a visible gap at the lower right cheek
+- Head sides: from the eye patch down to the cheek the face edge is a straight vertical seam, tan on tan with a dark line, and it steps outward into the cheek with a notch
+- Ear roots: at both crown corners the ear top is cut by a straight horizontal and diagonal edge, so a trapezoid tan flap pokes above the head line, with a light band along its top, and the crown outline stops bluntly beside it
+- Eyes: they are perfect circles with an almost uniform near-black iris (L about 5 over roughly 70% of the disc) and a hard-edged white sliver that reads as a glass bead's reflection
