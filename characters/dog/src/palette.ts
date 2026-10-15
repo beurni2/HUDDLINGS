@@ -41,6 +41,10 @@ export const C = {
   furShadeBy,
   /** Every other fill's shade, 10% darker (spec L507: the fill 8 to 12% darker). */
   shadeBy: darken(light, 0.1),
+  /** The far legs of a turned view (spec L369: 6 to 10% darker than the near ones), kept warm: the fur under its own
+   * warm shade and a quarter of that shade again, #FDDFC1, its channels 8.5% darker on average (luma 7.1%), where the
+   * spec's plain darkening would turn it grey (#EBE0D5). */
+  farFur: multiply(multiply(fur, furShadeBy), mix(light, furShadeBy, 0.25)),
   /** The ears' tan under the fur's own warm shade (about #D79768), and under it twice (about #D58D5A): the sheet's
    * lower ear deepens to about #D89464. */
   earDeep: multiply(marking, furShadeBy),
