@@ -106,7 +106,7 @@ const ears = { R: earR, L: earL };
 // to the chin, dipping lowest under the near cheek, and rises from the chin up the far side of the jaw to the far
 // cheek's puff, which bulges out over the far ear; above it the face's far side runs up over the far ear to its
 // root and the crown.
-const headNodes: Node[] = [[-70, -149.3], [-46, -154], [-12.4, -150.8], [-1.6, -144.8], [2.6, -137], [0.4, -135.4], [-18.2, -133.6], [-19.8, -130.4], [-14.6, -115],
+const headNodes: Node[] = [[-70, -149.3], [-46, -154], [-12.4, -150.8], [-1.6, -144.8], [2.6, -137], [0.4, -135.4], [-18.2, -132.2], [-19.8, -129.4], [-14.6, -115],
   [-12.4, -104], [-14.2, -91], [-17.4, -78], [-15.8, -67.2], [-26, -61.4], [-42.8, -57.9], [-61.7, -59.8], [-73.5, -62.4], [-84.2, -68.6], [-90.8, -76.2],
   [-96.6, -84.2], [-97.6, -93.4], [-91.2, -100.6], [-86.4, -128], [-79.6, -143.8]];
 /**
@@ -228,12 +228,12 @@ function headLinePiece(): Piece {
   // over the root's tan in a feathered edge.
   const s = uid("blur");
   const roots: [P, P][] = [[[-1.6, -135.2], [-19.6, -131.6]]];
-  const feathered = roots.map(([a, b]) => strokeOf(spanPoints(head, ...([fracAt(head, a), fracAt(head, b)].sort((p, q) => p - q) as [number, number])), 2.4, { taper: 3, tip: 0.4 }).d).join("");
+  const feathered = roots.map(([a, b]) => strokeOf(spanPoints(head, ...([fracAt(head, a), fracAt(head, b)].sort((p, q) => p - q) as [number, number])), 1.6, { taper: 3, tip: 0.4 }).d).join("");
   const seam = (id: string, top: number, bottom: number) => `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="0" y1="${top}" x2="0" y2="${bottom}">` +
     `<stop offset="0" stop-color="${C.earEdge}"/><stop offset="1" stop-color="${C.earLine}"/></linearGradient>`;
   return piece(`<defs>${blur(f, pad(box, 2), headLine.blur!)}${blur(g, pad(box, 2), 0.35)}${blur(s, pad(box, 2), 0.8)}` +
     seam(SEAM_R, -126, -110) + seam(SEAM_L, -119, -106) + `</defs>` +
-    `<path d="${feathered}" fill="${C.fur}" opacity="0.8" filter="url(#${s})"/>` +
+    `<path d="${feathered}" fill="${C.fur}" opacity="0.6" filter="url(#${s})"/>` +
     `<g fill="${headLine.colour}" filter="url(#${f})">${r.svg}</g>` +
     `<g filter="url(#${g})">${c.svg}</g>`, box, {
     shapes: [{ name: "head.line", nodes: head.typed, segs: head.segs, outlined: [...r.outlined, ...c.outlined], fur: head.fur.map(([a, b]) => [fracAt(head, a), fracAt(head, b)]) }],
@@ -396,8 +396,6 @@ function earPaint(side: "L" | "R"): Paint {
     `<rect x="${fmt(ex0)}" y="${fmt(ey0)}" width="${fmt(ex1 - ex0)}" height="${fmt(ey1 - ey0)}" fill="url(#${deep})"/>` +
     `<path d="${softly(light, 2.2)}" fill="${C.patch}" opacity="0.3" filter="url(#${along})"/>` +
     `<path d="${softly(dark, 1.5)}" fill="${C.earLow}" opacity="0.25" filter="url(#${parting})"/>`;
-  // Along the inner edge, where the ear tucks under the head's side; for the near ear, under the near cheek too.
-  const innerD = side === "R" ? "M-84 -144 C-88 -128 -92.6 -110 -96 -96 L-100 -82 L-86 -82 L-76 -144Z" : "M-4 -140 C-12 -124 -14 -100 -15 -80 L-15 -62 L-4 -62 L4 -140Z";
   const highlight = side === "R"
     ? "M-114 -110 C-112 -118 -104 -126 -94 -132 C-90 -130 -92 -122 -98 -116 C-104 -110 -110 -106 -114 -110Z"
     : "M0 -130 C6 -128 14 -120 20 -110 C24 -104 22 -98 16 -98 C10 -100 4 -110 0 -118 C-2 -124 -3 -130 0 -130Z";
@@ -411,11 +409,27 @@ function earPaint(side: "L" | "R"): Paint {
   return {
     fill: C.marking,
     under: under + lines,
-    shade: { multiply: C.furShadeBy, rim: { inset: 2.2, toLight: 3.6 }, shapes: [innerD], blur: 3.2 },
+    // The rim away from the light; the head's shadow where the ear goes under it is the head's own part (headShadow).
+    shade: { multiply: C.furShadeBy, rim: { inset: 2.2, toLight: 3.6 }, blur: 3.2 },
     highlight: { d: highlight, colour: C.patch, opacity: 0.4, blur: 3 },
     inner: dark.map((pts) => ({ pts: sample(smooth(pts.slice(-3), { closed: false }).segs, 8, false), width: 0.7, colour: C.earLine, opacity: 0.2 })),
     outline: { ...OUTLINE, colour: C.warmLine, width: 1.3, taper: 7, blur: 0.25, spans },
   };
+}
+
+/**
+ * The head's shadow on an ear (spec L396: cast by the head, so it turns with the head, clipped to the ear it falls on):
+ * a soft band of the ear's tan in the fur's warm shade just outside the face's side where the ear goes under it, and,
+ * on the near ear, under the crown's overhang across its root. Typed along the head's edge, its inner side under the head.
+ */
+function headShadow(side: "L" | "R"): Piece {
+  const band: P[] = side === "R"
+    ? [[-78, -144.4], [-84.4, -128], [-87.4, -115], [-89, -102], [-91.6, -96.6], [-95.8, -98.2], [-93.4, -104], [-91.8, -116], [-89.4, -130], [-82.6, -145.4]]
+    : [[2, -137.6], [-18.2, -134.4], [-21.4, -129.6], [-16.4, -115], [-14.2, -104], [-16, -91], [-19.2, -78], [-17.6, -66.4], [-13.6, -66.2], [-14.6, -78],
+      [-11.4, -91], [-9.4, -104], [-11.4, -115], [-15.8, -126.6], [-15.2, -129.8], [1.6, -132.4]];
+  const shape = smooth(band);
+  const [x0, y0, x1, y1] = bbox(shape.segs);
+  return soft(pathD(shape.segs), [x0, y0, x1 - x0, y1 - y0], C.earDeep, 1.4, 0.75);
 }
 
 /** Between the two front legs, the slot where the chest lies in shade, as the sheet paints it: warm tan deepening toward the paws. */
@@ -508,7 +522,10 @@ export function threeQuarter(): Drawn[] {
     outline: { colour: C.collarRim, width: THIN, taper: 3, blur: 0.2, spans: [{ from: [-22.8, -59.2], to: [-72.6, -58.4] }] },
   }));
   add("tag", tagPiece());
-  for (const side of ["R", "L"] as const) add(`ear.${side}`, part(`ear.${side}`, ears[side], earPaint(side)));
+  for (const side of ["R", "L"] as const) {
+    add(`ear.${side}`, part(`ear.${side}`, ears[side], earPaint(side)));
+    add(`shadow.head.${side}`, headShadow(side));
+  }
   add("head.base", part("head.base", head, headPaint));
   add("head.patch.L", marking("head.patch.L", { shape: head, paint: headPaint }, patchL, { fill: C.patch, blur: 0.8, clip: false, fade: { from: [-43, -106], to: [-47, -103.4] } }));
   add("head.patch.R", marking("head.patch.R", { shape: head, paint: headPaint }, patchR, { fill: C.patch, blur: 0.8, clip: false, fade: { from: [-74, -114], to: [-69.8, -112.6] } }));

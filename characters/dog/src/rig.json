@@ -44,6 +44,8 @@
     { "name": "tag", "bone": "tag", "group": "body", "regions": { "front": "tag/front", "threeQuarter.L": "tag/threeQuarter.L" } },
     { "name": "ear.L", "bone": "ear.L", "group": "head", "regions": { "front": "ear.L/front", "threeQuarter.L": "ear.L/threeQuarter.L" } },
     { "name": "ear.R", "bone": "ear.R", "group": "head", "regions": { "front": "ear.R/front", "threeQuarter.L": "ear.R/threeQuarter.L" } },
+    { "name": "shadow.head.L", "bone": "head", "group": "head", "clipTo": "ear.L", "regions": { "threeQuarter.L": "shadow.head.L/threeQuarter.L" } },
+    { "name": "shadow.head.R", "bone": "head", "group": "head", "clipTo": "ear.R", "regions": { "threeQuarter.L": "shadow.head.R/threeQuarter.L" } },
     { "name": "head.base", "bone": "head", "group": "head", "regions": { "front": "head.base/front", "threeQuarter.L": "head.base/threeQuarter.L" } },
     { "name": "head.patch.L", "bone": "head", "group": "head", "clipTo": "head.base", "regions": { "front": "head.patch.L/front", "threeQuarter.L": "head.patch.L/threeQuarter.L" } },
     { "name": "head.patch.R", "bone": "head", "group": "head", "clipTo": "head.base", "regions": { "front": "head.patch.R/front", "threeQuarter.L": "head.patch.R/threeQuarter.L" } },
@@ -64,7 +66,7 @@
     "front": ["shadow", "tail", "body.back", "back.patch.R", "back.patch.L", "hind.L", "hind.R", "body.front", "shadow.chin", "collar", "tag", "@head", "front.L", "front.R"],
     "head.front": ["ear.L", "ear.R", "head.base", "head.patch.L", "head.patch.R", "blush.L", "blush.R", "eye.L", "eye.R", "brow.L", "brow.R", "nose", "mouth", "head.line", "tuft"],
     "threeQuarter.L": ["shadow", "tail", "tail.base", "body.back", "back.patch.L", "rump.patch.L", "hind.L", "front.R", "body.front", "shadow.chin", "collar", "tag", "@head", "front.L"],
-    "head.threeQuarter.L": ["ear.R", "ear.L", "head.base", "head.patch.L", "head.patch.R", "blush.L", "eye.L", "eye.R", "brow.L", "brow.R", "nose", "mouth", "head.line", "tuft"]
+    "head.threeQuarter.L": ["ear.R", "shadow.head.R", "ear.L", "shadow.head.L", "head.base", "head.patch.L", "head.patch.R", "blush.L", "eye.L", "eye.R", "brow.L", "brow.R", "nose", "mouth", "head.line", "tuft"]
   },
   "fakeTurn": {
     "bone": "head", "yawDeg": 20, "pitchDeg": 12,
