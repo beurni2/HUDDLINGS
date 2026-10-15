@@ -15,9 +15,11 @@ import { validate } from "../../../runtime-web/src/format.ts";
 import { openStills, type StillInfo, type Stills } from "../../../runtime-web/lab/still.ts";
 import { buildPackage, readSource, writePackage } from "../../build/build.ts";
 import { restTransform } from "../../draw/frame.ts";
+import { LIGHT } from "../../draw/paint.ts";
 import { scopeIds, type Piece } from "../../draw/svg.ts";
 import { composite, type Layer } from "../../draw/test/composite.ts";
 import { landmarks as placed } from "../src/drawings.ts";
+import { LINES } from "../src/palette.ts";
 import { mirrorPiece, reflectPath, swapSides } from "../src/views/facing.ts";
 import type { Drawn } from "../src/views/front.ts";
 import { side } from "../src/views/side.ts";
@@ -189,6 +191,210 @@ test("the light stays at the top left in both facings: each part's shade sits ri
       assert.ok(shift.plain[0] < -0.5, `${kind} ${unit.join(" + ")}: a plain mirror shifts the shade ${f(shift.plain)} pt, which this test would not catch`);
     }
   }
+});
+
+/** A ribbon sample of a lined edge (parts/lines.ts): its centre and outward normal in model space, its tone and its width. */
+interface LineSample {
+  x: number;
+  y: number;
+  nx: number;
+  ny: number;
+  tone: number;
+  width: number;
+}
+const MIRROR = '<g transform="scale(-1 1)">';
+const TONES = new Map([...LINES.cream.map((c, i) => [c, i] as const), ...LINES.tan.map((c, i) => [c, i] as const)]);
+
+/**
+ * Every lined edge's samples in a view's drawings, keyed by their centre. lines.ts draws each run of one tone as a
+ * polygon, its left side (out from the edge) and then its right side back, one point a sample: so each sample's
+ * width and normal are its two sides' gap, its tone the run's place on its ladder. A run's end samples are shared
+ * with its neighbours, so only its inner ones count. A .R drawing is its .L-frame drawing mirrored (mirrorPiece).
+ */
+function lineSamples(drawings: Piece[]): Map<string, LineSample> {
+  const out = new Map<string, LineSample | undefined>();
+  for (const p of drawings) {
+    const flip = p.svg.startsWith(MIRROR) ? -1 : 1;
+    for (const m of p.svg.matchAll(/<path fill="(#[0-9A-F]{6})" d="(M[-0-9. L]+Z)"\/>/g)) {
+      const tone = TONES.get(m[1]!);
+      if (tone === undefined) continue;
+      const n = m[2]!.match(/-?\d+(?:\.\d+)?/g)!.map(Number);
+      const pts: [number, number][] = [];
+      for (let i = 0; i < n.length; i += 2) pts.push([flip * n[i]!, n[i + 1]!]);
+      for (let k = 1; k < pts.length / 2 - 1; k++) {
+        const l = pts[k]!, r = pts[pts.length - 1 - k]!, w = Math.hypot(l[0] - r[0], l[1] - r[1]);
+        if (w === 0) continue;
+        const s = { x: (l[0] + r[0]) / 2, y: (l[1] + r[1]) / 2, nx: (l[0] - r[0]) / w, ny: (l[1] - r[1]) / w, tone, width: w };
+        const key = `${s.x.toFixed(2)} ${s.y.toFixed(2)}`;
+        // A marking carries its part's line over itself, the same samples; two different edges through one point
+        // are left out, since which is which cannot be told.
+        const seen = out.get(key);
+        const same = seen && seen.tone === s.tone && Math.abs(seen.nx - s.nx) < 1e-3 && Math.abs(seen.ny - s.ny) < 1e-3 && Math.abs(seen.width - s.width) < 1e-3;
+        out.set(key, !out.has(key) || same ? s : undefined);
+      }
+    }
+  }
+  return new Map([...out].filter((e): e is [string, LineSample] => e[1] !== undefined));
+}
+
+test("the lines are lit from the top left in both facings: a .R edge facing left is lighter and thinner than its .L twin, one facing right darker and wider, where a plain mirror changes nothing", (t) => {
+  // Each .R edge is a .L edge mirrored: drawn by the same rule (DECISIONS 74, 100), under the same light, the one
+  // facing left faces the light more than its twin did and the one facing right less, so it is lighter and thinner,
+  // or darker and wider. lines.ts's shade by place (under the chin, the ground) is the same for both and cancels.
+  for (const kind of KINDS) {
+    const L = drawn.get(`${kind}.L`)!, R = drawn.get(`${kind}.R`)!;
+    const twins = lineSamples(L.map((d) => mirrorPiece(d.piece)));
+    const against = (right: Piece[]) => {
+      const sum = { left: [0, 0, 0], right: [0, 0, 0] };
+      let matched = 0;
+      for (const [key, s] of lineSamples(right)) {
+        const twin = twins.get(key);
+        if (!twin || Math.abs(twin.nx - s.nx) > 1e-3) continue;
+        matched++;
+        const g = s.nx < -0.5 ? sum.left : s.nx > 0.5 ? sum.right : undefined;
+        if (g) (g[0]!++, (g[1]! += s.tone - twin.tone), (g[2]! += s.width / twin.width));
+      }
+      const mean = (g: number[]) => ({ n: g[0]!, tone: g[1]! / g[0]!, width: g[2]! / g[0]! });
+      return { matched, left: mean(sum.left), right: mean(sum.right) };
+    };
+    const lit = against(R.map((d) => d.piece)), plain = against(L.map((d) => mirrorPiece(d.piece)));
+    const f = (g: { n: number; tone: number; width: number }) => `${g.n} samples, ${g.tone >= 0 ? "+" : ""}${g.tone.toFixed(2)} tones, width ×${g.width.toFixed(3)}`;
+    t.diagnostic(`${kind}.R against its .L twins (${lit.matched} samples matched): facing left ${f(lit.left)}; facing right ${f(lit.right)}`);
+    assert.ok(lit.matched > 1000 && lit.left.n > 300 && lit.right.n > 300, `${kind}: too few edge samples matched (${lit.matched})`);
+    assert.ok(lit.left.tone < -0.7 && lit.left.width < 0.98, `${kind}.R: its edges facing left are not lighter and thinner than their .L twins: ${f(lit.left)}`);
+    assert.ok(lit.right.tone > 0.7 && lit.right.width > 1.02, `${kind}.R: its edges facing right are not darker and wider than their .L twins: ${f(lit.right)}`);
+    assert.ok(Math.abs(plain.left.tone) < 1e-9 && Math.abs(plain.right.tone) < 1e-9, `${kind}: a plain mirror moves the lines' tones (${f(plain.left)}; ${f(plain.right)}), which this test would not catch`);
+  }
+});
+
+test("in both .R facings, lined edges facing up-left are lighter and thinner than those facing down-right, and lighter than those facing up-right, which a plain mirror reverses", (t) => {
+  const toward = (samples: Map<string, LineSample>, dx: number, dy: number) => {
+    const g = [...samples.values()].filter((s) => (s.nx * dx + s.ny * dy) / Math.hypot(dx, dy) > Math.SQRT1_2);
+    return { n: g.length, tone: g.reduce((a, s) => a + s.tone, 0) / g.length, width: g.reduce((a, s) => a + s.width, 0) / g.length };
+  };
+  // head.line's ribbon is drawn unclipped at the line's own width, where every other part's is twice the line with
+  // half of it under the part's clip: its widths are not comparable with theirs, so it is left out here.
+  const clipped = (view: string, mirror = false) => drawn.get(view)!.filter((d) => d.part !== "head.line").map((d) => (mirror ? mirrorPiece(d.piece) : d.piece));
+  for (const kind of KINDS) {
+    for (const [label, drawings] of [[`${kind}.R`, clipped(`${kind}.R`)], [`${kind}.L mirrored`, clipped(`${kind}.L`, true)]] as const) {
+      const s = lineSamples(drawings);
+      const [ul, ur, dr] = [toward(s, -1, -1), toward(s, 1, -1), toward(s, 1, 1)];
+      const f = (g: { n: number; tone: number; width: number }) => `tone ${g.tone.toFixed(2)}, width ${g.width.toFixed(2)} (${g.n})`;
+      t.diagnostic(`${label}: up-left ${f(ul)}; up-right ${f(ur)}; down-right ${f(dr)}`);
+      assert.ok(ul.n > 300 && ur.n > 300 && dr.n > 300, `${label}: too few samples`);
+      // Up-left against down-right holds for the plain mirror too, the light being higher than it is wide: up-left
+      // against up-right, at the same height, is what tells the light's side.
+      assert.ok(ul.tone < dr.tone - 2 && ul.width < dr.width, `${label}: edges facing up-left (${f(ul)}) are not lighter and thinner than those facing down-right (${f(dr)})`);
+      if (label.endsWith(".R")) assert.ok(ul.tone < ur.tone - 1, `${label}: edges facing up-left (${f(ul)}) are not lighter than those facing up-right (${f(ur)})`);
+      else assert.ok(ul.tone > ur.tone, `${label}: a plain mirror lights its up-left edges (${f(ul)}) over its up-right ones (${f(ur)}), which this test would not catch`);
+    }
+  }
+});
+
+/** Each subpath of path data as its absolute points (every end and control point), walked as SVG reads it. */
+function subpaths(d: string): [number, number][][] {
+  const tokens = d.match(/[A-Za-z]|[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?/g) ?? [];
+  const per: Record<string, number> = { m: 2, l: 2, t: 2, h: 1, v: 1, c: 6, s: 4, q: 4, a: 7, z: 0 };
+  const out: [number, number][][] = [];
+  let cmd = "", x = 0, y = 0, sx = 0, sy = 0, first = true;
+  for (let i = 0; i < tokens.length; ) {
+    if (/[A-Za-z]/.test(tokens[i]!)) cmd = tokens[i++]!;
+    const lower = cmd.toLowerCase(), rel = cmd === lower && !(first && lower === "m");
+    if (lower === "z") {
+      [x, y] = [sx, sy];
+      if (i < tokens.length && !/[A-Za-z]/.test(tokens[i]!)) throw new Error(`subpaths: cannot read ${d}`);
+      continue;
+    }
+    const a = tokens.slice(i, i + per[lower]!).map(Number);
+    i += per[lower]!;
+    const at = (px: number, py: number): [number, number] => (rel ? [x + px, y + py] : [px, py]);
+    let pts: [number, number][];
+    if (lower === "h") pts = [[rel ? x + a[0]! : a[0]!, y]];
+    else if (lower === "v") pts = [[x, rel ? y + a[0]! : a[0]!]];
+    else if (lower === "a") pts = [at(a[5]!, a[6]!)];
+    else pts = Array.from({ length: a.length / 2 }, (_, k) => at(a[2 * k]!, a[2 * k + 1]!));
+    if (lower === "m") {
+      out.push([]);
+      [sx, sy] = pts[0]!;
+      // Pairs after a moveto's first are linetos, relative after an m (a leading one included).
+      cmd = cmd === "M" ? "L" : "l";
+    }
+    first = false;
+    out.at(-1)!.push(...pts);
+    [x, y] = pts.at(-1)!;
+  }
+  return out;
+}
+
+/** The highlights typed by hand in a drawing, in order: paint.ts draws each as a blurred path of its own. */
+const handLights = (svg: string) => [...svg.matchAll(/<path d="([^"]+)" fill="#[0-9A-F]{6}" opacity="[\d.]+" filter="url\(#[^)]+\)"\/>/g)].map((m) => m[1]!);
+
+test("each light typed by hand toward the light (Facing.lit) lies on its feature's side toward the top-left light in .R: the .L light reflected about its feature's middle, then mirrored", () => {
+  // The parts DECISIONS 101 lists: the ears' sheen, the tail's plume top, the forehead's and the crown's light (the
+  // head and the topknot share it), the tag's light and the far paw's dome. Named as in .L.
+  const lit: Record<Kind, string[]> = { side: ["ear.L", "tail", "head.base", "tuft", "tag", "front.R"], threeQuarter: ["ear.R", "head.base", "tuft", "tag"] };
+  for (const kind of KINDS) {
+    const L = pieces(`${kind}.L`), R = pieces(`${kind}.R`);
+    for (const name of lit[kind]) {
+      const l = handLights(L.get(name)!.svg), rSvg = R.get(swapSides(name))!.svg;
+      assert.ok(rSvg.startsWith(MIRROR), `${kind}.R ${swapSides(name)} is not its .L drawing mirrored`);
+      // In the .R drawing, before its mirror: the frame the view is typed in.
+      const r = handLights(rSvg.slice(MIRROR.length));
+      assert.equal(r.length, l.length, `${kind} ${name}: the facings place different numbers of lights`);
+      let moved = 0;
+      l.forEach((dl, k) => {
+        const [sl, sr] = [subpaths(dl), subpaths(r[k]!)];
+        assert.equal(sr.length, sl.length, `${kind} ${name}: light ${k}'s subpaths`);
+        sl.forEach((pl, j) => {
+          const pr = sr[j]!;
+          assert.equal(pr.length, pl.length, `${kind} ${name}: light ${k}.${j}'s points`);
+          if (pl.every((p, i) => Math.abs(p[0] - pr[i]![0]) < 1e-3 && Math.abs(p[1] - pr[i]![1]) < 1e-3)) return; // A light that follows the place.
+          moved++;
+          // Reflected about one vertical line, the feature's middle: every point, arcs' ends included.
+          const about = (pl[0]![0] + pr[0]![0]) / 2;
+          for (const [i, p] of pl.entries()) {
+            assert.ok(Math.abs(pr[i]![0] - (2 * about - p[0])) < 2e-3 && Math.abs(pr[i]![1] - p[1]) < 2e-3, `${kind} ${name}: light ${k}.${j} is not the .L light reflected about x = ${about.toFixed(2)}`);
+          }
+          const [x0, , w] = L.get(name)!.box;
+          assert.ok(about > x0 && about < x0 + w, `${kind} ${name}: light ${k}.${j}'s middle x = ${about.toFixed(2)} lies off its part`);
+          // Once the .R view is mirrored as a whole, the light and its feature's middle land at -x: the light lies as
+          // far left of its feature's middle there as the .L light does in .L (toward the top-left light, as the .L crop
+          // paints it), where a plain mirror's would lie as far right.
+          const centre = (pts: [number, number][]) => (Math.min(...pts.map((p) => p[0])) + Math.max(...pts.map((p) => p[0]))) / 2;
+          const offsetL = centre(pl) - about, offsetR = -centre(pr) - -about;
+          assert.ok(Math.abs(offsetR - offsetL) < 1e-2,
+            `${kind}.R ${swapSides(name)}: light ${k}.${j} lies ${offsetR.toFixed(2)} pt from its feature's middle, the .L light ${offsetL.toFixed(2)} pt`);
+        });
+      });
+      assert.ok(moved > 0, `${kind}.R ${swapSides(name)}: no light typed by hand is placed again across its feature: a plain mirror's light, away from the top-left light`);
+    }
+  }
+});
+
+test("no paint or line in side('R') or threeQuarter('R') falls back to the default light: the facing's own mirror of LIGHT is the only read of it", () => {
+  // Instrumented: every read of LIGHT's two numbers is recorded with its caller. In .L, LIGHT is the facing's light and
+  // paint.ts and lines.ts read it; in .R the facing reads it once to mirror it, and anything else reading it has
+  // fallen back to the default light, the plain mirror's.
+  const own = [LIGHT[0], LIGHT[1]] as const;
+  const reads: string[] = [];
+  for (const i of [0, 1] as const) {
+    Object.defineProperty(LIGHT, i, { configurable: true, enumerable: true, get: () => (reads.push(new Error().stack!.split("\n").slice(2, 5).join(" <- ")), own[i]) });
+  }
+  try {
+    for (const kind of KINDS) {
+      reads.length = 0;
+      VIEWS[kind]("L");
+      assert.ok(reads.some((r) => /draw\/paint\.ts/.test(r)) && reads.some((r) => /parts\/lines\.ts/.test(r)), `${kind}.L: the instrument sees no read from paint.ts and lines.ts`);
+      reads.length = 0;
+      VIEWS[kind]("R");
+      const fallbacks = reads.filter((r) => !/^\s*at facing \(.*views\/facing\.ts:/.test(r));
+      assert.ok(reads.length > fallbacks.length, `${kind}.R: the facing never read LIGHT`);
+      assert.deepEqual([...new Set(fallbacks)], [], `${kind}.R falls back to the default light`);
+    }
+  } finally {
+    for (const i of [0, 1] as const) Object.defineProperty(LIGHT, i, { configurable: true, enumerable: true, writable: true, value: own[i] });
+  }
+  assert.deepEqual([LIGHT[0], LIGHT[1]], own);
 });
 
 test("a light typed by hand is reflected across its feature's middle, arcs included", () => {
