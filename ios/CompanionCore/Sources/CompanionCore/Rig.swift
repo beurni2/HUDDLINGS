@@ -179,15 +179,23 @@ public struct DrawItem: Equatable, Sendable {
     public var rows: Int
     /// The index in the draw list of the part this one is clipped to.
     public var clipTo: Int?
+    /// The part's alpha, 0 to 1: it multiplies the drawn colour, never a mask's cut (README, Rendering).
+    public var alpha: Double = 1
 }
 
 /// Sub-rows per control row when a bending part's grid is expanded (README, Bending parts).
 public let warpSubdivisions = 4
 
-/// The region a part draws for a view and a state, or nil when the part is not drawn in that view (README, Rig: parts).
+/// The region a part draws for a view and a state, or nil when it draws nothing (README,
+/// Rig: parts): of "view:state" (the default state when no clip gives one), "view" and
+/// "view:defaultState", the first key present decides, and a null draws nothing.
 public func regionFor(_ part: Part, _ view: String, _ state: String?) -> String? {
-    if let state, let region = part.regions["\(view):\(state)"] { return region }
-    return part.regions[view] ?? part.regions["\(view):\(part.defaultState ?? "open")"]
+    let fallback = part.defaultState ?? "open"
+    for key in ["\(view):\(state ?? fallback)", view, "\(view):\(fallback)"] {
+        // A key present holds String?: nil is the file's null.
+        if let region = part.regions[key] { return region }
+    }
+    return nil
 }
 
 /// The parts in drawing order for the current views and draw-order variant: the head's
@@ -208,9 +216,11 @@ public struct FrameState: Sendable {
     public var variant: String?
     /// The channels of the fake turn's bone (yaw, pitch), when the rig has one.
     public var turn: Channels?
+    /// Each keyed part's alpha; a part left out draws at 1.
+    public var alpha: [String: Double]
 
-    public init(views: Views, states: [String: String] = [:], variant: String? = nil, turn: Channels? = nil) {
-        self.views = views; self.states = states; self.variant = variant; self.turn = turn
+    public init(views: Views, states: [String: String] = [:], variant: String? = nil, turn: Channels? = nil, alpha: [String: Double] = [:]) {
+        self.views = views; self.states = states; self.variant = variant; self.turn = turn; self.alpha = alpha
     }
 }
 
@@ -274,7 +284,7 @@ public func drawList(_ c: CompiledRig, _ pose: Pose, _ atlas: AtlasSet, _ frame:
         let v0 = region.y / page.height
         let u1 = (region.x + region.w) / page.width
         let v1 = (region.y + region.h) / page.height
-        var item = DrawItem(part: name, region: regionName, page: region.page, positions: [], uvs: [], columns: 1, rows: 1)
+        var item = DrawItem(part: name, region: regionName, page: region.page, positions: [], uvs: [], columns: 1, rows: 1, alpha: frame.alpha[name] ?? 1)
         if let warp = part.warp {
             warpMesh(c, pose, warp, frame.views, left, top, width, height, &item)
             for r in 0...item.rows {

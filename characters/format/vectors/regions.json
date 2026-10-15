@@ -1,0 +1,627 @@
+{
+ "parts": [
+  {
+   "name": "eye",
+   "bone": "head",
+   "group": "head",
+   "defaultState": "open",
+   "regions": {
+    "front:open": "eye/open",
+    "front:closed": null,
+    "front:wink": "eye/wink",
+    "side.R:open": "eye/side",
+    "side.R:wide": "eye/wide",
+    "side.R": null
+   }
+  },
+  {
+   "name": "mouth",
+   "bone": "head",
+   "group": "head",
+   "regions": {
+    "front": "mouth/front",
+    "front:open": "mouth/open",
+    "front:yawn": null
+   }
+  },
+  {
+   "name": "lid",
+   "bone": "head",
+   "group": "head",
+   "defaultState": "closed",
+   "regions": {
+    "front:closed": "lid/closed",
+    "front:open": null,
+    "side.R": "lid/side"
+   }
+  },
+  {
+   "name": "blush",
+   "bone": "head",
+   "group": "head",
+   "regions": {
+    "front": "blush/front",
+    "side.R": null,
+    "side.R:shy": "blush/side"
+   }
+  }
+ ],
+ "cases": [
+  {
+   "part": "eye",
+   "view": "front",
+   "state": null,
+   "region": "eye/open"
+  },
+  {
+   "part": "eye",
+   "view": "front",
+   "state": "open",
+   "region": "eye/open"
+  },
+  {
+   "part": "eye",
+   "view": "front",
+   "state": "closed",
+   "region": null
+  },
+  {
+   "part": "eye",
+   "view": "front",
+   "state": "wink",
+   "region": "eye/wink"
+  },
+  {
+   "part": "eye",
+   "view": "front",
+   "state": "wide",
+   "region": "eye/open"
+  },
+  {
+   "part": "eye",
+   "view": "front",
+   "state": "yawn",
+   "region": "eye/open"
+  },
+  {
+   "part": "eye",
+   "view": "front",
+   "state": "shy",
+   "region": "eye/open"
+  },
+  {
+   "part": "eye",
+   "view": "front",
+   "state": "happy",
+   "region": "eye/open"
+  },
+  {
+   "part": "eye",
+   "view": "side.R",
+   "state": null,
+   "region": "eye/side"
+  },
+  {
+   "part": "eye",
+   "view": "side.R",
+   "state": "open",
+   "region": "eye/side"
+  },
+  {
+   "part": "eye",
+   "view": "side.R",
+   "state": "closed",
+   "region": null
+  },
+  {
+   "part": "eye",
+   "view": "side.R",
+   "state": "wink",
+   "region": null
+  },
+  {
+   "part": "eye",
+   "view": "side.R",
+   "state": "wide",
+   "region": "eye/wide"
+  },
+  {
+   "part": "eye",
+   "view": "side.R",
+   "state": "yawn",
+   "region": null
+  },
+  {
+   "part": "eye",
+   "view": "side.R",
+   "state": "shy",
+   "region": null
+  },
+  {
+   "part": "eye",
+   "view": "side.R",
+   "state": "happy",
+   "region": null
+  },
+  {
+   "part": "eye",
+   "view": "back",
+   "state": null,
+   "region": null
+  },
+  {
+   "part": "eye",
+   "view": "back",
+   "state": "open",
+   "region": null
+  },
+  {
+   "part": "eye",
+   "view": "back",
+   "state": "closed",
+   "region": null
+  },
+  {
+   "part": "eye",
+   "view": "back",
+   "state": "wink",
+   "region": null
+  },
+  {
+   "part": "eye",
+   "view": "back",
+   "state": "wide",
+   "region": null
+  },
+  {
+   "part": "eye",
+   "view": "back",
+   "state": "yawn",
+   "region": null
+  },
+  {
+   "part": "eye",
+   "view": "back",
+   "state": "shy",
+   "region": null
+  },
+  {
+   "part": "eye",
+   "view": "back",
+   "state": "happy",
+   "region": null
+  },
+  {
+   "part": "mouth",
+   "view": "front",
+   "state": null,
+   "region": "mouth/open"
+  },
+  {
+   "part": "mouth",
+   "view": "front",
+   "state": "open",
+   "region": "mouth/open"
+  },
+  {
+   "part": "mouth",
+   "view": "front",
+   "state": "closed",
+   "region": "mouth/front"
+  },
+  {
+   "part": "mouth",
+   "view": "front",
+   "state": "wink",
+   "region": "mouth/front"
+  },
+  {
+   "part": "mouth",
+   "view": "front",
+   "state": "wide",
+   "region": "mouth/front"
+  },
+  {
+   "part": "mouth",
+   "view": "front",
+   "state": "yawn",
+   "region": null
+  },
+  {
+   "part": "mouth",
+   "view": "front",
+   "state": "shy",
+   "region": "mouth/front"
+  },
+  {
+   "part": "mouth",
+   "view": "front",
+   "state": "happy",
+   "region": "mouth/front"
+  },
+  {
+   "part": "mouth",
+   "view": "side.R",
+   "state": null,
+   "region": null
+  },
+  {
+   "part": "mouth",
+   "view": "side.R",
+   "state": "open",
+   "region": null
+  },
+  {
+   "part": "mouth",
+   "view": "side.R",
+   "state": "closed",
+   "region": null
+  },
+  {
+   "part": "mouth",
+   "view": "side.R",
+   "state": "wink",
+   "region": null
+  },
+  {
+   "part": "mouth",
+   "view": "side.R",
+   "state": "wide",
+   "region": null
+  },
+  {
+   "part": "mouth",
+   "view": "side.R",
+   "state": "yawn",
+   "region": null
+  },
+  {
+   "part": "mouth",
+   "view": "side.R",
+   "state": "shy",
+   "region": null
+  },
+  {
+   "part": "mouth",
+   "view": "side.R",
+   "state": "happy",
+   "region": null
+  },
+  {
+   "part": "mouth",
+   "view": "back",
+   "state": null,
+   "region": null
+  },
+  {
+   "part": "mouth",
+   "view": "back",
+   "state": "open",
+   "region": null
+  },
+  {
+   "part": "mouth",
+   "view": "back",
+   "state": "closed",
+   "region": null
+  },
+  {
+   "part": "mouth",
+   "view": "back",
+   "state": "wink",
+   "region": null
+  },
+  {
+   "part": "mouth",
+   "view": "back",
+   "state": "wide",
+   "region": null
+  },
+  {
+   "part": "mouth",
+   "view": "back",
+   "state": "yawn",
+   "region": null
+  },
+  {
+   "part": "mouth",
+   "view": "back",
+   "state": "shy",
+   "region": null
+  },
+  {
+   "part": "mouth",
+   "view": "back",
+   "state": "happy",
+   "region": null
+  },
+  {
+   "part": "lid",
+   "view": "front",
+   "state": null,
+   "region": "lid/closed"
+  },
+  {
+   "part": "lid",
+   "view": "front",
+   "state": "open",
+   "region": null
+  },
+  {
+   "part": "lid",
+   "view": "front",
+   "state": "closed",
+   "region": "lid/closed"
+  },
+  {
+   "part": "lid",
+   "view": "front",
+   "state": "wink",
+   "region": "lid/closed"
+  },
+  {
+   "part": "lid",
+   "view": "front",
+   "state": "wide",
+   "region": "lid/closed"
+  },
+  {
+   "part": "lid",
+   "view": "front",
+   "state": "yawn",
+   "region": "lid/closed"
+  },
+  {
+   "part": "lid",
+   "view": "front",
+   "state": "shy",
+   "region": "lid/closed"
+  },
+  {
+   "part": "lid",
+   "view": "front",
+   "state": "happy",
+   "region": "lid/closed"
+  },
+  {
+   "part": "lid",
+   "view": "side.R",
+   "state": null,
+   "region": "lid/side"
+  },
+  {
+   "part": "lid",
+   "view": "side.R",
+   "state": "open",
+   "region": "lid/side"
+  },
+  {
+   "part": "lid",
+   "view": "side.R",
+   "state": "closed",
+   "region": "lid/side"
+  },
+  {
+   "part": "lid",
+   "view": "side.R",
+   "state": "wink",
+   "region": "lid/side"
+  },
+  {
+   "part": "lid",
+   "view": "side.R",
+   "state": "wide",
+   "region": "lid/side"
+  },
+  {
+   "part": "lid",
+   "view": "side.R",
+   "state": "yawn",
+   "region": "lid/side"
+  },
+  {
+   "part": "lid",
+   "view": "side.R",
+   "state": "shy",
+   "region": "lid/side"
+  },
+  {
+   "part": "lid",
+   "view": "side.R",
+   "state": "happy",
+   "region": "lid/side"
+  },
+  {
+   "part": "lid",
+   "view": "back",
+   "state": null,
+   "region": null
+  },
+  {
+   "part": "lid",
+   "view": "back",
+   "state": "open",
+   "region": null
+  },
+  {
+   "part": "lid",
+   "view": "back",
+   "state": "closed",
+   "region": null
+  },
+  {
+   "part": "lid",
+   "view": "back",
+   "state": "wink",
+   "region": null
+  },
+  {
+   "part": "lid",
+   "view": "back",
+   "state": "wide",
+   "region": null
+  },
+  {
+   "part": "lid",
+   "view": "back",
+   "state": "yawn",
+   "region": null
+  },
+  {
+   "part": "lid",
+   "view": "back",
+   "state": "shy",
+   "region": null
+  },
+  {
+   "part": "lid",
+   "view": "back",
+   "state": "happy",
+   "region": null
+  },
+  {
+   "part": "blush",
+   "view": "front",
+   "state": null,
+   "region": "blush/front"
+  },
+  {
+   "part": "blush",
+   "view": "front",
+   "state": "open",
+   "region": "blush/front"
+  },
+  {
+   "part": "blush",
+   "view": "front",
+   "state": "closed",
+   "region": "blush/front"
+  },
+  {
+   "part": "blush",
+   "view": "front",
+   "state": "wink",
+   "region": "blush/front"
+  },
+  {
+   "part": "blush",
+   "view": "front",
+   "state": "wide",
+   "region": "blush/front"
+  },
+  {
+   "part": "blush",
+   "view": "front",
+   "state": "yawn",
+   "region": "blush/front"
+  },
+  {
+   "part": "blush",
+   "view": "front",
+   "state": "shy",
+   "region": "blush/front"
+  },
+  {
+   "part": "blush",
+   "view": "front",
+   "state": "happy",
+   "region": "blush/front"
+  },
+  {
+   "part": "blush",
+   "view": "side.R",
+   "state": null,
+   "region": null
+  },
+  {
+   "part": "blush",
+   "view": "side.R",
+   "state": "open",
+   "region": null
+  },
+  {
+   "part": "blush",
+   "view": "side.R",
+   "state": "closed",
+   "region": null
+  },
+  {
+   "part": "blush",
+   "view": "side.R",
+   "state": "wink",
+   "region": null
+  },
+  {
+   "part": "blush",
+   "view": "side.R",
+   "state": "wide",
+   "region": null
+  },
+  {
+   "part": "blush",
+   "view": "side.R",
+   "state": "yawn",
+   "region": null
+  },
+  {
+   "part": "blush",
+   "view": "side.R",
+   "state": "shy",
+   "region": "blush/side"
+  },
+  {
+   "part": "blush",
+   "view": "side.R",
+   "state": "happy",
+   "region": null
+  },
+  {
+   "part": "blush",
+   "view": "back",
+   "state": null,
+   "region": null
+  },
+  {
+   "part": "blush",
+   "view": "back",
+   "state": "open",
+   "region": null
+  },
+  {
+   "part": "blush",
+   "view": "back",
+   "state": "closed",
+   "region": null
+  },
+  {
+   "part": "blush",
+   "view": "back",
+   "state": "wink",
+   "region": null
+  },
+  {
+   "part": "blush",
+   "view": "back",
+   "state": "wide",
+   "region": null
+  },
+  {
+   "part": "blush",
+   "view": "back",
+   "state": "yawn",
+   "region": null
+  },
+  {
+   "part": "blush",
+   "view": "back",
+   "state": "shy",
+   "region": null
+  },
+  {
+   "part": "blush",
+   "view": "back",
+   "state": "happy",
+   "region": null
+  }
+ ]
+}

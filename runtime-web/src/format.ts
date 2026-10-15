@@ -49,8 +49,8 @@ export interface Part {
   name: string;
   bone: string;
   group: "body" | "head";
-  /** Region name per view, or per view and state ("front" or "front:closed"). */
-  regions: Record<string, string>;
+  /** Region name per view, or per view and state ("front" or "front:closed"); null draws nothing there (regionFor). */
+  regions: Record<string, string | null>;
   clipTo?: string;
   warp?: Warp;
   /** The state drawn when no clip sets one (for parts whose regions are all "view:state"). */
@@ -115,6 +115,8 @@ export interface Clip {
   blendInMs?: number;
   interruptAt?: number[];
   tracks?: Record<string, Partial<Record<Channel, Key[]>>>;
+  /** Each part's opacity over time, 0 to 1; 1, its rest value, where no clip keys it (README, Clips: alpha). */
+  alpha?: Record<string, Key[]>;
   states?: Record<string, DiscreteKey[]>;
   views?: Partial<Record<"body" | "head", DiscreteKey[]>>;
   /** The body's draw-order variant over time; null is the view's own order. */
@@ -152,6 +154,40 @@ function bodyOrders(rig: Rig): [string, string[]][] {
   return [...Object.entries(rig.drawOrder).filter(([name]) => !name.startsWith("head.")), ...Object.entries(rig.drawOrderVariants ?? {})];
 }
 
+/**
+ * The checks every keyed track gets, a bone's channel or a part's alpha: keys in order and
+ * inside the clip, CSS's rule for a Bézier's x1 and x2, each key's value (valueProblem), and,
+ * given a limit, no overshoot past it between keys.
+ */
+function keyProblems(clip: Clip, what: string, keys: Key[], limit: readonly [number, number] | undefined, valueProblem: (v: number) => string | undefined): string[] {
+  const problems: string[] = [];
+  let last = -Infinity;
+  for (const key of keys) {
+    if (key[0] < last) problems.push(`clip ${clip.name}: ${what} keys out of order at ${key[0]} ms`);
+    if (key[0] < 0 || key[0] > clip.lengthMs) problems.push(`clip ${clip.name}: ${what} key at ${key[0]} ms is outside the clip`);
+    last = key[0];
+    const easing = key[2];
+    if (Array.isArray(easing) && easing[0] === "bezier" && !(easing[1] >= 0 && easing[1] <= 1 && easing[3] >= 0 && easing[3] <= 1))
+      problems.push(`clip ${clip.name}: ${what} key at ${key[0]} ms has a bezier with x1 or x2 outside 0 to 1`);
+    const problem = valueProblem(key[1]);
+    if (problem) problems.push(`clip ${clip.name}: ${problem}`);
+  }
+  // Between keys an easing can overshoot (easeOutBack, a bezier): sample each segment finely.
+  if (limit) {
+    for (let k = 1; k < keys.length; k++) {
+      const [t0, t1] = [keys[k - 1]![0], keys[k]![0]];
+      for (let i = 1; i < 256 && t1 > t0; i++) {
+        const v = sampleKeys(keys, t0 + ((t1 - t0) * i) / 256);
+        if (v < limit[0] - 1e-9 || v > limit[1] + 1e-9) {
+          problems.push(`clip ${clip.name}: ${what} overshoots to ${v.toFixed(2)} between ${t0} and ${t1} ms, past its limit [${limit[0]}, ${limit[1]}]`);
+          break;
+        }
+      }
+    }
+  }
+  return problems;
+}
+
 /** Every problem with a rig and its clips, as readable lines. An empty list means the package is sound. */
 export function validate(rig: Rig, clips: Clip[], atlas?: AtlasSet): string[] {
   const problems: string[] = [];
@@ -182,11 +218,15 @@ export function validate(rig: Rig, clips: Clip[], atlas?: AtlasSet): string[] {
     if (parts.has(part.name)) problems.push(`part ${part.name}: listed twice`);
     parts.set(part.name, part);
     if (!bones.has(part.bone)) problems.push(`part ${part.name}: unknown bone ${part.bone}`);
+    // Per view: whether any of its keys names a region. A null needs nothing in the atlas.
+    const drawsIn = new Map<string, boolean>();
     for (const [view, region] of Object.entries(part.regions)) {
       const viewName = view.split(":")[0]!;
       if (!rig.views.includes(viewName)) problems.push(`part ${part.name}: unknown view ${viewName}`);
-      if (atlas && !atlas.regions[region]) problems.push(`part ${part.name}: region ${region} is not in the atlas`);
+      drawsIn.set(viewName, (drawsIn.get(viewName) ?? false) || region !== null);
+      if (region !== null && atlas && !atlas.regions[region]) problems.push(`part ${part.name}: region ${region} is not in the atlas`);
     }
+    for (const [view, draws] of drawsIn) if (!draws) problems.push(`part ${part.name}: every region in view ${view} is null; leave the view out instead`);
     if (part.warp) {
       const chain = part.warp.chain;
       for (const b of chain) if (!bones.has(b)) problems.push(`part ${part.name}: warp chain bone ${b} is unknown`);
@@ -274,37 +314,20 @@ export function validate(rig: Rig, clips: Clip[], atlas?: AtlasSet): string[] {
       for (const [channel, keys] of Object.entries(channels) as [Channel, Key[]][]) {
         if (!CHANNELS.includes(channel)) problems.push(`clip ${clip.name}: ${boneName} has unknown channel ${channel}`);
         if ((channel === "yaw" || channel === "pitch") && boneName !== ft?.bone) problems.push(`clip ${clip.name}: ${boneName}.${channel}: only the fake turn's bone has ${channel}`);
-        let last = -Infinity;
-        for (const key of keys) {
-          if (key[0] < last) problems.push(`clip ${clip.name}: ${boneName}.${channel} keys out of order at ${key[0]} ms`);
-          if (key[0] < 0 || key[0] > clip.lengthMs) problems.push(`clip ${clip.name}: ${boneName}.${channel} key at ${key[0]} ms is outside the clip`);
-          last = key[0];
-          const easing = key[2];
-          if (Array.isArray(easing) && easing[0] === "bezier" && !(easing[1] >= 0 && easing[1] <= 1 && easing[3] >= 0 && easing[3] <= 1))
-            problems.push(`clip ${clip.name}: ${boneName}.${channel} key at ${key[0]} ms has a bezier with x1 or x2 outside 0 to 1`);
-          const v = key[1];
-          if ((channel === "rot" || channel === "yaw" || channel === "pitch") && !bone[channel])
-            problems.push(`clip ${clip.name}: ${boneName} has no ${channel} limit, so it cannot be keyed`);
-          else if ((channel === "rot" || channel === "yaw" || channel === "pitch") && (v < bone[channel]![0] || v > bone[channel]![1]))
-            problems.push(`clip ${clip.name}: ${boneName}.${channel} ${v} leaves its limit [${bone[channel]![0]}, ${bone[channel]![1]}]`);
-          if ((channel === "squash" || channel === "scale") && (!bone[channel] || v < bone[channel][0] || v > bone[channel][1]))
-            problems.push(`clip ${clip.name}: ${boneName}.${channel} ${v} is not allowed (scale channels, section 5b)`);
-        }
-        // Between keys an easing can overshoot (easeOutBack, a bezier): sample each segment finely.
         const limit = channel === "x" || channel === "y" ? undefined : bone[channel];
-        if (limit) {
-          for (let k = 1; k < keys.length; k++) {
-            const [t0, t1] = [keys[k - 1]![0], keys[k]![0]];
-            for (let i = 1; i < 256 && t1 > t0; i++) {
-              const v = sampleKeys(keys, t0 + ((t1 - t0) * i) / 256);
-              if (v < limit[0] - 1e-9 || v > limit[1] + 1e-9) {
-                problems.push(`clip ${clip.name}: ${boneName}.${channel} overshoots to ${v.toFixed(2)} between ${t0} and ${t1} ms, past its limit [${limit[0]}, ${limit[1]}]`);
-                break;
-              }
-            }
-          }
-        }
+        problems.push(...keyProblems(clip, `${boneName}.${channel}`, keys, limit, (v) => {
+          if ((channel === "rot" || channel === "yaw" || channel === "pitch") && !bone[channel]) return `${boneName} has no ${channel} limit, so it cannot be keyed`;
+          if ((channel === "rot" || channel === "yaw" || channel === "pitch") && (v < bone[channel]![0] || v > bone[channel]![1]))
+            return `${boneName}.${channel} ${v} leaves its limit [${bone[channel]![0]}, ${bone[channel]![1]}]`;
+          if ((channel === "squash" || channel === "scale") && (!bone[channel] || v < bone[channel][0] || v > bone[channel][1]))
+            return `${boneName}.${channel} ${v} is not allowed (scale channels, section 5b)`;
+        }));
       }
+    }
+    // A part's alpha keys like a channel, inside 0 to 1 (README, Clips: alpha).
+    for (const [partName, keys] of Object.entries(clip.alpha ?? {})) {
+      if (!parts.has(partName)) problems.push(`clip ${clip.name}: alpha of unknown part ${partName}`);
+      problems.push(...keyProblems(clip, `alpha of ${partName}`, keys, [0, 1], (v) => (v >= 0 && v <= 1 ? undefined : `alpha of ${partName} ${v} leaves 0 to 1`)));
     }
     for (const event of clip.events ?? []) {
       if (event.at < 0 || event.at > clip.lengthMs) problems.push(`clip ${clip.name}: event ${event.type} at ${event.at} ms is outside the clip`);

@@ -459,3 +459,38 @@ test("two keys at the same time are a jump, and a first key's step easing is not
   q.play("plain", 0);
   for (let i = 1; i <= 120; i++) close(p.advanceTo(i / 120).pose.angle[c.index.get("tag")!]!, q.advanceTo(i / 120).pose.angle[c.index.get("tag")!]!, 1e-12, `frame ${i}`);
 });
+
+test("a part's alpha keys, eases and blends as a channel does, from and to its rest value 1", () => {
+  const fades: Clip[] = [
+    { name: "blush", lengthMs: 1000, alpha: { eye: [[0, 0.2], [400, 1, "linear"]], tail: [[0, 0.5]] } },
+    { name: "plain", lengthMs: 1000, tracks: { body: { rot: [[0, 5]] } } },
+    { name: "dim", lengthMs: 1000, alpha: { tail: [[0, 0]] } },
+  ];
+  assert.deepEqual(validate(rig, fades), []);
+  const p = new Player(c, fades);
+  p.play("blush", 0);
+  const at0 = p.advanceTo(0).state.alpha!;
+  assert.deepEqual(at0, { eye: 0.2, tail: 0.5 });
+  close(p.advanceTo(0.2).state.alpha!.eye!, 0.6, 1e-12, "linear, halfway");
+  // A clip that keys no alpha blends each part back to 1; halfway through the blend the weight is 0.5.
+  p.play("plain", 0.5, 200);
+  const mid = p.advanceTo(0.6).state.alpha!;
+  close(mid.eye!, 1, 1e-12, "the eye was at 1 already");
+  close(mid.tail!, 0.75, 1e-12, "the tail halfway from 0.5 to 1");
+  assert.deepEqual(p.advanceTo(0.7).state.alpha, {}, "after the blend no part is keyed: each draws at 1");
+  // And from 1 to a clip's value.
+  p.play("dim", 1, 200);
+  close(p.advanceTo(1.1).state.alpha!.tail!, 0.5, 1e-12, "halfway from 1 to 0");
+});
+
+test("alpha moves nothing: a clip's alpha keys, jumps included, leave its poses and springs as they are", () => {
+  const dance = clips.find((k) => k.name === "slide")!;
+  const faded: Clip = { ...dance, name: "fadedSlide", alpha: { tail: [[0, 1], [150, 0, "step"], [300, 1, "step"], [500, 0.4, "easeOutBack"]], eye: [[0, 0], [100, 1, "step"]] } };
+  const a = new Player(c, [dance]), b = new Player(c, [faded]);
+  a.play("slide", 0);
+  b.play("fadedSlide", 0);
+  for (let i = 0; i <= 120; i++) {
+    const fa = a.advanceTo(i / 60), fb = b.advanceTo(i / 60);
+    assert.deepEqual(fb.pose, fa.pose, `frame ${i}`);
+  }
+});

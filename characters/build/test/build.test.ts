@@ -16,7 +16,7 @@ const source = await readSource("test");
 const pkg = await buildPackage(source);
 
 test("the test character builds every atlas set with every region its rig uses", () => {
-  const used = new Set(source.rig.parts.flatMap((p) => Object.values(p.regions)));
+  const used = new Set(source.rig.parts.flatMap((p) => Object.values(p.regions).filter((r) => r !== null)));
   assert.deepEqual(pkg.atlas.sets.map((s) => s.name), SETS.map((s) => s.name));
   for (const set of pkg.atlas.sets) {
     assert.deepEqual(new Set(Object.keys(set.regions)), used, `set ${set.name}`);
@@ -89,4 +89,15 @@ test("the build refuses a region nobody draws, a drawing nobody uses, and a brok
   await assert.rejects(buildPackage(extra), /drawing spare: no part uses it/);
   const broken = { ...source, rig: { ...source.rig, drawOrder: { ...source.rig.drawOrder, front: ["ghost"] } } };
   await assert.rejects(buildPackage(broken), /unknown part ghost/);
+});
+
+test("a null region needs no drawing, and the atlas holds only the regions named", async () => {
+  // eye.R's closed state in front draws nothing: its drawing goes, and nothing asks for it.
+  const parts = source.rig.parts.map((p) => (p.name === "eye.R" ? { ...p, regions: { ...p.regions, "front:closed": null } } : p));
+  const built = await buildPackage({ ...source, rig: { ...source.rig, parts }, drawings: source.drawings.filter((d) => d.region !== "eye.R/front:closed") });
+  for (const set of built.atlas.sets) {
+    assert.equal(set.regions["eye.R/front:closed"], undefined, set.name);
+    assert.ok(set.regions["eye.R/front:open"], set.name);
+  }
+  assert.deepEqual(JSON.parse(built.files.get("rig.json")!.toString("utf8")).parts.find((p: { name: string }) => p.name === "eye.R").regions["front:closed"], null);
 });

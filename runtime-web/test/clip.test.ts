@@ -2,7 +2,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { localTime, sampleDiscrete, sampleKeys } from "../src/clip.ts";
-import { validate, type Clip, type Key, type Rig } from "../src/format.ts";
+import { validate, type AtlasSet, type Clip, type Key, type Rig } from "../src/format.ts";
 
 const close = (a: number, b: number, eps = 1e-12) => assert.ok(Math.abs(a - b) <= eps, `${a} vs ${b}`);
 
@@ -178,4 +178,30 @@ test("validation refuses an easing that overshoots a limit between keys", () => 
   expectProblem(validate(rig, [over]), "head.rot overshoots to 18.");
   const fine: Clip = { name: "fine", lengthMs: 500, tracks: { head: { rot: [[0, 0], [400, 16, "easeOutBack"]] } } };
   assert.deepEqual(validate(rig, [fine]), []);
+});
+
+test("validation keeps a part's alpha inside 0 to 1, at its keys and between them, and only on a part", () => {
+  const ok: Clip = { name: "blush", lengthMs: 600, alpha: { "eye.L": [[0, 0.2], [300, 0.8, "easeOutBack"], [600, 0]], body: [[0, 1]] } };
+  assert.deepEqual(validate(rig, [ok]), []);
+  const bad: Clip = {
+    name: "bad", lengthMs: 600,
+    alpha: { "eye.L": [[0, 0], [300, 1.2]], ghost: [[0, 1]], "eye.R": [[0, 0.5], [400, 1, "easeOutBack"]], "head.base": [[700, 0.5], [100, -0.1]] },
+  };
+  const problems = validate(rig, [bad]);
+  for (const expected of ["alpha of eye.L 1.2 leaves 0 to 1", "alpha of unknown part ghost", "alpha of eye.R overshoots to 1.0", "alpha of head.base key at 700 ms is outside the clip",
+    "alpha of head.base keys out of order at 100 ms", "alpha of head.base -0.1 leaves 0 to 1"]) expectProblem(problems, expected);
+  assert.equal(problems.length, 7, problems.join("\n"));
+});
+
+test("validation takes a null region, which needs nothing in the atlas, and names a view whose regions are all null", () => {
+  const parts = rig.parts.map((p) =>
+    p.name === "eye.L" ? { ...p, regions: { ...p.regions, "front:wink": null } } : p.name === "eye.R" ? { ...p, regions: { front: "eye.R/front", "front:closed": null } } : p);
+  const named = parts.flatMap((p) => Object.values(p.regions)).filter((r) => r !== null);
+  const atlas: AtlasSet = {
+    name: "2x", scale: 2, pages: [{ file: "p.png", scale: 2, width: 64, height: 64 }],
+    regions: Object.fromEntries(named.map((r) => [r, { page: 0, x: 0, y: 0, w: 2, h: 2, anchorX: 1, anchorY: 1 }])),
+  };
+  assert.deepEqual(validate({ ...rig, parts }, [], atlas), []);
+  const allNull = parts.map((p) => (p.name === "eye.R" ? { ...p, regions: { "front:closed": null, "front:wink": null } } : p));
+  assert.deepEqual(validate({ ...rig, parts: allNull }, [], atlas), ["part eye.R: every region in view front is null; leave the view out instead"]);
 });

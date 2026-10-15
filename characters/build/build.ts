@@ -109,7 +109,8 @@ export async function buildPackage(source: Source, opts: RasterOptions = {}): Pr
     if (drawn.has(d.region)) problems.push(`drawing ${d.region}: drawn twice`);
     drawn.add(d.region);
   }
-  const used = new Set(rig.parts.flatMap((p) => Object.values(p.regions)));
+  // A null region draws nothing, so it needs no drawing.
+  const used = new Set(rig.parts.flatMap((p) => Object.values(p.regions).filter((r) => r !== null)));
   for (const region of used) if (!drawn.has(region)) problems.push(`region ${region}: the rig uses it but nothing draws it`);
   for (const region of drawn) if (!used.has(region)) problems.push(`drawing ${region}: no part uses it`);
   const names = new Set<string>();
