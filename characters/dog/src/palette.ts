@@ -45,6 +45,8 @@ export const C = {
    * lower ear deepens to about #D89464. */
   earDeep: multiply(marking, furShadeBy),
   earDeeper: multiply(multiply(marking, furShadeBy), furShadeBy),
+  /** The ear's lowest clumps, its deeper shade 8% darker: about #C48253 against the sheet's #C17D50. */
+  earLow: darken(multiply(multiply(marking, furShadeBy), furShadeBy), 0.08),
   /** The lighter line on fur spans. */
   furLine: mix(outline, fur, 0.14),
   /** The faint line round the cheeks' fluff and the topknot, which the sheet barely outlines. */
@@ -55,6 +57,8 @@ export const C = {
   /** The line the front turnaround draws where the head's side meets the ear: the ear's tan in its own deep shade
    * (the tan multiplied by itself, 12% darker), #A35C32 against the sheet's #9E5C2C. */
   earLine: darken(multiply(marking, marking), 0.12),
+  /** The ears' outline: their deep tan a third of the way back to the tan, #B5734A against the sheet's #B57549. */
+  earEdge: mix(darken(multiply(marking, marking), 0.12), marking, 0.33),
   collarLine: darken(collar, 0.25),
   /** The tag's edge: the outline's brown warmed toward the gold, as the sheet draws it, not a darker olive gold. */
   tagLine: mix(outline, tag, 0.35),
