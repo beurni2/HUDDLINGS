@@ -16,6 +16,7 @@ import { litEdge, litMarking, litPart, withDefaults, type LitSpan } from "../par
 import { curlShapes, topknot, type Curl } from "../parts/topknot.ts";
 import { earFur } from "../parts/ear.ts";
 import { toes } from "../parts/paw.ts";
+import { tagPaint } from "../parts/tag.ts";
 import type { Drawn } from "./front.ts";
 
 const INNER = model.outline.innerPt;
@@ -95,8 +96,9 @@ const mirrored = (half: Node[], bottom: Node, dx: number): Node[] =>
 /** The heart hangs a little turned on its ring, its point 1.5 pt toward the far side, as the sheet draws it. */
 const TAG_TILT = 6, TAG_HANG: P = [TAG_X, -51];
 const heart = smooth(rotate(mirrored(heartHalf, [0, -36.2], TAG_X), TAG_TILT, TAG_HANG), { corners: [0], typed: heartHalf.length + 1 });
-const innerHeart = smooth(rotate(mirrored([[0, -46.6], [-1.6, -48], [-3.5, -48.1], [-4.8, -46.9], [-5, -45], [-4.3, -43.1], [-2.7, -41.5]], [0, -40.3], TAG_X),
-  TAG_TILT, TAG_HANG), { corners: [0], typed: 8 });
+/** The two embossed hearts, the tag's own heart at 70% and 44% about its middle (x on the ring's line, y -44). */
+const embossed = [0.7, 0.44].map((k) => smooth(rotate(mirrored(heartHalf.map(([x, y]): Node => [x * k, -44 + (y + 44) * k]), [0, -44 + (-36.2 + 44) * k], TAG_X),
+  TAG_TILT, TAG_HANG), { corners: [0], typed: heartHalf.length + 1 }));
 
 // The ears. The far ear (the dog's right) hangs out past the far cheek from high on the head's far side, its
 // upper edge one long round convex arc from the root down to its widest (the sheet's runs x -86 at y -141, -94 at
@@ -411,26 +413,17 @@ function blush(): Piece {
   return soft(d, [cx - rx - 0.5, cy - ry - 0.8, 2 * rx + 1, 2 * ry + 1.6], C.blush, 2.2, Math.round(model.blush.restingLevel * 1.28 * 100) / 100);
 }
 
-/** The tag and its ring (front.ts's recipe): flat matte gold, one soft light high on its left lobe, the smaller heart raised in it. */
+/** The tag and its small round ring, by the dog's one tag recipe (parts/tag.ts). */
 function tagPiece(): Piece {
   // The ring: a small rounded loop in the collar's light blue, leaning with the heart.
   const ringLine: DrawnLine = { kind: "inner", width: 0.6, where: "tag ring", drawn: [0.6, 0.6] };
   const [rx, ry] = [TAG_X - 1.6, LM["tag.ring"]![1] - 0.2];
-  const ring = piece(`<rect x="${fmt(rx)}" y="${fmt(ry)}" width="3.2" height="6.6" rx="1.6" transform="rotate(${TAG_TILT + 4} ${fmt(TAG_X)} ${fmt(ry + 3.3)})" ` +
-    `fill="${C.collarHighlight}" stroke="${C.collarRim}" stroke-width="${ringLine.width}"/>`, [rx - 2, ry - 1, 7.2, 8.6], { shapes: [], lines: [ringLine] });
-  const emboss = sample(innerHeart.segs, 10);
-  emboss.push(emboss[0]!);
-  const lit = uid("blur"), raised = sample(innerHeart.segs, 10).filter(([x, y]) => x < TAG_X && y < -44.2);
-  return join(ring, part("tag", heart, {
-    fill: C.tag,
-    // A soft shade round its lower right; the smaller heart raised in it, lit along its upper left and only faintly
-    // edged, as the sheet paints it, not engraved.
-    shade: { multiply: C.tagShadeBy, rim: { inset: 1, toLight: 1.8 }, blur: 1.2 },
-    under: `<defs>${blur(lit, [TAG_X - 8, -51, 10, 10], 0.35)}</defs><path d="${strokeOf(raised, 1, { taper: 1.6, tip: 0.2 }).d}" fill="${C.tagShine}" opacity="0.8" filter="url(#${lit})"/>`,
-    highlight: { d: `M${fmt(TAG_X - 6.6)} -47.4 a2.6 1.8 -40 1 0 5.2 0 a2.6 1.8 -40 1 0 -5.2 0`, colour: C.tagShine, opacity: 0.5, blur: 1.4 },
-    inner: [{ pts: emboss, width: 0.7, colour: C.tagLine, opacity: 0.3 }],
-    outline: { colour: C.tagLine, width: 1.2, taper: 2, blur: 0.25 },
-  }));
+  // The ring: a small open loop in the collar's blue hanging from the band to the heart's cleft, as the sheet draws it.
+  const ring = piece(`<g transform="rotate(${TAG_TILT} ${fmt(TAG_X)} ${fmt(ry + 3.6)})"><ellipse cx="${fmt(TAG_X)}" cy="${fmt(ry + 3.6)}" rx="1.8" ry="3.2" fill="${C.collar}" stroke="${C.collarRim}" stroke-width="${ringLine.width}"/>` +
+    `<ellipse cx="${fmt(TAG_X)}" cy="${fmt(ry + 3.6)}" rx="0.7" ry="1.9" fill="${C.collarLine}"/></g>`, [rx - 2, ry - 1, 7.2, 8.6], { shapes: [], lines: [ringLine] });
+  // The dog's one tag recipe (parts/tag.ts): matte gold warming toward orange along its lower right, one small soft
+  // light on its upper left lobe, no glossy streak, and two smaller hearts embossed as concentric warm rings.
+  return join(ring, part("tag", heart, tagPaint({ emboss: embossed, light: `M${fmt(TAG_X - 6.4)} -47.2 a2.2 1.5 -40 1 0 4.4 0 a2.2 1.5 -40 1 0 -4.4 0`, rim: 1.25 })));
 }
 
 /**

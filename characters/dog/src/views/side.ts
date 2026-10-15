@@ -20,6 +20,8 @@ import { litEdge, litMarking, litPart, type LitSpan } from "../parts/lines.ts";
 import { curlShapes, topknot, type Curl } from "../parts/topknot.ts";
 import { earFur } from "../parts/ear.ts";
 import { toes } from "../parts/paw.ts";
+import { tagPaint } from "../parts/tag.ts";
+import { deepen, strands } from "../parts/marking.ts";
 import type { Drawn } from "./front.ts";
 
 const INNER = model.outline.innerPt;
@@ -111,26 +113,26 @@ const tail = furSpan(furEdge(furEdge(smooth([[10, -22], [17.4, -35.2], [19.8, -3
   { len: 1.5, w: 1, lean: 0.25 }], 0.42, (_tip, _root, notches) => tailLobes.push(notches)), [17.2, -50.4], [38.8, -17.2]);
 
 // The collar: a band round the neck, almost as thick at its back as at its
-// front (10 pt under the chin, where the jaw's fur lies over its top, about 8
-// pt of it showing, and 7 pt by the ear), its front end a round turn
+// front (about 11 pt under the chin, where the jaw's fur lies over its top,
+// about 9 pt of it showing, as the sheet's does, and 8 pt by the ear), its front end a round turn
 // under the jaw (x -62.2) where the band wraps round the throat, its top edge
 // rising under the jaw to the ear's foot, its bottom edge rising steeply behind
 // the shoulder so its back end goes up square under the ear's foot (hidden
 // from x -18), as the sheet draws it.
-const collar = smooth([[-62.2, -56], [-61.2, -59.2], [-55.9, -60.5], [-48.8, -61.7], [-41.7, -62.6], [-34.7, -63.6], [-27.6, -64.7], [-22, -65.5], [-17, -66.2],
-  [-14.6, -65.6], [-14.8, -63.6], [-17.6, -62.8], [-20.6, -60.8], [-24, -58.7], [-27.6, -57.3], [-34.7, -54.8], [-41.7, -52.7], [-48.8, -51.3], [-55.9, -51.6],
-  [-60.2, -52.6]]);
+const collar = smooth([[-62.6, -55.4], [-61.4, -59.2], [-55.9, -60.5], [-48.8, -61.7], [-41.7, -62.6], [-34.7, -63.6], [-27.6, -64.7], [-22, -65.5], [-17, -66.2],
+  [-14.6, -65.6], [-14.8, -63.6], [-17.6, -62.4], [-20.6, -59.8], [-24, -57.4], [-27.6, -55.8], [-34.7, -53.2], [-41.7, -51.2], [-48.8, -50], [-55.9, -50.2],
+  [-60.6, -51.4]]);
 
 // The tag, a little turned: a round, coin-like heart (12.4 pt wide, 14.4 pt
 // tall; the front's is 17.9 wide), the dip between its lobes shallow, its foot
 // blunt and round, its left side, where the coin's edge shows, the fuller,
 // hanging right under the collar's front from a small ring, as the sheet draws
 // it.
-const heart = smooth([[-60.4, -51.2], [-62.4, -52], [-64.6, -51.4], [-66.2, -49.4], [-66.8, -46.4], [-66.4, -43], [-65, -40.2], [-62.8, -38.2], [-60.4, -37.6],
-  [-58, -38.2], [-56, -40], [-54.8, -42.8], [-54.4, -46], [-54.9, -49.2], [-56.4, -51.2], [-58.4, -52]], { corners: [0] });
-// The embossed heart in its middle, a little left of the coin's middle, as a turned coin shows it.
-const innerHeart = smooth([[-61.7, -48.2], [-62.9, -49.2], [-64.3, -48.6], [-64.8, -46.6], [-64.1, -44.2], [-61.9, -41.8], [-59.8, -43.8], [-58.9, -46.2], [-59.2, -48.4],
-  [-60.4, -49.2]], { corners: [0, 5] });
+const HEART_NODES: P[] = [[-60.4, -50.4], [-62.6, -51.2], [-64.8, -50.6], [-66.4, -48.6], [-66.9, -45.8], [-66.4, -42.6], [-65, -40], [-63, -38.4], [-60.6, -37.9],
+  [-58.2, -38.4], [-56.2, -40], [-55, -42.6], [-54.6, -45.8], [-55, -48.6], [-56.4, -50.4], [-58.4, -51.2]];
+const heart = smooth(HEART_NODES, { corners: [0] });
+/** The embossed heart, the coin's own heart at 60% about a point a little left of its middle, as a turned coin shows it (the side crop shows one ring on so small a coin). */
+const embossed = [0.6].map((k) => smooth(HEART_NODES.map(([x, y]): P => [-61.6 + (x + 61.6) * k, -44.6 + (y + 44.6) * k]), { corners: [0] }));
 
 // The ear: a broad droplet hanging over the head's side, its top under the
 // crown's fur (the root, the ear's highest tan, at x -12.9, y -143.8), a
@@ -479,18 +481,10 @@ function tagPiece(): Piece {
   const strap = piece(`<defs>${blur(f, box, 0.5)}</defs>` +
     `<path d="M-60.8 -58.8 C-61 -57.6 -60.8 -56.6 -60.4 -55.8 L-58.6 -55.8 C-58.3 -56.8 -58.3 -57.8 -58.5 -58.9 C-59.2 -59.5 -60.2 -59.4 -60.8 -58.8Z" ` +
     `fill="${C.collarLine}" opacity="0.6" filter="url(#${f})"/>` +
-    `<ellipse cx="-60.4" cy="-52.1" rx="1" ry="0.85" fill="${C.tag}" stroke="${C.tagLine}" stroke-width="${strapLine.width}"/>`, box, { shapes: [], lines: [strapLine] });
-  const g = uid("blur"), emboss = pathD(innerHeart.segs);
-  const rim = sample(innerHeart.segs, 10);
-  rim.push(rim[0]!);
-  return join(strap, part("tag", heart, {
-    fill: C.tag,
-    shade: { multiply: C.tagShadeBy, rim: { inset: 0.9, toLight: 1 }, shapes: ["M-67.6 -49 C-66.8 -44 -65 -40.6 -61.6 -38.6 L-61 -36 L-68 -36Z"], blur: 1 },
-    highlight: { d: "M-64.6 -47.6 a2.2 1.5 -50 1 0 4.4 0 a2.2 1.5 -50 1 0 -4.4 0", colour: C.tagShine, opacity: 0.4, blur: 1.3 },
-    under: `<defs>${blur(g, [-68, -54, 16, 18], 0.4)}</defs><path d="${emboss}" fill="${C.tagShine}" opacity="0.3" filter="url(#${g})"/>`,
-    inner: [{ pts: rim, width: 0.7, colour: C.tagLine, opacity: 0.45 }],
-    outline: { colour: C.tagLine, width: THIN, taper: 2, blur: 0.25 },
-  }));
+    `<ellipse cx="-60.4" cy="-51.2" rx="0.85" ry="0.75" fill="${C.tagEdge}" stroke="${C.tagEdge}" stroke-width="${strapLine.width}"/>`, box, { shapes: [], lines: [strapLine] });
+  // The dog's one tag recipe (parts/tag.ts), its turned coin's edge down its left side in the deeper shade.
+  return join(strap, part("tag", heart, tagPaint({ emboss: embossed, light: "M-64.4 -47.2 a2 1.4 -50 1 0 4 0 a2 1.4 -50 1 0 -4 0",
+    shade: ["M-67.6 -49 C-66.8 -44 -65 -40.6 -61.6 -38.6 L-61 -36 L-68 -36Z"], rim: THIN, shadeRim: { inset: 0.9, toLight: 1 } })));
 }
 
 /**
@@ -542,28 +536,6 @@ function collarContact(): string {
     `<path d="${shade}" fill="${C.collarLine}" opacity="0.4" filter="url(#${g})"/><path d="${rim}" fill="${C.collarRim}" opacity="0.85" filter="url(#${f})"/>`;
 }
 
-/**
- * Paint inside a marking, through its own soft edge (a mask of its shape, blurred as the marking is), so it never
- * shows past the marking's edge: the darker fur strands the sheet paints in its patches, or a deepening of the tan.
- * Pieces under a clip group (rig.json's clipTo) are held to their part by it as well.
- */
-function within(name: string, shape: Shape, soft: number, content: (box: Box) => string, lines: DrawnLine[] = []): Piece {
-  const [x0, y0, x1, y1] = bbox(shape.segs);
-  const box = pad([x0, y0, x1 - x0, y1 - y0], 2), area = pad(box, reach(soft, 0));
-  const m = uid("within"), e = uid("blur");
-  return piece(`<defs>${blur(e, area, soft)}${mask(m, area, `<path d="${pathD(shape.segs)}" fill="#FFFFFF" filter="url(#${e})"/>`)}</defs>` +
-    `<g mask="url(#${m})">${content(box)}</g>`, box, { shapes: [], lines: lines.map((l) => ({ ...l, where: `${name} ${l.where}` })) });
-}
-
-/** Fur strands, typed as a few nodes each, drawn as tapered inner lines in one colour, soft at their edges. */
-function strands(name: string, shape: Shape, soft: number, lines: P[][], o: { colour: string; opacity: number; width: number }): Piece {
-  const drawn = lines.map((pts, k) => strokeOf(sample(smooth(pts, { closed: false }).segs, 8, false), o.width, { taper: 3, tip: 0.15, band: LIMITS.inner, wobble: 0.08, seed: 5 + k }));
-  const f = uid("blur");
-  return within(name, shape, soft, (box) => `<defs>${blur(f, pad(box, 2), 0.3)}</defs>` +
-    `<g fill="${o.colour}" opacity="${o.opacity}" filter="url(#${f})">${drawn.map((d) => `<path d="${d.d}"/>`).join("")}</g>`,
-  drawn.map((d) => ({ kind: "inner" as const, width: o.width, where: "strands", drawn: d.drawn })));
-}
-
 export function side(): Drawn[] {
   const out: Drawn[] = [];
   const add = (name: string, p: Piece, state?: string) => out.push({ part: name, piece: p, ...(state ? { state } : {}) });
@@ -613,11 +585,8 @@ export function side(): Drawn[] {
   add("tag", tagPiece());
   add("head.base", part("head.base", head, headPaint));
   // The head patch, soft but defined, deepening a little toward the ear, as the sheet paints it.
-  const deepen = uid("deepen");
   add("head.patch.L", join(marking("head.patch.L", { shape: head, paint: headPaint }, patch, { fill: C.patch, blur: 0.5, clip: false }),
-    within("head.patch.L", patch, 0.5, (box) => `<defs><linearGradient id="${deepen}" gradientUnits="userSpaceOnUse" x1="-46" y1="0" x2="-28" y2="0">` +
-      `<stop offset="0" stop-color="${C.marking}" stop-opacity="0"/><stop offset="1" stop-color="${C.marking}" stop-opacity="0.5"/></linearGradient></defs>` +
-      `<rect ${region(box)} fill="url(#${deepen})"/>`)));
+    deepen("head.patch.L", patch, 0.5, [-46, 0], [-28, 0], 0.5)));
   add("blush.L", blush());
   add("eye.L", eye(EYE), "open");
   add("brow.L", brow());
