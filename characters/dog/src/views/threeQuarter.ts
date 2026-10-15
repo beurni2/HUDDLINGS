@@ -118,7 +118,7 @@ const ears = { R: earR, L: earL };
 // to the chin, dipping lowest under the near cheek, and rises from the chin up the far side of the jaw to the far
 // cheek's puff, which bulges out over the far ear; above it the face's far side runs up over the far ear to its
 // root and the crown.
-const headNodes: Node[] = [[-68.6, -149.6], [-11.2, -149.6], [-2.4, -144.2], [3.6, -136.8], [1.4, -135.6], [-18.2, -132.2], [-19.8, -129.4], [-13.6, -115.4],
+const headNodes: Node[] = [[-68.6, -149.6], [-11.2, -149.6], [-2.4, -144.2], [3.6, -136.8], [1.4, -135.6], [-17.4, -132], [-20.6, -127.6], [-13.6, -115.4],
   [-11.4, -105], [-14.2, -91], [-17.4, -78], [-15.8, -67.2], [-26, -61.4], [-48, -58.4], [-73.5, -62.4], [-84.2, -68.6], [-90.6, -74.4],
   [-96.4, -79.2], [-99.6, -84.4], [-100.4, -90.4], [-96.6, -97.4], [-91.2, -100.6], [-88.8, -121.6], [-79.6, -143.8]];
 /**
@@ -142,7 +142,7 @@ head = furEdge(head, [-91.4, -75], [-99.2, -94.2], cheekLocks, 0.4, (tip, root, 
 head = furSpan(head, [3.2, -137.4], [0.4, -135.5]);
 // Under the overhang the crown's cream fur hangs down over the near ear's root in a few soft locks, as the sheet
 // draws them, so the root has no flat top edge.
-head = furEdge(head, [-3.8, -135], [-16.4, -132.5], [{ len: 1.8, w: 1.3, lean: 0.3 }, { len: 0.9, w: 0.9, lean: 0.25 }, { len: 1.4, w: 1.1, lean: 0.3 }], 0.42);
+head = furEdge(head, [-3.8, -135], [-15.4, -131], [{ len: 1.8, w: 1.3, lean: 0.3 }, { len: 0.9, w: 0.9, lean: 0.25 }, { len: 1.4, w: 1.1, lean: 0.3 }], 0.42);
 
 // The topknot: an upright sprig of three fur lobes, typed node by node (the sheet's tuft, seen turned), each side
 // lobe a petal of fur: the left one low and broad, pointing out to its tip at the left (x -67.2) and drawn back
@@ -164,7 +164,7 @@ const tuft = furSpan(smooth([[-55.6, -149.2], [-60.2, -150], [-64.4, -151.6], [-
 // root; below the hood, beside the eye, the face is cream, as the sheet paints it. Each is typed with bleed
 // past the head's edge; the eyes cover what lies under them.
 const patchL = smooth([[-46.4, -104.8], [-43.6, -110.4], [-38, -113.8], [-31, -115], [-26, -113.4], [-22.4, -108.6], [-20.2, -106.2], [-18, -112], [-17.4, -123],
-  [-18.6, -130.4], [-16, -133.4], [-10, -128], [-8, -116], [-8, -100], [-11, -86], [-15, -79.6], [-21, -79.6], [-25.4, -82.4], [-27.6, -87], [-28.6, -95],
+  [-20.4, -127.4], [-14.8, -131.8], [-10, -128], [-8, -116], [-8, -100], [-11, -86], [-15, -79.6], [-21, -79.6], [-25.4, -82.4], [-27.6, -87], [-28.6, -95],
   [-33, -103.6], [-40, -105.6], [-44.6, -102.6]], { corners: [6] });
 const patchR = smooth([[-95, -140], [-89.6, -140.4], [-86.6, -136.4], [-84.8, -130.4], [-83.2, -126.6], [-78.8, -125.4], [-74.2, -123.2], [-71, -119.6],
   [-70.4, -114], [-73, -110.8], [-78, -110], [-84, -111.4], [-88.6, -114.6], [-95, -118]]);
@@ -294,7 +294,7 @@ function headLinePiece(): Piece {
   // Where the crown's fur meets each ear's root with no line, the sheet's edge is soft: the crown's cream lies out
   // over the root's tan in a feathered edge.
   const s = uid("blur");
-  const roots: [P, P][] = [[[-1.2, -135.4], [-19.8, -129.8]]];
+  const roots: [P, P][] = [[[-1.2, -135.4], [-20.4, -128]]];
   const feathered = roots.map(([a, b]) => strokeOf(spanPoints(head, ...([fracAt(head, a), fracAt(head, b)].sort((p, q) => p - q) as [number, number])), 2.4, { taper: 3, tip: 0.4 }).d).join("");
   const seam = (id: string, top: number, bottom: number) => `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="0" y1="${top}" x2="0" y2="${bottom}">` +
     `<stop offset="0" stop-color="${C.earEdge}"/><stop offset="1" stop-color="${C.earLine}"/></linearGradient>`;
