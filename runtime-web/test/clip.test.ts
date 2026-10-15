@@ -282,3 +282,45 @@ test("validation refuses an empty discrete track", () => {
     "clip c: states of eye.L has no keys; a track needs at least one", "clip c: body views has no keys; a track needs at least one", "clip c: order has no keys; a track needs at least one",
   ]);
 });
+
+test("validation refuses a discrete key that is not [finite time, name], with null a name only on the order track", () => {
+  // Swift refuses each at decode, a [time, number] state among them, which the web took.
+  const clip = { name: "c", lengthMs: 500, states: { "eye.L": [[0, 5]], "eye.R": [[0, null], [100, "open"]] }, views: { head: [5, [Infinity, "front"]] },
+    order: [[0, null], ["100", "low"], [200], [300, "low", "x"]] } as unknown as Clip;
+  assert.deepEqual(validate(rig, [clip]), [
+    "clip c: states of eye.L key 0 is not [time, name] with a finite time and a name: [0,5]",
+    "clip c: states of eye.R key 0 is not [time, name] with a finite time and a name: [0,null]",
+    "clip c: head views key 0 is not [time, name] with a finite time and a name: 5",
+    "clip c: head views key 1 is not [time, name] with a finite time and a name: [null,\"front\"]",
+    'clip c: order key 1 is not [time, name] with a finite time and a name or null: ["100","low"]',
+    "clip c: order key 2 is not [time, name] with a finite time and a name or null: [200]",
+    'clip c: order key 3 is not [time, name] with a finite time and a name or null: [300,"low","x"]',
+  ]);
+  const sound: Clip = { name: "c", lengthMs: 500, states: { "eye.L": [[0, "open"], [100, "closed"]] }, views: { body: [[0, "front"]], head: [[0, "front"]] }, order: [[0, null], [100, "low"]] };
+  assert.deepEqual(validate(rig, [sound]), []);
+});
+
+test("validation refuses a discrete track that is not a list, naming it rather than reading it", () => {
+  // The first two threw inside validate() on the web, walking a number; the states were called empty. Swift refuses each at decode.
+  for (const [field, value, expected] of [["views", { body: 5 }, "clip c: body views is not a list of keys"], ["order", 5, "clip c: order is not a list of keys"],
+    ["states", { "eye.L": null }, "clip c: states of eye.L is not a list of keys"], ["states", { "eye.L": { 0: "open" } }, "clip c: states of eye.L is not a list of keys"]] as const) {
+    assert.deepEqual(validate(rig, [{ name: "c", lengthMs: 500, [field]: value } as unknown as Clip]), [expected], `${field} ${JSON.stringify(value)}`);
+  }
+});
+
+test("validation refuses a map of tracks that is not an object: a clip's tracks, alpha, states or views, or a bone's channels", () => {
+  // tracks {"head": null} threw inside validate() on the web; Swift refuses each at decode.
+  const cases: [Record<string, unknown>, string][] = [
+    [{ tracks: { head: null } }, "clip c: tracks of head is not a map of channels: null"], [{ tracks: { head: [[0, 1]] } }, "clip c: tracks of head is not a map of channels: [[0,1]]"],
+    [{ tracks: 5 }, "clip c: tracks is not a map of bones: 5"], [{ alpha: [[0, 1]] }, "clip c: alpha is not a map of parts: [[0,1]]"],
+    [{ states: "open" }, 'clip c: states is not a map of parts: "open"'], [{ views: [[0, "front"]] }, 'clip c: views is not a map of groups: [[0,"front"]]'],
+  ];
+  for (const [fields, expected] of cases) assert.deepEqual(validate(rig, [{ name: "c", lengthMs: 500, ...fields } as unknown as Clip]), [expected], JSON.stringify(fields));
+});
+
+test("validation refuses discrete keys out of time order, and takes two keys at one time", () => {
+  // Both samplers walk the keys in order and stop at the first past the time, so a key out of order hides another:
+  // here closed at 300 ms would never show.
+  const clip: Clip = { name: "c", lengthMs: 500, states: { "eye.L": [[0, "open"], [300, "closed"], [200, "open"]] }, order: [[0, null], [100, "low"], [100, null]] };
+  assert.deepEqual(validate(rig, [clip]), ["clip c: states of eye.L keys out of order at 200 ms"]);
+});

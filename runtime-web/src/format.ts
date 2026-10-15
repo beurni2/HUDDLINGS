@@ -158,6 +158,8 @@ function bodyOrders(rig: Rig): [string, string[]][] {
 
 const EASING_NAMES = new Set(["linear", "step", "easeIn", "easeOut", "easeInOut", "easeOutBack"]);
 const finite = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v);
+/** A JSON object: not a list, not null. */
+const isMap = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
 
 /**
  * Why a key's easing is not one the README names, or undefined when it is: a name, ["easeOutBack", s]
@@ -338,13 +340,21 @@ export function validate(rig: Rig, clips: Clip[], atlas?: AtlasSet): string[] {
 
   for (const clip of clips) {
     if (clip.blendInMs !== undefined && !(clip.blendInMs >= 150 && clip.blendInMs <= 300)) problems.push(`clip ${clip.name}: blendInMs ${clip.blendInMs} is outside 150 to 300 ms (section 5b)`);
-    for (const [boneName, channels] of Object.entries(clip.tracks ?? {})) {
+    // A clip file is JSON: a map of tracks that is not an object is named here, not iterated. A clip's own field may be
+    // null, which both runtimes read as absent; a bone's channels may not.
+    const entries = (what: string, of: string, map: unknown, absent = map === undefined || map === null): [string, unknown][] => {
+      if (absent) return [];
+      if (isMap(map)) return Object.entries(map);
+      problems.push(`clip ${clip.name}: ${what} is not a map of ${of}: ${JSON.stringify(map)}`);
+      return [];
+    };
+    for (const [boneName, channels] of entries("tracks", "bones", clip.tracks)) {
       const bone = bones.get(boneName);
       if (!bone) {
         problems.push(`clip ${clip.name}: unknown bone ${boneName}`);
         continue;
       }
-      for (const [channel, keys] of Object.entries(channels) as [Channel, Key[]][]) {
+      for (const [channel, keys] of entries(`tracks of ${boneName}`, "channels", channels, false) as [Channel, Key[]][]) {
         if (!CHANNELS.includes(channel)) problems.push(`clip ${clip.name}: ${boneName} has unknown channel ${channel}`);
         if ((channel === "yaw" || channel === "pitch") && boneName !== ft?.bone) problems.push(`clip ${clip.name}: ${boneName}.${channel}: only the fake turn's bone has ${channel}`);
         const limit = channel === "x" || channel === "y" ? undefined : bone[channel];
@@ -358,7 +368,7 @@ export function validate(rig: Rig, clips: Clip[], atlas?: AtlasSet): string[] {
       }
     }
     // A part's alpha keys like a channel, inside 0 to 1 (README, Clips: alpha).
-    for (const [partName, keys] of Object.entries(clip.alpha ?? {})) {
+    for (const [partName, keys] of entries("alpha", "parts", clip.alpha) as [string, Key[]][]) {
       if (!parts.has(partName)) problems.push(`clip ${clip.name}: alpha of unknown part ${partName}`);
       problems.push(...keyProblems(clip, `alpha of ${partName}`, keys, [0, 1], (v) => (v >= 0 && v <= 1 ? undefined : `alpha of ${partName} ${v} leaves 0 to 1`)));
     }
@@ -366,16 +376,34 @@ export function validate(rig: Rig, clips: Clip[], atlas?: AtlasSet): string[] {
       if (event.at < 0 || event.at > clip.lengthMs) problems.push(`clip ${clip.name}: event ${event.type} at ${event.at} ms is outside the clip`);
       if (clip.loop && event.at === clip.lengthMs) problems.push(`clip ${clip.name}: on a loop, an event at ${clip.lengthMs} ms is the event at 0 ms; put it at 0`);
     }
-    // A discrete track holds its first value before its first key, so it needs one, as a keyed track does.
-    const discrete = [...Object.entries(clip.states ?? {}).map(([part, keys]) => [`states of ${part}`, keys] as const),
-      ...Object.entries(clip.views ?? {}).map(([group, keys]) => [`${group} views`, keys] as const), ...(clip.order ? [["order", clip.order] as const] : [])];
-    for (const [what, keys] of discrete) if (!Array.isArray(keys) || keys.length === 0) problems.push(`clip ${clip.name}: ${what} has no keys; a track needs at least one`);
-    for (const [group, keys] of Object.entries(clip.views ?? {})) {
-      for (const [, view] of keys ?? []) if (!rig.views.includes(view)) problems.push(`clip ${clip.name}: ${group} view ${view} is unknown`);
-    }
-    for (const [, variant] of clip.order ?? []) {
-      if (variant !== null && !rig.views.some((view) => rig.drawOrderVariants?.[`${view}:${variant}`]))
-        problems.push(`clip ${clip.name}: order variant ${variant} exists in no view`);
+    // A discrete track holds its first value before its first key, so it needs one, as a keyed track does. Each key is
+    // [time, name] (an order key's name may be null, the view's own order), in time order, the order both samplers
+    // read them in; a name is looked up only once its key reads.
+    type Discrete = [what: string, keys: unknown, nullable: boolean, nameProblem: (name: string | null) => string | undefined];
+    const discrete: Discrete[] = [
+      ...entries("states", "parts", clip.states).map(([part, keys]): Discrete => [`states of ${part}`, keys, false, () => undefined]),
+      ...entries("views", "groups", clip.views).map(([group, keys]): Discrete =>
+        [`${group} views`, keys, false, (view) => (rig.views.includes(view!) ? undefined : `${group} view ${view} is unknown`)]),
+      ...(clip.order === undefined || clip.order === null ? [] : [["order", clip.order, true, (variant) =>
+        (variant === null || rig.views.some((view) => rig.drawOrderVariants?.[`${view}:${variant}`]) ? undefined : `order variant ${variant} exists in no view`)] as Discrete]),
+    ];
+    for (const [what, keys, nullable, nameProblem] of discrete) {
+      if (!Array.isArray(keys)) {
+        problems.push(`clip ${clip.name}: ${what} is not a list of keys`);
+        continue;
+      }
+      if (keys.length === 0) problems.push(`clip ${clip.name}: ${what} has no keys; a track needs at least one`);
+      let last = -Infinity;
+      for (const [index, key] of keys.entries()) {
+        if (!Array.isArray(key) || key.length !== 2 || !finite(key[0]) || !(typeof key[1] === "string" || (nullable && key[1] === null))) {
+          problems.push(`clip ${clip.name}: ${what} key ${index} is not [time, name] with a finite time and a name${nullable ? " or null" : ""}: ${JSON.stringify(key) ?? String(key)}`);
+          continue;
+        }
+        if (key[0] < last) problems.push(`clip ${clip.name}: ${what} keys out of order at ${key[0]} ms`);
+        last = key[0];
+        const problem = nameProblem(key[1]);
+        if (problem) problems.push(`clip ${clip.name}: ${problem}`);
+      }
     }
   }
   return problems;
