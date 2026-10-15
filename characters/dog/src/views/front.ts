@@ -138,16 +138,19 @@ const collar = smooth([[-26.4, -62.6], [-21, -61.2], [-10, -59], [0, -58.2], [10
   [27.4, -59.6], [22.6, -55.4], [17, -52.6], [10, -50.4], [0, -49.8], [-10, -50], [-15, -50.8], [-19.4, -52.6], [-22.6, -55], [-25, -57.2], [-26.8, -59],
   [-27.4, -60.8]]);
 
-// The tag: a plump, coin-like gold heart, as the sheet draws it: full round
-// lobes with a shallow notch, widest at mid-height (17.9 pt with its line, the
-// sheet's 17.8), its sides staying wide low down before a blunt rounded point
-// (the sheet's is 12.5 pt wide 3 pt above its foot), 16 pt tall, centred under
-// its ring; and the smaller heart embossed in it.
+// The tag: a true heart, as the sheet draws it: two round lobes with a clear
+// cleft between them at the top, widest a little above mid-height (17.1 pt
+// with its line, the sheet's 17.8 blurred), its sides running down nearly
+// straight to a soft point at the foot, 15.9 pt tall, centred under its ring;
+// and the smaller heart embossed in it, the same heart at 57% about its middle.
 const shift = (shape: Shape, dx: number): Shape => ({ ...shape, segs: shape.segs.map((g) => g.map(([x, y]): P => [x + dx, y]) as Seg) });
 const TAG_X = 0.4;
-const heart = shift(symmetric([[0, -50.4], [-1.6, -51.3], [-3.6, -51.7], [-5.8, -51.1], [-7.6, -49.3], [-8.7, -47.1], [-8.95, -45], [-8.5, -43], [-7.8, -41],
-  [-6.6, -39], [-4.8, -37.3], [-2.6, -36.1]], [0, -35.6], { corners: [0] }), TAG_X);
-const innerHeart = shift(symmetric([[0, -46.4], [-1.8, -48], [-3.9, -48.1], [-5.3, -46.8], [-5.6, -44.6], [-4.8, -42.4], [-3, -40.6]], [0, -39.2], { corners: [0] }), TAG_X);
+const HEART: Node[] = [[0, -48.8], [-1.1, -50.2], [-2.7, -51], [-4.5, -51], [-6, -50.3], [-7.5, -48.8], [-8.5, -46.8], [-8.85, -44.6], [-8.4, -42.4],
+  [-7.2, -40.3], [-5.7, -38.5], [-4, -36.9], [-2, -35.7]];
+const HEART_FOOT: Node = [0, -35.1];
+const heart = shift(symmetric(HEART, HEART_FOOT, { corners: [0] }), TAG_X);
+const inset = ([x, y]: Node): Node => [x * 0.57, -43.6 + (y + 43.6) * 0.57];
+const innerHeart = shift(symmetric(HEART.map(inset), inset(HEART_FOOT), { corners: [0] }), TAG_X);
 
 // The ears (front a's): droplets hanging from high on the head's sides, narrow
 // at the root (tucked under the crown fur), broad and rounded below, their inner
@@ -604,13 +607,15 @@ function blush(sx: number): Piece {
 /**
  * The tag and the ring it swings from, which the turnaround paints blue on the blue collar. The heart is
  * painted as the sheet paints it: a flat matte gold, a slightly darker gold rim inside its line, one soft light
- * high on its left lobe, and the smaller heart engraved in it as one faint warm line: no bevel, no raised face.
+ * high on its left lobe, and the smaller heart embossed in it, its rim one faint warm line and its upper left
+ * lobe catching the light: no bevel, no glint.
  */
 function tagPiece(): Piece {
   // The ring's edge is a plain stroke, drawn exactly as wide as it is declared.
   const ringLine: DrawnLine = { kind: "inner", width: 0.6, where: "tag ring", drawn: [0.6, 0.6] };
-  const ring = piece(`<rect x="-0.9" y="-57.2" width="2.8" height="7.6" rx="1.4" fill="${C.collar}" stroke="${C.collarRim}" stroke-width="${ringLine.width}"/>` +
-    `<rect x="-0.2" y="-56.6" width="0.8" height="6" rx="0.4" fill="${C.collarHighlight}"/>`, [-2, -58, 5, 9.4], { shapes: [], lines: [ringLine] });
+  // It runs down into the heart's cleft, so the heart hangs from it with no gap between the lobes.
+  const ring = piece(`<rect x="-0.9" y="-57.2" width="2.8" height="8.6" rx="1.4" fill="${C.collar}" stroke="${C.collarRim}" stroke-width="${ringLine.width}"/>` +
+    `<rect x="-0.2" y="-56.6" width="0.8" height="6.6" rx="0.4" fill="${C.collarHighlight}"/>`, [-2, -58, 5, 10.4], { shapes: [], lines: [ringLine] });
   const emboss = sample(innerHeart.segs, 10);
   emboss.push(emboss[0]!);
   // The embossed heart's light, along its upper left lobe, where the light catches its raised edge.
@@ -620,7 +625,7 @@ function tagPiece(): Piece {
     shade: { multiply: C.tagShadeBy, rim: { inset: 1.3, toLight: 1.3 }, blur: 1 },
     under: `<defs>${blur(lit, [-8, -51, 10, 10], 0.35)}</defs><path d="${strokeOf(raised, 0.9, { taper: 1.6, tip: 0.2 }).d}" fill="${C.tagShine}" opacity="0.7" filter="url(#${lit})"/>`,
     // A soft matte light on the upper left lobe, not a bevel's glint.
-    highlight: { d: "M-6.6 -47.4 a2.8 1.9 -40 1 0 5.6 0 a2.8 1.9 -40 1 0 -5.6 0", colour: C.tagShine, opacity: 0.45, blur: 1.4 },
+    highlight: { d: "M-7.2 -48.4 a2.8 1.8 -35 1 0 5.6 0 a2.8 1.8 -35 1 0 -5.6 0", colour: C.tagShine, opacity: 0.45, blur: 1.4 },
     // The embossed heart's own rim, a little darker than the tag's gold.
     inner: [{ pts: emboss, width: 0.7, colour: C.tagLine, opacity: 0.6 }],
     outline: { colour: C.tagLine, width: 1.3, taper: 2, blur: 0.2 },
