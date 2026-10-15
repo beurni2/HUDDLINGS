@@ -5,13 +5,15 @@
 // hind paws); joins are feathered and carry no rim and no line.
 import { furEdge, furSpan, type Lock } from "../../../draw/fur.ts";
 import { arc, bbox, ellipse, fracAt, mirrorX, pathD, polyD, rotate, sample, smooth, spanPoints, symmetric, v, type Node, type P, type Seg, type Shape } from "../../../draw/geom.ts";
-import { innerLine, mirrorSpans, strokeOf, type DrawnLine, type Stroke } from "../../../draw/line.ts";
-import { LIMITS } from "../../../draw/lint.ts";
+import { innerLine, mirrorSpans, strokeOf, type DrawnLine } from "../../../draw/line.ts";
 import { marking, part, soft, type Fade, type Paint } from "../../../draw/paint.ts";
 import { blur, join, pad, piece, uid, type Box, type Piece } from "../../../draw/svg.ts";
 import { model } from "../model.ts";
 import { C, LINES } from "../palette.ts";
+import { brow } from "../parts/brow.ts";
 import { eye as sharedEye } from "../parts/eye.ts";
+import { rolledFrame } from "../parts/face.ts";
+import { mouth } from "../parts/mouth.ts";
 import { litEdge, litMarking, litPart, type LitSpan } from "../parts/lines.ts";
 import { curlShapes, topknot, type Curl } from "../parts/topknot.ts";
 import { earFur } from "../parts/ear.ts";
@@ -40,15 +42,6 @@ const litSide = (side: "L" | "R", spans: LitSpan[]) => (side === "R" ? spans : (
 const roomy = (p: Piece, by: number): Piece => ({ ...p, box: pad(p.box, by) });
 /** Inner lines typed for the dog's right side, mirrored for its left. */
 const flipX = (pts: P[], side: "L" | "R") => (side === "R" ? pts : pts.map(([x, y]): P => [-x, y]));
-/**
- * A tapered line drawn as a filled polygon, with its meta for the lint built from what strokeOf draws: the
- * width it is declared and the narrowest and widest it is drawn, held to its band (outer 1.2 to 1.8 pt,
- * inner 0.6 to 0.9).
- */
-function tapered(pts: P[], width: number, kind: "outer" | "inner", where: string, opts: Stroke = {}): { d: string; line: DrawnLine } {
-  const s = strokeOf(pts, width, { band: LIMITS[kind], ...opts });
-  return { d: s.d, line: { kind, width, where, drawn: s.drawn } };
-}
 /** The same fur locks on the dog's left side, whose path runs the other way: in reverse, leaning the other way. */
 const lefthandOf = (locks: Lock[]): Lock[] => [...locks].reverse().map((l) => ({ ...l, lean: -(l.lean ?? 0) }));
 /** Path data (absolute commands, each point an "x y" pair) mirrored across x = 0. */
@@ -78,14 +71,8 @@ const r3 = (n: number) => Math.round(n * 1000) / 1000;
 const fmt = (n: number) => r3(n).toString();
 /** Path data typed upright in the head's frame (absolute M, L, C and Z, each point an "x y" pair), rolled point by point. */
 const rollD = (d: string) => d.replace(/(-?\d+(?:\.\d+)?) (-?\d+(?:\.\d+)?)/g, (_m, x: string, y: string) => rollP([Number(x), Number(y)]).map(fmt).join(" "));
-/** SVG drawn in the face frame, placed in model space. */
-const inFace = (svg: string) => `<g transform="translate(${r3(FC[0])} ${r3(FC[1])}) rotate(${r3((ROLL * 180) / Math.PI)})">${svg}</g>`;
-/** A box in the face frame, as the model-space box that holds it. */
-function faceBox([x, y, w, h]: Box): Box {
-  const corners = ([[x, y], [x + w, y], [x, y + h], [x + w, y + h]] as P[]).map(face);
-  const xs = corners.map((p) => p[0]), ys = corners.map((p) => p[1]);
-  return [Math.min(...xs), Math.min(...ys), Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)];
-}
+/** The face frame the face's parts are typed in (parts/face.ts): the eyes' midpoint, rolled with them. */
+const FRAME = rolledFrame(FC, ROLL_DEG);
 
 // Shapes.
 
@@ -472,23 +459,6 @@ function eye(landmark: P, noseward: 1 | -1): Piece {
 }
 
 /**
- * A brow in the face frame, as the sheet paints it: a paler tan comma with a thin darker brown upper edge in the
- * cream above the hood, about 9 pt long and 2.6 pt thick at its middle, tapering round to both ends, one gentle arch whose crown sits a little
- * nearer its inner end, which lies higher than its outer end, so the face reads happy rather than worried; soft
- * at its edges.
- */
-function brow(sx: number): Piece {
-  const pts: P[] = ([[27.4, -25.4], [26, -27.4], [24.2, -28.8], [22.2, -29.4], [20.2, -29.1], [18.6, -28.2]] as P[]).map(([x, y]): P => [sx * x, y]);
-  const f = uid("blur"), box = faceBox([sx > 0 ? 15 : -31, -34, 16, 12]);
-  const along = sample(smooth(pts, { closed: false }).segs, 8, false);
-  // Its upper edge a thin, slightly darker brown, as the sheet draws it, inside the comma's top.
-  const edge = strokeOf(along.map(([x, y]): P => [x, y - 0.9]), 0.75, { taper: 2.6, tip: 0.1 });
-  return piece(`<defs>${blur(f, box, 0.35)}</defs><g filter="url(#${f})">` +
-    inFace(`<path d="${strokeOf(along, 2.6, { taper: 3.4, tip: 0.6 }).d}" fill="${C.marking}" opacity="0.72"/><path d="${edge.d}" fill="${C.earEdge}" opacity="0.5"/>`) + "</g>", box,
-    { shapes: [], lines: [{ kind: "inner", width: 0.75, where: "brow edge", drawn: edge.drawn } as DrawnLine] });
-}
-
-/**
  * The nose in the face frame, as the turnaround, the blush-cheeks panel and the hero draw it: a wide rounded
  * inverted triangle, its top nearly flat, broadest near its top with round shoulders (the sheet's is 12.5 pt wide
  * there and about 7.4 pt tall), its sides running in straight to a small round point that runs on into the
@@ -499,64 +469,9 @@ const noseShape = symmetric([[0, 4.2], [-2.6, 4.25], [-4.6, 4.6], [-5.9, 5.3], [
   [0, 11.8]);
 function nose(): Piece {
   const f = uid("blur"), g = uid("blur"), box: Box = [-8, 2, 16, 13];
-  return piece(inFace(`<defs>${blur(f, box, 0.7)}${blur(g, box, 1.1)}</defs><path d="${pathD(noseShape.segs)}" fill="${C.eyeDark}"/>` +
+  return piece(FRAME.place(`<defs>${blur(f, box, 0.7)}${blur(g, box, 1.1)}</defs><path d="${pathD(noseShape.segs)}" fill="${C.eyeDark}"/>` +
     `<ellipse cx="0.2" cy="8.2" rx="3.3" ry="1.9" fill="${C.dark}" opacity="0.55" filter="url(#${g})"/>` +
-    `<ellipse cx="-1.3" cy="6.05" rx="2.9" ry="1.05" transform="rotate(-6 -1.3 6.05)" fill="${C.noseSheen}" opacity="0.8" filter="url(#${f})"/>`), faceBox(box));
-}
-
-/**
- * The open happy mouth in the face frame, as the turnaround, the hero and the expression sheet's happy face draw
- * it. The upper lip is one line (the muzzle line, an inner line, 0.9 pt, tapering to fine points at its tips), a
- * deep red-brown over the opening and the printed dark brown out along its ends: from the philtrum's foot down
- * to the opening's top corners, about 9.3 pt either side, then on in a short flick that hooks up into a small
- * curl at each tip (12.9 pt out and 3 pt up). The lip IS the opening's top edge: the opening hangs from it in a
- * round, full U, its sides sloping in from the corners and rounding into a broad foot (14 pt deep at its middle,
- * as the sheet's is), never a V. Inside, a band of deep maroon right under the lip and back into the upper corners,
- * easing to the mouth's red; the tongue fills the lower half, a wide coral dome whose top is a soft convex mound
- * (the sheet's peaks about 6 pt under the lip's middle and meets the sides about 3 pt lower), lighter in its middle,
- * with no groove; the opening's foot narrows to a round U. A dark red-brown rim runs down the opening's sides and a warm
- * brown one round its foot, under the tongue.
- */
-function mouth(): Piece {
-  // One half of the lip, typed on the dog's left (the viewer's right), from the philtrum's foot to the curl's tip.
-  const half: P[] = [[0, 14.2], [1.4, 15], [3.2, 15.8], [5.4, 16.5], [7.6, 16.95], [9.3, 17.05], [10.6, 16.75], [11.7, 16], [12.5, 15], [12.9, 14]];
-  const lipShape = smooth([...mirrorX(half, false).slice(0, -1), ...half], { closed: false });
-  const lip = tapered(sample(lipShape.segs, 12, false), 0.9, "inner", "upper lip", { taper: 2.2, tip: 0.3 });
-  // The opening: along the lip from corner to corner, then down sides that slope in and round into a full U.
-  const opening = smooth([[0, 14.4], [3.2, 16], [5.4, 16.75], [7.6, 17.15], [9.2, 17.25], [8.6, 20.2], [7.3, 23], [5.6, 25.6], [3.8, 27.4], [1.9, 28.3], [0, 28.55],
-    [-1.9, 28.3], [-3.8, 27.4], [-5.6, 25.6], [-7.3, 23], [-8.6, 20.2], [-9.2, 17.25], [-7.6, 17.15], [-5.4, 16.75], [-3.2, 16]], { corners: [0, 4, 16] });
-  const m = pathD(opening.segs);
-  // The rim down each side, from the top corner to where the tongue meets the side, drawn twice its width centred
-  // on the edge inside the opening's clip, so the half that shows lies inside the opening; and a warm one round
-  // the foot under the tongue.
-  const edgePts = sample(opening.segs.slice(opening.segs.findIndex((g) => g[0][0] === 9.2 && g[0][1] === 17.25)), 16, false)
-    .filter(([x, y]) => y > 17.6 || Math.abs(x) > 9);
-  const end = edgePts.findIndex(([x, y], i) => i > 4 && x < -9 && y < 17.6);
-  const along = end > 0 ? edgePts.slice(0, end + 1) : edgePts;
-  const doubled: [number, number] = [LIMITS.inner[0] * 2, LIMITS.inner[1] * 2];
-  const sides = ([1, -1] as const).map((sx) => strokeOf(along.filter(([x, y]) => sx * x > 0 && y < 23.2).sort((a, b) => a[1] - b[1]), 1.8, { taper: 2.6, tip: 0.2, band: doubled }));
-  const foot = strokeOf(along.filter(([, y]) => y > 21), 1.5, { taper: 3, tip: 0.1, band: doubled });
-  const rimLines: DrawnLine[] = [...sides.map((s) => ({ kind: "inner" as const, width: 0.9, where: "mouth side", drawn: [s.drawn[0] / 2, s.drawn[1] / 2] as [number, number] })),
-    { kind: "inner", width: 0.75, where: "mouth foot", drawn: [foot.drawn[0] / 2, foot.drawn[1] / 2] }];
-  const clip = uid("mouth"), soft = uid("blur"), lit = uid("blur"), edge = uid("blur"), lipFade = uid("lip");
-  // The tongue's top: a wide convex mound peaking 4.7 pt under the lip and running down to meet each side 3 pt lower.
-  const TONGUE = "M-9.4 31 L-9.4 23.6 C-8 21.8 -5 20.5 0 20.4 C5 20.5 8 21.8 9.4 23.6 L9.4 31Z";
-  const philtrum = innerLine([[0, 11.7], [0, 14.4]], 0.9, C.eyeDark, { taper: 0.9, tip: 0.75, wobble: 0 });
-  const box: Box = [-15, 10, 30, 21];
-  const svg = `<defs><clipPath id="${clip}"><path d="${m}"/></clipPath>${blur(soft, box, 0.45)}${blur(lit, box, 1.3)}${blur(edge, box, 0.2)}` +
-    `<linearGradient id="${lipFade}" gradientUnits="userSpaceOnUse" x1="-13" y1="0" x2="13" y2="0">` +
-    `<stop offset="0.08" stop-color="${C.dark}"/><stop offset="0.25" stop-color="${C.lipLine}"/><stop offset="0.75" stop-color="${C.lipLine}"/>` +
-    `<stop offset="0.92" stop-color="${C.dark}"/></linearGradient></defs>` +
-    `<path d="${m}" fill="${C.mouthInside}"/><g clip-path="url(#${clip})">` +
-    // Deepest right under the lip and back into its corners, easing to the mouth's own red.
-    `<path d="M-10 14 L10 14 L10 18 C6 17.8 3 17.1 0 16.9 C-3 17.1 -6 17.8 -10 18Z" fill="${C.mouthDeep}" opacity="0.55" filter="url(#${soft})"/>` +
-    `<path d="M-10 17 L-7.8 17.4 C-7.9 18.4 -8 19.4 -8.4 20.8 L-10 20.8Z M10 17 L7.8 17.4 C7.9 18.4 8 19.4 8.4 20.8 L10 20.8Z" fill="${C.mouthDeep}" opacity="0.35" filter="url(#${soft})"/>` +
-    // The tongue, a dome in the lower half, its top soft where it meets the dark, lighter in its middle, no groove.
-    `<path d="${TONGUE}" fill="${C.tongue}" filter="url(#${soft})"/>` +
-    `<ellipse cx="-0.3" cy="23.8" rx="4" ry="2.2" fill="${C.tongueShine}" opacity="0.5" filter="url(#${lit})"/>` +
-    `<g filter="url(#${edge})">${sides.map((s) => `<path d="${s.d}" fill="${C.mouthRim}"/>`).join("")}<path d="${foot.d}" fill="${C.tongueRim}"/></g></g>` +
-    `<path d="${lip.d}" fill="url(#${lipFade})"/>${philtrum.svg}`;
-  return piece(inFace(svg), faceBox(box), { shapes: [], lines: [lip.line, ...rimLines, { ...philtrum.line, where: "philtrum" }] });
+    `<ellipse cx="-1.3" cy="6.05" rx="2.9" ry="1.05" transform="rotate(-6 -1.3 6.05)" fill="${C.noseSheen}" opacity="0.8" filter="url(#${f})"/>`), FRAME.box(box));
 }
 
 /** A blush in the face frame, under the eye's outer side: an ellipse turned with the face. */
@@ -743,10 +658,10 @@ export function front(): Drawn[] {
   add("blush.R", blush(-1));
   add("eye.L", eye(EYE_L, -1), "open");
   add("eye.R", eye(EYE_R, 1), "open");
-  add("brow.L", brow(1));
-  add("brow.R", brow(-1));
+  add("brow.L", brow("neutral", 1, FRAME).piece);
+  add("brow.R", brow("neutral", -1, FRAME).piece);
   add("nose", nose());
-  add("mouth", mouth(), "open");
+  add("mouth", mouth("open", FRAME).piece, "open");
   add("head.line", headLinePiece());
   add("tuft", topknot(CURLS, {
     fill: C.fur,
