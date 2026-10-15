@@ -10,7 +10,7 @@ import { LIMITS } from "../../../draw/lint.ts";
 import { marking, part, soft, type Fade, type Paint } from "../../../draw/paint.ts";
 import { blur, join, pad, piece, uid, type Box, type Piece } from "../../../draw/svg.ts";
 import { model } from "../model.ts";
-import { C } from "../palette.ts";
+import { C, LINES } from "../palette.ts";
 import { eye as sharedEye } from "../parts/eye.ts";
 import { litEdge, litMarking, litPart, type LitSpan } from "../parts/lines.ts";
 import { curlShapes, topknot, type Curl } from "../parts/topknot.ts";
@@ -435,12 +435,13 @@ function headLinePiece(): Piece {
   // overhang and more broadly (about 3 pt from tan to cream) round the tan's inner end and down the face's side
   // to where its line begins, so the root's tan tucks in under the cream with no cut edge and no corner.
   const s = uid("blur");
-  const feathered = (spans: [P, P][], width: number) => spans.map(([a, b]) =>
-    strokeOf(spanPoints(head, fracAt(head, cheekRoll(a)), fracAt(head, cheekRoll(b))), width, { taper: 3, tip: 0.4 }).d).join("");
-  const under = feathered([[[-45.6, -134.8], [-34.6, -135]], [[33, -139.6], [40.6, -140.6]]], 1.4);
-  const side = feathered([[[-34.4, -134.4], [-41.4, -121.4]], [[39.2, -123.4], [31.6, -139.2]]], 1.6);
-  return piece(`<defs>${r.defs}${c.defs}${blur(g, pad(box, 2), 0.35)}${blur(s, pad(box, 2), 0.55)}</defs>` +
-    `<path d="${under}" fill="${C.fur}" opacity="0.55" filter="url(#${s})"/><path d="${side}" fill="${C.fur}" opacity="0.6" filter="url(#${s})"/>` +
+  const feathered = (spans: [P, P][], width: number, offset = 0) => spans.map(([a, b]) =>
+    strokeOf(spanPoints(head, fracAt(head, cheekRoll(a)), fracAt(head, cheekRoll(b))), width, { taper: 3, tip: 0.4, offset }).d).join("");
+  // Under the right overhang the root's tan fades up into the cream; on the left the sheet's tan runs up to the crown.
+  const under = feathered([[[-45.4, -134.6], [-34.6, -135]]], 2.6, 0.8);
+  const side = feathered([[[-34.4, -134.4], [-41.4, -121.4]], [[39.2, -123.4], [31.6, -139.2]]], 3);
+  return piece(`<defs>${r.defs}${c.defs}${blur(g, pad(box, 2), 0.35)}${blur(s, pad(box, 2), 0.9)}</defs>` +
+    `<path d="${under}" fill="${C.fur}" opacity="0.95" filter="url(#${s})"/><path d="${side}" fill="${C.fur}" opacity="0.9" filter="url(#${s})"/>` +
     `${r.body}${c.body}<g filter="url(#${g})">${strokes.map((l) => l.svg).join("")}</g>`, box, {
     shapes: [{ name: "head.line", nodes: head.typed, segs: head.segs, outlined: [...r.outlined, ...c.outlined], fur: head.fur.map(([a, b]) => [fracAt(head, a), fracAt(head, b)]) }],
     lines: [...r.lines, ...c.lines, ...strokes.map((l) => ({ ...l.line, where: "cheek fur" }))],
@@ -471,16 +472,20 @@ function eye(landmark: P, noseward: 1 | -1): Piece {
 }
 
 /**
- * A brow in the face frame, as the sheet paints it: a thick tan comma in the cream above the hood, about 9 pt
- * long and 2.8 pt thick at its middle, tapering round to both ends, one gentle arch whose crown sits a little
+ * A brow in the face frame, as the sheet paints it: a paler tan comma with a thin darker brown upper edge in the
+ * cream above the hood, about 9 pt long and 2.6 pt thick at its middle, tapering round to both ends, one gentle arch whose crown sits a little
  * nearer its inner end, which lies higher than its outer end, so the face reads happy rather than worried; soft
  * at its edges.
  */
 function brow(sx: number): Piece {
   const pts: P[] = ([[27.4, -25.4], [26, -27.4], [24.2, -28.8], [22.2, -29.4], [20.2, -29.1], [18.6, -28.2]] as P[]).map(([x, y]): P => [sx * x, y]);
   const f = uid("blur"), box = faceBox([sx > 0 ? 15 : -31, -34, 16, 12]);
+  const along = sample(smooth(pts, { closed: false }).segs, 8, false);
+  // Its upper edge a thin, slightly darker brown, as the sheet draws it, inside the comma's top.
+  const edge = strokeOf(along.map(([x, y]): P => [x, y - 0.9]), 0.75, { taper: 2.6, tip: 0.1 });
   return piece(`<defs>${blur(f, box, 0.35)}</defs><g filter="url(#${f})">` +
-    inFace(`<path d="${strokeOf(sample(smooth(pts, { closed: false }).segs, 8, false), 2.8, { taper: 3.4, tip: 0.6 }).d}" fill="${C.marking}" opacity="0.85"/>`) + "</g>", box);
+    inFace(`<path d="${strokeOf(along, 2.6, { taper: 3.4, tip: 0.6 }).d}" fill="${C.marking}" opacity="0.72"/><path d="${edge.d}" fill="${C.earEdge}" opacity="0.5"/>`) + "</g>", box,
+    { shapes: [], lines: [{ kind: "inner", width: 0.75, where: "brow edge", drawn: edge.drawn } as DrawnLine] });
 }
 
 /**
@@ -700,6 +705,10 @@ export function front(): Drawn[] {
     // The shade falls under the chin, just below the collar.
     shade: furShade(bodyGroup, ["M-22 -52 C-10 -48 10 -48 22 -52 L22 -58 L-22 -58Z"]),
     under: between(),
+    // A few soft fur strokes on the bib, combed down from under the collar's ends and the tag, as the sheet draws them.
+    inner: ([[[-23.4, -47], [-21.8, -42.4], [-21, -38.2]], [[23.4, -47.6], [21.8, -43], [21.2, -38.8]], [[-17.6, -44.6], [-16.6, -41], [-16.2, -38]],
+      [[17.6, -45.2], [16.6, -41.6], [16.4, -38.6]], [[-6.4, -34.6], [-5.4, -31.8]], [[6.6, -34.6], [5.6, -31.8]]] as P[][])
+      .map((pts) => ({ pts: sample(smooth(pts, { closed: false }).segs, 6, false), width: 0.75, colour: LINES.cream[2]!, opacity: 0.4 })),
     // Its edge lies on the saddle's tan inside the silhouette, with no line, as the sheet paints it; no lines beside
     // the tag, and nothing marks the V's top, which fades up into the chest's cream.
   }), 1));
