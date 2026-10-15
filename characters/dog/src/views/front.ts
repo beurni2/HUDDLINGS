@@ -22,7 +22,7 @@ const OUTER = model.outline.outerPt;
 const INNER = model.outline.innerPt;
 /** Lines on fur spans and small parts: lighter, and never under 1.2 pt (a thinner line is a question for the founder). */
 const THIN = 1.2;
-const OUTLINE: Outline = { colour: C.outline, width: OUTER, taper: 6, blur: 0.3 };
+const OUTLINE: Outline = { colour: C.outline, width: OUTER, taper: 6, blur: 0.2 };
 
 /** The same shape on the dog's other side. */
 const other = (nodes: Node[]) => smooth(mirrorX(nodes));
@@ -265,8 +265,8 @@ const headGroup = [head, tuft];
 const backPaint: Paint = {
   fill: C.fur,
   shade: furShade(hipGroup),
-  // The haunch's line is lighter than the head's, in the warm line the sheet draws there (L* 57 to 66).
-  outline: { ...OUTLINE, colour: C.warmLine, width: 1.2, taper: 8, spans: [{ from: [-34.6, -51], to: [-47.4, -11] }, { from: [47.4, -11], to: [34.6, -51] }] },
+  // The haunch's line is the warm line the sheet draws there, lighter on the side toward the light.
+  outline: { ...OUTLINE, colour: C.warmLine, width: 1.25, taper: 8, spans: [{ from: [-34.6, -51], to: [-47.4, -11] }, { from: [47.4, -11], to: [34.6, -51], width: 1.5 }] },
 };
 const headPaint: Paint = {
   fill: C.fur,
@@ -275,17 +275,17 @@ const headPaint: Paint = {
   highlight: { d: headLight, colour: C.light, opacity: 0.4, blur: 4 },
   inner: ([1, -1] as const).map((sx) => ({ pts: cheekFlick.map(([x, y]) => cheekRoll([sx * x, y])), width: 0.7, colour: C.furLine, opacity: 0.22 })),
 };
-// The head's line runs all round it: a light line on the crown's fur; down each
-// side, where the head lies over the ear, one crisp curve in the ear's deep tan
-// (the sheet's #AB6839 there, DECISIONS 7), from where the crown's fur covers
-// the ear's root to the cheek's puff; round the puffs and the jaw over the
-// collar, the warm line the sheet draws there.
+// The head's line runs all round it: a light line on the crown's fur in the
+// light; down each side, where the head lies over the ear, one crisp curve in
+// the ear's deep tan (the sheet's #AB6839 there, DECISIONS 7), from where the
+// crown's fur covers the ear's root to the cheek's puff; a lighter warm line
+// round the puffs; and under the chin, over the collar, the heavier warm line.
 const headLine: Outline = { ...OUTLINE, taper: 5, blur: 0.15, spans: [
   { from: [-27, -148.2], to: [-44, -137], width: THIN, colour: C.fluffLine },
   { from: [-45.2, -133.4], to: [-45.2, -91.4], width: 1.25, colour: C.earLine },
-  { from: [-45.4, -90.6], to: [-35, -64.8], width: THIN, colour: C.warmLine },
-  { from: [-31, -63.6], to: [31, -63.6], width: THIN, colour: C.warmLine },
-  { from: [35, -64.8], to: [45.4, -90.6], width: THIN, colour: C.warmLine },
+  { from: [-45.4, -90.6], to: [-35, -64.8], width: THIN, colour: C.puffLine },
+  { from: [-31, -63.6], to: [31, -63.6], width: 1.5, colour: C.warmLine },
+  { from: [35, -64.8], to: [45.4, -90.6], width: THIN, colour: C.puffLine },
   { from: [43.4, -91.4], to: [41.6, -136.2], width: 1.25, colour: C.earLine },
   { from: [44, -137], to: [17, -150.8], width: THIN, colour: C.fluffLine },
 ].map((span) => ({ ...span, from: cheekRoll(span.from as P), to: cheekRoll(span.to as P) })) };
@@ -385,7 +385,7 @@ function mouth(): Piece {
   // One half of the lip, typed on the dog's left (the viewer's right), from the peak to the curl's end.
   const half: P[] = [[0, 13.9], [1.3, 14.85], [2.9, 15.85], [4.9, 16.7], [7, 17.2], [9.1, 17.3], [10.6, 17.1], [11.8, 16.6], [12.7, 15.9], [13.3, 15.1]];
   const lipShape = smooth([...mirrorX(half, false).slice(0, -1), ...half], { closed: false });
-  const lip = tapered(sample(lipShape.segs, 12, false), 1.5, "outer", "upper lip", { taper: 4.2, tip: 0.3 });
+  const lip = tapered(sample(lipShape.segs, 12, false), 1.5, "outer", "upper lip", { taper: 5.2, tip: 0.3 });
   // The opening: along the lip's cups from corner to corner, then down sides that slope in to a round bottom.
   const opening = smooth([[0, 14.3], [2.9, 16.2], [4.9, 17.1], [7, 17.55], [9.2, 17.65], [9.3, 20.2], [7.7, 23.8], [5.8, 26.6], [3.2, 28.3], [0, 28.8],
     [-3.2, 28.3], [-5.8, 26.6], [-7.7, 23.8], [-9.3, 20.2], [-9.2, 17.65], [-7, 17.55], [-4.9, 17.1], [-2.9, 16.2]], { corners: [0, 4, 14] });
@@ -396,7 +396,7 @@ function mouth(): Piece {
   const svg = `<defs><clipPath id="${clip}"><path d="${m}"/></clipPath>${blur(soft, box, 0.55)}${blur(deep, box, 1.1)}${blur(lit, box, 1.6)}</defs>` +
     `<path d="${m}" fill="${C.mouthInside}"/><g clip-path="url(#${clip})">` +
     // Deeper under the lip and into the corners.
-    `<path d="M-10 15 L10 15 L10 18.2 C6 18 3 17.6 0 17.6 C-3 17.6 -6 18 -10 18.2Z M-10 17.4 L-7.4 17.4 L-8.8 22 Z M10 17.4 L7.4 17.4 L8.8 22Z" fill="${C.mouthDeep}" opacity="0.8" filter="url(#${deep})"/>` +
+    `<path d="M-10 15 L10 15 L10 18.2 C6 18 3 17.6 0 17.6 C-3 17.6 -6 18 -10 18.2Z M-10 17.4 L-7.4 17.4 L-8.8 22 Z M10 17.4 L7.4 17.4 L8.8 22Z" fill="${C.mouthDeep}" opacity="0.85" filter="url(#${deep})"/>` +
     `<path d="M-10.4 23.8 C-7.4 20.6 -3.8 19.5 0 19.5 C3.8 19.5 7.4 20.6 10.4 23.8 L10.4 31 L-10.4 31Z" fill="${C.tongue}" filter="url(#${soft})"/>` +
     `<ellipse cx="-0.6" cy="24.6" rx="4.2" ry="2.4" fill="${C.tongueShine}" opacity="0.4" filter="url(#${lit})"/></g>` +
     `<path d="${lip.d}" fill="${C.dark}"/>${philtrum.svg}`;
@@ -469,7 +469,8 @@ function earPaint(side: "L" | "R"): Paint {
       ...dark.map((pts) => ({ pts: pts.map((p) => onEar(side, p)), width: 0.75, colour: C.earLine, opacity: 0.32 })),
       ...light.map((pts) => ({ pts: pts.map((p) => onEar(side, p)), width: 0.7, colour: C.patch, opacity: 0.3 })),
     ],
-    outline: { ...OUTLINE, colour: C.earEdge, taper: 6, blur: 0.15, spans: [side === "R" ? { from: ends[0], to: ends[1] } : { from: ends[1], to: ends[0] }] },
+    // A little lighter on the ear toward the light, heavier on the one away from it.
+    outline: { ...OUTLINE, colour: C.earEdge, width: side === "R" ? 1.4 : 1.6, taper: 6, blur: 0.15, spans: [side === "R" ? { from: ends[0], to: ends[1] } : { from: ends[1], to: ends[0] }] },
   };
 }
 
@@ -497,8 +498,8 @@ export function front(): Drawn[] {
     add(`hind.${side}`, roomy(part(`hind.${side}`, hind[side], {
       fill: C.fur,
       shade: furShade(hipGroup, [], [`M${cx - 12} ${cy - 12} L${cx + 12} ${cy - 12} L${cx + 12} ${cy - 4} L${cx - 12} ${cy - 4}Z`]),
-      // Over the top, round the outside and the sole, to where it goes behind the front paw, in the warm line.
-      outline: { ...OUTLINE, colour: C.warmLine, width: 1.3, taper: 4, spans: bySide(side, [{ from: [-30.2, -18.4], to: [-29.2, -4.6] }]) },
+      // Over the top and round the outside, then heavier along the sole, to where it goes behind the front paw.
+      outline: { ...OUTLINE, colour: C.warmLine, width: 1.3, taper: 4, spans: bySide(side, [{ from: [-30.2, -18.4], to: [-46.4, -6.4] }, { from: [-47.4, -11.4], to: [-29.2, -4.6], width: 1.7 }]) },
       // Two short toe lines curving up from the sole, bowing apart like the paw stub's.
       inner: [[[-41.4, -3.9], [-42.2, -6.1], [-41.8, -8.5]], [[-35.6, -3.1], [-35, -5.3], [-35.4, -7.7]]].map((pts) => ({ pts: flipX(pts as P[], side), width: INNER, colour: C.warmLine, opacity: 0.8 })),
     }), 6));
@@ -569,7 +570,7 @@ export function front(): Drawn[] {
       // the paw and up the outside's lower half, where the sheet draws the leg against the haunch.
       outline: { ...OUTLINE, taper: 5, spans: bySide(side, [
         { from: [-3.3, -22], to: [-1.3, -8], width: THIN, colour: C.furLine },
-        { from: [-1.4, -6], to: [-29.5, -8.6], width: 1.3, colour: C.warmLine },
+        { from: [-1.4, -6], to: [-29.5, -8.6], width: 1.6, colour: C.warmLine },
         { from: [-29.8, -10.4], to: [-33.4, -30], width: THIN, colour: C.warmLine },
       ]) },
       feather: { from: [sx * 20, -41.6], to: [sx * 22.4, -35.2] },

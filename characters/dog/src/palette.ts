@@ -51,9 +51,11 @@ export const C = {
   furLine: mix(outline, fur, 0.14),
   /** The faint line round the cheeks' fluff and the topknot, which the sheet barely outlines. */
   fluffLine: mix(outline, fur, 0.45),
-  /** The outline warmed toward the tan, lighter than the full outline: the sheet's line round the ears, the
-   * haunches and the paws (L* 57 to 66 there against the outline's 48). */
-  warmLine: mix(outline, marking, 0.3),
+  /** The outline warmed toward the ears' deep brown: the sheet's line round the haunches, the paws and under the
+   * chin, #9F6D4A against the sheet's #A06D48 to #A36E4F there. */
+  warmLine: mix(outline, mix(darken(multiply(marking, marking), 0.12), marking, 0.33), 0.4),
+  /** The lighter warm line round the cheeks' puffs: the outline warmed toward the tan (the sheet's #B17B4C there). */
+  puffLine: mix(outline, marking, 0.3),
   /** The line the front turnaround draws where the head's side meets the ear: the ear's tan in its own deep shade
    * (the tan multiplied by itself, 12% darker), #A35C32 against the sheet's #9E5C2C. */
   earLine: darken(multiply(marking, marking), 0.12),
