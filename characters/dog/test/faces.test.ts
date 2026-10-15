@@ -54,13 +54,16 @@ function mouthProblem(outline: P[]): string | undefined {
 
 /**
  * The brows' tilt on the sheets, measured on all nine expression panels the Faces check holds (DECISIONS 131): each
- * brow's end zones (its outer and inner fifth across) in the panel's own level frame. Every sheet brow is an arc
- * bowing up 0.75 to 1.16 pt with its inner end 1.38 to 2.34 pt higher than its outer; the largest, 2.34 pt (Excited's
- * and Shy's left brows), is the most either end may stand above the other, either way: past it a brow slants, inner
- * end up (worried) or down (angry).
+ * brow's end zones (its outer and inner fifth across) in the panel's own level frame (qa/phase3/faces/brows.py). Every
+ * sheet brow has its inner end 1.38 to 2.34 pt higher than its outer; the largest, 2.34 pt (Excited's and Shy's left
+ * brows), is the most either end may stand above the other, either way: past it a brow slants, inner end up (worried)
+ * or down (angry).
  */
 const BROW_TILT_PT = 2.34;
-/** The least a brow bows up at its middle above its ends' mean (the sheets' least is 0.75 pt). */
+/**
+ * The least a brow bows up at its middle above its ends' mean. The sheet's brows bow up 0.75 to 1.16 pt, all but the
+ * one over Mischievous's wink, a longer stroke on a turned head (−0.51); 0.3 keeps every arc an arc.
+ */
 const BROW_BOW_PT = 0.3;
 
 /** The brow guard: an arc bowing up, its ends level within the sheets' tilt. `sx` is +1 on the dog's left (the viewer's right). */

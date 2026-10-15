@@ -1,0 +1,111 @@
+{
+ "species": "dog",
+ "preset": "proud",
+ "renderFaceRollDeg": -3.98,
+ "still": {
+  "still": "face_proud",
+  "clip": "face_proud",
+  "views": {
+   "body": "front",
+   "head": "front"
+  },
+  "ppp": 3,
+  "sizePx": [607, 570],
+  "rootPx": [306, 517]
+ },
+ "thresholds": {
+  "landmarkShareOfHead": 0.03,
+  "landmarkPt": 2.8,
+  "reachShareOfHead": 0.08,
+  "touchShareOfHead": 0.05,
+  "topShareOfHead": 0.15,
+  "pinReachShareOfHead": 0.2,
+  "pinRounds": 4,
+  "pinSettledPx": 0.05,
+  "subsamples": 4,
+  "softL": [50, 70],
+  "endPx": 2.0,
+  "eyeMinPx": 20,
+  "noseCorePx": 5
+ },
+ "records": {
+  "expressions.expression.proud": {
+   "crop": "expressions.expression.proud",
+   "ptPerCropPx": 0.70625,
+   "rollDeg": -10.66,
+   "turnDeg": -6.68,
+   "drawn": {
+    "eyes": "happy",
+    "mouth": "smile"
+   },
+   "heldTo": [
+    "eye.R",
+    "eye.L",
+    "mouth.R",
+    "mouth.L"
+   ],
+   "alignment": {
+    "pinnedOn": "nose",
+    "shiftFromModelPt": [0.43, 0.45]
+   },
+   "rows": {
+    "head.top": {
+     "record": [131.67, 4.67],
+     "held": false,
+     "found": [128.48, 0.48],
+     "errPt": 3.72,
+     "offsetPt": [-1.67, -3.33],
+     "pass": true,
+     "note": "reported, never held: the sheet draws the tuft differently in every panel"
+    },
+    "nose": {
+     "record": [137.55, 90.88],
+     "held": false,
+     "found": [137.54, 90.89],
+     "errPt": 0.01,
+     "offsetPt": [-0.01, 0.0],
+     "pass": true,
+     "note": "the render is placed here"
+    },
+    "eye.R": {
+     "record": [97.08, 92.89],
+     "held": true,
+     "found": [101.15, 90.17],
+     "errPt": 3.46,
+     "offsetPt": [3.18, -1.36],
+     "pass": false
+    },
+    "eye.L": {
+     "record": [166.05, 79.91],
+     "held": true,
+     "found": [170.94, 76.98],
+     "errPt": 4.03,
+     "offsetPt": [3.78, -1.39],
+     "pass": false
+    },
+    "mouth.R": {
+     "record": [119.59, 104.85],
+     "held": true,
+     "found": [124.1, 103.91],
+     "errPt": 3.26,
+     "offsetPt": [3.25, -0.06],
+     "pass": false
+    },
+    "mouth.L": {
+     "record": [155.55, 98.75],
+     "held": true,
+     "found": [154.37, 98.88],
+     "errPt": 0.84,
+     "offsetPt": [-0.84, -0.07],
+     "pass": true
+    }
+   },
+   "pass": false
+  }
+ },
+ "held": 4,
+ "failed": [
+  "expressions.expression.proud"
+ ],
+ "pass": false
+}

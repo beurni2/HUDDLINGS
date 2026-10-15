@@ -1,0 +1,141 @@
+{
+ "panels": {
+  "expressions.expression.happy": {
+   "eye.R": {
+    "lengthPt": 8.81,
+    "innerAboveOuterPt": 1.68,
+    "bowPt": 1.09,
+    "px": 50
+   },
+   "eye.L": {
+    "lengthPt": 7.97,
+    "innerAboveOuterPt": 2.0,
+    "bowPt": 1.1,
+    "px": 48
+   }
+  },
+  "expressions.expression.excited": {
+   "eye.R": {
+    "lengthPt": 8.36,
+    "innerAboveOuterPt": 1.76,
+    "bowPt": 0.8,
+    "px": 51
+   },
+   "eye.L": {
+    "lengthPt": 7.88,
+    "innerAboveOuterPt": 2.34,
+    "bowPt": 0.94,
+    "px": 41
+   }
+  },
+  "expressions.expression.laughing": {
+   "eye.R": {
+    "lengthPt": 8.76,
+    "innerAboveOuterPt": 1.97,
+    "bowPt": 0.89,
+    "px": 50
+   },
+   "eye.L": {
+    "lengthPt": 7.74,
+    "innerAboveOuterPt": 1.8,
+    "bowPt": 0.75,
+    "px": 30
+   }
+  },
+  "expressions.expression.curious": {
+   "eye.R": {
+    "lengthPt": 8.06,
+    "innerAboveOuterPt": 1.91,
+    "bowPt": 0.95,
+    "px": 40
+   },
+   "eye.L": {
+    "lengthPt": 8.96,
+    "innerAboveOuterPt": 1.65,
+    "bowPt": 0.93,
+    "px": 47
+   }
+  },
+  "expressions.expression.sleepy": {
+   "eye.R": {
+    "lengthPt": 8.31,
+    "innerAboveOuterPt": 1.59,
+    "bowPt": 1.14,
+    "px": 43
+   },
+   "eye.L": {
+    "lengthPt": 8.32,
+    "innerAboveOuterPt": 1.81,
+    "bowPt": 1.16,
+    "px": 36
+   }
+  },
+  "expressions.expression.surprised": {
+   "eye.R": {
+    "lengthPt": 7.96,
+    "innerAboveOuterPt": 2.24,
+    "bowPt": 0.82,
+    "px": 36
+   },
+   "eye.L": {
+    "lengthPt": 7.72,
+    "innerAboveOuterPt": 1.83,
+    "bowPt": 0.87,
+    "px": 33
+   }
+  },
+  "expressions.expression.shy": {
+   "eye.R": {
+    "lengthPt": 7.04,
+    "innerAboveOuterPt": 2.11,
+    "bowPt": 0.9,
+    "px": 34
+   },
+   "eye.L": {
+    "lengthPt": 8.2,
+    "innerAboveOuterPt": 2.34,
+    "bowPt": 0.97,
+    "px": 38
+   }
+  },
+  "expressions.expression.proud": {
+   "eye.R": {
+    "lengthPt": 8.98,
+    "innerAboveOuterPt": 1.72,
+    "bowPt": 1.07,
+    "px": 42
+   },
+   "eye.L": {
+    "lengthPt": 6.94,
+    "innerAboveOuterPt": 2.14,
+    "bowPt": 0.91,
+    "px": 30
+   }
+  },
+  "expressions.expression.mischievous": {
+   "eye.R": {
+    "lengthPt": 9.83,
+    "innerAboveOuterPt": 2.28,
+    "bowPt": -0.51,
+    "px": 59
+   },
+   "eye.L": {
+    "lengthPt": 6.8,
+    "innerAboveOuterPt": 1.38,
+    "bowPt": 0.9,
+    "px": 32
+   }
+  }
+ },
+ "summary": {
+  "innerAboveOuterPt": [
+   1.38,
+   2.34
+  ],
+  "largestTiltPt": 2.34,
+  "bowPt": [
+   -0.51,
+   1.16
+  ]
+ }
+}

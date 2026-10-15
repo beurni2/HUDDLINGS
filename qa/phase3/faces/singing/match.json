@@ -1,0 +1,167 @@
+{
+ "species": "dog",
+ "preset": "singing",
+ "renderFaceRollDeg": -3.98,
+ "still": {
+  "still": "face_singing",
+  "clip": "face_singing",
+  "views": {
+   "body": "front",
+   "head": "front"
+  },
+  "ppp": 3,
+  "sizePx": [607, 570],
+  "rootPx": [306, 517]
+ },
+ "thresholds": {
+  "landmarkShareOfHead": 0.03,
+  "landmarkPt": 2.8,
+  "reachShareOfHead": 0.08,
+  "touchShareOfHead": 0.05,
+  "topShareOfHead": 0.15,
+  "pinReachShareOfHead": 0.2,
+  "pinRounds": 4,
+  "pinSettledPx": 0.05,
+  "subsamples": 4,
+  "softL": [50, 70],
+  "endPx": 2.0,
+  "eyeMinPx": 20,
+  "noseCorePx": 5
+ },
+ "records": {
+  "expressions.expression.happy": {
+   "crop": "expressions.expression.happy",
+   "ptPerCropPx": 0.67881,
+   "rollDeg": -11.79,
+   "turnDeg": -7.81,
+   "drawn": {
+    "eyes": "open",
+    "mouth": "open"
+   },
+   "heldTo": [],
+   "alignment": {
+    "pinnedOn": "nose",
+    "shiftFromModelPt": [0.45, 0.46]
+   },
+   "rows": {
+    "head.top": {
+     "record": [123.5, 4.6],
+     "held": false,
+     "found": [119.5, 2.6],
+     "errPt": 3.04,
+     "offsetPt": [-2.38, -1.88],
+     "pass": true,
+     "note": "reported, never held: the sheet draws the tuft differently in every panel"
+    },
+    "nose": {
+     "record": [131.92, 106.97],
+     "held": false,
+     "found": [131.92, 106.98],
+     "errPt": 0.01,
+     "offsetPt": [-0.01, 0.01],
+     "pass": true,
+     "note": "the render is placed here"
+    },
+    "eye.R": {
+     "record": [95.03, 101.48],
+     "held": false,
+     "found": [93.98, 107.03],
+     "errPt": 3.84,
+     "offsetPt": [-1.47, 3.54],
+     "pass": true
+    },
+    "eye.L": {
+     "record": [161.44, 87.62],
+     "held": false,
+     "found": [166.47, 91.92],
+     "errPt": 4.49,
+     "offsetPt": [2.75, 3.55],
+     "pass": true
+    },
+    "mouth.R": {
+     "record": [115.29, 120.4],
+     "held": false,
+     "missing": true,
+     "pass": true
+    },
+    "mouth.L": {
+     "record": [151.07, 113.49],
+     "held": false,
+     "missing": true,
+     "pass": true
+    }
+   },
+   "pass": true
+  },
+  "expressions.expression.laughing": {
+   "crop": "expressions.expression.laughing",
+   "ptPerCropPx": 0.70232,
+   "rollDeg": -20.01,
+   "turnDeg": -16.03,
+   "drawn": {
+    "eyes": "happy",
+    "mouth": "laugh"
+   },
+   "heldTo": [
+    "eye.R",
+    "eye.L"
+   ],
+   "alignment": {
+    "pinnedOn": "nose",
+    "shiftFromModelPt": [0.45, 0.46]
+   },
+   "rows": {
+    "head.top": {
+     "record": [100.71, 4.59],
+     "held": false,
+     "found": [96.5, 4.67],
+     "errPt": 2.96,
+     "offsetPt": [-2.8, -0.96],
+     "pass": true,
+     "note": "reported, never held: the sheet draws the tuft differently in every panel"
+    },
+    "nose": {
+     "record": [121.57, 103.43],
+     "held": false,
+     "found": [121.57, 103.43],
+     "errPt": 0.0,
+     "offsetPt": [0.0, 0.0],
+     "pass": true,
+     "note": "the render is placed here"
+    },
+    "eye.R": {
+     "record": [85.09, 108.74],
+     "held": true,
+     "found": [85.28, 108.66],
+     "errPt": 0.15,
+     "offsetPt": [0.15, -0.01],
+     "pass": true
+    },
+    "eye.L": {
+     "record": [152.25, 84.28],
+     "held": true,
+     "found": [152.57, 84.2],
+     "errPt": 0.23,
+     "offsetPt": [0.23, 0.02],
+     "pass": true
+    },
+    "mouth.R": {
+     "record": [104.7, 118.13],
+     "held": false,
+     "missing": true,
+     "pass": true
+    },
+    "mouth.L": {
+     "record": [142.83, 104.95],
+     "held": false,
+     "missing": true,
+     "pass": true
+    }
+   },
+   "pass": true
+  }
+ },
+ "held": 2,
+ "failed": [],
+ "pass": true
+}

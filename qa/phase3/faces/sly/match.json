@@ -1,0 +1,111 @@
+{
+ "species": "dog",
+ "preset": "sly",
+ "renderFaceRollDeg": -3.98,
+ "still": {
+  "still": "face_sly",
+  "clip": "face_sly",
+  "views": {
+   "body": "front",
+   "head": "front"
+  },
+  "ppp": 3,
+  "sizePx": [504, 591],
+  "rootPx": [268, 538]
+ },
+ "thresholds": {
+  "landmarkShareOfHead": 0.03,
+  "landmarkPt": 2.8,
+  "reachShareOfHead": 0.08,
+  "touchShareOfHead": 0.05,
+  "topShareOfHead": 0.15,
+  "pinReachShareOfHead": 0.2,
+  "pinRounds": 4,
+  "pinSettledPx": 0.05,
+  "subsamples": 4,
+  "softL": [50, 70],
+  "endPx": 2.0,
+  "eyeMinPx": 20,
+  "noseCorePx": 5
+ },
+ "records": {
+  "expressions.expression.mischievous": {
+   "crop": "expressions.expression.mischievous",
+   "ptPerCropPx": 0.69432,
+   "rollDeg": -11.79,
+   "turnDeg": -7.81,
+   "drawn": {
+    "eyes": "wink",
+    "mouth": "cheeky"
+   },
+   "heldTo": [
+    "eye.R",
+    "eye.L",
+    "mouth.R",
+    "mouth.L"
+   ],
+   "alignment": {
+    "pinnedOn": "nose",
+    "shiftFromModelPt": [0.43, 0.47]
+   },
+   "rows": {
+    "head.top": {
+     "record": [137.56, 4.66],
+     "held": false,
+     "found": [138.21, 5.58],
+     "errPt": 0.78,
+     "offsetPt": [0.31, 0.72],
+     "pass": true,
+     "note": "reported, never held: the sheet draws the tuft differently in every panel"
+    },
+    "nose": {
+     "record": [150.47, 107.47],
+     "held": false,
+     "found": [150.47, 107.46],
+     "errPt": 0.0,
+     "offsetPt": [0.0, 0.0],
+     "pass": true,
+     "note": "the render is placed here"
+    },
+    "eye.R": {
+     "record": [107.4, 101.18],
+     "held": true,
+     "found": [114.77, 104.64],
+     "errPt": 5.66,
+     "offsetPt": [4.52, 3.4],
+     "pass": false
+    },
+    "eye.L": {
+     "record": [172.15, 87.67],
+     "held": true,
+     "found": [181.95, 89.63],
+     "errPt": 6.94,
+     "offsetPt": [6.39, 2.73],
+     "pass": false
+    },
+    "mouth.R": {
+     "record": [126.59, 117.61],
+     "held": true,
+     "found": [135.72, 122.02],
+     "errPt": 7.04,
+     "offsetPt": [5.58, 4.3],
+     "pass": false
+    },
+    "mouth.L": {
+     "record": [166.57, 113.66],
+     "held": true,
+     "found": [169.67, 115.18],
+     "errPt": 2.4,
+     "offsetPt": [1.89, 1.47],
+     "pass": true
+    }
+   },
+   "pass": false
+  }
+ },
+ "held": 4,
+ "failed": [
+  "expressions.expression.mischievous"
+ ],
+ "pass": false
+}

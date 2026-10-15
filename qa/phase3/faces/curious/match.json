@@ -1,0 +1,93 @@
+{
+ "species": "dog",
+ "preset": "curious",
+ "renderFaceRollDeg": -3.98,
+ "still": {
+  "still": "face_curious",
+  "clip": "face_curious",
+  "views": {
+   "body": "front",
+   "head": "front"
+  },
+  "ppp": 3,
+  "sizePx": [504, 591],
+  "rootPx": [268, 538]
+ },
+ "thresholds": {
+  "landmarkShareOfHead": 0.03,
+  "landmarkPt": 2.8,
+  "reachShareOfHead": 0.08,
+  "touchShareOfHead": 0.05,
+  "topShareOfHead": 0.15,
+  "pinReachShareOfHead": 0.2,
+  "pinRounds": 4,
+  "pinSettledPx": 0.05,
+  "subsamples": 4,
+  "softL": [50, 70],
+  "endPx": 2.0,
+  "eyeMinPx": 20,
+  "noseCorePx": 5
+ },
+ "records": {
+  "expressions.expression.curious": {
+   "crop": "expressions.expression.curious",
+   "ptPerCropPx": 0.73381,
+   "rollDeg": 21.15,
+   "turnDeg": 25.13,
+   "drawn": {
+    "eyes": "open",
+    "mouth": "downturned"
+   },
+   "heldTo": [
+    "eye.R",
+    "eye.L"
+   ],
+   "alignment": {
+    "pinnedOn": "nose",
+    "shiftFromModelPt": [0.49, 0.43]
+   },
+   "rows": {
+    "head.top": {
+     "record": [110.82, 29.65],
+     "held": false,
+     "found": [100.0, 36.72],
+     "errPt": 9.49,
+     "offsetPt": [-5.53, 7.7],
+     "pass": true,
+     "note": "reported, never held: the sheet draws the tuft differently in every panel"
+    },
+    "nose": {
+     "record": [94.55, 128.84],
+     "held": false,
+     "found": [94.55, 128.84],
+     "errPt": 0.0,
+     "offsetPt": [0.0, 0.0],
+     "pass": true,
+     "note": "the render is placed here"
+    },
+    "eye.R": {
+     "record": [75.6, 105.67],
+     "held": true,
+     "found": [67.93, 107.25],
+     "errPt": 5.75,
+     "offsetPt": [-4.83, 3.11],
+     "pass": false
+    },
+    "eye.L": {
+     "record": [133.51, 128.08],
+     "held": true,
+     "found": [128.85, 130.83],
+     "errPt": 3.97,
+     "offsetPt": [-2.46, 3.12],
+     "pass": false
+    }
+   },
+   "pass": false
+  }
+ },
+ "held": 2,
+ "failed": [
+  "expressions.expression.curious"
+ ],
+ "pass": false
+}

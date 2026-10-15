@@ -1,0 +1,51 @@
+== no plant
+✔ every face state is on the allowlist, and no state, part or preset is named for sorrow (51.600646ms)
+✔ every mouth keeps its corners at or above its middle, as drawn in the front (163.71331ms)
+✔ every brow is an arc that bows up with its ends level within the sheets' tilt, as drawn in the front (105.724485ms)
+✔ no face clip turns an ear in past the lowered state, only the sleepy face lowers it, and the lowered ear stays in sight (1.600881ms)
+✔ the face clips are what presets.ts writes: one per preset drawn now, sound, at the frame each primary panel draws (4.025585ms)
+✔ the stars draw only beside the sparkle eyes, and every eye state draws its own drawing (0.415876ms)
+== planted frown: the smile's tips hung 7.6 pt lower
+✔ every face state is on the allowlist, and no state, part or preset is named for sorrow (60.002118ms)
+✖ every mouth keeps its corners at or above its middle, as drawn in the front (182.760609ms)
+✔ every brow is an arc that bows up with its ends level within the sheets' tilt, as drawn in the front (115.130728ms)
+✔ no face clip turns an ear in past the lowered state, only the sleepy face lowers it, and the lowered ear stays in sight (1.749217ms)
+✔ the face clips are what presets.ts writes: one per preset drawn now, sound, at the frame each primary panel draws (8.816951ms)
+✔ the stars draw only beside the sparkle eyes, and every eye state draws its own drawing (0.384905ms)
+✖ every mouth keeps its corners at or above its middle, as drawn in the front (182.760609ms)
+  AssertionError [ERR_ASSERTION]: the smile mouth
+  + actual - expected
+  + 'its left corner sits 3.30 pt below its middle'
+== planted slant: the neutral brow's inner end 4 pt higher
+✔ every face state is on the allowlist, and no state, part or preset is named for sorrow (51.172156ms)
+✔ every mouth keeps its corners at or above its middle, as drawn in the front (147.795609ms)
+✖ every brow is an arc that bows up with its ends level within the sheets' tilt, as drawn in the front (114.263153ms)
+✔ no face clip turns an ear in past the lowered state, only the sleepy face lowers it, and the lowered ear stays in sight (1.598259ms)
+✔ the face clips are what presets.ts writes: one per preset drawn now, sound, at the frame each primary panel draws (4.090569ms)
+✔ the stars draw only beside the sparkle eyes, and every eye state draws its own drawing (0.417136ms)
+✖ every brow is an arc that bows up with its ends level within the sheets' tilt, as drawn in the front (114.263153ms)
+  AssertionError [ERR_ASSERTION]: brow.L neutral
+  + actual - expected
+  + "its inner end stands 4.87 pt above the other, past the sheets' 2.34 pt"
+== planted droop: face_shy's left ear turned 12 degrees in
+✔ every face state is on the allowlist, and no state, part or preset is named for sorrow (45.912666ms)
+✔ every mouth keeps its corners at or above its middle, as drawn in the front (156.48747ms)
+✔ every brow is an arc that bows up with its ends level within the sheets' tilt, as drawn in the front (112.116811ms)
+✖ no face clip turns an ear in past the lowered state, only the sleepy face lowers it, and the lowered ear stays in sight (1.2557ms)
+✖ the face clips are what presets.ts writes: one per preset drawn now, sound, at the frame each primary panel draws (7.271028ms)
+✔ the stars draw only beside the sparkle eyes, and every eye state draws its own drawing (0.351182ms)
+✖ no face clip turns an ear in past the lowered state, only the sleepy face lowers it, and the lowered ear stays in sight (1.2557ms)
+  AssertionError [ERR_ASSERTION]: face_shy
+  + actual - expected
+  + "ear.L turns 12° in, past the lowered state's 7°"
+✖ the face clips are what presets.ts writes: one per preset drawn now, sound, at the frame each primary panel draws (7.271028ms)
+  AssertionError [ERR_ASSERTION]: face_shy.json is stale: node characters/dog/src/faceClips.ts
+  + actual - expected
+  +   '  "tracks": { "ear.L": { "rot": [[0, 12]] }, "ear.R": { "rot": [[0, -3]] } },\n' +
+== plants taken out
+✔ every face state is on the allowlist, and no state, part or preset is named for sorrow (44.418023ms)
+✔ every mouth keeps its corners at or above its middle, as drawn in the front (166.052843ms)
+✔ every brow is an arc that bows up with its ends level within the sheets' tilt, as drawn in the front (118.550268ms)
+✔ no face clip turns an ear in past the lowered state, only the sleepy face lowers it, and the lowered ear stays in sight (1.742841ms)
+✔ the face clips are what presets.ts writes: one per preset drawn now, sound, at the frame each primary panel draws (4.501468ms)
+✔ the stars draw only beside the sparkle eyes, and every eye state draws its own drawing (0.481917ms)

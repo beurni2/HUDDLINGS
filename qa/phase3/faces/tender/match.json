@@ -1,0 +1,36 @@
+{
+ "species": "dog",
+ "preset": "tender",
+ "renderFaceRollDeg": -3.98,
+ "still": {
+  "still": "face_tender",
+  "clip": "face_tender",
+  "views": {
+   "body": "front",
+   "head": "front"
+  },
+  "ppp": 3,
+  "sizePx": [533, 570],
+  "rootPx": [269, 517]
+ },
+ "thresholds": {
+  "landmarkShareOfHead": 0.03,
+  "landmarkPt": 2.8,
+  "reachShareOfHead": 0.08,
+  "touchShareOfHead": 0.05,
+  "topShareOfHead": 0.15,
+  "pinReachShareOfHead": 0.2,
+  "pinRounds": 4,
+  "pinSettledPx": 0.05,
+  "subsamples": 4,
+  "softL": [50, 70],
+  "endPx": 2.0,
+  "eyeMinPx": 20,
+  "noseCorePx": 5
+ },
+ "records": {},
+ "held": 0,
+ "failed": [],
+ "pass": true,
+ "note": "no panel judges tender (refmap/faces.json): it is judged by eye"
+}
