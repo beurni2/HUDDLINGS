@@ -67,6 +67,10 @@ export const C = {
   /** The line round the paws and their soles: the outline 15% of the way to the soft shadow, a greyer brown,
    * #9E7B5F against the sheet's #9A7B5E to #977C61. */
   pawLine: mix(outline, need(printed, "shadow"), 0.15),
+  /** The line under the paws where they meet the ground, the sheet's darkest line: the outline 30% of the way to
+   * the printed dark brown, #775439 against the side turnaround's #795535 under the hind paw and #795030 at the near
+   * front paw's toe end. */
+  soleLine: mix(outline, dark, 0.3),
   /** The line round the haunches: the outline 35% of the way to the soft shadow, #B39479 against the sheet's
    * #BB9370 to #BE997E. */
   haunchLine: mix(outline, need(printed, "shadow"), 0.35),
