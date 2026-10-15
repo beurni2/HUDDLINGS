@@ -61,9 +61,11 @@ export const C = {
   /** The outline warmed toward the ears' deep brown: the sheet's line round the haunches, the paws and under the
    * chin, #9F6D4A against the sheet's #A06D48 to #A36E4F there. */
   warmLine: mix(outline, mix(darken(multiply(marking, marking), 0.12), marking, 0.33), 0.4),
-  /** The line under the paws' soles, the darkest of the outer lines, where the light is furthest: the warm line 30%
-   * of the way to the printed dark brown, #81573A against the sheet's #7B5330 to #835C3C under the paws. */
-  soleLine: mix(mix(outline, mix(darken(multiply(marking, marking), 0.12), marking, 0.33), 0.4), dark, 0.3),
+  /** The line under the paws' soles, the darkest of the outer lines, where the light is furthest: the warm line a
+   * fifth of the way to the printed dark brown, #8B5E3F (L* 44) against the sheet's L* 37 to 51 under the paws
+   * (#876144, #89644A, #9A7250 in front, #7F5338 to #855C3E in the turned views), whose soft line peaks lighter than
+   * its core. */
+  soleLine: mix(mix(outline, mix(darken(multiply(marking, marking), 0.12), marking, 0.33), 0.4), dark, 0.2),
   /** The faint line where one part lies over another (a leg over the haunch, a hind paw's top): the warm line
    * halfway to the fur's shade, #CEA889 against the sheet's #CCAB8C to #D6AE8B. */
   softLine: mix(mix(outline, mix(darken(multiply(marking, marking), 0.12), marking, 0.33), 0.4), furShade, 0.5),
@@ -121,12 +123,13 @@ const ladder = (stops: string[], n: number) => Array.from({ length: n }, (_, k) 
 });
 
 /**
- * The outer line by light and place (parts/lines.ts, DECISIONS 74), each a ladder of 11 tones from lit (0) through
- * the side away from the light (0.5) to the darkest place (1), where a part meets the ground or tucks under another:
- * - `cream`, round the cream fur: the warm line halfway to the cream where the light falls (#CFB199, L* 74, against
- *   the sheet's L* 66 to 81 on the crown, the topknot and the chest's lit edges), 20% of the way where it turns
- *   away (#B2886A, L* 60, against the sheet's 52 to 62 down the paws' and haunches' far sides), and the sole's line
- *   under the paws (#81573A, L* 41, against the sheet's 37 to 46);
+ * The outer line by light and place (parts/lines.ts, DECISIONS 74, 79), each a ladder of 11 tones from lit (0)
+ * through the side away from the light (0.5) to the darkest place (1), where a part meets the ground or tucks under
+ * another:
+ * - `cream`, round the cream fur: the warm line a third of the way to the cream where the light falls (#BF9A7E,
+ *   L* 66, against the sheet's crown and topknot lines at their core, #B49880, #BC9A77, #BD9B80, #B19371, #C49A78,
+ *   L* 60 to 67), 12% of the way where it turns away (about L* 56, against the sheet's 50 to 62 down the paws' and
+ *   haunches' far sides), and the sole's line under the paws (#8B5E3F, L* 44, against the sheet's 37 to 51);
  * - `tan`, round the ears and where the line lies on the tan: the ears' outline where lit (#B57349, L* 55),
  *   halfway between the warm line and the ears' deep line away from the light (#A1653E, L* 49), and the deep line a
  *   fifth of the way to the printed dark brown where an ear lies on the body (#8E512C, L* 41), against the sheet's
@@ -134,7 +137,7 @@ const ladder = (stops: string[], n: number) => Array.from({ length: n }, (_, k) 
  * Warm all through (hue 55 to 66, C* 18 to 44): no grey-taupe.
  */
 export const LINES = {
-  cream: ladder([mix(C.warmLine, fur, 0.5), mix(C.warmLine, fur, 0.2), C.soleLine], 11),
+  cream: ladder([mix(C.warmLine, fur, 0.33), mix(C.warmLine, fur, 0.12), C.soleLine], 11),
   tan: ladder([C.earEdge, mix(C.warmLine, C.earLine, 0.5), mix(C.earLine, dark, 0.2)], 11),
 };
 

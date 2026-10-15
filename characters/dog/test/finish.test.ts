@@ -54,9 +54,11 @@ test("the line ladders darken from lit to the ground, warm all through, and are 
       assert.ok(palette.includes(h), `${h} is not in the palette`);
     }
   }
-  // The darkest cream tone is the soles' line; the lit cream tone is far lighter, toward the sheet's crown (L* 66 to 85).
+  // The darkest cream tone is the soles' line; the lit cream tone is the sheet's crown and topknot line at its core
+  // (L* 60 to 67 in the three turnaround crops, DECISIONS 79), at the light end of the sheet's L* 66 to 85 on the cream.
   assert.equal(LINES.cream[10], C.soleLine);
-  assert.ok(lab(LINES.cream[0]!)[0] > 70, `the lit cream line ${LINES.cream[0]} is darker than L* 70`);
+  const lit = lab(LINES.cream[0]!)[0];
+  assert.ok(lit >= 64 && lit <= 70, `the lit cream line ${LINES.cream[0]} is L* ${lit.toFixed(1)}, not the sheet's crown line (64 to 70)`);
 });
 
 // A round part sitting on the ground, typed clockwise from its top: its lit upper left, its foot on the ground.

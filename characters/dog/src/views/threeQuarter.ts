@@ -148,21 +148,24 @@ head = furSpan(head, [3.2, -137.4], [0.4, -135.5]);
 head = furEdge(head, [-3.8, -135], [-15.4, -131], [{ len: 1.8, w: 1.3, lean: 0.3 }, { len: 0.9, w: 0.9, lean: 0.25 }, { len: 1.4, w: 1.1, lean: 0.3 }], 0.42);
 
 // The topknot (parts/topknot.ts): three separate curls of fur, seen turned, as the sheet draws them, back to front.
-// The left curl low and broad, pointing out to its tip at the left (x -67.2), its line running from under the tip
-// round it and over its crown (y -158.4) to where it tucks behind the middle one; the right curl low, rising from
-// behind the middle one over its crown (y -157) to its tip at the right (x -9.6), which hooks back in under itself;
-// and in front the tall middle curl, its top the head's highest point (y -164.5), its right foot looping in under it.
-// Each curl's hidden foot lies in the crown, feathered into it.
+// The left curl low and broad, a leaf pointing out to its tip at the left (x -67.2), the crown's line running in
+// under it to a V at its underside, and its own line from there along its underside, round the tip and over its
+// crown (y -158.4) to where it tucks behind the middle one; the right curl low, rising from behind the middle one
+// over its crown (y -157.4) to a V at the right (x -12.2), where the crown's line runs on down the head and a stroke
+// runs back along its underside into the fur; and in front the tall middle curl, its top the head's highest point
+// (y -164.5), its line dipping into the V at its left foot and running on down into the fur, its right side coming
+// down into the fur behind the right curl's start. Each curl's hidden foot lies in the crown, feathered into it.
 const CURLS: Curl[] = [
   { nodes: [[-67.2, -153.8], [-65.4, -156.2], [-61.4, -157.8], [-56.6, -158.4], [-52.2, -157.6], [-48.8, -154.8], [-46.4, -151], [-50, -147.4], [-56, -148.2],
     [-61.4, -150.4], [-64.6, -151.8]],
-    line: { from: [-61.6, -150.4], to: [-48.8, -154.8], taper: [2, 2.4] }, hooks: [[[-64.4, -152.6], [-62, -152.4], [-59.4, -151.6]]] },
-  { nodes: [[-32, -152], [-30, -155.2], [-26.4, -156.6], [-21.4, -157], [-16.4, -156.2], [-12.2, -153.8], [-9.6, -151], [-11.4, -148.8], [-16.6, -147.6],
+    line: { from: [-61.6, -150.4], to: [-48.8, -154.8], taper: [0.8, 1] }, tip: [[-66.6, -152.8], [-66.8, -154.8]] },
+  { nodes: [[-32, -152], [-30, -155.4], [-26.4, -157.2], [-21, -157.6], [-16.4, -156.6], [-13.4, -154.6], [-12.2, -152.4], [-11.4, -149.6], [-16.6, -147.6],
     [-24, -147], [-31, -148.4]],
-    line: { from: [-30.4, -155], to: [-16.6, -147.6], taper: [2.4, 1.4] }, hooks: [[[-10.4, -151.2], [-12.6, -150.4], [-15.2, -150.2]]] },
+    line: { from: [-30.4, -155.2], to: [-11.4, -149.8], taper: [1, 0.4] }, into: [[[-12.4, -152.3], [-15.6, -151.6], [-19.4, -151.1]]],
+    tip: [[-12.6, -153.4], [-11.8, -151.2]] },
   { nodes: [[-48.6, -154.4], [-46.4, -159.4], [-41.6, -163], [-35.6, -164.5], [-31, -162.8], [-29.4, -159.4], [-30.2, -155.6], [-31.6, -153.6], [-33, -150],
     [-40, -146.6], [-46, -149]],
-    line: { from: [-48.6, -154.4], to: [-31.6, -153.6], taper: [2, 2.2] }, hooks: [[[-31.4, -153.8], [-33, -153.2], [-34.8, -153.8], [-35.6, -155.2]]] },
+    line: { from: [-48.6, -154.4], to: [-31.6, -153.6], taper: [0.6, 2.2] }, into: [[[-48.7, -154.7], [-48.2, -152.8], [-47.2, -151.2]]] },
 ];
 const tuftShapes = curlShapes(CURLS);
 
@@ -287,8 +290,8 @@ const headSpans: LitSpan[] = [
   { from: [-91, -102], to: [-82.4, -139.6], on: "tan", under: 0.6, taper: 4 },
   { from: [-16.4, -120], to: [-17, -73], on: "tan", under: 0.6, taper: 4 },
   { from: [-74, -62.6], to: [-91, -74.8], under: 0.45, taper: 4 },
-  { from: [-85.4, -138.6], to: [-66, -150.6], taper: 1.4 },
-  { from: [-11.4, -149.6], to: [0.8, -135.4], taper: 1.4 },
+  { from: [-85.4, -138.6], to: [-61.8, -149.8], taper: [1.4, 0.4] },
+  { from: [-15, -149.6], to: [0.8, -135.4], taper: 1.4 },
 ];
 /** head.line: the head's outline as its own unclipped region, drawn after the head's clip group, reaching 0.5 pt past the head. */
 function headLinePiece(): Piece {

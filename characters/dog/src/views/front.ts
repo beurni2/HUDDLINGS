@@ -295,25 +295,27 @@ const crownLocks = [{ len: 0.85, w: 1, lean: 0.35 }, { len: 0.55, w: 0.8, lean: 
 head = furEdge(furEdge(head, [-35.6, -145.1], [-38.6, -142.6], crownLocks, 0.26), [38.4, -144.6], [35.4, -147], lefthandOf(crownLocks), 0.26);
 
 // The topknot (parts/topknot.ts): three separate curls of fur, as the sheet draws them, back to front. The left
-// curl low and broad, its pointed tip at the crown's line hooking back under itself, its crown at y -156.4, tucking
-// behind the middle one at the notch (-11.6, -153); the right curl a little higher (its crown at y -158.4), coming out
-// from behind the middle one and ending in a tip at (22.4, -152.6) that hooks back under itself; and in front the
-// middle curl, tall and round (its top at y -164.3, the head's highest point), whose right side turns in at its foot
-// and loops up inside itself. Each curl's hidden foot runs along under the crown, feathered into it.
+// curl low and broad, its crown at y -156.4, its pointed tip at the crown's line (-30.4, -150.2), where the line dips
+// into a V and runs on along the curl's underside into the fur, and its other end tucking behind the middle one at
+// the notch (-11.6, -153); the right curl a little higher (its crown at y -158), coming out from behind the middle one
+// and ending in a V at (21.8, -153), where its underside's stroke runs back into the fur and the crown's line runs on
+// down the head; and in front the middle curl, tall and round (its top at y -164.3, the head's highest point), its
+// line dipping into the V at its left foot and on down into the fur, its right side coming down into the fur behind
+// the right curl's start. Each curl's hidden foot runs along under the crown, feathered into it.
 const TUFT_CREASE = uid("blur");
 const CURLS: Curl[] = [
   { nodes: [[-30.4, -150.2], [-29.6, -152.8], [-27, -155], [-22.8, -156.3], [-18.2, -156.4], [-14.4, -155.4], [-11.6, -153], [-9.4, -149.6], [-13, -146.6],
     [-22, -146.4], [-27.6, -148.4]],
-    line: { from: [-30.2, -150.4], to: [-11.6, -153], taper: [1.5, 2.5] }, hooks: [[[-30, -150], [-28, -149.4], [-25.6, -149.4]]], tip: [[-29.6, -149.4], [-30.8, -151.2]] },
-  { nodes: [[3, -152], [5.4, -156.2], [8.8, -158], [13.2, -158.4], [17.6, -157.4], [20.8, -155.6], [22.4, -152.6], [21.2, -150.6], [16, -148.6], [8, -147.6]],
-    line: { from: [5.2, -156], to: [22.4, -152.6], taper: [2.5, 1.5] }, hooks: [[[22.2, -152.4], [20.4, -151.4], [18, -151.2]]], tip: [[22.6, -153.4], [21.6, -151]] },
+    line: { from: [-30.2, -150.4], to: [-11.6, -153], taper: [0.6, 1] }, into: [[[-30.6, -150.5], [-27.4, -149.9], [-23.6, -149.4]]], tip: [[-29.6, -149.4], [-30.8, -151.2]] },
+  { nodes: [[3, -152], [5.4, -155.8], [8.8, -157.6], [13.2, -158], [17.6, -157.2], [20.6, -155.6], [21.8, -153], [21.2, -150.6], [16, -148.6], [8, -147.6]],
+    line: { from: [5.2, -155.6], to: [21.2, -150.8], taper: [1, 0.4] }, into: [[[22, -152.9], [19.2, -152.6], [15.4, -152.2]]], tip: [[22, -153.8], [21.6, -151.6]] },
   { nodes: [[-11.8, -152.6], [-10.4, -156.8], [-7.6, -160.6], [-3.6, -163.4], [0.4, -164.3], [3.4, -163.4], [5.2, -161], [5.8, -158], [4.8, -155.2], [2.4, -151],
     [-4, -147], [-10, -148]],
-    line: { from: [-11.8, -152.6], to: [4.8, -155.2], taper: [2, 2.5] },
+    line: { from: [-11.8, -152.6], to: [3.6, -152.8], taper: [0.6, 2.4] },
     // A soft crease of the fur's tan down its lower middle, where the curl turns, as the sheet paints it.
     under: `<defs>${blur(TUFT_CREASE, [-8, -162, 10, 16], 0.7)}</defs>` +
       `<path d="${strokeOf([[-1.4, -158], [-2.6, -154], [-3.8, -150.4]], 1.8, { taper: 2.4, tip: 0.3 }).d}" fill="${C.marking}" opacity="0.3" filter="url(#${TUFT_CREASE})"/>`,
-    hooks: [[[4.8, -155.2], [3.4, -154], [1.8, -154.2], [0.8, -155.6]]] },
+    into: [[[-12, -152.9], [-11.2, -151.4], [-10, -150.2]]] },
 ];
 const tuftShapes = curlShapes(CURLS);
 

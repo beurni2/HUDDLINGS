@@ -14,7 +14,7 @@ import { LIMITS, reach } from "../../../draw/lint.ts";
 import { marking, part, soft, type Fade, type Paint } from "../../../draw/paint.ts";
 import { blur, join, mask, pad, piece, region, uid, type Box, type Piece } from "../../../draw/svg.ts";
 import { model } from "../model.ts";
-import { C } from "../palette.ts";
+import { C, LINES } from "../palette.ts";
 import { eye, type EyeSpec } from "../parts/eye.ts";
 import { litEdge, litMarking, litPart, type LitSpan } from "../parts/lines.ts";
 import { curlShapes, topknot, type Curl } from "../parts/topknot.ts";
@@ -170,27 +170,28 @@ const head = furEdge(furEdge(smooth([[-60.8, -59.6], [-70, -63.8], [-80.6, -67.4
   [-20, -155.8], [-4, -149], [10, -131], [17, -110], [14, -78], [-28, -63.8], [-50, -58.8]]), [-80.9, -127], [-65.8, -149.6],
 // The forehead's fur breaks into two locks below the topknot, their tips combed forward and hooking back in under
 // themselves, as the sheet draws them.
-[{ len: 2.3, w: 1, lean: -0.45 }, { len: 3, w: 1.2, lean: -0.5 }], 0.38, noteLock),
+[{ len: 1.6, w: 1, lean: -0.45 }, { len: 2.2, w: 1.2, lean: -0.5 }], 0.38, noteLock),
 // Down the back of the head, between the topknot and the ear's top, one small lock, its tip hooking in, as the sheet draws it.
-[-1.6, -147.6], [5, -138.6], [{ len: 1.1, w: 1, lean: -0.35 }], 0.32, noteLock);
+[-1.6, -147.6], [5, -138.6], [{ len: 0.7, w: 1, lean: -0.35 }], 0.32, noteLock);
 
 // The topknot (parts/topknot.ts): five curls in profile, stepping up from the forehead to the tall one and down the
 // back of the head, as the sheet draws them. The forehead's two locks are the head's own edge (above), each with its
 // own line; the topknot proper is three separate curls, back to front: a low one over the forehead, its tip combed
-// forward (x -63.2) and hooking back under itself, its crown at y -158.2; a lower one at the back, coming out from
-// behind the tall one, whose tip hooks back in (x -5.6 at y -152.6); and in front the tall middle one, a round dome
-// (the head's top, x -36.8 at y -164.5) whose front curls in and loops round inside it. Each curl's foot lies on the
-// crown, feathered into it.
+// forward (x -63.2), where the forehead's line meets its underside in a V and a stroke runs back along its underside
+// into the fur, its crown at y -158.2; a lower one at the back, coming out from behind the tall one over its crown
+// (y -158.6) to a V at its tip (x -7.2), where the head's line runs on down the back of the head; and in front the tall
+// middle one, swept back, its top the head's highest point (y -164.6), its front curling round from the V at its foot
+// (x -43.6), where its stroke runs back into the fur, its back coming down into the V behind it. Each curl's foot
+// lies on the crown, feathered into it.
 const CURLS: Curl[] = [
-  { nodes: [[-63.2, -150.8], [-62.2, -154], [-59.6, -156.6], [-56, -158.2], [-52.4, -158.2], [-49.4, -156.6], [-47.4, -153.6], [-46, -150], [-52, -147.4],
-    [-58, -147.6], [-61.6, -149]],
-    line: { from: [-63, -150.6], to: [-47.6, -154], taper: [1.4, 2.4] }, hooks: [[[-61.6, -154.4], [-59.8, -153], [-57.4, -152.4], [-55, -152.4]]] },
-  { nodes: [[-23.6, -153], [-21, -156.6], [-16.6, -157.2], [-11.6, -156.6], [-7.8, -155.2], [-5.6, -152.6], [-6.4, -150], [-12, -148.4], [-20, -147.6]],
-    line: { from: [-21.4, -156.4], to: [-6.4, -150], taper: [2.4, 1.4] }, hooks: [[[-5.9, -152.6], [-7.6, -151.4], [-10.2, -151], [-13.2, -151.2]]] },
-  { nodes: [[-48.8, -154.4], [-46.6, -158], [-43.6, -161.6], [-40.4, -163.6], [-36.8, -164.5], [-33, -164.2], [-29.4, -162.8], [-26.2, -160.6], [-23.6, -158.2],
-    [-21.8, -156.4], [-22.6, -152], [-30, -148], [-42, -148], [-48, -150.6]],
-    line: { from: [-48.8, -154.4], to: [-21.8, -156.4], taper: [2, 2] },
-    hooks: [[[-42.6, -161.2], [-43.2, -158.8], [-42, -156.6], [-39.4, -155.3], [-36.4, -154.9]]] },
+  { nodes: [[-63.2, -150.8], [-62.2, -154], [-59.6, -156.6], [-56, -158.2], [-52.4, -158.2], [-49.4, -156.8], [-46.6, -155.4], [-44.4, -152.6], [-44, -150],
+    [-52, -147.4], [-58, -147.6], [-61.6, -149]],
+    line: { from: [-63, -150.6], to: [-46.6, -155.4], taper: [0.6, 1] }, into: [[[-63, -151], [-60, -151.5], [-56.4, -151.7]]] },
+  { nodes: [[-26.6, -153.4], [-25, -157.6], [-21, -158.6], [-16, -158.4], [-11.4, -157], [-8.4, -154.6], [-7.2, -152.2], [-8.2, -149.6], [-14, -148.4], [-22, -148]],
+    line: { from: [-24.8, -157.6], to: [-7.2, -152.2], taper: [1, 0.5] }, into: [[[-7.4, -152], [-10.6, -151.5], [-14.4, -151.2]]], tip: [[-7.4, -153.2], [-7.6, -151]] },
+  { nodes: [[-43.6, -155.4], [-46.4, -158.4], [-45.6, -162.2], [-42.4, -164.4], [-37.6, -164.7], [-32.4, -164.3], [-28, -162.6], [-25, -160], [-23.6, -157.4],
+    [-24.6, -152], [-32, -148], [-40, -148], [-43.6, -151]],
+    line: { from: [-43.6, -155.4], to: [-23.6, -157.4], taper: [0.5, 1] }, into: [[[-43.8, -155.6], [-40.4, -155], [-36.6, -154.8]]], tip: [[-43.4, -154.6], [-44.6, -156.4]] },
 ];
 const tuftShapes = curlShapes(CURLS);
 
@@ -357,12 +358,13 @@ const headPaint: Paint = {
     "M-33 -106 C-37.4 -100 -40 -94 -40.4 -86 C-41 -80 -42.6 -74 -45 -70 C-46 -66 -46 -60 -45 -56 L-22 -56 L-22 -62.6 L-30 -62.6 L-30 -106Z"],
     ["M-100 -172 L20 -172 L20 -140 L-100 -140Z"], { inset: 3, toLight: 4.5 }),
   highlight: { d: headLight, colour: C.light, opacity: 0.4, blur: 4 },
-  // Each lock's tip hooks back in under itself, a hair stroke in the crown's line running back along the lock's
-  // underside, as the sheet draws them (its "<" under each tip).
-  inner: foreLocks.map(({ tip, root, notches }) => {
-    const into = v.norm(v.sub(root, tip)), up = v.norm(v.sub(notches[1], notches[0]));
-    const at = (a: number, b: number): P => v.add(tip, v.add(v.mul(into, a), v.mul(up, b)));
-    return { pts: [at(0.15, 0), at(1.4, -0.6), at(2.9, -0.8), at(4.4, -0.5)], width: 0.9, colour: C.puffLine };
+  // Where the forehead's upper lock meets the one under it, the line dips into a V and runs on as one short stroke
+  // back into the fur under the upper lock, as the sheet draws it (its "<" under each lock), in the crown line's own
+  // tone; it starts a little outside the head, where the head's clip hides its first taper.
+  inner: foreLocks.slice(1, 2).map(({ root, tip, notches }) => {
+    const V = notches[0], into = v.norm(v.sub(root, tip)), to = v.add(root, v.mul(into, 1.6));
+    const back = v.norm(v.sub(V, to));
+    return { pts: sample(smooth([v.add(V, v.mul(back, 2.4)), V, v.add(V, v.mul(v.sub(to, V), 0.5)), to], { closed: false }).segs, 8, false), width: 0.85, colour: LINES.cream[1]!, opacity: 0.9 };
   }),
 };
 
@@ -376,7 +378,7 @@ const headPaint: Paint = {
  * the puffs' warm line (`puffLine`, #A77A58 against the sheet's #AC835F), where the front's crown is lighter. Along
  * the collar's top, under the chin's fur, the collar's own contact rim (collarContact).
  */
-const [lock1, lock2, backLock] = foreLocks as [Lock, Lock, Lock];
+const [lock1, lock2] = foreLocks as [Lock, Lock, Lock];
 const headSpans: LitSpan[] = [
   // The bridge, from the nose's top to the stop, the muzzle's own line, deeper than the crown's (the sheet's #987A5F).
   { from: [-88.8, -100.6], to: [-84.6, -108.6], under: 0.55, taper: [2, 3] },
@@ -386,10 +388,8 @@ const headSpans: LitSpan[] = [
   { from: lock1.notches[0], to: lock1.notches[1], taper: 1.4 },
   { from: lock2.notches[0], to: lock2.notches[1], taper: 1.4 },
   { from: lock2.notches[1], to: [-62.2, -151.2], taper: [1.2, 3] },
-  // Down the back of the head, round its small lock, to the ear's top.
-  { from: [-14, -154], to: backLock.notches[0], taper: [3, 1.2] },
-  { from: backLock.notches[0], to: backLock.notches[1], taper: 1.4 },
-  { from: backLock.notches[1], to: [6.6, -136.4], taper: [1.2, 4] },
+  // Down the back of the head, unbroken over its small lock, to the ear's top.
+  { from: [-14, -154], to: [6.6, -136.4], taper: [3, 4] },
   // Under the chin and along the jaw (the sheet's #AC8D74).
   { from: [-61.6, -60.2], to: [-92.5, -79.4], under: 0.4, taper: 4 },
 ];

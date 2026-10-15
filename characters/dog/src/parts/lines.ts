@@ -33,8 +33,10 @@ export interface LitOptions {
   reach?: number;
 }
 
-/** The widths: lit, turned away, darkest. */
-const WIDTH = { lit: 1.2, away: 1.55, deep: 1.7 };
+/** The widths: lit, turned away, darkest (the sheet's soft line peaks at about 1 to 1.5 pt even under the paws). */
+const WIDTH = { lit: 1.2, away: 1.45, deep: 1.6 };
+/** The line's soft falloff, σ in points: the sheet's line is a soft peak, never a flat plateau with hard edges. */
+const SOFT = 0.3;
 
 /** How deep a point of an edge lies, 0 to 1, from the light and the ground. */
 function depth(p: P, out: P, light: P): number {
@@ -137,7 +139,7 @@ function feather(f: { from: P; to: P }, area: Box): { defs: string; id: string }
 function clippedLines(name: string, shape: Shape, spans: LitSpan[], box: Box, paint: Paint, o: LitOptions) {
   const r = litRibbons(shape, spans, name, { ...o, light: o.light ?? paint.light });
   const clip = uid("clip");
-  const s = softened(r, box, o.blur ?? 0.15);
+  const s = softened(r, box, o.blur ?? SOFT);
   let defs = `<clipPath id="${clip}"><path d="${shapePath(shape)}"/></clipPath>${s.defs}`;
   let body = `<g clip-path="url(#${clip})">${s.body}</g>`;
   if (paint.feather) {
@@ -187,6 +189,6 @@ export const withDefaults = (defaults: Omit<LitSpan, "from" | "to">, spans: LitS
 /** head.line's lit spans: unclipped, reaching `reach` past the path, as one group with its soft edge. */
 export function litEdge(shape: Shape, spans: LitSpan[], where: string, box: Box, o: LitOptions & { reach: number }) {
   const r = litRibbons(shape, spans, where, o);
-  const s = softened(r, box, o.blur ?? 0.15);
+  const s = softened(r, box, o.blur ?? SOFT);
   return { defs: s.defs, body: s.body, lines: r.lines, outlined: r.outlined };
 }
