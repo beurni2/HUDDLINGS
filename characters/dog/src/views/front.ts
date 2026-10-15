@@ -275,8 +275,8 @@ const cheekLocks = {
   R: [{ len: 2.9, w: 1.5, lean: 0.35 }, { len: 2.1, w: 1.1, lean: 0.45 }, { len: 1.7, w: 0.85, lean: 0.55 }, { len: 0.9, w: 0.45, lean: 0.65 }],
   L: [{ len: 3.1, w: 1.6, lean: 0.3 }, { len: 1.6, w: 0.8, lean: 0.45 }, { len: 2.2, w: 1.1, lean: 0.55 }, { len: 0.9, w: 0.5, lean: 0.65 }],
 };
-const chinLocks = [{ len: 0.8, w: 0.8, lean: -0.4 }, { len: 1.2, w: 1.1, lean: -0.3 }, { len: 0.9, w: 0.9, lean: -0.2 }, { len: 1.3, w: 1.2, lean: -0.05 },
-  { len: 1, w: 1, lean: 0.1 }, { len: 1.25, w: 1.15, lean: 0.25 }, { len: 0.85, w: 0.85, lean: 0.4 }];
+const chinLocks = [{ len: 0.6, w: 0.8, lean: -0.4 }, { len: 0.95, w: 1.1, lean: -0.3 }, { len: 0.65, w: 0.9, lean: -0.2 }, { len: 0.9, w: 1.2, lean: -0.05 },
+  { len: 0.7, w: 1, lean: 0.1 }, { len: 0.95, w: 1.15, lean: 0.25 }, { len: 0.65, w: 0.85, lean: 0.4 }];
 /** Each cheek clump's tip, root and notches (path order), for its line and the shade under it. */
 const clumps: { tip: P; root: P; notches: [P, P] }[] = [];
 const noteClump = (tip: P, root: P, notches: [P, P]) => clumps.push({ tip, root, notches });

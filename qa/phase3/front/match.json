@@ -53,7 +53,7 @@
   "groundShadowLeftOut": true,
   "pass": true,
   "iouHeadAligned": 0.9785,
-  "headCentreOffsetPt": [0.02, -0.12]
+  "headCentreOffsetPt": [0.02, -0.13]
  },
  "landmarks": {
   "thresholdPt": 2.8,
@@ -68,10 +68,10 @@
    },
    "collar": {
     "how": "finder",
-    "found": [0.8, -55.19],
+    "found": [1.0, -55.35],
     "model": [1.3, -55.8],
-    "errPt": 0.79,
-    "errShareOfHead": 0.008,
+    "errPt": 0.54,
+    "errShareOfHead": 0.006,
     "pass": true
    },
    "collar.line.sheetLeft": {
@@ -84,10 +84,10 @@
    },
    "collar.line.sheetRight": {
     "how": "finder",
-    "found": [27.65, -61.4],
+    "found": [27.65, -61.79],
     "model": [27.6, -61.8],
-    "errPt": 0.4,
-    "errShareOfHead": 0.004,
+    "errPt": 0.05,
+    "errShareOfHead": 0.001,
     "pass": true
    },
    "ear.L.root": {
@@ -248,7 +248,7 @@
     "heldTo": "#FFF4E8",
     "heldBy": "palette.fur",
     "deltaE2000": 0.0,
-    "pixels": 14795,
+    "pixels": 14774,
     "pass": true
    },
    "furShade": {
@@ -256,7 +256,7 @@
     "heldTo": "#FDE3C8",
     "heldBy": "palettePainted.furShade",
     "deltaE2000": 0.44,
-    "pixels": 1367,
+    "pixels": 1362,
     "pass": true
    },
    "eyes": {
@@ -324,11 +324,11 @@
     "pass": true
    },
    "collar": {
-    "dominant": "#79B0E0",
+    "dominant": "#79B1E0",
     "heldTo": "#7DB7E8",
     "heldBy": "palette.collar",
-    "deltaE2000": 1.95,
-    "pixels": 325,
+    "deltaE2000": 1.69,
+    "pixels": 351,
     "pass": true
    },
    "tag": {
@@ -336,7 +336,7 @@
     "heldTo": "#F4C542",
     "heldBy": "palette.tag",
     "deltaE2000": 0.0,
-    "pixels": 324,
+    "pixels": 327,
     "pass": true
    }
   },
@@ -492,7 +492,7 @@
  },
  "advisory": {
   "edgeDistance": {
-   "meanRenderToSheetPt": 0.62,
+   "meanRenderToSheetPt": 0.61,
    "p95RenderToSheetPt": 1.81,
    "meanSheetToRenderPt": 0.61,
    "p95SheetToRenderPt": 1.74,
@@ -501,12 +501,12 @@
   },
   "partIoU": {
    "collar": {
-    "iou": 0.659,
+    "iou": 0.704,
     "target": 0.85,
     "meetsTarget": false
    },
    "tag": {
-    "iou": 0.653,
+    "iou": 0.648,
     "target": 0.85,
     "meetsTarget": false
    },
@@ -525,8 +525,8 @@
    "set": "3x",
    "pages": 1,
    "pageAreaPx": 1048576,
-   "allRegionsShare": 0.508,
-   "thisStillShare": 0.508
+   "allRegionsShare": 0.507,
+   "thisStillShare": 0.507
   }
  },
  "failed": [],
