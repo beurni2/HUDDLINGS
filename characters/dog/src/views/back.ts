@@ -113,8 +113,8 @@ const earRNodes: Node[] = [[28.6, -142.6], [36.4, -145.2], [41, -145.4], [44, -1
   [72.2, -112.6], [75, -105.8], [76, -97], [75.6, -88.6], [73.2, -82], [68.6, -76.8], [62.2, -72.4], [54, -69.8], [48, -68.8], [44, -69.6],
   [40.4, -71.8], [38.4, -76], [36.2, -88], [35.4, -104], [31.8, -126]];
 /** Each ear's foot from its outer side in: a small step, a middle clump and the big inner clump, lowest under its middle. */
-const footLocks: Lock[] = [{ len: 0.8, w: 0.55, lean: 0.3 }, { len: 1.5, w: 1.4, lean: 0.2 }, { len: 1.6, w: 2.2, lean: 0.05 }];
-const footLocksR: Lock[] = [{ len: 0.8, w: 0.6, lean: 0.3 }, { len: 1.4, w: 1.3, lean: 0.2 }, { len: 1.6, w: 2.3, lean: 0.05 }];
+const footLocks: Lock[] = [{ len: 0.8, w: 0.95, lean: 0.3 }, { len: 1.5, w: 1.45, lean: 0.2 }, { len: 1.6, w: 1.75, lean: 0.05 }];
+const footLocksR: Lock[] = [{ len: 0.8, w: 0.95, lean: 0.3 }, { len: 1.4, w: 1.4, lean: 0.2 }, { len: 1.6, w: 1.85, lean: 0.05 }];
 /** Each clump of each ear's foot: its tip, root and notches, for the partings drawn up into it. */
 const earClumps: Record<"L" | "R", { tip: P; root: P; notches: [P, P] }[]> = { L: [], R: [] };
 const ears = {
@@ -397,7 +397,7 @@ function headLinePiece(): Piece {
     `<stop offset="0" stop-color="${C.earEdge}" stop-opacity="0"/><stop offset="0.16" stop-color="${C.earEdge}"/><stop offset="0.4" stop-color="${C.earLine}"/>` +
     `<stop offset="0.62" stop-color="${C.earLine}"/><stop offset="0.82" stop-color="${C.warmLine}"/><stop offset="1" stop-color="${C.softLine}"/></linearGradient>` +
     `${rootGradient(ROOT.L, [-32.4, -150.4], [-41.6, -144])}${rootGradient(ROOT.R, [35.4, -152.4], [40.6, -148.4])}</defs>` +
-    `<path d="${edge}" fill="${C.fur}" opacity="0.5" filter="url(#${s})"/>` +
+    `<path d="${edge}" fill="${C.fur}" opacity="0.35" filter="url(#${s})"/>` +
     `<path d="${wisps}" fill="${C.fur}" opacity="0.92" filter="url(#${w})"/>` +
     `<g fill="${headLine.colour}" filter="url(#${f})">${r.svg}</g>` +
     `<g fill="${C.crownWarm}" opacity="0.8" filter="url(#${f})">${hooks.map((h) => `<path d="${h.d}"/>`).join("")}</g>`, box, {
@@ -424,7 +424,8 @@ function earPaint(side: "L" | "R"): Paint {
   // Fine strands, typed for the left ear (the viewer's left) and mirrored for the right: darker ones in the lower half,
   // a few lighter ones higher up on the side toward the light.
   const dark = flip([[[-70.4, -104], [-72.4, -96], [-73, -88]], [[-63.8, -106], [-66.4, -97], [-67.6, -88], [-67.6, -81]], [[-58, -98], [-59.4, -89], [-60, -80]],
-    [[-52, -103], [-53.2, -93], [-53.8, -83], [-53.6, -76]], [[-46.6, -95], [-47.4, -86], [-47.8, -77]], [[-66.6, -86], [-65.4, -79.6]]]);
+    [[-52, -103], [-53.2, -93], [-53.8, -83], [-53.6, -76]], [[-46.6, -95], [-47.4, -86], [-47.8, -77]], [[-66.6, -86], [-65.4, -79.6]],
+    [[-61.4, -86], [-62.6, -79], [-62.4, -73.6]], [[-56.6, -84], [-56.8, -77], [-56, -72]], [[-50.4, -86], [-50.6, -79], [-50, -73]]]);
   const light = flip([[[-58.4, -118], [-62, -108], [-64, -98]], [[-50.4, -114], [-52.2, -103], [-53, -94]], [[-45, -106], [-46, -97]]]);
   const fine = (pts: P[][], width: number, seed: number) =>
     pts.map((l, i) => strokeOf(curve(l), width, { taper: 3, tip: 0.1, wobble: 0.12, seed: seed + i }).d).join("");
@@ -440,11 +441,11 @@ function earPaint(side: "L" | "R"): Paint {
     `<stop offset="0" stop-color="${C.earLine}" stop-opacity="0.5"/><stop offset="1" stop-color="${C.earLine}" stop-opacity="0"/></linearGradient>` +
     // Its top a little lighter where it comes out from under the crown's fur, in the head patches' paler tan.
     `<linearGradient id="${top}" gradientUnits="userSpaceOnUse" x1="0" y1="-146" x2="0" y2="-132">` +
-    `<stop offset="0" stop-color="${C.patch}" stop-opacity="0.3"/><stop offset="1" stop-color="${C.patch}" stop-opacity="0"/></linearGradient></defs>` +
+    `<stop offset="0" stop-color="${C.patch}" stop-opacity="0.15"/><stop offset="1" stop-color="${C.patch}" stop-opacity="0"/></linearGradient></defs>` +
     `<rect x="${fmt(ex0)}" y="${fmt(ey0)}" width="${fmt(ex1 - ex0)}" height="${fmt(ey1 - ey0)}" fill="url(#${deep})"/>` +
     `<rect x="${fmt(ex0)}" y="${fmt(ey0)}" width="${fmt(ex1 - ex0)}" height="${fmt(ey1 - ey0)}" fill="url(#${top})"/>` +
     `<g filter="url(#${soft1})"><path d="${fine(light, 0.9, 21)}" fill="${C.patch}" opacity="0.22"/>` +
-    `<path d="${fine(dark, 0.65, 31)}" fill="${C.earLow}" opacity="0.26"/></g>`;
+    `<path d="${fine(dark, 0.65, 31)}" fill="${C.earLow}" opacity="0.36"/></g>`;
   // Along the inner edge, where the ear tucks under the head's side; and its foot.
   const innerD = side === "L" ? "M-38 -132 C-42.6 -118 -43.4 -100 -42.4 -84 L-34 -84 L-34 -132Z" : "M38 -132 C42.6 -118 43.4 -100 42.4 -84 L34 -84 L34 -132Z";
   const footD = `M${k * 82} -90 C${k * 70} -78 ${k * 56} -74 ${k * 36} -74 L${k * 36} -60 L${k * 82} -60Z`;
@@ -454,12 +455,12 @@ function earPaint(side: "L" | "R"): Paint {
     fill: C.marking,
     under,
     shade: { multiply: C.furShadeBy, rim: { inset: 2.2, toLight: 3.6 }, shapes: [innerD, footD], blur: 3.2 },
-    highlight: { d: lightD, colour: C.patch, opacity: 0.35, blur: 3.4 },
+    highlight: { d: lightD, colour: C.patch, opacity: 0.22, blur: 3.4 },
     // A parting up from each notch between the foot's clumps, fading out upward.
     inner: clumps.map((n) => ({ pts: curve([n, [n[0] - k * 0.4, n[1] - 3.6], [n[0] - k * 0.2, n[1] - 8]]), width: 0.75, colour: `url(#${strand})` })),
     outline: { ...OUTLINE, colour: C.warmLine, width: 1.3, taper: 1.4, blur: 0.15, spans: side === "L"
-      ? [{ from: [-40.4, -145], to: [-76.6, -86.4], width: 1.3, colour: `url(#${toRoot})` }, { from: [-77.2, -91.4], to: [-38.6, -78], width: 1.45, colour: C.earFootLine }]
-      : [{ from: [41, -145.4], to: [75.6, -87], width: 1.35, colour: `url(#${toRoot})` }, { from: [75.9, -92], to: [38.2, -80], width: 1.5, colour: C.earFootLine }] },
+      ? [{ from: [-40.4, -145], to: [-76.6, -86.4], width: 1.3, colour: `url(#${toRoot})` }, { from: [-77.2, -91.4], to: [-38.6, -78], width: 1.35, colour: C.earFootLine }]
+      : [{ from: [41, -145.4], to: [75.6, -87], width: 1.35, colour: `url(#${toRoot})` }, { from: [75.9, -92], to: [38.2, -80], width: 1.4, colour: C.earFootLine }] },
   };
 }
 
@@ -563,7 +564,7 @@ export function back(): Drawn[] {
     // Its lower part in shade, where it turns under toward the shoulders: about two fifths of the band, as the sheet paints it.
     shade: { multiply: C.shadeBy, shapes: ["M-32 -66.2 C-16 -69.2 16 -69.2 32 -66.2 L32 -58 L-32 -58Z", pathD(ellipse([-29.6, -66], 2.6, 6, 0)), pathD(ellipse([31.4, -66], 2.6, 6, 0))], blur: 0.9 },
     highlight: { d: "M-27 -70.6 C-15 -73.6 0 -74.4 16 -73.8 C22 -73.4 26 -72.6 29.6 -71 L29.6 -68.6 C20 -71 0 -72 -27 -68Z", colour: C.collarHighlight, opacity: 0.4, blur: 0.8 },
-    outline: { colour: C.collarRim, width: 1.3, taper: 2, blur: 0.2 },
+    outline: { colour: C.collarRim, width: THIN, taper: 2, blur: 0.2 },
   }));
   return out;
 }

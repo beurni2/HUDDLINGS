@@ -41,29 +41,29 @@
  },
  "alignment": {
   "rootOnCropGroundPlusHalf": true,
-  "bestFitShiftPx": [0.3, -0.14],
-  "bestFitShiftPt": [0.23, -0.11],
-  "iouAtBestWholePixelShift": 0.9723,
+  "bestFitShiftPx": [0.28, -0.14],
+  "bestFitShiftPt": [0.22, -0.11],
+  "iouAtBestWholePixelShift": 0.9727,
   "thresholdPx": 2.0,
   "pass": true
  },
  "silhouette": {
-  "iou": 0.9723,
+  "iou": 0.9727,
   "threshold": 0.85,
   "groundShadowLeftOut": true,
   "pass": true,
-  "iouHeadAligned": 0.9712,
-  "headCentreOffsetPt": [0.39, -0.29]
+  "iouHeadAligned": 0.9718,
+  "headCentreOffsetPt": [0.42, -0.27]
  },
  "landmarks": {
   "thresholdPt": 2.8,
   "rows": {
    "collar": {
     "how": "finder",
-    "found": [0.7, -69.09],
+    "found": [0.72, -69.11],
     "model": [0.6, -68.9],
-    "errPt": 0.22,
-    "errShareOfHead": 0.002,
+    "errPt": 0.24,
+    "errShareOfHead": 0.003,
     "pass": true
    },
    "collar.line.sheetLeft": {
@@ -92,9 +92,9 @@
    },
    "ear.L.tip": {
     "how": "finder",
-    "found": [-49.44, -68.27],
+    "found": [-49.21, -68.27],
     "model": [-49.3, -68.3],
-    "errPt": 0.14,
+    "errPt": 0.1,
     "errShareOfHead": 0.001,
     "pass": true
    },
@@ -149,15 +149,15 @@
     "heldTo": "#FDE3C8",
     "heldBy": "palettePainted.furShade",
     "deltaE2000": 1.32,
-    "pixels": 1048,
+    "pixels": 1044,
     "pass": true
    },
    "ears": {
-    "dominant": "#D99F73",
+    "dominant": "#D99F74",
     "heldTo": "#D9A379",
     "heldBy": "palette.marking",
-    "deltaE2000": 1.31,
-    "pixels": 6573,
+    "deltaE2000": 1.3,
+    "pixels": 6567,
     "pass": true
    },
    "bodyMarkings": {
@@ -305,7 +305,7 @@
   "edgeDistance": {
    "meanRenderToSheetPt": 0.75,
    "p95RenderToSheetPt": 1.57,
-   "meanSheetToRenderPt": 0.82,
+   "meanSheetToRenderPt": 0.81,
    "p95SheetToRenderPt": 1.75,
    "targetP95Pt": 2.0,
    "meetsTarget": true
@@ -317,12 +317,12 @@
     "meetsTarget": true
    },
    "ear.L": {
-    "iou": 0.867,
+    "iou": 0.869,
     "target": 0.85,
     "meetsTarget": true
    },
    "ear.R": {
-    "iou": 0.817,
+    "iou": 0.816,
     "target": 0.85,
     "meetsTarget": false
    }
