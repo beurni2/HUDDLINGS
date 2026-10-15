@@ -10,6 +10,7 @@ export interface Model {
   palettePainted: Record<string, { value: string }>;
   blush: { restingLevel: number };
   outline: { outerPt: number; innerPt: number };
+  markings: { id: string; part: string; side: string }[];
 }
 
 export const model = JSON.parse(readFileSync(new URL("../model.json", import.meta.url), "utf8")) as Model;
