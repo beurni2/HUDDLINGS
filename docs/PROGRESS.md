@@ -11,9 +11,17 @@ Kept current every session (CLAUDE.md). One section per lane; each lane edits on
 
 **In progress: phase 3, drawing the dog** (section 5b; `PLAN.md`), ending at Gate A: every part in its six facings and every face state, drawn in TypeScript from `model.json`, beside the sheet crops, with the sheet match. The plan, from a design panel of three independent prototyped designs, is `docs/phase3-plan.md`.
 - Done on the branch: the drawing kit (`characters/draw/`, with a lint that refuses images, unbounded masks, off-palette colours and lines outside their bands as drawn), the build in crash-isolated child processes with a raster cache, the stills renderer and look loop (`npm run look -- dog front`, about 5 s), and the automated sheet match (`characters/sheetmatch/`) in CI and the pre-commit hook.
-- The front view: three independent redraws judged against the sheet, the best (front b) grafted with the others' best parts, then five judged polish rounds. Every sheet-match gate passes: silhouette IoU 0.978, all 22 landmarks within 2.8 pt, every palette region within ΔE 1.1, both cheeks' blush at 0.34 and 0.35, markings placed (`qa/phase3/front/`). Fresh reviewers score it 4 on-model and 3 to 3.5 on face and charm (`qa/phase3/front/review.md`); the eyes' white crescent, the ear roots, the legs and the cheek fluff are what they still want.
-- In review: the front view's pull request, an early look so you can stop me if the look is wrong. It is not a gate.
-- Next, while you look: the reviewers' fixes on the front, the chin's shadow on the collar (`DECISIONS.md` 33), then the three-quarter and side views (`docs/phase3-plan.md`).
+- Three views drawn, each from its own turnaround crop, every sheet-match gate green (`qa/phase3/<view>/`):
+
+  | View | Silhouette IoU | Worst landmark | Worst colour ΔE | Reviewers (on-model / face / charm) |
+  | --- | --- | --- | --- | --- |
+  | front | 0.978 | 1.9 pt | 1.69 | 3.5–4 / 3–4 / 3 |
+  | threeQuarter.L | 0.967 | 2.59 pt | 1.92 | 3.5–4 / 3 / 3 |
+  | side.L | 0.965 | 2.44 pt | 1.51 | 4 / 3.5–4 / 3–3.5 |
+
+  The reviewers agree on what is left: the eyes (a crisp white crescent and a warm lower iris), lines lighter and softer on the cream fur and darker only at the soles, the crown's tuft as separate curls, and ears painted with a few fur locks rather than stripes.
+- In review: https://github.com/beurni2/HUDDLINGS/pull/4, an early look so you can stop me if the look is wrong. It is not a gate.
+- Next: one finish pass on those shared recipes across all three views, then the right-facing views (built from the left ones with the light recomputed and the right side's markings), the back view, the face library with the hungry and huffy faces, and Gate A.
 
 **Blockers**
 - For TestFlight at the end of phase 1: the Apple pieces in `PLAN.md`, What I need from you (Team ID, API key, your iPhone registered once, the app record and bundle ID).
