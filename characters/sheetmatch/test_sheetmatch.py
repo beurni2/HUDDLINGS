@@ -8,6 +8,7 @@ The passing still is built from the turnaround crop: phase 2's own finders
 give each region (eyes, nose, mouth, ears, collar, tag, patches, cheeks), each
 is repainted flat in the value model.json holds it to and becomes its own part,
 and the whole is enlarged into the still format. It never leaves the test."""
+import argparse
 import contextlib
 import copy
 import io
@@ -681,6 +682,17 @@ class PlantedTest(unittest.TestCase):
         for name, value in constants.items():
             if name not in ("PHONE_PPP", "ZOOM"):
                 self.assertIn(value, recorded.values(), name)
+
+    def test_the_atlas_share_counts_every_state_of_the_views_parts(self):
+        regions = {"eye.L/front:open": (10, 10), "eye.L/front:closed": (10, 5), "head.base/front": (20, 10), "head.base/side.L": (30, 10), "tail/front": (5, 5)}
+        atlas = {"sets": [{"name": "3x", "scale": 3, "pages": [{"width": 100, "height": 100}],
+                           "regions": {k: {"w": w, "h": h} for k, (w, h) in regions.items()}}]}
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "atlas.json"
+            path.write_text(json.dumps(atlas))
+            share = match.atlas_share("dog", argparse.Namespace(drawn=["eye.L", "head.base"]), {"front"}, path)
+        self.assertEqual(share["thisStillShare"], round((100 + 50 + 200) / 10000, 3))
+        self.assertEqual(share["allRegionsShare"], round((100 + 50 + 200 + 300 + 25) / 10000, 3))
 
     def test_any_error_exits_2_and_leaves_no_verdict(self):
         """1 means only that a gating check failed: a crash anywhere is 2, and no match.json, old or half-made, stays."""

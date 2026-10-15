@@ -697,9 +697,10 @@ def part_ious(frame, grid, render, still):
     return out
 
 
-def atlas_share(species, still, views):
-    """The share of the 3x atlas pages the still's drawn parts take in its views (the 48 MB budget, section 5b)."""
-    path = sheets.ROOT / "build" / "characters" / species / "atlas.json"
+def atlas_share(species, still, views, path=None):
+    """The share of the 3x atlas pages the still's drawn parts take in its views (the 48 MB budget, section 5b),
+    every state of a part's view included (eye.L/front:open and eye.L/front:closed are both the front's)."""
+    path = Path(path) if path else sheets.ROOT / "build" / "characters" / species / "atlas.json"
     if not path.exists():
         return {"note": f"no package at {repo_path(path.parent)}"}
     sets = {s["name"]: s for s in json.loads(path.read_text())["sets"]}
@@ -708,8 +709,11 @@ def atlas_share(species, still, views):
     regions = chosen["regions"]
     drawn = {n for n in still.drawn}
 
-    mine = sum(r["w"] * r["h"] for key, r in regions.items()
-               if key.split("/")[0] in drawn and len(key.split("/")) > 1 and key.split("/")[1] in views)
+    def in_view(key):
+        part, _, view = key.partition("/")
+        return part in drawn and view.split(":")[0] in views
+
+    mine = sum(r["w"] * r["h"] for key, r in regions.items() if in_view(key))
     total = sum(r["w"] * r["h"] for r in regions.values())
     return {"set": chosen["name"], "pages": len(chosen["pages"]), "pageAreaPx": pages,
             "allRegionsShare": round(total / pages, 3), "thisStillShare": round(mine / pages, 3)}
