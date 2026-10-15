@@ -97,11 +97,13 @@ const back = furEdge(furEdge(backHalf, [-30.6, -59], [-34.4, -50.8], shoulderLoc
 
 // The hind paws: plump domes resting in front of the haunches, as the sheet draws them, each a round arc on
 // top from where it comes out from behind the front paw over its crown (y -19 at x -38) and down its outer side
-// (x -48.2), its sole rounded and sitting a little above the front paws' (the sheet's at y -3.1), its inner half
-// behind the front paw.
-const hindR: Node[] = [[-29.6, -15.2], [-33, -18], [-37.6, -19.2], [-42.4, -18.4], [-46.2, -15.4], [-48.2, -11], [-47.2, -6.6], [-43.4, -3.6], [-37.6, -2.6],
-  [-32, -2.9], [-27.6, -5.4], [-25.4, -10.6]];
-const hind = { R: smooth(hindR), L: other(hindR) };
+// (x -48.2), its sole rounded and sitting a little above the front paws' (the sheet's at y -3.1), one soft bump
+// a toe with a small scallop at each toe line, its inner half behind the front paw.
+const hindR: Node[] = [[-29.6, -15.2], [-33, -18], [-37.6, -19.2], [-42.4, -18.4], [-46.2, -15.4], [-48.2, -11], [-47.6, -6.8], [-45.4, -4.3], [-41.6, -3.3],
+  [-38.6, -2.5], [-35.6, -3], [-32.4, -2.6], [-28.6, -4.4], [-25.4, -10.6]];
+/** The scallops' notches in the sole (concave, so no corner rule applies). */
+const HIND_TOES = [8, 10];
+const hind = { R: smooth(hindR, { corners: HIND_TOES }), L: smooth(mirrorX(hindR), { corners: HIND_TOES.map((j) => (hindR.length - j) % hindR.length) }) };
 
 // The chest: the cream bib in front of the saddle, its edge about 2 pt inside
 // the silhouette from under the collar's end down the shoulder, so the saddle's
@@ -672,8 +674,8 @@ function earPaint(side: "L" | "R"): Paint {
     highlight: { d: earD(side, "M-74 -101 C-74 -106 -70 -111 -66 -112 C-64 -109 -66 -102 -69.6 -99 C-72 -98 -74 -99 -74 -101Z"), colour: C.patch, opacity: 0.3, blur: 2.6 },
     inner: dark.map((pts) => ({ pts: sample(smooth(pts.slice(-3).map((p) => onEar(side, p)), { closed: false }).segs, 8, false), width: 0.7, colour: `url(#${strand})` })),
     // A little lighter on the ear toward the light, heavier on the one away from it, and along each one's bottom.
-    outline: { ...OUTLINE, colour: C.warmLine, width: 1.2, taper: 7, blur: 0.15, spans: side === "R"
-      ? [{ from: ends[0], to: lower, width: 1.5 }, { from: upper, to: ends[1], colour: `url(#${toRoot})` }]
+    outline: { ...OUTLINE, colour: C.warmLine, width: 1.2, taper: 7, blur: 0.25, spans: side === "R"
+      ? [{ from: ends[0], to: lower, width: 1.4 }, { from: upper, to: ends[1], colour: `url(#${toRoot})` }]
       : [{ from: ends[1], to: lower, width: 1.3, colour: `url(#${toRoot})` }, { from: upper, to: ends[0], width: 1.65 }] },
   };
 }
@@ -736,7 +738,7 @@ export function front(): Drawn[] {
       outline: { ...OUTLINE, colour: C.pawLine, width: 1.3, taper: 4, spans: bySide(side, [{ from: [-33.4, -17.6], to: [-48.4, -13.6], width: THIN, colour: C.softLine },
         { from: [-47, -15.8], to: [-29.2, -4.6], width: 1.45 }]) },
       // Two toe lines rising from the sole about 6.5 pt up the paw, each bowing a little away from the middle toe.
-      inner: [[[-41.6, -3.4], [-42.3, -5.8], [-42.2, -8.1], [-41.6, -10]], [[-35.6, -3], [-34.9, -5.4], [-34.9, -7.8], [-35.4, -9.7]]]
+      inner: [[[-41.6, -3.4], [-42.3, -5.8], [-42.2, -8.1], [-41.6, -10]], [[-35.6, -3.1], [-34.9, -5.5], [-34.9, -7.8], [-35.4, -9.7]]]
         .map((pts) => ({ pts: flipX(pts as P[], side), width: INNER, colour: C.pawLine, opacity: 0.65 })),
     }), 6));
   }
