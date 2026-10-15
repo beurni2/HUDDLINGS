@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { Resvg } from "@resvg/resvg-js";
 import { PNG } from "pngjs";
 import { pathD, smooth, type Node } from "../geom.ts";
-import { LIGHT, darken, marking, mix, part, ratio } from "../paint.ts";
+import { LIGHT, darken, marking, mix, multiply, part, ratio } from "../paint.ts";
 import type { Piece } from "../svg.ts";
 
 const FUR = "#FFF4E8", FUR_SHADE = "#FDE3C8", TAN = "#D9A379";
@@ -27,6 +27,10 @@ test("the derived colours follow their rules", () => {
   assert.equal(ratio(FUR, FUR_SHADE), "#FDEDDC");
   assert.equal(mix("#000000", "#FFFFFF", 0.5), "#808080");
   assert.equal(darken("#FFFFFF", 0.1), "#E6E6E6");
+  // A multiply shade turns a fill into their product: it undoes ratio, and white leaves a colour as it is.
+  assert.equal(multiply(FUR, ratio(FUR, FUR_SHADE)), FUR_SHADE);
+  assert.equal(multiply(TAN, "#FFFFFF"), TAN);
+  assert.equal(multiply("#808080", "#808080"), "#404040");
 });
 
 test("a full shade turns cream into the sheet's #FDE3C8, and a tan marking under the same shade into about #D79768", () => {

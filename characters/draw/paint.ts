@@ -211,3 +211,6 @@ export const darken = (hex: string, k: number) => hexOf(channels(hex).map((x) =>
 
 /** The multiply colour that turns `base` into `shaded`: #FFF4E8 into #FDE3C8 is #FDEDDC. */
 export const ratio = (base: string, shaded: string) => hexOf(channels(base).map((x, i) => (channels(shaded)[i]! / x) * 255));
+
+/** a multiplied by b, channel by channel: what a multiply shade of colour b turns a fill of colour a into. */
+export const multiply = (a: string, b: string) => hexOf(channels(a).map((x, i) => (x * channels(b)[i]!) / 255));

@@ -326,6 +326,34 @@ export function mirrorX(nodes: Node[], closed = true): Node[] {
 }
 
 /**
+ * Hand nodes turned `deg` degrees about a point, clockwise on screen (y down), names kept: a part typed
+ * upright in its own frame and drawn rolled, as a sheet draws a tilted head, or an ear's hang.
+ */
+export function rotate(nodes: Node[], deg: number, about: P): Node[] {
+  const a = (deg * Math.PI) / 180, c = Math.cos(a), s = Math.sin(a);
+  return nodes.map((n): Node => {
+    const dx = n[0] - about[0], dy = n[1] - about[1];
+    const p: P = [about[0] + dx * c - dy * s, about[1] + dx * s + dy * c];
+    return n.length === 3 ? [p[0], p[1], n[2]] : p;
+  });
+}
+
+/**
+ * An ellipse as four cubics, turned `deg` degrees clockwise on screen about its centre: a turned eye or
+ * blush written as plain path data, so no SVG transform rounds differently from canvas to canvas.
+ */
+export function ellipse(c: P, rx: number, ry: number, deg = 0): Seg[] {
+  const k = 0.5522847498;
+  const p = (x: number, y: number): P => rotate([[c[0] + x, c[1] + y]], deg, c)[0] as P;
+  return [
+    [p(rx, 0), p(rx, ry * k), p(rx * k, ry), p(0, ry)],
+    [p(0, ry), p(-rx * k, ry), p(-rx, ry * k), p(-rx, 0)],
+    [p(-rx, 0), p(-rx, -ry * k), p(-rx * k, -ry), p(0, -ry)],
+    [p(0, -ry), p(rx * k, -ry), p(rx, -ry * k), p(rx, 0)],
+  ];
+}
+
+/**
  * The tightest radius of curvature on a closed path where `keep` allows (a share
  * of its length), convex and concave apart. A kink between two cubics (a corner)
  * counts as radius 0.
