@@ -4,7 +4,7 @@
 // paint is the front view's (front.ts): the same recipes for the ears, eyes, nose, mouth, collar, tag and paws,
 // each part's nodes typed again from this view's own crop. Light comes from the top left, as in every view.
 import { furEdge, furSpan, type Lock } from "../../../draw/fur.ts";
-import { bbox, ellipse, fracAt, pathD, sample, smooth, spanPoints, type Node, type P, type Shape } from "../../../draw/geom.ts";
+import { bbox, ellipse, fracAt, pathD, sample, smooth, spanPoints, v, type Node, type P, type Shape } from "../../../draw/geom.ts";
 import { innerLine, ribbons, strokeOf, type DrawnLine, type Outline, type Span, type Stroke } from "../../../draw/line.ts";
 import { LIMITS } from "../../../draw/lint.ts";
 import { marking, part, soft, type Paint } from "../../../draw/paint.ts";
@@ -149,24 +149,42 @@ const patchL = smooth([[-46.4, -104.8], [-43.6, -110.4], [-38, -113.6], [-31, -1
 const patchR = smooth([[-95, -137], [-86.6, -137], [-83.4, -133.4], [-82.4, -126], [-79.4, -119.4], [-72.4, -116.4], [-69.4, -112.6], [-72, -111.2],
   [-76, -112.6], [-81, -111.6], [-84.6, -107.6], [-86.2, -102], [-87.2, -97.6], [-95, -97]]);
 
-// The body's markings, each clipped to its part (L395): the near half of the saddle, a streak of tan down the
-// sloping back from under the near ear toward the rump, lying along the back's line; the small soft spot on the
-// rump where the tail's tan crosses the haunch's outline; and the tail's tan root.
-const saddleL = smooth([[-24, -64.6], [-17, -62.6], [-10, -58], [-2, -52], [5, -46.5], [9.6, -41], [10.4, -38.2], [7, -38.8], [2, -41.6], [-4, -44.6],
-  [-10, -48.2], [-15, -51.8], [-19.6, -55.6], [-24, -59]]);
-const rumpL = smooth([[14, -33.6], [17, -28], [17, -21], [13.6, -18.4], [10.4, -20], [8.6, -25], [9.6, -30.6]]);
-const tailBase = smooth([[11.6, -36.4], [20.6, -36], [26.6, -31.4], [30.4, -23.6], [30.8, -16], [27, -11.2], [19, -10], [12.4, -10.6], [9.6, -23.6]]);
+// The body's markings, each clipped to its part (L395). The near half of the saddle, a clear patch on the upper
+// back behind the near ear, as the sheet paints it: its top the back's line from x -9 down to x 10, its lower edge
+// a soft round sweep from under the line at x -14.8 down to y -40.2 and back up to the line, breaking into small
+// locks of fur along its lower left; typed with bleed past the line. The rump's patch: an upright oval at the
+// haunch's back edge, from y -34.6 to -14, running out under the line. The tail's tan root is the tail's.
+let saddleL = smooth([[-14.8, -52.6], [-13.4, -48], [-10.6, -43.6], [-6, -40.8], [0, -40], [5.6, -40.2], [11.4, -42], [10.4, -45.6], [4, -51.6], [-3, -56.6],
+  [-9.4, -58.6], [-12.6, -56.4]]);
+saddleL = furEdge(saddleL, [-14.6, -51.4], [-1.6, -40.2], [{ len: 0.9, w: 1, lean: 0.3 }, { len: 1.3, w: 1.3, lean: 0.35 }, { len: 0.8, w: 0.9, lean: 0.3 },
+  { len: 1.1, w: 1.2, lean: 0.4 }], 0.3);
+const rumpL = smooth([[8.4, -33], [11.4, -34.6], [15.6, -32], [16.6, -24], [15.6, -14.4], [12.4, -13.8], [9.2, -17], [7.4, -22], [7.4, -28]]);
 
-// The tail: a fluffy curl rising behind the haunch, its root hidden behind the rump; its upper edge breaks into
-// soft clumps of fur where it curls over, and it rounds down the far side to its foot behind the haunch.
-let tail = smooth([[6, -32], [13.6, -34.4], [16.4, -37.4], [18.2, -43], [17.8, -49.4], [18.6, -53.6], [22.9, -57.2], [27, -59], [33.4, -57], [39.6, -52.4],
-  [43.6, -48.4], [46, -43.6], [46.8, -36.4], [46.4, -29.6], [45, -23.6], [41.6, -19.4], [37.6, -14.2], [33, -11.4], [30.6, -9.8], [24.8, -8.4],
-  [18.6, -8.2], [13.6, -10.2], [8, -16], [5.6, -24]]);
-const tailLocks: Lock[] = [{ len: 1.2, w: 1, lean: 0.25 }, { len: 1.6, w: 1.2, lean: 0.3 }, { len: 1.1, w: 0.9, lean: 0.35 }, { len: 1.4, w: 1.1, lean: 0.3 }];
-tail = furEdge(tail, [18.4, -52.6], [39, -52.8], tailLocks, 0.3);
-// Down its far side the plume breaks into a few soft clumps, as the sheet draws it.
-const plumeLocks: Lock[] = [{ len: 0.9, w: 1, lean: 0.3 }, { len: 1.2, w: 1.2, lean: 0.35 }, { len: 0.8, w: 0.9, lean: 0.3 }, { len: 1, w: 1.1, lean: 0.3 }];
-tail = furEdge(tail, [46.6, -40], [40.4, -17.4], plumeLocks, 0.3);
+// The tail: a plume rising from behind the rump, as the sheet draws it, narrow where it comes out from behind the
+// haunch's line (y -33.6) and widening as it rises; its tip curls over toward the head at the top left in a hook
+// whose underside tucks into a notch on the plume's inner edge (x 18.9, y -47.5). From the hook over the top and
+// down the far side to its foot the plume is five lobes of fur of uneven size, each a soft arc that ends tucked into
+// a notch under the start of the next (concave corners), as the sheet draws them; its foot breaks into a small
+// fringe. Its root lies hidden behind the rump.
+const tailNodes: Node[] = [[6, -30], [13.4, -33.6], [18.4, -37.6], [20.6, -42.4], [18.9, -47.5], [17, -49.4], [17, -52.8], [19.6, -55.6],
+  [24.2, -56.6], [28.6, -60], [31.6, -58.4], [35.8, -57], [37.6, -55.6], [41.6, -52.6], [42.9, -47.6], [45.6, -44.2], [46.5, -37], [45.6, -30.4],
+  [43.6, -26.4], [41.8, -24], [38.6, -18.4], [30.4, -12.6], [13.6, -10.8], [9, -14.4]];
+/** The notches where each lobe of the plume tucks under the next, in path order: shallow steps in the silhouette. */
+const TAIL_NOTCHES = [8, 10, 12, 14, 19, 21];
+let tail = smooth(tailNodes, { corners: [4, ...TAIL_NOTCHES] });
+// The hook's tip and the lobes are fur (the tail tip, L509).
+tail = furSpan(furSpan(tail, [17.6, -48.6], [18.2, -54.6]), [24.2, -56.6], [30.4, -12.6]);
+// Its foot breaks into a small fringe of tan tufts, combed back toward the haunch.
+const fringeLocks: Lock[] = [{ len: 1, w: 1.2, lean: 0.35 }, { len: 0.7, w: 0.8, lean: 0.3 }, { len: 1.2, w: 1.4, lean: 0.35 }];
+tail = furEdge(tail, [29.4, -12.2], [15.4, -10.6], fringeLocks, 0.42);
+
+// The tail's tan root, as the sheet paints it: deep at the foot behind the haunch and rising up the plume's lower
+// half in long flames of fur combed up along the plume, split by narrow streaks of cream, the tallest at x 15 to 21
+// to y -40, lower ones to the right, and down its far side (x 29.6) short tongues combed up and out, to the fringe.
+// Typed with bleed past the tail's edge, under the haunch and below the foot.
+const tailBase = smooth([[8, -40], [13.4, -37.4], [15.4, -39.8], [16.6, -38.4], [17.2, -33.8], [18.4, -38.2], [20, -40.2], [21.8, -37.8], [22.4, -33.2],
+  [23.6, -36.6], [24.8, -31.8], [26.6, -35.4], [28, -31.6], [29.6, -30.2], [28.6, -26.6], [31, -24.6], [28.8, -21.4], [31.2, -18.4], [29.8, -15],
+  [33, -8], [12, -6], [6, -20]], { corners: [2, 4, 6, 8, 9, 10, 11, 14, 15, 16, 17] });
 
 // Paint.
 
@@ -199,7 +217,7 @@ const thighLayers = `<defs><linearGradient id="${THIGH}" gradientUnits="userSpac
 const backPaint: Paint = {
   fill: C.fur,
   // The haunch's rear and its underside, away from the light; and the gap beside the thigh in the fur's shade.
-  shade: furShade(hipGroup, [pathD(smooth(gapNodes).segs)]),
+  shade: furShade(hipGroup, [pathD(smooth(gapNodes).segs)], ["M-24 -70 L4 -58 L14 -42 L6 -36 L-20 -50Z"]),
   under: thighLayers,
   inner: [{ pts: sample(smooth(thighPts, { closed: false }).segs, 8, false), width: 0.8, colour: `url(#${THIGH})` }],
   // The back's line, from under the ear down the sloping back and round the rump to the ground, in the outline's
@@ -493,18 +511,29 @@ export function threeQuarter(): Drawn[] {
   add("shadow", join(soft("M-88 -0.6 a62 2.6 0 1 0 124 0 a62 2.6 0 1 0 -124 0Z", [-88, -3.2, 124, 5.2], C.shadow, 1.8, 0.85),
     ...([[-69, 11], [-44, 13], [-19, 10]] as const).map(([x, r]) => soft(`M${x - r} -0.6 a${r} 1.8 0 1 0 ${2 * r} 0 a${r} 1.8 0 1 0 ${-2 * r} 0Z`,
       [x - r, -2.4, 2 * r, 3.6], C.contact, 1.2, 0.7))));
-  add("tail", part("tail", tail, {
+  // The tail's line, light where its fur curls over at the top, a warmer brown down its far side's tufts and the
+  // outline's brown round its foot (the sheet's #CABB9C on the curl, #BC9E7C down its side and #916F49 at its foot);
+  // and a fur stroke running in from the notch at the foot of each tuft, as the sheet draws them. The foot behind the
+  // haunch lies in the haunch's shade.
+  // Each lobe's line ends in a short flick running on into the plume past the notch, as the sheet draws it.
+  const flicks: P[][] = [[[30.4, -58.6], [31.6, -57.6], [32.4, -56], [32.4, -54]], [[36.6, -55.8], [37.6, -54.8], [38.2, -53.2], [38, -51.2]],
+    [[42.6, -48.8], [42.8, -47], [42.4, -45], [41.4, -42.8]], [[42.8, -24.6], [41.6, -23.4], [40.2, -22.4], [38.4, -21.8]]];
+  const strokes = flicks.map((pts) => ({ pts: sample(smooth(pts, { closed: false }).segs, 6, false), width: 0.8, colour: C.crownLine, opacity: 0.85 }));
+  const tailPaint: Paint = {
     fill: C.fur,
-    shade: furShade([tail], [], ["M16 -64 L48 -64 L48 -46 L16 -46Z"]),
-    // The tail's line, light where its fur curls over at the top and down its far side, the outline's brown
-    // round its foot (the sheet's #CABB9C on the curl, #BC9E7C down its side and #916F49 at its foot).
-    outline: { ...OUTLINE, colour: C.crownLine, width: THIN, taper: 4, spans: [{ from: [14.2, -34.6], to: [44.6, -40] , colour: C.fluffLine },
-      { from: [46, -44], to: [33, -11.4] }, { from: [37.6, -14.2], to: [13.6, -10.2], width: 1.4, colour: C.outline }] },
-  }));
-  add("tail.base", marking("tail.base", { shape: tail, paint: { fill: C.fur, shade: furShade([tail]) } }, tailBase, { fill: C.marking, blur: 2.4, clip: true, fade: { from: [20, -20], to: [30, -46] } }));
+    shade: furShade([tail], ["M6 -32 C12 -26 18 -20 30 -14 L32 -6 L6 -6Z"], ["M14 -64 L48 -64 L48 -46 L14 -46Z"]),
+    inner: strokes,
+    // Round the hook and over each lobe its own line, breaking at the notches; round the foot the outline's brown.
+    outline: { ...OUTLINE, colour: C.crownLine, width: THIN, taper: 1.4, spans: [{ from: [14.2, -34.6], to: [24.2, -56.6], colour: C.fluffLine },
+      { from: [24.2, -56.6], to: [31.6, -58.4], colour: C.fluffLine }, { from: [31.6, -58.4], to: [37.6, -55.6] }, { from: [37.6, -55.6], to: [42.9, -47.6] },
+      { from: [42.9, -47.6], to: [41.8, -24] }, { from: [41.8, -24], to: [30.4, -12.6], width: 1.3, colour: C.warmLine },
+      { from: [30.4, -12.6], to: [13.6, -10.8], width: 1.35, colour: C.outline }] },
+  };
+  add("tail", part("tail", tail, tailPaint));
+  add("tail.base", marking("tail.base", { shape: tail, paint: tailPaint }, tailBase, { fill: C.marking, blur: 0.55, clip: true, fade: { from: [19.5, -24], to: [22.5, -41] } }));
   add("body.back", part("body.back", back, backPaint));
-  add("back.patch.L", marking("back.patch.L", { shape: back, paint: backPaint }, saddleL, { fill: C.marking, blur: 1.2, clip: true }));
-  add("rump.patch.L", marking("rump.patch.L", { shape: back, paint: backPaint }, rumpL, { fill: C.marking, blur: 1.4, clip: true }));
+  add("back.patch.L", marking("back.patch.L", { shape: back, paint: backPaint }, saddleL, { fill: C.marking, blur: 0.8, clip: true }));
+  add("rump.patch.L", marking("rump.patch.L", { shape: back, paint: backPaint }, rumpL, { fill: C.marking, blur: 1, clip: true }));
   add("hind.L", roomy(part("hind.L", hind, {
     fill: C.fur,
     shade: furShade(hipGroup, [], ["M-34 -24 L-4 -24 L-4 -9 L-34 -9Z"]),
