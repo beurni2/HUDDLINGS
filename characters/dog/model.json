@@ -234,5 +234,356 @@
    },
    "mask": "ref/silhouettes/back.png"
   }
+ },
+ "faceCrops": {
+  "expressions.expression.happy": {
+   "crop": "expressions.expression.happy",
+   "sheet": "expressions",
+   "boxSheetPx": [15, 64, 258, 190],
+   "presets": [
+    "neutral",
+    "happy",
+    "singing"
+   ],
+   "view": "front",
+   "facing": "front",
+   "ptPerCropPx": 0.67881,
+   "rollDeg": -11.79,
+   "headWidthCropPx": 137.45,
+   "anchorsCropPx": {
+    "head.top": [123.5, 4.6],
+    "nose": [131.92, 106.97],
+    "eye.R": [95.03, 101.48],
+    "eye.L": [161.44, 87.62],
+    "mouth.R": [115.29, 120.4],
+    "mouth.L": [151.07, 113.49]
+   },
+   "drawn": {
+    "eyes": "open",
+    "mouth": "open"
+   },
+   "gates": {
+    "neutral": [
+     "eye.R",
+     "eye.L"
+    ],
+    "happy": [
+     "eye.R",
+     "eye.L",
+     "mouth.R",
+     "mouth.L"
+    ],
+    "singing": []
+   },
+   "mask": "ref/faces/expressions.expression.happy.png"
+  },
+  "expressions.expression.excited": {
+   "crop": "expressions.expression.excited",
+   "sheet": "expressions",
+   "boxSheetPx": [277, 62, 248, 192],
+   "presets": [
+    "excited",
+    "ticklish"
+   ],
+   "view": "front",
+   "facing": "front",
+   "ptPerCropPx": 0.68367,
+   "rollDeg": -12.13,
+   "headWidthCropPx": 136.47,
+   "anchorsCropPx": {
+    "head.top": [119.36, 4.64],
+    "nose": [131.42, 109.41],
+    "eye.R": [92.43, 108.58],
+    "eye.L": [163.11, 93.38],
+    "mouth.R": [112.37, 122.84],
+    "mouth.L": [151.71, 114.33]
+   },
+   "drawn": {
+    "eyes": "happy",
+    "mouth": "open"
+   },
+   "gates": {
+    "excited": [
+     "eye.R",
+     "eye.L",
+     "mouth.R",
+     "mouth.L"
+    ],
+    "ticklish": [
+     "eye.R",
+     "eye.L"
+    ]
+   },
+   "mask": "ref/faces/expressions.expression.excited.png"
+  },
+  "expressions.expression.laughing": {
+   "crop": "expressions.expression.laughing",
+   "sheet": "expressions",
+   "boxSheetPx": [526, 62, 238, 190],
+   "presets": [
+    "laughing",
+    "singing",
+    "ticklish"
+   ],
+   "view": "front",
+   "facing": "front",
+   "ptPerCropPx": 0.70232,
+   "rollDeg": -20.01,
+   "headWidthCropPx": 132.85,
+   "anchorsCropPx": {
+    "head.top": [100.71, 4.59],
+    "nose": [121.57, 103.43],
+    "eye.R": [85.09, 108.74],
+    "eye.L": [152.25, 84.28],
+    "mouth.R": [104.7, 118.13],
+    "mouth.L": [142.83, 104.95]
+   },
+   "drawn": {
+    "eyes": "happy",
+    "mouth": "laugh"
+   },
+   "gates": {
+    "laughing": [
+     "eye.R",
+     "eye.L",
+     "mouth.R",
+     "mouth.L"
+    ],
+    "singing": [
+     "eye.R",
+     "eye.L"
+    ],
+    "ticklish": [
+     "eye.R",
+     "eye.L",
+     "mouth.R",
+     "mouth.L"
+    ]
+   },
+   "mask": "ref/faces/expressions.expression.laughing.png"
+  },
+  "expressions.expression.curious": {
+   "crop": "expressions.expression.curious",
+   "sheet": "expressions",
+   "boxSheetPx": [767, 53, 229, 201],
+   "presets": [
+    "curious"
+   ],
+   "view": "front",
+   "facing": "front",
+   "ptPerCropPx": 0.73381,
+   "rollDeg": 21.15,
+   "headWidthCropPx": 127.14,
+   "anchorsCropPx": {
+    "head.top": [110.82, 29.65],
+    "nose": [94.55, 128.84],
+    "eye.R": [75.6, 105.67],
+    "eye.L": [133.51, 128.08]
+   },
+   "drawn": {
+    "eyes": "open",
+    "mouth": "downturned"
+   },
+   "gates": {
+    "curious": [
+     "eye.R",
+     "eye.L"
+    ]
+   },
+   "mask": "ref/faces/expressions.expression.curious.png"
+  },
+  "expressions.expression.sleepy": {
+   "crop": "expressions.expression.sleepy",
+   "sheet": "expressions",
+   "boxSheetPx": [1002, 80, 248, 172],
+   "presets": [
+    "sleepy"
+   ],
+   "view": "front",
+   "facing": "front",
+   "ptPerCropPx": 0.7023,
+   "rollDeg": 9.54,
+   "headWidthCropPx": 132.85,
+   "anchorsCropPx": {
+    "head.top": [131.5, 22.6],
+    "nose": [104.67, 130.72],
+    "eye.R": [75.23, 116.93],
+    "eye.L": [144.25, 128.54]
+   },
+   "drawn": {
+    "eyes": "closed",
+    "mouth": "downturned"
+   },
+   "gates": {
+    "sleepy": [
+     "eye.R",
+     "eye.L"
+    ]
+   },
+   "mask": "ref/faces/expressions.expression.sleepy.png"
+  },
+  "expressions.expression.surprised": {
+   "crop": "expressions.expression.surprised",
+   "sheet": "expressions",
+   "boxSheetPx": [20, 279, 250, 191],
+   "presets": [
+    "surprised"
+   ],
+   "view": "front",
+   "facing": "front",
+   "ptPerCropPx": 0.709,
+   "rollDeg": -2.78,
+   "headWidthCropPx": 131.59,
+   "anchorsCropPx": {
+    "head.top": [123.31, 8.69],
+    "nose": [126.84, 109.96],
+    "eye.R": [94.07, 98.74],
+    "eye.L": [157.27, 95.67],
+    "mouth.R": [121.52, 130.67],
+    "mouth.L": [133.37, 129.6]
+   },
+   "drawn": {
+    "eyes": "wide",
+    "mouth": "o"
+   },
+   "gates": {
+    "surprised": [
+     "eye.R",
+     "eye.L",
+     "mouth.R",
+     "mouth.L"
+    ]
+   },
+   "mask": "ref/faces/expressions.expression.surprised.png"
+  },
+  "expressions.expression.shy": {
+   "crop": "expressions.expression.shy",
+   "sheet": "expressions",
+   "boxSheetPx": [277, 287, 234, 183],
+   "presets": [
+    "shy"
+   ],
+   "view": "front",
+   "facing": "front",
+   "ptPerCropPx": 0.7023,
+   "rollDeg": -9.49,
+   "headWidthCropPx": 132.85,
+   "anchorsCropPx": {
+    "head.top": [99.28, 4.67],
+    "nose": [97.52, 118.83],
+    "eye.R": [67.83, 106.9],
+    "eye.L": [132.75, 96.04]
+   },
+   "drawn": {
+    "eyes": "open",
+    "mouth": "downturned"
+   },
+   "gates": {
+    "shy": [
+     "eye.R",
+     "eye.L"
+    ]
+   },
+   "mask": "ref/faces/expressions.expression.shy.png"
+  },
+  "expressions.expression.proud": {
+   "crop": "expressions.expression.proud",
+   "sheet": "expressions",
+   "boxSheetPx": [521, 283, 237, 187],
+   "presets": [
+    "proud"
+   ],
+   "view": "front",
+   "facing": "front",
+   "ptPerCropPx": 0.70625,
+   "rollDeg": -10.66,
+   "headWidthCropPx": 132.11,
+   "anchorsCropPx": {
+    "head.top": [131.67, 4.67],
+    "nose": [137.55, 90.88],
+    "eye.R": [97.08, 92.89],
+    "eye.L": [166.05, 79.91],
+    "mouth.R": [119.59, 104.85],
+    "mouth.L": [155.55, 98.75]
+   },
+   "drawn": {
+    "eyes": "happy",
+    "mouth": "smile"
+   },
+   "gates": {
+    "proud": [
+     "eye.R",
+     "eye.L",
+     "mouth.R",
+     "mouth.L"
+    ]
+   },
+   "mask": "ref/faces/expressions.expression.proud.png"
+  },
+  "expressions.expression.mischievous": {
+   "crop": "expressions.expression.mischievous",
+   "sheet": "expressions",
+   "boxSheetPx": [1005, 292, 252, 179],
+   "presets": [
+    "mischievous",
+    "sly"
+   ],
+   "view": "front",
+   "facing": "front",
+   "ptPerCropPx": 0.69432,
+   "rollDeg": -11.79,
+   "headWidthCropPx": 134.38,
+   "anchorsCropPx": {
+    "head.top": [137.56, 4.66],
+    "nose": [150.47, 107.47],
+    "eye.R": [107.4, 101.18],
+    "eye.L": [172.15, 87.67],
+    "mouth.R": [126.59, 117.61],
+    "mouth.L": [166.57, 113.66]
+   },
+   "drawn": {
+    "eyes": "wink",
+    "mouth": "cheeky"
+   },
+   "gates": {
+    "mischievous": [
+     "eye.R",
+     "eye.L",
+     "mouth.R",
+     "mouth.L"
+    ],
+    "sly": [
+     "eye.R",
+     "eye.L",
+     "mouth.R",
+     "mouth.L"
+    ]
+   },
+   "mask": "ref/faces/expressions.expression.mischievous.png"
+  },
+  "expressions.ears.lifted-slightly": {
+   "crop": "expressions.ears.lifted-slightly",
+   "sheet": "expressions",
+   "boxSheetPx": [166, 740, 146, 95],
+   "presets": [
+    "listening"
+   ],
+   "view": "front",
+   "facing": "front",
+   "ptPerCropPx": 1.03667,
+   "rollDeg": 0.0,
+   "headWidthCropPx": 90.0,
+   "anchorsCropPx": {
+    "head.top": [80.15, 4.69]
+   },
+   "drawn": {
+    "eyes": "none",
+    "mouth": "none"
+   },
+   "gates": {
+    "listening": []
+   },
+   "mask": "ref/faces/expressions.ears.lifted-slightly.png"
+  }
  }
 }

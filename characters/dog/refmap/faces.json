@@ -1,0 +1,512 @@
+{
+ "_about": "The face panels' crop records, written by hand (spec section 5b: the Faces check, L525; the crop records, L529; DECISIONS.md 14). For each face preset of L480-498, the expression-sheet panels it is judged against; for each panel, what it draws, its anchors placed by hand in the expression sheet's pixels (x right, y down) and checked on ref/overlays/faces-<panel>.png, the head's width, and the boxes of motion marks, labels and neighbours' slivers to leave out. characters/refprep/faces.py refines each anchor by its feature's rule, the rule the Faces check applies to a render, and fails when one is more than 2.5 px off its feature or out of order; model.py puts the records into model.json as faceCrops.",
+ "_anchors": "Each anchor is placed by hand on its feature, then refined by its feature's rule (characters/refprep/faces.py), the rule the Faces check applies to a render. head.top: the highest point of the head's outline near it, on the tuft (reported, never held: the sheet draws the tuft differently in every panel, and Proud's raised chin brings it 11 pt nearer the nose). nose: the centroid of the nose's dark core grown back over its edge, the lines that join it to the mouth left out (measure.py's core). eye.R and eye.L, the dog's own right and left (the sheet's left and right in these front views): the centroid of the eye's dark mark, darker than L* 60 with the catchlight filled, an open eye's iris and rim or a closed, happy or winking eye's arc. mouth.R and mouth.L: the mouth's farthest reach each way across the head, at the tips of its upturned curls, or an open mouth's or an o's sides. Centroids and reaches weigh each pixel by its darkness, so they move smoothly with the drawing. The roll is the line from eye.R to eye.L, clockwise on the sheet.",
+ "_headWidth": "The scale is model.json's headWidth (93.3 pt, the turnaround's cheeks between the ears' inner edges) over the panel's own head width, taken the same way along the head's across axis: the cheeks' widest run near the row placed here, each run from a quarter of the width out from the nose to the first line or tan (the cheek's outline over the ear; a patch); faces.py fails a row more than 2% short of the widest from the nose's row down 0.3 of the head. Measured so, the Happy panel's eyes are 46.1 pt apart, as the turnaround's are. Where a panel hides its cheeks (Shy: the far ear hangs across the right cheek, so the run is 114 px against the others' 127 to 137; Sleepy: the paws cover them) it takes the median width of the expressions that show theirs, since the sheet draws its ten expressions at one size ({\"from\": \"expressions\"}). The ear positions draw a head with no cheeks to run across: its width is placed by hand on the head's outline ({\"hand\": ends}).",
+ "_r3": "Rule R3: no record names the Sad, Angry or Pout panels, the Both drooped ears, or the Sleepy face assembly, whose label pairs the face with drooped ears (DECISIONS.md 22; the sleepy preset is judged against the Sleepy expression instead); faces.py refuses one, and a test fails if one exists. A mouth the sheet draws with its ends below its middle (Curious and Sleepy: a short 人 under the nose; Shy: a small ∩) is 'downturned': it gets no corners, so no face is ever held to it, and its presets' mouths are judged by eye.",
+ "_gates": "A preset is held to a panel's eyes when the panel draws an eye state the preset uses, and to its mouth's corners when it draws a mouth state the preset uses (states as L450-468 name them); other anchors are reported, never held. Aliases: the dog's squeeze and sparkle eyes are its happy crescents (docs/QUESTIONS.md Q2's default).",
+ "_assemblies": "The face assembly examples (Happy, Surprised, Mischievous) share the expressions' labels but are smaller drawings of the same faces that disagree with them: laid on each other at their own scales and pinned at the nose, about: the Mischievous assembly's eyes lie 3.5 and 5.0 pt from the Mischievous expression's, the Surprised assembly's 2.7 and 2.1 pt from the Surprised expression's, the Happy assembly's 0.6 and 1.3 pt from the Happy expression's. One face cannot be held to two drawings that far apart, so each preset is held to the expression panel the spec names, the larger drawing, and no assembly gets a record.",
+ "aliases": {
+  "squeeze": "happy",
+  "sparkle": "happy"
+ },
+ "presets": {
+  "neutral": {
+   "eyes": [
+    "open"
+   ],
+   "mouth": [
+    "smile"
+   ],
+   "specPanels": "Happy (default), Idle",
+   "panels": [
+    "expressions.expression.happy"
+   ],
+   "note": "Happy (default): the Happy expression. Idle is the motion sheet's Idle / breathing, not an expression-sheet panel, so it is compared by phase 4's Poses check, not here. The panel draws an open mouth and neutral's is the smile: its eyes are held, its mouth reported."
+  },
+  "happy": {
+   "eyes": [
+    "open"
+   ],
+   "mouth": [
+    "open"
+   ],
+   "specPanels": "Happy",
+   "panels": [
+    "expressions.expression.happy"
+   ]
+  },
+  "excited": {
+   "eyes": [
+    "squeeze",
+    "happy"
+   ],
+   "mouth": [
+    "open"
+   ],
+   "specPanels": "Excited",
+   "panels": [
+    "expressions.expression.excited"
+   ]
+  },
+  "laughing": {
+   "eyes": [
+    "happy"
+   ],
+   "mouth": [
+    "laugh"
+   ],
+   "specPanels": "Laughing",
+   "panels": [
+    "expressions.expression.laughing"
+   ]
+  },
+  "curious": {
+   "eyes": [
+    "open"
+   ],
+   "mouth": [
+    "o",
+    "smile"
+   ],
+   "specPanels": "Curious",
+   "panels": [
+    "expressions.expression.curious"
+   ],
+   "note": "The panel's mouth is a short 人 under the nose, its ends below its middle; the spec gives curious an o or a smile, so its eyes are held and its mouth judged by eye."
+  },
+  "surprised": {
+   "eyes": [
+    "wide"
+   ],
+   "mouth": [
+    "o"
+   ],
+   "specPanels": "Surprised",
+   "panels": [
+    "expressions.expression.surprised"
+   ]
+  },
+  "shy": {
+   "eyes": [
+    "open"
+   ],
+   "mouth": [
+    "smile"
+   ],
+   "specPanels": "Shy",
+   "panels": [
+    "expressions.expression.shy"
+   ],
+   "note": "The panel's mouth is a small ∩; shy's is a smile, so its eyes are held and its mouth judged by eye. The panel's head is turned a little toward the sheet's left and its far ear hangs across the right cheek, so its width is the expressions' median."
+  },
+  "proud": {
+   "eyes": [
+    "happy",
+    "sparkle"
+   ],
+   "mouth": [
+    "smile"
+   ],
+   "specPanels": "Proud",
+   "panels": [
+    "expressions.expression.proud"
+   ],
+   "note": "The panel raises the chin: its crescents sit 4 pt above the nose against the turnaround's open eyes 8 pt above."
+  },
+  "mischievous": {
+   "eyes": [
+    "wink"
+   ],
+   "mouth": [
+    "cheeky"
+   ],
+   "specPanels": "Mischievous",
+   "panels": [
+    "expressions.expression.mischievous"
+   ],
+   "note": "The panel winks the dog's right eye (the sheet's left) and turns the head about halfway to three-quarter (panels.json), so the nose sits off the eyes' middle: 28.4 pt from the right eye and 17.5 pt from the left, against the turnaround's 23.5 and 22.6."
+  },
+  "content": {
+   "eyes": [
+    "happy"
+   ],
+   "mouth": [
+    "smile"
+   ],
+   "specPanels": "Content",
+   "panels": [],
+   "note": "No record: the dog's expression sheet (and every species' sheet) draws no Content panel. The one panel with content's happy eyes and smile is Proud, which raises the chin; holding content to it would hold a level face to a raised one. Judged by eye at Gate A until the founder names a panel (question for QUESTIONS.md)."
+  },
+  "sleepy": {
+   "eyes": [
+    "sleepy",
+    "closed"
+   ],
+   "mouth": [
+    "smile"
+   ],
+   "specPanels": "Sleepy",
+   "panels": [
+    "expressions.expression.sleepy"
+   ],
+   "note": "The Sleepy expression (lying, chin on its paws, eyes closed): sleepy's 'then closed' eyes are held. Its mouth is a short 人, judged by eye. Not the Sleepy face assembly, whose label pairs it with drooped ears (R3)."
+  },
+  "listening": {
+   "eyes": [
+    "open"
+   ],
+   "mouth": [
+    "smile"
+   ],
+   "specPanels": "the ear positions Lifted, Forward and Perked",
+   "panels": [
+    "expressions.ears.lifted-slightly"
+   ],
+   "note": "Lifted slightly is the dog's lifted ears (Forward and Perked are the other species' names). It draws a head with no face, so nothing is held: the record places the render beside it, on the head's top, for the eyes of the agent and the founder."
+  },
+  "tender": {
+   "eyes": [
+    "sleepy"
+   ],
+   "mouth": [
+    "smile"
+   ],
+   "specPanels": "Content",
+   "panels": [],
+   "note": "No record: no Content panel (see content). The only panel with half-lid eyes and a smile is the Sleepy face assembly, which R3 keeps out. Judged by eye at Gate A."
+  },
+  "singing": {
+   "eyes": [
+    "happy",
+    "closed"
+   ],
+   "mouth": [
+    "o"
+   ],
+   "specPanels": "Laughing, Happy",
+   "panels": [
+    "expressions.expression.laughing",
+    "expressions.expression.happy"
+   ],
+   "note": "Laughing's crescents are singing's happy eyes and are held; Happy's open eyes and both panels' open mouths are not singing's states, so they are reported."
+  },
+  "blissful": {
+   "eyes": [
+    "closed",
+    "happy"
+   ],
+   "mouth": [
+    "smile"
+   ],
+   "specPanels": "Content",
+   "panels": [],
+   "note": "No record: no Content panel (see content). Judged by eye at Gate A."
+  },
+  "ticklish": {
+   "eyes": [
+    "squeeze"
+   ],
+   "mouth": [
+    "laugh"
+   ],
+   "specPanels": "Laughing, Excited",
+   "panels": [
+    "expressions.expression.laughing",
+    "expressions.expression.excited"
+   ],
+   "note": "Squeeze is the happy crescent (Q2): held to both panels' eyes, and to Laughing's mouth; Excited's open mouth is reported."
+  },
+  "hungry": {
+   "eyes": [
+    "wide"
+   ],
+   "mouth": [
+    "o"
+   ],
+   "specPanels": "none: drawn new from the Surprised and Happy panels, approved by the founder",
+   "panels": [],
+   "note": "A new drawing the founder approves (L497, R3); no panel."
+  },
+  "huffy": {
+   "eyes": [
+    "closed"
+   ],
+   "mouth": [],
+   "specPanels": "none: drawn new for Grumpy and approved by the founder",
+   "panels": [],
+   "note": "A new drawing the founder approves (L498, R3); never the sheets' Angry or Pout; no panel."
+  },
+  "sly": {
+   "eyes": [
+    "wink"
+   ],
+   "mouth": [
+    "cheeky"
+   ],
+   "specPanels": "Mischievous",
+   "panels": [
+    "expressions.expression.mischievous"
+   ]
+  }
+ },
+ "panels": {
+  "expressions.expression.happy": {
+   "drawn": {
+    "eyes": "open",
+    "mouth": "open"
+   },
+   "anchors": {
+    "head.top": [138, 69],
+    "nose": [147, 171],
+    "eye.R": [110, 165],
+    "eye.L": [176, 152],
+    "mouth.R": [130, 184],
+    "mouth.L": [166, 177]
+   },
+   "headWidth": [
+    [81, 198],
+    [215, 170]
+   ],
+   "remove": {
+    "marks": [],
+    "labels": [],
+    "slivers": []
+   },
+   "_note": "Head rolled about 12 degrees counter-clockwise. The open mouth's corners are the tips of the upper lip's curls."
+  },
+  "expressions.expression.excited": {
+   "drawn": {
+    "eyes": "happy",
+    "mouth": "open"
+   },
+   "anchors": {
+    "head.top": [396, 67],
+    "nose": [409, 171],
+    "eye.R": [370, 171],
+    "eye.L": [440, 155],
+    "mouth.R": [390, 185],
+    "mouth.L": [429, 176]
+   },
+   "headWidth": [
+    [340, 200],
+    [472, 172]
+   ],
+   "remove": {
+    "marks": [
+     [321, 72, 19, 29],
+     [299, 89, 27, 22]
+    ],
+    "labels": [],
+    "slivers": []
+   },
+   "_note": "The two red excitement marks at the upper left are left out."
+  },
+  "expressions.expression.laughing": {
+   "drawn": {
+    "eyes": "happy",
+    "mouth": "laugh"
+   },
+   "anchors": {
+    "head.top": [627, 67],
+    "nose": [648, 165],
+    "eye.R": [611, 171],
+    "eye.L": [678, 146],
+    "mouth.R": [631, 180],
+    "mouth.L": [669, 167]
+   },
+   "headWidth": [
+    [588, 199],
+    [710, 155]
+   ],
+   "remove": {
+    "marks": [
+     [559, 80, 15, 23],
+     [538, 94, 25, 19],
+     [535, 119, 22, 10]
+    ],
+    "labels": [],
+    "slivers": []
+   },
+   "_note": "The three blue laugh lines at the upper left are left out. The raised paw sits under the mouth's right corner (the sheet's left), clear of it."
+  },
+  "expressions.expression.curious": {
+   "drawn": {
+    "eyes": "open",
+    "mouth": "downturned"
+   },
+   "anchors": {
+    "head.top": [878, 83],
+    "nose": [862, 182],
+    "eye.R": [843, 159],
+    "eye.L": [900, 181]
+   },
+   "headWidth": [
+    [809, 171],
+    [927, 216]
+   ],
+   "remove": {
+    "marks": [
+     [906, 55, 23, 36]
+    ],
+    "labels": [],
+    "slivers": []
+   },
+   "_note": "Head rolled about 21 degrees clockwise and turned a little toward the sheet's left. The question mark above the head is left out. The mouth is a short 人 under the nose: no corners."
+  },
+  "expressions.expression.sleepy": {
+   "drawn": {
+    "eyes": "closed",
+    "mouth": "downturned"
+   },
+   "anchors": {
+    "head.top": [1134, 102],
+    "nose": [1107, 211],
+    "eye.R": [1077, 197],
+    "eye.L": [1146, 209]
+   },
+   "headWidth": {
+    "from": "expressions",
+    "why": "the front paws lie over both cheeks"
+   },
+   "remove": {
+    "marks": [
+     [1221, 82, 22, 21],
+     [1201, 96, 21, 19],
+     [1183, 108, 19, 19]
+    ],
+    "labels": [],
+    "slivers": []
+   },
+   "_note": "Lying, chin on the paws, eyes closed in arcs; head rolled about 10 degrees clockwise. The three z marks are left out. The mouth is a short 人: no corners."
+  },
+  "expressions.expression.surprised": {
+   "drawn": {
+    "eyes": "wide",
+    "mouth": "o"
+   },
+   "anchors": {
+    "head.top": [144, 288],
+    "nose": [147, 390],
+    "eye.R": [114, 378],
+    "eye.L": [177, 375],
+    "mouth.R": [141, 411],
+    "mouth.L": [154, 408]
+   },
+   "headWidth": [
+    [82, 404],
+    [213, 397]
+   ],
+   "remove": {
+    "marks": [
+     [62, 281, 22, 34],
+     [42, 302, 29, 25]
+    ],
+    "labels": [],
+    "slivers": []
+   },
+   "_note": "The two yellow surprise marks at the upper left are left out. The o's corners are its sides."
+  },
+  "expressions.expression.shy": {
+   "drawn": {
+    "eyes": "open",
+    "mouth": "downturned"
+   },
+   "anchors": {
+    "head.top": [376, 292],
+    "nose": [376, 406],
+    "eye.R": [345, 394],
+    "eye.L": [410, 383]
+   },
+   "headWidth": {
+    "from": "expressions",
+    "why": "the far ear hangs across the right cheek and the head is turned a little toward the sheet's left: the cheeks' run measures 114 px against the expressions' 131 to 137"
+   },
+   "remove": {
+    "marks": [],
+    "labels": [],
+    "slivers": []
+   },
+   "_note": "Paws held up under the chin, blush on the cheeks. The mouth is a small ∩: no corners."
+  },
+  "expressions.expression.proud": {
+   "drawn": {
+    "eyes": "happy",
+    "mouth": "smile"
+   },
+   "anchors": {
+    "head.top": [653, 288],
+    "nose": [659, 374],
+    "eye.R": [618, 376],
+    "eye.L": [687, 363],
+    "mouth.R": [641, 388],
+    "mouth.L": [677, 381]
+   },
+   "headWidth": [
+    [586, 414],
+    [715, 390]
+   ],
+   "remove": {
+    "marks": [
+     [550, 302, 21, 24],
+     [531, 323, 25, 28],
+     [724, 319, 14, 16],
+     [732, 329, 14, 13]
+    ],
+    "labels": [],
+    "slivers": []
+   },
+   "_note": "Chin raised, eyes closed in happy arcs, a small smile with a tooth at its left. The yellow sparkles at the upper left and the two small marks at the right are left out."
+  },
+  "expressions.expression.mischievous": {
+   "drawn": {
+    "eyes": "wink",
+    "mouth": "cheeky"
+   },
+   "anchors": {
+    "head.top": [1142, 297],
+    "nose": [1156, 399],
+    "eye.R": [1112, 393],
+    "eye.L": [1177, 380],
+    "mouth.R": [1132, 410],
+    "mouth.L": [1172, 405]
+   },
+   "headWidth": [
+    [1076, 420],
+    [1207, 393]
+   ],
+   "remove": {
+    "marks": [
+     [1211, 308, 17, 23],
+     [1221, 319, 21, 19]
+    ],
+    "labels": [],
+    "slivers": []
+   },
+   "_note": "Winks the dog's right eye (the sheet's left), tongue out; the head turned toward the sheet's right. The two red marks at the upper right are left out."
+  },
+  "expressions.ears.lifted-slightly": {
+   "drawn": {
+    "eyes": "none",
+    "mouth": "none"
+   },
+   "anchors": {
+    "head.top": [246, 745]
+   },
+   "headWidth": {
+    "hand": [
+     [195, 810],
+     [285, 810]
+    ],
+    "why": "a head with no face or cheeks: the head's outline below the lifted ears, level"
+   },
+   "remove": {
+    "marks": [],
+    "labels": [],
+    "slivers": [
+     [310, 800, 2, 20]
+    ]
+   },
+   "_note": "Head only, drawn without eyes, nose or mouth. The 2 px sliver of the One ear perked drawing's ear at its right edge is left out."
+  }
+ }
+}
