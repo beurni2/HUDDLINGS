@@ -103,7 +103,8 @@ const tail = furSpan(furEdge(furEdge(furEdge(furEdge(smooth([[10, -22], [17.4, -
 [42.2, -22.4], [38.6, -18.8], [{ len: 0.8, w: 1, lean: 0.4 }], 0.3), [17.2, -50.4], [38.6, -18.8]);
 
 // The collar: a band round the neck, almost as thick at its back as at its
-// front (10 pt under the chin, 7 pt by the ear), its front end a round turn
+// front (10 pt under the chin, where the jaw's fur lies over its top, about 8
+// pt of it showing, and 7 pt by the ear), its front end a round turn
 // under the jaw (x -62.2) where the band wraps round the throat, its top edge
 // rising under the jaw to the ear's foot, its bottom edge rising steeply behind
 // the shoulder so its back end goes up square under the ear's foot (hidden
@@ -437,7 +438,8 @@ function eye(): Piece {
   // The iris as the sheet's dark oval measures (its extremes x -73.4 to -62, y -110.8 to -89.7).
   const c: P = [-67.7, -100.2], rx = 5.6, ry = 10.5, lean = 6;
   const iris = pathD(ellipse(c, rx, ry, lean));
-  const clip = uid("eye"), glow = uid("glow"), cool = uid("cool"), lidShade = uid("shade"), shine = uid("blur"), edge = uid("blur"), white = uid("blur"), halo = uid("blur"), rimSoft = uid("blur");
+  const clip = uid("eye"), glow = uid("glow"), cool = uid("cool"), lidShade = uid("shade");
+  const shine = uid("blur"), edge = uid("blur"), white = uid("blur"), halo = uid("blur"), rimSoft = uid("blur");
   const box: Box = [c[0] - 10, c[1] - 15, 24, 30];
   /** A point on the iris's oval at an angle (degrees, 0 toward the back, 90 down), grown by `grow`. */
   const on = (deg: number, grow = 0): P => {
@@ -479,7 +481,7 @@ function eye(): Piece {
     `<stop offset="0" stop-color="${C.collarHighlight}" stop-opacity="0"/><stop offset="1" stop-color="${C.collarHighlight}" stop-opacity="0.32"/></linearGradient>` +
     `${blur(shine, box, 0.1)}${blur(edge, box, 0.2)}${blur(white, box, 0.3)}${blur(halo, box, 0.55)}${blur(rimSoft, box, 0.45)}</defs>` +
     `<path d="${ring.d}" fill="${C.fur}" opacity="0.8" filter="url(#${halo})"/><path d="${outer.d}" fill="${C.fur}" opacity="0.5" filter="url(#${halo})"/>` +
-    `<g filter="url(#${white})"><path d="${pathD(whiteShape.segs)}" fill="${C.eyeWhite}"/><path d="${pathD(whiteShape.segs)}" fill="url(#${cool})"/><path d="${pathD(whiteShape.segs)}" fill="url(#${lidShade})"/></g>` +
+    `<g filter="url(#${white})">${[C.eyeWhite, `url(#${cool})`, `url(#${lidShade})`].map((fill) => `<path d="${pathD(whiteShape.segs)}" fill="${fill}"/>`).join("")}</g>` +
     `<g filter="url(#${edge})"><path d="${iris}" fill="url(#${glow})"/></g>` +
     `<g clip-path="url(#${clip})"><path d="${rim.d}" fill="${C.eyeDark}" opacity="0.7" filter="url(#${rimSoft})"/></g>` +
     `<g filter="url(#${edge})"><path d="${lid.d}" fill="${C.eyeDark}"/><path d="${lidTop.d}" fill="${C.eyeDark}"/></g>` +
