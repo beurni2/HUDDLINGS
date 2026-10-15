@@ -618,12 +618,14 @@ function tagPiece(): Piece {
  */
 function earPaint(side: "L" | "R"): Paint {
   const on = (p: P) => onEar(side, p);
+  // Five locks of uneven length coming in from about the ear's middle and curving with its outer bulge down into its
+  // lower edge, the outer two into the dips between its clumps, a short one in the outer clump.
   const locks: P[][] = [
-    [[-66, -122], [-72.6, -112], [-77.4, -101], [-79, -92]],
-    [[-61.6, -116], [-68, -107], [-73.4, -97], [-76, -87.4], [-76.4, -79]],
-    [[-56.4, -109], [-62, -98.6], [-66.2, -88], [-67.8, -78], [-67, -70.2]],
-    [[-51.2, -101], [-55.4, -90], [-57.6, -78], [-57.4, -66.4]],
-    [[-46.8, -94], [-48.8, -83], [-48.6, -71]],
+    [[-69.4, -104], [-74, -96], [-76.4, -87.4], [-76.6, -79.6]],
+    [[-62.6, -99], [-66.4, -90], [-67.8, -80], [-67, -70.6]],
+    [[-56.8, -92], [-59, -83], [-59.4, -74], [-58.4, -65.8]],
+    [[-50.6, -86], [-51.6, -78.6], [-51.2, -71.4]],
+    [[-72.4, -89], [-73.4, -82.6], [-72.6, -76.8]],
   ];
   const shadeD = "M-90 -92 C-80 -80 -62 -72 -40 -70 L-40 -50 L-90 -50Z";
   const cheekD = "M-38 -98 C-43 -93 -48.6 -85 -49.8 -74 C-49 -66 -45 -62 -40 -60Z";
@@ -637,7 +639,8 @@ function earPaint(side: "L" | "R"): Paint {
     deepen: [0.3, 1],
     locks: locks.map((pts) => pts.map(on)),
     dips: ([[-66.6, -69.4], [-76.2, -78.2]] as P[]).map(on),
-    light: earD(side, "M-74 -101 C-74 -106 -70 -111 -66 -112 C-64 -109 -66 -102 -69.6 -99 C-72 -98 -74 -99 -74 -101Z"),
+    // A soft sheen down the upper outer side, where the light falls.
+    light: earD(side, "M-77 -97 C-76 -106 -69 -116 -61 -123 C-57 -122 -59 -115 -63.6 -108 C-67.6 -102 -72 -97 -77 -97Z"),
     under: [earD(side, shadeD), earD(side, cheekD), earD(side, innerD), earD(side, rootD)],
   });
 }

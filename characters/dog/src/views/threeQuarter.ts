@@ -106,10 +106,12 @@ const innerHeart = smooth(rotate(mirrored([[0, -46.6], [-1.6, -48], [-3.5, -48.1
 // the ear's outer foot; its upper corner by the face is round and tucked under the overhang's underside, so no
 // corner shows between the crown and the face's side. Each reaches well under the head at its root and along its
 // inner edge (spec L394), its hidden end rounded.
-const EAR_R_NOTCHES = [9, 11];
-const earR = smooth([[-80.8, -143.4], [-75.4, -141.6], [-76.6, -132], [-86.4, -108], [-94, -84], [-96.2, -80.4], [-99.8, -78.5], [-104.4, -79.2], [-107.4, -80.4],
-  [-109.2, -82.6], [-112.8, -84.9], [-115.4, -88.4], [-117.2, -89.3], [-119.4, -91.4], [-120.6, -94.8], [-121, -99], [-120.6, -105.6], [-119.2, -111.8],
-  [-114.8, -119.2], [-108.6, -125.4], [-101.6, -130.4], [-94.8, -135.6], [-88.4, -140.4]], { corners: EAR_R_NOTCHES });
+// The far ear's upper edge rises from a small notch on its outer side as a round shoulder with one fur bump partway
+// up (x -92.6, y -138.6), into the head behind the crown's fur, as the sheet draws it, no corner at its top.
+const EAR_R_NOTCHES = [8, 10, 15];
+const earR = smooth([[-80.8, -144], [-75.4, -141.6], [-76.6, -132], [-86.4, -108], [-94, -84], [-99.8, -78.5], [-104.4, -79.2], [-107.4, -80.4],
+  [-109.2, -82.6], [-112.8, -84.9], [-115.4, -88.4], [-119.4, -91.4], [-120.8, -96.6], [-120.8, -105.6], [-119.8, -110.6], [-118.2, -113.2], [-116.6, -117.4],
+  [-112.2, -122.8], [-104, -129.6], [-96, -135], [-92.6, -138.4], [-88.4, -141.2], [-84.4, -143.4]], { corners: EAR_R_NOTCHES });
 const EAR_L_NOTCHES = [12, 15];
 const earL = smooth([[-5, -140.6], [7.6, -130.4], [12, -125.6], [15, -118.4], [18.8, -111.4], [25.8, -105.2], [29, -95.4], [30.9, -88.6],
   [30.8, -80.6], [29.2, -74.4], [25.4, -68.4], [18.6, -63.2], [9.8, -61.2], [5.4, -59.2], [1.6, -58.6], [-4.4, -60.4], [-9.4, -61.8],
@@ -143,9 +145,11 @@ head = furEdge(head, [-24, -61.8], [-70, -61.6], chinLocks, 0.34);
 head = furEdge(head, [-91.4, -75], [-99.2, -94.2], cheekLocks, 0.4, (tip, root, notches) => clumps.push({ tip, root, notches }));
 // The crown's fur where it overhangs the near ear's root is a lock of fur, its tip a fur span.
 head = furSpan(head, [3.2, -137.4], [0.4, -135.5]);
-// Under the overhang the crown's cream fur hangs down over the near ear's root in a few soft locks, as the sheet
-// draws them, so the root has no flat top edge.
-head = furEdge(head, [-3.8, -135], [-15.4, -131], [{ len: 1.8, w: 1.3, lean: 0.3 }, { len: 0.9, w: 0.9, lean: 0.25 }, { len: 1.4, w: 1.1, lean: 0.3 }], 0.42);
+// Under the overhang the crown's cream fur comes down over the near ear's root in one long soft flame, as the sheet
+// draws it, so the root has no flat top edge and no row of teeth.
+head = furEdge(head, [-1.6, -135.2], [-12.8, -132.6], [{ len: 3.4, w: 1, lean: 0.3 }], 0.24);
+// Over the far ear's root the crown's fur breaks into two small wisps, its line broken by them at the top.
+head = furEdge(head, [-86.8, -127.4], [-81.8, -139.8], [{ len: 1.2, w: 1, lean: 0.3 }, { len: 0.8, w: 0.8, lean: 0.35 }], 0.3);
 
 // The topknot (parts/topknot.ts): three separate curls of fur, seen turned, as the sheet draws them, back to front.
 // The left curl low and broad, a leaf pointing out to its tip at the left (x -67.2), the crown's line running in
@@ -287,10 +291,10 @@ const headPaint: Paint = {
  * carry their own line, on the far ear's tan, broken at each notch.
  */
 const headSpans: LitSpan[] = [
-  { from: [-91, -102], to: [-82.4, -139.6], on: "tan", under: 0.6, taper: 4 },
+  { from: [-91, -102], to: [-87.4, -127], on: "tan", under: 0.3, taper: [4, 6] },
   { from: [-16.4, -120], to: [-17, -73], on: "tan", under: 0.6, taper: 4 },
   { from: [-74, -62.6], to: [-91, -74.8], under: 0.45, taper: 4 },
-  { from: [-85.4, -138.6], to: [-61.8, -149.8], taper: [1.4, 0.4] },
+  { from: [-83.6, -141], to: [-61.8, -149.8], taper: [1.4, 0.4] },
   { from: [-15, -149.6], to: [0.8, -135.4], taper: 1.4 },
 ];
 /** head.line: the head's outline as its own unclipped region, drawn after the head's clip group, reaching 0.5 pt past the head. */
@@ -303,9 +307,9 @@ function headLinePiece(): Piece {
   // over the root's tan in a feathered edge.
   const s = uid("blur");
   const roots: [P, P][] = [[[-1.2, -135.4], [-20.4, -128]], [[-20.6, -127.4], [-15.6, -117.4]]];
-  const feathered = roots.map(([a, b]) => strokeOf(spanPoints(head, ...([fracAt(head, a), fracAt(head, b)].sort((p, q) => p - q) as [number, number])), 2.4, { taper: 3, tip: 0.4 }).d).join("");
-  return piece(`<defs>${r.defs}${c.defs}${blur(s, pad(box, 2), 0.8)}</defs>` +
-    `<path d="${feathered}" fill="${C.fur}" opacity="0.75" filter="url(#${s})"/>${r.body}${c.body}`, box, {
+  const feathered = roots.map(([a, b]) => strokeOf(spanPoints(head, ...([fracAt(head, a), fracAt(head, b)].sort((p, q) => p - q) as [number, number])), 1.6, { taper: 3, tip: 0.4 }).d).join("");
+  return piece(`<defs>${r.defs}${c.defs}${blur(s, pad(box, 2), 0.6)}</defs>` +
+    `<path d="${feathered}" fill="${C.fur}" opacity="0.6" filter="url(#${s})"/>${r.body}${c.body}`, box, {
     shapes: [{ name: "head.line", nodes: head.typed, segs: head.segs, outlined: [...r.outlined, ...c.outlined], fur: head.fur.map(([a, b]) => [fracAt(head, a), fracAt(head, b)]) }],
     lines: [...r.lines, ...c.lines],
   });
@@ -439,18 +443,20 @@ function earPaint(side: "L" | "R"): Paint {
   return side === "R"
     ? earFur({
       ear: ears.R, axis: [[-95, -137], [-108, -80]], deepen: [0.3, 1.12],
-      locks: [[[-113.6, -116], [-117.4, -106], [-118.6, -97]], [[-108, -120], [-112.4, -110], [-114.6, -100], [-115.2, -92], [-115.4, -88.4]],
-        [[-100, -118], [-104.6, -106], [-107.6, -94], [-109, -86], [-109.2, -82.6]], [[-94, -122], [-98, -108], [-100.6, -94], [-102, -84]],
-        [[-89.6, -114], [-92.6, -100], [-95, -88]]],
+      locks: [[[-115.6, -110], [-117.8, -103], [-118.6, -96]], [[-111.4, -106], [-114, -99], [-115.2, -92], [-115.4, -88.8]],
+        [[-103.6, -103], [-106.6, -96], [-108.6, -88.4], [-109.2, -83.2]], [[-97.2, -99], [-99.8, -91.6], [-101.2, -84.6]],
+        [[-92.4, -96], [-94.2, -89], [-95.4, -83.6]]],
       dips: [[-109.2, -82.6], [-115.4, -88.4]],
       light: "M-114 -110 C-112 -118 -104 -126 -94 -132 C-90 -130 -92 -122 -98 -116 C-104 -110 -110 -106 -114 -110Z",
       under: [],
     })
     : earFur({
       ear: ears.L, axis: [[5, -134], [8, -60]], deepen: [0.45, 1.12],
-      locks: [[[6, -124], [13, -110], [17, -96], [18.4, -82]], [[12, -118], [19, -104], [23.4, -90], [25, -78], [24.4, -70]],
-        [[20.6, -108], [25.6, -99.6], [28.4, -90]], [[2, -112], [7, -98], [9.4, -84], [10, -70], [9.8, -61.6]], [[-8, -100], [-6.6, -86], [-5, -72], [-4.4, -61]],
-        [[-15, -108], [-15.4, -92], [-14, -76]]],
+      locks: [[[15.4, -95], [18.4, -86], [18.8, -76.4]], [[21.6, -91], [24.4, -82], [24.6, -72.4]], [[6.6, -92], [9.4, -82], [10, -71.4], [9.8, -62]],
+        [[-4.4, -87], [-4.8, -75.6], [-4.4, -61.4]], [[-12.4, -84], [-12, -74.6], [-10.8, -67]]],
+      // Along its outer edge from its top down to its outer bump, the fold where the ear turns over, the back layer beyond it.
+      fold: { line: [[4.2, -131.6], [10, -124.4], [14.6, -116.4], [18.4, -109.6], [22.6, -103.6]],
+        back: "M2 -134 L10.4 -126.8 L16.4 -118 L20.6 -110.8 L25.8 -104.4 L34 -104 L34 -142 L2 -142Z" },
       dips: [[9.8, -61.2], [-4.4, -60.4]],
       light: "M0 -130 C6 -128 14 -120 20 -110 C24 -104 22 -98 16 -98 C10 -100 4 -110 0 -118 C-2 -124 -3 -130 0 -130Z",
       under: [],
@@ -466,7 +472,7 @@ function earSpans(side: "L" | "R"): LitSpan[] {
   const foot = (p: P) => Math.min(0.7, Math.max(0, (p[1] + 74) / 6) * 0.7);
   return withDefaults({ on: "tan", taper: 2.6 }, side === "R"
     ? [{ from: [-93, -86], to: [-109.2, -82.6] }, { from: [-109.2, -82.6], to: [-115.4, -88.4] }, { from: [-115.4, -88.4], to: [-120.4, -104.6] },
-      { from: [-120.4, -102], to: [-85, -140.8] }]
+      { from: [-120.6, -100], to: [-118.2, -113.2] }, { from: [-118.2, -113.2], to: [-83, -143.8], taper: [2.6, 1] }]
     : [{ from: [-1, -135.4], to: [9.8, -61.2], under: foot }, { from: [9.8, -61.2], to: [-4.4, -60.4], under: 0.7 }, { from: [-4.4, -60.4], to: [-15.2, -68], under: 0.7 }]);
 }
 

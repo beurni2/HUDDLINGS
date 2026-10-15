@@ -144,12 +144,11 @@ const earClumps: { tip: P; root: P; notches: [P, P] }[] = [];
 // small one low on its back, a second, the broadest under its middle, hanging lowest, and a smaller one at its
 // front. Its top, where it comes out from under the crown, breaks into a row of small soft points of fur, feathered
 // into the crown, with no line.
-const ear = furEdge(furEdge(smooth([[8.6, -134.4], [13.4, -125], [16.4, -114.6], [19.4, -104.6], [21.6, -95.4], [21.4, -85.4], [18.6, -77.6], [12.6, -71],
-  [4, -66.4], [-13, -62.8], [-21.2, -64.4], [-28.6, -69.6], [-34.6, -77], [-37.2, -85.6], [-36.8, -94.4], [-34, -103.6], [-30.8, -113.4],
-  [-29.4, -124], [-30.8, -132], [-27.4, -138.6], [-20.6, -142.6], [-12.9, -144], [-4.4, -142.6], [2.6, -139.4]]), [21.4, -86.4], [-29.4, -70.4],
+const ear = furEdge(smooth([[8.6, -133.6], [13.4, -124.6], [17.6, -114.6], [21, -104.4], [22.4, -94], [21.6, -84.4], [18.6, -76.6], [12.6, -70.4],
+  [4, -66], [-13, -62.8], [-21.4, -64], [-28.8, -69], [-35, -77], [-37.6, -86.4], [-37, -96], [-34.6, -106], [-32.4, -115.4],
+  [-31.2, -124], [-29.6, -130.6], [-23.6, -138], [-17.8, -142.2], [-12.9, -143.8], [-4.4, -142.4], [2.6, -138.8]]), [21.6, -85.4], [-29.4, -70],
 [{ len: 1.1, w: 1.2, lean: 0.2 }, { len: 1.4, w: 2.2, lean: 0 }, { len: 1, w: 1.3, lean: -0.2 }], 0.45,
-(tip, root, notches) => earClumps.push({ tip, root, notches })), [-30.4, -134], [-6.4, -143],
-[{ len: 0.6, w: 1, lean: -0.4 }, { len: 0.8, w: 1.1, lean: -0.35 }, { len: 0.5, w: 0.9, lean: -0.3 }, { len: 0.7, w: 1.1, lean: -0.25 }, { len: 0.5, w: 0.8, lean: -0.2 }], 0.3);
+(tip, root, notches) => earClumps.push({ tip, root, notches }));
 
 // The head: the muzzle's profile from the upper lip's front (x -95.2 at y
 // -85.6) down to the lip's notch (x -92.8 at y -80.2), the chin and the jaw
@@ -513,14 +512,18 @@ function earPaint(): Paint {
   return {
     ...earFur({
       ear, axis: [[-6, -143], [-8, -63]], deepen: [0.4, 1.1],
-      locks: [[[-24, -118], [-28, -104], [-29.6, -90], [-28, -78]], [[-14, -124], [-17.4, -108], [-19, -92], [-18.4, -76], [-16.4, -67]],
-        [[-4, -126], [-5.4, -110], [-5.8, -94], [-4.6, -80], [-2.4, -67]], [[6, -122], [8.6, -108], [10, -94], [10, -82], [8, -71]],
-        [[-3, -134.6], [3.4, -128.4], [9.8, -120], [15, -112.4], [17.8, -104], [18.4, -92]]],
+      locks: [[[-26.6, -97], [-28.6, -87], [-27.8, -77.4]], [[-17.4, -93], [-18.8, -83], [-17.2, -70.4]], [[-6, -99], [-6.2, -87], [-4.6, -75], [-2.6, -67.6]],
+        [[6.6, -95], [7.8, -85], [6.8, -73.6]]],
+      // Along its back edge from its top to about two thirds down, the fold where the ear turns over the back of the
+      // head, as the sheet draws it, the back layer beyond it.
+      fold: { line: [[-3.4, -138.4], [4, -132.6], [10, -124.6], [14.6, -115.6], [17.8, -106.6], [19.2, -99]],
+        back: "M-4 -141 L4.6 -134.6 L10.8 -126.4 L15.6 -117 L19 -107.6 L20.6 -99 L30 -99 L30 -146 L-4 -146Z" },
       dips: earClumps.slice(1).map(({ notches }) => notches[0]),
-      light: "M-31 -110 C-31 -124 -25 -136 -13 -139 C-19 -132 -24 -122 -26.6 -108 C-28.6 -104 -31 -105 -31 -110Z",
+      light: "M-33 -100 C-33 -112 -29 -124 -20 -132 C-14 -134 -12 -128 -16 -120 C-20 -112 -24 -104 -27.6 -98 C-30 -95 -33 -96 -33 -100Z",
       under: ["M-6 -142 C4 -136 11 -126 15.6 -114 C18 -106 22 -96 22 -82 L30 -82 L30 -142Z"],
     }),
-    feather: { from: [-12, -145], to: [-12, -142.4] },
+    // Its top melts into the crown's fur from its front corner, where the crown's fur lies over it, no edge and no line along it.
+    feather: { from: [-24.4, -143.4], to: [-18.4, -137.2] },
   };
 }
 
@@ -529,8 +532,8 @@ function earPaint(): Paint {
  * deepest where it hangs over the collar and the neck, and up its front from under the patch's tan; its top, under
  * the crown's fur, has none.
  */
-const earSpans: LitSpan[] = [{ from: [4.6, -136.6], to: [-30.4, -72], on: "tan", under: (p: P) => Math.min(0.7, Math.max(0, (p[1] + 76) / 5) * 0.7), taper: 6 },
-  { from: [-26.4, -67.6], to: [-30.6, -121], on: "tan", taper: 6 }];
+const earSpans: LitSpan[] = [{ from: [4.6, -135.8], to: [-30.4, -71.6], on: "tan", under: (p: P) => Math.min(0.55, Math.max(0, (p[1] + 76) / 5) * 0.55), taper: [12, 6] },
+  { from: [-26.4, -67.4], to: [-31.4, -123], on: "tan", taper: [4, 12] }];
 
 /**
  * Where the chin's fur lies on the collar, as the sheet paints it (the front's recipe): the collar's dark rim right
