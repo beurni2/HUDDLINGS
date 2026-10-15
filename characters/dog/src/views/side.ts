@@ -141,7 +141,7 @@ const ear = furEdge(furEdge(smooth([[8.6, -134.4], [13.4, -125], [16.4, -114.6],
   [-29.4, -124], [-30.8, -132], [-27.4, -138.6], [-20.6, -142.6], [-12.9, -144], [-4.4, -142.6], [2.6, -139.4]]), [21.4, -86.4], [-29.4, -70.4],
 [{ len: 1.2, w: 0.9, lean: 0.25 }, { len: 0.9, w: 1.2, lean: 0.05 }, { len: 1.3, w: 2.1, lean: -0.05 }, { len: 0.9, w: 1.1, lean: -0.2 }], 0.45,
 (tip, root, notches) => earClumps.push({ tip, root, notches })), [-30.4, -134], [-6.4, -143],
-[{ len: 0.9, w: 1, lean: -0.4 }, { len: 1.2, w: 1.1, lean: -0.35 }, { len: 0.8, w: 0.9, lean: -0.3 }, { len: 1.1, w: 1.1, lean: -0.25 }, { len: 0.7, w: 0.8, lean: -0.2 }], 0.35);
+[{ len: 0.6, w: 1, lean: -0.4 }, { len: 0.8, w: 1.1, lean: -0.35 }, { len: 0.5, w: 0.9, lean: -0.3 }, { len: 0.7, w: 1.1, lean: -0.25 }, { len: 0.5, w: 0.8, lean: -0.2 }], 0.3);
 
 // The head: the muzzle's profile from the upper lip's front (x -95.2 at y
 // -85.6) down to the lip's notch (x -92.8 at y -80.2), the chin and the jaw
@@ -228,7 +228,7 @@ const backPaint: Paint = {
   fill: C.fur,
   // The haunch's underside and its back, away from the light; and under the ear and the collar's back end, where the
   // ear hangs over the neck.
-  shade: furShade(bodyGroup, ["M-30 -66 L-8 -66 L-10 -56 C-16 -54 -24 -56 -30 -58Z"]),
+  shade: furShade(bodyGroup, ["M-30 -66 L-6 -66 L-8 -55 C-14 -49 -22 -49 -30 -53Z"]),
   // The topline in the warm line the sheet draws round the back (#9C673F to #A86C47 at its core); round the rump the
   // ears' deep warm brown, where the sheet's line runs deeper and more orange beside the tail's tan (#A8622E to
   // #AB673A); along the underside the paws' line; and up the thigh's front one round arc, in the paws' line where it
@@ -251,9 +251,9 @@ function chestPaint(): Paint {
   const edge = uid("edge");
   return {
   fill: C.fur,
-  // In shade under the collar; a soft band of shade in front of the thigh's round, where the belly turns away under
+  // In shade under the collar, a little way down the chest; a soft band of shade in front of the thigh's round, where the belly turns away under
   // it; and deep warm shade on the belly between the paws, as the sheet paints it there.
-  shade: furShade(bodyGroup, ["M-60 -54 C-48 -48 -32 -48 -20 -54 L-20 -60 L-60 -60Z",
+  shade: furShade(bodyGroup, ["M-62 -52 C-50 -45 -32 -45 -18 -52 L-18 -62 L-62 -62Z",
     "M-30.6 -6 C-31.2 -14 -29.4 -22 -26.6 -28 C-24.8 -32 -22.8 -35 -20.6 -38 L-24.6 -40.4 C-28.2 -35 -31.4 -28.6 -33.4 -21 C-34.6 -15 -34.8 -9 -34.4 -4Z"]),
   under: belly() + `<defs>${chestEdge(edge)}</defs>`,
   // Only its front edge between the tag's foot and the near leg shows, a line as the sheet draws it over the far leg.
@@ -262,15 +262,16 @@ function chestPaint(): Paint {
 }
 
 /**
- * The belly between the front paw's heel and the hind paw, in deep warm shade, as the sheet paints it (#D39870):
- * a wedge rising from the ground to a point by the haunch's front, its top fading out.
+ * The belly between the front paw's heel and the hind paw, in deep warm shade, as the sheet paints it (#C29067 to
+ * #AB7B57 low down): a wedge rising from the ground to a point by the haunch's front, deepening toward the ground
+ * through the ears' deeper tans, its top fading out.
  */
 function belly(): string {
   const g = uid("belly"), f = uid("blur");
   const d = pathD(smooth([[-37, -2], [-35.4, -8], [-31.6, -14.4], [-27, -18.6], [-25.6, -16], [-27.6, -9], [-28.6, -2]], { corners: [0, 6] }).segs);
   return `<defs><linearGradient id="${g}" gradientUnits="userSpaceOnUse" x1="0" y1="-19" x2="0" y2="-3">` +
-    `<stop offset="0" stop-color="${C.marking}" stop-opacity="0.1"/><stop offset="0.5" stop-color="${C.marking}" stop-opacity="0.4"/>` +
-    `<stop offset="1" stop-color="${C.marking}" stop-opacity="0.7"/></linearGradient>${blur(f, [-42, -24, 20, 26], 0.8)}</defs>` +
+    `<stop offset="0" stop-color="${C.marking}" stop-opacity="0.2"/><stop offset="0.45" stop-color="${C.earDeep}" stop-opacity="0.7"/>` +
+    `<stop offset="1" stop-color="${C.earLow}" stop-opacity="0.9"/></linearGradient>${blur(f, [-42, -24, 20, 26], 0.8)}</defs>` +
     `<path d="${d}" fill="url(#${g})" filter="url(#${f})"/>`;
 }
 
@@ -373,8 +374,10 @@ const headLight = "M-82 -128 C-74 -146 -56 -154 -38 -152 C-46 -146 -62 -140 -72 
   "M-90 -103 C-87 -106 -80 -107 -76 -104 C-79 -101 -86 -100 -90 -103Z";
 const headPaint: Paint = {
   fill: C.fur,
-  // Under the jaw, where the head turns under toward the collar, and the cheek's back under the ear's foot.
-  shade: furShade(headGroup, ["M-92 -76 C-84 -66 -72 -63 -56 -61 L-30 -62 L-30 -56 L-92 -56Z", "M-40 -82 C-36 -72 -30 -66 -24 -64 L-24 -56 L-44 -56Z"],
+  // Under the jaw, where the head turns under toward the collar; and down the cheek along the ear's front, where the
+  // ear hangs over it, deepest under the ear's foot, as the sheet paints it (#F8CAA6 to #FEDAB8 there).
+  shade: furShade(headGroup, ["M-92 -76 C-84 -66 -72 -63 -56 -61 L-30 -62 L-30 -56 L-92 -56Z",
+    "M-33 -106 C-37.4 -100 -40 -94 -40.4 -86 C-41 -80 -42.6 -74 -45 -70 C-46 -66 -46 -60 -45 -56 L-22 -56 L-22 -62.6 L-30 -62.6 L-30 -106Z"],
     ["M-100 -172 L20 -172 L20 -140 L-100 -140Z"], { inset: 3, toLight: 4.5 }),
   highlight: { d: headLight, colour: C.light, opacity: 0.4, blur: 4 },
   // Each lock's tip hooks back in under itself, a hair stroke in the crown's line running back along the lock's
@@ -424,8 +427,8 @@ function headLinePiece(): Piece {
 /**
  * The near eye in profile, as the side turnaround paints it: a tall oval iris (11.2 by 21 pt) leaning 6° back at its
  * top, near-black over its upper half and glowing smoothly down into a warm brown at its foot, with no step, inside
- * a slightly darker rim; behind it, toward the ear, a thin crescent of white, narrow at the top and widest at its
- * lower back, where it cools into a soft pale blue-grey shade; the lid line sitting right on the iris's top and
+ * a slightly darker rim; behind it, toward the ear, a thin crescent of white, narrow at the top, where the lid's soft
+ * shade falls on it, and widest at its lower back, where it cools into a soft pale blue-grey shade; the lid line sitting right on the iris's top and
  * running round its back, heaviest along the top and the back corner and tapering away down the back; a faint pale
  * halo round the iris's foot and front; and one catchlight high on its front, toward the nose, as the sheet draws it
  * (Q26's default: the side crop shows one).
@@ -434,7 +437,7 @@ function eye(): Piece {
   // The iris as the sheet's dark oval measures (its extremes x -73.4 to -62, y -110.8 to -89.7).
   const c: P = [-67.7, -100.2], rx = 5.6, ry = 10.5, lean = 6;
   const iris = pathD(ellipse(c, rx, ry, lean));
-  const clip = uid("eye"), glow = uid("glow"), cool = uid("cool"), shine = uid("blur"), edge = uid("blur"), white = uid("blur"), core = uid("blur"), halo = uid("blur"), rimSoft = uid("blur");
+  const clip = uid("eye"), glow = uid("glow"), cool = uid("cool"), lidShade = uid("shade"), shine = uid("blur"), edge = uid("blur"), white = uid("blur"), core = uid("blur"), halo = uid("blur"), rimSoft = uid("blur");
   const box: Box = [c[0] - 10, c[1] - 15, 24, 30];
   /** A point on the iris's oval at an angle (degrees, 0 toward the back, 90 down), grown by `grow`. */
   const on = (deg: number, grow = 0): P => {
@@ -443,19 +446,19 @@ function eye(): Piece {
     return [c[0] + x * Math.cos(t) - y * Math.sin(t), c[1] + x * Math.sin(t) + y * Math.cos(t)];
   };
   // The white: from the iris's top round its back, just inside the lid line, down to its lower back, where it is widest.
-  const whiteShape = smooth([on(-100), [-63.8, -109.4], [-61.2, -107.4], [-59.8, -105.2], [-58.8, -102.2], [-58.4, -99.2], [-58.6, -96.2], [-59.4, -93.4],
+  const whiteShape = smooth([on(-100), [-63.6, -108.6], [-61, -106.4], [-59.6, -104.2], [-58.7, -101.6], [-58.3, -98.8], [-58.5, -96], [-59.4, -93.4],
     [-60.8, -91.4], [-62.8, -90.4], on(55), on(0), on(-50)], { corners: [0, 10] });
   // The lid: along the iris's top from its front and round its back to its lower back; a heavier stroke along the top
   // and the back corner over it.
-  const lidArc = smooth([on(-150, 0.1), on(-118, 0.25), on(-92, 0.35), [-63.9, -109.9], [-61, -108], [-59.3, -105.6], [-58.1, -102.4], [-57.6, -99.2], [-57.7, -96.2],
-    [-58.4, -94]], { closed: false });
-  const topArc = smooth([on(-140, 0.2), on(-110, 0.35), on(-88, 0.4), [-63.9, -110], [-61, -108.1], [-59.4, -105.6]], { closed: false });
+  const lidArc = smooth([on(-150, 0.1), on(-118, 0.25), on(-92, 0.35), [-63.8, -109.4], [-60.8, -107.2], [-59, -104.8], [-57.9, -101.8], [-57.5, -98.8], [-57.6, -96],
+    [-58.3, -93.8]], { closed: false });
+  const topArc = smooth([on(-140, 0.2), on(-110, 0.35), on(-88, 0.4), [-63.8, -109.5], [-60.8, -107.3], [-59.2, -105]], { closed: false });
   const lid = tapered(sample(lidArc.segs, 10, false), 1.3, "outer", "eye lid", { taper: 7, tip: 0.25 });
   const lidTop = tapered(sample(topArc.segs, 10, false), 1.8, "outer", "eye lid", { taper: 4, tip: 0.6 });
   // A faint pale halo just outside the rim round the iris's foot and front, between the eye and the fur, as the sheet paints it.
   const ring = strokeOf(Array.from({ length: 25 }, (_, k) => on(95 + (k * 120) / 24, 1.1)), 1.6, { taper: 5, tip: 0.2 });
   // And just outside the lid, round the eye's top and back, where the patch's tan stops short of it, as the sheet paints it.
-  const outer = strokeOf(sample(smooth([on(-150, 1.4), on(-110, 1.7), on(-88, 1.8), [-63.4, -111.6], [-60, -109.4], [-57.8, -106], [-56.4, -101.6], [-56.1, -97],
+  const outer = strokeOf(sample(smooth([on(-150, 1.4), on(-110, 1.7), on(-88, 1.8), [-63.4, -111.2], [-59.8, -108.8], [-57.6, -105.4], [-56.3, -101.2], [-56, -96.6],
     [-56.8, -93.2]], { closed: false }).segs, 8, false), 1.5, { taper: 5, tip: 0.2 });
   // The iris's own darker rim, round its front, foot and back, inside its edge.
   const rim = tapered(Array.from({ length: 31 }, (_, k) => on(-160 + (k * 250) / 30, -0.35)), 0.8, "inner", "eye rim", { taper: 5, tip: 0.3 });
@@ -468,11 +471,14 @@ function eye(): Piece {
     `<linearGradient id="${glow}" gradientUnits="userSpaceOnUse" x1="${fmt(tx)}" y1="${fmt(ty)}" x2="${fmt(bx)}" y2="${fmt(by)}">` +
     `<stop offset="0.42" stop-color="${C.eyeDark}"/><stop offset="0.7" stop-color="${C.dark}"/><stop offset="0.86" stop-color="${C.dark}"/>` +
     `<stop offset="1" stop-color="${C.irisWarm}"/></linearGradient>` +
+    // The lid's soft shade over the white's top, the printed soft shadow, as the sheet paints it there (#E7DAD1).
+    `<linearGradient id="${lidShade}" gradientUnits="userSpaceOnUse" x1="0" y1="-109" x2="0" y2="-100">` +
+    `<stop offset="0" stop-color="${C.shadow}" stop-opacity="0.95"/><stop offset="1" stop-color="${C.shadow}" stop-opacity="0"/></linearGradient>` +
     `<linearGradient id="${cool}" gradientUnits="userSpaceOnUse" x1="0" y1="-97" x2="0" y2="-90.4">` +
     `<stop offset="0" stop-color="${C.collarHighlight}" stop-opacity="0"/><stop offset="1" stop-color="${C.collarHighlight}" stop-opacity="0.32"/></linearGradient>` +
     `${blur(shine, box, 0.1)}${blur(edge, box, 0.2)}${blur(white, box, 0.3)}${blur(core, box, 0.3)}${blur(halo, box, 0.55)}${blur(rimSoft, box, 0.45)}</defs>` +
     `<path d="${ring.d}" fill="${C.fur}" opacity="0.8" filter="url(#${halo})"/><path d="${outer.d}" fill="${C.fur}" opacity="0.5" filter="url(#${halo})"/>` +
-    `<g filter="url(#${white})"><path d="${pathD(whiteShape.segs)}" fill="${C.eyeWhite}"/><path d="${pathD(whiteShape.segs)}" fill="url(#${cool})"/></g>` +
+    `<g filter="url(#${white})"><path d="${pathD(whiteShape.segs)}" fill="${C.eyeWhite}"/><path d="${pathD(whiteShape.segs)}" fill="url(#${cool})"/><path d="${pathD(whiteShape.segs)}" fill="url(#${lidShade})"/></g>` +
     `<g filter="url(#${edge})"><path d="${iris}" fill="url(#${glow})"/></g>` +
     `<g clip-path="url(#${clip})"><path d="${rim.d}" fill="${C.eyeDark}" opacity="0.7" filter="url(#${rimSoft})"/></g>` +
     `<g filter="url(#${edge})"><path d="${lid.d}" fill="${C.eyeDark}"/><path d="${lidTop.d}" fill="${C.eyeDark}"/></g>` +
@@ -593,10 +599,9 @@ function earPaint(): Paint {
     `<linearGradient id="${hair}" gradientUnits="userSpaceOnUse" x1="0" y1="-106" x2="0" y2="-68">` +
     `<stop offset="0" stop-color="${C.earLine}" stop-opacity="0"/><stop offset="0.55" stop-color="${C.earLine}" stop-opacity="0.26"/>` +
     `<stop offset="1" stop-color="${C.earLine}" stop-opacity="0.08"/></linearGradient></defs>`;
-  // Uneven, as the sheet paints them: two close together under the ear's middle, one short low at its front, one long
-  // toward its back.
-  const hairs: P[][] = [[[-26.8, -92], [-27.8, -82], [-26.8, -74]], [[-17.8, -98], [-18.2, -86], [-16.8, -75], [-15.4, -69]],
-    [[-13.4, -94], [-13.6, -84], [-12.6, -74]], [[2.4, -104], [3.6, -91], [3.4, -78], [2.2, -70]], [[12.4, -92], [13.2, -84], [12.4, -77]]];
+  // Few and uneven, low on the ear, as the sheet paints them: two close together under its middle, curving with its
+  // round, one short toward its back.
+  const hairs: P[][] = [[[-19.4, -86], [-19.4, -78], [-17.6, -71]], [[-14.6, -84], [-14.2, -77], [-12.8, -71.4]], [[3.4, -88], [4.4, -80], [3.8, -73]]];
   return {
     fill: C.marking,
     under: under + strands,
