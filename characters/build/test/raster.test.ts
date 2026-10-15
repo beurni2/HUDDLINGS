@@ -1,9 +1,10 @@
 // Tests for rasterizing in child processes, from characters/build/raster.ts.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, readdirSync, rmSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { rasterize, type Drawing } from "../atlas.ts";
 import { rasterKey, rasterizeAll } from "../raster.ts";
 
@@ -42,6 +43,37 @@ test("a drawing that aborts resvg fails the build by name, and only it", async (
 test("a drawing the worker refuses is named with the worker's reason", async () => {
   const odd: Drawing = { region: "odd/front", svg: good.svg.replace('width="80"', 'width="80.5"').replace("80 64", "80.5 64"), anchor: [0, 0] };
   await assert.rejects(rasterizeAll([odd], [1]), /drawing odd\/front at 1x could not be drawn \(exit 1: Error: drawing odd\/front: 80.5 × 64 pt at scale 1 is not a whole number of pixels\)/);
+});
+
+test("the cache key is the rasterizing code's: the same code anywhere keys alike, changed code keys anew", async () => {
+  const build = join(dirname(fileURLToPath(import.meta.url)), "..");
+  // Copies under the repository's build/, so they find its node_modules as the hook's checkout does.
+  const scratch = join(build, "../../build");
+  mkdirSync(scratch, { recursive: true });
+  const dir = mkdtempSync(join(scratch, "raster-key-"));
+  /** The key the three files give, copied into a folder of their own, one of them changed. */
+  const keyWith = async (name: string, change: (text: string) => string = (t) => t) => {
+    const folder = mkdtempSync(join(dir, "copy-"));
+    for (const file of ["atlas.ts", "raster.ts", "raster-worker.ts"]) {
+      const text = readFileSync(join(build, file), "utf8");
+      writeFileSync(join(folder, file), file === name ? change(text) : text);
+    }
+    const copy = (await import(pathToFileURL(join(folder, "raster.ts")).href)) as { rasterKey: typeof rasterKey };
+    return copy.rasterKey(good.svg, 2);
+  };
+  try {
+    const here = rasterKey(good.svg, 2);
+    assert.equal(await keyWith(""), here, "the same code in another folder");
+    const trim = (t: string) => t.replace("if (data[(y * width + x) * 4 + 3]! > 0) {", "if (data[(y * width + x) * 4 + 3]! > 1) {");
+    assert.notEqual(trim(readFileSync(join(build, "atlas.ts"), "utf8")), readFileSync(join(build, "atlas.ts"), "utf8"));
+    assert.notEqual(await keyWith("atlas.ts", trim), here, "a change to the trim");
+    assert.notEqual(await keyWith("raster-worker.ts", (t) => `${t}// another worker\n`), here, "a change to the worker");
+    assert.notEqual(await keyWith("raster.ts", (t) => `${t}// another cache\n`), here, "a change to this file");
+    // The packer draws nothing: a change there keeps every cached raster.
+    assert.equal(await keyWith("atlas.ts", (t) => t.replace("export function packRasters(", "// packed otherwise\nexport function packRasters(")), here);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 test("rasters are cached by what makes them, and a cached raster is the one drawn", async () => {
