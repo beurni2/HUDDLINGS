@@ -141,7 +141,7 @@ head = furEdge(head, [-91.4, -75], [-99.2, -94.2], cheekLocks, 0.4, (tip, root, 
 head = furSpan(head, [3.2, -137.4], [0.4, -135.5]);
 // Under the overhang the crown's cream fur hangs down over the near ear's root in a few soft locks, as the sheet
 // draws them, so the root has no flat top edge.
-head = furEdge(head, [-3.8, -135], [-16.4, -132.5], [{ len: 2.2, w: 1.3, lean: 0.4 }, { len: 1, w: 0.9, lean: 0.35 }, { len: 1.6, w: 1.1, lean: 0.4 }], 0.24);
+head = furEdge(head, [-3.8, -135], [-16.4, -132.5], [{ len: 1.8, w: 1.3, lean: 0.3 }, { len: 0.9, w: 0.9, lean: 0.25 }, { len: 1.4, w: 1.1, lean: 0.3 }], 0.42);
 
 // The topknot: an upright sprig of three fur lobes, typed node by node (the sheet's tuft, seen turned), each side
 // lobe a petal of fur: the left one low and broad, pointing out to its tip at the left (x -67.2) and drawn back
@@ -293,13 +293,13 @@ function headLinePiece(): Piece {
   // Where the crown's fur meets each ear's root with no line, the sheet's edge is soft: the crown's cream lies out
   // over the root's tan in a feathered edge.
   const s = uid("blur");
-  const roots: [P, P][] = [[[-1.6, -135.2], [-19.6, -131.6]]];
-  const feathered = roots.map(([a, b]) => strokeOf(spanPoints(head, ...([fracAt(head, a), fracAt(head, b)].sort((p, q) => p - q) as [number, number])), 1.6, { taper: 3, tip: 0.4 }).d).join("");
+  const roots: [P, P][] = [[[-1.2, -135.4], [-19.8, -129.8]]];
+  const feathered = roots.map(([a, b]) => strokeOf(spanPoints(head, ...([fracAt(head, a), fracAt(head, b)].sort((p, q) => p - q) as [number, number])), 2.4, { taper: 3, tip: 0.4 }).d).join("");
   const seam = (id: string, top: number, bottom: number) => `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="0" y1="${top}" x2="0" y2="${bottom}">` +
     `<stop offset="0" stop-color="${C.earEdge}"/><stop offset="1" stop-color="${C.earLine}"/></linearGradient>`;
   return piece(`<defs>${blur(f, pad(box, 2), headLine.blur!)}${blur(g, pad(box, 2), 0.35)}${blur(s, pad(box, 2), 0.8)}` +
     seam(SEAM_R, -126, -110) + seam(SEAM_L, -119, -106) + `</defs>` +
-    `<path d="${feathered}" fill="${C.fur}" opacity="0.6" filter="url(#${s})"/>` +
+    `<path d="${feathered}" fill="${C.fur}" opacity="0.75" filter="url(#${s})"/>` +
     `<g fill="${headLine.colour}" filter="url(#${f})">${r.svg}</g>` +
     `<g filter="url(#${g})">${c.svg}</g>`, box, {
     shapes: [{ name: "head.line", nodes: head.typed, segs: head.segs, outlined: [...r.outlined, ...c.outlined], fur: head.fur.map(([a, b]) => [fracAt(head, a), fracAt(head, b)]) }],
@@ -425,8 +425,8 @@ function mouth(): Piece {
   const sides = strokeOf(along.filter(([x, y]) => y < -74 || x < -60), 1.6, { taper: 2.4, tip: 0.2, band: doubled });
   const rimLine: DrawnLine = { kind: "inner", width: 0.8, where: "mouth rim", drawn: [sides.drawn[0] / 2, sides.drawn[1] / 2] };
   const clip = uid("mouth"), softB = uid("blur"), lit = uid("blur"), lipFade = uid("lip"), rimB = uid("blur");
-  const TONGUE = "M-75.4 -69 L-74.6 -78.8 C-72 -80.2 -69 -80.9 -66 -80.8 C-62.8 -80.7 -60.2 -80.2 -57.4 -79 L-56.6 -69Z";
-  const groove = innerLine([[-66.5, -79.8], [-66.8, -77.4], [-67.2, -74.8]], 0.7, C.tongueRim, { taper: 1.2, tip: 0.1, opacity: 0.22 });
+  const TONGUE = "M-75.4 -69 L-74.4 -79.6 C-72.2 -81.4 -69.4 -82.2 -66.2 -82 C-63 -81.8 -60.4 -81.2 -57.6 -79.8 L-56.6 -69Z";
+  const groove = innerLine([[-66.5, -80.8], [-66.8, -78], [-67.2, -75]], 0.7, C.tongueRim, { taper: 1.2, tip: 0.1, opacity: 0.22 });
   const philtrum = innerLine([[-68.3, -88.9], [-68.7, -87.5], [-69.4, -85.8]], 0.9, C.eyeDark, { taper: 0.8, tip: 0.6, wobble: 0 });
   const box: Box = [-80, -91, 28, 23];
   const svg = `<defs><clipPath id="${clip}"><path d="${m}"/></clipPath>${blur(softB, box, 0.4)}${blur(lit, box, 1.2)}${blur(rimB, box, 0.2)}` +
@@ -435,7 +435,7 @@ function mouth(): Piece {
     `<stop offset="0.92" stop-color="${C.dark}"/></linearGradient></defs>` +
     `<path d="${m}" fill="${C.mouthInside}"/><g clip-path="url(#${clip})">` +
     // Deepest right under the lip and back into the far corner.
-    `<path d="M-76 -86.6 L-57 -83.4 L-57 -81.4 C-62 -81.6 -67 -83 -71 -83.4 C-73 -82.6 -74 -81 -75 -79Z" fill="${C.mouthDeep}" opacity="0.5" filter="url(#${softB})"/>` +
+    `<path d="M-76 -86.6 L-57 -83.4 L-57 -82.4 C-62 -82.6 -67 -83.8 -71 -84 C-73 -83.2 -74 -81.6 -75 -79.6Z" fill="${C.mouthDeep}" opacity="0.3" filter="url(#${softB})"/>` +
     `<path d="${TONGUE}" fill="${C.tongue}" filter="url(#${softB})"/>` +
     `<ellipse cx="-66.6" cy="-76.4" rx="3.6" ry="2.6" fill="${C.tongueShine}" opacity="0.45" filter="url(#${lit})"/>${groove.svg}` +
     `<path d="${sides.d}" fill="${C.mouthRim}" opacity="0.85" filter="url(#${rimB})"/></g>` +
@@ -497,7 +497,8 @@ function earPaint(side: "L" | "R"): Paint {
   // Lighter and more golden at the root, in the head patches' paler tan, deepening down the ear (the sheet's
   // #EAAE7F by the near ear's root).
   const rootLight = uid("root");
-  const under = `<defs><linearGradient id="${deep}" gradientUnits="userSpaceOnUse" x1="0" y1="${side === "R" ? -110 : -100}" x2="0" y2="${fmt(ey1)}">` +
+  // The far ear, turned away, deepens from higher up than the near one, as the sheet paints it.
+  const under = `<defs><linearGradient id="${deep}" gradientUnits="userSpaceOnUse" x1="0" y1="${side === "R" ? -118 : -100}" x2="0" y2="${fmt(ey1)}">` +
     `<stop offset="0" stop-color="${C.earDeep}" stop-opacity="0"/><stop offset="0.35" stop-color="${C.earDeep}"/>` +
     `<stop offset="0.72" stop-color="${C.earDeeper}"/><stop offset="1" stop-color="${C.earFoot}"/></linearGradient>` +
     `<linearGradient id="${rootLight}" gradientUnits="userSpaceOnUse" x1="0" y1="${side === "R" ? -143 : -136}" x2="0" y2="${side === "R" ? -125 : -117}">` +
@@ -544,7 +545,7 @@ function headShadow(side: "L" | "R"): Piece {
       [-11.4, -91], [-9.4, -104], [-11.4, -115], [-15.8, -126.6], [-15.2, -129.8], [1.6, -132.4]];
   const shape = smooth(band);
   const [x0, y0, x1, y1] = bbox(shape.segs);
-  return soft(pathD(shape.segs), [x0, y0, x1 - x0, y1 - y0], C.earDeep, 1.4, 0.5);
+  return soft(pathD(shape.segs), [x0, y0, x1 - x0, y1 - y0], C.earDeep, 1.4, side === "R" ? 0.8 : 0.5);
 }
 
 /**
