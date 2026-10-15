@@ -6,7 +6,8 @@
 // bytes twice. The reference is composited on the
 // CPU straight from the atlas page, for every part drawn unrotated on whole pixels.
 // A still never comes out half-written or at another size, and the look loop
-// (look.ts) never reads a crash of the sheet match as failed checks.
+// (look.ts) never reads a crash of the sheet match as failed checks; its faces
+// mode renders every face clip with the rest front and checks each.
 import { after, before, test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
@@ -18,7 +19,7 @@ import type { Clip } from "../src/format.ts";
 import { compile, drawList, evaluatePose, type DrawItem } from "../src/rig.ts";
 import { MASK_ALPHA } from "../src/renderer.ts";
 import { hex, idColour, inPart, largestAlpha, MASK_ONLY, recolour } from "../lab/ids.ts";
-import { failures, matchVerdict } from "../lab/look.ts";
+import { faceClips, failures, lookFaces, matchVerdict } from "../lab/look.ts";
 import { MARGIN, openStills, type StillInfo, type Stills } from "../lab/still.ts";
 
 const PPP = 3;
@@ -426,6 +427,43 @@ test("the look loop reads a crash of the sheet match as a crash, never as the la
   assert.deepEqual(failed, { verdict: "fail", text: "FAIL blush.cheeks.L" });
   assert.deepEqual(await matchVerdict(process.execPath, matcher(0, { pass: true }), out), { verdict: "pass", text: "pass" });
   assert.deepEqual(failures({ a: { pass: false }, b: [{ name: "x", pass: false }], c: { gating: false, pass: false } }), ["a", "b.x"]);
+});
+
+test("the look loop's faces mode checks every face clip against the rest front, and passes a package with none", async () => {
+  // The test character with three face clips. A stand-in for facematch.py checks it was handed the face's still and
+  // the rest front's, writes a match.json with a summary and exits by preset: happy passes, sly fails, shy crashes.
+  const facesDir = join(dir, "faces-package");
+  writePackage(await buildPackage({ ...source, clips: [...source.clips, still("still_front", "front"), ...["happy", "sly", "shy"].map((p) => still(`face_${p}`, "front"))] }), facesDir);
+  assert.deepEqual(faceClips(facesDir), ["happy", "shy", "sly"]);
+  assert.deepEqual(faceClips(join(dir, "package")), []);
+  const script = `const fs = require("fs"), path = require("path"); const [still, rest, out] = process.argv.slice(1);
+    const clip = JSON.parse(fs.readFileSync(path.join(still, "still.json"))).clip, restClip = JSON.parse(fs.readFileSync(path.join(rest, "still.json"))).clip;
+    if (restClip !== "still_front") process.exit(3);
+    const code = { face_happy: 0, face_sly: 1, face_shy: 2 }[clip];
+    if (code < 2) { fs.mkdirSync(out, { recursive: true }); fs.writeFileSync(path.join(out, "match.json"), JSON.stringify({ pass: code === 0, summary: (code ? "FAIL: " : "pass: ") + clip })); }
+    else console.error("crashed");
+    process.exit(code);`;
+  const matcher = (stillDir: string, rest: string, out: string): [string, string[]] => [process.execPath, ["-e", script, stillDir, rest, out]];
+  const facesStills = await openStills(facesDir);
+  try {
+    await facesStills.load(PPP);
+    const result = await lookFaces(facesStills, { packageDir: facesDir, stillsDir: join(dir, "face-stills"), qa: join(dir, "face-qa"), matcher });
+    assert.equal(result.verdict, "error", "a crash outranks a failed face");
+    assert.equal(result.lines.length, 3);
+    assert.match(result.lines[0]!, /^happy {2}pass: face_happy {2}· /);
+    assert.match(result.lines[1]!, /^shy {4}ERROR the sheet match crashed \(exit 2\): crashed/);
+    assert.match(result.lines[2]!, /^sly {4}FAIL: face_sly {2}· /);
+    assert.equal(JSON.parse(readFileSync(join(dir, "face-stills", "faces", "sly", "still.json"), "utf8")).clip, "face_sly");
+    assert.equal(JSON.parse(readFileSync(join(dir, "face-stills", "front", "still.json"), "utf8")).clip, "still_front");
+    const passing = await lookFaces(facesStills, { packageDir: facesDir, stillsDir: join(dir, "face-stills"), qa: join(dir, "face-qa"),
+      matcher: (stillDir, rest, out) => (stillDir.endsWith("shy") ? matcher(stillDir.replace(/shy$/, "happy"), rest, out) : matcher(stillDir, rest, out)) });
+    assert.equal(passing.verdict, "fail", "a failed face with no crash is a failure");
+  } finally {
+    await facesStills.close();
+  }
+  // A package with no face clip says so and passes.
+  const none = await lookFaces(stills, { packageDir: join(dir, "package"), stillsDir: join(dir, "face-stills"), qa: join(dir, "face-qa"), matcher });
+  assert.deepEqual(none, { verdict: "pass", lines: ["the package holds no face_<preset> clip, so no face is checked"] });
 });
 
 test("ID colours are fixed by a part's index, distinct and never black", () => {
