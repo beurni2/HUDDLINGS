@@ -8,10 +8,11 @@ import type { LintRules } from "../../draw/lint.ts";
 import type { Rig } from "../../../runtime-web/src/format.ts";
 import { palette } from "./palette.ts";
 import { front, landmarks as frontLandmarks } from "./views/front.ts";
+import { side, landmarks as sideLandmarks } from "./views/side.ts";
 
 const rig = JSON.parse(readFileSync(new URL("./rig.json", import.meta.url), "utf8")) as Rig;
 
-const VIEWS = { front };
+const VIEWS = { front, "side.L": side };
 
 export function drawings(): Drawing[] {
   return Object.entries(VIEWS).flatMap(([view, draw]) => draw().map((d) => toBone(d.part, rig, view, d.piece, d.state)));
@@ -19,7 +20,7 @@ export function drawings(): Drawing[] {
 
 /** Where each view's drawing puts the points the sheet has no finder for, in model space. */
 export function landmarks(): Record<string, Record<string, [number, number]>> {
-  return { front: frontLandmarks };
+  return { front: frontLandmarks, "side.L": sideLandmarks };
 }
 
 export const lint: LintRules = {
