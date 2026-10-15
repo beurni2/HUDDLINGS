@@ -4,9 +4,11 @@
 // and keeps the clip to head.base, model points land on rootPx + ppp·(x, y), and
 // the same still renders the same bytes twice. The reference is composited on the
 // CPU straight from the atlas page, for every part drawn unrotated on whole pixels.
+// A still never comes out half-written or at another size, and the look loop
+// (look.ts) never reads a crash of the sheet match as failed checks.
 import { after, before, test } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { PNG } from "pngjs";
@@ -15,6 +17,7 @@ import type { Clip } from "../src/format.ts";
 import { compile, drawList, evaluatePose, type DrawItem } from "../src/rig.ts";
 import { MASK_ALPHA } from "../src/renderer.ts";
 import { hex, idColour, inPart, largestAlpha, recolour } from "../lab/ids.ts";
+import { failures, matchVerdict } from "../lab/look.ts";
 import { MARGIN, openStills, type StillInfo, type Stills } from "../lab/still.ts";
 
 const PPP = 3;
@@ -312,6 +315,29 @@ test("the ground shadow, a soft part, shows in the ID pass", () => {
   let n = 0;
   for (let k = 0; k < ids.data.length; k += 4) if (hex([...ids.data.subarray(k, k + 3)]) === shadow) n++;
   assert.ok(n > 1000, `the shadow shows on ${n} pixels`);
+});
+
+test("the look loop reads a crash of the sheet match as a crash, never as the last run's checks", async () => {
+  const out = join(dir, "look");
+  mkdirSync(out, { recursive: true });
+  const json = join(out, "match.json");
+  const stale = JSON.stringify({ silhouette: { pass: false }, landmarks: { pass: true }, pass: false });
+  // A stand-in for match.py: writes what it is given into match.json, if anything, and exits with a code.
+  const matcher = (code: number, written?: unknown) =>
+    ["-e", `${written === undefined ? "" : `require("fs").writeFileSync(${JSON.stringify(json)}, ${JSON.stringify(JSON.stringify(written))});`} console.error("said"); process.exit(${code});`];
+  writeFileSync(json, stale);
+  const crash = await matchVerdict(process.execPath, matcher(2), out);
+  assert.equal(crash.verdict, "error");
+  assert.match(crash.text, /^ERROR the sheet match crashed \(exit 2\): said/);
+  assert.ok(!existsSync(json), "the old match.json is deleted before the match runs");
+  writeFileSync(json, stale);
+  const silent = await matchVerdict(process.execPath, matcher(1), out);
+  assert.equal(silent.verdict, "error", "a 1 with no match.json of its own is not failed checks");
+  assert.match(silent.text, /left no readable match.json/);
+  const failed = await matchVerdict(process.execPath, matcher(1, { blush: { pass: false, cheeks: [{ name: "L", pass: false }] }, advisory: { gating: false, x: { pass: false } }, pass: false }), out);
+  assert.deepEqual(failed, { verdict: "fail", text: "FAIL blush.cheeks.L" });
+  assert.deepEqual(await matchVerdict(process.execPath, matcher(0, { pass: true }), out), { verdict: "pass", text: "pass" });
+  assert.deepEqual(failures({ a: { pass: false }, b: [{ name: "x", pass: false }], c: { gating: false, pass: false } }), ["a", "b.x"]);
 });
 
 test("ID colours are fixed by a part's index, distinct and never black", () => {

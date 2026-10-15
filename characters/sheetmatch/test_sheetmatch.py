@@ -12,6 +12,9 @@ import contextlib
 import copy
 import io
 import json
+import os
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -591,6 +594,40 @@ class PlantedTest(unittest.TestCase):
         with contextlib.redirect_stderr(io.StringIO()) as said:
             self.assertEqual(match.main(["dog", "--still", str(Path(self.folder.name) / "none"), "--out", str(out)]), 2)
         self.assertIn("still.json", said.getvalue())
+
+    def test_any_error_exits_2_and_leaves_no_verdict(self):
+        """1 means only that a gating check failed: a crash anywhere is 2, and no match.json, old or half-made, stays."""
+        folder = Path(self.folder.name) / "crash"
+        self.fixture().write(folder)
+        (folder / "landmarks.json").write_text(json.dumps(self.fixtures["front"].source()))
+        out = folder / "out"
+        args = ["dog", "--still", str(folder), "--out", str(out), "--landmarks", str(folder / "landmarks.json")]
+        self.assertEqual(match.main(args), 0)
+        self.assertTrue((out / "match.json").exists())
+        # A check that crashes (a box with no light pixels once raised IndexError here).
+        original = match.check_blush
+        match.check_blush = lambda *_: [][0]
+        try:
+            with contextlib.redirect_stderr(io.StringIO()) as said:
+                self.assertEqual(match.main(args), 2)
+        finally:
+            match.check_blush = original
+        self.assertIn("IndexError", said.getvalue())
+        self.assertFalse((out / "match.json").exists(), "the last run's match.json stays beside a crash")
+        # A landmarks file that is not there is an error, not a run without the source's points.
+        with contextlib.redirect_stderr(io.StringIO()):
+            self.assertEqual(match.main(args[:-1] + [str(folder / "missing.json")]), 2)
+        # Run as a command, an error before any check, even in an import, exits 2.
+        fake = folder / "fake"
+        fake.mkdir()
+        (fake / "numpy.py").write_text("raise ImportError('planted')\n")
+        script = Path(match.__file__).resolve()
+        env = dict(os.environ, PYTHONPATH=str(fake))
+        ran = subprocess.run([sys.executable, str(script), *args], capture_output=True, text=True, env=env)
+        self.assertEqual(ran.returncode, 2, ran.stderr)
+        self.assertIn("planted", ran.stderr)
+        ran = subprocess.run([sys.executable, str(script), *args], capture_output=True, text=True)
+        self.assertEqual(ran.returncode, 0, ran.stderr)
 
 
 if __name__ == "__main__":

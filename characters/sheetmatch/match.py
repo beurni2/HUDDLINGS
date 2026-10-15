@@ -12,7 +12,8 @@ the points the sheet has no finder for (paws, tag ring, seat). Writes
 <out>/match.json (every check, its numbers, its threshold, its verdict),
 compare.png (crop | render | outlines and landmarks | onion skin) and
 phone.png (the render at 3x, 164 pt tall, beside the crop at the same size).
-Exits 1 when a gating check fails, 2 when the inputs are unusable.
+Exits 0 when every gating check passes, 1 when one fails, and 2 on any error
+at all (unusable inputs, a crash, even in an import), leaving no match.json.
 
 The render is area-averaged onto the crop's own pixel grid (ptPerCropPx) with
 model point (0, 0) on the crop's ground anchor, and is never moved to fit:
@@ -27,15 +28,27 @@ region (each against its own value, docs/QUESTIONS.md Q24), the blush as a
 level (Q25) and the markings. Advisory, never pass or fail: edge distances,
 IoU per part where the sheet gives the part, and the atlas share. The numbers
 are guard rails: the comparison images are looked at every time."""
-import argparse
-import fnmatch
-import json
+import os
 import sys
-from pathlib import Path
+import traceback
 
-import numpy as np
-from PIL import Image, ImageDraw
-from scipy import ndimage
+if __name__ == "__main__":
+    def crashed(kind, value, trace):
+        """Any error, from the imports on, exits 2: an uncaught exception's own 1 would read as failed checks."""
+        traceback.print_exception(kind, value, trace)
+        sys.stderr.flush()
+        os._exit(2)
+
+    sys.excepthook = crashed
+
+import argparse  # noqa: E402
+import fnmatch  # noqa: E402
+import json  # noqa: E402
+from pathlib import Path  # noqa: E402
+
+import numpy as np  # noqa: E402
+from PIL import Image, ImageDraw  # noqa: E402
+from scipy import ndimage  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "refprep"))
 import measure  # noqa: E402
@@ -791,15 +804,24 @@ def main(argv):
     parser.add_argument("--out", required=True)
     parser.add_argument("--landmarks")
     args = parser.parse_args(argv)
-    try:
-        result, parts = match(args.species, args.still, args.landmarks)
-    except (OSError, ValueError, KeyError) as error:
-        print(f"match: {type(error).__name__}: {error}", file=sys.stderr)
-        return 2
     out = Path(args.out)
-    sheets.write_json(out / "match.json", result)
-    compare_image(result, parts, out / "compare.png")
-    phone_image(parts, out / "phone.png")
+    written = out / "match.json"
+    try:
+        # An old verdict never stays beside a run that errs.
+        written.unlink(missing_ok=True)
+        if args.landmarks and not Path(args.landmarks).is_file():
+            raise FileNotFoundError(f"--landmarks {args.landmarks} is not a file")
+        result, parts = match(args.species, args.still, args.landmarks)
+        out.mkdir(parents=True, exist_ok=True)
+        compare_image(result, parts, out / "compare.png")
+        phone_image(parts, out / "phone.png")
+        # Written last: a match.json is always a whole run's.
+        sheets.write_json(written, result)
+    except Exception as error:  # any error is exit 2, never a failed gate's 1
+        traceback.print_exc()
+        print(f"match: {type(error).__name__}: {error}", file=sys.stderr)
+        written.unlink(missing_ok=True)
+        return 2
     print(f"match: {verdict(result)}; IoU {result['silhouette']['iou']:.3f}; written to {out}")
     return 0 if result["pass"] else 1
 
