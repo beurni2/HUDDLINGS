@@ -65,7 +65,8 @@ export const C = {
   /** The warm light low in the iris: the printed iris brown a fifth of the way to the mouth's red and a tenth
    * toward the gold, #5F331A against the sheet's #5B3119. */
   irisWarm: mix(mix(dark, mouthInside, 0.2), tag, 0.1),
-  tongueLine: darken(tongue, 0.1),
+  /** The mouth's inside in its own shade under the lip and in the corners: a quarter darker. */
+  mouthDeep: darken(mouthInside, 0.25),
   tongueShine: mix(tongue, light, 0.5),
 };
 
