@@ -54,6 +54,9 @@ export const C = {
   /** The outline warmed toward the ears' deep brown: the sheet's line round the haunches, the paws and under the
    * chin, #9F6D4A against the sheet's #A06D48 to #A36E4F there. */
   warmLine: mix(outline, mix(darken(multiply(marking, marking), 0.12), marking, 0.33), 0.4),
+  /** The faint line where one part lies over another (a leg over the haunch, a hind paw's top): the warm line
+   * halfway to the fur's shade, #CEA889 against the sheet's #CCAB8C to #D6AE8B. */
+  softLine: mix(mix(outline, mix(darken(multiply(marking, marking), 0.12), marking, 0.33), 0.4), furShade, 0.5),
   /** The lighter warm line round the cheeks' puffs: the outline warmed toward the tan (the sheet's #B17B4C there). */
   puffLine: mix(outline, marking, 0.3),
   /** The line the front turnaround draws where the head's side meets the ear: the ear's tan in its own deep shade

@@ -88,31 +88,29 @@ function faceBox([x, y, w, h]: Box): Box {
 const back = symmetric([[0, -52], [-20, -52.6], [-31, -55], [-35, -49.8], [-38, -43.6], [-42.4, -38], [-46.4, -33], [-48.8, -27.4], [-49.6, -21],
   [-49.2, -15.4], [-47.6, -10.6], [-44.4, -6.8], [-36, -4.8], [-20, -2.4]], [0, -1.6]);
 
-// The hind paws (front c's): round buns in front of the haunches, their soles rounded and sitting a little
-// above the front paws' (the sheet's at y -3.1), their inner halves behind the front paws.
-const hindR: Node[] = [[-29.4, -17.6], [-34.6, -19.8], [-40.8, -19.6], [-45.4, -16.6], [-47.4, -11.4], [-46.4, -6.4], [-43, -3.6], [-37.6, -2.6],
-  [-32, -2.9], [-27.6, -5.4], [-25.2, -11], [-26.4, -15.6]];
+// The hind paws (front c's): round buns in front of the haunches, as tall as the sheet's (their tops at y
+// -20.6, their outer sides at x -48.2), their soles rounded and sitting a little above the front paws' (the
+// sheet's at y -3.1), their inner halves behind the front paws.
+const hindR: Node[] = [[-29.4, -18.2], [-34.6, -20.6], [-41, -20.4], [-45.8, -17.4], [-48.2, -12], [-47.2, -6.6], [-43.4, -3.6], [-37.6, -2.6],
+  [-32, -2.9], [-27.6, -5.4], [-25.2, -11], [-26.4, -16]];
 const hind = { R: smooth(hindR), L: other(hindR) };
 
 // The chest: its edge is the silhouette from under the cheek to the top of the
-// haunch, then the soft line where the chest meets the haunch, melting into the
-// leg; its foot runs on down between the front paws.
-let chest = symmetric([[0, -66], [-16, -65.4], [-25.6, -63.2], [-30, -59.6], [-32.6, -55.4], [-34.4, -50.6], [-35.2, -45.4], [-35, -40],
+// haunch, a smooth round shoulder as the sheet draws it, then the soft line
+// where the chest meets the haunch, melting into the leg; its foot runs on down
+// between the front paws.
+const chest = symmetric([[0, -66], [-16, -65.4], [-25.6, -63.2], [-30, -59.6], [-32.6, -55.4], [-34.4, -50.6], [-35.2, -45.4], [-35, -40],
   [-34.2, -34], [-33, -26], [-31, -17], [-28, -9], [-20, -4.4], [-8, -3.2]], [0, -3]);
-// The shoulders' fluff: under each of the collar's ends the chest's edge breaks into two soft round tufts
-// combed down, as the turnaround draws its chest fur (spec L508); the chest itself carries no other fur marks.
-const shoulderLocks = [{ len: 1.2, lean: 0.25 }, { len: 1.5, w: 1.2, lean: 0.3 }];
-chest = furEdge(chest, [-30.4, -59], [-34.2, -51.6], shoulderLocks, 0.42);
-chest = furEdge(chest, [34.2, -51.6], [30.4, -59], [...shoulderLocks].reverse().map((l) => ({ ...l, lean: -l.lean })), 0.42);
 
 // The front legs (front c's): short chubby columns that melt into the chest,
 // sloping down toward the middle so they pass under the tag, where the chest
-// shows between them in a soft tan V. Each tapers gently down its outer side
-// into a round bun of a paw (the sheet's outer contour at x -33 at y -22, -30.5
-// at -15 and -29 at the paw, so the hind paw shows outside it), its sole in
-// three toe lobes, notched where the toe lines meet it.
-const legR: Node[] = [[-1.2, -31], [-3.2, -24], [-3.4, -17], [-2.4, -11.6], [-1.2, -6.8], [-2.4, -2.6], [-6.4, -0.4], [-11.2, -0.9], [-15.6, -0.05],
-  [-20.2, -0.9], [-24.6, -0.35], [-27.6, -1.7], [-29.3, -4.8], [-29.6, -10.4], [-30.6, -15.4], [-32.2, -21], [-33.6, -29.4], [-34.2, -40], [-34.4, -46.4],
+// shows between them in a narrow soft tan band (the sheet's inner edges at x
+// -3.4 at y -25, -3 at -18 and -2.2 at -8). Each tapers gently down its outer
+// side into a round bun of a paw (the sheet's outer contour at x -33 at y -22,
+// -30.5 at -15 and -29 at the paw, so the hind paw shows outside it), its sole a
+// smooth dome barely dipping where the toe lines meet it.
+const legR: Node[] = [[-2.4, -31], [-3.4, -24.6], [-3, -17.6], [-2.4, -11.4], [-2.3, -7.8], [-3.8, -3.8], [-7.2, -0.9], [-11.2, -0.6], [-15.6, -0.1],
+  [-20.2, -0.6], [-24.4, -0.4], [-27.6, -2], [-29.3, -4.8], [-29.6, -10.4], [-30.6, -15.4], [-32.2, -21], [-33.6, -29.4], [-34.2, -40], [-34.4, -46.4],
   [-26, -44], [-15, -40], [-6, -35]];
 const legs = { R: smooth(legR), L: other(legR) };
 
@@ -261,7 +259,10 @@ const patchFade = { R: { from: [-16.8, -105.4], to: [-13.6, -104.4] }, L: { from
 // The saddle's two halves where they show from the front: the right half down
 // the right haunch's outer side, the left half a narrow strip down the flank
 // beside the chest (the sheet's, x 33 to 40 from y -47 to -31).
-const saddleR = smooth([[-34.6, -50], [-35.2, -42], [-35.6, -35.4], [-37.4, -29.4], [-39.6, -24.6], [-41.6, -20.6], [-44.6, -18], [-52, -16], [-53, -40], [-41, -54]]);
+// The right half is the outer thigh's broad patch, widest low down, with a strip of cream between it and the
+// front leg (its inner edge at x -36 at y -44, -40 at -32 and -39.4 at -22).
+const saddleR = smooth([[-34.8, -50.4], [-35.8, -44], [-37.8, -37.6], [-39.8, -31.6], [-40.4, -26.4], [-39.4, -21.4], [-38, -17], [-44, -14], [-53, -16], [-53, -40],
+  [-41, -54]]);
 const saddleL = smooth([[34, -49.4], [36.2, -46.6], [37.8, -42.2], [39.6, -38.2], [40.6, -34.6], [39.6, -31.4], [36.6, -29.8], [33, -30.6], [31.8, -40], [32.2, -48.4]]);
 
 // Paint.
@@ -459,8 +460,8 @@ function blush(sx: number): Piece {
 
 /**
  * The tag and the ring it swings from, which the turnaround paints blue on the blue collar. The heart is
- * painted as the sheet paints it: a matte warm gold whose soft shade deepens toward orange, a soft light high
- * on its left lobe, and the smaller heart debossed in it, a warm line with the light catching its lower edge.
+ * painted as the sheet paints it: a flat matte gold, a slightly darker gold rim inside its line, one soft light
+ * high on its left lobe, and the smaller heart engraved in it as one faint warm line: no bevel, no raised face.
  */
 function tagPiece(): Piece {
   // The ring's edge is a plain stroke, drawn exactly as wide as it is declared.
@@ -471,10 +472,10 @@ function tagPiece(): Piece {
   emboss.push(emboss[0]!);
   return join(ring, part("tag", heart, {
     fill: C.tag,
-    shade: { multiply: C.tagShadeBy, rim: { inset: 1.1, toLight: 1.8 }, blur: 1.5 },
+    shade: { multiply: C.tagShadeBy, rim: { inset: 1.2, toLight: 1.2 }, blur: 1 },
     // A soft matte light on the upper left lobe, not a bevel's glint.
     highlight: { d: "M-6.4 -47.5 a2.6 1.8 -40 1 0 5.2 0 a2.6 1.8 -40 1 0 -5.2 0", colour: C.tagShine, opacity: 0.4, blur: 1.4 },
-    inner: [{ pts: emboss, width: 0.7, colour: C.tagLine, opacity: 0.55 }, { pts: emboss.map(([x, y]): P => [x + 0.35, y + 0.45]), width: 0.6, colour: C.tagShine, opacity: 0.5 }],
+    inner: [{ pts: emboss, width: 0.65, colour: C.tagLine, opacity: 0.4 }],
     outline: { colour: C.tagLine, width: THIN, taper: 2, blur: 0.2 },
   }));
 }
@@ -484,27 +485,37 @@ function tagPiece(): Piece {
  * darker brown at its lower clumps (the sheet's #E09B6C mid-ear to #C17D50 at the bottom) under the fur's own
  * warm shade; the shade on the rim away from the light, along the inner edge where the ear tucks under the
  * head, and where the cheek's fluff hangs over it, none where the root shows under the crown; a small soft
- * light on its upper outer side; long faint fur strands, darker and lighter, running down its length into the
- * notches between the clumps of its lower edge; and its line in the ear's own deep brown (the sheet's #B57549),
- * from where it comes out from under the cheek round the bottom and up the outside to where it tucks under
- * the crown.
+ * light on its upper outer side; a few soft fur locks, darker strokes where they part and lighter ones along
+ * them, curving with the ear's bulge from its upper middle down into the notches between the clumps of its
+ * lower edge; and its line in the warm brown the sheet draws round the ears (#A47049 to #9D6C4B), a little
+ * heavier along the bottom, from where it comes out from under the cheek round the bottom and up the outside
+ * to where it tucks under the crown.
  */
 function earPaint(side: "L" | "R"): Paint {
   const k = side === "R" ? 1 : -1;
   const ear = ears[side];
-  const deep = uid("deep"), [ex0, ey0, ex1, ey1] = bbox(ear.segs);
+  const deep = uid("deep"), parting = uid("blur"), along = uid("blur"), [ex0, ey0, ex1, ey1] = bbox(ear.segs);
+  const earBox = pad([ex0, ey0, ex1 - ex0, ey1 - ey0], 2);
+  // The locks' partings: curving down from the ear's upper middle with its outer contour into the notches between
+  // the clumps, and a short one low toward the face; the lighter strokes run along the locks between them. Painted
+  // soft, as the sheet paints them, not drawn as lines; only the partings' last few points into the notches are
+  // drawn, as short fine strokes.
+  const dark: P[][] = [[[-61.6, -115], [-67.6, -107.6], [-72.4, -98.4], [-75.2, -88.6], [-76, -79.6]], [[-56.6, -103.4], [-61.8, -94], [-65.4, -83.6], [-67, -72]],
+    [[-50.8, -92], [-54, -82], [-55.6, -70.4]]];
+  const light: P[][] = [[[-58.4, -110.4], [-64.4, -100.6], [-69, -90.6], [-71.2, -80.4]], [[-53.2, -98.4], [-58.4, -88.4], [-61.4, -77]]];
+  const soft = (pts: P[][], width: number) => pts.map((l) => strokeOf(sample(smooth(l.map((p) => onEar(side, p)), { closed: false }).segs, 8, false), width, { taper: 6, tip: 0.2 }).d).join("");
   const under = `<defs><linearGradient id="${deep}" gradientUnits="userSpaceOnUse" x1="${-k * 52}" y1="-100" x2="${-k * 58}" y2="-60">` +
     `<stop offset="0" stop-color="${C.earDeep}" stop-opacity="0"/><stop offset="0.35" stop-color="${C.earDeep}"/>` +
-    `<stop offset="0.72" stop-color="${C.earDeeper}"/><stop offset="1" stop-color="${C.earLow}"/></linearGradient></defs>` +
-    `<rect x="${fmt(ex0)}" y="${fmt(ey0)}" width="${fmt(ex1 - ex0)}" height="${fmt(ey1 - ey0)}" fill="url(#${deep})"/>`;
+    `<stop offset="0.72" stop-color="${C.earDeeper}"/><stop offset="1" stop-color="${C.earLow}"/></linearGradient>` +
+    `${blur(parting, earBox, 0.7)}${blur(along, earBox, 1)}</defs>` +
+    `<rect x="${fmt(ex0)}" y="${fmt(ey0)}" width="${fmt(ex1 - ex0)}" height="${fmt(ey1 - ey0)}" fill="url(#${deep})"/>` +
+    `<path d="${soft(light, 2.2)}" fill="${C.patch}" opacity="0.3" filter="url(#${along})"/>` +
+    `<path d="${soft(dark, 1.5)}" fill="${C.earLow}" opacity="0.4" filter="url(#${parting})"/>`;
   const shadeD = "M-90 -92 C-80 -80 -62 -72 -40 -70 L-40 -50 L-90 -50Z";
   const cheekD = "M-38 -98 C-43 -93 -48.6 -85 -49.8 -74 C-49 -66 -45 -62 -40 -60Z";
   // Along the inner edge, where the ear tucks under the head's side.
   const innerD = "M-44 -128 C-48.4 -118 -49.4 -104 -48.8 -94 L-43 -94 L-43 -128Z";
   const root = "M-50 -146 L-30 -146 L-30 -122 L-50 -122Z";
-  // Darker strands into the notches between the clumps and up the ear's middle; lighter ones between them.
-  const dark: P[][] = [[[-76.2, -78.2], [-77.8, -83.4], [-78.4, -90]], [[-67.2, -69.2], [-68.8, -75.4], [-69.6, -84]], [[-58.4, -65.6], [-59.6, -73], [-60.6, -88], [-60, -100]]];
-  const light: P[][] = [[[-72.6, -73.4], [-74.4, -81], [-75, -94], [-73.6, -104]], [[-63, -67.6], [-64.4, -76], [-65, -90]]];
   const ends: [P, P] = [onEar(side, [-41.6, -67.2]), onEar(side, [-44.6, -135.4])];
   return {
     fill: C.marking,
@@ -512,24 +523,28 @@ function earPaint(side: "L" | "R"): Paint {
     shade: { multiply: C.furShadeBy, rim: { inset: 2.2, toLight: 3.6 }, shapes: [earD(side, shadeD), earD(side, cheekD), earD(side, innerD)], keep: [earD(side, root)], blur: 3.2 },
     highlight: { d: earD(side, "M-74 -101 C-74 -106 -70 -111 -66 -112 C-64 -109 -66 -102 -69.6 -99 C-72 -98 -74 -99 -74 -101Z"), colour: C.patch, opacity: 0.3, blur: 2.6 },
     inner: [
-      ...dark.map((pts) => ({ pts: pts.map((p) => onEar(side, p)), width: 0.75, colour: C.earLine, opacity: 0.32 })),
-      ...light.map((pts) => ({ pts: pts.map((p) => onEar(side, p)), width: 0.7, colour: C.patch, opacity: 0.3 })),
+      ...dark.map((pts) => ({ pts: pts.slice(-2).map((p) => onEar(side, p)), width: 0.7, colour: C.earLine, opacity: 0.3 })),
     ],
-    // A little lighter on the ear toward the light, heavier on the one away from it.
-    outline: { ...OUTLINE, colour: C.earEdge, width: side === "R" ? 1.4 : 1.6, taper: 6, blur: 0.15, spans: [side === "R" ? { from: ends[0], to: ends[1] } : { from: ends[1], to: ends[0] }] },
+    // A little lighter on the ear toward the light, heavier on the one away from it, and along each one's bottom.
+    outline: { ...OUTLINE, colour: C.warmLine, width: side === "R" ? 1.3 : 1.5, taper: 6, blur: 0.15, spans: side === "R"
+      ? [{ from: ends[0], to: onEar(side, [-80.4, -82]), width: 1.55 }, { from: onEar(side, [-80.4, -82]), to: ends[1] }]
+      : [{ from: ends[1], to: onEar(side, [-80.4, -82]) }, { from: onEar(side, [-80.4, -82]), to: ends[0], width: 1.7 }] },
   };
 }
 
 /**
- * Between the front legs the sheet paints a soft inverted V of the body's tan, with no line down its middle:
- * it starts below the tag, about mid-chest, and widens and deepens down to the ground between the paws.
+ * Between the front legs the sheet paints a soft narrow band of the body's tan, with no line down its middle:
+ * it fades in below the tag, about mid-chest, and deepens down to a soft shadow on the ground between the paws.
  */
 function between(): string {
   const g = uid("between"), f = uid("blur");
-  return `<defs><linearGradient id="${g}" gradientUnits="userSpaceOnUse" x1="0" y1="-38" x2="0" y2="-2">` +
-    `<stop offset="0" stop-color="${C.marking}" stop-opacity="0"/><stop offset="0.45" stop-color="${C.marking}" stop-opacity="0.55"/>` +
-    `<stop offset="1" stop-color="${C.earDeep}" stop-opacity="0.9"/></linearGradient>${blur(f, [-12, -42, 24, 44], 1.4)}</defs>` +
-    `<path d="M0 -38 C-1.6 -31 -4 -21 -5.2 -11 L-5.8 -1 L5.8 -1 L5.2 -11 C4 -21 1.6 -31 0 -38Z" fill="url(#${g})" filter="url(#${f})"/>`;
+  // Deepest just above the paws' contact, where the sheet's is a shadowed brown (#905C34), then easing out onto the ground.
+  return `<defs><linearGradient id="${g}" gradientUnits="userSpaceOnUse" x1="0" y1="-32" x2="0" y2="-1">` +
+    `<stop offset="0" stop-color="${C.marking}" stop-opacity="0"/><stop offset="0.4" stop-color="${C.marking}" stop-opacity="0.65"/>` +
+    `<stop offset="0.7" stop-color="${C.earDeep}" stop-opacity="0.95"/><stop offset="0.86" stop-color="${C.warmLine}" stop-opacity="0.85"/>` +
+    `<stop offset="1" stop-color="${C.earLow}" stop-opacity="0.3"/></linearGradient>` +
+    `${blur(f, [-12, -36, 24, 38], 1.2)}</defs>` +
+    `<path d="M0 -32 C-2.4 -27 -4 -21 -4 -14 L-4.4 -1 L4.4 -1 L4 -14 C4 -21 2.4 -27 0 -32Z" fill="url(#${g})" filter="url(#${f})"/>`;
 }
 
 export function front(): Drawn[] {
@@ -549,10 +564,12 @@ export function front(): Drawn[] {
     add(`hind.${side}`, roomy(part(`hind.${side}`, hind[side], {
       fill: C.fur,
       shade: furShade(hipGroup, [], [`M${cx - 12} ${cy - 12} L${cx + 12} ${cy - 12} L${cx + 12} ${cy - 4} L${cx - 12} ${cy - 4}Z`]),
-      // Over the top and round the outside, then heavier along the sole, to where it goes behind the front paw.
-      outline: { ...OUTLINE, colour: C.warmLine, width: 1.3, taper: 4, spans: bySide(side, [{ from: [-30.2, -18.4], to: [-46.4, -6.4] }, { from: [-47.4, -11.4], to: [-29.2, -4.6], width: 1.7 }]) },
-      // Two short toe lines curving up from the sole, bowing apart like the paw stub's.
-      inner: [[[-41.4, -3.9], [-42.2, -6.1], [-41.8, -8.5]], [[-35.6, -3.1], [-35, -5.3], [-35.4, -7.7]]].map((pts) => ({ pts: flipX(pts as P[], side), width: INNER, colour: C.warmLine, opacity: 0.8 })),
+      // Faint over its top, where it lies on the haunch, as the sheet draws it; the warm line round the outside and,
+      // heavier, along the sole, to where it goes behind the front paw.
+      outline: { ...OUTLINE, colour: C.warmLine, width: 1.3, taper: 4, spans: bySide(side, [{ from: [-30.2, -18.8], to: [-46, -15.6], colour: C.softLine },
+        { from: [-47.6, -13.6], to: [-29.2, -4.6], width: 1.6 }]) },
+      // Two toe lines rising from the sole about 6.5 pt up the paw, bowing apart, soft as the sheet's.
+      inner: [[[-41.6, -3.4], [-42.2, -6.6], [-41.6, -9.8]], [[-35.6, -3], [-35, -6.4], [-35.4, -9.6]]].map((pts) => ({ pts: flipX(pts as P[], side), width: INNER, colour: C.warmLine, opacity: 0.6 })),
     }), 6));
   }
   add("body.front", part("body.front", chest, {
@@ -560,8 +577,11 @@ export function front(): Drawn[] {
     // The shade falls under the chin, just below the collar, and down between the paws.
     shade: furShade(bodyGroup, ["M-22 -52 C-10 -48 10 -48 22 -52 L22 -58 L-22 -58Z", "M-4 -8 L4 -8 L5 0 L-5 0Z"]),
     under: between(),
-    // From under the collar's end down over the shoulder's fluff to where the chest lies on the haunch, the lighter fur line.
+    // From under the collar's end down over the shoulder to where the chest lies on the haunch, the lighter fur line.
     outline: { ...OUTLINE, taper: 4.5, spans: [{ from: [-28.8, -61], to: [-34.8, -38], width: THIN, colour: C.furLine }, { from: [34.8, -38], to: [28.8, -61], width: THIN, colour: C.furLine }] },
+    // A few soft fur strokes in the chest's tuft under the collar, combed down and out.
+    inner: [[[-5.4, -47], [-6.8, -43.4], [-6.6, -39.6]], [[5, -46.6], [6.6, -43], [6.4, -39.2]], [[-14.4, -48.4], [-16.4, -44.8], [-16.6, -41.2]],
+      [[13.8, -48.2], [15.8, -44.6], [16.2, -41]]].map((pts) => ({ pts: pts as P[], width: 0.65, colour: C.furLine, opacity: 0.15 })),
   }));
   // The chin's shadow on the chest, cast by the head (spec L396).
   add("shadow.chin", soft("M-26 -59 C-12 -53 12 -53 26 -59 L26 -66 L-26 -66Z", [-26, -66, 52, 10], C.furShade, 2.4));
@@ -595,15 +615,21 @@ export function front(): Drawn[] {
     fill: C.fur,
     shade: { multiply: C.furShadeBy, rim: { inset: 3, toLight: 4.5 }, group: headGroup, keep: ["M-40 -152 L40 -152 L40 -130 L-40 -130Z"], blur: 2.4 },
     highlight: { d: headLight, colour: C.light, opacity: 0.4, blur: 4 },
-    // The curls where the tall middle lock overlaps the locks either side, one where the right lock tucks in,
-    // short enough to stay inside the edge, and the one curl stroke inside the middle lock.
+    // Each lobe's line ends in a curl hooked into the lobe, as the sheet draws its topknot: the left lobe's into the
+    // notch under the tall middle lock, the middle lock's where it tucks over the right lobe, and the right lobe's
+    // under its own tip; a little curl where the crown's line meets the left lobe; and a soft fur stroke along each lobe.
     inner: [
-      { pts: [[-13.4, -155.4], [-11.6, -153.6], [-11.2, -151.2]], width: 0.9, colour: C.furLine, opacity: 0.7 },
-      { pts: [[5.2, -160.4], [5, -157.4], [3, -154.6]], width: 0.9, colour: C.furLine, opacity: 0.7 },
-      { pts: [[21.6, -154.8], [20.4, -152.8], [18.4, -151.6]], width: 0.8, colour: C.furLine, opacity: 0.5 },
-      { pts: [[-4.2, -152.6], [-3.6, -156.6], [-1.6, -159.8]], width: 0.75, colour: C.furLine, opacity: 0.4 },
+      { pts: [[-12.6, -155.8], [-11.4, -154], [-11.8, -152.4], [-13.4, -151.6]], width: 0.85, colour: C.furLine, opacity: 0.7 },
+      { pts: [[5, -160.2], [5.1, -158], [4.2, -156.4], [2.6, -155.6]], width: 0.85, colour: C.furLine, opacity: 0.7 },
+      { pts: [[23, -155.2], [22.4, -153.2], [20.8, -152], [18.4, -151.6]], width: 0.8, colour: C.furLine, opacity: 0.6 },
+      { pts: [[-31.4, -148.8], [-30, -149.9], [-27.4, -150.3], [-24.4, -150]], width: 0.75, colour: C.furLine, opacity: 0.45 },
+      { pts: [[-4.2, -152.6], [-3.6, -156.6], [-1.6, -159.8]], width: 0.7, colour: C.furLine, opacity: 0.35 },
+      { pts: [[-24.4, -152], [-21.6, -154.2], [-17.8, -155.2]], width: 0.65, colour: C.furLine, opacity: 0.25 },
+      { pts: [[9.6, -152.8], [12.4, -155.6], [16, -157]], width: 0.65, colour: C.furLine, opacity: 0.25 },
     ],
-    outline: { ...OUTLINE, colour: C.fluffLine, width: THIN, spans: [{ from: [-30.6, -150.4], to: [22.8, -153] }], taper: 4 },
+    // One line per lobe, broken at the notches between them.
+    outline: { ...OUTLINE, colour: C.fluffLine, width: THIN, spans: [{ from: [-30.6, -150.4], to: [-12.2, -155.6] }, { from: [-10.4, -156.4], to: [4.9, -159.8] },
+      { from: [5.9, -158.6], to: [22.8, -153] }], taper: 4 },
     feather: { from: [0, -146.5], to: [0, -150.5] },
   }));
   for (const side of ["R", "L"] as const) {
@@ -611,14 +637,14 @@ export function front(): Drawn[] {
     add(`front.${side}`, part(`front.${side}`, legs[side], {
       fill: C.fur,
       shade: furShade(bodyGroup, [], ["M-40 -60 L40 -60 L40 -34 L-40 -34Z"]),
-      // Two short toe lines curving up from the sole's notches, bowing apart like the paw stub's.
-      inner: [[[-20.2, -1.1], [-20.9, -3.3], [-20.5, -5.7]], [[-11.2, -1.1], [-10.6, -3.3], [-11, -5.7]]].map((pts) => ({ pts: flipX(pts as P[], side), width: INNER, colour: C.warmLine, opacity: 0.8 })),
-      // A light line down the inside from mid-chest, where the leg lies on the chest's tan; the warm line round
-      // the paw, and up the outside to the shoulder, where the sheet draws the leg against the haunch.
+      // Two toe lines rising from the sole about 7 pt up the paw (the sheet's 6.5), bowing apart.
+      inner: [[[-20.4, -1.3], [-21, -4.6], [-20.5, -8]], [[-11.2, -1.3], [-10.6, -4.8], [-11, -8.4]]].map((pts) => ({ pts: flipX(pts as P[], side), width: INNER, colour: C.warmLine, opacity: 0.65 })),
+      // Faint lines where the leg lies over the chest's tan and over the haunch, as the sheet draws them (about
+      // luminance 180 against the outline's 120), and the warm line round the paw.
       outline: { ...OUTLINE, taper: 5, spans: bySide(side, [
-        { from: [-3.3, -22], to: [-1.3, -8], width: THIN, colour: C.furLine },
-        { from: [-1.4, -6], to: [-29.5, -8.6], width: 1.6, colour: C.warmLine },
-        { from: [-29.8, -10.4], to: [-34.3, -42], width: THIN, colour: C.warmLine },
+        { from: [-3.4, -26], to: [-2.3, -11.4], width: THIN, colour: C.fluffLine },
+        { from: [-2.3, -9.6], to: [-29.5, -10.4], width: 1.5, colour: C.warmLine },
+        { from: [-29.9, -13], to: [-34.3, -42], width: THIN, colour: C.softLine },
       ]) },
       feather: { from: [sx * 20, -41.6], to: [sx * 22.4, -35.2] },
     }));
