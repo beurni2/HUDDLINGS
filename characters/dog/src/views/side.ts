@@ -145,7 +145,8 @@ const ear = furEdge(furEdge(smooth([[8.6, -134.4], [13.4, -125], [16.4, -114.6],
 
 // The head: the muzzle's profile from the upper lip's front (x -95.2 at y
 // -85.6) down to the lip's notch (x -92.8 at y -80.2), the chin and the jaw
-// sweeping back to the collar's front end; up from the lip round the nose's
+// sweeping back to the collar's front end (x -70 at y -63.8, where the sheet
+// draws the jaw's line); up from the lip round the nose's
 // front, where the nose's own edge is the profile's tip (the nose, clipped to
 // the head, fills it to its edge), and from the nose's top into the short
 // bridge, the stop (x -85 at y -104.4) and the forehead rising into
@@ -155,9 +156,9 @@ const ear = furEdge(furEdge(smooth([[8.6, -134.4], [13.4, -125], [16.4, -114.6],
 /** Each forehead lock's tip, its root and its notches (path order), for the hook drawn into it. */
 const foreLocks: { tip: P; root: P; notches: [P, P] }[] = [];
 const noteLock = (tip: P, root: P, notches: [P, P]) => foreLocks.push({ tip, root, notches });
-const head = furEdge(furEdge(smooth([[-59.8, -58.4], [-70, -62.2], [-80.4, -65.6], [-91.8, -76.2], [-92.8, -80.2], [-95.2, -85.6], [-96.6, -92.2],
+const head = furEdge(furEdge(smooth([[-60.8, -59.6], [-70, -63.8], [-80.6, -67.4], [-91.8, -76.2], [-92.8, -80.2], [-95.2, -85.6], [-96.6, -92.2],
   [-96, -97.2], [-92.4, -100.3], [-85, -104.4], [-84, -112.6], [-81, -124.4], [-77.8, -132.6], [-74, -140.2], [-69, -146.4], [-62.6, -151.4],
-  [-20, -155.8], [-4, -149], [10, -131], [17, -110], [14, -78], [-28, -64.6], [-44, -61.4]]), [-80.9, -127], [-65.8, -149.6],
+  [-20, -155.8], [-4, -149], [10, -131], [17, -110], [14, -78], [-28, -64.6], [-44, -61.8]]), [-80.9, -127], [-65.8, -149.6],
 // The forehead's fur breaks into two locks below the topknot, their tips combed forward and hooking back in under
 // themselves, as the sheet draws them.
 [{ len: 2.3, w: 1, lean: -0.45 }, { len: 3, w: 1.2, lean: -0.5 }], 0.38, noteLock),
@@ -398,7 +399,7 @@ const headPaint: Paint = {
 const headLine = (warming: string): Outline => ({ ...OUTLINE, taper: 4, blur: 0.15, spans: [
   { from: [-88.8, -100.6], to: [-54, -153.4], width: 1.25, colour: `url(#${warming})` },
   { from: [-14, -154], to: [6.6, -136.4], width: 1.25, colour: C.puffLine },
-  { from: [-61, -59], to: [-92.5, -79.4], width: 1.3, colour: C.furLine },
+  { from: [-61.6, -60.2], to: [-92.5, -79.4], width: 1.3, colour: C.furLine },
 ] });
 /**
  * Round the nose's front, where the nose is the head's edge, a line in the nose's own near-black, so the stencil's
@@ -453,6 +454,9 @@ function eye(): Piece {
   const lidTop = tapered(sample(topArc.segs, 10, false), 1.8, "outer", "eye lid", { taper: 4, tip: 0.6 });
   // A faint pale halo just outside the rim round the iris's foot and front, between the eye and the fur, as the sheet paints it.
   const ring = strokeOf(Array.from({ length: 25 }, (_, k) => on(95 + (k * 120) / 24, 1.1)), 1.6, { taper: 5, tip: 0.2 });
+  // And just outside the lid, round the eye's top and back, where the patch's tan stops short of it, as the sheet paints it.
+  const outer = strokeOf(sample(smooth([on(-150, 1.4), on(-110, 1.7), on(-88, 1.8), [-63.4, -111.6], [-60, -109.4], [-57.8, -106], [-56.4, -101.6], [-56.1, -97],
+    [-56.8, -93.2]], { closed: false }).segs, 8, false), 1.5, { taper: 5, tip: 0.2 });
   // The iris's own darker rim, round its front, foot and back, inside its edge.
   const rim = tapered(Array.from({ length: 31 }, (_, k) => on(-160 + (k * 250) / 30, -0.35)), 0.8, "inner", "eye rim", { taper: 5, tip: 0.3 });
   const big = on(-128, -2.7);
@@ -462,17 +466,17 @@ function eye(): Piece {
     // Down the iris's own axis: near-black over its upper half, glowing smoothly into the printed lower iris's warm dark
     // brown and, at its foot, the warm light low in the iris.
     `<linearGradient id="${glow}" gradientUnits="userSpaceOnUse" x1="${fmt(tx)}" y1="${fmt(ty)}" x2="${fmt(bx)}" y2="${fmt(by)}">` +
-    `<stop offset="0.52" stop-color="${C.eyeDark}"/><stop offset="0.78" stop-color="${C.dark}"/><stop offset="0.9" stop-color="${C.dark}"/>` +
-    `<stop offset="1" stop-color="${C.irisLight}"/></linearGradient>` +
+    `<stop offset="0.42" stop-color="${C.eyeDark}"/><stop offset="0.7" stop-color="${C.dark}"/><stop offset="0.86" stop-color="${C.dark}"/>` +
+    `<stop offset="1" stop-color="${C.irisWarm}"/></linearGradient>` +
     `<linearGradient id="${cool}" gradientUnits="userSpaceOnUse" x1="0" y1="-97" x2="0" y2="-90.4">` +
     `<stop offset="0" stop-color="${C.collarHighlight}" stop-opacity="0"/><stop offset="1" stop-color="${C.collarHighlight}" stop-opacity="0.32"/></linearGradient>` +
-    `${blur(shine, box, 0.15)}${blur(edge, box, 0.2)}${blur(white, box, 0.3)}${blur(core, box, 0.3)}${blur(halo, box, 0.55)}${blur(rimSoft, box, 0.45)}</defs>` +
-    `<path d="${ring.d}" fill="${C.fur}" opacity="0.8" filter="url(#${halo})"/>` +
+    `${blur(shine, box, 0.1)}${blur(edge, box, 0.2)}${blur(white, box, 0.3)}${blur(core, box, 0.3)}${blur(halo, box, 0.55)}${blur(rimSoft, box, 0.45)}</defs>` +
+    `<path d="${ring.d}" fill="${C.fur}" opacity="0.8" filter="url(#${halo})"/><path d="${outer.d}" fill="${C.fur}" opacity="0.5" filter="url(#${halo})"/>` +
     `<g filter="url(#${white})"><path d="${pathD(whiteShape.segs)}" fill="${C.eyeWhite}"/><path d="${pathD(whiteShape.segs)}" fill="url(#${cool})"/></g>` +
     `<g filter="url(#${edge})"><path d="${iris}" fill="url(#${glow})"/></g>` +
     `<g clip-path="url(#${clip})"><path d="${rim.d}" fill="${C.eyeDark}" opacity="0.7" filter="url(#${rimSoft})"/></g>` +
     `<g filter="url(#${edge})"><path d="${lid.d}" fill="${C.eyeDark}"/><path d="${lidTop.d}" fill="${C.eyeDark}"/></g>` +
-    `<ellipse cx="${n(big)}" rx="1.55" ry="1.5" fill="${C.light}" filter="url(#${shine})"/>` +
+    `<ellipse cx="${n(big)}" rx="1.6" ry="1.55" fill="${C.light}" filter="url(#${shine})"/>` +
     `<ellipse cx="${n(big)}" rx="0.6" ry="0.55" fill="${C.dark}" opacity="0.1" filter="url(#${core})"/>`;
   return piece(svg, box, { shapes: [], lines: [lid.line, lidTop.line, rim.line] });
 }
