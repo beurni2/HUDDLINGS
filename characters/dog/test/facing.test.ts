@@ -15,6 +15,7 @@ import { validate } from "../../../runtime-web/src/format.ts";
 import { openStills, type StillInfo, type Stills } from "../../../runtime-web/lab/still.ts";
 import { buildPackage, readSource, writePackage } from "../../build/build.ts";
 import { restTransform } from "../../draw/frame.ts";
+import { bbox } from "../../draw/geom.ts";
 import { LIGHT } from "../../draw/paint.ts";
 import { scopeIds, type Piece } from "../../draw/svg.ts";
 import { composite, type Layer } from "../../draw/test/composite.ts";
@@ -329,44 +330,62 @@ function subpaths(d: string): [number, number][][] {
 /** The highlights typed by hand in a drawing, in order: paint.ts draws each as a blurred path of its own. */
 const handLights = (svg: string) => [...svg.matchAll(/<path d="([^"]+)" fill="#[0-9A-F]{6}" opacity="[\d.]+" filter="url\(#[^)]+\)"\/>/g)].map((m) => m[1]!);
 
-test("each light typed by hand toward the light (Facing.lit) lies on its feature's side toward the top-left light in .R: the .L light reflected about its feature's middle, then mirrored", () => {
-  // The parts DECISIONS 101 lists: the ears' sheen, the tail's plume top, the forehead's and the crown's light (the
-  // head and the topknot share it), the tag's light and the far paw's dome. Named as in .L.
-  const lit: Record<Kind, string[]> = { side: ["ear.L", "tail", "head.base", "tuft", "tag", "front.R"], threeQuarter: ["ear.R", "head.base", "tuft", "tag"] };
+test("each light typed by hand toward the light (Facing.lit) is, in .R, the .L light reflected about the middle its view states for its feature; every other light typed by hand is where .L types it", () => {
+  // The middles the views pass to Facing.lit, worked out again here from the .L drawings: a feature's middle across
+  // (side.ts's and threeQuarter.ts's middle(), the box of its shape's segments), the far paw's centre for its dome
+  // (side.ts), and for the three-quarter far cheek's light the face's middle, halfway between the far cheek's puff
+  // (x -100.4) and the near face's side (x -14.2): threeQuarter.ts's FACE_MID, restated as that file keeps it to itself.
+  const middle = (view: string, part: string) => {
+    const shapes = pieces(view).get(part)!.meta.shapes.filter((s) => s.name === part);
+    assert.equal(shapes.length, 1, `${view} ${part}: its shape`);
+    const [x0, , x1] = bbox(shapes[0]!.segs);
+    return (x0 + x1) / 2;
+  };
+  const tail = middle("side.L", "tail"), head = middle("side.L", "head.base");
+  const head3 = middle("threeQuarter.L", "head.base"), FACE_MID = (-100.4 + -14.2) / 2;
+  // For each .L drawing carrying such lights, the middle of each light placed again, in the order the drawing paints
+  // them (DECISIONS 101): the ear's sheen, the plume's top (the tail and its marking), the forehead's or crown's light
+  // (the head, its patches and the topknot's three curls, which share the head's light; in three-quarter with the far
+  // cheek's), the tag's and the far paw's dome. Every other drawing's lights belong to their place and mirror with it.
+  const stated: Record<Kind, Record<string, number[]>> = {
+    side: {
+      "ear.L": [middle("side.L", "ear.L")], tail: [tail], "tail.base": [tail], "head.base": [head], "head.patch.L": [head], tuft: [head, head, head],
+      tag: [middle("side.L", "tag")], "front.R": [placed()["side.L"]!["paw.front.R"]![0]],
+    },
+    threeQuarter: {
+      "ear.R": [middle("threeQuarter.L", "ear.R")], "head.base": [head3, FACE_MID], "head.patch.L": [head3, FACE_MID], "head.patch.R": [head3, FACE_MID],
+      tuft: [head3, FACE_MID, head3, FACE_MID, head3, FACE_MID], tag: [middle("threeQuarter.L", "tag")],
+    },
+  };
   for (const kind of KINDS) {
-    const L = pieces(`${kind}.L`), R = pieces(`${kind}.R`);
-    for (const name of lit[kind]) {
-      const l = handLights(L.get(name)!.svg), rSvg = R.get(swapSides(name))!.svg;
-      assert.ok(rSvg.startsWith(MIRROR), `${kind}.R ${swapSides(name)} is not its .L drawing mirrored`);
+    const R = pieces(`${kind}.R`);
+    for (const [name, l] of pieces(`${kind}.L`)) {
+      const r = R.get(swapSides(name));
+      if (!r) continue; // The left side's own marking, which .R does not draw.
+      const where = `${kind}.R ${swapSides(name)}`;
+      assert.ok(r.svg.startsWith(MIRROR), `${where} is not its .L drawing mirrored`);
       // In the .R drawing, before its mirror: the frame the view is typed in.
-      const r = handLights(rSvg.slice(MIRROR.length));
-      assert.equal(r.length, l.length, `${kind} ${name}: the facings place different numbers of lights`);
+      const [lights, again] = [handLights(l.svg), handLights(r.svg.slice(MIRROR.length))];
+      assert.equal(again.length, lights.length, `${where}: the facings paint different numbers of lights`);
+      const abouts = stated[kind][name] ?? [];
       let moved = 0;
-      l.forEach((dl, k) => {
-        const [sl, sr] = [subpaths(dl), subpaths(r[k]!)];
-        assert.equal(sr.length, sl.length, `${kind} ${name}: light ${k}'s subpaths`);
+      lights.forEach((dl, k) => {
+        const [sl, sr] = [subpaths(dl), subpaths(again[k]!)];
+        assert.equal(sr.length, sl.length, `${where}: light ${k}'s subpaths`);
         sl.forEach((pl, j) => {
           const pr = sr[j]!;
-          assert.equal(pr.length, pl.length, `${kind} ${name}: light ${k}.${j}'s points`);
-          if (pl.every((p, i) => Math.abs(p[0] - pr[i]![0]) < 1e-3 && Math.abs(p[1] - pr[i]![1]) < 1e-3)) return; // A light that follows the place.
-          moved++;
-          // Reflected about one vertical line, the feature's middle: every point, arcs' ends included.
-          const about = (pl[0]![0] + pr[0]![0]) / 2;
+          assert.equal(pr.length, pl.length, `${where}: light ${k}.${j}'s points`);
+          if (pl.every((p, i) => Math.abs(p[0] - pr[i]![0]) < 1e-3 && Math.abs(p[1] - pr[i]![1]) < 1e-3)) return; // Where .L types it.
+          const about = abouts[moved++];
+          assert.ok(about !== undefined, `${where}: light ${k}.${j} is placed again across its part, where its view states no middle`);
+          // Reflected about the stated middle: every point, arcs' ends included.
           for (const [i, p] of pl.entries()) {
-            assert.ok(Math.abs(pr[i]![0] - (2 * about - p[0])) < 2e-3 && Math.abs(pr[i]![1] - p[1]) < 2e-3, `${kind} ${name}: light ${k}.${j} is not the .L light reflected about x = ${about.toFixed(2)}`);
+            assert.ok(Math.abs(pr[i]![0] - (2 * about - p[0])) < 2e-3 && Math.abs(pr[i]![1] - p[1]) < 2e-3,
+              `${where}: light ${k}.${j} is reflected about x = ${((p[0] + pr[i]![0]) / 2).toFixed(2)}, not its feature's middle x = ${about.toFixed(2)}`);
           }
-          const [x0, , w] = L.get(name)!.box;
-          assert.ok(about > x0 && about < x0 + w, `${kind} ${name}: light ${k}.${j}'s middle x = ${about.toFixed(2)} lies off its part`);
-          // Once the .R view is mirrored as a whole, the light and its feature's middle land at -x: the light lies as
-          // far left of its feature's middle there as the .L light does in .L (toward the top-left light, as the .L crop
-          // paints it), where a plain mirror's would lie as far right.
-          const centre = (pts: [number, number][]) => (Math.min(...pts.map((p) => p[0])) + Math.max(...pts.map((p) => p[0]))) / 2;
-          const offsetL = centre(pl) - about, offsetR = -centre(pr) - -about;
-          assert.ok(Math.abs(offsetR - offsetL) < 1e-2,
-            `${kind}.R ${swapSides(name)}: light ${k}.${j} lies ${offsetR.toFixed(2)} pt from its feature's middle, the .L light ${offsetL.toFixed(2)} pt`);
         });
       });
-      assert.ok(moved > 0, `${kind}.R ${swapSides(name)}: no light typed by hand is placed again across its feature: a plain mirror's light, away from the top-left light`);
+      assert.equal(moved, abouts.length, `${where}: ${moved} of its ${abouts.length} lights typed toward the light are placed again across their features; the rest lie where a plain mirror puts them, away from the top-left light`);
     }
   }
 });
