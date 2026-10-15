@@ -1,7 +1,7 @@
 // The part-ID pass of a still (still.ts): every part drawn flat in its own colour
 // wherever its alpha is at least half its region's own largest alpha, so the
-// sheet match can tell each part's pixels apart, soft parts included (the
-// ground shadow at 0.18, the blush at its level, shadow.chin). The pass draws a
+// sheet match can tell each part's pixels apart, soft parts included (a shadow
+// at 0.18, the blush at its 0.29 to 0.43 level). The pass draws a
 // recoloured copy of the atlas pages through the same renderer, so draw order
 // and clip groups are the runtime's own.
 
