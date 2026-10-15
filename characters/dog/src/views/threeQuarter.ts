@@ -365,8 +365,8 @@ function mouth(): Piece {
   const lipShape = smooth(lipPts, { closed: false });
   const lip = tapered(sample(lipShape.segs, 12, false), 0.9, "inner", "upper lip", { taper: 2.2, tip: 0.3 });
   const opening = smooth([[-74.4, -84.9], [-72.4, -85.2], [-70.4, -85.6], [-69.4, -85.5], [-67.2, -84.3], [-64.2, -82.8], [-61.2, -82.1], [-58, -81.8],
-    [-58.2, -80.4], [-59.4, -77.6], [-60.8, -74.6], [-62.7, -72.3], [-65, -70.7], [-67.8, -70.1], [-70.4, -71.1], [-71.9, -73.9], [-72.8, -77.8],
-    [-73.6, -81.6]], { corners: [0, 7] });
+    [-58.4, -79.2], [-59.4, -76], [-61, -73], [-63.4, -71], [-66.4, -70], [-69.4, -70.4], [-71.8, -72.2], [-73.2, -75.2], [-73.8, -78.6],
+    [-74.2, -82]], { corners: [0, 7] });
   const m = pathD(opening.segs);
   // The rim down the sides and round the foot: drawn twice its width centred on the edge inside the opening's clip,
   // so the half that shows lies inside the opening.

@@ -41,18 +41,18 @@
  },
  "alignment": {
   "rootOnCropGroundPlusHalf": true,
-  "bestFitShiftPx": [0.14, 0.78],
-  "bestFitShiftPt": [0.11, 0.6],
-  "iouAtBestWholePixelShift": 0.9682,
+  "bestFitShiftPx": [0.12, 0.77],
+  "bestFitShiftPt": [0.09, 0.6],
+  "iouAtBestWholePixelShift": 0.9683,
   "thresholdPx": 2.0,
   "pass": true
  },
  "silhouette": {
-  "iou": 0.9653,
+  "iou": 0.9654,
   "threshold": 0.85,
   "groundShadowLeftOut": true,
   "pass": true,
-  "iouHeadAligned": 0.9642,
+  "iouHeadAligned": 0.9645,
   "headCentreOffsetPt": [0.36, -0.74]
  },
  "landmarks": {
@@ -199,7 +199,7 @@
     "heldTo": "#FFF4E8",
     "heldBy": "palette.fur",
     "deltaE2000": 0.0,
-    "pixels": 13050,
+    "pixels": 13061,
     "pass": true
    },
    "furShade": {
@@ -207,7 +207,7 @@
     "heldTo": "#FDE3C8",
     "heldBy": "palettePainted.furShade",
     "deltaE2000": 0.44,
-    "pixels": 1796,
+    "pixels": 1804,
     "pass": true
    },
    "eyes": {
@@ -251,10 +251,10 @@
     "pass": true
    },
    "bodyMarkings": {
-    "dominant": "#D89E73",
+    "dominant": "#D89F73",
     "heldTo": "#D9A379",
     "heldBy": "palette.marking",
-    "deltaE2000": 1.51,
+    "deltaE2000": 1.22,
     "pixels": 1165,
     "pass": true
    },
@@ -406,7 +406,7 @@
    },
    "tail.base": {
     "part": "tail.base",
-    "shownPt2": 291.7,
+    "shownPt2": 292.2,
     "shows": true,
     "expected": true,
     "host": "tail",

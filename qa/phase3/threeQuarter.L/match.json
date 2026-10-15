@@ -239,7 +239,7 @@
     "heldTo": "#FFF4E8",
     "heldBy": "palette.fur",
     "deltaE2000": 0.0,
-    "pixels": 16943,
+    "pixels": 16916,
     "pass": true
    },
    "furShade": {
@@ -275,19 +275,19 @@
     "pass": true
    },
    "tongue": {
-    "dominant": "#FA9A88",
+    "dominant": "#FB9A88",
     "heldTo": "#FB9A88",
     "heldBy": "palettePainted.tongue",
-    "deltaE2000": 0.18,
-    "pixels": 219,
+    "deltaE2000": 0.0,
+    "pixels": 246,
     "pass": true
    },
    "mouthInside": {
-    "dominant": "#982319",
+    "dominant": "#9D241A",
     "heldTo": "#9E241A",
     "heldBy": "palettePainted.mouthInside",
-    "deltaE2000": 1.22,
-    "pixels": 88,
+    "deltaE2000": 0.2,
+    "pixels": 90,
     "pass": true
    },
    "ears": {

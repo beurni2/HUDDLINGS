@@ -238,8 +238,8 @@ const leftSide = ([x, y]: P): P => [x > 0 ? x - 2.4 * Math.min(1, Math.max(0, (y
 // the left, and the cheeks rolled with the face. The crown's part under the
 // topknot is hidden by it.
 const headHalf: Node[] = [[0, -151.8], [-32.4, -146.8], [-37.6, -143.4], [-42.2, -139.6], [-46.2, -133.6], [-40.4, -135.3], [-33.8, -134.9],
-  [-36.9, -129.4], [-41.6, -120.6], [-45.6, -114.4], [-47, -105], [-46.4, -97.4], [-44.4, -93], [-46.4, -88.6], [-45.4, -77.8],
-  [-42.6, -73.4], [-38.6, -70.2], [-31, -64.2], [-9, -59.4]];
+  [-36.9, -129.4], [-41.6, -120.6], [-45.6, -114.4], [-47, -105], [-46.4, -97.4], [-44.4, -93], [-47.4, -88.6], [-47.6, -80],
+  [-44.6, -73.6], [-38.6, -70.2], [-31, -64.2], [-9, -59.4]];
 /**
  * The crown's overhang and the crescent's inner end, on the right: the lock's tip hanging just inside the ear's
  * edge, its underside arching over the root's tan to y -134.9, and the rounded turn into the face's side.
@@ -274,16 +274,16 @@ let head = smooth([...headHalf, [0, -58.4], ...leftHalf].map(([x, y]): Node => c
 // over the collar in a row of small soft tufts, uneven, combed out from its
 // middle.
 const cheekLocks = {
-  R: [{ len: 2.9, w: 1.5, lean: 0.35 }, { len: 2.1, w: 1.1, lean: 0.45 }, { len: 1.7, w: 0.85, lean: 0.55 }, { len: 0.9, w: 0.45, lean: 0.65 }],
-  L: [{ len: 3.1, w: 1.6, lean: 0.3 }, { len: 1.6, w: 0.8, lean: 0.45 }, { len: 2.2, w: 1.1, lean: 0.55 }, { len: 0.9, w: 0.5, lean: 0.65 }],
+  R: [{ len: 1.6, w: 1.5, lean: 0.25 }, { len: 1.2, w: 1.1, lean: 0.3 }, { len: 0.9, w: 0.9, lean: 0.35 }],
+  L: [{ len: 1.7, w: 1.6, lean: 0.25 }, { len: 0.9, w: 0.85, lean: 0.3 }, { len: 1.2, w: 1.1, lean: 0.35 }],
 };
 const chinLocks = [{ len: 0.6, w: 0.8, lean: -0.4 }, { len: 0.95, w: 1.1, lean: -0.3 }, { len: 0.65, w: 0.9, lean: -0.2 }, { len: 0.9, w: 1.2, lean: -0.05 },
   { len: 0.7, w: 1, lean: 0.1 }, { len: 0.95, w: 1.15, lean: 0.25 }, { len: 0.65, w: 0.85, lean: 0.4 }];
 /** Each cheek clump's tip, root and notches (path order), for its line and the shade under it. */
 const clumps: { tip: P; root: P; notches: [P, P] }[] = [];
 const noteClump = (tip: P, root: P, notches: [P, P]) => clumps.push({ tip, root, notches });
-head = furEdge(head, cheekRoll([-45.4, -91.8]), cheekRoll([-36.4, -68.8]), cheekLocks.R, 0.42, noteClump);
-head = furEdge(head, cheekRoll([36.4, -68.8]), cheekRoll([45.4, -91.8]), lefthandOf(cheekLocks.L), 0.42, noteClump);
+head = furEdge(head, cheekRoll([-46, -91.4]), cheekRoll([-36.4, -68.8]), cheekLocks.R, 0.55, noteClump);
+head = furEdge(head, cheekRoll([36.4, -68.8]), cheekRoll([46, -91.4]), lefthandOf(cheekLocks.L), 0.55, noteClump);
 /** The chin's tufts' notches, in path order, for their lines. */
 const chinTufts: [P, P][] = [];
 head = furEdge(head, cheekRoll([-32.4, -65.4]), cheekRoll([32.4, -65.4]), chinLocks, 0.36, (_tip, _root, notches) => chinTufts.push(notches));
@@ -327,11 +327,11 @@ const tuftShapes = curlShapes(CURLS);
 // pt of bleed past the head's edge; the eye covers what is typed under it.
 // Their edges are soft but defined: a sigma of 0.5 pt.
 const patches = {
-  R: smooth([[-43, -86.6], [-49.6, -86], [-50, -106], [-48.6, -124], [-44.4, -130.6], [-39.6, -129.2], [-37.6, -126.4], [-38.8, -122.2], [-39.6, -119.2],
-    [-39, -116.2], [-37.8, -113.4], [-35.4, -115.6], [-32.4, -118.4], [-28.4, -118.8], [-22.4, -117.6], [-18.4, -114.6], [-15.8, -108.6], [-15.6, -102.4],
-    [-18, -98], [-26, -93.4], [-33.4, -90.2], [-38.4, -88.4]], { corners: [10] }),
-  L: smooth([[43.4, -91.4], [49, -90.4], [49.4, -110], [44.6, -125], [39.4, -131.8], [34.6, -131.2], [33, -127], [32.4, -123.2], [31.2, -121.2],
-    [28.4, -121.8], [24, -122.2], [19.6, -121.4], [16, -118.8], [13.6, -114], [12.6, -108.4], [13.2, -103.4], [18, -96.6], [28, -94.4], [34.4, -94.2], [39.6, -93.2]], { corners: [8] }),
+  R: smooth([[-43.4, -91.2], [-49.6, -91.4], [-50, -106], [-48.6, -124], [-44.4, -130.6], [-39.6, -129.2], [-37.6, -126.4], [-38.8, -122.2], [-39.6, -119.2],
+    [-39, -116.2], [-37.6, -114], [-35.4, -115.6], [-32.4, -118.4], [-28.4, -118.8], [-22.4, -117.6], [-18.4, -114.6], [-15.8, -108.6], [-15.6, -102.4],
+    [-18, -98], [-26, -93.8], [-33.4, -91.4], [-38.4, -90.8]]),
+  L: smooth([[43.6, -94.6], [49, -94.4], [49.4, -110], [44.6, -125], [39.4, -131.8], [34.6, -131.2], [33, -127], [32.4, -123.2], [31, -121.6],
+    [28.4, -121.8], [24, -122.2], [19.6, -121.4], [16, -118.8], [13.6, -114], [12.6, -108.4], [13.2, -103.4], [18, -96.6], [28, -95.2], [34.4, -95.6], [39.6, -95]]),
 };
 /** Each hood's end toward the nose softens a little more than its edge, as the sheet's does. */
 const patchFade = { R: { from: [-16.8, -105.4], to: [-13.6, -104.4] }, L: { from: [14.2, -109.6], to: [11, -108.6] } } satisfies Record<string, Fade>;
@@ -414,7 +414,7 @@ const crownSpans: LitSpan[] = [{ from: [-24, -149.2], to: [-45.6, -134.6], taper
  * its tip.
  */
 function cheekLines(): { spans: LitSpan[]; strokes: P[][] } {
-  const spans: LitSpan[] = clumps.filter(({ tip, root }) => v.len(v.sub(tip, root)) >= 1.2).map(({ notches }) => ({ from: notches[0], to: notches[1], on: "tan", taper: 1.6 }));
+  const spans: LitSpan[] = clumps.map(({ notches }) => ({ from: notches[0], to: notches[1], on: "tan", taper: 1.6 }));
   const strokes = clumps.filter(({ tip, root }) => v.len(v.sub(tip, root)) >= 1.9).map(({ tip, root, notches }) => {
     // The path runs down the right cheek and up the left, so a clump's lower notch is its second on the right.
     const below = tip[0] < 0 ? notches[1] : notches[0];

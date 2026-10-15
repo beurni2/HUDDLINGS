@@ -98,11 +98,16 @@ const hindNear = smooth([[-30.8, -8.4], [-30, -12.4], [-27.6, -15.2], [-23.4, -1
 // a small one at the top of the curl, a bump where the plume turns down its
 // back, a smaller one lower on its back, and a little fringe notch on its
 // underside; its root hidden under the rump.
-const tail = furSpan(furEdge(furEdge(furEdge(furEdge(smooth([[10, -22], [17.4, -35.2], [19.8, -39.4], [20.8, -43.8], [19.6, -47.6], [17.2, -50.4], [15.4, -53.2],
-  [15.8, -56.4], [18.4, -59], [22.4, -60.6], [29, -61.6], [35.8, -59.2], [40.8, -55.2], [44, -50], [46, -42.4], [46.4, -35], [45.4, -28.6], [42.6, -22.8], [37.6, -18],
+/** Each lobe of the plume's back: its notches, in path order, for its own line. */
+const tailLobes: [P, P][] = [];
+// Down its back the plume breaks into five round lobes of fur of uneven size, each tucked under the next at a soft
+// notch, as the sheet draws them (its back at x 36 at y -58, 41.5 at -50, 44.8 at -43.7, 45.6 at -35.3, 44.8 at
+// -28.7, 43 at -22, 39.8 at -17), not a smooth feather's edge.
+const tail = furSpan(furEdge(furEdge(smooth([[10, -22], [17.4, -35.2], [19.8, -39.4], [20.8, -43.8], [19.6, -47.6], [17.2, -50.4], [15.4, -53.2],
+  [15.8, -56.4], [18.4, -59], [22.4, -60.6], [29, -61.6], [35.8, -59.2], [39.8, -55.4], [43, -50], [45, -42.4], [45.2, -35], [44.2, -28.6], [41.6, -23], [37, -18.4],
   [31.4, -13.4], [24.4, -10.6], [16.6, -9.8]]), [20.6, -59.6], [27.2, -61.8], [{ len: 1.5, w: 1, lean: 0.35 }], 0.3),
-[41.2, -54.8], [44.8, -48.4], [{ len: 1.3, w: 1, lean: 0.25 }], 0.32), [46.6, -37.4], [45.8, -30], [{ len: 1, w: 1, lean: 0.25 }], 0.34),
-[42.2, -22.4], [38.6, -18.8], [{ len: 0.8, w: 1, lean: 0.4 }], 0.3), [17.2, -50.4], [38.6, -18.8]);
+[36.4, -58.6], [38.8, -17.2], [{ len: 1.6, w: 1, lean: 0.3 }, { len: 2, w: 1.25, lean: 0.25 }, { len: 1.7, w: 1.1, lean: 0.2 }, { len: 2.1, w: 1.3, lean: 0.15 },
+  { len: 1.5, w: 1, lean: 0.25 }], 0.42, (_tip, _root, notches) => tailLobes.push(notches)), [17.2, -50.4], [38.8, -17.2]);
 
 // The collar: a band round the neck, almost as thick at its back as at its
 // front (10 pt under the chin, where the jaw's fur lies over its top, about 8
@@ -291,11 +296,11 @@ function legNearPaint(): Paint {
   return {
     fill: C.fur,
     shade: furShade(bodyGroup, [], ["M-70 -60 L-30 -60 L-30 -30 L-70 -30Z"]),
-    under: `<defs>${toeFade(toe, -0.6, -10)}</defs>`,
-    // Three toe lines rising from the sole at the paw's front, curving with its dome, the third the faintest, as the
-    // sheet draws them. Its back lies on the chest's fur with no line.
-    inner: toes([[[-61.2, -2.4], [-62, -5], [-61.8, -7.8], [-60.8, -10.2]], [[-57.4, -1.2], [-58, -3.8], [-57.8, -6.4], [-57, -8.6]],
-      [[-53.6, -0.9], [-53.9, -3.2], [-53.6, -5.4], [-53, -7]]], toe),
+    under: `<defs>${toeFade(toe, -0.6, -9)}</defs>`,
+    // Short toe lines rising from the sole at the paw's front, curving with its dome, unevenly spaced, fading out
+    // upward and the third the shortest, as the sheet draws them: toes, not claws. Its back lies on the chest's fur
+    // with no line.
+    inner: toes([[[-61.4, -2.6], [-62, -4.8], [-61.6, -6.8]], [[-57.6, -1.4], [-58, -3.6], [-57.6, -5.6]], [[-53.4, -1], [-53.6, -2.6], [-53.3, -4]]], toe, 0.75),
     // Its top fades in on the chest, so it comes out of the chest's fur with no edge.
     feather: { from: [-44, -42], to: [-46, -36] },
   };
@@ -310,9 +315,9 @@ function legFarPaint(): Paint {
     shade: { multiply: C.furShadeBy, rim: { inset: 1.4, toLight: 2.2 }, shapes: ["M-66 -40 L-58 -40 L-58 -34 C-61 -33 -64 -33 -66.4 -34Z"], blur: 2 },
     // The paw's dome catches the light from the top left, so it reads as the sheet's near-cream paw below the shaded wedge.
     highlight: { d: "M-74 -13 C-73.6 -16.4 -70.6 -18.4 -67.6 -17.6 C-66 -14.4 -66.6 -10 -68.6 -7.4 C-71.4 -7 -73.8 -9 -74 -13Z", colour: C.fur, opacity: 0.55, blur: 1.6 },
-    under: `<defs>${toeFade(toe, -4.6, -14)}</defs>`,
+    under: `<defs>${toeFade(toe, -4.6, -11)}</defs>`,
     // Two toe lines curving up its front, as the sheet draws them.
-    inner: toes([[[-72.6, -6], [-73.3, -8.6], [-73.1, -11.4], [-72.2, -13.8]], [[-69.8, -5], [-70.3, -7.8], [-70.1, -10.6], [-69.4, -12.8]]], toe, 0.75),
+    inner: toes([[[-72.6, -6], [-73.2, -8.2], [-72.9, -10.4]], [[-69.8, -5], [-70.2, -7.2], [-69.9, -9.2]]], toe, 0.7),
   };
 }
 
@@ -321,10 +326,10 @@ function hindPaint(): Paint {
   return {
     fill: C.fur,
     shade: furShade(bodyGroup),
-    under: `<defs>${toeFade(toe, -0.8, -10)}</defs>`,
-    // Three toe lines rising from the sole at its front, curving with its dome, as the sheet draws them.
-    inner: toes([[[-27.6, -2], [-28.1, -4.6], [-27.9, -7.4], [-27.1, -9.8]], [[-24, -1.2], [-24.4, -3.8], [-24.2, -6.4], [-23.6, -8.6]],
-      [[-20.6, -0.9], [-20.8, -3.2], [-20.6, -5.4], [-20.1, -7.2]]], toe),
+    under: `<defs>${toeFade(toe, -0.8, -9)}</defs>`,
+    // Short toe lines rising from the sole at its front, curving with its dome, unevenly spaced and fading out upward,
+    // as the sheet draws them.
+    inner: toes([[[-27.8, -2.2], [-28.2, -4.6], [-27.8, -6.8]], [[-24.2, -1.3], [-24.5, -3.6], [-24.2, -5.6]], [[-20.6, -1], [-20.7, -2.6], [-20.4, -4]]], toe, 0.75),
     feather: { from: [-10.8, -9], to: [-14.6, -9] },
   };
 }
@@ -338,9 +343,6 @@ const tailPaint: Paint = {
   inner: [
     // The curl's hook turns in under itself at the plume's front, its tip pointing back toward the body, as the sheet draws it.
     { pts: sample(smooth([[15.8, -53.4], [18.4, -52.2], [20.8, -50.2], [22.2, -47.6]], { closed: false }).segs, 6, false), width: 0.85, colour: C.crownLine, opacity: 0.9 },
-    // A few soft strands of fur along the plume, combed round its curl and down its back.
-    ...[[[26.4, -56.4], [30.6, -56.2], [34.4, -54]], [[39.6, -46.6], [41.6, -42.4], [42.2, -38]], [[31, -48.6], [33.8, -45.6], [35.2, -41.8]],
-      [[38.4, -29.6], [37.6, -26.2], [35.6, -23.2]]].map((pts) => ({ pts: sample(smooth(pts as P[], { closed: false }).segs, 6, false), width: 0.7, colour: C.crownLine, opacity: 0.3 })),
   ],
 
 };
@@ -576,8 +578,9 @@ export function side(): Drawn[] {
       soft(`M${x - rx} -0.4 a${rx} 1.6 0 1 0 ${2 * rx} 0 a${rx} 1.6 0 1 0 ${-2 * rx} 0Z`, [x - rx, -2, 2 * rx, 3.2], C.contact, 1.2, 0.45))));
   // The tail's one soft line all round, as the sheet draws it (parts/lines.ts): up its front where it leaves the rump,
   // by the tan root; over the curl and the top; down its back; and along its underside, on the tan by the root.
-  const tailLines: LitSpan[] = [{ from: [17.6, -35.8], to: [20.6, -45.4], on: "tan", taper: 3 }, { from: [20.4, -43.6], to: [40.8, -55.4], taper: 3 },
-    { from: [38.6, -57.2], to: [44.8, -26.2], taper: 3 }, { from: [45.6, -29.4], to: [30, -13.4], taper: 3 }, { from: [31.6, -12.8], to: [17.4, -9.8], on: "tan", taper: 3 }];
+  const tailLines: LitSpan[] = [{ from: [17.6, -35.8], to: [20.6, -45.4], on: "tan", taper: 3 }, { from: [20.4, -43.6], to: tailLobes[0]![0], taper: [3, 1.4] },
+    ...tailLobes.map(([a, b]): LitSpan => ({ from: a, to: b, taper: 1.4 })), { from: tailLobes.at(-1)![1], to: [30, -13.4], taper: [1.4, 3] },
+    { from: [31.6, -12.8], to: [17.4, -9.8], on: "tan", taper: 3 }];
   add("tail", litPart("tail", tail, tailPaint, tailLines));
   // The tail's tan root, soft but defined, with a few darker streaks in it radiating from the rump along the fur.
   add("tail.base", join(litMarking("tail.base", { shape: tail, paint: tailPaint, spans: tailLines }, tailBase, { fill: C.marking, blur: 0.75 }),
