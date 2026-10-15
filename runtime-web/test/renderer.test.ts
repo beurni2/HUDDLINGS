@@ -36,8 +36,8 @@ function quad(part: string, page: { width: number; height: number }, x0: number,
   return { part, region: part, page: 0, positions: [l, t, r, t, l, b, r, b], uvs: [u0, v0, u1, v0, u0, v1, u1, v1], columns: 1, rows: 1, clipTo, alpha };
 }
 
-async function render(size: [number, number], pages: string[], items: DrawItem[], stage = { x: 0, y: 0, pixelsPerPoint: 2 }, background: [number, number, number] = [1, 1, 1]) {
-  const bytes = await page.evaluate(([s, p, i, st, bg]) => (window as unknown as { render: Function }).render(s, p, i, st, bg), [size, pages, items, stage, background] as const);
+async function render(size: [number, number], pages: string[], items: DrawItem[], stage = { x: 0, y: 0, pixelsPerPoint: 2 }, background: [number, number, number] = [1, 1, 1], cut = 0) {
+  const bytes = await page.evaluate(([s, p, i, st, bg, c]) => (window as unknown as { render: Function }).render(s, p, i, st, bg, c), [size, pages, items, stage, background, cut] as const);
   return (x: number, y: number) => (bytes as number[]).slice((y * size[0] + x) * 4, (y * size[0] + x) * 4 + 4);
 }
 
@@ -94,4 +94,56 @@ test("a mesh of rows draws the whole region, row by row", async () => {
   const at = await render([8, 12], [url], [mesh]);
   for (let y = 2; y < 10; y++) for (let x = 2; x < 6; x++) assert.deepEqual(at(x, y), [0, 128 + (y - 2) * 10, 0, 255], `pixel ${x}, ${y}`);
   assert.deepEqual(at(2, 10), [255, 255, 255, 255]);
+});
+
+const near = (got: number[], want: number[], what: string) => assert.ok(got.every((v, i) => Math.abs(v - want[i]!) <= 1), `${what}: got ${got}, want ${want} within 1`);
+
+test("a part's alpha multiplies its premultiplied colour", async () => {
+  // Columns 0..3 opaque red; 4..7 (100, 200, 50) at alpha 128.
+  const url = pagePng(8, 4, (x) => (x < 4 ? [255, 0, 0, 255] : [100, 200, 50, 128]));
+  const p = { width: 8, height: 4 };
+  const draw = (alpha: number) => render([8, 8], [url], [quad("red", p, 0, 0, 4, 4, 2, 0, 0, undefined, alpha), quad("soft", p, 4, 0, 4, 4, 2, 2, 0, undefined, alpha)]);
+  const half = await draw(0.5);
+  // Red at 0.5 over white: (255, 255·0.5, 255·0.5).
+  near(half(1, 1), [255, 128, 128, 255], "opaque red at half");
+  // (100, 200, 50)·128/255·0.5 + 255·(1 − 128/255·0.5) = (216.1, 241.2, 203.6): texel alpha × part alpha.
+  near(half(5, 1), [216, 241, 204, 255], "a soft texel at half");
+  const none = await draw(0);
+  assert.deepEqual([none(1, 1), none(5, 1)], [[255, 255, 255, 255], [255, 255, 255, 255]], "alpha 0 draws nothing");
+  const full = await draw(1);
+  near(full(5, 1), [177, 227, 152, 255], "alpha 1 draws the texel as it is");
+});
+
+test("a mask's alpha never changes what it lets through, and a clipped part's alpha fades only itself", async () => {
+  // The mask's white texels in columns 0..3 (alpha 13, 12, 255, 0); an opaque blue block at x 8..11.
+  const maskAlpha = [13, 12, 255, 0];
+  const url = pagePng(16, 4, (x) => (x < 4 ? [255, 255, 255, maskAlpha[x]!] : x >= 8 && x < 12 ? [0, 0, 255, 255] : [0, 0, 0, 0]));
+  const p = { width: 16, height: 4 };
+  const draw = (maskPart: number, clipped: number) =>
+    render([8, 8], [url], [quad("mask", p, 0, 0, 4, 4, 2, 0, 0, undefined, maskPart), quad("clipped", p, 8, 0, 4, 4, 2, 0, 0, 0, clipped)], { x: 0, y: 0, pixelsPerPoint: 2 }, [0, 0, 0]);
+  // A mask faded to nothing still cuts at its own texels' 0.05.
+  const hidden = await draw(0, 1);
+  assert.deepEqual(hidden(0, 1), [0, 0, 255, 255], "alpha 13 keeps");
+  assert.deepEqual(hidden(1, 1), [0, 0, 0, 255], "alpha 12 cuts, and the mask itself draws nothing");
+  assert.deepEqual(hidden(2, 1), [0, 0, 255, 255], "opaque keeps");
+  assert.deepEqual(hidden(3, 1), [0, 0, 0, 255], "clear cuts");
+  // A clipped part at half over its opaque white mask: (127.5, 127.5, 255); its mask's cut unchanged.
+  const faded = await draw(1, 0.5);
+  near(faded(2, 1), [128, 128, 255, 255], "the clipped part at half");
+  near(faded(0, 1), [7, 7, 134, 255], "over the faint mask texel, still let through");
+  near(faded(1, 1), [12, 12, 12, 255], "where the mask cuts, only the mask's own faint white");
+});
+
+test("a cut keeps texels below it out of the colour but never out of a mask (the Lab's ID pass)", async () => {
+  // The mask's red texels in columns 0..3 (alpha 64, 64, 255, 0); an opaque blue block at x 8..9, over columns 0..1.
+  const maskAlpha = [64, 64, 255, 0];
+  const url = pagePng(16, 4, (x) => (x < 4 ? [255, 0, 0, maskAlpha[x]!] : x >= 8 && x < 10 ? [0, 0, 255, 255] : [0, 0, 0, 0]));
+  const p = { width: 16, height: 4 };
+  const items = [quad("mask", p, 0, 0, 4, 4, 2, 0, 0), quad("clipped", p, 8, 0, 2, 4, 2, 0, 0, 0)];
+  const at = await render([8, 8], [url], items, { x: 0, y: 0, pixelsPerPoint: 2 }, [0, 0, 0], 0.5);
+  assert.deepEqual(at(0, 1), [0, 0, 255, 255], "a mask texel below the cut still lets its group through");
+  assert.deepEqual(at(2, 1), [255, 0, 0, 255], "a texel above the cut draws");
+  assert.deepEqual(at(3, 1), [0, 0, 0, 255]);
+  const plain = await render([8, 8], [url], items.slice(0, 1), { x: 0, y: 0, pixelsPerPoint: 2 }, [0, 0, 0], 0.5);
+  assert.deepEqual(plain(0, 1), [0, 0, 0, 255], "below the cut no colour is drawn");
 });

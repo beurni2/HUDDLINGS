@@ -10,7 +10,7 @@ async function image(url: string): Promise<HTMLImageElement> {
   return img;
 }
 
-async function render(size: [number, number], pages: string[], items: DrawItem[], stage: Stage, background: [number, number, number]) {
+async function render(size: [number, number], pages: string[], items: DrawItem[], stage: Stage, background: [number, number, number], cut: number) {
   const canvas = document.createElement("canvas");
   canvas.width = size[0];
   canvas.height = size[1];
@@ -18,7 +18,7 @@ async function render(size: [number, number], pages: string[], items: DrawItem[]
   if (!gl) throw new Error("no WebGL2");
   const renderer = new Renderer(gl);
   renderer.loadPages(await Promise.all(pages.map(image)));
-  renderer.draw(items, stage, background);
+  renderer.draw(items, stage, background, cut);
   return Array.from(renderer.readPixels());
 }
 

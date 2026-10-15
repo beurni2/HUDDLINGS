@@ -1,8 +1,8 @@
 // Draws a draw list with WebGL2 (characters/format/README.md, Rendering):
 // premultiplied textures sampled linearly without mipmaps (as SpriteKit was
-// measured to draw them), single-sample, one quad or dense mesh per part, and
-// clip groups through the stencil buffer, keeping mask pixels whose alpha is
-// 0.05 or more, as SKCropNode does.
+// measured to draw them), single-sample, one quad or dense mesh per part, each
+// part's colour times its alpha, and clip groups through the stencil buffer,
+// keeping mask pixels whose own texel alpha is 0.05 or more, as SKCropNode does.
 import type { AtlasSet } from "./format.ts";
 import type { DrawItem } from "./rig.ts";
 
@@ -55,12 +55,14 @@ const FRAGMENT = `#version 300 es
 precision highp float;
 uniform sampler2D u_texture;
 uniform float u_maskCut;
+uniform float u_alpha;
 in vec2 v_uv;
 out vec4 color;
 void main() {
   vec4 c = texture(u_texture, v_uv);
+  // The cut reads the texel's own alpha, so a part's alpha never changes what a mask lets through.
   if (c.a < u_maskCut) discard;
-  color = c;
+  color = c * u_alpha;
 }`;
 
 function compile(gl: WebGL2RenderingContext, type: number, source: string): WebGLShader {
@@ -78,7 +80,7 @@ export class Renderer {
   private positions: WebGLBuffer;
   private uvs: WebGLBuffer;
   private indices: WebGLBuffer;
-  private where: { viewport: WebGLUniformLocation; maskCut: WebGLUniformLocation; texture: WebGLUniformLocation };
+  private where: { viewport: WebGLUniformLocation; maskCut: WebGLUniformLocation; alpha: WebGLUniformLocation; texture: WebGLUniformLocation };
 
   constructor(gl: WebGL2RenderingContext) {
     this.gl = gl;
@@ -93,6 +95,7 @@ export class Renderer {
     this.where = {
       viewport: gl.getUniformLocation(program, "u_viewport")!,
       maskCut: gl.getUniformLocation(program, "u_maskCut")!,
+      alpha: gl.getUniformLocation(program, "u_alpha")!,
       texture: gl.getUniformLocation(program, "u_texture")!,
     };
     this.positions = gl.createBuffer()!;
@@ -124,8 +127,12 @@ export class Renderer {
     });
   }
 
-  /** Clears to an opaque background and draws the list in order. Colours are 0..1. */
-  draw(items: DrawItem[], stage: Stage, background: [number, number, number]): void {
+  /**
+   * Clears to an opaque background and draws the list in order. Colours are 0..1. Texels
+   * whose alpha is below `cut` draw no colour (the Lab's ID pass draws flat colours at 0.5);
+   * a mask always cuts at MASK_ALPHA.
+   */
+  draw(items: DrawItem[], stage: Stage, background: [number, number, number], cut = 0): void {
     const gl = this.gl;
     const width = gl.drawingBufferWidth;
     const height = gl.drawingBufferHeight;
@@ -157,21 +164,22 @@ export class Renderer {
           gl.stencilOp(gl.KEEP, gl.KEEP, gl.REPLACE);
           gl.colorMask(false, false, false, false);
           gl.uniform1f(this.where.maskCut, MASK_ALPHA);
-          this.mesh(items[mask]!, stage);
+          this.mesh(items[mask]!, stage, 1);
           gl.colorMask(true, true, true, true);
           gl.stencilFunc(gl.EQUAL, 1, 0xff);
           gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP);
         }
       }
       // Fully transparent texels add nothing to a premultiplied blend, so drawing them changes no pixel.
-      gl.uniform1f(this.where.maskCut, 0);
-      this.mesh(item, stage);
+      gl.uniform1f(this.where.maskCut, cut);
+      this.mesh(item, stage, item.alpha);
     }
     gl.disable(gl.STENCIL_TEST);
   }
 
-  private mesh(item: DrawItem, stage: Stage): void {
+  private mesh(item: DrawItem, stage: Stage, alpha: number): void {
     const gl = this.gl;
+    gl.uniform1f(this.where.alpha, alpha);
     const n = item.positions.length / 2;
     const pixels = new Float32Array(item.positions.length);
     for (let i = 0; i < n; i++) {
