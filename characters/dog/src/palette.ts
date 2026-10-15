@@ -75,6 +75,11 @@ export const C = {
   irisWarm: mix(mix(dark, mouthInside, 0.2), tag, 0.1),
   /** The mouth's inside in its own shade under the lip and in the corners: a quarter darker. */
   mouthDeep: darken(mouthInside, 0.25),
+  /** The thin rim round the opening's sides: the mouth's inside halfway to the printed dark brown, #6C2417. */
+  mouthRim: mix(mouthInside, dark, 0.5),
+  /** The rim where the tongue meets the opening's foot: the tongue a third of the way to the printed dark brown,
+   * #BB7362 against the sheet's #BA7766. */
+  tongueRim: mix(tongue, dark, 0.33),
   tongueShine: mix(tongue, light, 0.5),
 };
 
