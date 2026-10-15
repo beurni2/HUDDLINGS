@@ -17,6 +17,7 @@ import { curlShapes, topknot, type Curl } from "../parts/topknot.ts";
 import { earFur } from "../parts/ear.ts";
 import { toes } from "../parts/paw.ts";
 import { tagPaint } from "../parts/tag.ts";
+import { strands } from "../parts/marking.ts";
 import type { Drawn } from "./front.ts";
 
 const INNER = model.outline.innerPt;
@@ -81,10 +82,11 @@ const chestLocks: Lock[] = [{ len: 0.8, w: 0.9, lean: -0.3 }, { len: 1.3, w: 1.3
 chest = furEdge(chest, [-77.6, -38.8], [-74.9, -54.2], chestLocks, 0.32);
 
 // The collar: the band round the neck from under the chin, where its rounded end shows, along the near side
-// to where it turns away round the neck just short of the near ear; deepest (7.5 pt) under the near side of the
-// chin, 6 pt toward its rounded end under the chin and narrowing to 3 pt where it turns away. Its top lies under the head's fur.
-const collar = smooth([[-72.6, -61.8], [-60, -63], [-45, -62], [-30, -63.4], [-24.6, -64.6], [-22.2, -63.4], [-21.8, -61.2], [-22.8, -59.2], [-26, -56.4],
-  [-30, -53.8], [-37.6, -51], [-45.4, -49.4], [-52.6, -50], [-60.6, -51.6], [-67, -52.4], [-70.6, -55.4], [-72.6, -58.4]]);
+// to where it passes behind the near ear, as the sheet draws it: deepest (7.5 pt) under the near side of the chin,
+// 6 pt toward its rounded end under the chin and still about 7 pt where it goes behind the ear, no point. Its top lies
+// under the head's fur.
+const collar = smooth([[-72.6, -61.8], [-60, -63], [-45, -62], [-30, -63.6], [-24.6, -65], [-21.8, -64.2], [-21, -61.4], [-21.6, -58.4], [-24.4, -56],
+  [-30, -53.2], [-37.6, -50.6], [-45.4, -49.2], [-52.6, -49.8], [-60.6, -51.4], [-67, -52.4], [-70.6, -55.4], [-72.6, -58.4]]);
 
 // The tag: the plump gold heart, hanging straight under its ring, a little narrower and shorter than the front's
 // as the turn shows it (16 pt across with its line, under 15 pt tall); and the smaller heart embossed in it.
@@ -216,8 +218,8 @@ const TAIL_NOTCHES = [8, 10, 12, 14, 19, 21];
 let tail = smooth(tailNodes, { corners: [4, ...TAIL_NOTCHES] });
 // The hook's tip and the lobes are fur (the tail tip, L509).
 tail = furSpan(furSpan(tail, [17.6, -48.6], [18.2, -54.6]), [24.2, -56.6], [30.4, -12.6]);
-// Its foot breaks into a small fringe of tan tufts, combed back toward the haunch.
-const fringeLocks: Lock[] = [{ len: 1, w: 1.2, lean: 0.35 }, { len: 0.7, w: 0.8, lean: 0.3 }, { len: 1.2, w: 1.4, lean: 0.35 }];
+// Its foot breaks into two soft, uneven tufts, combed back toward the haunch.
+const fringeLocks: Lock[] = [{ len: 0.8, w: 1.6, lean: 0.35 }, { len: 0.5, w: 0.9, lean: 0.3 }];
 tail = furEdge(tail, [29.4, -12.2], [15.4, -10.6], fringeLocks, 0.42);
 
 // The tail's tan root, as the sheet paints it: deep at the foot behind the haunch and rising up the plume's lower
@@ -423,9 +425,9 @@ function tagPiece(): Piece {
   // The ring: a small rounded loop in the collar's light blue, leaning with the heart.
   const ringLine: DrawnLine = { kind: "inner", width: 0.6, where: "tag ring", drawn: [0.6, 0.6] };
   const [rx, ry] = [TAG_X - 1.6, LM["tag.ring"]![1] - 0.2];
-  // The ring: a small open loop in the collar's blue hanging from the band to the heart's cleft, as the sheet draws it.
-  const ring = piece(`<g transform="rotate(${TAG_TILT} ${fmt(TAG_X)} ${fmt(ry + 3.6)})"><ellipse cx="${fmt(TAG_X)}" cy="${fmt(ry + 3.6)}" rx="1.8" ry="3.2" fill="${C.collar}" stroke="${C.collarRim}" stroke-width="${ringLine.width}"/>` +
-    `<ellipse cx="${fmt(TAG_X)}" cy="${fmt(ry + 3.6)}" rx="0.7" ry="1.9" fill="${C.collarLine}"/></g>`, [rx - 2, ry - 1, 7.2, 8.6], { shapes: [], lines: [ringLine] });
+  // The ring: a narrow loop in the collar's light blue hanging from the band to the heart's cleft, as the sheet draws it.
+  const ring = piece(`<rect x="${fmt(TAG_X - 1.2)}" y="${fmt(ry)}" width="2.4" height="6.4" rx="1.2" transform="rotate(${TAG_TILT + 4} ${fmt(TAG_X)} ${fmt(ry + 3.5)})" ` +
+    `fill="${C.collarHighlight}" stroke="${C.collarLine}" stroke-width="${ringLine.width}"/>`, [rx - 2, ry - 1, 7.2, 8.6], { shapes: [], lines: [ringLine] });
   // The dog's one tag recipe (parts/tag.ts): matte gold warming toward orange along its lower right, one small soft
   // light on its upper left lobe, no glossy streak, and two smaller hearts embossed as concentric warm rings.
   return join(ring, part("tag", heart, tagPaint({ emboss: embossed, light: `M${fmt(TAG_X - 6.4)} -47.2 a2.2 1.5 -40 1 0 4.4 0 a2.2 1.5 -40 1 0 -4.4 0`, rim: 1.25 })));
@@ -545,7 +547,14 @@ export function threeQuarter(): Drawn[] {
     { from: [31.6, -58.4], to: [37.6, -55.6] }, { from: [37.6, -55.6], to: [42.9, -47.6] }, { from: [42.9, -47.6], to: [41.8, -24] },
     { from: [41.8, -24], to: [30.4, -12.6] }, { from: [30.4, -12.6], to: [13.6, -10.8], on: "tan" }]);
   add("tail", litPart("tail", tail, tailPaint, tailLines));
-  add("tail.base", litMarking("tail.base", { shape: tail, paint: tailPaint, spans: tailLines }, tailBase, { fill: C.marking, blur: 0.55, fade: { from: [19.5, -24], to: [22.5, -41] } }));
+  // The tail's tan root painted as a flame of brush strokes, as the sheet paints it (parts/marking.ts): darkest at the
+  // root, a few darker strands and lighter streaks of cream radiating up and out along the plume's fur from the root,
+  // its edge soft and fading up into the cream.
+  add("tail.base", join(litMarking("tail.base", { shape: tail, paint: tailPaint, spans: tailLines }, tailBase, { fill: C.marking, blur: 0.8, fade: { from: [19.5, -22], to: [22.5, -41] } }),
+    strands("tail.base", tailBase, 0.8, [[[13.4, -14.4], [16.6, -22], [18.4, -30]], [[15.6, -13.2], [20.4, -19.4], [24, -26.4]], [[17.4, -12.6], [23, -16.4], [27.4, -21]]],
+      { colour: C.earLow, opacity: 0.4, width: 0.85 }),
+    strands("tail.base", tailBase, 0.8, [[[15.4, -16.4], [18.6, -24.4], [20.4, -33]], [[18.2, -15], [22.6, -21.4], [25.6, -28.6]]],
+      { colour: C.fur, opacity: 0.4, width: 0.9 })));
   add("body.back", litPart("body.back", back, backPaint, backLines));
   add("back.patch.L", litMarking("back.patch.L", { shape: back, paint: backPaint, spans: backLines }, saddleL, { fill: C.marking, blur: 0.8 }));
   add("rump.patch.L", litMarking("rump.patch.L", { shape: back, paint: backPaint, spans: backLines }, rumpL, { fill: C.marking, blur: 1 }));
@@ -600,8 +609,10 @@ export function threeQuarter(): Drawn[] {
   add("shadow.chin", soft(pathD(smooth(jawShade, { corners: [0, 5] }).segs), [-83, -70, 70, 16], C.furShade, 1.3));
   add("collar", part("collar", collar, {
     fill: C.collar,
-    shade: { multiply: C.shadeBy, shapes: ["M-76 -55 C-60 -49 -40 -48 -18 -57 L-18 -46 L-76 -46Z"], blur: 0.9 },
-    highlight: { d: "M-70 -57.4 C-58 -55 -42 -54 -24 -59 L-24 -57 C-42 -52 -58 -53 -70 -55.4Z", colour: C.collarHighlight, opacity: 0.3, blur: 0.9 },
+    // Its lower part in shade, turning under toward the chest, and a lighter band along its top where it faces the
+    // light, under the chin's fur, as the sheet paints it.
+    shade: { multiply: C.shadeBy, shapes: ["M-76 -56.4 C-60 -51 -40 -50 -18 -59 L-18 -46 L-76 -46Z"], blur: 0.9 },
+    highlight: { d: "M-71 -60.2 C-58 -59.4 -42 -58.4 -24 -62.6 L-24 -60.4 C-42 -56.6 -58 -57.4 -71 -58Z", colour: C.collarHighlight, opacity: 0.45, blur: 0.8 },
     // The keeper the tag's ring hangs from, a lighter loop across the band, and the jaw's contact on the collar.
     under: `<rect x="${fmt(TAG_X - 2.6)}" y="-61" width="4.4" height="9.4" rx="1.2" fill="${C.collarHighlight}" opacity="0.4"/>` + collarContact(),
     outline: { colour: C.collarRim, width: THIN, taper: 3, blur: 0.2, spans: [{ from: [-22.8, -59.2], to: [-72.6, -58.4] }] },

@@ -109,8 +109,8 @@ const tailLobes: [P, P][] = [];
 const tail = furSpan(furEdge(furEdge(smooth([[10, -22], [17.4, -35.2], [19.8, -39.4], [20.8, -43.8], [19.6, -47.6], [17.2, -50.4], [15.4, -53.2],
   [15.8, -56.4], [18.4, -59], [22.4, -60.6], [29, -61.6], [35.8, -59.2], [39.8, -55.4], [43, -50], [45, -42.4], [45.2, -35], [44.2, -28.6], [41.6, -23], [37, -18.4],
   [31.4, -13.4], [24.4, -10.6], [16.6, -9.8]]), [20.6, -59.6], [27.2, -61.8], [{ len: 1.5, w: 1, lean: 0.35 }], 0.3),
-[36.4, -58.6], [38.8, -17.2], [{ len: 1.6, w: 1, lean: 0.3 }, { len: 2, w: 1.25, lean: 0.25 }, { len: 1.7, w: 1.1, lean: 0.2 }, { len: 2.1, w: 1.3, lean: 0.15 },
-  { len: 1.5, w: 1, lean: 0.25 }], 0.42, (_tip, _root, notches) => tailLobes.push(notches)), [17.2, -50.4], [38.8, -17.2]);
+[36.4, -58.6], [38.8, -17.2], [{ len: 1.4, w: 0.8, lean: 0.35 }, { len: 2.3, w: 1.6, lean: 0.25 }, { len: 1.1, w: 0.7, lean: 0.3 }, { len: 1.9, w: 1.5, lean: 0.15 },
+  { len: 1.2, w: 0.9, lean: 0.3 }], 0.36, (_tip, _root, notches) => tailLobes.push(notches)), [17.2, -50.4], [38.8, -17.2]);
 
 // The collar: a band round the neck, almost as thick at its back as at its
 // front (about 11 pt under the chin, where the jaw's fur lies over its top,
@@ -561,9 +561,10 @@ export function side(): Drawn[] {
     { from: [31.6, -12.8], to: [17.4, -9.8], on: "tan", taper: 3 }];
   add("tail", litPart("tail", tail, tailPaint, tailLines));
   // The tail's tan root, soft but defined, with a few darker streaks in it radiating from the rump along the fur.
-  add("tail.base", join(litMarking("tail.base", { shape: tail, paint: tailPaint, spans: tailLines }, tailBase, { fill: C.marking, blur: 0.75 }),
-    strands("tail.base", tailBase, 0.75, [[[15.6, -31.4], [20.4, -33], [24.6, -32.2]], [[16.6, -25.4], [21.6, -26], [26.4, -24.6]], [[16.4, -19.2], [21.4, -18.2], [25.6, -15.6]],
-      [[14.4, -13.4], [18.6, -11.4], [22.2, -9.6]]], { colour: C.earLow, opacity: 0.35, width: 0.8 })));
+  add("tail.base", join(litMarking("tail.base", { shape: tail, paint: tailPaint, spans: tailLines }, tailBase, { fill: C.marking, blur: 0.9 }),
+    strands("tail.base", tailBase, 0.9, [[[15.6, -31.4], [20.4, -33], [24.6, -32.2]], [[16.6, -25.4], [21.6, -26], [26.4, -24.6]], [[16.4, -19.2], [21.4, -18.2], [25.6, -15.6]],
+      [[14.4, -13.4], [18.6, -11.4], [22.2, -9.6]]], { colour: C.earLow, opacity: 0.35, width: 0.8 }),
+    strands("tail.base", tailBase, 0.9, [[[18, -29], [22.6, -29.6], [27.6, -27.6]], [[18.4, -22.4], [23, -21.8], [27.6, -19.6]]], { colour: C.fur, opacity: 0.4, width: 0.9 })));
   add("front.R", litPart("front.R", legFar, legFarPaint(), [{ from: [-63.6, -35.2], to: [-66.6, -4.8], taper: 4 }]));
   // Only the chest's front edge between the tag's foot and the near leg shows over the far leg: a couple of short
   // tapered fur strokes, as the sheet draws it, not a hooked line.
