@@ -8,13 +8,22 @@ import type { LintRules } from "../../draw/lint.ts";
 import type { Rig } from "../../../runtime-web/src/format.ts";
 import { palette } from "./palette.ts";
 import { back, landmarks as backLandmarks } from "./views/back.ts";
+import { landmarksFor } from "./views/facing.ts";
 import { front, landmarks as frontLandmarks } from "./views/front.ts";
 import { side, landmarks as sideLandmarks } from "./views/side.ts";
 import { threeQuarter, landmarks as threeQuarterLandmarks } from "./views/threeQuarter.ts";
 
 const rig = JSON.parse(readFileSync(new URL("./rig.json", import.meta.url), "utf8")) as Rig;
 
-const VIEWS = { front, "threeQuarter.L": threeQuarter, "side.L": side, back };
+/** Each view's drawings: the turned views in both facings, each .R its .L view mirrored and lit again (views/facing.ts). */
+const VIEWS = {
+  front: () => front(),
+  "threeQuarter.L": () => threeQuarter("L"),
+  "threeQuarter.R": () => threeQuarter("R"),
+  "side.L": () => side("L"),
+  "side.R": () => side("R"),
+  back: () => back(),
+};
 
 export function drawings(): Drawing[] {
   return Object.entries(VIEWS).flatMap(([view, draw]) => draw().map((d) => toBone(d.part, rig, view, d.piece, d.state)));
@@ -22,7 +31,14 @@ export function drawings(): Drawing[] {
 
 /** Where each view's drawing puts the points the sheet has no finder for, in model space. */
 export function landmarks(): Record<string, Record<string, [number, number]>> {
-  return { front: frontLandmarks, "threeQuarter.L": threeQuarterLandmarks, "side.L": sideLandmarks, back: backLandmarks };
+  return {
+    front: frontLandmarks,
+    "threeQuarter.L": threeQuarterLandmarks,
+    "threeQuarter.R": landmarksFor("R", threeQuarterLandmarks),
+    "side.L": sideLandmarks,
+    "side.R": landmarksFor("R", sideLandmarks),
+    back: backLandmarks,
+  };
 }
 
 export const lint: LintRules = {
