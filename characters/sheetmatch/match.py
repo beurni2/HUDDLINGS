@@ -51,6 +51,7 @@ from PIL import Image, ImageDraw  # noqa: E402
 from scipy import ndimage  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "refprep"))
+import markings  # noqa: E402
 import measure  # noqa: E402
 import palette  # noqa: E402
 import sheets  # noqa: E402
@@ -64,6 +65,7 @@ ID_TOLERANCE = 6.0  # RGB distance: an ID colour a renderer's filtering moved sl
 SHOWN_PT2 = 4.0  # a marking part shows when this much of it is in view
 BAKED_MIN_PX = 20  # crop px: tan smaller than this on a host part is a speck, not a marking
 MATCH_RADIUS_SHARE = 0.2  # of the head's width: how near a marking painted into its part must be to the sheet's
+MARKING_PLACE_SHARE = 0.03  # of the head's width (L523's 3%): how far each patch is grown to hold the other's centroid
 EDGE_P95_PT = 2.0  # advisory target for the edge distance
 PART_IOU = 0.85  # advisory target for each part the sheet's finders give
 PHONE_PPP = 3
@@ -442,29 +444,91 @@ def check_markings(frame, grid, render, still):
     # marking near it is one the facing should not show (a plain mirror shows the left side's on the right).
     radius = MATCH_RADIUS_SHARE * frame.head_width / frame.k
     unexpected = []
+    drawn = {n: render.mask([n]) for n in rows if n in still.names}
     for host in sorted(set(hosts.values())):
         wanted = painted.get(host, [])
         if host not in still.names:
             rows.update({n: {"host": host, "problem": "its host part is not drawn", "pass": False} for n in wanted})
             continue
         sheet_at = {n: np.array(expected[n]["centroidPx"]) + [grid.left, grid.top] for n in wanted}
-        tan = {n: 0 for n in wanted}
+        tan = {n: np.zeros(render.sil.shape, bool) for n in wanted}
         for blob in baked_tan(render, frame, render.mask([host])):
             centre = np.array(measure.centroid(blob))
             near = min(((float(np.hypot(*(centre - xy))), n) for n, xy in sheet_at.items()), default=None)
             if near is not None and near[0] <= radius:
-                tan[near[1]] += int(blob.sum())
+                tan[near[1]] |= blob
             else:
                 unexpected.append({"host": host, "centrePt": round2(grid.to_pt(centre)), "px": int(blob.sum())})
-        rows.update({n: {"host": host, "paintedIntoHost": True, "tanPx": px, "shows": px > 0, "expected": True,
-                         "pass": px > 0} for n, px in tan.items()})
+        rows.update({n: {"host": host, "paintedIntoHost": True, "tanPx": int(px.sum()), "shows": bool(px.any()), "expected": True,
+                         "pass": bool(px.any())} for n, px in tan.items()})
+        drawn.update(tan)
+    # Each marking the facing shows is where the sheet has it, and about its size: its centroid inside the sheet's
+    # patch for this sighting, and the patch's centroid inside it, each grown by 3% of the head's width.
+    patches = sheet_patches(frame)
+    for name, row in rows.items():
+        if row.get("expected") and row.get("shows"):
+            # In the frame the sheet names a mirrored facing's marking from its own side (a plain mirror of the .L
+            # crop): back.patch.R is held to the patch the sheet calls back.patch.L, mirrored.
+            row["place"] = place(drawn[name], grid.pad(patches.get(frame.to_still_name(name), np.zeros(frame.sil.shape, bool)), False), frame)
+            row["pass"] = row["pass"] and row["place"]["pass"]
     if frame.mirrored:
         for item in unexpected:
             item["centrePt"][0] = -item["centrePt"][0]
     shown = sorted(n for n, r in rows.items() if r.get("shows"))
-    result = {"expected": sorted(expected), "shown": shown, "rows": rows, "unexpectedTan": unexpected}
+    result = {"expected": sorted(expected), "shown": shown, "rows": rows, "unexpectedTan": unexpected,
+              "placeThresholdPt": round(MARKING_PLACE_SHARE * frame.head_width, 2)}
     result["pass"] = all(r["pass"] for r in rows.values()) and not unexpected and set(expected) <= set(shown)
     return result
+
+
+def sheet_patches(frame):
+    """Each marking's patch on the crop, as markings.py finds it on the sheet: the crop's tan region holding each
+    of the sighting's seeds (refmap/markings.json), in the crop's pixels and the sheet's own names."""
+    plan = json.loads((frame.folder / "refmap" / "markings.json").read_text())
+    entry = next((e for e in plan["evidence"] if e["panel"] == frame.rec["crop"]), None)
+    if entry is None:
+        return {}
+    x0, y0 = frame.rec["boxSheetPx"][:2]
+    area = markings.tan(frame.crop.copy())
+    found = {}
+    for name, places in entry["seeds"].items():
+        mask = np.zeros(area.shape, bool)
+        for where in places if isinstance(places, list) else [places]:
+            clip = [where["clip"][0] - x0, where["clip"][1] - y0, *where["clip"][2:]] if "clip" in where else None
+            region = markings.patch(area, [where["seed"][0] - x0, where["seed"][1] - y0], clip)
+            if region is not None:
+                mask |= region
+        found[name] = mask
+    return found
+
+
+def place(mine, sheet, frame):
+    """Whether a marking sits where the sheet's patch is, and is about its size (gating): the render's centroid
+    inside the sheet's patch and the patch's centroid inside the render's marking, each grown by 3% of the head's
+    width. A patch's holes (an eye inside a ring) count as inside it. The area ratio and the centroids' offset are
+    reported, never gating."""
+    if not sheet.any():
+        return {"problem": "the sheet's patch for this sighting was not found", "pass": False}
+    if not mine.any():
+        return {"problem": "the marking covers no crop pixel by half", "pass": False}
+    grow =MARKING_PLACE_SHARE * frame.head_width / frame.k
+
+    def near(mask):
+        return ndimage.distance_transform_edt(~ndimage.binary_fill_holes(mask)) <= grow
+
+    def holds(mask, xy):
+        x, y = int(round(xy[0])), int(round(xy[1]))
+        return bool(0 <= y < mask.shape[0] and 0 <= x < mask.shape[1] and mask[y, x])
+
+    ours, theirs = measure.centroid(mine), measure.centroid(sheet)
+    offset = [(ours[0] - theirs[0]) * frame.k, (ours[1] - theirs[1]) * frame.k]
+    if frame.mirrored:
+        offset[0] = -offset[0]
+    row = {"renderCentroidInSheetPatch": holds(near(sheet), ours), "sheetCentroidInRender": holds(near(mine), theirs),
+           "advisory": {"areaRatio": round(float(mine.sum() / sheet.sum()), 3), "centroidOffsetPt": round2(offset),
+                        "centroidDistancePt": round(float(np.hypot(*offset)), 2)}}
+    row["pass"] = row["renderCentroidInSheetPatch"] and row["sheetCentroidInRender"]
+    return row
 
 
 def held(frame, where):

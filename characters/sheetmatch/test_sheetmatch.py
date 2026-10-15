@@ -551,6 +551,53 @@ class PlantedTest(unittest.TestCase):
         self.assertEqual(problems, ["no light pixels in its box, so no level can be fitted"])
         self.assertIn("blush", result["failed"])
 
+    def test_a_marking_away_from_the_sheets_place_fails(self):
+        fixture = self.fixture()
+        ys, _ = np.nonzero(fixture.part == fixture.names.index("head.patch.L"))
+        fixture.move("head.patch.L", 0, int(np.ptp(ys)) + 2, "head.base")
+        result = self.run_still(fixture, "marking-moved")
+        row = result["markings"]["rows"]["head.patch.L"]
+        # What the check looked at before still holds: the right name, clipped to its host, shown.
+        self.assertTrue(row["clipped"] and row["shows"] and row["expected"])
+        self.assertEqual((row["place"]["renderCentroidInSheetPatch"], row["place"]["sheetCentroidInRender"]), (False, False))
+        self.assertGreater(row["place"]["advisory"]["centroidDistancePt"], 10)
+        self.assertIn("markings", result["failed"])
+        # Unmoved, every marking is where the sheet has it, at its size (less what the eyes cover in the fixture).
+        for name, row in self.run_still(self.fixture(), "marking-kept")["markings"]["rows"].items():
+            if row.get("shows"):
+                self.assertTrue(row["place"]["pass"], name)
+                self.assertAlmostEqual(row["place"]["advisory"]["areaRatio"], 1.0, delta=0.05, msg=name)
+                self.assertLess(row["place"]["advisory"]["centroidDistancePt"], 0.5, name)
+
+    def test_a_marking_far_smaller_than_the_sheets_fails(self):
+        fixture = self.fixture()
+        index = fixture.names.index("back.patch.R")
+        patch = fixture.part == index
+        ys, xs = np.nonzero(patch)
+        # Only a sliver at its outer edge is left: the sheet's centroid falls outside it.
+        sliver = patch & (np.arange(patch.shape[1])[None, :] < xs.min() + 4)
+        fixture.relabel("back.patch.R", "body.back", hexes(("palette", "fur")))
+        fixture.part[sliver] = index
+        fixture.rgb[sliver] = hexes(("palette", "marking"))
+        result = self.run_still(fixture, "marking-sliver")
+        row = result["markings"]["rows"]["back.patch.R"]
+        self.assertTrue(row["shows"])
+        self.assertFalse(row["place"]["sheetCentroidInRender"])
+        self.assertLess(row["place"]["advisory"]["areaRatio"], 0.5)
+        self.assertIn("markings", result["failed"])
+
+    def test_a_mirrored_facing_is_held_to_the_mirrored_patch_of_its_own_sides_marking(self):
+        fixture = self.fixture("threeQuarter.L")
+        fixture.right_side()
+        ys, _ = np.nonzero(fixture.part == fixture.names.index("back.patch.R"))
+        fixture.move("back.patch.R", 0, -(int(np.ptp(ys)) + 2), "body.back")
+        result = self.run_still(fixture, "right-moved", view="threeQuarter.R", mirror=True)
+        place = result["markings"]["rows"]["back.patch.R"]["place"]
+        self.assertFalse(place["pass"])
+        # Reported in the facing's own coordinates: moved up, so a negative y offset.
+        self.assertLess(place["advisory"]["centroidOffsetPt"][1], -5)
+        self.assertIn("markings", result["failed"])
+
     def test_a_silhouette_scaled_5_percent_fails(self):
         result = self.run_still(self.fixture(), "scaled", scale=1.05)
         self.assertIn("landmarks", result["failed"])
