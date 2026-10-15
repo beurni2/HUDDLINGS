@@ -52,8 +52,6 @@ export const C = {
   /** The outline warmed toward the tan, lighter than the full outline: the sheet's line round the ears, the
    * haunches and the paws (L* 57 to 66 there against the outline's 48). */
   warmLine: mix(outline, marking, 0.3),
-  /** Where a patch meets its ear, the sheet draws no outline: a line in the ear's own tan, a little deeper (DECISIONS 7). */
-  junction: mix(marking, outline, 0.25),
   /** The line the front turnaround draws where the head's side meets the ear: the ear's tan in its own deep shade
    * (the tan multiplied by itself, 12% darker), #A35C32 against the sheet's #9E5C2C. */
   earLine: darken(multiply(marking, marking), 0.12),

@@ -229,8 +229,8 @@ const patches = {
 const earTips = {
   R: smooth([[-50, -135], [-46.4, -132.6], [-41.2, -133.4], [-36.8, -134.2], [-34.4, -133.4], [-36.8, -131.2], [-39.4, -128], [-41, -124.4], [-42.6, -121],
     [-44.4, -117.6], [-46, -114.4], [-50.4, -112]]),
-  L: smooth([[46, -140.4], [42.2, -137.6], [38, -138.4], [34, -138.8], [31, -137.6], [31.4, -134], [32.8, -130.8], [34.6, -127.8], [36.8, -125.2], [38.8, -122.6],
-    [40.8, -119.8], [42.6, -116.8], [44.4, -113.8], [50.4, -112], [50.6, -136]]),
+  L: smooth([[46, -140.4], [42.2, -137.6], [38, -138.4], [34, -138.8], [31, -137.6], [30.4, -133.6], [30.6, -129], [31.4, -124.6], [32.8, -120.6], [35.6, -118.4],
+    [39.4, -117.4], [42.4, -115.6], [44.2, -113.6], [50.4, -112], [50.6, -136]]),
 };
 // The saddle's two halves where they show from the front: the right half down
 // the right haunch's outer side, the left half's tip at the top of the left haunch.
@@ -276,15 +276,15 @@ const headLine: Outline = { ...OUTLINE, taper: 5, spans: [
   { from: [-46.5, -113], to: [-46.4, -92], width: THIN, colour: C.earLine },
   { from: [-46.2, -92], to: [-35, -64.6], width: THIN, colour: C.fluffLine },
   { from: [-30, -63.4], to: [30, -63.4], width: THIN, colour: C.fluffLine },
-  { from: [35, -64.6], to: [46.2, -92], width: THIN, colour: C.fluffLine },
-  { from: [46.4, -92], to: [46.5, -113], width: THIN, colour: C.earLine },
-  { from: [46.3, -116], to: [45.6, -131.6], width: THIN, colour: C.marking },
+  { from: [35, -64.6], to: [45.2, -92], width: THIN, colour: C.fluffLine },
+  { from: [44.4, -93], to: [44.5, -113], width: THIN, colour: C.earLine },
+  { from: [44.6, -116], to: [45.6, -131.6], width: THIN, colour: C.marking },
   { from: [44, -137], to: [17, -150.8], width: THIN, colour: C.fluffLine },
 ].map((span) => ({ ...span, from: cheekRoll(span.from as P), to: cheekRoll(span.to as P) })) };
 
 /** Where each ear's tan tip melts into the head, the sheet draws the ear's inner edge on across it, down to the head's side. */
 const earTipEdges: P[][] = [[[-38.4, -128.6], [-40.6, -124.6], [-42.8, -120.6], [-44.8, -116.2], [-46.3, -112.4]],
-  [[37.4, -131], [40, -126], [42.6, -121], [44.4, -117], [45.8, -112.4]]];
+  [[37.4, -131], [39.8, -126], [41.8, -121], [43.2, -117], [44.3, -112.4]]];
 
 /** head.line: the head's outline as its own unclipped region, drawn after the head's clip group, reaching 0.5 pt past the head. */
 function headLinePiece(): Piece {
@@ -370,14 +370,14 @@ function mouth(): Piece {
   const clip = uid("mouth");
   // Each half of the upper lip, from the peak along the opening's top to the corner, then up into the hook.
   const top = sample([[[0, 13.2], [2.8, 14.8], [6.4, 16.2], [9.4, 16.4]]], 10, false);
-  const upper = (sx: number): P[] => ([...top, [11.2, 16.1], [12.4, 15.3], [13.2, 14.5]] as P[]).map(([x, y]): P => [sx * x, y]);
+  const upper = (sx: number): P[] => ([...top, [11.4, 16.2], [12.6, 15.6], [13.4, 14.8]] as P[]).map(([x, y]): P => [sx * x, y]);
   const lips = [upper(-1), upper(1)].map((pts) => tapered(pts, 1.2, "outer", "upper lip", { taper: 2.6, tip: 0.5 }));
   // The opening's own edge, down each side and round the bottom, dark and soft.
   const edge = sample([[[-9.4, 16.4], [-10, 22.6], [-6.8, 29], [0, 29.2]], [[0, 29.2], [6.8, 29], [10, 22.6], [9.4, 16.4]]], 10, false);
   const lower = tapered(edge, 0.75, "inner", "lower lip", { taper: 5, tip: 0.2 });
   const philtrum = innerLine([[0, 10.9], [0, 13.4]], 0.9, C.dark, { taper: 1, tip: 0.6, wobble: 0 });
   const svg = `<defs><clipPath id="${clip}"><path d="${m}"/></clipPath></defs>` +
-    `<path d="${m}" fill="${C.mouthInside}"/><g clip-path="url(#${clip})"><path d="M-10.4 24.2 C-7.4 20.9 -3.8 19.8 0 19.8 C3.8 19.8 7.4 20.9 10.4 24.2 L10.4 31 L-10.4 31Z" fill="${C.tongue}"/>` +
+    `<path d="${m}" fill="${C.mouthInside}"/><g clip-path="url(#${clip})"><path d="M-10.4 23.6 C-7.4 20.4 -3.8 19.3 0 19.3 C3.8 19.3 7.4 20.4 10.4 23.6 L10.4 31 L-10.4 31Z" fill="${C.tongue}"/>` +
     `<ellipse cx="-3" cy="23.2" rx="2.2" ry="1.1" fill="${C.tongueShine}" opacity="0.55"/></g>` +
     `<path d="${lower.d}" fill="${C.dark}" opacity="0.55"/>${lips.map((l) => `<path d="${l.d}" fill="${C.dark}"/>`).join("")}${philtrum.svg}`;
   return piece(inFace(svg), faceBox([-15, 10, 30, 21]), { shapes: [], lines: [...lips.map((l) => l.line), lower.line, { ...philtrum.line, where: "philtrum" }] });
