@@ -111,7 +111,7 @@ const chest = symmetric([[0, -66], [-16, -65.4], [-25.6, -63.2], [-30, -59.6], [
 // hind paw still shows outside it. Its sole is three soft toes, a small scallop
 // at each toe line (concave notches, so no corner rule applies).
 const legR: Node[] = [[-6.4, -33], [-3.6, -25.4], [-2.3, -19], [-1.8, -13.4], [-1.3, -9], [-1.5, -5.6], [-3.1, -2], [-6.4, -0.6], [-11, -1.2], [-15.5, -0.1],
-  [-20, -1.2], [-24.6, -0.5], [-28.4, -2.4], [-30.6, -6], [-31.2, -9.6], [-30.8, -13.4], [-32.2, -18.4], [-33.8, -24.4], [-34.4, -31], [-34.6, -40],
+  [-20, -1.2], [-24.6, -0.5], [-28.6, -2.2], [-31.2, -5.6], [-31.9, -9.2], [-30.8, -13.6], [-32.2, -18.4], [-33.8, -24.4], [-34.4, -31], [-34.6, -40],
   [-34.4, -46.4], [-26, -44], [-15, -40]];
 /** The scallops' notches in the sole. */
 const TOES = [8, 10];
@@ -744,13 +744,13 @@ export function front(): Drawn[] {
       under: `<defs><linearGradient id="${fade}" gradientUnits="userSpaceOnUse" x1="0" y1="${top}" x2="0" y2="-14">` +
         `<stop offset="0" stop-color="${C.softLine}"/><stop offset="1" stop-color="${C.warmLine}"/></linearGradient></defs>`,
       // Two toe lines rising from the sole's scallops about 5 pt up the paw (38% of it), bowing apart a little.
-      inner: [[[-20, -1.5], [-20.4, -3.6], [-20.1, -5.7]], [[-11, -1.6], [-10.6, -3.7], [-10.9, -5.8]]].map((pts) => ({ pts: flipX(pts as P[], side), width: INNER, colour: C.warmLine, opacity: 0.7 })),
+      inner: [[[-20, -1.5], [-20.5, -3.8], [-20.1, -6.1]], [[-11, -1.6], [-10.5, -3.9], [-10.9, -6.2]]].map((pts) => ({ pts: flipX(pts as P[], side), width: 0.8, colour: C.warmLine, opacity: 0.85 })),
       // Faint lines down the V where the leg lies over the chest's tan, as the sheet draws them (about luminance 180
       // against the outline's 120); and one warm line round the paw and on up the leg's outer side, fading out well
       // below the chest.
       outline: { ...OUTLINE, taper: 5, spans: bySide(side, [
         { from: [-4.8, -28.2], to: [-1.7, -12], width: THIN, colour: C.fluffLine },
-        { from: [-1.4, -10.6], to: [-34.2, top], width: 1.5, colour: `url(#${fade})` },
+        { from: [-1.4, -10.6], to: [-34.2, top], width: 1.35, colour: `url(#${fade})` },
       ]) },
       feather: { from: [sx * 20, -41.6], to: [sx * 22.4, -35.2] },
     }));
