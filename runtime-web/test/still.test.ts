@@ -6,7 +6,7 @@
 // CPU straight from the atlas page, for every part drawn unrotated on whole pixels.
 import { after, before, test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { PNG } from "pngjs";
@@ -234,6 +234,41 @@ test("the same still renders the same bytes again, after another still", async (
 test("a clip that does not set both views is not a still", async () => {
   await assert.rejects(stills.render("idle", join(dir, "idle")), /idle must set both the body and the head view/);
   await assert.rejects(stills.render("still_back", join(dir, "back")), /no clip still_back/);
+});
+
+/** Loads another package in the same page for the length of a test, then the test's own again. */
+async function withPackage(other: typeof pkg, ppp: number, run: () => Promise<void>): Promise<void> {
+  writePackage(other, join(dir, "package"));
+  try {
+    await stills.load(ppp);
+    await run();
+  } finally {
+    writePackage(pkg, join(dir, "package"));
+    await stills.load(PPP);
+  }
+}
+
+test("a pass that fails leaves the still's folder as it was, and no half-written folder beside it", async () => {
+  // Two parts sharing a region build, but the ID pass refuses them: the third pass fails after white and black.
+  const left = source.rig.parts.find((p) => p.name === "eye.L")!;
+  const parts = source.rig.parts.map((p) => (p.name === "eye.R" ? { ...p, regions: { ...p.regions, "front:open": left.regions["front:open"]! } } : p));
+  const shared = await buildPackage({ ...source, clips: [...source.clips, still("still_front", "front")], rig: { ...source.rig, parts }, drawings: source.drawings.filter((d) => d.region !== "eye.R/front:open") });
+  const out = join(dir, "kept");
+  await stills.render("still_front", out);
+  const before = new Map(readdirSync(out).map((name) => [name, readFileSync(join(out, name))]));
+  await withPackage(shared, PPP, async () => {
+    await assert.rejects(stills.render("still_front", out), /region eye\.L\/front:open belongs to both eye\.L and eye\.R/);
+  });
+  assert.deepEqual(readdirSync(out).sort(), [...before.keys()].sort());
+  for (const [name, bytes] of before) assert.ok(readFileSync(join(out, name)).equals(bytes), `${name} changed`);
+  assert.deepEqual(readdirSync(dir).filter((name) => name.includes("partial")), []);
+});
+
+test("a canvas Chromium will not give at full size fails instead of drawing the still smaller", async () => {
+  await withPackage(pkg, 60, async () => {
+    await assert.rejects(stills.render("still_front", join(dir, "huge")), /Chromium gave the canvas \d+ × \d+ px, not the \d+ × \d+ px the still needs/);
+  });
+  assert.ok(!existsSync(join(dir, "huge")));
 });
 
 test("the ID pages keep each region's texels from alpha 0.5 up, its ring included, and nothing else", () => {

@@ -6,11 +6,12 @@
 // - ids.png: each part in its own flat ID colour wherever its alpha is 0.5 or
 //   more, still clipped by its mask, on black (ids.ts).
 // Model point (x, y) is at pixel rootPx + ppp·(x, y), pixel (i, j) covering
-// [i, i + 1) × [j, j + 1).
+// [i, i + 1) × [j, j + 1). The folder is replaced whole, and only once every
+// file is written; a canvas Chromium will not give at full size fails.
 //
 // node runtime-web/lab/still.ts --species <s> --still <clip> --ppp <n> --out <folder>
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
+import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import { PNG } from "pngjs";
@@ -36,7 +37,7 @@ export interface StillInfo {
 export interface Stills {
   /** Loads the package, again after every build, for stills at ppp pixels per point; returns the atlas set they draw from. */
   load(ppp: number): Promise<string>;
-  /** Renders a still of the loaded package into a folder: white.png, black.png, ids.png and still.json. */
+  /** Renders a still of the loaded package into a folder, replaced whole once all are written: white.png, black.png, ids.png and still.json. */
   render(still: string, out: string): Promise<StillInfo>;
   /** The GPU Chromium draws with, so a still never passes on a missing device. */
   device(): Promise<string>;
@@ -78,20 +79,33 @@ export async function openStills(packageDir: string): Promise<Stills> {
       const width = Math.ceil((x1 + MARGIN) * ppp) - left;
       const height = Math.ceil((y1 + MARGIN) * ppp) - top;
       const stage = { x: -left, y: -top, pixelsPerPoint: ppp };
-      mkdirSync(out, { recursive: true });
-      const passes = [["white", [1, 1, 1], false], ["black", [0, 0, 0], false], ["ids", [0, 0, 0], true]] as const;
-      for (const [name, background, ids] of passes) {
-        const rgba = await page.evaluate((o) => window.lab.drawStill(o), { width, height, stage, background: [...background] as [number, number, number], ids });
-        const png = new PNG({ width, height });
-        Buffer.from(rgba, "base64").copy(png.data);
-        writeFileSync(join(out, `${name}.png`), PNG.sync.write(png));
+      // Every file is written into a folder beside out and moved into place only when all are: a pass that fails
+      // leaves out as it was, never half a still.
+      mkdirSync(dirname(out), { recursive: true });
+      const partial = mkdtempSync(join(dirname(out), `.${basename(out)}.partial-`));
+      try {
+        const passes = [["white", [1, 1, 1], false], ["black", [0, 0, 0], false], ["ids", [0, 0, 0], true]] as const;
+        for (const [name, background, ids] of passes) {
+          const rgba = await page.evaluate((o) => window.lab.drawStill(o), { width, height, stage, background: [...background] as [number, number, number], ids }).catch((e) => {
+            throw pageError(e);
+          });
+          const bytes = Buffer.from(rgba, "base64");
+          if (bytes.length !== width * height * 4) throw new Error(`the ${name} pass read back ${bytes.length} bytes, not the ${width * height * 4} of ${width} × ${height} px`);
+          const png = new PNG({ width, height });
+          bytes.copy(png.data);
+          writeFileSync(join(partial, `${name}.png`), PNG.sync.write(png));
+        }
+        const info: StillInfo = {
+          species, still, clip: still, views: posed.views, ppp,
+          sizePx: [width, height], rootPx: [stage.x, stage.y], parts: posed.parts, drawn: posed.drawn,
+        };
+        writeFileSync(join(partial, "still.json"), JSON.stringify(info, null, 1) + "\n");
+        rmSync(out, { recursive: true, force: true });
+        renameSync(partial, out);
+        return info;
+      } finally {
+        rmSync(partial, { recursive: true, force: true });
       }
-      const info: StillInfo = {
-        species, still, clip: still, views: posed.views, ppp,
-        sizePx: [width, height], rootPx: [stage.x, stage.y], parts: posed.parts, drawn: posed.drawn,
-      };
-      writeFileSync(join(out, "still.json"), JSON.stringify(info, null, 1) + "\n");
-      return info;
     },
     device: () => page.evaluate(() => window.lab.device()),
     close: () => lab.close(),
