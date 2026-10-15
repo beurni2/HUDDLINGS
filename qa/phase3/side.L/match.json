@@ -219,10 +219,10 @@
     "pass": true
    },
    "lowerIris": {
-    "dominant": "#3D2414",
+    "dominant": "#392213",
     "heldTo": "#3A2314",
     "heldBy": "palette.dark",
-    "deltaE2000": 0.97,
+    "deltaE2000": 0.31,
     "pixels": 70,
     "pass": true
    },
@@ -459,7 +459,7 @@
    "set": "3x",
    "pages": 1,
    "pageAreaPx": 4194304,
-   "allRegionsShare": 0.352,
+   "allRegionsShare": 0.351,
    "thisStillShare": 0.106
   }
  },

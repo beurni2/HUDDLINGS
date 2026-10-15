@@ -300,6 +300,7 @@ head = furEdge(furEdge(head, [-35.6, -145.1], [-38.6, -142.6], crownLocks, 0.26)
 // from behind the middle one and ending in a tip at (22.4, -152.6) that hooks back under itself; and in front the
 // middle curl, tall and round (its top at y -164.3, the head's highest point), whose right side turns in at its foot
 // and loops up inside itself. Each curl's hidden foot runs along under the crown, feathered into it.
+const TUFT_CREASE = uid("blur");
 const CURLS: Curl[] = [
   { nodes: [[-30.4, -150.2], [-29.6, -152.8], [-27, -155], [-22.8, -156.3], [-18.2, -156.4], [-14.4, -155.4], [-11.6, -153], [-9.4, -149.6], [-13, -146.6],
     [-22, -146.4], [-27.6, -148.4]],
@@ -309,6 +310,9 @@ const CURLS: Curl[] = [
   { nodes: [[-11.8, -152.6], [-10.4, -156.8], [-7.6, -160.6], [-3.6, -163.4], [0.4, -164.3], [3.4, -163.4], [5.2, -161], [5.8, -158], [4.8, -155.2], [2.4, -151],
     [-4, -147], [-10, -148]],
     line: { from: [-11.8, -152.6], to: [4.8, -155.2], taper: [2, 2.5] },
+    // A soft crease of the fur's tan down its lower middle, where the curl turns, as the sheet paints it.
+    under: `<defs>${blur(TUFT_CREASE, [-8, -162, 10, 16], 0.7)}</defs>` +
+      `<path d="${strokeOf([[-1.4, -158], [-2.6, -154], [-3.8, -150.4]], 1.8, { taper: 2.4, tip: 0.3 }).d}" fill="${C.marking}" opacity="0.3" filter="url(#${TUFT_CREASE})"/>`,
     hooks: [[[4.8, -155.2], [3.4, -154], [1.8, -154.2], [0.8, -155.6]]] },
 ];
 const tuftShapes = curlShapes(CURLS);

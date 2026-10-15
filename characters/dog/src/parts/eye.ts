@@ -100,8 +100,8 @@ export function eye(e: EyeSpec): Piece {
     // The iris: near-black, its lower third the held brown with the russet glow above its foot.
     `<path d="${g.opening}" fill="${C.eyeDark}"/>` +
     `<g clip-path="url(#${irisClip})"><g filter="url(#${band})"><path d="${g.irisD}" fill="${C.dark}" clip-path="url(#${bandClip})"/></g>` +
-    `<path d="${ell(glowAt, iris.a * 0.52, iris.b * 0.16)}" fill="${C.irisWarm}" opacity="0.85" filter="url(#${glow})"/>` +
-    `<path d="${ell(coreAt, iris.a * 0.3, iris.b * 0.08)}" fill="${C.irisLight}" opacity="0.7" filter="url(#${core})"/></g>` +
+    `<path d="${ell(glowAt, iris.a * 0.52, iris.b * 0.16)}" fill="${C.irisWarm}" opacity="1" filter="url(#${glow})"/>` +
+    `<path d="${ell(coreAt, iris.a * 0.34, iris.b * 0.09)}" fill="${C.irisLight}" opacity="0.9" filter="url(#${core})"/></g>` +
     // The white beside the iris, crisp along both its edges.
     `<g clip-path="url(#${whiteClip})" filter="url(#${crisp})"><path d="${g.opening}" fill="${C.eyeWhite}"/><path d="${g.opening}" fill="url(#${lidShade})"/></g></g>` +
     // One catchlight, high on the nose's side.

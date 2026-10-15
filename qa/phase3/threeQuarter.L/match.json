@@ -53,7 +53,7 @@
   "groundShadowLeftOut": true,
   "pass": true,
   "iouHeadAligned": 0.9694,
-  "headCentreOffsetPt": [-0.43, 0.03]
+  "headCentreOffsetPt": [-0.39, 0.02]
  },
  "landmarks": {
   "thresholdPt": 2.8,
@@ -239,7 +239,7 @@
     "heldTo": "#FFF4E8",
     "heldBy": "palette.fur",
     "deltaE2000": 0.0,
-    "pixels": 16916,
+    "pixels": 16907,
     "pass": true
    },
    "furShade": {
@@ -247,7 +247,7 @@
     "heldTo": "#FDE3C8",
     "heldBy": "palettePainted.furShade",
     "deltaE2000": 0.38,
-    "pixels": 2179,
+    "pixels": 2184,
     "pass": true
    },
    "eyes": {
@@ -263,7 +263,7 @@
     "heldTo": "#3A2314",
     "heldBy": "palette.dark",
     "deltaE2000": 1.15,
-    "pixels": 168,
+    "pixels": 169,
     "pass": true
    },
    "nose": {
@@ -414,7 +414,7 @@
    },
    "head.patch.L": {
     "part": "head.patch.L",
-    "shownPt2": 569.4,
+    "shownPt2": 568.1,
     "shows": true,
     "expected": true,
     "host": "head.base",
@@ -425,9 +425,9 @@
      "renderCentroidInSheetPatch": true,
      "sheetCentroidInRender": true,
      "advisory": {
-      "areaRatio": 0.877,
-      "centroidOffsetPt": [-0.52, 2.2],
-      "centroidDistancePt": 2.26
+      "areaRatio": 0.874,
+      "centroidOffsetPt": [-0.55, 2.25],
+      "centroidDistancePt": 2.32
      },
      "pass": true
     }
@@ -532,7 +532,7 @@
    "set": "3x",
    "pages": 1,
    "pageAreaPx": 4194304,
-   "allRegionsShare": 0.352,
+   "allRegionsShare": 0.351,
    "thisStillShare": 0.121
   }
  },

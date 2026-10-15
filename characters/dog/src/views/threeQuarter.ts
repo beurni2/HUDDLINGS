@@ -299,7 +299,7 @@ function headLinePiece(): Piece {
   // Where the crown's fur meets each ear's root with no line, the sheet's edge is soft: the crown's cream lies out
   // over the root's tan in a feathered edge.
   const s = uid("blur");
-  const roots: [P, P][] = [[[-1.2, -135.4], [-20.4, -128]]];
+  const roots: [P, P][] = [[[-1.2, -135.4], [-20.4, -128]], [[-20.6, -127.4], [-15.6, -117.4]]];
   const feathered = roots.map(([a, b]) => strokeOf(spanPoints(head, ...([fracAt(head, a), fracAt(head, b)].sort((p, q) => p - q) as [number, number])), 2.4, { taper: 3, tip: 0.4 }).d).join("");
   return piece(`<defs>${r.defs}${c.defs}${blur(s, pad(box, 2), 0.8)}</defs>` +
     `<path d="${feathered}" fill="${C.fur}" opacity="0.75" filter="url(#${s})"/>${r.body}${c.body}`, box, {
