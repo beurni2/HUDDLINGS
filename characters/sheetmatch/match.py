@@ -7,12 +7,13 @@ alike.
 
 Reads the still that runtime-web/lab/still.ts writes (still.json, white.png,
 black.png, ids.png), characters/<species>/model.json and ref/, and the
-source's landmarks (default build/characters/<species>/dev/landmarks.json):
+source's landmarks (default build/dev/<species>/landmarks.json, from the build):
 the points the sheet has no finder for (paws, tag ring, seat). Writes
 <out>/match.json (every check, its numbers, its threshold, its verdict),
 compare.png (crop | render | outlines and landmarks | onion skin) and
 phone.png (the render at 3x, 164 pt tall, beside the crop at the same size).
-Exits 1 when a gating check fails, 2 when the inputs are unusable.
+Exits 0 when every gating check passes, 1 when one fails, and 2 on any error
+at all (unusable inputs, a crash, even in an import), leaving no match.json.
 
 The render is area-averaged onto the crop's own pixel grid (ptPerCropPx) with
 model point (0, 0) on the crop's ground anchor, and is never moved to fit:
@@ -27,17 +28,30 @@ region (each against its own value, docs/QUESTIONS.md Q24), the blush as a
 level (Q25) and the markings. Advisory, never pass or fail: edge distances,
 IoU per part where the sheet gives the part, and the atlas share. The numbers
 are guard rails: the comparison images are looked at every time."""
-import argparse
-import fnmatch
-import json
+import os
 import sys
-from pathlib import Path
+import traceback
 
-import numpy as np
-from PIL import Image, ImageDraw
-from scipy import ndimage
+if __name__ == "__main__":
+    def crashed(kind, value, trace):
+        """Any error, from the imports on, exits 2: an uncaught exception's own 1 would read as failed checks."""
+        traceback.print_exception(kind, value, trace)
+        sys.stderr.flush()
+        os._exit(2)
+
+    sys.excepthook = crashed
+
+import argparse  # noqa: E402
+import fnmatch  # noqa: E402
+import json  # noqa: E402
+from pathlib import Path  # noqa: E402
+
+import numpy as np  # noqa: E402
+from PIL import Image, ImageDraw  # noqa: E402
+from scipy import ndimage  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "refprep"))
+import markings  # noqa: E402
 import measure  # noqa: E402
 import palette  # noqa: E402
 import sheets  # noqa: E402
@@ -51,8 +65,10 @@ ID_TOLERANCE = 6.0  # RGB distance: an ID colour a renderer's filtering moved sl
 SHOWN_PT2 = 4.0  # a marking part shows when this much of it is in view
 BAKED_MIN_PX = 20  # crop px: tan smaller than this on a host part is a speck, not a marking
 MATCH_RADIUS_SHARE = 0.2  # of the head's width: how near a marking painted into its part must be to the sheet's
+MARKING_PLACE_SHARE = 0.03  # of the head's width (L523's 3%): how far each patch is grown to hold the other's centroid
 EDGE_P95_PT = 2.0  # advisory target for the edge distance
 PART_IOU = 0.85  # advisory target for each part the sheet's finders give
+COVERAGE = 0.5  # a crop pixel is in the silhouette, or a part's, when this much of it is covered
 PHONE_PPP = 3
 ZOOM = 3
 CARD = (251, 245, 236)  # a light card for areas outside the crop
@@ -80,6 +96,7 @@ REGIONS = {
     "tag": (("tag*",), ("palette", "tag")),
 }
 BLUSH_PARTS = ("blush*",)
+BLUSH_MIN_PX = 6  # crop px: a blush part covering less is a speck, not a cheek
 # The part each source landmark must lie on: the spec's part names, then the art prototype's.
 SOURCE_PARTS = {
     "paw.front.L": ("front.L", "paw.front.L"), "paw.front.R": ("front.R", "paw.front.R"),
@@ -258,9 +275,9 @@ class Render:
         over = premult + (1 - self.alpha[..., None]) * (frame.card / 255)
         self.rgb = np.clip(np.round(over * 255), 0, 255).astype(np.uint8)
         shadow = self.coverage.get(GROUND_SHADOW, np.zeros(grid.shape))
-        self.sil = (self.alpha >= 0.5) & (shadow < 0.5)
+        self.sil = (self.alpha >= COVERAGE) & (shadow < COVERAGE)
 
-    def mask(self, names, threshold=0.5):
+    def mask(self, names, threshold=COVERAGE):
         """Where the named parts together cover at least threshold of a pixel."""
         total = np.zeros(self.alpha.shape)
         for name in names:
@@ -295,6 +312,22 @@ def best_shift(sil, sheet):
     fx = vertex(scores[iy, ix - 1], scores[iy, ix], scores[iy, ix + 1]) if 0 < ix < 2 * r else 0.0
     fy = vertex(scores[iy - 1, ix], scores[iy, ix], scores[iy + 1, ix]) if 0 < iy < 2 * r else 0.0
     return [ix - r + fx, iy - r + fy], float(scores[iy, ix])
+
+
+def thresholds(frame):
+    """Every threshold the checks use, as match.json records them."""
+    return {"silhouetteIoUMin": IOU_MIN[frame.kind], "coverage": COVERAGE, "shiftMaxPx": SHIFT_MAX_PX, "shiftSearchPx": SHIFT_SEARCH_PX,
+            "landmarkShareOfHead": LANDMARK_SHARE, "landmarkPt": round(LANDMARK_SHARE * frame.head_width, 2), "deltaE2000Max": DELTA_E_MAX,
+            "idTolerance": ID_TOLERANCE, "blushRestingSpread": frame.model["blush"]["restingSpread"], "blushMinPx": BLUSH_MIN_PX,
+            "shownPt2": SHOWN_PT2, "bakedMinPx": BAKED_MIN_PX, "matchRadiusShareOfHead": MATCH_RADIUS_SHARE,
+            "markingPlaceShareOfHead": MARKING_PLACE_SHARE, "edgeP95Pt": EDGE_P95_PT, "partIoU": PART_IOU}
+
+
+def repo_path(path):
+    """A path as match.json records it: from the repository's root when inside it, so evidence never names a
+    machine's folders."""
+    path = Path(path).resolve()
+    return path.relative_to(sheets.ROOT).as_posix() if path.is_relative_to(sheets.ROOT) else str(path)
 
 
 def round2(values):
@@ -428,29 +461,91 @@ def check_markings(frame, grid, render, still):
     # marking near it is one the facing should not show (a plain mirror shows the left side's on the right).
     radius = MATCH_RADIUS_SHARE * frame.head_width / frame.k
     unexpected = []
+    drawn = {n: render.mask([n]) for n in rows if n in still.names}
     for host in sorted(set(hosts.values())):
         wanted = painted.get(host, [])
         if host not in still.names:
             rows.update({n: {"host": host, "problem": "its host part is not drawn", "pass": False} for n in wanted})
             continue
         sheet_at = {n: np.array(expected[n]["centroidPx"]) + [grid.left, grid.top] for n in wanted}
-        tan = {n: 0 for n in wanted}
+        tan = {n: np.zeros(render.sil.shape, bool) for n in wanted}
         for blob in baked_tan(render, frame, render.mask([host])):
             centre = np.array(measure.centroid(blob))
             near = min(((float(np.hypot(*(centre - xy))), n) for n, xy in sheet_at.items()), default=None)
             if near is not None and near[0] <= radius:
-                tan[near[1]] += int(blob.sum())
+                tan[near[1]] |= blob
             else:
                 unexpected.append({"host": host, "centrePt": round2(grid.to_pt(centre)), "px": int(blob.sum())})
-        rows.update({n: {"host": host, "paintedIntoHost": True, "tanPx": px, "shows": px > 0, "expected": True,
-                         "pass": px > 0} for n, px in tan.items()})
+        rows.update({n: {"host": host, "paintedIntoHost": True, "tanPx": int(px.sum()), "shows": bool(px.any()), "expected": True,
+                         "pass": bool(px.any())} for n, px in tan.items()})
+        drawn.update(tan)
+    # Each marking the facing shows is where the sheet has it, and about its size: its centroid inside the sheet's
+    # patch for this sighting, and the patch's centroid inside it, each grown by 3% of the head's width.
+    patches = sheet_patches(frame)
+    for name, row in rows.items():
+        if row.get("expected") and row.get("shows"):
+            # In the frame the sheet names a mirrored facing's marking from its own side (a plain mirror of the .L
+            # crop): back.patch.R is held to the patch the sheet calls back.patch.L, mirrored.
+            row["place"] = place(drawn[name], grid.pad(patches.get(frame.to_still_name(name), np.zeros(frame.sil.shape, bool)), False), frame)
+            row["pass"] = row["pass"] and row["place"]["pass"]
     if frame.mirrored:
         for item in unexpected:
             item["centrePt"][0] = -item["centrePt"][0]
     shown = sorted(n for n, r in rows.items() if r.get("shows"))
-    result = {"expected": sorted(expected), "shown": shown, "rows": rows, "unexpectedTan": unexpected}
+    result = {"expected": sorted(expected), "shown": shown, "rows": rows, "unexpectedTan": unexpected,
+              "placeThresholdPt": round(MARKING_PLACE_SHARE * frame.head_width, 2)}
     result["pass"] = all(r["pass"] for r in rows.values()) and not unexpected and set(expected) <= set(shown)
     return result
+
+
+def sheet_patches(frame):
+    """Each marking's patch on the crop, as markings.py finds it on the sheet: the crop's tan region holding each
+    of the sighting's seeds (refmap/markings.json), in the crop's pixels and the sheet's own names."""
+    plan = json.loads((frame.folder / "refmap" / "markings.json").read_text())
+    entry = next((e for e in plan["evidence"] if e["panel"] == frame.rec["crop"]), None)
+    if entry is None:
+        return {}
+    x0, y0 = frame.rec["boxSheetPx"][:2]
+    area = markings.tan(frame.crop.copy())
+    found = {}
+    for name, places in entry["seeds"].items():
+        mask = np.zeros(area.shape, bool)
+        for where in places if isinstance(places, list) else [places]:
+            clip = [where["clip"][0] - x0, where["clip"][1] - y0, *where["clip"][2:]] if "clip" in where else None
+            region = markings.patch(area, [where["seed"][0] - x0, where["seed"][1] - y0], clip)
+            if region is not None:
+                mask |= region
+        found[name] = mask
+    return found
+
+
+def place(mine, sheet, frame):
+    """Whether a marking sits where the sheet's patch is, and is about its size (gating): the render's centroid
+    inside the sheet's patch and the patch's centroid inside the render's marking, each grown by 3% of the head's
+    width. A patch's holes (an eye inside a ring) count as inside it. The area ratio and the centroids' offset are
+    reported, never gating."""
+    if not sheet.any():
+        return {"problem": "the sheet's patch for this sighting was not found", "pass": False}
+    if not mine.any():
+        return {"problem": "the marking covers no crop pixel by half", "pass": False}
+    grow =MARKING_PLACE_SHARE * frame.head_width / frame.k
+
+    def near(mask):
+        return ndimage.distance_transform_edt(~ndimage.binary_fill_holes(mask)) <= grow
+
+    def holds(mask, xy):
+        x, y = int(round(xy[0])), int(round(xy[1]))
+        return bool(0 <= y < mask.shape[0] and 0 <= x < mask.shape[1] and mask[y, x])
+
+    ours, theirs = measure.centroid(mine), measure.centroid(sheet)
+    offset = [(ours[0] - theirs[0]) * frame.k, (ours[1] - theirs[1]) * frame.k]
+    if frame.mirrored:
+        offset[0] = -offset[0]
+    row = {"renderCentroidInSheetPatch": holds(near(sheet), ours), "sheetCentroidInRender": holds(near(mine), theirs),
+           "advisory": {"areaRatio": round(float(mine.sum() / sheet.sum()), 3), "centroidOffsetPt": round2(offset),
+                        "centroidDistancePt": round(float(np.hypot(*offset)), 2)}}
+    row["pass"] = row["renderCentroidInSheetPatch"] and row["sheetCentroidInRender"]
+    return row
 
 
 def held(frame, where):
@@ -528,26 +623,35 @@ def check_palette(frame, render, still):
 def check_blush(frame, render, still):
     """The blush as a level (Q25): each cheek fitted as palette.py fits the sheet's, in a box around the blush part,
     within the sheet's resting spread; and the blush part's own colour, the cheek carried along the fitted blend
-    from the fur to full strength, within ΔE2000 3 of the printed pink."""
+    from the fur to full strength, within ΔE2000 3 of the printed pink. As many cheeks blush as the sheet's crop
+    shows (phase 2's blush boxes for it, refmap/palette.json)."""
     fur_hex, pink_hex = frame.model["palette"]["fur"], frame.model["palette"]["blush"]
     lo, hi = frame.model["blush"]["restingSpread"]
     fur, pink = sheets.hex_to_rgb(fur_hex).astype(float), sheets.hex_to_rgb(pink_hex).astype(float)
     cheeks = []
     names, mask = masks_for(render, still, BLUSH_PARTS)
-    for blob in measure.components(mask, 6):
+    for blob in measure.components(mask, BLUSH_MIN_PX):
         ys, xs = np.nonzero(blob)
         box = render.rgb[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
+        centre = round2(measure.centroid(blob))
+        # palette.blush fits the box's light pixels (L* over 70, chroma under 30); a box with none has no level.
+        lab = sheets.to_lab(box.reshape(-1, 3))
+        if not ((lab[:, 0] > 70) & (np.hypot(lab[:, 1], lab[:, 2]) < 30)).any():
+            cheeks.append({"centrePx": centre, "problem": "no light pixels in its box, so no level can be fitted", "pass": False})
+            continue
         level, peak = palette.blush(box, fur_hex, pink_hex)
         core = fur + (peak - fur) / level if level > 0.05 else peak
         de = palette.delta(np.clip(core, 0, 255), pink_hex)
-        cheeks.append({"centrePx": round2(measure.centroid(blob)), "level": round(level, 3), "peak": sheets.rgb_to_hex(peak),
+        cheeks.append({"centrePx": centre, "level": round(level, 3), "peak": sheets.rgb_to_hex(peak),
                        "coreColour": sheets.rgb_to_hex(np.clip(core, 0, 255)), "coreDeltaE2000": round(de, 2),
                        "pass": lo <= level <= hi and de <= DELTA_E_MAX})
     plan = json.loads((frame.folder / "refmap" / "palette.json").read_text())
-    wanted = any(b["panel"] == frame.rec["crop"] for b in plan["blush"])
+    boxes = [b for b in plan["blush"] if b["panel"] == frame.rec["crop"]]
     result = {"parts": names, "restingSpread": [lo, hi], "heldTo": pink_hex, "thresholdDeltaE2000": DELTA_E_MAX,
-              "cheeks": cheeks, "sheetShowsBlush": wanted}
-    result["pass"] = all(c["pass"] for c in cheeks) and (bool(cheeks) or not wanted)
+              "cheeks": cheeks, "sheetShowsBlush": bool(boxes), "sheetCheeks": len(boxes)}
+    if len(cheeks) < len(boxes):
+        result["problem"] = f"{len(cheeks)} cheek{'' if len(cheeks) == 1 else 's'} blush; the sheet shows {len(boxes)}"
+    result["pass"] = all(c["pass"] for c in cheeks) and len(cheeks) >= len(boxes)
     return result
 
 
@@ -593,18 +697,23 @@ def part_ious(frame, grid, render, still):
     return out
 
 
-def atlas_share(species, still, views):
-    """The share of the 3x atlas pages the still's drawn parts take in its views (the 48 MB budget, section 5b)."""
-    path = sheets.ROOT / "build" / "characters" / species / "atlas.json"
+def atlas_share(species, still, views, path=None):
+    """The share of the 3x atlas pages the still's drawn parts take in its views (the 48 MB budget, section 5b),
+    every state of a part's view included (eye.L/front:open and eye.L/front:closed are both the front's)."""
+    path = Path(path) if path else sheets.ROOT / "build" / "characters" / species / "atlas.json"
     if not path.exists():
-        return {"note": f"no package at {path.parent}"}
+        return {"note": f"no package at {repo_path(path.parent)}"}
     sets = {s["name"]: s for s in json.loads(path.read_text())["sets"]}
     chosen = sets.get("3x") or max(sets.values(), key=lambda s: s["scale"])
     pages = sum(p["width"] * p["height"] for p in chosen["pages"])
     regions = chosen["regions"]
     drawn = {n for n in still.drawn}
-    mine = sum(r["w"] * r["h"] for key, r in regions.items()
-               if key.split("/")[0] in drawn and len(key.split("/")) > 1 and key.split("/")[1] in views)
+
+    def in_view(key):
+        part, _, view = key.partition("/")
+        return part in drawn and view.split(":")[0] in views
+
+    mine = sum(r["w"] * r["h"] for key, r in regions.items() if in_view(key))
     total = sum(r["w"] * r["h"] for r in regions.values())
     return {"set": chosen["name"], "pages": len(chosen["pages"]), "pageAreaPx": pages,
             "allRegionsShare": round(total / pages, 3), "thisStillShare": round(mine / pages, 3)}
@@ -619,7 +728,7 @@ def match(species, still_dir, landmarks_path=None):
         raise ValueError(f"the still's body is in {views['body']} and its head in {views['head']}: the turnaround draws one view")
     frame = Frame(species, model, views["body"])
     source = {}
-    path = Path(landmarks_path) if landmarks_path else sheets.ROOT / "build" / "characters" / species / "dev" / "landmarks.json"
+    path = Path(landmarks_path) if landmarks_path else sheets.ROOT / "build" / "dev" / species / "landmarks.json"
     if path.exists():
         given = json.loads(path.read_text()).get(frame.view, {})
         source = {frame.to_still_name(n): frame.to_frame_point(xy) for n, xy in given.items()}
@@ -629,7 +738,7 @@ def match(species, still_dir, landmarks_path=None):
     sheet = grid.pad(frame.sil, False)
     result = {"species": species, "still": {k: still.meta.get(k) for k in ("still", "clip", "views", "ppp", "sizePx", "rootPx")},
               "view": frame.view, "crop": frame.rec["crop"], "mirroredFrom": frame.source if frame.mirrored else None,
-              "ptPerCropPx": frame.k, "landmarkSource": str(path) if source else None}
+              "ptPerCropPx": frame.k, "landmarkSource": repo_path(path) if source else None, "thresholds": thresholds(frame)}
 
     score = iou(render.sil, sheet)
     shift, shifted_iou = best_shift(render.sil, sheet)
@@ -736,7 +845,9 @@ def compare_image(result, parts, path):
                  f"within {lm['thresholdPt']} pt" + (f"; {lm['error']}" if "error" in lm else ""))
     pal = result["palette"]["rows"]
     lines.append("palette: " + ", ".join(f"{k} {v.get('deltaE2000', 'missing')}" + ("" if v["pass"] else " FAIL") for k, v in pal.items()))
-    lines.append("blush: " + (", ".join(f"{c['level']:.0%} core dE {c['coreDeltaE2000']}" for c in result["blush"]["cheeks"]) or "none")
+    blush = result["blush"]
+    lines.append("blush: " + (", ".join(f"{c['level']:.0%} core dE {c['coreDeltaE2000']}" if "level" in c else c["problem"] for c in blush["cheeks"]) or "none")
+                 + (f" ({blush['problem']})" if "problem" in blush else "")
                  + f"; markings shown {result['markings']['shown']} expected {result['markings']['expected']}")
     strip = Image.new("RGB", (image.width, 16 * len(lines) + 6), "white")
     sd = ImageDraw.Draw(strip)
@@ -791,15 +902,24 @@ def main(argv):
     parser.add_argument("--out", required=True)
     parser.add_argument("--landmarks")
     args = parser.parse_args(argv)
-    try:
-        result, parts = match(args.species, args.still, args.landmarks)
-    except (OSError, ValueError, KeyError) as error:
-        print(f"match: {type(error).__name__}: {error}", file=sys.stderr)
-        return 2
     out = Path(args.out)
-    sheets.write_json(out / "match.json", result)
-    compare_image(result, parts, out / "compare.png")
-    phone_image(parts, out / "phone.png")
+    written = out / "match.json"
+    try:
+        # An old verdict never stays beside a run that errs.
+        written.unlink(missing_ok=True)
+        if args.landmarks and not Path(args.landmarks).is_file():
+            raise FileNotFoundError(f"--landmarks {args.landmarks} is not a file")
+        result, parts = match(args.species, args.still, args.landmarks)
+        out.mkdir(parents=True, exist_ok=True)
+        compare_image(result, parts, out / "compare.png")
+        phone_image(parts, out / "phone.png")
+        # Written last: a match.json is always a whole run's.
+        sheets.write_json(written, result)
+    except Exception as error:  # any error is exit 2, never a failed gate's 1
+        traceback.print_exc()
+        print(f"match: {type(error).__name__}: {error}", file=sys.stderr)
+        written.unlink(missing_ok=True)
+        return 2
     print(f"match: {verdict(result)}; IoU {result['silhouette']['iou']:.3f}; written to {out}")
     return 0 if result["pass"] else 1
 

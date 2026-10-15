@@ -2,13 +2,26 @@
 # Runs before every commit (spec section 5b, Guard rails) on exactly what is
 # being committed, the index, not the working tree: the copy lint and its
 # tests, the app code's strings, the QA tools' tests, the reference prep's
-# tests and outputs, the runtimes' typecheck and tests, and a check that the
-# shared test vectors match the code that writes them. A fast Visual QA subset joins in phase 4, with the checks (PLAN.md).
+# tests and outputs, the sheet match's and the placement guide's tests, the
+# runtimes' typecheck and tests, a check that the shared test vectors match the
+# code that writes them, and, when a commit touches what draws or judges the
+# dog, its front's sheet match. A fast Visual QA subset joins in phase 4, with the checks (PLAN.md).
 set -e
 top=$(git rev-parse --show-toplevel)
 tmp=$(mktemp -d)
-trap 'rm -rf "$tmp"' EXIT
+sheetmatch=""
+# An early exit stops the background tests too; a failing kill must not become the hook's own status.
+trap 'if [ -n "$sheetmatch" ]; then kill "$sheetmatch" 2> /dev/null || true; fi; rm -rf "$tmp"' EXIT
 git -C "$top" checkout-index -a --prefix="$tmp/"
+staged=$(git -C "$top" diff --cached --name-only)
+
+# The sheet match's tests take the longest of the Python ones and need nothing
+# else, so they run beside everything below and are waited for at the end.
+if [ -d "$tmp/characters/sheetmatch" ]; then
+  PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s "$tmp/characters/sheetmatch" -q > "$tmp/sheetmatch.log" 2>&1 &
+  sheetmatch=$!
+fi
+
 python3 "$tmp/tools/copylint/copylint.py"
 python3 -m unittest discover -s "$tmp/tools/copylint" -q
 # The app's code shows only catalogue copy outside the Lab.
@@ -19,11 +32,15 @@ fi
 if [ -d "$tmp/tools/qa" ]; then
   python3 -m unittest discover -s "$tmp/tools/qa" -q
 fi
+# The placement guide's tests.
+if [ -d "$tmp/tools/guide" ]; then
+  PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s "$tmp/tools/guide" -q
+fi
 # The reference prep's tests and, when a commit touches it, a check that each
 # species' ref/ and model.json are what the scripts write from its refmap/.
 if [ -d "$tmp/characters/refprep" ]; then
   PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s "$tmp/characters/refprep" -q
-  if git -C "$top" diff --cached --name-only | grep -Eq '^characters/(refprep/|[^/]+/(refmap|ref)/|[^/]+/model\.json)'; then
+  if echo "$staged" | grep -Eq '^characters/(refprep/|[^/]+/(refmap|ref)/|[^/]+/model\.json)'; then
     for refmap in "$tmp"/characters/*/refmap; do
       [ -d "$refmap" ] || continue
       species=$(basename "$(dirname "$refmap")")
@@ -38,18 +55,43 @@ if [ -d "$tmp/characters/refprep" ]; then
 fi
 
 # The runtime checks, wherever the committed tree has the runtime.
-[ -f "$tmp/package.json" ] || exit 0
-if [ ! -d "$top/node_modules" ]; then
-  echo "pre-commit: run npm install first; the runtime checks need it" >&2
-  exit 1
+if [ -f "$tmp/package.json" ]; then
+  if [ ! -d "$top/node_modules" ]; then
+    echo "pre-commit: run npm install first; the runtime checks need it" >&2
+    exit 1
+  fi
+  ln -s "$top/node_modules" "$tmp/node_modules"
+  (cd "$tmp" && npx tsc -p tsconfig.json)
+  (cd "$tmp" && npm test --silent)
+  # The vectors both runtimes are held to must be the ones this code writes.
+  cp -R "$tmp/characters/format/vectors" "$tmp/vectors.committed"
+  (cd "$tmp" && node characters/format/make-vectors.ts > /dev/null)
+  if ! diff -r -q "$tmp/vectors.committed" "$tmp/characters/format/vectors"; then
+    echo "pre-commit: characters/format/vectors is stale; run npm run vectors and stage it" >&2
+    exit 1
+  fi
+  # The dog's front against its sheet, when the commit touches what draws or judges it: the dog built from the
+  # committed source (with the repository's raster cache, keyed on the rasterizing code, so only changed parts are
+  # drawn), its still rendered and the sheet match run, as CI does. Its evidence goes to build/qa/front.
+  # It is off until the front passes its match (phase 3, PR 3.2): HUDDLINGS_FRONT_MATCH=1 turns it on, and the
+  # lead makes that the default then by removing the variable's test below.
+  if [ -d "$tmp/characters/dog/src" ] && echo "$staged" | grep -Eq '^(characters/dog/src|characters/draw|characters/build|runtime-web/lab|characters/sheetmatch)/'; then
+    if [ "${HUDDLINGS_FRONT_MATCH:-}" != 1 ]; then
+      echo "pre-commit: the dog's front sheet match is off until the front passes; HUDDLINGS_FRONT_MATCH=1 runs it" >&2
+    elif ! (cd "$tmp" && node runtime-web/lab/look.ts dog front --qa "$tmp/build/qa" --cache "$top/build/cache"); then
+      rm -rf "$top/build/qa/front" && mkdir -p "$top/build/qa" && cp -R "$tmp/build/qa/front" "$top/build/qa/front" 2> /dev/null || true
+      echo "pre-commit: the dog's front fails its sheet match (or the match could not run); see build/qa/front/compare.png" >&2
+      exit 1
+    fi
+  fi
 fi
-ln -s "$top/node_modules" "$tmp/node_modules"
-(cd "$tmp" && npx tsc -p tsconfig.json)
-(cd "$tmp" && npm test --silent)
-# The vectors both runtimes are held to must be the ones this code writes.
-cp -R "$tmp/characters/format/vectors" "$tmp/vectors.committed"
-(cd "$tmp" && node characters/format/make-vectors.ts > /dev/null)
-if ! diff -r -q "$tmp/vectors.committed" "$tmp/characters/format/vectors"; then
-  echo "pre-commit: characters/format/vectors is stale; run npm run vectors and stage it" >&2
-  exit 1
+
+if [ -n "$sheetmatch" ]; then
+  if ! wait "$sheetmatch"; then
+    sheetmatch=""
+    cat "$tmp/sheetmatch.log" >&2
+    echo "pre-commit: the sheet match's tests fail" >&2
+    exit 1
+  fi
+  sheetmatch=""
 fi

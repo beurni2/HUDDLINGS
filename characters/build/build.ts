@@ -1,13 +1,15 @@
 // Builds a character package (characters/format/README.md, Files) from
 // characters/<species>/src: checks the rig, clips and drawings, lints the
 // drawings, rasterizes them into atlas sets, and writes
-// build/characters/<species>/. Beside the package, in dev/ (never part of it),
-// it writes a build report and the landmarks the species' drawings place.
-// Run: node characters/build/build.ts <species> [out folder]
+// build/characters/<species>/. Its development output (a build report and the
+// landmarks the species' drawings place) goes to build/dev/<species>/, outside
+// build/characters, which the app bundles whole (ios/project.yml).
+// Run: node characters/build/build.ts <species> [out folder] [--dev <folder>] [--cache <folder>]
 import { createHash } from "node:crypto";
 import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { parseArgs } from "node:util";
 import { FORMAT, validate, type AtlasSet, type Clip, type Rig } from "../../runtime-web/src/format.ts";
 import { lint, type LintRules } from "../draw/lint.ts";
 import { packAtlas, type Drawing } from "./atlas.ts";
@@ -70,7 +72,7 @@ export interface Package {
   /** Every file of the package by name, as bytes. */
   files: Map<string, Buffer>;
   atlas: { sets: AtlasSet[] };
-  /** Development output written beside the package in dev/, never part of it. */
+  /** Development output, never part of the package: written to build/dev/<species>/ (devFolder). */
   dev: Map<string, Buffer>;
   report: Report;
 }
@@ -143,35 +145,45 @@ export async function buildPackage(source: Source, opts: RasterOptions = {}): Pr
   for (const name of [...files.keys()].sort()) hashes[name] = createHash("sha256").update(files.get(name)!).digest("hex");
   files.set("package.json", text({ format: FORMAT, species: rig.species, version: rig.version ?? "0.0.0", minRuntime: FORMAT, files: hashes }));
   const built = report(drawings, sets);
-  // Only a species drawn with the kit gets dev/, so the test character's folder stays exactly the package.
+  // Only a species drawn with the kit has development output.
   const dev = new Map<string, Buffer>();
   if (source.lint || source.landmarks) dev.set("report.json", text(built));
   if (source.landmarks) dev.set("landmarks.json", text(source.landmarks));
   return { files, atlas: { sets }, dev, report: built };
 }
 
-export function writePackage(pkg: Package, out: string): void {
-  rmSync(out, { recursive: true, force: true });
-  const write = (name: string, bytes: Buffer) => {
-    mkdirSync(dirname(join(out, name)), { recursive: true });
-    writeFileSync(join(out, name), bytes);
+/** Where a species' package goes: the folder the app bundles whole. */
+export const packageFolder = (species: string) => join(repo, "build", "characters", species);
+/** Where a species' development output goes (report.json, landmarks.json): never inside a package folder. */
+export const devFolder = (species: string) => join(repo, "build", "dev", species);
+
+/** Writes the package into out and its development output, if it is given a folder, into dev; each folder is replaced whole. */
+export function writePackage(pkg: Package, out: string, dev?: string): void {
+  const write = (folder: string, files: Map<string, Buffer>) => {
+    rmSync(folder, { recursive: true, force: true });
+    for (const [name, bytes] of files) {
+      mkdirSync(dirname(join(folder, name)), { recursive: true });
+      writeFileSync(join(folder, name), bytes);
+    }
   };
-  for (const [name, bytes] of pkg.files) write(name, bytes);
-  for (const [name, bytes] of pkg.dev) write(join("dev", name), bytes);
+  write(out, pkg.files);
+  if (dev) write(dev, pkg.dev);
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const species = process.argv[2];
+  const { values: args, positionals } = parseArgs({ allowPositionals: true, options: { dev: { type: "string" }, cache: { type: "string" } } });
+  const [species, outArg] = positionals;
   if (!species) {
-    console.error("usage: node characters/build/build.ts <species> [out folder]");
+    console.error("usage: node characters/build/build.ts <species> [out folder] [--dev <folder>] [--cache <folder>]");
     process.exit(2);
   }
-  const out = resolve(process.argv[3] ?? join(repo, "build", "characters", species));
+  const out = resolve(outArg ?? packageFolder(species));
+  const dev = resolve(args.dev ?? devFolder(species));
   try {
-    const pkg = await buildPackage(await readSource(species), { cache: join(repo, "build", "cache") });
-    writePackage(pkg, out);
+    const pkg = await buildPackage(await readSource(species), { cache: resolve(args.cache ?? join(repo, "build", "cache")) });
+    writePackage(pkg, out, dev);
     const pages = Object.entries(pkg.report.pageShare).map(([set, p]) => `${set}: ${p.pages.join(" + ")} (${Math.round(p.share * 100)}% filled)`).join(", ");
-    console.log(`built ${species} into ${out} (${pkg.files.size} files; pages ${pages})`);
+    console.log(`built ${species} into ${out} (${pkg.files.size} files; pages ${pages})${pkg.dev.size ? `; report and landmarks in ${dev}` : ""}`);
     const nodes = Object.entries(pkg.report.nodes).map(([part, regions]) => `${part} ${Object.values(regions).join("/")}`);
     if (nodes.length) console.log(`hand nodes: ${nodes.join(", ")}`);
   } catch (error) {

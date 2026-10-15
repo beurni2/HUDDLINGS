@@ -2,21 +2,31 @@
 // whole process on some SVGs (a panic at geom.rs:27, exit 134), so each batch
 // runs in a child process, and a batch that dies is rerun one drawing at a time
 // to name the culprit. Rasters are cached under build/cache/ by the SHA-256 of
-// what makes them (the SVG, the scale, resvg's version and this code's), so an
-// unchanged part is never drawn twice.
+// what makes them (the SVG, the scale, resvg's and pngjs's versions and the
+// rasterizing code's own text), so an unchanged part is never drawn twice and a
+// change to how parts are drawn never reads a stale one.
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { availableParallelism, tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { Drawing, Raster } from "./atlas.ts";
+import { rasterize, type Drawing, type Raster } from "./atlas.ts";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const WORKER = join(here, "raster-worker.ts");
-/** Bumped whenever rasterizing changes what it writes, so old cache entries are never read. */
-export const RASTER_VERSION = 1;
-const RESVG = (JSON.parse(readFileSync(join(here, "../../node_modules/@resvg/resvg-js/package.json"), "utf8")) as { version: string }).version;
+const version = (name: string) => (createRequire(import.meta.url)(`${name}/package.json`) as { version: string }).version;
+/**
+ * What makes a raster besides its SVG and scale: the libraries' versions and the
+ * code that draws, trims, writes and reads it (atlas.ts's rasterize, this file
+ * and the worker), by its text, so the same code in another checkout (the
+ * pre-commit hook's) shares the cache and changed code never reads it.
+ */
+export const RASTERIZER = createHash("sha256")
+  .update([`@resvg/resvg-js ${version("@resvg/resvg-js")}`, `pngjs ${version("pngjs")}`, rasterize.toString(),
+    readFileSync(fileURLToPath(import.meta.url), "utf8"), readFileSync(WORKER, "utf8")].join("\n"))
+  .digest("hex");
 
 export interface Job {
   /** The drawing's region, for the worker's own errors. */
@@ -44,7 +54,7 @@ function readRaster(file: string, d: Drawing, scale: number): Raster {
 }
 
 export function rasterKey(svg: string, scale: number): string {
-  return createHash("sha256").update(`${RASTER_VERSION}\n${RESVG}\n${scale}\n${svg}`).digest("hex");
+  return createHash("sha256").update(`${RASTERIZER}\n${scale}\n${svg}`).digest("hex");
 }
 
 /** Runs the worker on some jobs: the exit code, or the signal that killed it, and what it said. */

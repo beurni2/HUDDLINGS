@@ -4,9 +4,11 @@
 // and keeps the clip to head.base, model points land on rootPx + ppp·(x, y), and
 // the same still renders the same bytes twice. The reference is composited on the
 // CPU straight from the atlas page, for every part drawn unrotated on whole pixels.
+// A still never comes out half-written or at another size, and the look loop
+// (look.ts) never reads a crash of the sheet match as failed checks.
 import { after, before, test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { PNG } from "pngjs";
@@ -14,7 +16,8 @@ import { buildPackage, pngChunks, readSource, writePackage } from "../../charact
 import type { Clip } from "../src/format.ts";
 import { compile, drawList, evaluatePose, type DrawItem } from "../src/rig.ts";
 import { MASK_ALPHA } from "../src/renderer.ts";
-import { hex, ID_ALPHA, idColour, recolour } from "../lab/ids.ts";
+import { hex, idColour, inPart, largestAlpha, recolour } from "../lab/ids.ts";
+import { failures, matchVerdict } from "../lab/look.ts";
 import { MARGIN, openStills, type StillInfo, type Stills } from "../lab/still.ts";
 
 const PPP = 3;
@@ -73,6 +76,17 @@ function alphaAt(p: Placed, i: number, j: number): number {
   const region = set.regions[p.item.region]!;
   const page = pages[region.page]!;
   return page.data[((region.y + j - p.top) * page.width + region.x + i - p.left) * 4 + 3]!;
+}
+
+/** Whether the part's texel under pixel (i, j) is in its part for the ID pass: at least half its region's largest alpha. */
+function inItsPart(p: Placed, i: number, j: number): boolean {
+  return inPart(alphaAt(p, i, j), largest(p.item.region));
+}
+const largestOf = new Map<string, number>();
+function largest(name: string): number {
+  const region = set.regions[name]!;
+  if (!largestOf.has(name)) largestOf.set(name, largestAlpha(pages[region.page]!.data, pages[region.page]!.width, region));
+  return largestOf.get(name)!;
 }
 
 /** The pixels a part's quads could touch, a pixel wider all round. */
@@ -159,7 +173,7 @@ test("alpha from the white and black passes is the package's own alpha", (t) => 
   assert.ok(worst <= 2 / 255, `alpha differs by up to ${(worst * 255).toFixed(2)}/255`);
 });
 
-test("the ID pass paints each part flat where its alpha is 0.5 or more, inside its mask", () => {
+test("the ID pass paints each part flat where its alpha is half its largest or more, inside its mask", () => {
   const { placed, inTail, byPart, maskOf } = reference();
   const [w, h] = info.sizePx;
   const colourOf = new Map(Object.entries(info.parts).map(([name, p]) => [p.id, name]));
@@ -169,12 +183,12 @@ test("the ID pass paints each part flat where its alpha is 0.5 or more, inside i
       const got = hex(pixel(ids, i, j).slice(0, 3));
       assert.ok(got === "#000000" || colourOf.has(got), `pixel ${i}, ${j} is ${got}, no part's colour`);
       if (inTail(i, j)) continue;
-      // The topmost part with alpha 0.5 or more there, whose mask (cut at 0.5 in this pass) covers it.
+      // The topmost part at half its largest alpha or more there, whose mask (cut the same way in this pass) covers it.
       let want = "#000000";
       for (const p of placed) {
         const mask = maskOf(p);
-        if (mask && alphaAt(mask, i, j) < ID_ALPHA) continue;
-        if (alphaAt(p, i, j) >= ID_ALPHA) want = info.parts[p.item.part]!.id;
+        if (mask && !inItsPart(mask, i, j)) continue;
+        if (inItsPart(p, i, j)) want = info.parts[p.item.part]!.id;
       }
       if (got !== want) wrong++;
     }
@@ -185,9 +199,9 @@ test("the ID pass paints each part flat where its alpha is 0.5 or more, inside i
   let outside = 0, shown = 0;
   for (let j = marking.top; j < marking.top + marking.h; j++) {
     for (let i = marking.left; i < marking.left + marking.w; i++) {
-      if (alphaAt(marking, i, j) < ID_ALPHA) continue;
+      if (!inItsPart(marking, i, j)) continue;
       const here = hex(pixel(ids, i, j).slice(0, 3));
-      if (alphaAt(head, i, j) < ID_ALPHA) {
+      if (!inItsPart(head, i, j)) {
         outside++;
         assert.notEqual(here, info.parts["head.marking"]!.id, `the stripe shows outside head.base at ${i}, ${j}`);
       } else if (here === info.parts["head.marking"]!.id) shown++;
@@ -215,7 +229,8 @@ test("model points land on rootPx + ppp·(x, y)", () => {
     const item = items.find((i) => i.part === part)!;
     const region = set.regions[item.region]!;
     const page = pages[region.page]!;
-    const [rx, ry] = centroid(region.w, region.h, (i, j) => page.data[((region.y + j) * page.width + region.x + i) * 4 + 3]! >= ID_ALPHA);
+    const most = largestAlpha(page.data, page.width, region);
+    const [rx, ry] = centroid(region.w, region.h, (i, j) => inPart(page.data[((region.y + j) * page.width + region.x + i) * 4 + 3]!, most));
     const exact = [info.rootPx[0] + PPP * head.tx + rx - region.anchorX, info.rootPx[1] + PPP * head.ty + ry - region.anchorY];
     assert.ok(Math.abs(cx - exact[0]!) < 1e-9 && Math.abs(cy - exact[1]!) < 1e-9, `${part} at ${cx}, ${cy}, its raster puts it at ${exact}`);
     // And on its model point, within resvg's own antialiasing bias (0.07 px down for the nose at 3x).
@@ -236,7 +251,42 @@ test("a clip that does not set both views is not a still", async () => {
   await assert.rejects(stills.render("still_back", join(dir, "back")), /no clip still_back/);
 });
 
-test("the ID pages keep each region's texels from alpha 0.5 up, its ring included, and nothing else", () => {
+/** Loads another package in the same page for the length of a test, then the test's own again. */
+async function withPackage(other: typeof pkg, ppp: number, run: () => Promise<void>): Promise<void> {
+  writePackage(other, join(dir, "package"));
+  try {
+    await stills.load(ppp);
+    await run();
+  } finally {
+    writePackage(pkg, join(dir, "package"));
+    await stills.load(PPP);
+  }
+}
+
+test("a pass that fails leaves the still's folder as it was, and no half-written folder beside it", async () => {
+  // Two parts sharing a region build, but the ID pass refuses them: the third pass fails after white and black.
+  const left = source.rig.parts.find((p) => p.name === "eye.L")!;
+  const parts = source.rig.parts.map((p) => (p.name === "eye.R" ? { ...p, regions: { ...p.regions, "front:open": left.regions["front:open"]! } } : p));
+  const shared = await buildPackage({ ...source, clips: [...source.clips, still("still_front", "front")], rig: { ...source.rig, parts }, drawings: source.drawings.filter((d) => d.region !== "eye.R/front:open") });
+  const out = join(dir, "kept");
+  await stills.render("still_front", out);
+  const before = new Map(readdirSync(out).map((name) => [name, readFileSync(join(out, name))]));
+  await withPackage(shared, PPP, async () => {
+    await assert.rejects(stills.render("still_front", out), /region eye\.L\/front:open belongs to both eye\.L and eye\.R/);
+  });
+  assert.deepEqual(readdirSync(out).sort(), [...before.keys()].sort());
+  for (const [name, bytes] of before) assert.ok(readFileSync(join(out, name)).equals(bytes), `${name} changed`);
+  assert.deepEqual(readdirSync(dir).filter((name) => name.includes("partial")), []);
+});
+
+test("a canvas Chromium will not give at full size fails instead of drawing the still smaller", async () => {
+  await withPackage(pkg, 60, async () => {
+    await assert.rejects(stills.render("still_front", join(dir, "huge")), /Chromium gave the canvas \d+ × \d+ px, not the \d+ × \d+ px the still needs/);
+  });
+  assert.ok(!existsSync(join(dir, "huge")));
+});
+
+test("the ID pages keep each region's texels from half its largest alpha up, its ring included, and nothing else", () => {
   // A 10 × 4 page: a 3 × 2 region at (4, 1) with alphas 127, 128, 255 on each row, an opaque texel two to its left (the ring) and three to its right (not).
   const page = new Uint8Array(10 * 4 * 4);
   const alpha = (x: number, y: number, a: number) => page.set([9, 9, 9, a], (y * 10 + x) * 4);
@@ -245,11 +295,49 @@ test("the ID pages keep each region's texels from alpha 0.5 up, its ring include
   alpha(9, 1, 255);
   const out = recolour(page, 10, 4, [{ x: 4, y: 1, w: 3, h: 2, colour: [10, 20, 30] }]);
   const at = (x: number, y: number) => [...out.subarray((y * 10 + x) * 4, (y * 10 + x) * 4 + 4)];
-  assert.deepEqual(at(4, 1), [0, 0, 0, 0], "127 is below 0.5");
-  assert.deepEqual(at(5, 1), [10, 20, 30, 255], "128 is 0.5 or more");
+  assert.deepEqual(at(4, 1), [0, 0, 0, 0], "127 is below half of 255");
+  assert.deepEqual(at(5, 1), [10, 20, 30, 255], "128 is half of 255 or more");
   assert.deepEqual(at(6, 2), [10, 20, 30, 255]);
   assert.deepEqual(at(2, 1), [10, 20, 30, 255], "the ring");
   assert.deepEqual(at(9, 1), [0, 0, 0, 0], "outside the ring");
+  // A soft region (a shadow at 0.18, the blush at its level) is cut at half its own largest alpha, not at 0.5.
+  const soft = new Uint8Array(10 * 4 * 4);
+  [0, 22, 23, 46].forEach((a, k) => soft.set([9, 9, 9, a], (1 * 10 + 4 + k) * 4));
+  const shadow = recolour(soft, 10, 4, [{ x: 4, y: 1, w: 4, h: 1, colour: [10, 20, 30] }]);
+  const of = (x: number) => shadow[(1 * 10 + x) * 4 + 3];
+  assert.deepEqual([4, 5, 6, 7].map(of), [0, 0, 255, 255], "of 46: 0 and 22 are out, 23 and 46 in");
+  assert.deepEqual([inPart(0, 0), inPart(1, 1), inPart(64, 128), inPart(63, 128)], [false, true, true, false]);
+});
+
+test("the ground shadow, a soft part, shows in the ID pass", () => {
+  // The test character's shadow is 0.18 opaque: under the old 0.5 cut it never showed.
+  const shadow = info.parts.shadow!.id;
+  let n = 0;
+  for (let k = 0; k < ids.data.length; k += 4) if (hex([...ids.data.subarray(k, k + 3)]) === shadow) n++;
+  assert.ok(n > 1000, `the shadow shows on ${n} pixels`);
+});
+
+test("the look loop reads a crash of the sheet match as a crash, never as the last run's checks", async () => {
+  const out = join(dir, "look");
+  mkdirSync(out, { recursive: true });
+  const json = join(out, "match.json");
+  const stale = JSON.stringify({ silhouette: { pass: false }, landmarks: { pass: true }, pass: false });
+  // A stand-in for match.py: writes what it is given into match.json, if anything, and exits with a code.
+  const matcher = (code: number, written?: unknown) =>
+    ["-e", `${written === undefined ? "" : `require("fs").writeFileSync(${JSON.stringify(json)}, ${JSON.stringify(JSON.stringify(written))});`} console.error("said"); process.exit(${code});`];
+  writeFileSync(json, stale);
+  const crash = await matchVerdict(process.execPath, matcher(2), out);
+  assert.equal(crash.verdict, "error");
+  assert.match(crash.text, /^ERROR the sheet match crashed \(exit 2\): said/);
+  assert.ok(!existsSync(json), "the old match.json is deleted before the match runs");
+  writeFileSync(json, stale);
+  const silent = await matchVerdict(process.execPath, matcher(1), out);
+  assert.equal(silent.verdict, "error", "a 1 with no match.json of its own is not failed checks");
+  assert.match(silent.text, /left no readable match.json/);
+  const failed = await matchVerdict(process.execPath, matcher(1, { blush: { pass: false, cheeks: [{ name: "L", pass: false }] }, advisory: { gating: false, x: { pass: false } }, pass: false }), out);
+  assert.deepEqual(failed, { verdict: "fail", text: "FAIL blush.cheeks.L" });
+  assert.deepEqual(await matchVerdict(process.execPath, matcher(0, { pass: true }), out), { verdict: "pass", text: "pass" });
+  assert.deepEqual(failures({ a: { pass: false }, b: [{ name: "x", pass: false }], c: { gating: false, pass: false } }), ["a", "b.x"]);
 });
 
 test("ID colours are fixed by a part's index, distinct and never black", () => {

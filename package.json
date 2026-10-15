@@ -5,11 +5,16 @@
   "engines": { "node": ">=22.18" },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
-    "test": "node --test --test-reporter=dot \"runtime-web/test/*.test.ts\" \"characters/build/test/*.test.ts\"",
+    "test": "node --test --test-reporter=dot \"runtime-web/test/*.test.ts\" \"characters/build/test/*.test.ts\" \"characters/draw/test/*.test.ts\" \"characters/dog/test/*.test.ts\"",
     "vectors": "node characters/format/make-vectors.ts",
     "build:test-character": "node characters/build/build.ts test",
+    "build:dog": "node characters/build/build.ts dog",
     "render": "node runtime-web/lab/render.ts",
-    "render:all": "node runtime-web/lab/render-all.ts"
+    "render:all": "node runtime-web/lab/render-all.ts",
+    "still": "node runtime-web/lab/still.ts",
+    "look": "node runtime-web/lab/look.ts",
+    "match": "python3 characters/sheetmatch/match.py",
+    "guide": "python3 tools/guide/grid.py"
   },
   "devDependencies": {
     "@resvg/resvg-js": "2.6.2",

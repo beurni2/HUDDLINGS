@@ -8,10 +8,15 @@ The passing still is built from the turnaround crop: phase 2's own finders
 give each region (eyes, nose, mouth, ears, collar, tag, patches, cheeks), each
 is repainted flat in the value model.json holds it to and becomes its own part,
 and the whole is enlarged into the still format. It never leaves the test."""
+import argparse
 import contextlib
 import copy
 import io
 import json
+import os
+import shutil
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -529,6 +534,72 @@ class PlantedTest(unittest.TestCase):
             self.assertLessEqual(cheek["coreDeltaE2000"], 3)
         self.assertFailed(result, ["blush"])
 
+    def test_fewer_cheeks_than_the_sheet_shows_fails(self):
+        fixture = self.fixture()
+        fixture.relabel("blush.R", "head.base", hexes(("palette", "fur")))
+        result = self.run_still(fixture, "one-cheek")
+        # The cheek that is left passes on its own; before, that was the whole check.
+        self.assertEqual([c["pass"] for c in result["blush"]["cheeks"]], [True])
+        self.assertEqual(result["blush"]["sheetCheeks"], 2)
+        self.assertEqual(result["blush"]["problem"], "1 cheek blush; the sheet shows 2")
+        self.assertFailed(result, ["blush"])
+
+    def test_a_cheek_with_no_light_pixels_fails_with_its_reason(self):
+        fixture = self.fixture()
+        ys, xs = np.nonzero(fixture.part == fixture.names.index("blush.L"))
+        fixture.rgb[ys.min():ys.max() + 1, xs.min():xs.max() + 1] = hexes(("palettePainted", "eyeDark"))
+        result = self.run_still(fixture, "dark-cheek")
+        problems = [c["problem"] for c in result["blush"]["cheeks"] if "problem" in c]
+        self.assertEqual(problems, ["no light pixels in its box, so no level can be fitted"])
+        self.assertIn("blush", result["failed"])
+
+    def test_a_marking_away_from_the_sheets_place_fails(self):
+        fixture = self.fixture()
+        ys, _ = np.nonzero(fixture.part == fixture.names.index("head.patch.L"))
+        fixture.move("head.patch.L", 0, int(np.ptp(ys)) + 2, "head.base")
+        result = self.run_still(fixture, "marking-moved")
+        row = result["markings"]["rows"]["head.patch.L"]
+        # What the check looked at before still holds: the right name, clipped to its host, shown.
+        self.assertTrue(row["clipped"] and row["shows"] and row["expected"])
+        self.assertEqual((row["place"]["renderCentroidInSheetPatch"], row["place"]["sheetCentroidInRender"]), (False, False))
+        self.assertGreater(row["place"]["advisory"]["centroidDistancePt"], 10)
+        self.assertIn("markings", result["failed"])
+        # Unmoved, every marking is where the sheet has it, at its size (less what the eyes cover in the fixture).
+        for name, row in self.run_still(self.fixture(), "marking-kept")["markings"]["rows"].items():
+            if row.get("shows"):
+                self.assertTrue(row["place"]["pass"], name)
+                self.assertAlmostEqual(row["place"]["advisory"]["areaRatio"], 1.0, delta=0.05, msg=name)
+                self.assertLess(row["place"]["advisory"]["centroidDistancePt"], 0.5, name)
+
+    def test_a_marking_far_smaller_than_the_sheets_fails(self):
+        fixture = self.fixture()
+        index = fixture.names.index("back.patch.R")
+        patch = fixture.part == index
+        ys, xs = np.nonzero(patch)
+        # Only a sliver at its outer edge is left: the sheet's centroid falls outside it.
+        sliver = patch & (np.arange(patch.shape[1])[None, :] < xs.min() + 4)
+        fixture.relabel("back.patch.R", "body.back", hexes(("palette", "fur")))
+        fixture.part[sliver] = index
+        fixture.rgb[sliver] = hexes(("palette", "marking"))
+        result = self.run_still(fixture, "marking-sliver")
+        row = result["markings"]["rows"]["back.patch.R"]
+        self.assertTrue(row["shows"])
+        self.assertFalse(row["place"]["sheetCentroidInRender"])
+        self.assertLess(row["place"]["advisory"]["areaRatio"], 0.5)
+        self.assertIn("markings", result["failed"])
+
+    def test_a_mirrored_facing_is_held_to_the_mirrored_patch_of_its_own_sides_marking(self):
+        fixture = self.fixture("threeQuarter.L")
+        fixture.right_side()
+        ys, _ = np.nonzero(fixture.part == fixture.names.index("back.patch.R"))
+        fixture.move("back.patch.R", 0, -(int(np.ptp(ys)) + 2), "body.back")
+        result = self.run_still(fixture, "right-moved", view="threeQuarter.R", mirror=True)
+        place = result["markings"]["rows"]["back.patch.R"]["place"]
+        self.assertFalse(place["pass"])
+        # Reported in the facing's own coordinates: moved up, so a negative y offset.
+        self.assertLess(place["advisory"]["centroidOffsetPt"][1], -5)
+        self.assertIn("markings", result["failed"])
+
     def test_a_silhouette_scaled_5_percent_fails(self):
         result = self.run_still(self.fixture(), "scaled", scale=1.05)
         self.assertIn("landmarks", result["failed"])
@@ -591,6 +662,71 @@ class PlantedTest(unittest.TestCase):
         with contextlib.redirect_stderr(io.StringIO()) as said:
             self.assertEqual(match.main(["dog", "--still", str(Path(self.folder.name) / "none"), "--out", str(out)]), 2)
         self.assertIn("still.json", said.getvalue())
+
+    def test_match_json_names_paths_from_the_repository_and_records_every_threshold(self):
+        # Inside the repository, as the look loop's stills and landmarks are.
+        folder = sheets.ROOT / "build" / "sheetmatch-test"
+        try:
+            self.fixture().write(folder)
+            (folder / "landmarks.json").write_text(json.dumps(self.fixtures["front"].source()))
+            result, _ = match.match("dog", folder, folder / "landmarks.json")
+        finally:
+            shutil.rmtree(folder, ignore_errors=True)
+        self.assertEqual(result["landmarkSource"], "build/sheetmatch-test/landmarks.json")
+        self.assertNotIn(str(sheets.ROOT), json.dumps(result))
+        recorded = result["thresholds"]
+        self.assertEqual((recorded["shownPt2"], recorded["bakedMinPx"], recorded["silhouetteIoUMin"]), (match.SHOWN_PT2, match.BAKED_MIN_PX, match.IOU_MIN["front"]))
+        self.assertEqual(recorded["blushRestingSpread"], MODEL["blush"]["restingSpread"])
+        # Every numeric constant of the module is a threshold match.json records, but the images' own settings.
+        constants = {name: value for name, value in vars(match).items() if name.isupper() and isinstance(value, (int, float))}
+        for name, value in constants.items():
+            if name not in ("PHONE_PPP", "ZOOM"):
+                self.assertIn(value, recorded.values(), name)
+
+    def test_the_atlas_share_counts_every_state_of_the_views_parts(self):
+        regions = {"eye.L/front:open": (10, 10), "eye.L/front:closed": (10, 5), "head.base/front": (20, 10), "head.base/side.L": (30, 10), "tail/front": (5, 5)}
+        atlas = {"sets": [{"name": "3x", "scale": 3, "pages": [{"width": 100, "height": 100}],
+                           "regions": {k: {"w": w, "h": h} for k, (w, h) in regions.items()}}]}
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "atlas.json"
+            path.write_text(json.dumps(atlas))
+            share = match.atlas_share("dog", argparse.Namespace(drawn=["eye.L", "head.base"]), {"front"}, path)
+        self.assertEqual(share["thisStillShare"], round((100 + 50 + 200) / 10000, 3))
+        self.assertEqual(share["allRegionsShare"], round((100 + 50 + 200 + 300 + 25) / 10000, 3))
+
+    def test_any_error_exits_2_and_leaves_no_verdict(self):
+        """1 means only that a gating check failed: a crash anywhere is 2, and no match.json, old or half-made, stays."""
+        folder = Path(self.folder.name) / "crash"
+        self.fixture().write(folder)
+        (folder / "landmarks.json").write_text(json.dumps(self.fixtures["front"].source()))
+        out = folder / "out"
+        args = ["dog", "--still", str(folder), "--out", str(out), "--landmarks", str(folder / "landmarks.json")]
+        self.assertEqual(match.main(args), 0)
+        self.assertTrue((out / "match.json").exists())
+        # A check that crashes (a box with no light pixels once raised IndexError here).
+        original = match.check_blush
+        match.check_blush = lambda *_: [][0]
+        try:
+            with contextlib.redirect_stderr(io.StringIO()) as said:
+                self.assertEqual(match.main(args), 2)
+        finally:
+            match.check_blush = original
+        self.assertIn("IndexError", said.getvalue())
+        self.assertFalse((out / "match.json").exists(), "the last run's match.json stays beside a crash")
+        # A landmarks file that is not there is an error, not a run without the source's points.
+        with contextlib.redirect_stderr(io.StringIO()):
+            self.assertEqual(match.main(args[:-1] + [str(folder / "missing.json")]), 2)
+        # Run as a command, an error before any check, even in an import, exits 2.
+        fake = folder / "fake"
+        fake.mkdir()
+        (fake / "numpy.py").write_text("raise ImportError('planted')\n")
+        script = Path(match.__file__).resolve()
+        env = dict(os.environ, PYTHONPATH=str(fake))
+        ran = subprocess.run([sys.executable, str(script), *args], capture_output=True, text=True, env=env)
+        self.assertEqual(ran.returncode, 2, ran.stderr)
+        self.assertIn("planted", ran.stderr)
+        ran = subprocess.run([sys.executable, str(script), *args], capture_output=True, text=True)
+        self.assertEqual(ran.returncode, 0, ran.stderr)
 
 
 if __name__ == "__main__":

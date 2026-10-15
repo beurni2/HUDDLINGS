@@ -124,12 +124,17 @@ class Lab {
   drawStill(o: { width: number; height: number; stage: Stage; background: [number, number, number]; ids?: boolean }): string {
     this.canvas.width = o.width;
     this.canvas.height = o.height;
+    // Past its limits Chromium silently gives a smaller drawing buffer, and the frame would be drawn at its size.
+    const gl = this.renderer!.gl;
+    if (gl.drawingBufferWidth !== o.width || gl.drawingBufferHeight !== o.height) {
+      throw new Error(`Chromium gave the canvas ${gl.drawingBufferWidth} × ${gl.drawingBufferHeight} px, not the ${o.width} × ${o.height} px the still needs; use fewer pixels per point`);
+    }
     if (!o.ids) {
       this.renderer!.draw(this.held, o.stage, o.background);
       return this.pixels();
     }
+    // The ID pass's renderer draws on the same context.
     const { renderer, sampler } = this.idPass();
-    const gl = renderer.gl;
     // A sampler on the renderer's texture unit overrides its linear filtering, so every pixel takes one texel's flat colour.
     gl.bindSampler(0, sampler);
     renderer.draw(this.held, o.stage, o.background);
