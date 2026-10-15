@@ -61,6 +61,8 @@ export const C = {
   earLine: darken(multiply(marking, marking), 0.12),
   /** The ears' outline: their deep tan a third of the way back to the tan, #B5734A against the sheet's #B57549. */
   earEdge: mix(darken(multiply(marking, marking), 0.12), marking, 0.33),
+  /** A contact shadow under a paw: the ground shadow 8% darker. */
+  contact: darken(need(printed, "shadow"), 0.08),
   collarLine: darken(collar, 0.25),
   /** The tag's edge: the outline's brown warmed toward the gold, as the sheet draws it, not a darker olive gold. */
   tagLine: mix(outline, tag, 0.35),

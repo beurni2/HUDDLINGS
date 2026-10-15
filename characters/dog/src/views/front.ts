@@ -238,7 +238,7 @@ const patchFade = { R: { from: [-27, -108], to: [-13, -104] }, L: { from: [25, -
 // the crown's fur, and melting down into the patch with no line or crease: a
 // wedge painted with the patch, fading into it, wider on the dog's left.
 const earRoots = {
-  R: smooth([[-47, -134.6], [-44, -135.6], [-40, -135.8], [-36.6, -135.3], [-35.2, -133.8], [-35.8, -131], [-37.2, -128.6], [-38.4, -126], [-40, -123.6],
+  R: smooth([[-47, -134.6], [-44, -135.6], [-40, -135.8], [-36.2, -135.5], [-34.2, -134], [-35.8, -131], [-37.2, -128.6], [-38.4, -126], [-40, -123.6],
     [-42.6, -122.2], [-47.6, -122]]),
   L: smooth([[43.4, -136.6], [40.4, -138.4], [37.2, -138.9], [33.6, -138.8], [30.8, -137.6], [30.2, -134], [31.4, -130], [33.6, -127], [37, -125.4], [41.6, -125.2],
     [46, -126], [47, -133]]),
@@ -353,12 +353,12 @@ function eye(landmark: P, noseward: number): Piece {
   return piece(svg, box, { shapes: [], lines: [lidLine.line] });
 }
 
-/** A brow in the face frame: a short thin arch in pale tan, about 1.7 pt at its fullest, its inner end higher. */
+/** A brow in the face frame: a short thin arch in pale tan, 1.6 pt at its fullest, its inner end higher. */
 function brow(sx: number): Piece {
   const pts: P[] = [[sx * 26.6, -25.4], [sx * 24.9, -27.8], [sx * 22.2, -29.2], [sx * 19, -28.4]];
   const f = uid("blur"), box = faceBox([sx > 0 ? 15 : -31, -33, 16, 12]);
   return piece(`<defs>${blur(f, box, 0.3)}</defs><g filter="url(#${f})">` +
-    inFace(`<path d="${strokeOf(pts, 1.7, { taper: 2.6, tip: 0.7 }).d}" fill="${C.marking}" opacity="0.85"/>`) + "</g>", box);
+    inFace(`<path d="${strokeOf(pts, 1.6, { taper: 2.6, tip: 0.7 }).d}" fill="${C.marking}" opacity="0.8"/>`) + "</g>", box);
 }
 
 /**
@@ -489,7 +489,12 @@ function between(): string {
 export function front(): Drawn[] {
   const out: Drawn[] = [];
   const add = (name: string, p: Piece, state?: string) => out.push({ part: name, piece: p, ...(state ? { state } : {}) });
-  add("shadow", soft("M-64 -3 a64 4.6 0 1 0 128 0 a64 4.6 0 1 0 -128 0Z", [-64, -7.6, 128, 9.2], C.shadow, 2.5));
+  // The ground shadow, and a soft contact shadow a little deeper under each paw where it sits.
+  add("shadow", join(soft("M-64 -3 a64 4.6 0 1 0 128 0 a64 4.6 0 1 0 -128 0Z", [-64, -7.6, 128, 9.2], C.shadow, 2.5),
+    ...[-1, 1].flatMap((sx) => [
+      soft(`M${sx * 15.6 - 12} -0.6 a12 1.8 0 1 0 24 0 a12 1.8 0 1 0 -24 0Z`, [sx * 15.6 - 12, -2.4, 24, 3.6], C.contact, 1.2, 0.7),
+      soft(`M${sx * 38.4 - 8} -2 a8 1.6 0 1 0 16 0 a8 1.6 0 1 0 -16 0Z`, [sx * 38.4 - 8, -3.6, 16, 3.2], C.contact, 1.2, 0.6),
+    ])));
   add("body.back", part("body.back", back, backPaint));
   add("back.patch.R", marking("back.patch.R", { shape: back, paint: backPaint }, saddleR, { fill: C.marking, blur: 1.2, clip: true }));
   add("back.patch.L", marking("back.patch.L", { shape: back, paint: backPaint }, saddleL, { fill: C.marking, blur: 1.2, clip: true }));
@@ -531,8 +536,10 @@ export function front(): Drawn[] {
   for (const side of ["L", "R"] as const) {
     add(`head.patch.${side}`, join(
       marking(`head.patch.${side}`, { shape: head, paint: headPaint }, patches[side], { fill: C.patch, blur: 0.9, clip: false, fade: patchFade[side] }),
-      // The ear root's tan is the ear's own, unshaded as the ear is there, fading down into the patch.
-      marking(`head.patch.${side}`, { shape: head, paint: { ...headPaint, shade: undefined, highlight: undefined } }, earRoots[side], { fill: C.marking, blur: 0.8, clip: false, fade: rootFade[side] }),
+      // The ear root's tan, unshaded as the ear is there, fading down into the patch: the ear's own on the dog's
+      // left, where the sheet paints it as dark as the ear, the patch's paler tan on its right, where it does not.
+      marking(`head.patch.${side}`, { shape: head, paint: { ...headPaint, shade: undefined, highlight: undefined } }, earRoots[side],
+        { fill: side === "L" ? C.marking : C.patch, blur: 0.8, clip: false, fade: rootFade[side] }),
     ));
   }
   add("blush.L", blush(1));
