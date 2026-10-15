@@ -362,10 +362,13 @@ const backPaint: Paint = {
 };
 const headPaint: Paint = {
   fill: C.fur,
-  // Under the jaw, where the head turns under toward the collar; and a faint wash in each hood just over the eye,
+  // Under the jaw, where the head turns under toward the collar; a faint wash in each hood just over the eye,
   // under the brow's overhang, where the sheet's tan deepens (#ECB888 against the hood's #F0BC92).
   shade: furShade(headGroup, ["M-38 -66 C-28 -61.2 -14 -59.2 0 -59.2 C14 -59.2 28 -61.2 38 -66 L46 -56 L-46 -56Z",
-    ...[EYE_R, EYE_L].map(([x, y]) => `M${fmt(x - 8)} ${fmt(y - 9.6)} a8 2 0 1 0 16 0 a8 2 0 1 0 -16 0Z`)],
+    ...[EYE_R, EYE_L].map(([x, y]) => `M${fmt(x - 8)} ${fmt(y - 9.6)} a8 2 0 1 0 16 0 a8 2 0 1 0 -16 0Z`),
+    // And down the face's sides, where it turns away toward the ears, so each patch is lighter by the eye and
+    // deepens toward the ear, as the sheet paints it.
+    "M-54 -128 L-42 -127 C-40.4 -116 -40.6 -102 -42.4 -92 L-54 -92Z", "M54 -132 L37.6 -130 C38.2 -118 39.4 -104 41.4 -95 L54 -95Z"],
     // The crown stays light right out to its line, as the sheet paints it, the overhangs over the ears' roots
     // included; and so do the cheeks' puffs out to their rims, above the jaw.
     ["M-52 -172 L52 -172 L52 -137 L-52 -137Z", "M-52 -95 L-36 -95 L-36 -72 L-52 -72Z", "M52 -99 L36 -99 L36 -76 L52 -76Z"], { inset: 3, toLight: 4.5 }),
@@ -709,8 +712,10 @@ function earPaint(side: "L" | "R"): Paint {
     `<path d="${soft(dark, 1.5)}" fill="${C.earLow}" opacity="0.3" filter="url(#${parting})"/>`;
   const shadeD = "M-90 -92 C-80 -80 -62 -72 -40 -70 L-40 -50 L-90 -50Z";
   const cheekD = "M-38 -98 C-43 -93 -48.6 -85 -49.8 -74 C-49 -66 -45 -62 -40 -60Z";
-  // Along the inner edge, where the ear tucks under the head's side.
+  // Along the inner edge, where the ear tucks under the head's side; and the crown's soft contact shadow across
+  // the root's tan, right under the overhang's fur.
   const innerD = "M-44 -128 C-48.4 -118 -49.4 -104 -48.8 -94 L-43 -94 L-43 -128Z";
+  const rootD = "M-54 -140 L-26 -140 L-27 -132.6 C-35 -132.2 -45 -131.8 -54 -130.6Z";
   // The line begins under the crown at the root's top, so it comes out from under the crown at full weight,
   // carrying on the crown's own line; its upper run lightens toward the root and its lower run, heavier, takes
   // over down the outer side, the two cross-fading where their tapers overlap.
@@ -725,7 +730,7 @@ function earPaint(side: "L" | "R"): Paint {
   return {
     fill: C.marking,
     under: under + lines,
-    shade: { multiply: C.furShadeBy, rim: { inset: 2.2, toLight: 3.6 }, shapes: [earD(side, shadeD), earD(side, cheekD), earD(side, innerD)], blur: 3.2 },
+    shade: { multiply: C.furShadeBy, rim: { inset: 2.2, toLight: 3.6 }, shapes: [earD(side, shadeD), earD(side, cheekD), earD(side, innerD), earD(side, rootD)], blur: 3.2 },
     highlight: { d: earD(side, "M-74 -101 C-74 -106 -70 -111 -66 -112 C-64 -109 -66 -102 -69.6 -99 C-72 -98 -74 -99 -74 -101Z"), colour: C.patch, opacity: 0.3, blur: 2.6 },
     inner: dark.map((pts) => ({ pts: sample(smooth(pts.slice(-3).map((p) => onEar(side, p)), { closed: false }).segs, 8, false), width: 0.7, colour: `url(#${strand})` })),
     // A little lighter on the ear toward the light, heavier on the one away from it, and along each one's bottom.
@@ -890,9 +895,13 @@ export function front(): Drawn[] {
         `<linearGradient id="${toe}" gradientUnits="userSpaceOnUse" x1="0" y1="-1" x2="0" y2="-6.6">` +
         `<stop offset="0.25" stop-color="${C.soleLine}"/><stop offset="1" stop-color="${C.warmLine}" stop-opacity="0.15"/></linearGradient></defs>`,
       // Two short curved toe lines rising from the sole's dips about 5.5 pt up the paw, each bowing a little away from
-      // the middle toe and turning in at its top round it, as the paw-stub and stubby-paws panels draw them.
-      inner: [[[-20.6, -1.1], [-21.3, -2.9], [-21.2, -4.8], [-20.3, -6.5]], [[-11.4, -1.05], [-10.8, -2.9], [-10.9, -4.8], [-11.8, -6.4]]]
+      // the middle toe and turning in at its top round it, as the paw-stub and stubby-paws panels draw them; and high
+      // on the leg, where it is the chest's fur, two fine strokes combed down into the V's point, the chest's tuft
+      // as the hero draws it.
+      inner: [...[[[-20.6, -1.1], [-21.3, -2.9], [-21.2, -4.8], [-20.3, -6.5]], [[-11.4, -1.05], [-10.8, -2.9], [-10.9, -4.8], [-11.8, -6.4]]]
         .map((pts) => ({ pts: flipX(pts as P[], side), width: 0.75, colour: `url(#${toe})`, opacity: 0.85 })),
+        ...[[[-10.2, -38.2], [-7.2, -35.4], [-4.4, -31.8]], [[-15.4, -39.4], [-12.6, -36.6], [-10.2, -33]]]
+        .map((pts) => ({ pts: flipX(pts as P[], side), width: 0.7, colour: C.softLine, opacity: 0.6 }))],
       // From the V's point down the inner side; under the paw; up its outer side, fading out below the shoulder. Their tapers overlap, so
       // each line hands on to the next with no join.
       outline: { ...OUTLINE, taper: 4, spans: bySide(side, [{ from: [-1.8, -31], to: [-5.6, -1.6], width: 1.25, colour: `url(#${fade})` },

@@ -52,8 +52,8 @@
   "threshold": 0.9,
   "groundShadowLeftOut": true,
   "pass": true,
-  "iouHeadAligned": 0.9783,
-  "headCentreOffsetPt": [0.04, -0.15]
+  "iouHeadAligned": 0.9785,
+  "headCentreOffsetPt": [0.02, -0.12]
  },
  "landmarks": {
   "thresholdPt": 2.8,
@@ -92,10 +92,10 @@
    },
    "ear.L.root": {
     "how": "finder",
-    "found": [35.81, -139.91],
+    "found": [35.86, -139.91],
     "model": [36.7, -138.4],
-    "errPt": 1.75,
-    "errShareOfHead": 0.019,
+    "errPt": 1.72,
+    "errShareOfHead": 0.018,
     "pass": true
    },
    "ear.L.tip": {
@@ -108,10 +108,10 @@
    },
    "ear.R.root": {
     "how": "finder",
-    "found": [-38.84, -134.46],
+    "found": [-39.07, -134.46],
     "model": [-40.1, -133.7],
-    "errPt": 1.47,
-    "errShareOfHead": 0.016,
+    "errPt": 1.28,
+    "errShareOfHead": 0.014,
     "pass": true
    },
    "ear.R.tip": {
@@ -256,7 +256,7 @@
     "heldTo": "#FDE3C8",
     "heldBy": "palettePainted.furShade",
     "deltaE2000": 0.44,
-    "pixels": 1320,
+    "pixels": 1367,
     "pass": true
    },
    "eyes": {
@@ -300,18 +300,18 @@
     "pass": true
    },
    "ears": {
-    "dominant": "#D9A074",
+    "dominant": "#D99F74",
     "heldTo": "#D9A379",
     "heldBy": "palette.marking",
-    "deltaE2000": 1.01,
+    "deltaE2000": 1.3,
     "pixels": 5805,
     "pass": true
    },
    "headPatches": {
-    "dominant": "#F0BC91",
+    "dominant": "#F0BB91",
     "heldTo": "#F0BC92",
     "heldBy": "palettePainted.markingLight",
-    "deltaE2000": 0.3,
+    "deltaE2000": 0.33,
     "pixels": 1501,
     "pass": true
    },
