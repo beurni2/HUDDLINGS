@@ -22,12 +22,13 @@ export interface Brow {
 }
 
 /** Each state's centre line on the dog's left (the viewer's right), from its outer end to its inner, and its canvas, in the face frame. */
+// The inner end stands about 2 pt above the outer, the sheets' own tilt (their brows' 1.4 to 2.3 pt, DECISIONS 131).
 const SHAPES: Record<BrowState, { pts: P[]; box: Box }> = {
-  neutral: { pts: [[27.4, -25.4], [26, -27.4], [24.2, -28.8], [22.2, -29.4], [20.2, -29.1], [18.6, -28.2]], box: [15, -34, 16, 12] },
+  neutral: { pts: [[27.4, -25.4], [26, -27.4], [24.2, -28.8], [22.2, -29.4], [20.2, -28.85], [18.6, -27.7]], box: [15, -34, 16, 12] },
   // About 3 pt higher (a tenth of the brow's height over the eye) and arched 0.4 pt more, its ends as level as the neutral's.
-  raised: { pts: [[27.7, -28.3], [26.2, -30.6], [24.3, -32.1], [22.2, -32.8], [20.1, -32.5], [18.5, -31.4]], box: [15, -37, 16, 12] },
+  raised: { pts: [[27.7, -28.3], [26.2, -30.6], [24.3, -32.1], [22.2, -32.8], [20.1, -32.1], [18.5, -30.6]], box: [15, -37, 16, 12] },
   // About 3.5 pt lower, as the crescent-eyed panels draw it (4.3 pt nearer the nose than the Happy panel's), its arch the neutral's.
-  happy: { pts: [[27.5, -21.9], [26.1, -23.9], [24.2, -25.3], [22.2, -25.9], [20.2, -25.6], [18.6, -24.7]], box: [15, -31, 16, 12] },
+  happy: { pts: [[27.5, -21.9], [26.1, -23.9], [24.2, -25.3], [22.2, -25.9], [20.2, -25.35], [18.6, -24.2]], box: [15, -31, 16, 12] },
 };
 
 /** A brow: `sx` is +1 for the brow on the dog's left (the viewer's right), −1 for its right. */

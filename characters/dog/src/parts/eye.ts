@@ -8,7 +8,7 @@
 // and as long as each crop draws it, crisp on the rim's side and a little soft on the iris's, greying toward its
 // upper end; no rays, rings or spokes; and one catchlight high on the nose's side (Q26's default), white with a
 // soft halo where it meets the iris.
-import { ellipse, pathD, type P } from "../../../draw/geom.ts";
+import { ellipse, pathD, v, type P } from "../../../draw/geom.ts";
 import { strokeOf, type DrawnLine } from "../../../draw/line.ts";
 import { LIMITS } from "../../../draw/lint.ts";
 import { blur, piece, uid, type Box, type Piece } from "../../../draw/svg.ts";
@@ -39,6 +39,13 @@ export interface EyeSpec {
   shine: { at: [number, number]; r: number };
   /** How far up from the iris's foot the lower iris lightens: the held brown's band and the russet glow, in points (6 and 2.6 by default). */
   glow?: { band: number; warm: number };
+  /**
+   * The sleepy half-lid, as the expression sheet's Sleepy half-lid draws it: the upper lid closed down over the eye to a
+   * level line `level` pt below the ball's centre (up negative), turned with the face by `tilt` degrees, its fur the
+   * hood's pale tan deepening toward its edge, a lash line `lash` pt thick along that edge that runs `overhang` pt
+   * past the ball either side, and the catchlight moved just under it (`shine`, as `shine` above).
+   */
+  cover?: { level: number; tilt: number; lash: number; overhang: number; shine: { at: [number, number]; r: number } };
 }
 
 const r3 = (n: number) => Math.round(n * 1000) / 1000;
@@ -127,5 +134,116 @@ export function eye(e: EyeSpec): Piece {
     `<path d="${ell(big, e.shine.r * 1.3, e.shine.r * 1.25)}" fill="${C.eyeWhite}" opacity="0.35" filter="url(#${haloBlur})"/>` +
     `<path d="${ell(big, e.shine.r, e.shine.r * 0.94)}" fill="${C.light}" filter="url(#${shineBlur})"/>`;
   const lidLine: DrawnLine = { kind: "outer", width: e.lid.width, where: "eye lid", drawn: lid.drawn };
-  return piece(svg, box, { shapes: [], lines: [lidLine] });
+  if (!e.cover) return piece(svg, box, { shapes: [], lines: [lidLine] });
+  return piece(svg + halfLid(e, e.cover, box), box, { shapes: [], lines: [lidLine] });
+}
+
+/** The half-lid over an open eye (EyeSpec.cover): drawn over it, inside the ball grown to cover its lash line. */
+function halfLid(e: EyeSpec, c: NonNullable<EyeSpec["cover"]>, box: Box): string {
+  const t = (c.tilt * Math.PI) / 180, cos = Math.cos(t), sin = Math.sin(t);
+  /** A point level with the face: `x` across the eye (toward the viewer's right), `y` down, from the ball's centre. */
+  const L = (x: number, y: number): P => [e.centre[0] + x * cos - y * sin, e.centre[1] + x * sin + y * cos];
+  const reach = Math.max(e.rx, e.ry) + 1, half = reach + c.overhang;
+  // The lid's edge bows down a little in its middle, as an eyelid's does.
+  const edge = Array.from({ length: 25 }, (_, k): P => {
+    const x = -half + (2 * half * k) / 24;
+    return L(x, c.level + 1.6 * (1 - (x / half) ** 2));
+  });
+  const ball = uid("ball"), shade = uid("lidshade"), soft = uid("blur"), lash = uid("blur"), shine = uid("blur");
+  // Grown past the ball by the open eye's lash line and its flick, so none of its rim shows round the lid.
+  const grown = pathD(ellipse(e.centre, e.rx + e.lid.width + e.lid.flick + 0.3, e.ry + e.lid.width + e.lid.flick + 0.3, e.turn));
+  const xy = (p: P) => `${fmt(p[0])} ${fmt(p[1])}`;
+  const top = `M${edge.map(xy).join("L")}L${xy(L(half, -reach - 2))}L${xy(L(-half, -reach - 2))}Z`;
+  const [g0, g1] = [L(0, c.level - 6), L(0, c.level)];
+  const band = strokeOf(edge.slice(2, -2), c.lash, { taper: 3.2, tip: 0.7 });
+  const a = (e.turn * Math.PI) / 180;
+  const [u, w] = [c.shine.at[0], -c.shine.at[1]];
+  const spot: P = [e.centre[0] + e.noseward * u * Math.cos(a) - w * Math.sin(a), e.centre[1] + e.noseward * u * Math.sin(a) + w * Math.cos(a)];
+  return `<defs><clipPath id="${ball}"><path d="${grown}"/></clipPath>` +
+    `<linearGradient id="${shade}" gradientUnits="userSpaceOnUse" x1="${fmt(g0[0])}" y1="${fmt(g0[1])}" x2="${fmt(g1[0])}" y2="${fmt(g1[1])}">` +
+    `<stop offset="0" stop-color="${C.patch}"/><stop offset="1" stop-color="${C.lidShade}"/></linearGradient>` +
+    `${blur(soft, box, 0.25)}${blur(lash, box, 0.2)}${blur(shine, box, 0.22)}</defs>` +
+    // The lid's fur over the ball's upper part, deepening to its edge, its rim soft so it melts into the hood.
+    `<g filter="url(#${soft})"><g clip-path="url(#${ball})"><path d="${top}" fill="url(#${shade})"/></g></g>` +
+    // The lash line along its edge, running a little past the ball either side, and the catchlight just under it.
+    `<g filter="url(#${lash})"><path d="${band.d}" fill="${C.eyeRim}"/></g>` +
+    `<path d="${pathD(ellipse(spot, c.shine.r, c.shine.r * 0.94, e.turn))}" fill="${C.light}" filter="url(#${shine})"/>`;
+}
+
+/**
+ * A closed eye drawn as the sheets' dark lash band (no ball, no iris): the happy crescent (Happy crescent, Excited,
+ * Laughing, Proud), a ∩ whose outer end hangs a little lower and runs out in a fine flick; the closed lid (Closed,
+ * Sleepy), a ∪; and the wink (Winking, Cheeky, Mischievous), a ∩ whose outer end lifts. The band is thickest at its
+ * middle, round at its inner end and tapering to its outer flick, near-black (the sheets' crescents are #160301 to
+ * #1B0300 at their core, L* 2 to 3), a touch soft at its edge, as the open eye's is.
+ */
+export interface LidBand {
+  /** Where the band's middle (its area's centroid) lies, in model space, and the face's roll (degrees). */
+  centre: P;
+  tilt: number;
+  /** +1 when the nose lies to the eye's right on screen, −1 when to its left. */
+  noseward: 1 | -1;
+  /** From the inner end's middle to the outer end's, across. */
+  width: number;
+  /** How far the middle stands above the ends: positive a ∩ (crescent, wink), negative a ∪ (closed). */
+  rise: number;
+  /** How much lower the outer end sits than the inner one (negative: higher). */
+  drop: number;
+  /** Thick at its middle, and at its inner and outer ends, in points. */
+  thickness: number;
+  ends: [number, number];
+  /** How far the outer end runs on as a fine flick, and how far it turns from the band's own direction (degrees, down positive). */
+  flick: { length: number; hook: number };
+}
+
+export function lidBand(b: LidBand): Piece {
+  const t = (b.tilt * Math.PI) / 180, cos = Math.cos(t), sin = Math.sin(t);
+  const out = -b.noseward;
+  // The centre line level with the face, from the inner end (s = 0) to the outer (s = 1), x across toward the outer side, y down.
+  const n = 40;
+  const pts: P[] = Array.from({ length: n + 1 }, (_, k): P => [(k / n - 0.5) * b.width, -b.rise * 4 * (k / n) * (1 - k / n) + b.drop * (k / n)]);
+  // The flick: on past the outer end along its own direction, turned by the hook.
+  const tip = pts[n]!, dir = v.norm(v.sub(tip, pts[n - 1]!));
+  const h = (b.flick.hook * Math.PI) / 180;
+  const flickDir: P = [dir[0] * Math.cos(h) - dir[1] * Math.sin(h), dir[0] * Math.sin(h) + dir[1] * Math.cos(h)];
+  const m = Math.max(2, Math.round(b.flick.length / 0.5));
+  for (let k = 1; k <= m; k++) pts.push(v.add(tip, v.mul(flickDir, (b.flick.length * k) / m)));
+  // Its width: the inner end's, swelling to the middle's and down to the outer end's, then thinning along the flick.
+  const total = pts.length - 1;
+  const widthAt = (k: number) => {
+    if (k > n) return b.ends[1] + (0.15 - b.ends[1]) * ((k - n) / m);
+    const s = k / n, base = b.ends[0] + (b.ends[1] - b.ends[0]) * s;
+    return base + (b.thickness - base) * Math.sin(Math.PI * s) ** 0.7;
+  };
+  const left: P[] = [], right: P[] = [];
+  for (let k = 0; k <= total; k++) {
+    const tan = v.norm(v.sub(pts[Math.min(total, k + 1)]!, pts[Math.max(0, k - 1)]!));
+    const nrm: P = [-tan[1], tan[0]];
+    left.push(v.add(pts[k]!, v.mul(nrm, widthAt(k) / 2)));
+    right.push(v.sub(pts[k]!, v.mul(nrm, widthAt(k) / 2)));
+  }
+  // A round cap on the inner end.
+  const back = v.norm(v.sub(pts[0]!, pts[1]!)), side: P = [-back[1], back[0]], capR = b.ends[0] / 2;
+  const cap: P[] = Array.from({ length: 7 }, (_, k) => {
+    const a = -Math.PI / 2 + (Math.PI * (k + 1)) / 8;
+    return v.add(pts[0]!, v.add(v.mul(back, capR * Math.cos(a)), v.mul(side, -capR * Math.sin(a))));
+  });
+  const outline: P[] = [...left, ...right.reverse(), ...cap];
+  // Its area's centroid, so the band's middle lands where the view asks.
+  let A = 0, cx = 0, cy = 0;
+  outline.forEach((p, i) => {
+    const q = outline[(i + 1) % outline.length]!, c = p[0] * q[1] - q[0] * p[1];
+    A += c; cx += (p[0] + q[0]) * c; cy += (p[1] + q[1]) * c;
+  });
+  const mid: P = [cx / (3 * A), cy / (3 * A)];
+  const place = ([x, y]: P): P => {
+    const lx = out * (x - mid[0]), ly = y - mid[1];
+    return [b.centre[0] + lx * cos - ly * sin, b.centre[1] + lx * sin + ly * cos];
+  };
+  const shape = outline.map(place);
+  const [x0, y0, x1, y1] = shape.reduce((q, [x, y]) => [Math.min(q[0], x), Math.min(q[1], y), Math.max(q[2], x), Math.max(q[3], y)], [Infinity, Infinity, -Infinity, -Infinity]);
+  const box: Box = [x0 - 2, y0 - 2, x1 - x0 + 4, y1 - y0 + 4];
+  const g = uid("blur");
+  const d = `M${shape.map((p) => `${fmt(p[0])} ${fmt(p[1])}`).join("L")}Z`;
+  return piece(`<defs>${blur(g, box, 0.2)}</defs><path d="${d}" fill="${C.eyeRim}" filter="url(#${g})"/>`, box);
 }

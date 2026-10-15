@@ -11,9 +11,10 @@ import { blur, join, pad, piece, uid, type Box, type Piece } from "../../../draw
 import { model } from "../model.ts";
 import { C, LINES } from "../palette.ts";
 import { brow } from "../parts/brow.ts";
-import { eye as sharedEye } from "../parts/eye.ts";
+import { eye as sharedEye, lidBand, type EyeSpec, type LidBand } from "../parts/eye.ts";
 import { rolledFrame } from "../parts/face.ts";
-import { mouth } from "../parts/mouth.ts";
+import { MOUTH_STATES, mouth } from "../parts/mouth.ts";
+import { stars, type Star } from "../parts/stars.ts";
 import { litEdge, litMarking, litPart, type LitSpan } from "../parts/lines.ts";
 import { curlShapes, topknot, type Curl } from "../parts/topknot.ts";
 import { earFur } from "../parts/ear.ts";
@@ -442,12 +443,12 @@ function headLinePiece(): Piece {
  * sheet's 1.5 to 1.9), from a little above the outer side's level to below its foot; the catchlight where the
  * sheet's sits, high on the nose's side. `noseward` is +1 when the nose is to its right.
  */
-function eye(landmark: P, noseward: 1 | -1): Piece {
+function eyeSpec(landmark: P, noseward: 1 | -1): EyeSpec {
   const out = -noseward;
   // The ball sits a hair out from the landmark and 0.45 pt below it, so the dark eye's own centre (DECISIONS 10)
   // lands on the landmark with the eye's foot where the sheet's is.
   const centre: P = [landmark[0] + out * 0.65 * cosR - 0.6 * sinR, landmark[1] + out * 0.65 * sinR + 0.6 * cosR];
-  return sharedEye({
+  return {
     centre, rx: 9.5, ry: 9.2, turn: 20 * noseward + ROLL_DEG, noseward,
     rim: { top: 1.3, side: 1, foot: 0.7 },
     lid: { from: -18, to: 122, width: 1.8, flick: 0.25 },
@@ -455,8 +456,9 @@ function eye(landmark: P, noseward: 1 | -1): Piece {
     shine: { at: [2.3, 5.1], r: 1.8 },
     // The front crop's glow is the narrowest, right along the foot (its L* 27 to 30 within 2 pt of it).
     glow: { band: 5.6, warm: 1.8 },
-  });
+  };
 }
+const eye = (landmark: P, noseward: 1 | -1): Piece => sharedEye(eyeSpec(landmark, noseward));
 
 /**
  * The nose in the face frame, as the turnaround, the blush-cheeks panel and the hero draw it: a wide rounded
@@ -549,7 +551,13 @@ function earSpans(side: "L" | "R"): LitSpan[] {
   const ends: [P, P] = [onEar(side, [-41.6, -67.2]), onEar(side, [-38.6, -140.6])];
   // Its foot, where it hangs over the shoulder, is a place under the head: deepest there (the sheet's #8A5334).
   const foot = (p: P) => Math.min(0.8, Math.max(0, (p[1] + 72) / 6) * 0.8);
-  return [side === "R" ? { from: ends[0], to: ends[1], on: "tan", under: foot, taper: 7 } : { from: ends[1], to: ends[0], on: "tan", under: foot, taper: 7 }];
+  // Its inner edge, from under the crown down behind the face to just above where it comes out under the cheek:
+  // hidden at rest, it shows where a lifted ear swings out from the cheek (DECISIONS 132), in the line of an ear tucked
+  // under the head. It starts below the root's tight inner corner, which stays under the crown.
+  const inner: [P, P] = [onEar(side, [-28.6, -129]), onEar(side, [-40.4, -71.6])];
+  return side === "R"
+    ? [{ from: ends[0], to: ends[1], on: "tan", under: foot, taper: 7 }, { from: inner[0], to: inner[1], on: "tan", under: 0.5, taper: [4, 6] }]
+    : [{ from: ends[1], to: ends[0], on: "tan", under: foot, taper: 7 }, { from: inner[1], to: inner[0], on: "tan", under: 0.5, taper: [6, 4] }];
 }
 
 /**
@@ -699,6 +707,107 @@ export function front(): Drawn[] {
   }
   return out;
 }
+
+// The face library (spec L440-498): every face state the front draws besides its rest, each from its panels by the
+// shared face recipes (parts/eye.ts, mouth.ts, brow.ts, stars.ts), placed by this view's face frame. The rest face
+// (open eyes, the open mouth, neutral brows and ears) is front()'s; the states' rotations of the ears are the face
+// clips' (presets.ts, faceClips.ts).
+
+/** Each eye's place along the eye line, out from the face frame's middle. */
+const EYE_HALF = Math.hypot(EYE_L[0] - EYE_R[0], EYE_L[1] - EYE_R[1]) / 2;
+/** A model-space point moved across and down in the face's level frame. */
+const nudge = ([x, y]: P, [dx, dy]: P): P => [x + dx * cosR - dy * sinR, y + dx * sinR + dy * cosR];
+
+/** The eye states the front draws besides the open eye (sparkle and squeeze are the happy crescent's region: rig.json). */
+export const EYE_STATES = ["happy", "closed", "sleepy", "wink", "wide", "peek"] as const;
+
+/**
+ * An eye state, drawn from its panels. The closed states are the sheets' dark lash bands, placed by their middles where
+ * the level panels place them from the nose (DECISIONS 130): the happy crescents (Excited, Laughing) 2.3 pt below the
+ * open eye's centre and 1.9 pt further out, the closed lids (Sleepy) 2 pt below and 1.6 out, the wink (Mischievous,
+ * Winking, Cheeky) at the open eye's height.
+ */
+function eyeState(state: (typeof EYE_STATES)[number], side: "L" | "R"): Piece {
+  const sx = side === "L" ? 1 : -1, noseward: 1 | -1 = side === "L" ? -1 : 1;
+  const spec = eyeSpec(side === "L" ? EYE_L : EYE_R, noseward);
+  const band = (out: number, down: number, b: Omit<LidBand, "centre" | "tilt" | "noseward">) =>
+    lidBand({ centre: FRAME.at([sx * (EYE_HALF + out), down]), tilt: ROLL_DEG, noseward, ...b });
+  switch (state) {
+    // A ∩ about as wide as the open eye (the panels' 19 to 21 pt with its soft edge), its middle 3.3 pt thick, the
+    // outer end a little lower and running out in a short lash flick.
+    case "happy":
+      return band(1.9, 2.35, { width: 17.6, rise: 4.4, drop: 1, thickness: 3.3, ends: [1.5, 0.8], flick: { length: 1.4, hook: -10 } });
+    // A ∪ a little narrower and thinner, its middle 3 pt below its ends, the outer end lifting in a lash flick.
+    case "closed":
+      return band(1.6, 2, { width: 17, rise: -3, drop: 0, thickness: 3, ends: [1.3, 0.8], flick: { length: 1.3, hook: -30 } });
+    // The crescent at the open eye's height, its outer end lifting into a longer lash flick, as the winks draw it.
+    case "wink":
+      return band(0.5, 0.6, { width: 17.6, rise: 4, drop: -1.4, thickness: 3.3, ends: [1.5, 0.8], flick: { length: 1.8, hook: -75 } });
+    // The open eye with its upper lid closed down to just below its middle, its edge bowing a little, as Sleepy half-lid
+    // draws it; the catchlight just under the lash.
+    case "sleepy":
+      return sharedEye({ ...spec, cover: { level: 0.6, tilt: ROLL_DEG, lash: 1.9, overhang: 1, shine: { at: [2.7, -4], r: 1.2 } } });
+    // Surprised round: 7% larger and a point higher, the white broader and longer, the catchlight bigger; its larger
+    // pupil baked in (phase 3 has no pupil scale).
+    case "wide":
+      return sharedEye({ ...spec, centre: nudge(spec.centre, [-sx * 0.4, -0.9]), rx: 10.2, ry: 9.85, white: { at: -28, width: 2, span: 42, fade: 0.5 },
+        shine: { at: [2.5, 5.6], r: 2.05 }, glow: { band: 6, warm: 2 } });
+    // Side glance: the iris baked toward the viewer's right, as the panel looks, the white a broad crescent on the
+    // other side; the catchlight stays on the iris.
+    case "peek":
+      return sharedEye({ ...spec, white: { at: side === "R" ? -6 : 186, width: 4.6, span: 58, fade: 0.3 }, shine: { at: [side === "R" ? 2.6 : -2.4, 5], r: 1.8 } });
+  }
+}
+
+/** Proud's stars beside the head on the dog's right, where the panel puts them from the nose, its raised chin levelled. */
+const STARS: Star[] = [{ at: [-74.9, -41.3], size: [11.4, 14.4], turn: 0 }, { at: [-60.3, -56.7], size: [9.6, 10.4], turn: 0 }];
+
+// The one perked ear, as the One ear perked panel draws it: flipped up off the head's side, its root still beside the
+// temple, coming out from behind the face's side and under the crown's overhang where the hanging ear's does, and the
+// flap turned up over the crown's corner and out, a bean whose free end hangs a little; typed on the dog's right ear
+// in the head's frame, mirrored for its left, and rolled with the face. Ears draw behind the head in every state, so
+// the flap's inner end tucks behind the crown and the topknot (DECISIONS 133).
+const perkedR: Node[] = [[-33, -137.4], [-36, -127], [-38.8, -121.8], [-42.4, -117.8], [-46.8, -117.8], [-49.8, -121.8], [-51.2, -127.8], [-53.6, -135], [-58.6, -141.2], [-65, -145],
+  [-71.4, -148.2], [-75.4, -153], [-74.4, -159.6], [-68, -164.6], [-58.8, -167.4], [-49.4, -167], [-41.4, -163.4], [-35.2, -158.2], [-31.4, -151.2], [-30.6, -143.6]];
+const perked = { R: smooth(rollN(perkedR)), L: smooth(rollN(mirrorX(perkedR))) };
+const onPerk = (side: "L" | "R", p: P): P => rollP(side === "R" ? p : [-p[0], p[1]]);
+const perkD = (side: "L" | "R", d: string) => rollD(side === "R" ? d : mirrorD(d));
+
+function perkedEar(side: "L" | "R"): Piece {
+  const on = (p: P) => onPerk(side, p);
+  const paint = earFur({
+    ear: perked[side],
+    axis: [on([-46, -124]), on([-75, -155])],
+    deepen: [0.4, 1],
+    // Four locks along the flap toward its free end, as the panel paints its fur.
+    locks: ([[[-52, -162], [-60, -164.5], [-67, -162.5], [-72, -157.5]], [[-50, -155], [-58, -157], [-65, -155.6], [-71, -152]],
+      [[-52, -147], [-59, -149.4], [-66, -149.2], [-71, -147.6]], [[-47, -140], [-53, -142], [-58, -144]]] as P[][]).map((pts) => pts.map(on)),
+    dips: [on([-74.6, -151])],
+    light: perkD(side, "M-42 -162 C-48 -166.4 -56 -167.8 -63 -166.6 C-58 -164 -50 -162.6 -45 -159.6Z"),
+    // The crown's and the face's shade where the root runs down behind the face and turns up under the crown.
+    under: [perkD(side, "M-26 -152 L-40 -152 C-44 -146 -46 -138 -47 -130 L-49 -116 L-26 -116Z")],
+  });
+  // Its line from where its root comes out beside the face, up round the flap's free end and over its top, to where the
+  // top goes behind the topknot.
+  const [a, b] = [on([-43.4, -118.2]), on([-31.8, -150.4])];
+  return litPart(`ear.${side}`, perked[side], paint, [side === "R" ? { from: a, to: b, on: "tan", taper: [3, 4] } : { from: b, to: a, on: "tan", taper: [4, 3] }]);
+}
+
+/** Every face state the front draws besides its rest, each with its part and state. */
+export function faceStates(): Drawn[] {
+  const out: Drawn[] = [];
+  for (const side of ["L", "R"] as const) for (const state of EYE_STATES) out.push({ part: `eye.${side}`, state, piece: eyeState(state, side) });
+  for (const state of MOUTH_STATES) if (state !== "open") out.push({ part: "mouth", state, piece: mouth(state, FRAME).piece });
+  for (const state of ["raised", "happy"] as const) {
+    out.push({ part: "brow.L", state, piece: brow(state, 1, FRAME).piece }, { part: "brow.R", state, piece: brow(state, -1, FRAME).piece });
+  }
+  for (const side of ["L", "R"] as const) out.push({ part: `ear.${side}`, state: "onePerked", piece: perkedEar(side) });
+  out.push({ part: "stars", state: "sparkle", piece: stars(STARS, FRAME) });
+  return out;
+}
+
+/** The face frame and its roll, for the R3 guards (characters/dog/test/faces.test.ts), which hold what each recipe draws here. */
+export const faceFrame = { frame: FRAME, rollDeg: ROLL_DEG };
 
 /** Points the sheet has no finder for, where this drawing puts them (dev output for the sheet match). */
 export const landmarks: Record<string, P> = {
