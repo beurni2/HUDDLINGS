@@ -120,3 +120,27 @@ Overlays: `markings-master.turnaround.back.png`, `markings-master.turnaround.fro
 
 **25. Not markings:** the tan brows are face parts (section 5b's dog features); the ears are their own parts; the warm tan between the front legs is the body's soft shade; and the warm band along each ear's inner edge in the back view is the ear's soft contact shadow on the head (section 5b: "soft contact shadows sit where parts overlap").
 Crops: `master.turnaround.front.png`, `master.turnaround.back.png`, `master.hero.main.png`.
+
+## Drawing the front view (phase 3)
+
+**26. Parts are drawn in model space** (points at the 164 pt height, the ground under the seat at 0, 0, y down) and wrapped into their bones' spaces from the rig's rest pivots (`characters/draw/frame.ts`), so no anchor is typed by hand. The WebGL rest frame of the dog's still matches the resvg composite of the drawings (`characters/draw/test/webgl.test.ts`).
+
+**27. The head's roll (8, revisited).** The head's parts are typed upright in the face's frame and rolled with it by the eyes' own roll, about 4°, so the eyes, ear roots, nose and mouth corners land on their landmarks. The roll lives in the drawing, not as a rest angle in the rig: a rest angle turns the head about the chin and swings the crown about 4 pt sideways off the sheet's. It fades out above the eyes, where the crown is level, and eases to 45% under the jaw, where the sheet's jaw lies nearly level over the collar (y −63.3 on the right and −64.5 on the left at x 31). Phase 4 decides whether the rest pose carries it as well.
+Crop: `master.turnaround.front.png`.
+
+**28. Where the turnaround is not symmetric, the drawing follows it:** the crown sits 1.8 pt higher to the right of the topknot; the head's left side comes in 2.4 pt between the ear's root and the cheek; the left ear hangs 2.8° further out and 3% longer, with its upper outer edge typed where the sheet draws it. Each rule is named in `characters/dog/src/views/front.ts`.
+Crop: `master.turnaround.front.png`.
+
+**29. The eyes:** tilted ovals 9.3 × 9.6 pt, their tops turned 30° toward the nose before the face's roll (an ellipse fitted to the sheet's dark eye reads 9.5 × 10.0 pt, turned 26° and 29°); a dark rim, the near-black pupil and upper iris, a lower iris warmed toward its rim within its held #3A2314, a white crescent low on the outer side, and one catchlight high on the nose's side, as every sheet draws it (`QUESTIONS.md` Q26).
+Crops: `master.turnaround.front.png`, `master.feature.large-glossy-eyes.png`, `master.hero.main.png`.
+
+**30. Lines and derived colours.** Every colour is the printed palette, the painted one (18) or derived from them by a stated rule (`characters/dog/src/palette.ts` lists each with its rule and the sheet colour it was matched to). The outer line is 1.2 to 1.7 pt as drawn, lighter where it runs over fur (the crown's and topknot's line, #B29379, against the sheet's #B29576), warmer round the ears, haunches and paws, and broken where the sheet's fur breaks it.
+
+**31. The blush part is drawn at 1.17 × the resting level,** so that the rendered cheek, blurred over the fur, fits at the resting level (0.34 and 0.35 on the two cheeks) by `palette.blush`'s own fit, the one that measured the sheet's.
+
+**32. Fur and corners.** The crown's fur where it overhangs each ear's root is declared fur, as the sheet draws it, so the 4 pt corner rule (L510) does not round it away. The lint's only part exceptions are the collar's narrow ends, which tuck under the cheek fur, and the tag's point (`characters/dog/src/drawings.ts`).
+
+**33. Known gap: the chin's shadow on the collar** is painted as the collar's own contact shade. Spec L396 wants a cast shadow on the bone that casts it, clipped to the part it falls on, so it moves with the head. That needs a new part (the chin's shadow on the head bone, clipped to the collar) and is done before Gate A. The chin's shade on the shoulders is already such a part.
+
+**34. The saddle seen from the front runs up to the shoulders,** where the sheet paints tan beside the front legs. Its area is 1.4 (right) and 2.0 (left) times phase 2's patches, because phase 2's patch finder did not join that tan to the haunch patches. The marking check holds each patch's place both ways (its centroid inside the sheet's patch and the sheet's inside it), and passes.
+Crops: `master.turnaround.front.png`, overlay `markings-master.turnaround.front.png`.

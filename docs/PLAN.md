@@ -137,7 +137,7 @@ In the order they come up. Weeks count from your `go`. Secrets go in GitHub (Set
 
 **Around week 3:** allow `commons.wikimedia.org` and `upload.wikimedia.org` for Muybridge's plates, needed in phase 4 (Edit the environment, Network access: https://code.claude.com/docs/en/cloud-environments#network-access), or upload the plates. Slow-motion video of a real puppy helps too, if you have some. Nothing else is needed; I work around the other blocked sites (`LIMITATIONS.md`).
 
-**Around week 3 to 4, at Gate A:** approve the dog's look: the views, the faces, the marking map and the collar blue; answer Q2 (the dog's squeeze and sparkle eyes); a first look at the new hungry and huffy faces. Q3 (four Visual QA checks) by phase 4.
+**Around week 3 to 4, at Gate A:** approve the dog's look: the views, the faces, the marking map and the collar blue; answer Q2 (the dog's squeeze and sparkle eyes) and Q26 (one catchlight per eye, as the sheets draw it, or the spec's two or three); a first look at the new hungry and huffy faces. Q3 (four Visual QA checks) by phase 4.
 
 **Around week 5, at Gate B:** answer Q4 (temporary licensed sounds are fine for Gate B).
 
