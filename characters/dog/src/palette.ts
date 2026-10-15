@@ -47,6 +47,9 @@ export const C = {
   earDeeper: multiply(multiply(marking, furShadeBy), furShadeBy),
   /** The ear's lowest clumps, its deeper shade 8% darker: about #C48253 against the sheet's #C17D50. */
   earLow: darken(multiply(multiply(marking, furShadeBy), furShadeBy), 0.08),
+  /** The ear's lowest clumps, browner: its deeper shade 30% of the way to the warm line, about #BA7D51 against the
+   * sheet's #BC7847 to #C48359. */
+  earFoot: mix(darken(multiply(multiply(marking, furShadeBy), furShadeBy), 0.08), mix(outline, mix(darken(multiply(marking, marking), 0.12), marking, 0.33), 0.4), 0.3),
   /** The lighter line on fur spans. */
   furLine: mix(outline, fur, 0.14),
   /** The crown's and the topknot's one light warm line: the outline 30% of the way to the cream, #B29379 against the
