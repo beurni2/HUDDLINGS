@@ -1,8 +1,8 @@
 // The stills renderer (runtime-web/lab/still.ts) on the test character with three
 // still clips added: the files follow the contract, the white and black passes
-// give the package's own alpha (times each part's), the ID pass paints each part
-// flat where it draws and keeps the clip to head.base, whatever the parts' alphas,
-// model points land on rootPx + ppp·(x, y), and the same still renders the same
+// give the package's own alpha (times each part's), the ID pass paints each part's
+// footprint flat, at any alpha above 0 and never at 0, and keeps the clip to
+// head.base, whatever the parts' alphas (the dog's blush too), model points land on rootPx + ppp·(x, y), and the same still renders the same
 // bytes twice. The reference is composited on the
 // CPU straight from the atlas page, for every part drawn unrotated on whole pixels.
 // A still never comes out half-written or at another size, and the look loop
@@ -99,7 +99,7 @@ function alphaAt(p: Placed, i: number, j: number): number {
 
 /**
  * Whether the part's texel under pixel (i, j) is in its part for the ID pass: at least half its region's largest
- * alpha, times the part's alpha; as a mask, at full alpha whatever its own.
+ * alpha, while the part draws at all (its alpha above 0); as a mask, whatever its own alpha.
  */
 function inItsPart(p: Placed, i: number, j: number, asMask = false): boolean {
   return inPart(alphaAt(p, i, j), largest(p.item.region), asMask ? 1 : p.item.alpha);
@@ -207,8 +207,8 @@ test("alpha from the white and black passes is the package's own alpha", (t) => 
 });
 
 /**
- * The ID pass against the CPU's: each pixel the topmost part whose texel, times the part's alpha, is half its
- * region's largest or more, where its mask (cut the same way, at full alpha) covers it. Returns the pixels that differ.
+ * The ID pass against the CPU's: each pixel the topmost part above alpha 0 whose texel is half its region's largest
+ * or more, where its mask (cut the same way, whatever its alpha) covers it. Returns the pixels that differ.
  */
 function idCheck(shot: Shot): number {
   const { info, ids } = shot;
@@ -261,7 +261,7 @@ test("the ID pass paints each part flat where its alpha is half its largest or m
   for (const eye of ["eye.L", "eye.R"]) assert.ok(ids.data.some((_, k) => k % 4 === 0 && hex([...ids.data.subarray(k, k + 3)]) === info.parts[eye]!.id), `${eye} shows`);
 });
 
-test("a still draws each part at its alpha; in the ID pass a faded part keeps fewer pixels and a faded mask still clips whole", (t) => {
+test("a still draws each part at its alpha; in the ID pass a part above 0 keeps its whole footprint, one at 0 none, and a faded mask still clips whole", (t) => {
   assert.deepEqual(Object.fromEntries(fadedItems.filter((i) => i.alpha !== 1).map((i) => [i.part, i.alpha])), fadedAlpha, "the faded still's draw list holds each part's alpha");
   assert.deepEqual(fadedShot.info.drawn, items.map((i) => i.part), "a part at alpha 0 stays in the draw list");
   // Up to three translucent layers stack here (the body, head.base at 0.3, the marking at 0.6), each rounded to 8 bits
@@ -272,16 +272,21 @@ test("a still draws each part at its alpha; in the ID pass a faded part keeps fe
   assert.ok(!fadedShot.white.data.equals(front.white.data), "the faded still looks different");
   const wrong = idCheck(fadedShot);
   assert.equal(wrong, 0, `${wrong} pixels show the wrong part`);
-  // head.base at 0.3 is under half everywhere, so its own colour is gone, but its clip group draws as before.
-  assert.equal(idPixels(fadedShot, "head.base"), 0);
+  // The level is white's and black's; the ID pass shows where each part is. Every pixel shows the part it shows at
+  // full alpha, but eye.L's, at 0: there the part under it shows, inside its mask, so the clip group is whole.
   assert.equal(idPixels(fadedShot, "eye.L"), 0, "an eye at 0");
-  assert.equal(idPixels(fadedShot, "eye.R"), idPixels(front, "eye.R"), "eye.R, at 1, clipped to the faded head.base");
-  const nose = [idPixels(fadedShot, "nose"), idPixels(front, "nose")];
-  assert.ok(nose[0]! > 0.8 * nose[1]! && nose[0]! <= nose[1]!, `the nose at 0.9 loses only its edge: ${nose[0]} of ${nose[1]} pixels`);
-  const marking = [idPixels(fadedShot, "head.marking"), idPixels(front, "head.marking")];
-  assert.ok(marking[0]! > 1000 && marking[0]! <= marking[1]!, `the marking at 0.6 keeps its core: ${marking[0]} of ${marking[1]} pixels`);
-  const shadow = [idPixels(fadedShot, "shadow"), idPixels(front, "shadow")];
-  assert.ok(shadow[0]! > 0 && shadow[0]! < shadow[1]!, `the soft shadow at 0.5 keeps only its strongest texels: ${shadow[0]} of ${shadow[1]} pixels`);
+  const eye = info.parts["eye.L"]!.id;
+  let changed = 0;
+  for (let k = 0; k < ids.data.length; k += 4) {
+    const before = hex([...ids.data.subarray(k, k + 3)]), after = hex([...fadedShot.ids.data.subarray(k, k + 3)]);
+    if (before === eye) {
+      changed++;
+      assert.ok([info.parts["head.base"]!.id, info.parts["head.marking"]!.id].includes(after), `under eye.L at pixel ${k / 4} shows ${after}`);
+    } else assert.equal(after, before, `pixel ${k / 4}`);
+  }
+  assert.ok(changed > 100, `eye.L covered ${changed} pixels`);
+  // Each faded part keeps the pixels it showed at 1, the mask head.base at 0.3 and the soft shadow at 0.5 among them.
+  for (const part of ["head.base", "head.marking", "shadow", "nose", "eye.R"]) assert.ok(idPixels(fadedShot, part) >= idPixels(front, part) && idPixels(front, part) > 0, part);
 });
 
 test("model points land on rootPx + ppp·(x, y)", () => {
@@ -382,19 +387,61 @@ test("the ID pages keep each region's texels from half its largest alpha up, its
   assert.deepEqual([inPart(0, 0), inPart(1, 1), inPart(64, 128), inPart(63, 128)], [false, true, true, false]);
 });
 
-test("the ID pages hold a part's alpha: texel × alpha from half the largest up draws, the rest of its part only masks", () => {
-  // A 3 × 1 region with alphas 128, 200, 255 (largest 255), drawn at alpha 0.6: 2·a·0.6 ≥ 255 keeps a ≥ 212.5.
-  const page = new Uint8Array(5 * 1 * 4);
-  [128, 200, 255].forEach((a, k) => page.set([9, 9, 9, a], (1 + k) * 4));
+test("the ID pages hold a part's footprint, never its level: any alpha above 0 draws all of it, 0 only masks", () => {
+  // A 4 × 1 region with alphas 127, 128, 200, 255 (largest 255): its footprint is a ≥ 127.5, whatever the part's alpha.
+  const page = new Uint8Array(6 * 1 * 4);
+  [127, 128, 200, 255].forEach((a, k) => page.set([9, 9, 9, a], (1 + k) * 4));
   const at = (alpha: number) => {
-    const out = recolour(page, 5, 1, [{ x: 1, y: 0, w: 3, h: 1, colour: [10, 20, 30], alpha }]);
-    return [1, 2, 3].map((x) => out[x * 4 + 3]);
+    const out = recolour(page, 6, 1, [{ x: 1, y: 0, w: 4, h: 1, colour: [10, 20, 30], alpha }]);
+    return [1, 2, 3, 4].map((x) => out[x * 4 + 3]);
   };
-  assert.deepEqual(at(0.6), [MASK_ONLY, MASK_ONLY, 255]);
-  assert.deepEqual(at(1), [255, 255, 255], "at full alpha as before");
-  assert.deepEqual(at(0), [MASK_ONLY, MASK_ONLY, MASK_ONLY], "at 0 the part only masks");
+  assert.deepEqual(at(1), [0, 255, 255, 255], "at full alpha as before");
+  assert.deepEqual(at(0.35), [0, 255, 255, 255], "the blush's level keeps the whole footprint");
+  assert.deepEqual(at(0.01), [0, 255, 255, 255]);
+  assert.deepEqual(at(0), [0, MASK_ONLY, MASK_ONLY, MASK_ONLY], "at 0 the part only masks");
   assert.ok(MASK_ONLY / 255 >= MASK_ALPHA && MASK_ONLY / 255 < 0.5, "the renderer's mask cut keeps MASK_ONLY, and the ID pass's colour cut leaves it out");
-  assert.deepEqual([inPart(255, 255, 0.5), inPart(254, 255, 0.5), inPart(255, 255, 0)], [true, false, false]);
+  // A soft region's core (a blush drawn soft, largest 46) at 0.35 as at 1.
+  assert.deepEqual([inPart(23, 46, 0.35), inPart(22, 46, 0.35), inPart(255, 255, 0.5), inPart(128, 255, 0.5), inPart(255, 255, 0)], [true, false, true, true, false]);
+});
+
+test("the ID pass shows the dog's blush by its footprint, never its level: keyed at 0.35 all of it, at 0 none, and its clip group's IDs unchanged", async () => {
+  // The blush is drawn soft and rests at its sheet's level (model.json's blush), its alpha by the rig or a clip
+  // (spec L474: 0 to 100%). The sheet match finds it in ids.png, and reads its level from white.png and black.png.
+  const dog = await readSource("dog");
+  const front = dog.clips.find((c) => c.name === "still_front")!;
+  const blushAt = (name: string, level: number): Clip => ({ ...front, name, alpha: { "blush.L": [[0, level]], "blush.R": [[0, level]] } });
+  const dogPkg = await buildPackage({ ...dog, clips: [...dog.clips, blushAt("still_blush35", 0.35), blushAt("still_blush0", 0)] });
+  const shots: Record<string, { info: StillInfo; ids: PNG; white: PNG }> = {};
+  await withPackage(dogPkg, PPP, async () => {
+    for (const name of ["still_front", "still_blush35", "still_blush0"]) {
+      const info = await stills.render(name, join(dir, `dog-${name}`));
+      shots[name] = { info, ids: PNG.sync.read(read(`dog-${name}`, "ids.png")), white: PNG.sync.read(read(`dog-${name}`, "white.png")) };
+    }
+  });
+  const { info: dogInfo } = shots.still_front!;
+  const count = (png: PNG, part: string) => {
+    let n = 0;
+    for (let k = 0; k < png.data.length; k += 4) if (hex([...png.data.subarray(k, k + 3)]) === dogInfo.parts[part]!.id) n++;
+    return n;
+  };
+  for (const cheek of ["blush.L", "blush.R"]) assert.ok(count(shots.still_front!.ids, cheek) > 200, `${cheek} shows at rest`);
+  // At 0.35 the frame is paler, and the ID pass is the rest still's, byte for byte.
+  assert.ok(!shots.still_blush35!.white.data.equals(shots.still_front!.white.data), "the blush's level shows in white.png");
+  assert.ok(shots.still_blush35!.ids.data.equals(shots.still_front!.ids.data), "the blush at 0.35 keeps its whole footprint");
+  // At 0 no blush pixel is left; every other pixel is as before, and where a cheek was, its mask's group shows through.
+  const blush = new Set(["blush.L", "blush.R"].map((p) => dogInfo.parts[p]!.id));
+  const group = new Set(Object.entries(dogInfo.parts).filter(([name, p]) => name === "head.base" || p.clipTo === "head.base").map(([, p]) => p.id));
+  const [rest, gone] = [shots.still_front!.ids.data, shots.still_blush0!.ids.data];
+  let under = 0;
+  for (let k = 0; k < rest.length; k += 4) {
+    const before = hex([...rest.subarray(k, k + 3)]), after = hex([...gone.subarray(k, k + 3)]);
+    assert.ok(!blush.has(after), `a blush pixel at alpha 0, pixel ${k / 4}`);
+    if (blush.has(before)) {
+      under++;
+      assert.ok(group.has(after) && !blush.has(after), `under the cheek at pixel ${k / 4} shows ${after}, not head.base or its group`);
+    } else assert.equal(after, before, `pixel ${k / 4} changed`);
+  }
+  assert.equal(under, count(shots.still_front!.ids, "blush.L") + count(shots.still_front!.ids, "blush.R"));
 });
 
 test("the ground shadow, a soft part, shows in the ID pass", () => {
