@@ -175,9 +175,38 @@ class RecordsTest(unittest.TestCase):
         self.assertEqual(self.built["records"][MASTER + "cheeky"]["drawn"], {"eyes": "wink", "mouth": "cheeky", "wink": "eye.L"})
         for name in WITH_PANELS:
             self.assertTrue(PLAN["presets"][name].get("note"), name)
-        # The panels that raise the chin or turn the head are never a primary.
+        # The panels that raise the chin or turn the head where a level panel draws the same states are never a primary.
         for pid in ("expressions.expression.proud", "expressions.expression.mischievous"):
             self.assertEqual(self.built["records"][pid]["primaryFor"], [])
+
+    def test_a_panel_that_turns_the_head_is_measured_so(self):
+        # The eyes' middle across from the nose, beside the turnaround front's: under 1.3 pt on the level primaries,
+        # 3 to 5.1 pt on the panels that turn the head (Curious, Shy, Sleepy, Mischievous, Proud).
+        records = self.built["records"]
+        limit = faces.TURNED_SHARE * self.built["headWidthPt"]
+        turned = {pid for pid, r in records.items() if r["turned"]}
+        self.assertEqual(turned, {MASTER + "curious", MASTER + "sleepy", "expressions.expression.curious",
+                                  "expressions.expression.sleepy", "expressions.expression.shy",
+                                  "expressions.expression.proud", "expressions.expression.mischievous"})
+        for pid, record in records.items():
+            with self.subTest(panel=pid):
+                if record["turnAcrossPt"] is None:
+                    self.assertNotIn("nose", record["anchorsCropPx"])
+                    continue
+                self.assertEqual(record["turned"], abs(record["turnAcrossPt"]) > limit)
+                if record["primaryFor"] and not record["turned"]:
+                    self.assertLess(abs(record["turnAcrossPt"]), 1.3)
+        # A turned primary holds no mouth: its pair would be held by its spacing, and these draw a downturned one.
+        for pid in turned:
+            for preset in records[pid]["primaryFor"]:
+                self.assertEqual(records[pid]["gates"][preset], ["eye.R", "eye.L"], (pid, preset))
+        # The turn is taken in the head's own frame: the same face rolled any way turns by the same amount.
+        face = {"nose": np.array([0.0, 0.0]), "eye.R": np.array([-10.0, -8.0]), "eye.L": np.array([12.0, -8.0])}
+        for roll in (0.0, 12.0, -21.0):
+            t = np.radians(roll)
+            turn = np.array([[np.cos(t), -np.sin(t)], [np.sin(t), np.cos(t)]])
+            rolled = {n: turn @ p for n, p in face.items()}
+            self.assertAlmostEqual(faces.eyes_across(rolled, faces.roll_of(rolled["eye.R"], rolled["eye.L"])), 1.0)
 
     def test_no_record_names_a_face_rule_r3_forbids(self):
         named = [p for preset in PLAN["presets"].values() for p in [preset.get("primary")] + preset["beside"] if p]

@@ -81,7 +81,8 @@ def build(species):
 
 
 FACE_KEYS = ("crop", "sheet", "boxSheetPx", "presets", "primaryFor", "view", "facing", "measureZoom", "ptPerCropPx",
-             "rollDeg", "headWidthCropPx", "anchorsCropPx", "shapesPt2", "drawn", "eyeStates", "gates", "mask")
+             "rollDeg", "turnAcrossPt", "turned", "headWidthCropPx", "anchorsCropPx", "shapesPt2", "drawn", "eyeStates",
+             "gates", "mask")
 
 
 def face_crops(folder):

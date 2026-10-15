@@ -27,6 +27,8 @@
     [35, 82],
     [111, 69]
    ],
+   "turnAcrossPt": -0.28,
+   "turned": false,
    "ptPerCropPx": 1.20696,
    "rollDeg": -9.66,
    "anchorsCropPx": {
@@ -103,6 +105,8 @@
     [32, 78],
     [105, 63]
    ],
+   "turnAcrossPt": 0.01,
+   "turned": false,
    "ptPerCropPx": 1.23556,
    "rollDeg": -11.75,
    "anchorsCropPx": {
@@ -181,6 +185,8 @@
     [33, 80],
     [108, 64]
    ],
+   "turnAcrossPt": 0.13,
+   "turned": false,
    "ptPerCropPx": 1.21811,
    "rollDeg": -11.9,
    "anchorsCropPx": {
@@ -261,6 +267,8 @@
     [22, 69],
     [89, 95]
    ],
+   "turnAcrossPt": 5.09,
+   "turned": true,
    "ptPerCropPx": 1.28807,
    "rollDeg": 20.88,
    "anchorsCropPx": {
@@ -314,6 +322,8 @@
    "measureZoom": 2,
    "headWidthCropPx": 76.05,
    "headWidthFrom": "expressions",
+   "turnAcrossPt": 3.04,
+   "turned": true,
    "ptPerCropPx": 1.22682,
    "rollDeg": 8.78,
    "anchorsCropPx": {
@@ -372,6 +382,8 @@
     [33, 79],
     [104, 63]
    ],
+   "turnAcrossPt": -2.39,
+   "turned": false,
    "ptPerCropPx": 1.27563,
    "rollDeg": -13.12,
    "anchorsCropPx": {
@@ -441,6 +453,8 @@
     [33, 71],
     [105, 70]
    ],
+   "turnAcrossPt": 2.27,
+   "turned": false,
    "ptPerCropPx": 1.27366,
    "rollDeg": -0.48,
    "anchorsCropPx": {
@@ -516,6 +530,8 @@
     [34, 74],
     [110, 66]
    ],
+   "turnAcrossPt": 1.03,
+   "turned": false,
    "ptPerCropPx": 1.20449,
    "rollDeg": -6.57,
    "anchorsCropPx": {
@@ -599,6 +615,8 @@
     [31, 73],
     [109, 72]
    ],
+   "turnAcrossPt": 1.21,
+   "turned": false,
    "ptPerCropPx": 1.19228,
    "rollDeg": -0.52,
    "anchorsCropPx": {
@@ -685,6 +703,8 @@
     [66, 134],
     [200, 106]
    ],
+   "turnAcrossPt": -0.29,
+   "turned": false,
    "ptPerCropPx": 0.67881,
    "rollDeg": -11.79,
    "anchorsCropPx": {
@@ -759,6 +779,8 @@
     [63, 138],
     [195, 110]
    ],
+   "turnAcrossPt": -0.79,
+   "turned": false,
    "ptPerCropPx": 0.68367,
    "rollDeg": -12.13,
    "anchorsCropPx": {
@@ -833,6 +855,8 @@
     [62, 137],
     [184, 93]
    ],
+   "turnAcrossPt": 0.19,
+   "turned": false,
    "ptPerCropPx": 0.70232,
    "rollDeg": -20.01,
    "anchorsCropPx": {
@@ -911,6 +935,8 @@
     [42, 118],
     [160, 163]
    ],
+   "turnAcrossPt": 4.12,
+   "turned": true,
    "ptPerCropPx": 0.73381,
    "rollDeg": 21.15,
    "anchorsCropPx": {
@@ -962,6 +988,8 @@
    "measureZoom": 1,
    "headWidthCropPx": 132.85,
    "headWidthFrom": "expressions",
+   "turnAcrossPt": 3.03,
+   "turned": true,
    "ptPerCropPx": 0.7023,
    "rollDeg": 9.54,
    "anchorsCropPx": {
@@ -1022,6 +1050,8 @@
     [62, 125],
     [193, 118]
    ],
+   "turnAcrossPt": 0.05,
+   "turned": false,
    "ptPerCropPx": 0.709,
    "rollDeg": -2.78,
    "anchorsCropPx": {
@@ -1085,6 +1115,8 @@
    "measureZoom": 1,
    "headWidthCropPx": 132.85,
    "headWidthFrom": "expressions",
+   "turnAcrossPt": 4.37,
+   "turned": true,
    "ptPerCropPx": 0.7023,
    "rollDeg": -9.49,
    "anchorsCropPx": {
@@ -1143,6 +1175,8 @@
     [65, 131],
     [194, 107]
    ],
+   "turnAcrossPt": -3.13,
+   "turned": true,
    "ptPerCropPx": 0.70625,
    "rollDeg": -10.66,
    "anchorsCropPx": {
@@ -1212,6 +1246,8 @@
     [71, 128],
     [202, 101]
    ],
+   "turnAcrossPt": -4.97,
+   "turned": true,
    "ptPerCropPx": 0.69432,
    "rollDeg": -11.79,
    "anchorsCropPx": {
@@ -1290,6 +1326,8 @@
     [119, 70]
    ],
    "headWidthFrom": "hand: the head's outline",
+   "turnAcrossPt": null,
+   "turned": false,
    "ptPerCropPx": 1.03667,
    "rollDeg": 0.0,
    "anchorsCropPx": {
@@ -1344,7 +1382,7 @@
    "beside": [
     "expressions.expression.curious"
    ],
-   "note": "The master sheet's Curious: both Curious panels tilt the head about 21 degrees and turn it a little toward the sheet's left, so the sheet that ranks first decides. Its mouth, like the expression sheet's, is downturned (see _r3): its eyes are held, its mouth judged by eye. Its eyes lie where the expression sheet's Shy draws its own (within 1.6 pt), so curious and shy legitimately match on what is held; their gaze, ears, blush and mouths are judged by eye."
+   "note": "The master sheet's Curious: both Curious panels tilt the head about 21 degrees and turn it toward the sheet's left (the eyes' middle 5.1 and 4.1 pt across from where the front puts it), so the sheet that ranks first decides. Turned: its open eyes are held by their shapes and spacing, and on the head. Its mouth, like the expression sheet's, is downturned (see _r3), judged by eye. Every panel that draws open eyes as far apart passes there (Happy, Surprised, Shy), so curious and shy legitimately match on what is held; their gaze, ears, blush and mouths are judged by eye."
   },
   "surprised": {
    "primary": "expressions.expression.surprised",
@@ -1356,14 +1394,14 @@
   "shy": {
    "primary": "expressions.expression.shy",
    "beside": [],
-   "note": "The expression sheet's Shy, the only Shy panel. Its mouth is a small ∩, and shy's is a smile: its eyes are held, its mouth judged by eye. The head is turned a little toward the sheet's left and the far ear hangs across the right cheek, so its width is its sheet's median."
+   "note": "The expression sheet's Shy, the only Shy panel. Its mouth is a small ∩, and shy's is a smile: its eyes are held, its mouth judged by eye. The head is turned toward the sheet's left (the eyes' middle 4.4 pt across from where the front puts it): its eyes are held by their shapes and spacing, and on the head. The far ear hangs across the right cheek, so its width is its sheet's median."
   },
   "proud": {
    "primary": "master.expression.content",
    "beside": [
     "expressions.expression.proud"
    ],
-   "note": "The master sheet's Content is the primary: it draws proud's states (happy crescents and a smile) on a level head. The Proud panel raises the chin (its crescents 3.9 pt above the nose against Content's 6.8 and the turnaround's open eyes' 8.1), and a face preset keeps the front's head, so it is shown beside, with its stars for the sparkle (Q2)."
+   "note": "The master sheet's Content is the primary: it draws proud's states (happy crescents and a smile) on a level head. The Proud panel raises the chin (its crescents 3.9 pt above the nose against Content's 6.8 and the turnaround's open eyes' 8.1), and a face preset keeps the front's head, so it is shown beside, with its stars for the sparkle (Q2). The still shows the sparkle: the happy crescents, held on Content, with the stars beside the head."
   },
   "mischievous": {
    "primary": "master.expression.cheeky",
@@ -1371,7 +1409,7 @@
     "master.expression.winking",
     "expressions.expression.mischievous"
    ],
-   "note": "The master sheet's Cheeky draws the wink with the cheeky mouth (the dog's left eye closed, the tongue out) on a nearly level head (6.6 degrees): the primary. Winking (the same wink with a smile) and the expression sheet's Mischievous, whose head is turned halfway to three-quarter and which winks the dog's right eye, are beside it. The face library winks the left eye, as Cheeky draws it."
+   "note": "The master sheet's Cheeky draws the wink with the cheeky mouth (the dog's left eye closed, the tongue out) on a nearly level head (6.6 degrees): the primary. Winking (the same wink with a smile) and the expression sheet's Mischievous, whose head is turned halfway to three-quarter and which winks the dog's right eye, are beside it. The face library winks the left eye, as Cheeky draws it. An open mouth passes Cheeky's mouth rows: the expression sheet's Mischievous draws its cheeky mouth open with the tongue in it, as Happy draws the open mouth, and only the deep-red share of the open part (Cheeky 0.14; the master sheet's open and laughing mouths 0.35 to 0.40; the expression sheet's Mischievous 0.27) tells Cheeky's tongue out from it, reported and judged by eye (docs/QUESTIONS.md Q27)."
   },
   "content": {
    "primary": "master.expression.content",
@@ -1383,7 +1421,7 @@
    "beside": [
     "expressions.expression.sleepy"
    ],
-   "note": "The master sheet's Sleepy (lying, chin on its paws, eyes closed; 8.8 degrees against the expression sheet's 9.5), the expression sheet's beside it: sleepy's 'then closed' eyes are held. Both mouths are downturned (see _r3), judged by eye. Not the expression sheet's Sleepy face assembly, whose label pairs it with drooped ears (R3)."
+   "note": "The master sheet's Sleepy (lying, chin on its paws, eyes closed; 8.8 degrees against the expression sheet's 9.5), the expression sheet's beside it: sleepy's 'then closed' eyes are held, so its still shows the closed eyes. No level panel draws closed eyes, and both Sleepy panels turn the head (the eyes' middle 3.0 pt across from where the front puts it): the closed arcs are held by their shapes and spacing, and on the head. Both mouths are downturned (see _r3), judged by eye. Not the expression sheet's Sleepy face assembly, whose label pairs it with drooped ears (R3)."
   },
   "listening": {
    "primary": "expressions.ears.lifted-slightly",
@@ -1393,7 +1431,7 @@
   "tender": {
    "primary": "master.expression.content",
    "beside": [],
-   "note": "The master sheet's Content (L493). Tender's eyes are the sleepy half-lid, which Content does not draw: its smile is held, its eyes reported."
+   "note": "The master sheet's Content (L493). Tender's eyes are the sleepy half-lid, which Content does not draw: its smile is held, its eyes reported, and held on the head by the eye parts' own pixels, which a lid closing over the eye does not move."
   },
   "singing": {
    "primary": "master.expression.laughing",
@@ -1402,12 +1440,12 @@
     "expressions.expression.laughing",
     "expressions.expression.happy"
    ],
-   "note": "The master sheet's Laughing: its crescents are singing's happy eyes and are held; its open mouth is not singing's o and is reported. Happy (both sheets) and the expression sheet's Laughing are beside it."
+   "note": "The master sheet's Laughing: its crescents are singing's happy eyes and are held, so its still shows the crescents, not the closed eyes; its open mouth is not singing's o and is reported. Happy (both sheets) and the expression sheet's Laughing are beside it."
   },
   "blissful": {
    "primary": "master.expression.content",
    "beside": [],
-   "note": "The master sheet's Content (L495): its crescents (blissful's 'then happy') and its smile are held."
+   "note": "The master sheet's Content (L495): its crescents (blissful's 'then happy') and its smile are held, so its still shows the crescents, not the closed eyes."
   },
   "ticklish": {
    "primary": "master.expression.laughing",

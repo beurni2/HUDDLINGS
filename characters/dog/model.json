@@ -254,6 +254,8 @@
    "measureZoom": 2,
    "ptPerCropPx": 1.20696,
    "rollDeg": -9.66,
+   "turnAcrossPt": -0.28,
+   "turned": false,
    "headWidthCropPx": 77.3,
    "anchorsCropPx": {
     "head.top": [67.84, 4.07],
@@ -314,6 +316,8 @@
    "measureZoom": 2,
    "ptPerCropPx": 1.23556,
    "rollDeg": -11.75,
+   "turnAcrossPt": 0.01,
+   "turned": false,
    "headWidthCropPx": 75.51,
    "anchorsCropPx": {
     "head.top": [64.83, 3.6],
@@ -376,6 +380,8 @@
    "measureZoom": 2,
    "ptPerCropPx": 1.21811,
    "rollDeg": -11.9,
+   "turnAcrossPt": 0.13,
+   "turned": false,
    "headWidthCropPx": 76.59,
    "anchorsCropPx": {
     "head.top": [62.23, 4.61],
@@ -440,6 +446,8 @@
    "measureZoom": 2,
    "ptPerCropPx": 1.28807,
    "rollDeg": 20.88,
+   "turnAcrossPt": 5.09,
+   "turned": true,
    "headWidthCropPx": 72.43,
    "anchorsCropPx": {
     "head.top": [56.44, 15.09],
@@ -486,6 +494,8 @@
    "measureZoom": 2,
    "ptPerCropPx": 1.22682,
    "rollDeg": 8.78,
+   "turnAcrossPt": 3.04,
+   "turned": true,
    "headWidthCropPx": 76.05,
    "anchorsCropPx": {
     "head.top": [74.25, 3.56],
@@ -530,6 +540,8 @@
    "measureZoom": 2,
    "ptPerCropPx": 1.27563,
    "rollDeg": -13.12,
+   "turnAcrossPt": -2.39,
+   "turned": false,
    "headWidthCropPx": 73.14,
    "anchorsCropPx": {
     "head.top": [61.75, 3.69],
@@ -583,6 +595,8 @@
    "measureZoom": 2,
    "ptPerCropPx": 1.27366,
    "rollDeg": -0.48,
+   "turnAcrossPt": 2.27,
+   "turned": false,
    "headWidthCropPx": 73.25,
    "anchorsCropPx": {
     "head.top": [65.25, 4.03],
@@ -642,6 +656,8 @@
    "measureZoom": 2,
    "ptPerCropPx": 1.20449,
    "rollDeg": -6.57,
+   "turnAcrossPt": 1.03,
+   "turned": false,
    "headWidthCropPx": 77.46,
    "anchorsCropPx": {
     "head.top": [67.78, 4.09],
@@ -709,6 +725,8 @@
    "measureZoom": 2,
    "ptPerCropPx": 1.19228,
    "rollDeg": -0.52,
+   "turnAcrossPt": 1.21,
+   "turned": false,
    "headWidthCropPx": 78.25,
    "anchorsCropPx": {
     "head.top": [78.08, 3.08],
@@ -779,6 +797,8 @@
    "measureZoom": 1,
    "ptPerCropPx": 0.67881,
    "rollDeg": -11.79,
+   "turnAcrossPt": -0.29,
+   "turned": false,
    "headWidthCropPx": 137.45,
    "anchorsCropPx": {
     "head.top": [123.5, 4.6],
@@ -837,6 +857,8 @@
    "measureZoom": 1,
    "ptPerCropPx": 0.68367,
    "rollDeg": -12.13,
+   "turnAcrossPt": -0.79,
+   "turned": false,
    "headWidthCropPx": 136.47,
    "anchorsCropPx": {
     "head.top": [119.36, 4.64],
@@ -895,6 +917,8 @@
    "measureZoom": 1,
    "ptPerCropPx": 0.70232,
    "rollDeg": -20.01,
+   "turnAcrossPt": 0.19,
+   "turned": false,
    "headWidthCropPx": 132.85,
    "anchorsCropPx": {
     "head.top": [100.71, 4.59],
@@ -957,6 +981,8 @@
    "measureZoom": 1,
    "ptPerCropPx": 0.73381,
    "rollDeg": 21.15,
+   "turnAcrossPt": 4.12,
+   "turned": true,
    "headWidthCropPx": 127.14,
    "anchorsCropPx": {
     "head.top": [110.82, 29.65],
@@ -1001,6 +1027,8 @@
    "measureZoom": 1,
    "ptPerCropPx": 0.7023,
    "rollDeg": 9.54,
+   "turnAcrossPt": 3.03,
+   "turned": true,
    "headWidthCropPx": 132.85,
    "anchorsCropPx": {
     "head.top": [131.5, 22.6],
@@ -1047,6 +1075,8 @@
    "measureZoom": 1,
    "ptPerCropPx": 0.709,
    "rollDeg": -2.78,
+   "turnAcrossPt": 0.05,
+   "turned": false,
    "headWidthCropPx": 131.59,
    "anchorsCropPx": {
     "head.top": [123.31, 8.69],
@@ -1101,6 +1131,8 @@
    "measureZoom": 1,
    "ptPerCropPx": 0.7023,
    "rollDeg": -9.49,
+   "turnAcrossPt": 4.37,
+   "turned": true,
    "headWidthCropPx": 132.85,
    "anchorsCropPx": {
     "head.top": [99.28, 4.67],
@@ -1145,6 +1177,8 @@
    "measureZoom": 1,
    "ptPerCropPx": 0.70625,
    "rollDeg": -10.66,
+   "turnAcrossPt": -3.13,
+   "turned": true,
    "headWidthCropPx": 132.11,
    "anchorsCropPx": {
     "head.top": [131.67, 4.67],
@@ -1198,6 +1232,8 @@
    "measureZoom": 1,
    "ptPerCropPx": 0.69432,
    "rollDeg": -11.79,
+   "turnAcrossPt": -4.97,
+   "turned": true,
    "headWidthCropPx": 134.38,
    "anchorsCropPx": {
     "head.top": [137.56, 4.66],
@@ -1259,6 +1295,8 @@
    "measureZoom": 1,
    "ptPerCropPx": 1.03667,
    "rollDeg": 0.0,
+   "turnAcrossPt": null,
+   "turned": false,
    "headWidthCropPx": 90.0,
    "anchorsCropPx": {
     "head.top": [80.15, 4.69]

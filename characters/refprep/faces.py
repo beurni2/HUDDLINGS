@@ -28,7 +28,11 @@ is out of order (a nose that is not below and between the eyes, a corner on
 the wrong side, a head top below the eyes), fails the run. The same rules give
 each eye's mark and the mouth's (its holes filled, and the part of it open:
 pink or the inside's deep red), whose areas the record keeps and whose shapes
-the check compares with a render's.
+the check compares with a render's. Each record also keeps the panel's turn:
+how far its eyes' middle lies across from its nose beside where the
+turnaround's front puts it. Past TURNED_SHARE of the head's width the panel
+draws its head turned, and the check holds its eyes by their shapes and their
+spacing, never by their place against the nose.
 
 Rule R3: no record may name the Sad, Angry or Pout panels, the drooped ears,
 or any panel whose label pairs a face with them, and no preset outside the
@@ -74,6 +78,11 @@ WIDEST_SHARE = 0.98  # the hand-placed row's run must be this share of the cheek
 # on the expression sheet. Every record keeps its numbers in the crop's own pixels.
 SHEET_ZOOM = {"master": 2}
 ZOOM = 4
+# Of the head's width: a panel whose eyes' middle lies further across from its nose than this, beside where the
+# turnaround's front puts it, draws its head turned. It is the landmark check's own 3% (L523): turned so far, a face
+# that keeps the front's head cannot land both eyes on the panel's, so the Faces check holds their spacing there and
+# their place on the render's own head.
+TURNED_SHARE = 0.03
 
 
 def enlarge(rgb, zoom):
@@ -231,22 +240,31 @@ def soft_end(reach, weight, xs, ys):
     return [float((taper * xs).sum() / taper.sum()), float((taper * ys).sum() / taper.sum())]
 
 
-def open_pixels(rgb):
-    """Where a mouth is open: pink, or the inside's deep red (OPEN_CHROMA, OPEN_HUE, OPEN_L)."""
+def open_parts(rgb):
+    """Where a mouth is open: its pink (the tongue), and the inside's deep red (OPEN_CHROMA, OPEN_HUE, OPEN_L) that is
+    not pink."""
     lab = sheets.to_lab(rgb)
     L, a, b = lab[..., 0], lab[..., 1], lab[..., 2]
     C, hue = np.hypot(a, b), np.degrees(np.arctan2(b, a)) % 360
     pink = (a > 16) & (L > 45) & (hue < 40)  # measure.py's pink
-    return pink | ((C > OPEN_CHROMA) & (hue < OPEN_HUE) & (L < OPEN_L))
+    return pink, ((C > OPEN_CHROMA) & (hue < OPEN_HUE) & (L < OPEN_L)) & ~pink
+
+
+def open_pixels(rgb):
+    """Where a mouth is open: pink, or the inside's deep red."""
+    pink, red = open_parts(rgb)
+    return pink | red
 
 
 def shapes(rgb, masks):
-    """The marks whose shapes the Faces check compares: each eye's, the mouth's with its holes filled, and the open part
-    of the mouth."""
+    """The marks whose shapes the Faces check compares: each eye's, the mouth's with its holes filled, the open part of
+    the mouth and, of that, the inside's deep red (reported: a tongue out over a closed smile has little)."""
     out = {n: masks[n] for n in ("eye.R", "eye.L") if n in masks}
     if "mouth" in masks:
+        pink, red = open_parts(rgb)
         out["mouth"] = ndimage.binary_fill_holes(masks["mouth"])
-        out["mouth.open"] = out["mouth"] & open_pixels(rgb)
+        out["mouth.open"] = out["mouth"] & (pink | red)
+        out["mouth.red"] = out["mouth"] & red
     return out
 
 
@@ -335,6 +353,13 @@ def find_face(rgb, keep, seeds, head_width_px, roll_deg, allowed=None, reach_sha
         if top is not None:
             found["head.top"] = top
     return found, masks
+
+
+def eyes_across(points, roll_deg):
+    """How far the eyes' middle lies across the head from the nose (toward the dog's left), in the points' own units."""
+    across, _ = frame(roll_deg)
+    middle = (np.array(points["eye.R"], float) + np.array(points["eye.L"], float)) / 2
+    return float((middle - np.array(points["nose"], float)) @ across)
 
 
 def in_head_frame(points, roll_deg):
@@ -437,9 +462,10 @@ def gates(drawn, preset, aliases):
     return held
 
 
-def measure_panel(species, pid, entry, panel, names, presets, aliases, head_width_pt, shared_width=None):
+def measure_panel(species, pid, entry, panel, names, presets, aliases, head_width_pt, front, shared_width=None):
     """One panel's record: its anchors refined and checked, its head's width (measured, or shared_width for a panel
-    whose cheeks the sheet hides), its scale and roll; with the panel's pixels and the mask of what is compared."""
+    whose cheeks the sheet hides), its scale, roll and turn (against front, the turnaround's front landmarks in
+    points); with the panel's pixels and the mask of what is compared."""
     where = f"faces.json {pid}"
     drawn = entry["drawn"]
     if drawn["eyes"] not in EYE_STATES | UNHELD or drawn["mouth"] not in MOUTH_STATES | UNHELD:
@@ -525,6 +551,12 @@ def measure_panel(species, pid, entry, panel, names, presets, aliases, head_widt
     if "mouth" in marks and {"mouth.R", "mouth.L"} & set(hand):
         measured_shapes["mouth"] = {"areaPt2": round(float(marks["mouth"].sum()) * pt2, 1),
                                     "openPt2": round(float(marks["mouth.open"].sum()) * pt2, 1)}
+    if {"eye.R", "eye.L", "nose"} <= set(found):
+        # The turn: the eyes' middle across from the nose, beside the front's, each in its own head frame.
+        turn = eyes_across(found, roll) * k / z - eyes_across(front, roll_of(front["eye.R"], front["eye.L"]))
+        record.update(turnAcrossPt=round(turn, 2), turned=bool(abs(turn) > TURNED_SHARE * head_width_pt))
+    else:
+        record.update(turnAcrossPt=None, turned=False)
     record.update({
         "ptPerCropPx": round(k, 5), "rollDeg": round(roll, 2),
         "anchorsCropPx": {n: [round(v, 2) for v in to_crop(found[n], z)] for n in FACE_ANCHORS if n in found},
@@ -544,7 +576,9 @@ def build(species, plan=None, images=None):
     folder = sheets.ROOT / "characters" / species
     plan = plan or sheets.json.loads((folder / "refmap" / "faces.json").read_text())
     panels = {p["id"]: p for p in sheets.json.loads((folder / "ref" / "panels.json").read_text())["panels"]}
-    head_width_pt = sheets.json.loads((folder / "ref" / "measurements.json").read_text())["proportions"]["headWidth"]
+    measured = sheets.json.loads((folder / "ref" / "measurements.json").read_text())
+    head_width_pt = measured["proportions"]["headWidth"]
+    front = measured["views"]["front"]["landmarks"]
     presets, aliases = plan["presets"], plan["aliases"]
     unknown = sorted(set(presets) - set(PRESETS))
     if unknown:
@@ -579,7 +613,7 @@ def build(species, plan=None, images=None):
     def one(pid, shared=None):
         names = sorted(judged[pid], key=PRESETS.index)
         record, rgb, keep = measure_panel(species, pid, plan["panels"][pid], panels[pid], names, presets, aliases,
-                                          head_width_pt, shared)
+                                          head_width_pt, front, shared)
         if images is not None:
             images[pid] = (rgb, keep)
         return record

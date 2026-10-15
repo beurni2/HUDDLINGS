@@ -7,18 +7,21 @@ and a beside image for the eyes of the agent and the founder.
 
 Reads a still of a face clip as runtime-web/lab/still.ts writes it (still.json,
 white.png, black.png, ids.png; the clip face_<preset> names the preset unless
---preset does), the still of the rest front (still_front) in --rest,
-model.json's faceCrops (characters/refprep/faces.py) and each panel's crop and
-mask. Writes <out>/match.json (each panel's rows, numbers and verdict, the
-head's, and every threshold) and <out>/beside.png (for each panel: the panel |
-the render on the panel's pixels, the same size | the two blended, the
-record's anchors and marks in blue and the render's in red). Exits 0 when every
-gating check passes, 1 when one fails, and 2 on any error, leaving no
-match.json, as match.py does.
+--preset does), the still of the rest front (still_front) in --rest, drawn at
+the same ppp, model.json's faceCrops (characters/refprep/faces.py) and each
+panel's crop and mask. Writes <out>/match.json (each panel's rows, numbers and
+verdict, the head's, and every threshold) and <out>/beside.png (the face on its
+head, then for each panel: the panel | the render on the panel's pixels, the
+same size | the two blended, the record's anchors and marks in blue and the
+render's in red). Exits 0 when every gating check passes, 1 when one fails,
+and 2 on any error, leaving no match.json, as match.py does.
 
 Each preset has one primary panel (refmap/faces.json): its held anchors and
 shapes gate. The preset's other panels are measured the same way and shown,
-marked "gating": false, and never fail it.
+marked "gating": false, and never fail it. A still shows the state its primary
+panel draws where the preset names two (singing and blissful the happy
+crescents, sleepy the closed eyes, proud the crescents with the sparkle's
+stars), and is held to that state.
 
 On each panel the render is laid on the panel's pixel grid, padded all round
 by a quarter of the head's width in the card's colour so a head that stands
@@ -35,21 +38,30 @@ their marks, each within the render's own parts when its ID pass names them
 feature the record holds the preset to (its gates: the eyes when the panel
 draws the preset's eye state, the mouth when it draws its mouth state):
 
-- place: each anchor within 3% of the head's width (L523) of the record's;
+- place: each anchor within 3% of the head's width (L523) of the record's. On
+  a panel that turns the head (its record's turned: the eyes' middle further
+  across from the nose than that, beside where the front puts it, as Curious,
+  Shy and Sleepy draw it) each anchor's place is reported, and the pair is held
+  by its spacing instead, the one's place from the other's within the same 3%:
+  a face that keeps the front's head cannot land on a turned face's places,
+  and the head gate holds where its eyes sit;
 - shape: each eye's mark its area within EYE_AREA_RATIO of the record's and,
   with its centroid moved onto the record's, an IoU of at least EYE_IOU; the
   mouth's mark with its holes filled (its outline) an IoU of at least
   MOUTH_IOU, and its open part (pink or the inside's red) within
   MOUTH_OPEN_RATIO of the record's, each open area counted from
   MOUTH_OPEN_FLOOR_SHARE of the record's mouth up, so a closed smile (no open
-  part) and an open mouth are told apart and two smiles are not.
+  part) and an open mouth are told apart and two smiles are not. The share of
+  the open part that is the inside's deep red is reported, never held.
 
-Each threshold lies halfway between the worst pair of panels that draw the
-same state and the best pair that draw different ones, among pairs whose
-anchors pass: each panel laid as a render on every other's record, and the
-rest front's render on each (DECISIONS.md 117). Where two states are drawn
-alike on the sheets (open and wide eyes; open, laughing and cheeky mouths),
-no threshold tells them apart and the place of the anchors must.
+Each threshold lies between the worst pair of panels that draw the same state
+and the best pair that draw different ones, among pairs whose places pass:
+each panel laid as a render on every other's record, and the rest front's
+render on each (characters/sheetmatch/facecal.py; DECISIONS.md 117). Where two
+states are drawn alike on the sheets (open and wide eyes; open and laughing
+mouths on the master sheet; the open mouth and the expression sheet's cheeky
+one), no threshold tells them apart and the place of the anchors must
+(DECISIONS.md 118).
 
 The head (lead decision: a face preset keeps the front's head): pinning at the
 nose cannot see a whole face moved on its head, so the face is also held to
@@ -62,8 +74,8 @@ by the face rules) and eyes' middle (each eye's parts' pixels in the ID pass,
 which no eye state moves, or its dark mark where the ID pass names no eye
 part) must be, within 3% of the head's width.
 
-A preset no panel judges (hungry, huffy) and a primary panel that holds no
-anchor (the ear positions draw no face) are judged by eye beside the panels;
+A preset no panel judges (hungry, huffy) and a primary panel that holds
+nothing (the ear positions draw no face) are judged by eye beside the panels;
 the head is still held."""
 import os
 import sys
@@ -113,13 +125,15 @@ HEAD_BOX_PT = (-70.0, -190.0, 70.0, -30.0)
 BESIDE_HEAD_PX = 400  # about how wide each head is drawn in beside.png, whatever its panel's size
 FEATURE_PARTS = {"eye": match.EYE_PARTS, "nose": ("nose*",), "mouth": match.MOUTH_PARTS}
 HEAD_PART = "head.base"
+PAIRS = {"eyes": ("eye.R", "eye.L"), "mouth": ("mouth.R", "mouth.L")}  # what a turned panel holds by its spacing
+OUTLINED = ("eye.R", "eye.L", "mouth")  # the marks beside.png outlines
 
 
 def thresholds(head_width):
     return {"landmarkShareOfHead": LANDMARK_SHARE, "landmarkPt": round(LANDMARK_SHARE * head_width, 2),
             "eyeAreaRatio": EYE_AREA_RATIO, "eyeIoU": EYE_IOU, "mouthIoU": MOUTH_IOU,
             "mouthOpenRatio": MOUTH_OPEN_RATIO, "mouthOpenFloorShare": MOUTH_OPEN_FLOOR_SHARE,
-            "padShareOfHead": PAD_SHARE, "headBoxPt": list(HEAD_BOX_PT),
+            "padShareOfHead": PAD_SHARE, "headBoxPt": list(HEAD_BOX_PT), "turnedShareOfHead": faces.TURNED_SHARE,
             "reachShareOfHead": faces.REACH_SHARE, "touchShareOfHead": faces.TOUCH_SHARE, "topShareOfHead": faces.TOP_SHARE,
             "pinReachShareOfHead": PIN_REACH_SHARE, "pinRounds": PIN_ROUNDS, "pinSettledPx": PIN_SETTLED_PX,
             "windowShareOfHead": WINDOW_SHARE,
@@ -170,6 +184,7 @@ class Panel:
         self.shown[~self.keep] = np.round(self.card).astype(np.uint8)
         self.k = float(self.rec["ptPerCropPx"]) / self.zoom  # points per canvas pixel
         self.roll = float(self.rec["rollDeg"])
+        self.turned = bool(self.rec["turned"])
         # The render's face is already rolled as the turnaround's front is (DECISIONS.md 27): it turns by the rest.
         self.turn = self.roll - face_roll(model)
         self.anchors = {n: np.array(faces.to_canvas(q, self.zoom), float) + p for n, q in self.rec["anchorsCropPx"].items()}
@@ -271,6 +286,11 @@ def compare_shapes(mine, theirs, k):
             theirs_open = int(theirs["mouth.open"].sum())
             row.update(openPx=mine_open, recordOpenPx=theirs_open,
                        openRatio=round((mine_open + floor) / (theirs_open + floor), 3))
+            # Reported, never held (DECISIONS.md 118): the share of the open part that is the inside's deep red rather
+            # than the tongue's pink, which tells Cheeky's tongue out over a closed smile from an open mouth.
+            mine_red = int(mine["mouth.red"].sum()) if "mouth.red" in mine else 0
+            row.update(redShare=round(mine_red / max(mine_open, 1), 3),
+                       recordRedShare=round(int(theirs["mouth.red"].sum()) / max(theirs_open, 1), 3))
             row["pass"] = row["pass"] and ratio_ok(row["openRatio"], MOUTH_OPEN_RATIO)
         rows[name] = row
     return rows
@@ -320,19 +340,25 @@ def measure_on(still, panel, model_front):
 
 def judge(measured, panel, preset, tolerance):
     """A panel's rows for a preset from what measure_on found: each anchor's place and each mark's shape, held where the
-    preset's gates say, and the verdict, gating only where the panel is the preset's primary."""
+    preset's gates say, and the verdict, gating only where the panel is the preset's primary. On a panel that turns the
+    head, a held pair (the eyes, the mouth's corners) is held by its spacing, the one's place from the other's, and
+    each anchor's place is reported: a face that keeps the front's head cannot land on a turned face's places, and
+    the head gate holds where it sits."""
     gated = set(panel.rec["gates"][preset])
     result = {"crop": panel.pid, "gating": preset in panel.rec["primaryFor"], "ptPerCropPx": panel.rec["ptPerCropPx"],
               "measureZoom": panel.zoom, "rollDeg": panel.roll, "turnDeg": round(panel.turn, 2), "padPx": panel.pad,
+              "turned": panel.turned, "turnAcrossPt": panel.rec["turnAcrossPt"],
               "drawn": panel.rec["drawn"], "heldTo": panel.rec["gates"][preset]}
     if "problem" in measured:
-        return dict(result, problem=measured["problem"], rows={}, shapes={}, anchorsHeld=len(gated),
+        # Nothing was measured, so nothing is counted as held.
+        return dict(result, problem=measured["problem"], rows={}, spacing={}, shapes={}, anchorsHeld=0, spacingsHeld=0,
                     shapesHeld=0, **{"pass": False})
     pin, found = measured["pin"], measured["found"]
     result["alignment"] = {"pinnedOn": pin, "shiftFromModelPt": head_offset(panel, measured["origin"] - measured["start"], [0, 0])}
+    by_spacing = {n for pair in PAIRS.values() for n in pair if panel.turned and pair[0] in gated}
     rows = {}
     for name, want in panel.anchors.items():
-        row = {"record": match.round2(panel.to_crop(want)), "held": name in gated}
+        row = {"record": match.round2(panel.to_crop(want)), "held": name in gated and name not in by_spacing}
         if name not in found:
             row.update(missing=True, **{"pass": not row["held"]})
         else:
@@ -343,15 +369,32 @@ def judge(measured, panel, preset, tolerance):
             row["note"] = "the render is placed here"
         elif name == "head.top":
             row["note"] = "reported, never held: the sheet draws the tuft differently in every panel"
+        elif name in by_spacing:
+            row["note"] = "reported: the panel turns the head, so the pair is held by its spacing and the eyes on the head"
         rows[name] = row
+    spacing = {}
+    for feature, (right, left) in PAIRS.items():
+        if not panel.turned or right not in gated:
+            continue
+        row = {"held": True, "recordPt": head_offset(panel, panel.anchors[left], panel.anchors[right])}
+        if right in found and left in found:
+            # The one's place from the other's, against the record's: a turn moves both alike and drops out.
+            got = np.asarray(found[left]) - np.asarray(found[right])
+            want = panel.anchors[left] - panel.anchors[right]
+            err = float(np.hypot(*(got - want))) * panel.k
+            row.update(foundPt=head_offset(panel, got, [0, 0]), errPt=round(err, 2), **{"pass": err <= tolerance})
+        else:
+            row.update(missing=True, **{"pass": False})
+        spacing[feature] = row
     shape_rows = compare_shapes(measured["marks"], panel.marks, panel.k)
     for name, row in shape_rows.items():
         row["held"] = name in gated or (name == "mouth" and "mouth.R" in gated)
         row["pass"] = row["pass"] or not row["held"]
-    result["rows"], result["shapes"] = rows, shape_rows
+    result["rows"], result["spacing"], result["shapes"] = rows, spacing, shape_rows
     result["anchorsHeld"] = sum(1 for r in rows.values() if r["held"])
+    result["spacingsHeld"] = len(spacing)
     result["shapesHeld"] = sum(1 for r in shape_rows.values() if r["held"])
-    result["pass"] = all(r["pass"] for r in rows.values()) and all(r["pass"] for r in shape_rows.values())
+    result["pass"] = all(r["pass"] for group in (rows, spacing, shape_rows) for r in group.values())
     return result
 
 
@@ -508,31 +551,43 @@ def check(species, still_dir, rest_dir, preset=None):
         result["records"][pid] = row
         parts.append((panel, row, rgb, found, marks))
     primary = result["records"].get(result["primary"], {})
-    result["anchorsHeld"] = primary.get("anchorsHeld", 0)
-    result["shapesHeld"] = primary.get("shapesHeld", 0)
+    for count in ("anchorsHeld", "spacingsHeld", "shapesHeld"):
+        result[count] = primary.get(count, 0)
     result["pass"] = result["headGate"]["pass"] and primary.get("pass", True)
     if not result["records"]:
         result["note"] = f"no panel judges {preset} (refmap/faces.json): it is judged by eye; the head is held"
-    elif not result["anchorsHeld"]:
-        result["note"] = f"its primary panel holds no anchor of {preset}: it is judged by eye beside it; the head is held"
+    elif "problem" not in primary and not held_count(result):
+        result["note"] = f"its primary panel holds nothing of {preset}: it is judged by eye beside it; the head is held"
     result["summary"] = summary(result)
     return result, {"head": head, "panels": parts}
 
 
+def held_count(result):
+    return result["anchorsHeld"] + result["spacingsHeld"] + result["shapesHeld"]
+
+
 def summary(result):
-    """One line: the verdict, what was held on the primary panel, and the head."""
+    """One line: the verdict, what was held on the primary panel (or why nothing could be measured), and the head."""
     head = result["headGate"]["rows"]
     errs = ", ".join(f"{n} {r['errPt']} pt" if "errPt" in r else f"{n} not found" for n, r in head.items())
     head_text = ("head held (" if result["headGate"]["pass"] else "head FAILS (") + errs + ")"
     verdict = "pass" if result["pass"] else "FAIL"
     if not result["records"]:
         return f"{verdict}: no panel, judged by eye; {head_text}"
-    primary = result["records"][result["primary"]]
-    if not result["anchorsHeld"]:
-        return f"{verdict}: nothing held on {result['primary']}, judged by eye; {head_text}"
-    failed = [n for n, r in primary["rows"].items() if not r["pass"]] + [f"{n} shape" for n, r in primary["shapes"].items() if not r["pass"]]
-    return (f"{verdict}: {result['anchorsHeld']} anchors and {result['shapesHeld']} shapes held on {result['primary']}"
-            + (f" (failing: {', '.join(failed)})" if failed else "") + f"; {head_text}")
+    pid = result["primary"]
+    primary = result["records"][pid]
+    if "problem" in primary:
+        return f"{verdict}: nothing measured on {pid}, {primary['problem']}; {head_text}"
+    if not held_count(result):
+        return f"{verdict}: nothing held on {pid}, judged by eye; {head_text}"
+    held = [f"{result['anchorsHeld']} anchors"] if result["anchorsHeld"] else []
+    held += [f"the {name}' spacing" if name == "eyes" else f"the {name}'s spacing" for name in primary["spacing"]]
+    held.append(f"{result['shapesHeld']} shapes")
+    turned = " (it turns the head: each place reported, the eyes held on the head)" if primary["turned"] else ""
+    failed = ([n for n, r in primary["rows"].items() if not r["pass"]] + [f"{n} spacing" for n, r in primary["spacing"].items() if not r["pass"]]
+              + [f"{n} shape" for n, r in primary["shapes"].items() if not r["pass"]])
+    return (f"{verdict}: {', '.join(held[:-1])} and {held[-1]} held on {pid}" if len(held) > 1 else f"{verdict}: {held[0]} held on {pid}") \
+        + turned + (f" (failing: {', '.join(failed)})" if failed else "") + f"; {head_text}"
 
 
 def verdict(result):
@@ -581,10 +636,10 @@ def panel_rows(panel, row, rgb, marks):
     zoom = max(1, int(round(BESIDE_HEAD_PX / panel.width_px)))
     onion = ((panel.shown.astype(float) + rgb) / 2).astype(np.uint8)
     for name, mark in panel.marks.items():
-        if name != "mouth.open":
+        if name in OUTLINED:
             onion[outline(mark)] = (30, 110, 255)
     for name, mark in marks.items():
-        if name != "mouth.open":
+        if name in OUTLINED:
             onion[outline(mark)] = (230, 30, 60)
     tiles = [match.upscale(t, zoom) for t in (panel.shown, rgb, onion)]
     gap = 6
@@ -608,9 +663,11 @@ def panel_rows(panel, row, rgb, marks):
         match.label(draw, (i * (width + gap) + 4, 4), title, (40, 40, 40))
     held = [f"{n} {r['errPt']} pt" + ("" if r["pass"] else " FAIL") for n, r in row.get("rows", {}).items() if r["held"] and "errPt" in r]
     held += [f"{n} not found" for n, r in row.get("rows", {}).items() if r["held"] and r.get("missing")]
-    held += [f"{n} shape x{r['areaRatio']} IoU {r['iou']}" + (f" open x{r['openRatio']}" if "openRatio" in r else "")
+    held += [f"{n} spacing {r['errPt']} pt" + ("" if r["pass"] else " FAIL") if "errPt" in r else f"{n} spacing not found"
+             for n, r in row.get("spacing", {}).items()]
+    held += [f"{n} shape x{r['areaRatio']} IoU {r['iou']}" + (f" open x{r['openRatio']} red {r['redShare']}/{r['recordRedShare']}" if "openRatio" in r else "")
              + ("" if r["pass"] else " FAIL") for n, r in row.get("shapes", {}).items() if r["held"]]
-    role = "primary, gates" if row["gating"] else "beside, measured, does not gate"
+    role = ("primary, gates" if row["gating"] else "beside, measured, does not gate") + ("; turns the head" if row["turned"] else "")
     line = (f"{panel.pid} ({role}): " + ("pass" if row["pass"] else "FAIL") + f"; held {', '.join(held) or 'nothing'}"
             + (f"; {row['problem']}" if "problem" in row else ""))
     colour = (0, 0, 0) if row["pass"] else (200, 0, 30) if row["gating"] else (150, 90, 0)

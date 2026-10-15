@@ -11,6 +11,7 @@ with its face moved 4 pt on its head.
 
     python3 -m unittest discover -s characters/sheetmatch -p test_facematch.py -v"""
 import contextlib
+import copy
 import functools
 import io
 import json
@@ -21,6 +22,7 @@ from pathlib import Path
 import numpy as np
 from scipy import ndimage
 
+import facecal
 import facematch
 import match
 import test_sheetmatch
@@ -32,19 +34,17 @@ PPP = 3.0  # still pixels per point, the look loop's
 TOLERANCE = match.LANDMARK_SHARE * MODEL["proportions"]["headWidth"]
 M, E = "master.expression.", "expressions.expression."
 PRIMARIES = sorted({pid for pid, r in MODEL["faceCrops"].items() if r["primaryFor"] and "nose" in r["anchorsCropPx"]})
-# Shape classes of the dark marks the check compares. The sheets draw the wide eye as the open eye with a ring of white
-# round its iris (expressions.eyes.surprised-round), which no dark mark sees: one class (DECISIONS.md 117).
-EYE_CLASS = {"open": "open", "wide": "open", "happy": "crescent", "closed": "closed"}
+EYE_CLASS = facecal.EYE_CLASS  # the shape classes of the dark marks the check compares (DECISIONS.md 117)
 # Pairs of primary panels that the spec names apart but the sheets draw alike where the preset holds them (render
 # panel, record panel, preset): the master sheet's Excited and Laughing, whose mouths' corners lie within 0.5 pt and
 # whose open parts differ less (1.25 times) than Happy's and Excited's open mouths do (1.27 times).
 DRAWN_ALIKE = {(M + "excited", M + "laughing", "laughing"), (M + "excited", M + "laughing", "ticklish"),
                (M + "laughing", M + "excited", "excited")}
-# Pairs that draw the same held states and lie in the same places, so they legitimately match (render, record, preset):
-# both draw happy crescents and singing holds only the eyes on Laughing; Curious and Shy both draw open eyes where the
-# other does, with downturned mouths no preset is held to; Surprised's eyes are the open eyes neutral holds on Happy.
+# Pairs that draw the same held states and lie in the same places on a level record, so they legitimately match
+# (render, record, preset): both draw happy crescents and singing holds only the eyes on Laughing; Surprised's eyes are
+# the open eyes neutral holds on Happy. On a record that turns the head (Curious, Shy, Sleepy) the eyes are held by
+# their shapes and spacing, so every panel that draws the same eyes as far apart passes there.
 SAME_STATES = {(M + "excited", M + "laughing", "singing"), (M + "content", M + "laughing", "singing"),
-               (M + "curious", E + "shy", "shy"), (E + "shy", M + "curious", "curious"),
                (E + "surprised", M + "happy", "neutral")}
 
 
@@ -53,70 +53,8 @@ def panel(pid):
     return facematch.Panel("dog", MODEL, pid)
 
 
-class PanelStill:
-    """A panel as a still: its crop, the left-out boxes in the card's colour, carried into model space by its record's
-    scale and roll, its face left at the front view's own roll as a render's is, with its nose (or, with no face, its
-    head top) on the turnaround's front landmark, opaque over the crop and clear over the card round it, all of it
-    head.base. Faults are planted in the still's own pixels, as a drawing's would be."""
-
-    def __init__(self, pid, ppp=PPP):
-        self.panel = facematch.Panel("dog", MODEL, pid)
-        panel = self.panel
-        self.pin = "nose" if "nose" in panel.anchors else "head.top"
-        self.origin = panel.origin(self.pin, MODEL["landmarks"]["front"][self.pin])
-        h, w = panel.shape
-        corners = np.array([[0, 0], [w, 0], [0, h], [w, h]], float)
-        q = (corners - self.origin) @ facematch.rotation(-panel.turn).T * panel.k
-        low, high = q.min(axis=0) - 2, q.max(axis=0) + 2
-        size = np.ceil((high - low) * ppp).astype(int)
-        self.ppp, self.root = ppp, -low * ppp
-        vs, us = np.mgrid[:size[1], :size[0]]
-        model = np.stack([(us + 0.5 - self.root[0]) / ppp, (vs + 0.5 - self.root[1]) / ppp], axis=-1)
-        crop = model @ facematch.rotation(panel.turn).T / panel.k + self.origin
-        self.crop_at = crop  # each still pixel's place on the panel's canvas, continuous pixels
-        p = panel.pad
-        inside = (crop[..., 0] >= p) & (crop[..., 1] >= p) & (crop[..., 0] < w - p) & (crop[..., 1] < h - p)
-        coords = [crop[..., 1].ravel() - 0.5, crop[..., 0].ravel() - 0.5]
-        self.rgb = np.stack([ndimage.map_coordinates(panel.shown[..., c].astype(float), coords, order=1, mode="nearest")
-                             .reshape(inside.shape) for c in range(3)], axis=-1)
-        self.alpha = inside.astype(float)
-        self.part = np.where(inside, 0, -1)
-        self.names = ["head.base"]
-
-    def still(self, clip="face_fixture"):
-        meta = {"species": "dog", "still": "panel", "clip": clip, "views": {"body": "front", "head": "front"},
-                "ppp": self.ppp, "sizePx": [self.alpha.shape[1], self.alpha.shape[0]], "rootPx": [float(v) for v in self.root],
-                "parts": {n: {"id": c, "bone": "head"} for n, c in zip(self.names, ("#808080", "#20A040", "#A02040", "#2040A0", "#A0A020"))},
-                "drawn": list(self.names)}
-        return match.Still(meta, self.alpha, self.rgb / 255 * self.alpha[..., None], self.part)
-
-    def feature(self, name):
-        """A feature's mark on the panel (faces.py's rules), as the still's pixels it covers, grown by two crop pixels so it
-        takes the sheet's soft edge with it."""
-        panel = self.panel
-        _, masks = faces.find_face(panel.canvas, panel.keep, {n: list(q) for n, q in panel.anchors.items()},
-                                   panel.width_px, panel.roll)
-        mark = masks[name]
-        x = np.clip(np.floor(self.crop_at[..., 0]).astype(int), 0, mark.shape[1] - 1)
-        y = np.clip(np.floor(self.crop_at[..., 1]).astype(int), 0, mark.shape[0] - 1)
-        grow = int(np.ceil(2 * panel.rec["ptPerCropPx"] * self.ppp))
-        return ndimage.binary_dilation(mark[y, x] & (self.alpha > 0), iterations=grow)
-
-    def move(self, mask, dx_pt, dy_pt=0.0):
-        """Moves the pixels of a mask by whole still pixels, the place they left filled with the fur around them."""
-        dx, dy = int(round(dx_pt * self.ppp)), int(round(dy_pt * self.ppp))
-        ring = ndimage.binary_dilation(mask, iterations=4) & ~ndimage.binary_dilation(mask, iterations=2)
-        fur = np.median(self.rgb[ring], axis=0)
-        moved = match.shifted(mask, dx, dy)
-        colours = np.roll(self.rgb, (dy, dx), axis=(0, 1))
-        self.rgb[mask] = fur
-        self.rgb[moved] = colours[moved]
-
-    def label(self, mask, name):
-        """Gives the mask's pixels a part of their own, as a drawing's ID pass would."""
-        if name not in self.names:
-            self.names.append(name)
-        self.part[mask] = self.names.index(name)
+def PanelStill(pid, ppp=PPP):
+    return facecal.PanelStill(MODEL, pid, ppp)
 
 
 def own(pid, preset=None, plant=None):
@@ -253,6 +191,35 @@ class PlantedTest(unittest.TestCase):
             self.assertGreater(shape["areaRatio"], facematch.EYE_AREA_RATIO, name)
             self.assertLess(shape["iou"], facematch.EYE_IOU, name)
 
+    def test_a_record_that_turns_the_head_holds_each_pair_by_its_spacing(self):
+        # The expression sheet's Happy taken as if it turned the head: one mouth corner moved 3 pt changes the corners'
+        # spacing and fails; the whole mouth moved 3 pt keeps it and passes there, where on the level record its corners
+        # fail by place. Each eye's place is reported, the eyes' spacing held.
+        turned = copy.copy(panel(E + "happy"))
+        turned.turned = True
+
+        def corner(fixture):
+            mouth = fixture.feature("mouth")
+            xs = np.nonzero(mouth)[1]
+            fixture.move(mouth & (np.arange(mouth.shape[1])[None, :] <= xs.min() + 0.25 * np.ptp(xs)), 0.0, 3.0)
+
+        def whole(fixture):
+            fixture.move(fixture.feature("mouth"), 0.0, 3.0)
+        for plant, on_turned in ((corner, False), (whole, True)):
+            with self.subTest(plant=plant.__name__):
+                fixture = PanelStill(E + "happy")
+                plant(fixture)
+                still = fixture.still()
+                row = facematch.check_panel(still, turned, "happy", FRONT, TOLERANCE, picture=False)[0]
+                self.assertEqual(row["pass"], on_turned, failed(row))
+                self.assertEqual(sorted(row["spacing"]), ["eyes", "mouth"])
+                self.assertFalse(any(row["rows"][n]["held"] for n in ("eye.R", "eye.L", "mouth.R", "mouth.L")))
+                self.assertEqual(row["spacing"]["mouth"]["pass"], on_turned)
+                self.assertTrue(row["spacing"]["eyes"]["pass"])
+                level = facematch.check_panel(still, panel(E + "happy"), "happy", FRONT, TOLERANCE, picture=False)[0]
+                self.assertFalse(level["pass"])
+                self.assertFalse(level["rows"]["mouth.R"]["pass"])
+
     def test_a_feature_is_found_among_its_own_parts(self):
         # The eye moved 16 pt and a dark spot of some other part left where it was: with the eye named in the ID pass,
         # the eye is found where it went and fails; read from the pixels alone, the spot would pass for it.
@@ -274,20 +241,23 @@ class PlantedTest(unittest.TestCase):
 
 class PairTest(unittest.TestCase):
     """Every primary panel laid as a render on every other primary panel's record, for each preset that record is the
-    primary of: where a held feature draws another state, it fails; where the two draw the same held states, it passes
-    only where they lie in the same places too (SAME_STATES), and DRAWN_ALIKE lists the states the spec names apart that
-    the sheets draw alike."""
+    primary of: where a held feature draws another state, it fails; where the two draw the same held states, a level
+    record passes only where they lie in the same places too (SAME_STATES), and a record that turns the head passes
+    where the eyes are as far apart; DRAWN_ALIKE lists the states the spec names apart that the sheets draw alike."""
 
     @classmethod
     def setUpClass(cls):
         stills = {pid: PanelStill(pid).still() for pid in PRIMARIES}
-        cls.rows = {}
+        cls.rows, cls.features = {}, []
         for a in PRIMARIES:
             for b in PRIMARIES:
                 if a != b:
                     measured = facematch.measure_on(stills[a], panel(b), FRONT)
                     for preset in panel(b).rec["primaryFor"]:
                         cls.rows[a, b, preset] = facematch.judge(measured, panel(b), preset, TOLERANCE)
+                    everything = facecal.everything(panel(b))
+                    row = facematch.judge(measured, everything, "all", TOLERANCE)
+                    cls.features += facecal.feature_rows(a, MODEL["faceCrops"][a], b, MODEL["faceCrops"][b], dict(row, tolerance=TOLERANCE))
 
     @staticmethod
     def differ(a, b, preset):
@@ -301,6 +271,7 @@ class PairTest(unittest.TestCase):
 
     def test_every_pair_of_primary_panels_that_draws_another_state_fails(self):
         self.assertEqual(len(PRIMARIES), 9)
+        counts = {"differ": 0, "turned": 0}
         for (a, b, preset), row in self.rows.items():
             differ = self.differ(a, b, preset)
             with self.subTest(render=a, record=b, preset=preset, differ=differ):
@@ -308,13 +279,33 @@ class PairTest(unittest.TestCase):
                     self.assertEqual(differ, ["mouth"])
                     self.assertTrue(row["pass"], failed(row))
                 elif differ:
+                    counts["differ"] += 1
                     self.assertFalse(row["pass"])
+                elif MODEL["faceCrops"][b]["turned"]:
+                    # The same eyes on a turned record: held by their shapes and spacing, which they share.
+                    counts["turned"] += 1
+                    self.assertTrue(row["pass"], failed(row))
+                    self.assertTrue(row["spacing"]["eyes"]["pass"])
+                    self.assertFalse(any(r["held"] for n, r in row["rows"].items() if n.startswith("eye")))
                 elif (a, b, preset) in SAME_STATES:
                     self.assertTrue(row["pass"], failed(row))
                 else:
                     # The same states in other places: what differs is where the anchors lie, never their shapes.
                     self.assertFalse(row["pass"])
                     self.assertTrue(all(r["pass"] for r in row["shapes"].values()), failed(row))
+        self.assertEqual(counts, {"differ": 114, "turned": 6})
+
+    def test_the_shape_gates_lie_between_the_same_states_and_the_different(self):
+        # Over every feature the primaries draw, each laid on the others (facecal.py runs the same over every panel and
+        # the rest front): the worst same-state pair passes each gate and the best different-state pair it must
+        # separate fails it, among the pairs whose places pass.
+        measures, passing = facecal.spread(self.features)
+        for name, m in measures.items():
+            with self.subTest(measure=name, **m):
+                low, high = sorted((m["worstSame"], m["bestDifferent"]))
+                self.assertLess(low, m["used"])
+                self.assertGreater(high, m["used"])
+        self.assertEqual(facecal.wrong_side(passing), [])
 
     def test_what_differs_between_excited_and_laughing_is_how_far_the_mouth_opens(self):
         # The master sheet's Laughing opens about a quarter more than Excited, with its corners within 0.5 pt: reported
@@ -328,6 +319,21 @@ class PairTest(unittest.TestCase):
                 self.assertLess(row["rows"][corner]["errPt"], 0.6)
         happy = own_on(M + "excited", M + "happy", "happy")["shapes"]["mouth"]
         self.assertGreater(abs(np.log(happy["openRatio"])), abs(np.log(laughing_on_excited["shapes"]["mouth"]["openRatio"])))
+
+    def test_an_open_mouth_passes_cheeky_s_mouth_its_red_reported(self):
+        # Cheeky draws its tongue out over a closed smile; the expression sheet's Mischievous draws its cheeky mouth
+        # open with the tongue in it, as Happy draws the open mouth. No gate tells them apart (DECISIONS.md 118,
+        # docs/QUESTIONS.md Q27): an open mouth passes Cheeky's mouth rows, and only the share of its open part that
+        # is the inside's deep red, reported, tells it from the tongue out. Its open eye fails the wink.
+        for render in (M + "happy", M + "excited"):
+            with self.subTest(render=render):
+                row = own_on(render, M + "cheeky", "mischievous")
+                self.assertTrue(all(row["rows"][n]["pass"] for n in ("mouth.R", "mouth.L")))
+                mouth = row["shapes"]["mouth"]
+                self.assertTrue(mouth["pass"], mouth)
+                self.assertGreater(mouth["redShare"], 2 * mouth["recordRedShare"])
+                self.assertFalse(row["pass"])
+                self.assertFalse(row["shapes"]["eye.R"]["pass"] and row["shapes"]["eye.L"]["pass"])
 
 
 def own_on(a, b, preset):
@@ -422,6 +428,28 @@ class RestFrontTest(unittest.TestCase):
                     self.assertFalse(shapes[name]["pass"], name)
                     self.assertGreater(shapes[name]["areaRatio"], facematch.EYE_AREA_RATIO)
 
+    def test_its_open_eyes_pass_curious_and_shy_whose_panels_turn_the_head(self):
+        # Curious and Shy draw open eyes on a head turned 4 to 5 pt toward the sheet's left: held by place against the
+        # nose, the front's eyes lay 5 to 6 pt off. They are held by their shapes and spacing, and on the head.
+        for preset in ("curious", "shy"):
+            with self.subTest(preset=preset):
+                result, _ = facematch.check("dog", self.rest, self.rest, preset)
+                self.assertTrue(result["pass"], result["summary"])
+                primary = result["records"][result["primary"]]
+                self.assertTrue(primary["turned"])
+                self.assertGreater(abs(primary["turnAcrossPt"]), TOLERANCE)
+                self.assertEqual((result["anchorsHeld"], result["spacingsHeld"], result["shapesHeld"]), (0, 1, 2))
+                self.assertLess(primary["spacing"]["eyes"]["errPt"], TOLERANCE)
+                self.assertGreater(max(primary["rows"][n]["errPt"] for n in ("eye.R", "eye.L")), TOLERANCE)
+                self.assertIn("eyes' spacing", result["summary"])
+        # Sleepy's panel turns the head too, and draws closed arcs further apart than open eyes, as the crescents are:
+        # the open eyes fail by their shape and their spacing.
+        result, _ = facematch.check("dog", self.rest, self.rest, "sleepy")
+        primary = result["records"][result["primary"]]
+        self.assertTrue(primary["turned"])
+        self.assertFalse(result["pass"])
+        self.assertFalse(primary["shapes"]["eye.R"]["pass"] or primary["shapes"]["eye.L"]["pass"])
+
     def test_the_face_moved_4_pt_on_its_head_fails_and_in_place_passes(self):
         k = MODEL["crops"]["front"]["ptPerCropPx"]
         gate = facematch.check("dog", self.rest, self.rest, "neutral")[0]["headGate"]
@@ -487,6 +515,16 @@ class RestFrontTest(unittest.TestCase):
                               self.rest.alpha, self.rest.premult, self.rest.part)
         with self.assertRaisesRegex(ValueError, "head.base"):
             facematch.head_mask(no_head)
+
+    def test_a_render_with_no_nose_says_so_and_holds_nothing(self):
+        def no_nose(fixture):
+            fixture.relabel("nose", "head.base", fur_of(fixture))
+        result, _ = facematch.check("dog", self.planted("nonose", plant=no_nose), self.rest, "laughing")
+        primary = result["records"][result["primary"]]
+        self.assertFalse(result["pass"])
+        self.assertEqual((primary["anchorsHeld"], primary["spacingsHeld"], primary["shapesHeld"]), (0, 0, 0))
+        self.assertIn("no nose near the record's", result["summary"])
+        self.assertNotIn("anchors", result["summary"].split(";")[0])
 
 
 class CommandTest(unittest.TestCase):
@@ -577,8 +615,10 @@ class RecordsTest(unittest.TestCase):
                 if name.isupper() and isinstance(value, (int, float)) and name not in skip:
                     self.assertIn(value, values, f"{module.__name__}.{name}")
         self.assertEqual(recorded["softL"], list(faces.SOFT_L))
-        for name in ("eyeAreaRatio", "eyeIoU", "mouthIoU", "mouthOpenRatio", "mouthOpenFloorShare"):
+        for name in ("eyeAreaRatio", "eyeIoU", "mouthIoU", "mouthOpenRatio", "mouthOpenFloorShare", "turnedShareOfHead"):
             self.assertIn(name, recorded)
+        # A panel turns the head where the turn alone would put a front-on face's eyes past the landmark tolerance.
+        self.assertEqual(faces.TURNED_SHARE, match.LANDMARK_SHARE)
 
 
 if __name__ == "__main__":
