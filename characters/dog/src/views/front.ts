@@ -121,8 +121,8 @@ const chest = symmetric([[0, -66], [-16, -65.4], [-25.6, -63.2], [-28, -60], [-2
 // wrist (x -29.5 at y -9 outside, -0.5 at -8.4 inside), its sole one convex
 // curve from round corner to round corner, lowest under its middle, where it
 // rests on the ground, as the sheet's does.
-const legR: Node[] = [[-4.8, -33], [-3, -25.4], [-1.6, -19], [-1.1, -13.4], [-0.5, -8.4], [-1, -5], [-3.2, -2], [-6.8, -0.7], [-11, -0.25], [-16, -0.05],
-  [-21, -0.4], [-25, -1.4], [-27.9, -3.4], [-29.3, -6.4], [-29.5, -9.4], [-29, -13.4], [-30.4, -17.4], [-31.2, -22], [-32.4, -28], [-33.2, -35],
+const legR: Node[] = [[-5, -33], [-3.6, -25.4], [-2.8, -19], [-2.2, -13.4], [-1.7, -8.6], [-2.3, -4.9], [-4.4, -1.9], [-7.6, -0.6], [-11, -0.25], [-16, -0.05],
+  [-21, -0.4], [-24.8, -1.4], [-27.6, -3.4], [-28.9, -6.4], [-29.1, -9.4], [-28.6, -13.4], [-30.2, -17.4], [-31.2, -22], [-32.4, -28], [-33.2, -35],
   [-33.4, -41], [-31.4, -46.6], [-26, -44], [-15, -40]];
 const legs = { R: smooth(legR), L: smooth(mirrorX(legR)) };
 
@@ -712,7 +712,7 @@ function earPaint(side: "L" | "R"): Paint {
 function between(): string {
   const g = uid("between"), f = uid("blur");
   // A narrow, round-topped V, 7 pt across at y -29 and 2.4 pt between the paws, fully faded at its top.
-  const v = smooth([[0, -31], [3.6, -29.6], [2.6, -20], [1.6, -10], [1.2, -2.6], [-1.2, -2.6], [-1.6, -10], [-2.6, -20], [-3.6, -29.6]]);
+  const v = smooth([[0, -31], [4, -29.6], [3.4, -20], [2.6, -10], [2.2, -2.6], [-2.2, -2.6], [-2.6, -10], [-3.4, -20], [-4, -29.6]]);
   return `<defs><linearGradient id="${g}" gradientUnits="userSpaceOnUse" x1="0" y1="-30" x2="0" y2="-2.6">` +
     `<stop offset="0" stop-color="${C.marking}" stop-opacity="0"/><stop offset="0.15" stop-color="${C.marking}" stop-opacity="0.15"/>` +
     `<stop offset="0.37" stop-color="${C.marking}" stop-opacity="0.45"/><stop offset="0.55" stop-color="${C.marking}" stop-opacity="0.75"/>` +
@@ -843,10 +843,10 @@ export function front(): Drawn[] {
     const litX = side === "R" ? -19 : 13;
     add(`front.${side}`, part(`front.${side}`, legs[side], {
       fill: C.fur,
-      shade: furShade(bodyGroup, [polyD(flipX([[-0.2, -31], [-5.4, -31], [-3.8, -18], [-2.6, -8], [-0.2, -8]], side))], ["M-40 -60 L40 -60 L40 -34 L-40 -34Z"]),
+      shade: furShade(bodyGroup, [polyD(flipX([[-1, -31], [-6.4, -31], [-5, -18], [-3.8, -8], [-1, -8]], side))], ["M-40 -60 L40 -60 L40 -34 L-40 -34Z"], { inset: 2, toLight: 3 }),
       highlight: { d: `M${litX - 7} -24 a7 10 0 1 0 14 0 a7 10 0 1 0 -14 0Z`, colour: C.light, opacity: 0.25, blur: 3.5 },
       under: `<defs><linearGradient id="${fade}" gradientUnits="userSpaceOnUse" x1="0" y1="-29" x2="0" y2="-11">` +
-        `<stop offset="0" stop-color="${C.softLine}" stop-opacity="0.3"/><stop offset="0.45" stop-color="${C.softLine}" stop-opacity="0.85"/><stop offset="1" stop-color="${C.pawLine}"/></linearGradient>` +
+        `<stop offset="0" stop-color="${C.softLine}" stop-opacity="0.1"/><stop offset="0.3" stop-color="${C.softLine}" stop-opacity="0.5"/><stop offset="0.55" stop-color="${C.softLine}" stop-opacity="0.9"/><stop offset="1" stop-color="${C.pawLine}"/></linearGradient>` +
         // The toe lines fade out toward their tops.
         `<linearGradient id="${toe}" gradientUnits="userSpaceOnUse" x1="0" y1="-1" x2="0" y2="-7.4">` +
         `<stop offset="0.3" stop-color="${C.pawLine}"/><stop offset="1" stop-color="${C.pawLine}" stop-opacity="0.1"/></linearGradient></defs>`,
@@ -865,8 +865,8 @@ export function front(): Drawn[] {
 
 /** Points the sheet has no finder for, where this drawing puts them (dev output for the sheet match). */
 export const landmarks: Record<string, P> = {
-  "paw.front.L": [15, -5.4],
-  "paw.front.R": [-15, -5.4],
+  "paw.front.L": [15.4, -5.4],
+  "paw.front.R": [-15.4, -5.4],
   "paw.hind.L": [37.6, -10.9],
   "paw.hind.R": [-37.6, -10.9],
   // The ring's top as it shows below the chin; it swings from its hidden top, the tag's pivot at (0.4, −57.5).
