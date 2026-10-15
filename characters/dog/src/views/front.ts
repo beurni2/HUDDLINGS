@@ -4,7 +4,7 @@
 // light across joined parts (head and tuft, chest and front legs, haunches and
 // hind paws); joins are feathered and carry no rim and no line.
 import { furEdge, furSpan, type Lock } from "../../../draw/fur.ts";
-import { arc, bbox, ellipse, fracAt, mirrorX, pathD, rotate, sample, smooth, spanPoints, symmetric, v, type Node, type P, type Shape } from "../../../draw/geom.ts";
+import { arc, bbox, ellipse, fracAt, mirrorX, pathD, rotate, sample, smooth, spanPoints, symmetric, v, type Node, type P, type Seg, type Shape } from "../../../draw/geom.ts";
 import { innerLine, mirrorSpans, ribbons, strokeOf, type DrawnLine, type Outline, type Span, type Stroke } from "../../../draw/line.ts";
 import { LIMITS } from "../../../draw/lint.ts";
 import { marking, part, soft, type Fade, type Paint } from "../../../draw/paint.ts";
@@ -131,19 +131,21 @@ const legs = { R: smooth(legR, { corners: TOES }), L: smooth(mirrorX(legR), { co
 // (the sheet's 8.2 to 8.7 at x -14 to 16), 6.5 at x 20 and 4 where its ends
 // tuck in against the neck under the cheeks, each end a rounded square where it
 // turns away round the neck, both the same. The sheet's head roll tips it a
-// little: its left end sits higher.
-const collar = smooth([[-27.4, -63.4], [-21, -61.6], [-10, -59], [0, -58.2], [10, -59.4], [20.5, -62], [26.4, -63.9], [28, -63.4], [28.5, -61.6],
-  [27.4, -59.6], [22.6, -55.4], [17, -52.6], [10, -50.4], [0, -49.8], [-10, -50], [-15, -50.8], [-19.4, -52.6], [-22.8, -54.8], [-25.6, -57.2], [-27.8, -59.4],
-  [-28.6, -61.4]]);
+// little: its left end sits higher and reaches 2 pt further out.
+const collar = smooth([[-26.4, -62.6], [-21, -61.2], [-10, -59], [0, -58.2], [10, -59.4], [20.5, -62], [26.4, -63.9], [28, -63.4], [28.5, -61.6],
+  [27.4, -59.6], [22.6, -55.4], [17, -52.6], [10, -50.4], [0, -49.8], [-10, -50], [-15, -50.8], [-19.4, -52.6], [-22.6, -55], [-25, -57.2], [-26.8, -59],
+  [-27.4, -60.8]]);
 
 // The tag: a plump, coin-like gold heart, as the sheet draws it: full round
-// lobes with a shallow notch, its sides staying wide low down before a blunt
-// rounded point, 17.3 pt wide and 15.7 tall with its line (the sheet's 17.4 by
-// 15.9), centred under its ring (x 0.6); and the smaller heart embossed in it.
-const heart = smooth([[0.6, -49.7], [-1.2, -51.5], [-3.6, -52.3], [-6, -51.6], [-7.6, -49.6], [-8.1, -47], [-7.5, -44.3], [-6.1, -41.8], [-4, -39.6], [-1.6, -37.6],
-  [0.6, -36.6], [2.8, -37.6], [5.2, -39.6], [7.3, -41.8], [8.7, -44.3], [9.2, -47], [8.8, -49.6], [7.2, -51.6], [4.8, -52.3], [2.4, -51.5]], { corners: [0] });
-const innerHeart = smooth([[0.6, -46.6], [-1.2, -48.2], [-3.3, -48.4], [-4.8, -47.1], [-5.1, -45], [-4.2, -42.8], [-2.4, -41], [0.6, -39.3], [3.6, -41], [5.4, -42.8],
-  [6.3, -45], [6, -47.1], [4.5, -48.4], [2.4, -48.2]], { corners: [0] });
+// lobes with a shallow notch, widest at mid-height (17.9 pt with its line, the
+// sheet's 17.8), its sides staying wide low down before a blunt rounded point
+// (the sheet's is 12.5 pt wide 3 pt above its foot), 16 pt tall, centred under
+// its ring; and the smaller heart embossed in it.
+const shift = (shape: Shape, dx: number): Shape => ({ ...shape, segs: shape.segs.map((g) => g.map(([x, y]): P => [x + dx, y]) as Seg) });
+const TAG_X = 0.4;
+const heart = shift(symmetric([[0, -50.4], [-1.6, -51.3], [-3.6, -51.7], [-5.8, -51.1], [-7.6, -49.3], [-8.7, -47.1], [-8.95, -45], [-8.5, -43], [-7.8, -41],
+  [-6.6, -39], [-4.8, -37.3], [-2.6, -36.1]], [0, -35.6], { corners: [0] }), TAG_X);
+const innerHeart = shift(symmetric([[0, -46.4], [-1.8, -48], [-3.9, -48.1], [-5.3, -46.8], [-5.6, -44.6], [-4.8, -42.4], [-3, -40.6]], [0, -39.2], { corners: [0] }), TAG_X);
 
 // The ears (front a's): droplets hanging from high on the head's sides, narrow
 // at the root (tucked under the crown fur), broad and rounded below, their inner
@@ -184,13 +186,18 @@ const earD = (side: "L" | "R", d: string) => rollD(side === "R" ? d : mirrorD(d)
  * The face's roll carried down into the cheeks and jaw (DECISIONS 8): below the
  * eyes each point is lifted on the dog's left and lowered on its right by its
  * distance from the midline times the roll, fading out above the eyes, where
- * the crown and the topknot stay level as the sheet draws them, and easing to
- * about a third at the jaw's corners, where the sheet's jaw lies near level
- * over the collar's ends (y -63.3 on the right and -64.5 on the left at x 31,
- * where the full roll would put them 4.3 pt apart, the left one off the
- * collar's end).
+ * the crown and the topknot stay level as the sheet draws them; under the jaw
+ * three quarters of it under the chin (the sheet's chin meets the collar at
+ * y -59.5 at x -20 and -61.2 at x 20), easing to about a third at the jaw's
+ * corners, where the sheet's jaw lies near level over the collar's ends (y
+ * -63.3 on the right and -64.5 on the left at x 31, where the full roll would
+ * put them 4.3 pt apart, the left one off the collar's end).
  */
-const cheekRoll = ([x, y]: P): P => [x, y + x * Math.tan(ROLL) * Math.min(1, Math.max(0, (y + 118) / 20)) * (0.2 + 0.8 * Math.min(1, Math.max(0, (-62 - y) / 12)))];
+const clamp01 = (t: number) => Math.min(1, Math.max(0, t));
+const cheekRoll = ([x, y]: P): P => {
+  const jaw = clamp01((-62 - y) / 12), under = 0.75 - 0.4 * clamp01((Math.abs(x) - 20) / 11);
+  return [x, y + x * Math.tan(ROLL) * clamp01((y + 118) / 20) * (jaw + (1 - jaw) * under)];
+};
 
 /**
  * The crown to the right of the topknot sits higher on the sheet than its mirror on the left (the silhouette
@@ -598,13 +605,13 @@ function tagPiece(): Piece {
   const emboss = sample(innerHeart.segs, 10);
   emboss.push(emboss[0]!);
   // The embossed heart's light, along its upper left lobe, where the light catches its raised edge.
-  const lit = uid("blur"), raised = sample(innerHeart.segs, 10).filter(([x, y]) => x < 0.4 && y < -44.2);
+  const lit = uid("blur"), raised = sample(innerHeart.segs, 10).filter(([x, y]) => x < TAG_X && y < -43.8);
   return join(ring, part("tag", heart, {
     fill: C.tag,
     shade: { multiply: C.tagShadeBy, rim: { inset: 1.3, toLight: 1.3 }, blur: 1 },
     under: `<defs>${blur(lit, [-8, -51, 10, 10], 0.35)}</defs><path d="${strokeOf(raised, 0.9, { taper: 1.6, tip: 0.2 }).d}" fill="${C.tagShine}" opacity="0.7" filter="url(#${lit})"/>`,
     // A soft matte light on the upper left lobe, not a bevel's glint.
-    highlight: { d: "M-6.6 -48.2 a2.8 1.9 -40 1 0 5.6 0 a2.8 1.9 -40 1 0 -5.6 0", colour: C.tagShine, opacity: 0.45, blur: 1.4 },
+    highlight: { d: "M-6.6 -47.4 a2.8 1.9 -40 1 0 5.6 0 a2.8 1.9 -40 1 0 -5.6 0", colour: C.tagShine, opacity: 0.45, blur: 1.4 },
     // The embossed heart's own rim, a little darker than the tag's gold.
     inner: [{ pts: emboss, width: 0.7, colour: C.tagLine, opacity: 0.6 }],
     outline: { colour: C.tagLine, width: 1.3, taper: 2, blur: 0.2 },
@@ -760,7 +767,7 @@ export function front(): Drawn[] {
     shade: { multiply: C.shadeBy, shapes: ["M-32 -57.4 C-16 -49.4 16 -49.4 32 -58.4 L32 -46 L-32 -46Z"], blur: 0.9 },
     highlight: { d: "M-21 -57.6 C-11 -54.4 10 -54.4 21 -58.8 L21 -56.6 C10 -52.4 -11 -52.4 -21 -55.6Z", colour: C.collarHighlight, opacity: 0.3, blur: 0.9 },
     under: `<rect x="-1.5" y="-60" width="4.4" height="10.4" rx="1.2" fill="${C.collarLine}" opacity="0.3"/>` + collarContact(),
-    outline: { colour: C.collarRim, width: THIN, taper: 3, blur: 0.2, spans: [{ from: [26.2, -64], to: [-27.2, -63.6] }] },
+    outline: { colour: C.collarRim, width: THIN, taper: 3, blur: 0.2, spans: [{ from: [26.2, -64], to: [-26.2, -62.7] }] },
   }));
   add("tag", tagPiece());
   for (const side of ["R", "L"] as const) add(`ear.${side}`, part(`ear.${side}`, ears[side], earPaint(side)));
