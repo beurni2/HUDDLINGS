@@ -112,19 +112,22 @@ const hind = { R: smooth(hindR, { corners: HIND_TOES }), L: smooth(mirrorX(hindR
 const chest = symmetric([[0, -66], [-16, -65.4], [-25.6, -63.2], [-28, -60], [-29.6, -56.2], [-31, -51.4], [-32, -46], [-32.6, -40],
   [-32.4, -34], [-31.6, -26], [-29.6, -17], [-26.4, -9], [-20, -4.4], [-8, -3.2]], [0, -3]);
 
-// The front legs: short chubby columns that come out of the chest close
-// together, as the sheet draws them (their inner edges at x -4.8 at y -33, -1.6
-// at -19 and -1.1 at the wrist), each coming out from under the shoulder's
-// saddle, its outer edge where the sheet's tan meets the cream (x -33.4 from y
-// -41 to -35, -31.2 at -22), narrowing a little to the wrist (x -29 at y
-// -13.4), then swelling into a round bulb of a paw a little wider than the
-// wrist (x -29.5 at y -9 outside, -0.5 at -8.4 inside), its sole one convex
-// curve from round corner to round corner, lowest under its middle, where it
-// rests on the ground, as the sheet's does.
-const legR: Node[] = [[-5, -33], [-3.6, -25.4], [-2.8, -19], [-2.2, -13.4], [-1.7, -8.6], [-2.3, -4.9], [-4.4, -1.9], [-7.6, -0.6], [-11, -0.25], [-16, -0.05],
-  [-21, -0.4], [-24.8, -1.4], [-27.6, -3.4], [-28.9, -6.4], [-29.1, -9.4], [-28.6, -13.4], [-30.2, -17.4], [-31.2, -22], [-32.4, -28], [-33.2, -35],
-  [-33.4, -41], [-31.4, -46.6], [-26, -44], [-15, -40]];
-const legs = { R: smooth(legR), L: smooth(mirrorX(legR)) };
+// The front legs: short chubby columns that come out of the chest side by
+// side, as the sheet draws them, their inner edges running down from the V's
+// top just under the tag (x -1.8 at y -30) and parting a little toward the
+// wrist (-4.7 at -10.6), so the V between them widens downward; each comes out
+// from under the shoulder's saddle, its outer edge where the sheet draws the
+// leg's fine line against the haunch (x -35.2 at y -41, -32.2 at -21),
+// narrowing to the wrist (x -30 at y -15.8), then swelling into a round bun of a paw (x
+// -30.7 at y -11.2 outside, -3.4 at -6.4 inside), its outer corner well
+// rounded, its sole convex and dipping a little at the two toe lines (concave
+// corners), so it rests on the ground in three round toes, as the sheet's does.
+const legR: Node[] = [[-1.6, -36], [-1.8, -30], [-3.1, -22], [-4.5, -14.6], [-4.7, -10.6], [-3.4, -6.4], [-4.4, -2.9], [-8, -0.75], [-11.4, -1], [-16, -0.1],
+  [-20.6, -1.05], [-24.2, -1.3], [-27.8, -3.2], [-30, -6.8], [-30.7, -11.2], [-30, -15.8], [-32.2, -21], [-33.8, -28], [-34.8, -35], [-35.2, -41],
+  [-33, -47], [-26, -44], [-15, -40], [-5, -40]];
+/** The sole's dips at the toe lines (concave, so no corner rule applies). */
+const FRONT_TOES = [8, 10];
+const legs = { R: smooth(legR, { corners: FRONT_TOES }), L: smooth(mirrorX(legR), { corners: FRONT_TOES.map((j) => (legR.length - j) % legR.length) }) };
 
 // The collar: a band round the neck, following the chin down to a dip at the
 // front, as the sheet draws it: about 8.5 pt deep at the front with its rims
@@ -316,20 +319,17 @@ const patches = {
 const patchFade = { R: { from: [-16.8, -105.4], to: [-13.6, -104.4] }, L: { from: [14.2, -109.6], to: [11, -108.6] } } satisfies Record<string, Fade>;
 // The saddle's two halves where they show from the front, as the sheet paints
 // them. The right half runs down the shoulder from under the collar's end, a
-// strip of tan along the line, and widens over the upper outer haunch, its tan
-// running in under the front leg down to y -30; below that its inner edge runs
-// out across the thigh in a broken edge of fur (x -38 at y -28, -40 at -23),
-// leaving a streak of cream beside the leg, and the outer thigh's tan runs on
-// down the line to the hind paw, so the lower thigh above the hind paw is
-// cream. The left half is a
-// narrow streak down the shoulder from under the collar's end along the edge of
-// the front leg (the sheet's, x 33 to 39 from y -47 to -32), running out at the
-// top of the haunch, whose round is cream.
-const saddleR = smooth([[-27, -64.2], [-31.6, -63.4], [-37, -54], [-42, -45.6], [-53, -36], [-53, -17.6], [-47.6, -15.4], [-44.6, -17], [-42.2, -18.4], [-40.6, -20.4],
-  [-41.2, -22.2], [-39.6, -24.4], [-38.6, -26.6], [-37.4, -28.2], [-34.4, -30.6], [-32.4, -34], [-31.8, -40], [-30.6, -46], [-28.8, -53], [-27.4, -58.6]],
-  { corners: [9, 10, 11] });
-const saddleL = smooth([[27, -64.2], [31.6, -63.4], [36.4, -55], [39.6, -47], [40.4, -42.4], [39.2, -38.6], [37.4, -34.4], [35.8, -30.6], [34.4, -28.4], [33.4, -31],
-  [32.4, -38], [31.6, -46], [30.4, -52], [28.6, -57.6]], { corners: [8] });
+// strip of tan along the line, and widens into a rounded tear over the outer
+// haunch down to the hind paw's top, its inner edge along the front leg's line
+// down to y -30 and then out across the thigh (x -40 at y -24.6, -45 at -16.4),
+// leaving a wedge of cream between it and the leg above the hind paw. The left
+// half is a narrow streak down the shoulder from under the collar's end, outside
+// the front leg's line (the sheet's, x 36 to 41 from y -47 to -32), running out
+// to a point at the top of the haunch, whose round is cream.
+const saddleR = smooth([[-27, -64.2], [-31.6, -63.4], [-37.4, -55], [-43, -46], [-53, -36], [-54, -20], [-49, -14.6], [-45, -16.4], [-42.4, -20.2], [-40, -24.6],
+  [-38, -29], [-36.2, -34.4], [-35, -40], [-33.4, -46.4], [-30.8, -53], [-28.4, -58.6]]);
+const saddleL = smooth([[27, -64.2], [31.6, -63.4], [36.2, -55.6], [38.8, -47.4], [40.2, -41], [40.6, -36.2], [40.2, -32.4], [39.2, -29.6], [37.8, -31.8], [36.6, -36.8],
+  [35, -44], [32.6, -51], [29.6, -57.6]]);
 
 // Paint.
 
@@ -348,12 +348,11 @@ const backPaint: Paint = {
   fill: C.fur,
   shade: furShade(hipGroup),
   // From under the collar's end down the shoulder, the lighter fur line, coming out from under the collar; round
-  // the haunch, the light grey-brown line the sheet draws there (#BB9370 to #BE997E), thinner and lighter than
-  // the head's, lighter on the side toward the light. The two cross-fade where the shoulder meets the haunch,
-  // their tapers overlapping.
-  outline: { ...OUTLINE, colour: C.haunchLine, width: 1.2, taper: 6, spans: [
-    { from: [-29.2, -61.4], to: [-38.8, -42.6], width: THIN, colour: C.furLine }, { from: [-35.6, -47.6], to: [-47.4, -11] },
-    { from: [47.4, -11], to: [35.6, -47.6], width: 1.35 }, { from: [38.8, -42.6], to: [29.2, -61.4], width: THIN, colour: C.furLine }] },
+  // the haunch, the warm brown the sheet draws there (#9B6946 at its darkest), lighter and thinner on the side
+  // toward the light. The two cross-fade where the shoulder meets the haunch, their tapers overlapping.
+  outline: { ...OUTLINE, colour: C.warmLine, width: 1.25, taper: 6, spans: [
+    { from: [-29.2, -61.4], to: [-38.8, -42.6], width: THIN, colour: C.furLine }, { from: [-35.6, -47.6], to: [-47.4, -11], colour: C.outline },
+    { from: [47.4, -11], to: [35.6, -47.6], width: 1.4 }, { from: [38.8, -42.6], to: [29.2, -61.4], width: THIN, colour: C.furLine }] },
 };
 const headPaint: Paint = {
   fill: C.fur,
@@ -723,21 +722,20 @@ function earPaint(side: "L" | "R"): Paint {
 }
 
 /**
- * Between the front legs the sheet paints a narrow, light warm-tan V: nothing at its top, about 30 pt up, where
- * it fades up into the chest's cream with no edge, then a pale tan down the narrow slot between the legs (whose
- * inner edges lie over its sides), deepening only low down between the paws, then easing out where the paws meet,
- * so the floor shows light under them. No line runs down its middle and nothing marks its top.
+ * Between the front legs the sheet paints a narrow, light warm-tan V, its point at the top: nothing at its top,
+ * about 32 pt up just under the tag, where it fades up into the chest's cream with no edge, then a pale tan down
+ * the slot between the legs (whose inner edges lie over its sides), widening and deepening low down between the
+ * paws, then easing out where the paws meet the floor. No line runs down its middle and nothing marks its top.
  */
 function between(): string {
   const g = uid("between"), f = uid("blur");
-  // A narrow, round-topped V, 7 pt across at y -29 and 2.4 pt between the paws, fully faded at its top.
-  const v = smooth([[0, -31], [4, -29.6], [3.4, -20], [2.6, -10], [2.2, -2.6], [-2.2, -2.6], [-2.6, -10], [-3.4, -20], [-4, -29.6]]);
-  return `<defs><linearGradient id="${g}" gradientUnits="userSpaceOnUse" x1="0" y1="-30" x2="0" y2="-2.6">` +
-    `<stop offset="0" stop-color="${C.marking}" stop-opacity="0"/><stop offset="0.15" stop-color="${C.marking}" stop-opacity="0.15"/>` +
-    `<stop offset="0.37" stop-color="${C.marking}" stop-opacity="0.45"/><stop offset="0.55" stop-color="${C.marking}" stop-opacity="0.75"/>` +
-    `<stop offset="0.75" stop-color="${C.marking}" stop-opacity="0.85"/><stop offset="0.9" stop-color="${C.earDeep}" stop-opacity="0.8"/>` +
-    `<stop offset="1" stop-color="${C.earDeep}" stop-opacity="0"/></linearGradient>` +
-    `${blur(f, [-12, -36, 24, 36], 1.1)}</defs>` +
+  // A narrow V, its point at the top: 3.6 pt across at y -26 and 9.6 pt between the wrists.
+  const v = smooth([[0, -33], [1.6, -29], [3.4, -20], [4.8, -10], [4.6, -2.6], [-4.6, -2.6], [-4.8, -10], [-3.4, -20], [-1.6, -29]]);
+  return `<defs><linearGradient id="${g}" gradientUnits="userSpaceOnUse" x1="0" y1="-32" x2="0" y2="-2.6">` +
+    `<stop offset="0" stop-color="${C.marking}" stop-opacity="0"/><stop offset="0.25" stop-color="${C.marking}" stop-opacity="0.18"/>` +
+    `<stop offset="0.5" stop-color="${C.marking}" stop-opacity="0.5"/><stop offset="0.75" stop-color="${C.marking}" stop-opacity="0.75"/>` +
+    `<stop offset="0.9" stop-color="${C.earDeep}" stop-opacity="0.7"/><stop offset="1" stop-color="${C.earDeep}" stop-opacity="0"/></linearGradient>` +
+    `${blur(f, [-12, -36, 24, 36], 1)}</defs>` +
     `<path d="${pathD(v.segs)}" fill="url(#${g})" filter="url(#${f})"/>`;
 }
 
@@ -770,7 +768,7 @@ export function front(): Drawn[] {
     ])));
   add("body.back", part("body.back", back, backPaint));
   add("back.patch.R", marking("back.patch.R", { shape: back, paint: backPaint }, saddleR, { fill: C.marking, blur: 1.2, clip: true }));
-  add("back.patch.L", marking("back.patch.L", { shape: back, paint: backPaint }, saddleL, { fill: C.marking, blur: 1.2, clip: true }));
+  add("back.patch.L", marking("back.patch.L", { shape: back, paint: backPaint }, saddleL, { fill: C.marking, blur: 0.9, clip: true }));
   for (const side of ["R", "L"] as const) {
     const sx = side === "R" ? -1 : 1, cx = sx * 37.6, cy = -10.9;
     add(`hind.${side}`, roomy(part(`hind.${side}`, hind[side], {
@@ -852,29 +850,37 @@ export function front(): Drawn[] {
   }));
   for (const side of ["R", "L"] as const) {
     const sx = side === "R" ? -1 : 1;
-    // No line runs down the leg's outer side from the shoulder: the saddle's tan meets its cream there with no line,
-    // as the sheet paints it. The leg's one line comes in light at the V's top, runs down its inner side as a light
-    // warm line (the sheet's #DCB896 at y -25 to #B9825B at -16), deepens to the paw's warm line round the paw and
-    // runs out, tapering, on its outer side above the wrist.
-    const fade = uid("legline"), toe = uid("toe");
+    // No line runs down the leg's outer side from the collar: the shoulder's fur meets the leg with no line, as the
+    // sheet paints it. The leg's lines change with the light, as the sheet's do: a fine warm line comes in from
+    // nothing at the V's point and runs down the leg's inner side (the sheet's #AE7C58 low down); under the paw the
+    // darkest line of the figure, the sole's (the sheet's #7B5330 to #835C3C), dipping at the toes; and up the
+    // paw's outer side a warm line that lightens past the wrist and fades out below the shoulder, the fine line
+    // the sheet draws between the leg and the haunch.
+    const fade = uid("legline"), rise = uid("legline"), toe = uid("toe");
     // The one soft light on the leg's front, toward the light, so its cream is never one flat fill (the sheet's
-    // varies by about 2 L* down the leg); the shade along its inner side, where it turns into the V.
+    // varies by about 2 L* down the leg); the shade along its inner side, where it turns into the V; and no shade
+    // band along the sole, whose line alone marks the paw's foot.
     const litX = side === "R" ? -19 : 13;
     add(`front.${side}`, part(`front.${side}`, legs[side], {
       fill: C.fur,
-      shade: furShade(bodyGroup, [polyD(flipX([[-1, -31], [-6.4, -31], [-5, -18], [-3.8, -8], [-1, -8]], side))], ["M-40 -60 L40 -60 L40 -34 L-40 -34Z"], { inset: 2, toLight: 3 }),
+      shade: furShade(bodyGroup, [polyD(flipX([[-1.4, -33], [-4.6, -28], [-6.8, -16], [-6.6, -8], [-3, -8], [-3.6, -16], [-2.2, -28]], side))],
+        ["M-40 -60 L40 -60 L40 -36 L-40 -36Z", "M-40 -3.4 L40 -3.4 L40 4 L-40 4Z"], { inset: 2, toLight: 3 }),
       highlight: { d: `M${litX - 7} -24 a7 10 0 1 0 14 0 a7 10 0 1 0 -14 0Z`, colour: C.light, opacity: 0.25, blur: 3.5 },
-      under: `<defs><linearGradient id="${fade}" gradientUnits="userSpaceOnUse" x1="0" y1="-29" x2="0" y2="-11">` +
-        `<stop offset="0" stop-color="${C.softLine}" stop-opacity="0.1"/><stop offset="0.3" stop-color="${C.softLine}" stop-opacity="0.5"/><stop offset="0.55" stop-color="${C.softLine}" stop-opacity="0.9"/><stop offset="1" stop-color="${C.pawLine}"/></linearGradient>` +
+      under: `<defs><linearGradient id="${fade}" gradientUnits="userSpaceOnUse" x1="0" y1="-31" x2="0" y2="-12">` +
+        `<stop offset="0" stop-color="${C.softLine}" stop-opacity="0"/><stop offset="0.35" stop-color="${C.softLine}" stop-opacity="0.6"/><stop offset="1" stop-color="${C.warmLine}"/></linearGradient>` +
+        `<linearGradient id="${rise}" gradientUnits="userSpaceOnUse" x1="0" y1="-42" x2="0" y2="-14">` +
+        `<stop offset="0" stop-color="${C.softLine}" stop-opacity="0"/><stop offset="0.35" stop-color="${C.softLine}" stop-opacity="0.6"/><stop offset="1" stop-color="${C.warmLine}"/></linearGradient>` +
         // The toe lines fade out toward their tops.
-        `<linearGradient id="${toe}" gradientUnits="userSpaceOnUse" x1="0" y1="-1" x2="0" y2="-7.4">` +
-        `<stop offset="0.3" stop-color="${C.pawLine}"/><stop offset="1" stop-color="${C.pawLine}" stop-opacity="0.1"/></linearGradient></defs>`,
-      // Two faint toe lines rising from the sole about 6 pt up the paw, each bowing a little away from the middle
-      // toe, as the paw-stub and stubby-paws panels draw them; the sole runs on unbroken under them.
-      inner: [[[-20.6, -0.9], [-21.1, -3], [-21.1, -5.2], [-20.6, -7.2]], [[-11, -0.8], [-10.5, -2.9], [-10.5, -5.1], [-11, -7.1]]]
-        .map((pts) => ({ pts: flipX(pts as P[], side), width: 0.75, colour: `url(#${toe})`, opacity: 0.8 })),
-      // One line from the V's top down the leg's inner side, round the paw and up its outer side to y -21.
-      outline: { ...OUTLINE, taper: 5, spans: bySide(side, [{ from: [-4, -29], to: [-31, -21], width: 1.3, colour: `url(#${fade})` }]) },
+        `<linearGradient id="${toe}" gradientUnits="userSpaceOnUse" x1="0" y1="-1" x2="0" y2="-6.6">` +
+        `<stop offset="0.25" stop-color="${C.soleLine}"/><stop offset="1" stop-color="${C.warmLine}" stop-opacity="0.15"/></linearGradient></defs>`,
+      // Two short curved toe lines rising from the sole's dips about 5.5 pt up the paw, each bowing a little away from
+      // the middle toe and turning in at its top round it, as the paw-stub and stubby-paws panels draw them.
+      inner: [[[-20.6, -1.1], [-21.3, -2.9], [-21.2, -4.8], [-20.3, -6.5]], [[-11.4, -1.05], [-10.8, -2.9], [-10.9, -4.8], [-11.8, -6.4]]]
+        .map((pts) => ({ pts: flipX(pts as P[], side), width: 0.75, colour: `url(#${toe})`, opacity: 0.85 })),
+      // From the V's point down the inner side; under the paw; up its outer side, fading out below the shoulder. Their tapers overlap, so
+      // each line hands on to the next with no join.
+      outline: { ...OUTLINE, taper: 4, spans: bySide(side, [{ from: [-1.8, -31], to: [-5.6, -1.6], width: 1.25, colour: `url(#${fade})` },
+        { from: [-3.6, -4.2], to: [-30, -8.6], width: 1.4, colour: C.soleLine }, { from: [-29.4, -5.6], to: [-35, -40], width: 1.25, colour: `url(#${rise})` }]) },
       // Its top fades in under the shoulder, so it comes out from under the saddle's tan with no edge.
       feather: { from: [sx * 31, -45.6], to: [sx * 31, -41.8] },
     }));
