@@ -419,9 +419,9 @@ function headLinePiece(): Piece {
  * side crop shows one).
  */
 const EYE: EyeSpec = {
-  centre: [-66.15, -99.95], rx: 7.7, ry: 10.65, turn: 6, noseward: -1,
-  rim: { top: 1.3, side: 0.9, foot: 0.6 }, lid: { from: -45, to: 150, width: 1.8, flick: 0.3 },
-  white: { at: -8, width: 2.9, span: 64 }, shine: { at: [2.4, 4.1], r: 1.55 },
+  centre: [-66.4, -99.7], rx: 7.6, ry: 10.4, turn: 4, noseward: -1,
+  rim: { top: 1.3, side: 0.8, foot: 0.5 }, lid: { from: -45, to: 150, width: 1.8, flick: 0.3 },
+  white: { at: -18, width: 3.4, span: 62, fade: 0.15 }, shine: { at: [2.3, 4.0], r: 1.6 },
 };
 
 /** The brow: a short, thick, rounded dab of tan above the hood, domed, its back end lower, soft at its edges (the front's recipe). */

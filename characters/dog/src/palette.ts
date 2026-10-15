@@ -90,6 +90,9 @@ export const C = {
   tagShadeBy: mix(light, tag, 0.4),
   tagShine: mix(tag, light, 0.6),
   eyeWhite: mix(fur, light, 0.75),
+  /** The eye's rim and lash line, darker than the iris it rings: the pupils' near-black 35% darker, #150801 (L* 3)
+   * against the turnaround's #140405 to #180804 (L* 2 to 4) round an iris of L* 5 to 8. */
+  eyeRim: darken(eyeDark, 0.35),
   /** The warm light low in the iris: the printed iris brown a fifth of the way to the mouth's red and a tenth
    * toward the gold, #5F331A against the sheet's #5B3119. */
   irisWarm: mix(mix(dark, mouthInside, 0.2), tag, 0.1),

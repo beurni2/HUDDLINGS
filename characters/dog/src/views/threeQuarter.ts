@@ -317,14 +317,15 @@ function headLinePiece(): Piece {
  */
 const EYES: Record<"L" | "R", EyeSpec> = {
   L: {
-    centre: [-37.45, -95.45], rx: 9.05, ry: 9.85, turn: -4, noseward: -1,
-    rim: { top: 1.2, side: 0.9, foot: 0.7 }, lid: { from: -35, to: 120, width: 1.8, flick: 0.2 },
-    white: { at: -24, width: 1.9, span: 56 }, shine: { at: [3.2, 5], r: 1.6 },
+    centre: [-38.1, -95.15], rx: 9.5, ry: 9.5, turn: -4, noseward: -1,
+    rim: { top: 1.2, side: 0.9, foot: 0.6 }, lid: { from: -35, to: 120, width: 1.8, flick: 0.2 },
+    white: { at: -25, width: 1.5, span: 35, fade: 0.5 }, shine: { at: [3.4, 4.8], r: 1.75 },
   },
   R: {
-    centre: [-78.3, -104.8], rx: 6.6, ry: 8.8, turn: 15, noseward: 1,
-    rim: { top: 1, side: 0.8, foot: 0.6 }, lid: { from: -30, to: 120, width: 1.6, flick: 0.15 },
-    white: { at: -5, width: 1.3, span: 50 }, shine: { at: [2.2, 3.9], r: 1.3 },
+    centre: [-78.3, -104.8], rx: 6.6, ry: 8.65, turn: 15, noseward: 1,
+    rim: { top: 1, side: 0.8, foot: 0.5 }, lid: { from: -30, to: 120, width: 1.6, flick: 0.15 },
+    white: { at: -10, width: 1.2, span: 36, fade: 0.5 }, shine: { at: [2.2, 3.9], r: 1.4 },
+    glow: { band: 5, warm: 2.2 },
   },
 };
 

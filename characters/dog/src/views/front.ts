@@ -466,13 +466,15 @@ function eye(landmark: P, noseward: 1 | -1): Piece {
   const out = -noseward;
   // The ball sits a hair out from the landmark and 0.45 pt below it, so the dark eye's own centre (DECISIONS 10)
   // lands on the landmark with the eye's foot where the sheet's is.
-  const centre: P = [landmark[0] + out * 0.15 * cosR - 0.45 * sinR, landmark[1] + out * 0.15 * sinR + 0.45 * cosR];
+  const centre: P = [landmark[0] + out * 0.65 * cosR - 0.6 * sinR, landmark[1] + out * 0.65 * sinR + 0.6 * cosR];
   return sharedEye({
-    centre, rx: 8.8, ry: 9.5, turn: 20 * noseward + ROLL_DEG, noseward,
-    rim: { top: 1.3, side: 1, foot: 0.8 },
+    centre, rx: 9.5, ry: 9.2, turn: 20 * noseward + ROLL_DEG, noseward,
+    rim: { top: 1.3, side: 1, foot: 0.7 },
     lid: { from: -18, to: 122, width: 1.8, flick: 0.25 },
-    white: { at: -15, width: 1.6, span: 62 },
-    shine: { at: [1.8, 5.35], r: 1.8 },
+    white: { at: -28, width: 1.4, span: 32, fade: 0.6 },
+    shine: { at: [2.3, 5.1], r: 1.8 },
+    // The front crop's glow is the narrowest, right along the foot (its L* 27 to 30 within 2 pt of it).
+    glow: { band: 5.6, warm: 1.8 },
   });
 }
 
