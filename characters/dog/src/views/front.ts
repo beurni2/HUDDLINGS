@@ -133,25 +133,26 @@ const innerHeart = smooth([[0, -45.6], [-2.4, -47.6], [-4.8, -47.2], [-5.8, -44.
 // The ears (front a's): droplets hanging from high on the head's sides, narrow
 // at the root (tucked under the crown fur), broad and rounded below, the lower
 // edge hanging in soft lobes, their inner edges running on behind the face.
-// Typed in the head's frame for the dog's right side and rolled with the face;
-// the dog's left ear hangs 2.8° nearer the face, as the sheet draws it.
+// The right ear is typed in the head's frame and rolled with the face.
 const earR: Node[] = [[-37.5, -141.4], [-29.4, -138.6], [-28.2, -132.4], [-34, -114], [-39.6, -92], [-39.2, -74], [-41.4, -66.6], [-46.8, -63.8],
   [-53.4, -62.3], [-58.6, -63.5], [-63.6, -64.5], [-68.6, -67.9], [-73.4, -71], [-77.4, -76.4], [-80.4, -82], [-81, -88.4], [-80.4, -94.4],
   [-78.2, -100.2], [-73.6, -106.2], [-66.8, -111.6], [-60.8, -117.4], [-56, -125.6], [-50.2, -131.2], [-44.6, -135.6]];
-const EAR_L_HANG = 2.8, EAR_L_ROOT: P = [37.5, -138];
 /**
- * Each ear's length below its root: the face's roll turns the ears' tips 7 pt apart in height where the sheet
- * hangs them 3.1 pt apart (its roots 4.7), so the right ear is drawn 2% shorter and the left 3% longer, each
- * scaled down its length from its top.
+ * The left ear below its middle is the right one mirrored, hung 2.8° nearer the face about its root and 3%
+ * longer down its length from its top (the face's roll sets the tips 7 pt apart in height, where the sheet
+ * hangs them 3.1 apart), then rolled. A place on it, in the right ear's head frame.
  */
-const EAR_TOP = -141.4, EAR_LENGTH = { R: 0.98, L: 1.03 };
-const hang = (side: "L" | "R", nodes: Node[]): Node[] => {
-  const long = nodes.map((n): Node => (n.length === 3 ? [n[0], EAR_TOP + (n[1] - EAR_TOP) * EAR_LENGTH[side], n[2]] : [n[0], EAR_TOP + (n[1] - EAR_TOP) * EAR_LENGTH[side]]));
-  return rollN(side === "R" ? long : rotate(mirrorX(long), EAR_L_HANG, EAR_L_ROOT));
-};
-const ears = { R: smooth(hang("R", earR)), L: smooth(hang("L", earR)) };
-/** A head-frame place on the dog's right ear, or the same place on its left ear, hung and rolled as the ear is. */
-const onEar = (side: "L" | "R", p: P): P => hang(side, [p])[0] as P;
+const EAR_L_HANG = 2.8, EAR_L_ROOT: P = [37.5, -138], EAR_TOP = -141.4, EAR_L_LENGTH = 1.03;
+const hangL = (nodes: Node[]): Node[] => rollN(rotate(nodes.map(([x, y]): Node => [-x, EAR_TOP + (y - EAR_TOP) * EAR_L_LENGTH]), EAR_L_HANG, EAR_L_ROOT));
+const lowerL = hangL([earR[0]!, ...earR.slice(1).reverse()]);
+// Above its middle the sheet draws the left ear's outer edge as one full convex arc, 3.5 to 4.7 pt outside the
+// mirror's (y -137 to -113): those nodes are typed where the sheet draws them, in model space.
+const earL: Node[] = [lowerL[0]!, [41, -139.6], [50, -132.6], [57.6, -125], [64.6, -116], [71, -110], [75.6, -103.6], [78.6, -96], [79.6, -88], [78.8, -82],
+  ...lowerL.slice(11)];
+// Fitted closely (0.05 pt), so the fit keeps the lobes as round as the typed nodes make them.
+const ears = { R: smooth(rollN(earR)), L: smooth(earL, { tol: 0.05 }) };
+/** A head-frame place on the dog's right ear, or the same place on its left ear, in model space. */
+const onEar = (side: "L" | "R", p: P): P => (side === "R" ? rollP(p) : (hangL([p])[0] as P));
 /** Path data on the dog's right ear, or the same on its left (the hang is small enough to leave out of soft paint), rolled. */
 const earD = (side: "L" | "R", d: string) => rollD(side === "R" ? d : mirrorD(d));
 
