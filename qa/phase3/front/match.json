@@ -41,19 +41,19 @@
  },
  "alignment": {
   "rootOnCropGroundPlusHalf": true,
-  "bestFitShiftPx": [-0.11, 0.07],
+  "bestFitShiftPx": [-0.11, 0.06],
   "bestFitShiftPt": [-0.08, 0.05],
-  "iouAtBestWholePixelShift": 0.9784,
+  "iouAtBestWholePixelShift": 0.9783,
   "thresholdPx": 2.0,
   "pass": true
  },
  "silhouette": {
-  "iou": 0.9784,
+  "iou": 0.9783,
   "threshold": 0.9,
   "groundShadowLeftOut": true,
   "pass": true,
-  "iouHeadAligned": 0.9785,
-  "headCentreOffsetPt": [0.03, -0.58]
+  "iouHeadAligned": 0.9783,
+  "headCentreOffsetPt": [0.04, -0.53]
  },
  "landmarks": {
   "thresholdPt": 2.8,
@@ -68,10 +68,10 @@
    },
    "collar": {
     "how": "finder",
-    "found": [1.05, -55.61],
+    "found": [0.96, -55.46],
     "model": [1.3, -55.8],
-    "errPt": 0.31,
-    "errShareOfHead": 0.003,
+    "errPt": 0.48,
+    "errShareOfHead": 0.005,
     "pass": true
    },
    "collar.line.sheetLeft": {
@@ -84,10 +84,10 @@
    },
    "collar.line.sheetRight": {
     "how": "finder",
-    "found": [27.65, -61.79],
+    "found": [27.65, -61.4],
     "model": [27.6, -61.8],
-    "errPt": 0.05,
-    "errShareOfHead": 0.001,
+    "errPt": 0.4,
+    "errShareOfHead": 0.004,
     "pass": true
    },
    "ear.L.root": {
@@ -248,7 +248,7 @@
     "heldTo": "#FFF4E8",
     "heldBy": "palette.fur",
     "deltaE2000": 0.0,
-    "pixels": 14840,
+    "pixels": 14899,
     "pass": true
    },
    "furShade": {
@@ -256,7 +256,7 @@
     "heldTo": "#FDE3C8",
     "heldBy": "palettePainted.furShade",
     "deltaE2000": 0.44,
-    "pixels": 1322,
+    "pixels": 1350,
     "pass": true
    },
    "eyes": {
@@ -304,7 +304,7 @@
     "heldTo": "#D9A379",
     "heldBy": "palette.marking",
     "deltaE2000": 1.01,
-    "pixels": 5882,
+    "pixels": 5805,
     "pass": true
    },
    "headPatches": {
@@ -312,7 +312,7 @@
     "heldTo": "#F0BC92",
     "heldBy": "palettePainted.markingLight",
     "deltaE2000": 0.3,
-    "pixels": 1505,
+    "pixels": 1501,
     "pass": true
    },
    "bodyMarkings": {
@@ -328,7 +328,7 @@
     "heldTo": "#7DB7E8",
     "heldBy": "palette.collar",
     "deltaE2000": 1.53,
-    "pixels": 349,
+    "pixels": 325,
     "pass": true
    },
    "tag": {
@@ -427,7 +427,7 @@
    },
    "back.patch.R": {
     "part": "back.patch.R",
-    "shownPt2": 264.9,
+    "shownPt2": 264.8,
     "shows": true,
     "expected": true,
     "host": "body.back",
@@ -447,7 +447,7 @@
    },
    "head.patch.L": {
     "part": "head.patch.L",
-    "shownPt2": 553.7,
+    "shownPt2": 551.8,
     "shows": true,
     "expected": true,
     "host": "head.base",
@@ -458,16 +458,16 @@
      "renderCentroidInSheetPatch": true,
      "sheetCentroidInRender": true,
      "advisory": {
-      "areaRatio": 1.27,
-      "centroidOffsetPt": [0.4, 1.58],
-      "centroidDistancePt": 1.63
+      "areaRatio": 1.264,
+      "centroidOffsetPt": [0.33, 1.51],
+      "centroidDistancePt": 1.54
      },
      "pass": true
     }
    },
    "head.patch.R": {
     "part": "head.patch.R",
-    "shownPt2": 551.0,
+    "shownPt2": 549.9,
     "shows": true,
     "expected": true,
     "host": "head.base",
@@ -478,9 +478,9 @@
      "renderCentroidInSheetPatch": true,
      "sheetCentroidInRender": true,
      "advisory": {
-      "areaRatio": 1.269,
-      "centroidOffsetPt": [0.17, 0.33],
-      "centroidDistancePt": 0.37
+      "areaRatio": 1.265,
+      "centroidOffsetPt": [0.21, 0.26],
+      "centroidDistancePt": 0.34
      },
      "pass": true
     }
@@ -492,7 +492,7 @@
  },
  "advisory": {
   "edgeDistance": {
-   "meanRenderToSheetPt": 0.61,
+   "meanRenderToSheetPt": 0.62,
    "p95RenderToSheetPt": 1.74,
    "meanSheetToRenderPt": 0.61,
    "p95SheetToRenderPt": 1.74,
@@ -501,7 +501,7 @@
   },
   "partIoU": {
    "collar": {
-    "iou": 0.7,
+    "iou": 0.659,
     "target": 0.85,
     "meetsTarget": false
    },
@@ -511,12 +511,12 @@
     "meetsTarget": false
    },
    "ear.R": {
-    "iou": 0.697,
+    "iou": 0.693,
     "target": 0.85,
     "meetsTarget": false
    },
    "ear.L": {
-    "iou": 0.678,
+    "iou": 0.677,
     "target": 0.85,
     "meetsTarget": false
    }

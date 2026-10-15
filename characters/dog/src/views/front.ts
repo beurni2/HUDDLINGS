@@ -261,26 +261,26 @@ const leftHalf = [...mirroredHalf.slice(0, at - 1).map(([x, y]): Node => leftSid
 const CORNERS = [PUFF, headHalf.length + headHalf.length - PUFF, TEMPLE[2]!, headHalf.length + 1 + at];
 let head = smooth([...headHalf, [0, -58.4], ...leftHalf].map(([x, y]): Node => cheekRoll([x, y])), { typed: headHalf.length + 1 + leftTemple.length, corners: CORNERS });
 // The cheeks' fluff, as the hero and the front turnaround draw it: each puff
-// breaks along its outer and lower edge into a few irregular clumps of quite
-// different sizes, combed down and out, and the two cheeks differ, as the
-// sheet's do: on the right a big round clump high on the cheek, a small one, a
-// fuller one and a small pointed hook where the cheek meets the neck; on the
-// left a big lobe at the top, a rounder one under it, one pointing down and
-// out, and two small tufts down to the neck. Typed top to bottom; the path runs
-// down the right cheek and up the left. And the chin hangs over the collar in a
-// row of small pointed tufts, uneven, combed out from its middle.
+// bulges out over the ear's inner foot and breaks along its outer and lower edge
+// into a few round clumps of quite different sizes, each combed down and out to
+// a soft point: the fullest high on the cheek, two smaller ones under it and a
+// small hook where the cheek meets the neck; the two cheeks differ, as the
+// sheet's do (on the left the second clump is the small one). Typed top to
+// bottom; the path runs down the right cheek and up the left. And the chin hangs
+// over the collar in a row of small soft tufts, uneven, combed out from its
+// middle.
 const cheekLocks = {
-  R: [{ len: 2.3, w: 1.75, lean: 0.25 }, { len: 0.9, w: 0.55, lean: 0.45 }, { len: 1.9, w: 1.25, lean: 0.55 }, { len: 1.3, w: 0.7, lean: 0.8 }],
-  L: [{ len: 2.6, w: 1.9, lean: 0.2 }, { len: 1.7, w: 1.1, lean: 0.35 }, { len: 1.5, w: 0.7, lean: 0.7 }, { len: 0.7, w: 0.45, lean: 0.5 }, { len: 1.1, w: 0.75, lean: 0.8 }],
+  R: [{ len: 2.9, w: 1.5, lean: 0.35 }, { len: 2.1, w: 1.1, lean: 0.45 }, { len: 1.7, w: 0.85, lean: 0.55 }, { len: 0.9, w: 0.45, lean: 0.65 }],
+  L: [{ len: 3.1, w: 1.6, lean: 0.3 }, { len: 1.6, w: 0.8, lean: 0.45 }, { len: 2.2, w: 1.1, lean: 0.55 }, { len: 0.9, w: 0.5, lean: 0.65 }],
 };
-const chinLocks = [{ len: 0.55, w: 0.8, lean: -0.35 }, { len: 0.85, w: 1.1, lean: -0.3 }, { len: 0.6, w: 0.9, lean: -0.2 }, { len: 0.9, w: 1.2, lean: -0.1 },
-  { len: 0.7, w: 1, lean: 0 }, { len: 0.85, w: 1.15, lean: 0.1 }, { len: 0.6, w: 0.9, lean: 0.2 }, { len: 0.8, w: 1.05, lean: 0.3 }, { len: 0.55, w: 0.85, lean: 0.35 }];
+const chinLocks = [{ len: 0.8, w: 0.8, lean: -0.4 }, { len: 1.2, w: 1.1, lean: -0.3 }, { len: 0.9, w: 0.9, lean: -0.2 }, { len: 1.3, w: 1.2, lean: -0.05 },
+  { len: 1, w: 1, lean: 0.1 }, { len: 1.25, w: 1.15, lean: 0.25 }, { len: 0.85, w: 0.85, lean: 0.4 }];
 /** Each cheek clump's tip, root and notches (path order), for its line and the shade under it. */
 const clumps: { tip: P; root: P; notches: [P, P] }[] = [];
 const noteClump = (tip: P, root: P, notches: [P, P]) => clumps.push({ tip, root, notches });
-head = furEdge(head, cheekRoll([-45.4, -91.8]), cheekRoll([-36.4, -68.8]), cheekLocks.R, 0.3, noteClump);
-head = furEdge(head, cheekRoll([36.4, -68.8]), cheekRoll([45.4, -91.8]), lefthandOf(cheekLocks.L), 0.3, noteClump);
-head = furEdge(head, cheekRoll([-32.4, -65.4]), cheekRoll([32.4, -65.4]), chinLocks, 0.24);
+head = furEdge(head, cheekRoll([-45.4, -91.8]), cheekRoll([-36.4, -68.8]), cheekLocks.R, 0.42, noteClump);
+head = furEdge(head, cheekRoll([36.4, -68.8]), cheekRoll([45.4, -91.8]), lefthandOf(cheekLocks.L), 0.42, noteClump);
+head = furEdge(head, cheekRoll([-32.4, -65.4]), cheekRoll([32.4, -65.4]), chinLocks, 0.36);
 // The crown's fur where it overhangs each ear's root is a lock of fur, its tip a fur span, so the crown's line can
 // run on round it into the ear's own line, unbroken, as the sheet draws it. Between the topknot and each ear the
 // crown's outline breaks over a small lock of fur, as the sheet's does.
@@ -393,23 +393,22 @@ const crownLine: Outline = { ...headLine, taper: 1.4, spans: [
   { from: [40.8, -140.3], to: [19, -150.6], width: THIN, colour: C.crownLine },
 ] };
 /**
- * The cheek clumps' lines: no outline round the fluff, which the sheet barely lines, but a short tapered stroke
- * under each clump, from its tip down into the notch below it, where the fur parts, so the edge reads as separate
- * clumps of fur and not a cookie-cutter row; lighter warm brown on the upper clumps, where they lie on the ear's
- * light tan, deeper on the lower ones over its shaded foot (the sheet's #B17546 above to #9D5C31 below).
+ * The cheeks' lines, as the sheet draws them: a thin warm line round each clump, from the notch above it over its
+ * tip and down into the notch below, tapering out at both, so the line breaks where the fur parts and the edge
+ * reads as clumps of fur, not a cookie-cutter row; lighter on the upper clumps, where they lie on the ear's lit
+ * tan, deeper on the lower ones over its shaded foot (the sheet's #B17546 above to #A26842 below). And in each of
+ * the fuller clumps one fine fur stroke, combed with it from inside the cheek out toward its tip.
  */
-function clumpLines(): Outline {
-  // Each stroke runs on 1 pt past its notch, under the next clump's root, so even a small clump's stroke swells to
-  // its width between its tapered ends.
-  const past = 1 / arc(sample(head.segs, 48)).at(-1)!;
-  // Only the fuller clumps (standing out 1.5 pt or more) carry one; the small tufts between them are fur alone.
-  const spans: Span[] = clumps.filter(({ tip, root }) => v.len(v.sub(tip, root)) >= 1.5).map(({ tip, notches }) => {
+const CHEEK = uid("cheek");
+function cheekLines(): { outline: Outline; strokes: P[][] } {
+  const spans: Span[] = clumps.filter(({ tip, root }) => v.len(v.sub(tip, root)) >= 1.2).map(({ notches }) => ({ from: fracAt(head, notches[0]), to: fracAt(head, notches[1]), colour: `url(#${CHEEK})` }));
+  const strokes = clumps.filter(({ tip, root }) => v.len(v.sub(tip, root)) >= 1.9).map(({ tip, root, notches }) => {
     // The path runs down the right cheek and up the left, so a clump's lower notch is its second on the right.
-    const right = tip[0] < 0, below = right ? notches[1] : notches[0];
-    const span = right ? { from: fracAt(head, tip), to: fracAt(head, below) + past } : { from: fracAt(head, below) - past, to: fracAt(head, tip) };
-    return { ...span, colour: tip[1] < cheekRoll([tip[0], -80])[1] ? C.earEdge : C.earLine };
+    const below = tip[0] < 0 ? notches[1] : notches[0];
+    const along = v.sub(tip, root), aside = v.mul(v.sub(below, root), 0.3);
+    return [v.add(v.add(root, v.mul(along, -0.9)), v.mul(aside, 0.7)), v.add(v.add(root, v.mul(along, -0.15)), v.mul(aside, 1.05)), v.add(v.add(root, v.mul(along, 0.55)), v.mul(aside, 0.85))];
   });
-  return { ...OUTLINE, width: THIN, taper: 1.2, blur: 0.2, spans };
+  return { outline: { ...OUTLINE, width: THIN, taper: 1.6, blur: 0.2, spans }, strokes };
 }
 /** Two sets of ribbons as one. */
 const join2 = (a: ReturnType<typeof ribbons>, b: ReturnType<typeof ribbons>): ReturnType<typeof ribbons> =>
@@ -417,7 +416,9 @@ const join2 = (a: ReturnType<typeof ribbons>, b: ReturnType<typeof ribbons>): Re
 /** head.line: the head's outline as its own unclipped region, drawn after the head's clip group, reaching 0.5 pt past the head. */
 function headLinePiece(): Piece {
   const r = join2(ribbons(head, headLine, "head.line", 0.5), ribbons(head, crownLine, "head.line", 0.5));
-  const c = ribbons(head, clumpLines(), "head.line", 0.5);
+  const cheeks = cheekLines();
+  const c = ribbons(head, cheeks.outline, "head.line", 0.5);
+  const strokes = cheeks.strokes.map((pts) => innerLine(pts, 0.7, C.puffLine, { opacity: 0.45, taper: 1.4, tip: 0.15 }));
   const f = uid("blur"), g = uid("blur");
   const [x0, y0, x1, y1] = bbox(head.segs);
   // Room for the feathered cream round the cheeks' fluff, which reaches 3.8 pt past the head (half its width and
@@ -432,17 +433,16 @@ function headLinePiece(): Piece {
     strokeOf(spanPoints(head, fracAt(head, cheekRoll(a)), fracAt(head, cheekRoll(b))), width, { taper: 3, tip: 0.4 }).d).join("");
   const under = feathered([[[-45.6, -134.8], [-34.6, -135]], [[33, -139.6], [40.6, -140.6]]], 1.4);
   const side = feathered([[[-34.4, -134.4], [-41.4, -121.4]], [[39.2, -123.4], [31.6, -139.2]]], 1.6);
-  // And the cheeks' fluff is soft at its edge, its cream thinning out over the ear's tan, as the sheet paints it.
-  const fluff = feathered([[[-45.4, -91.8], [-36.4, -68.8]], [[36.4, -68.8], [45.4, -91.8]]], 1.6);
   return piece(`<defs>${blur(f, pad(box, 2), headLine.blur!)}${blur(g, pad(box, 2), 0.35)}${blur(s, pad(box, 2), 0.55)}` +
     `<linearGradient id="${SEAM}" gradientUnits="userSpaceOnUse" x1="0" y1="-131" x2="0" y2="-104">` +
-    `<stop offset="0" stop-color="${C.crownLine}"/><stop offset="0.4" stop-color="${C.earEdge}"/><stop offset="1" stop-color="${C.earLine}"/></linearGradient></defs>` +
+    `<stop offset="0" stop-color="${C.crownLine}"/><stop offset="0.4" stop-color="${C.earEdge}"/><stop offset="1" stop-color="${C.earLine}"/></linearGradient>` +
+    `<linearGradient id="${CHEEK}" gradientUnits="userSpaceOnUse" x1="0" y1="-92" x2="0" y2="-66">` +
+    `<stop offset="0" stop-color="${C.earEdge}"/><stop offset="1" stop-color="${C.warmLine}"/></linearGradient></defs>` +
     `<path d="${under}" fill="${C.fur}" opacity="0.55" filter="url(#${s})"/><path d="${side}" fill="${C.fur}" opacity="0.6" filter="url(#${s})"/>` +
-    `<path d="${fluff}" fill="${C.fur}" opacity="0.55" filter="url(#${s})"/>` +
     `<g fill="${headLine.colour}" filter="url(#${f})">${r.svg}</g>` +
-    `<g filter="url(#${g})">${c.svg}</g>`, box, {
+    `<g filter="url(#${g})">${c.svg}${strokes.map((l) => l.svg).join("")}</g>`, box, {
     shapes: [{ name: "head.line", nodes: head.typed, segs: head.segs, outlined: [...r.outlined, ...c.outlined], fur: head.fur.map(([a, b]) => [fracAt(head, a), fracAt(head, b)]) }],
-    lines: [...r.lines, ...c.lines.map((l) => ({ ...l, where: "cheek clump" }))],
+    lines: [...r.lines, ...c.lines.map((l) => ({ ...l, where: "cheek clump" })), ...strokes.map((l) => ({ ...l.line, where: "cheek fur" }))],
   });
 }
 
