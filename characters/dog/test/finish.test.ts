@@ -1,5 +1,5 @@
-// Tests for the finish pass's shared recipes (DECISIONS 73 to 76): every drawn view takes its eyes, its outer line,
-// its topknot and its ear paint from characters/dog/src/parts/; the line darkens and fills out from where the light
+// Tests for the finish pass's shared recipes (DECISIONS 73 to 76, 78 to 84): every drawn view takes its eyes, its outer
+// line, its topknot, its ear paint, its paws' toe lines and its tag from characters/dog/src/parts/; the line darkens and fills out from where the light
 // falls to where the part meets the ground, on warm ladders with no grey; the eye's white is a crescent as wide as
 // its view asks on its outer side and none on the other, under one catchlight; and the topknot and the ears keep
 // their counts (3 to 5 curls, 4 to 7 locks over 2 or 3 clumps).
@@ -13,6 +13,8 @@ import { earFur } from "../src/parts/ear.ts";
 import { eye, eyeGeometry, type EyeSpec } from "../src/parts/eye.ts";
 import { litRibbons, type LitSpan } from "../src/parts/lines.ts";
 import { topknot, type Curl } from "../src/parts/topknot.ts";
+import { toes } from "../src/parts/paw.ts";
+import { tagPaint } from "../src/parts/tag.ts";
 import { C, LINES, palette } from "../src/palette.ts";
 import { front } from "../src/views/front.ts";
 import { side } from "../src/views/side.ts";
@@ -23,8 +25,8 @@ const VIEWS = { front, threeQuarter, side };
 test("every drawn view takes its eyes, line, topknot and ears from the shared parts", () => {
   for (const view of Object.keys(VIEWS)) {
     const src = readFileSync(new URL(`../src/views/${view}.ts`, import.meta.url), "utf8");
-    for (const part of ["eye", "lines", "topknot", "ear"]) assert.match(src, new RegExp(`from "\\.\\./parts/${part}\\.ts"`), `${view} does not import parts/${part}.ts`);
-    for (const call of ["topknot(", "earFur(", "litPart("]) assert.ok(src.includes(call), `${view} never calls ${call.slice(0, -1)}`);
+    for (const part of ["eye", "lines", "topknot", "ear", "paw", "tag"]) assert.match(src, new RegExp(`from "\\.\\./parts/${part}\\.ts"`), `${view} does not import parts/${part}.ts`);
+    for (const call of ["topknot(", "earFur(", "litPart(", "toes(", "tagPaint("]) assert.ok(src.includes(call), `${view} never calls ${call.slice(0, -1)}`);
   }
 });
 
@@ -131,4 +133,47 @@ test("a topknot is 3 to 5 curls and an ear 4 to 7 locks over 2 or 3 clumps", () 
   assert.throws(() => earFur({ ...ear, locks: Array(8).fill(lock), dips: [[0, 0]] }), /4 to 7 locks/);
   assert.throws(() => earFur({ ...ear, locks: Array(5).fill(lock), dips: [] }), /2 or 3 clumps/);
   assert.throws(() => earFur({ ...ear, locks: Array(5).fill(lock), dips: [[0, 0], [1, 0], [2, 0]] }), /2 or 3 clumps/);
+});
+
+test("the eye's rim is darker than the iris it rings, and the lower iris lightens down to its foot", () => {
+  assert.ok(lab(C.eyeRim)[0] < lab(C.eyeDark)[0], `the rim ${C.eyeRim} is no darker than the iris ${C.eyeDark}`);
+  // The lower iris's crescents, painted from the broadest (highest) to the narrowest (along the foot), each lighter.
+  const svg = eye(round).svg;
+  const order = [C.dark, C.irisWarm, C.irisLight].map((c) => svg.indexOf(`fill="${c}"`));
+  assert.ok(order.every((i) => i > 0) && order[0]! < order[1]! && order[1]! < order[2]!, "the lower iris's crescents are not painted from the held brown down to the light at the foot");
+  const L = [C.dark, C.irisWarm, C.irisLight].map((c) => lab(c)[0]);
+  assert.ok(L[0]! < L[1]! && L[1]! < L[2]!, `the lower iris's tones ${L.map((l) => l.toFixed(1))} do not lighten toward the foot`);
+});
+
+test("a topknot's notches are V strokes running into the fur, never hooks", () => {
+  // The recipe has no hooks: a curl's notch strokes ("into") are its only inner lines, each tapering out inward.
+  const curl: Curl = { nodes: [[0, -10], [5, -5], [0, 0], [-5, -5]], line: { from: [-5, -5], to: [5, -5] }, into: [[[5, -5], [3, -4.6], [1, -4.4]]] };
+  const p = topknot([curl, curl, curl], { fill: C.fur });
+  const inner = p.meta.lines.filter((l) => l.kind === "inner");
+  assert.equal(inner.length, 3, "each curl draws exactly its one notch stroke");
+  assert.ok(!("hooks" in curl), "a curl carries hooks");
+});
+
+test("a paw carries two or three toe lines, fading out upward", () => {
+  const line: P[] = [[0, 0], [0.4, -2], [0.4, -4], [0, -5.6]];
+  assert.throws(() => toes({ lines: [line], fade: [0, -6] }), /two or three toe lines/);
+  assert.throws(() => toes({ lines: [line, line, line, line], fade: [0, -6] }), /two or three toe lines/);
+  const t = toes({ lines: [line, line], fade: [0, -6] });
+  assert.equal(t.inner!.length, 2);
+  for (const l of t.inner!) assert.ok(l.width >= LIMITS.inner[0] && l.width <= LIMITS.inner[1], `a toe line is ${l.width} pt, not an inner line`);
+  const stops = [...t.under!.matchAll(/stop-opacity="([0-9.]+)"/g)].map((m) => Number(m[1]));
+  assert.ok(stops.length === 2 && stops[0]! > stops[1]!, `the toe lines do not fade out upward (${stops})`);
+});
+
+test("the tag is matte gold with a warm rim, one soft light and embossed rings", () => {
+  const ring = smooth([[0, -4], [3, 0], [0, 4], [-3, 0]]);
+  const p = tagPaint({ emboss: [ring, ring], light: "M0 0Z" });
+  assert.equal(p.fill, C.tag);
+  assert.ok(p.highlight && p.highlight.opacity <= 0.5 && p.highlight.blur >= 1, "the tag's light is a glossy streak, not a soft matte light");
+  assert.equal(p.outline?.colour, C.tagEdge);
+  const [, a, b] = lab(C.tagEdge), hue = (Math.atan2(b, a) * 180) / Math.PI;
+  // The sheet's tag rims sit at hue 77.5 to 81.3 (#A67A33, #B68531, #AE8430); the olive rim reviewers rejected, #A07C2D, at 83.1.
+  assert.ok(hue > 72 && hue < 82, `the tag's rim ${C.tagEdge} is not the sheet's warm gold-brown (hue ${hue.toFixed(1)})`);
+  assert.equal(p.inner?.length, 2, "each embossed heart is one ring");
+  for (const r of p.inner!) assert.equal(r.colour, C.tagEmboss);
 });

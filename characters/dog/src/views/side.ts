@@ -245,20 +245,26 @@ const furShade = (group: Shape[], shapes: string[] = [], keep: string[] = [], ri
 const bodyGroup = [back, chest, legNear, hindNear];
 const headGroup = [head, ...tuftShapes];
 
+const THIGH = uid("thigh");
 const backPaint: Paint = {
   fill: C.fur,
   // The haunch's underside and its back, away from the light; and under the ear and the collar's back end, where the
   // ear hangs over the neck.
   shade: furShade(bodyGroup, ["M-30 -66 L-6 -66 L-8 -55 C-14 -49 -22 -49 -30 -53Z"]),
+  // The thigh's front, where the haunch lies over the chest's fur: a faint soft line at an inner line's weight, as the
+  // sheet draws it (L* 69 to 70 low down, fading out to 86 by y -28), never a crease splitting the body in two (the
+  // three-quarter's thigh, the same recipe).
+  under: `<defs><linearGradient id="${THIGH}" gradientUnits="userSpaceOnUse" x1="0" y1="-31" x2="0" y2="-12">` +
+    `<stop offset="0" stop-color="${C.softLine}" stop-opacity="0"/><stop offset="0.7" stop-color="${C.softLine}"/></linearGradient></defs>`,
+  inner: [{ pts: sample(smooth([[-29, -8.4], [-28.6, -13], [-27, -19], [-24.6, -25], [-22, -31]], { closed: false }).segs, 8, false), width: 0.85, colour: `url(#${THIGH})` }],
 };
 /**
  * The back's line (parts/lines.ts): the topline, where the saddle's tan lies along it, on the tan (the sheet's
  * #9C673F to #A86C47); round the rump, where the tail's tan crosses it, on the tan, deeper and more orange (#A8622E to
- * #AB673A); along the underside, on the ground, the darkest; and up the thigh's front one round arc from the hind
- * paw's top, tapering out as it sweeps up under the saddle, as the sheet draws it.
+ * #AB673A); along the underside, on the ground, the darkest. The thigh's front is the paint's own faint line.
  */
 const backLines: LitSpan[] = [{ from: [-11, -62.4], to: [14.6, -38.6], on: "tan", taper: 6 }, { from: [12.6, -42.6], to: [12, -4.6], on: "tan", taper: 6 },
-  { from: [14.6, -6.6], to: [-6, -1.6], taper: 6 }, { from: [-29.2, -7.4], to: [-21, -34.6], taper: [4, 12] }];
+  { from: [14.6, -6.6], to: [-6, -1.6], taper: 6 }];
 
 function chestPaint(): Paint {
   return {
