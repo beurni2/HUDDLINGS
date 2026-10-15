@@ -7,7 +7,7 @@ alike.
 
 Reads the still that runtime-web/lab/still.ts writes (still.json, white.png,
 black.png, ids.png), characters/<species>/model.json and ref/, and the
-source's landmarks (default build/characters/<species>/dev/landmarks.json):
+source's landmarks (default build/dev/<species>/landmarks.json, from the build):
 the points the sheet has no finder for (paws, tag ring, seat). Writes
 <out>/match.json (every check, its numbers, its threshold, its verdict),
 compare.png (crop | render | outlines and landmarks | onion skin) and
@@ -619,7 +619,7 @@ def match(species, still_dir, landmarks_path=None):
         raise ValueError(f"the still's body is in {views['body']} and its head in {views['head']}: the turnaround draws one view")
     frame = Frame(species, model, views["body"])
     source = {}
-    path = Path(landmarks_path) if landmarks_path else sheets.ROOT / "build" / "characters" / species / "dev" / "landmarks.json"
+    path = Path(landmarks_path) if landmarks_path else sheets.ROOT / "build" / "dev" / species / "landmarks.json"
     if path.exists():
         given = json.loads(path.read_text()).get(frame.view, {})
         source = {frame.to_still_name(n): frame.to_frame_point(xy) for n, xy in given.items()}

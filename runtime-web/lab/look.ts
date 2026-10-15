@@ -54,7 +54,7 @@ function failures(value: unknown, path: string[] = []): string[] {
 
 const seconds = (ms: number) => `${(ms / 1000).toFixed(1)} s`;
 const packageDir = join(repo, "build", "characters", species);
-const landmarks = join(packageDir, "dev", "landmarks.json");
+const landmarks = join(repo, "build", "dev", species, "landmarks.json");
 const width = Math.max(...views.map((v) => v.length));
 const stills = await openStills(packageDir);
 
@@ -67,7 +67,7 @@ async function loop(): Promise<boolean> {
     console.log(`look ${species}: the build failed (${seconds(builtAt - start)})\n${built.err.trim()}`);
     return false;
   }
-  if (!existsSync(landmarks)) console.log(`look ${species}: no dev/landmarks.json in the build, so source landmarks go unchecked`);
+  if (!existsSync(landmarks)) console.log(`look ${species}: no build/dev/${species}/landmarks.json from the build, so source landmarks go unchecked`);
   let ok = true;
   try {
     await stills.load(PPP);
