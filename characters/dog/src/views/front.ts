@@ -303,9 +303,9 @@ function earEdge(k: number): string {
 
 /** The warm shadow between the front legs, painted into the chest under its shade. */
 function legGap(): string {
-  const f = uid("blur"), box: Box = [-9, -36, 18, 36];
-  return `<defs>${blur(f, box, 1)}</defs><path d="M-3.2 -26 C-2.2 -18 -1.6 -10 -1.4 -3.4 L1.4 -3.4 C1.6 -10 2.2 -18 3.2 -26 C1.2 -28 -1.2 -28 -3.2 -26Z" ` +
-    `fill="${C.marking}" opacity="0.7" filter="url(#${f})"/>`;
+  const f = uid("blur"), box: Box = [-9, -30, 18, 30];
+  return `<defs>${blur(f, box, 1)}</defs><path d="M-2.2 -20 C-1.8 -14 -1.6 -9 -1.6 -3.4 L1.6 -3.4 C1.6 -9 1.8 -14 2.2 -20 C0.8 -21.4 -0.8 -21.4 -2.2 -20Z" ` +
+    `fill="${C.marking}" opacity="0.55" filter="url(#${f})"/>`;
 }
 
 export function front(): Drawn[] {
@@ -329,7 +329,7 @@ export function front(): Drawn[] {
   add("body.front", part("body.front", chest, {
     fill: C.fur,
     // The gap between the front legs is in shade, and deepest where they press together (a contact shadow).
-    shade: furShade(bodyGroup, ["M-5.4 -34 C-3 -30 -2 -12 -1.2 -3 L1.2 -3 C2 -12 3 -30 5.4 -34Z"]),
+    shade: furShade(bodyGroup, ["M-4.2 -32 C-2.6 -26 -2 -12 -1.2 -3 L1.2 -3 C2 -12 2.6 -26 4.2 -32Z"]),
     under: legGap(),
     outline: { ...OUTLINE, spans: [
       { from: [-29, -61], to: [-34.6, -48.6] }, { from: [-34.8, -47.6], to: [-34.8, -38], width: THIN, colour: C.furLine },
@@ -349,7 +349,8 @@ export function front(): Drawn[] {
     const k = side === "R" ? 1 : -1;
     const shape = ears[side];
     const shadeD = "M-92 -88 C-74 -84 -56 -79 -38 -74 L-38 -50 L-92 -50Z M-56 -138 C-62 -124 -72 -110 -76 -96 C-78 -88 -77 -80 -74 -74 L-92 -74 L-92 -138Z";
-    const inner = [[[-74.4, -86], [-74, -78], [-71.4, -71.6]], [[-65.4, -84], [-64.8, -74], [-62.4, -66.6]], [[-56.6, -80], [-56, -71.4], [-54, -65.8]]];
+    // The locks' soft lines, flowing down to the notches of the fringe.
+    const inner = [[[-73.6, -96], [-76.4, -86], [-77.2, -77], [-76.4, -69.8]], [[-65, -92], [-68, -82], [-69, -72], [-68.6, -64.6]], [[-56.4, -88], [-58.6, -78], [-59, -69], [-58.2, -62.6]]];
     add(`ear.${side}`, part(`ear.${side}`, shape, {
       fill: C.marking,
       under: earEdge(k),
@@ -358,7 +359,7 @@ export function front(): Drawn[] {
       // The upper ear is lighter where it leaves the head.
       // Lighter on its inner side and where it leaves the head.
       highlight: { d: k > 0 ? "M-58 -126 C-53 -132 -46 -137 -40 -134 L-38 -90 L-47.6 -90 C-48.4 -100 -49 -112 -51 -118 C-54 -120 -57 -122 -58 -126Z" : "M58 -126 C53 -132 46 -139 40 -137 L38 -90 L47.6 -90 C48.4 -100 49 -112 51 -118 C54 -120 57 -122 58 -126Z", colour: C.patch, opacity: 0.8, blur: 2.4 },
-      inner: inner.map((pts) => ({ pts: pts.map(([x, y]) => [k * x!, y!] as P), width: INNER, colour: C.outline, opacity: 0.32 })),
+      inner: inner.map((pts) => ({ pts: pts.map(([x, y]) => [k * x!, y!] as P), width: 0.9, colour: C.earLine, opacity: 0.26 })),
       // From where the ear comes out from behind the head, round to where its inner edge goes back under the cheek.
       outline: { ...OUTLINE, width: 1.3, spans: side === "R" ? [{ from: [-41.4, -136.8], to: [-40.2, -68.8] }] : [{ from: [40.6, -139.6], to: [40.2, -70.4] }], taper: 10 },
     }));
@@ -366,7 +367,7 @@ export function front(): Drawn[] {
   add("head.base", part("head.base", head, headPaint));
   for (const side of ["L", "R"] as const) {
     add(`head.patch.${side}`, join(
-      marking(`head.patch.${side}`, { shape: head, paint: headPaint }, patches[side], { fill: C.patch, blur: 1.5, clip: false }),
+      marking(`head.patch.${side}`, { shape: head, paint: headPaint }, patches[side], { fill: C.patch, blur: 2.1, clip: false }),
       marking(`head.patch.${side}`, { shape: head, paint: headPaint }, earTips[side], { fill: C.marking, blur: 1.4, clip: false }),
     ));
   }
