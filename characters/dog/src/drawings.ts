@@ -1,0 +1,31 @@
+// The dog's drawings, one per part, view and state, wrapped into their bones'
+// spaces from the rig's rest pivots. This is where an illustrator's layered SVGs
+// would plug in instead (spec L736), with the same part names and pivots.
+import { readFileSync } from "node:fs";
+import type { Drawing } from "../../build/atlas.ts";
+import { toBone } from "../../draw/frame.ts";
+import type { LintRules } from "../../draw/lint.ts";
+import type { Rig } from "../../../runtime-web/src/format.ts";
+import { palette } from "./palette.ts";
+import { front, landmarks as frontLandmarks } from "./views/front.ts";
+
+const rig = JSON.parse(readFileSync(new URL("./rig.json", import.meta.url), "utf8")) as Rig;
+
+const VIEWS = { front };
+
+export function drawings(): Drawing[] {
+  return Object.entries(VIEWS).flatMap(([view, draw]) => draw().map((d) => toBone(d.part, rig, view, d.piece, d.state)));
+}
+
+/** Where each view's drawing puts the points the sheet has no finder for, in model space. */
+export function landmarks(): Record<string, Record<string, [number, number]>> {
+  return { front: frontLandmarks };
+}
+
+export const lint: LintRules = {
+  palette,
+  corners: {
+    collar: "the band's square ends tuck under the cheek fur (spec L394), as the turnaround draws them",
+    tag: "the heart's point, as the sheet draws it",
+  },
+};
