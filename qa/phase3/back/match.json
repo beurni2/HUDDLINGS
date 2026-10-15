@@ -1,0 +1,340 @@
+{
+ "species": "dog",
+ "still": {
+  "still": "still_back",
+  "clip": "still_back",
+  "views": {
+   "body": "back",
+   "head": "back"
+  },
+  "ppp": 3,
+  "sizePx": [510, 567],
+  "rootPx": [257, 517]
+ },
+ "view": "back",
+ "crop": "master.turnaround.back",
+ "mirroredFrom": null,
+ "ptPerCropPx": 0.78469,
+ "landmarkSource": "build/dev/dog/landmarks.json",
+ "thresholds": {
+  "silhouetteIoUMin": 0.85,
+  "coverage": 0.5,
+  "shiftMaxPx": 2.0,
+  "shiftSearchPx": 8,
+  "landmarkShareOfHead": 0.03,
+  "landmarkPt": 2.8,
+  "deltaE2000Max": 3.0,
+  "idTolerance": 6.0,
+  "darkLMax": 40,
+  "blushRestingSpread": [0.29, 0.43],
+  "blushMinPx": 6,
+  "blushLightLMin": 70,
+  "blushLightChromaMax": 30,
+  "blushLevelMin": 0.05,
+  "blushPlaceShareOfHead": 0.03,
+  "shownPt2": 4.0,
+  "bakedMinPx": 20,
+  "matchRadiusShareOfHead": 0.2,
+  "markingPlaceShareOfHead": 0.03,
+  "edgeP95Pt": 2.0,
+  "partIoU": 0.85
+ },
+ "alignment": {
+  "rootOnCropGroundPlusHalf": true,
+  "bestFitShiftPx": [0.22, -0.09],
+  "bestFitShiftPt": [0.17, -0.07],
+  "iouAtBestWholePixelShift": 0.9654,
+  "thresholdPx": 2.0,
+  "pass": true
+ },
+ "silhouette": {
+  "iou": 0.9654,
+  "threshold": 0.85,
+  "groundShadowLeftOut": true,
+  "pass": true,
+  "iouHeadAligned": 0.9646,
+  "headCentreOffsetPt": [0.4, 0.03]
+ },
+ "landmarks": {
+  "thresholdPt": 2.8,
+  "rows": {
+   "collar": {
+    "how": "finder",
+    "found": [0.85, -69.41],
+    "model": [0.6, -68.9],
+    "errPt": 0.56,
+    "errShareOfHead": 0.006,
+    "pass": true
+   },
+   "collar.line.sheetLeft": {
+    "how": "finder",
+    "found": [-28.84, -65.13],
+    "model": [-28.1, -65.5],
+    "errPt": 0.83,
+    "errShareOfHead": 0.009,
+    "pass": true
+   },
+   "collar.line.sheetRight": {
+    "how": "finder",
+    "found": [30.01, -65.52],
+    "model": [30.0, -65.5],
+    "errPt": 0.03,
+    "errShareOfHead": 0.0,
+    "pass": true
+   },
+   "ear.L.root": {
+    "how": "finder",
+    "found": [-38.03, -145.17],
+    "model": [-38.9, -146.0],
+    "errPt": 1.21,
+    "errShareOfHead": 0.013,
+    "pass": true
+   },
+   "ear.L.tip": {
+    "how": "finder",
+    "found": [-49.19, -69.05],
+    "model": [-49.3, -68.3],
+    "errPt": 0.76,
+    "errShareOfHead": 0.008,
+    "pass": true
+   },
+   "ear.R.root": {
+    "how": "finder",
+    "found": [38.49, -149.88],
+    "model": [38.0, -149.9],
+    "errPt": 0.49,
+    "errShareOfHead": 0.005,
+    "pass": true
+   },
+   "ear.R.tip": {
+    "how": "finder",
+    "found": [50.42, -70.62],
+    "model": [49.6, -69.8],
+    "errPt": 1.16,
+    "errShareOfHead": 0.012,
+    "pass": true
+   },
+   "ground": {
+    "how": "finder",
+    "found": [-0.55, -0.78],
+    "model": [0.0, 0.0],
+    "errPt": 0.96,
+    "errShareOfHead": 0.01,
+    "pass": true
+   },
+   "head.top": {
+    "how": "finder",
+    "found": [-8.04, -164.0],
+    "model": [-9.6, -164.0],
+    "errPt": 1.56,
+    "errShareOfHead": 0.017,
+    "pass": true
+   }
+  },
+  "pass": true
+ },
+ "palette": {
+  "thresholdDeltaE2000": 3.0,
+  "rows": {
+   "fur": {
+    "dominant": "#FFF4E8",
+    "heldTo": "#FFF4E8",
+    "heldBy": "palette.fur",
+    "deltaE2000": 0.0,
+    "pixels": 15590,
+    "pass": true
+   },
+   "furShade": {
+    "dominant": "#FDE4CA",
+    "heldTo": "#FDE3C8",
+    "heldBy": "palettePainted.furShade",
+    "deltaE2000": 0.44,
+    "pixels": 1545,
+    "pass": true
+   },
+   "ears": {
+    "dominant": "#D99F73",
+    "heldTo": "#D9A379",
+    "heldBy": "palette.marking",
+    "deltaE2000": 1.31,
+    "pixels": 6662,
+    "pass": true
+   },
+   "bodyMarkings": {
+    "dominant": "#D9A37A",
+    "heldTo": "#D9A379",
+    "heldBy": "palette.marking",
+    "deltaE2000": 0.3,
+    "pixels": 1289,
+    "pass": true
+   },
+   "collar": {
+    "dominant": "#84BAE8",
+    "heldTo": "#7DB7E8",
+    "heldBy": "palette.collar",
+    "deltaE2000": 1.12,
+    "pixels": 717,
+    "pass": true
+   }
+  },
+  "pass": true
+ },
+ "blush": {
+  "parts": [
+   "blush.L",
+   "blush.R"
+  ],
+  "restingSpread": [0.29, 0.43],
+  "heldTo": "#F7B3A6",
+  "thresholdDeltaE2000": 3.0,
+  "placeThresholdPt": 2.8,
+  "cheeks": [],
+  "sheetBoxes": [],
+  "sheetShowsBlush": false,
+  "sheetCheeks": 0,
+  "pass": true
+ },
+ "markings": {
+  "expected": [
+   "back.patch.L",
+   "back.patch.R",
+   "tail.base"
+  ],
+  "shown": [
+   "back.patch.L",
+   "back.patch.R",
+   "tail.base"
+  ],
+  "rows": {
+   "back.patch.L": {
+    "part": "back.patch.L",
+    "shownPt2": 636.2,
+    "shows": true,
+    "expected": true,
+    "host": "body.back",
+    "clipTo": "body.back",
+    "clipped": true,
+    "pass": true,
+    "place": {
+     "renderCentroidInSheetPatch": true,
+     "sheetCentroidInRender": true,
+     "advisory": {
+      "areaRatio": 1.054,
+      "centroidOffsetPt": [0.51, -0.89],
+      "centroidDistancePt": 1.03
+     },
+     "pass": true
+    }
+   },
+   "back.patch.R": {
+    "part": "back.patch.R",
+    "shownPt2": 218.8,
+    "shows": true,
+    "expected": true,
+    "host": "body.back",
+    "clipTo": "body.back",
+    "clipped": true,
+    "pass": true,
+    "place": {
+     "renderCentroidInSheetPatch": true,
+     "sheetCentroidInRender": true,
+     "advisory": {
+      "areaRatio": 0.944,
+      "centroidOffsetPt": [-0.16, -1.9],
+      "centroidDistancePt": 1.91
+     },
+     "pass": true
+    }
+   },
+   "head.patch.L": {
+    "part": "head.patch.L",
+    "shownPt2": 0.0,
+    "shows": false,
+    "expected": false,
+    "host": "head.base",
+    "clipTo": "head.base",
+    "clipped": true,
+    "pass": true
+   },
+   "head.patch.R": {
+    "part": "head.patch.R",
+    "shownPt2": 0.0,
+    "shows": false,
+    "expected": false,
+    "host": "head.base",
+    "clipTo": "head.base",
+    "clipped": true,
+    "pass": true
+   },
+   "rump.patch.L": {
+    "part": "rump.patch.L",
+    "shownPt2": 0.0,
+    "shows": false,
+    "expected": false,
+    "host": "body.back",
+    "clipTo": "body.back",
+    "clipped": true,
+    "pass": true
+   },
+   "tail.base": {
+    "part": "tail.base",
+    "shownPt2": 58.4,
+    "shows": true,
+    "expected": true,
+    "host": "tail",
+    "clipTo": "tail",
+    "clipped": true,
+    "pass": true,
+    "place": {
+     "renderCentroidInSheetPatch": true,
+     "sheetCentroidInRender": true,
+     "advisory": {
+      "areaRatio": 1.278,
+      "centroidOffsetPt": [0.93, -0.72],
+      "centroidDistancePt": 1.18
+     },
+     "pass": true
+    }
+   }
+  },
+  "unexpectedTan": [],
+  "placeThresholdPt": 2.8,
+  "pass": true
+ },
+ "advisory": {
+  "edgeDistance": {
+   "meanRenderToSheetPt": 1.13,
+   "p95RenderToSheetPt": 3.92,
+   "meanSheetToRenderPt": 0.94,
+   "p95SheetToRenderPt": 2.39,
+   "targetP95Pt": 2.0,
+   "meetsTarget": false
+  },
+  "partIoU": {
+   "collar": {
+    "iou": 0.804,
+    "target": 0.85,
+    "meetsTarget": false
+   },
+   "ear.L": {
+    "iou": 0.882,
+    "target": 0.85,
+    "meetsTarget": true
+   },
+   "ear.R": {
+    "iou": 0.823,
+    "target": 0.85,
+    "meetsTarget": false
+   }
+  },
+  "atlas": {
+   "set": "3x",
+   "pages": 1,
+   "pageAreaPx": 4194304,
+   "allRegionsShare": 0.443,
+   "thisStillShare": 0.088
+  }
+ },
+ "failed": [],
+ "pass": true
+}
