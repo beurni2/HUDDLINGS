@@ -288,32 +288,36 @@ function headLinePiece(): Piece {
 }
 
 /**
- * An open eye (front.ts's recipe, turned with the view): a dark oval, its rim a lash line heaviest along the upper
- * lid; the iris near-black down to a lower band in the printed dark brown, warming in its middle; a thin white
- * crescent inside the rim on the outer side, where the sheet draws it (`white`: its middle's angle below level, in
- * degrees); and one catchlight high on the nose's side (`shine`: toward the nose, up, radius). `noseward` is +1
- * when the nose is to the eye's right; `turn` turns the oval clockwise, in degrees.
+ * An open eye (front.ts's recipe, turned with the view, warmer, as this crop paints it): a dark oval, its rim a lash
+ * line heaviest along the upper lid; the iris near-black down to a lower band
+ * in the printed dark brown with a warm red-brown light across it and a few faint lighter streaks rising from its
+ * foot toward the pupil; a thin soft crescent of light inside the rim along the outer side (the iris less itself
+ * moved `whiteWidth` toward the nose from `white` degrees below level, so the sliver runs up the whole outer side as
+ * the sheet draws it, widest at that angle), white on the far eye and a warmer grey on the near one (`whiteOpacity`);
+ * and one catchlight high on the nose's side (`shine`: toward the nose, up, radius). `noseward` is +1 when the nose
+ * is to the eye's right; `turn` turns the oval clockwise, in degrees.
  */
-function eye(c: P, o: { rx: number; ry: number; turn: number; noseward: 1 | -1; white: number; whiteWidth?: number; shine: [number, number, number] }): Piece {
+function eye(c: P, o: { rx: number; ry: number; turn: number; noseward: 1 | -1; white: number; whiteWidth: number; whiteOpacity: number; shine: [number, number, number] }): Piece {
   const { rx, ry, turn, noseward } = o;
   const a = (turn * Math.PI) / 180, cos = Math.cos(a), sin = Math.sin(a);
   /** A point in the eye's own frame, turned with it: x toward the nose, y down. */
   const S = (x: number, y: number): P => [c[0] + noseward * x * cos - y * sin, c[1] + noseward * x * sin + y * cos];
   const oval = (at: P, ax: number, ay: number) => pathD(ellipse(at, ax, ay, turn));
   const clip = uid("eye"), irisClip = uid("eye"), outside = uid("crescent"), above = uid("band"), rimFade = uid("rim");
-  const warm = uid("blur"), shine = uid("blur"), edge = uid("blur"), white = uid("blur"), band = uid("blur"), halo = uid("blur"), core = uid("blur");
+  const warm = uid("blur"), glow = uid("blur"), shine = uid("blur"), edge = uid("blur"), white = uid("blur"), band = uid("blur"), halo = uid("blur"), core = uid("blur");
+  const streak = uid("blur");
   const box: Box = [c[0] - rx - 5, c[1] - ry - 5, 2 * rx + 10, 2 * ry + 10];
   const ball = oval(c, rx, ry);
   const rim = 1, irisAt: [number, number] = [0.35, 0.4], ix = rx - rim, iy = ry - rim, irisOval = oval(S(...irisAt), ix, iy);
   const less = (at: P, r: number) => `M${fmt(c[0] - 30)} ${fmt(c[1] - 30)}H${fmt(c[0] + 30)}V${fmt(c[1] + 30)}H${fmt(c[0] - 30)}Z` + pathD(ellipse(at, r, r));
-  // The white: the iris less a disc set 6.6 pt from its centre toward the nose, turned so the sliver left on the
-  // outer side is `whiteWidth` wide at its middle (1.15 pt, the front's, by default), `white` degrees below level.
-  const w = (-o.white * Math.PI) / 180, reach = Math.hypot(ix * Math.cos(w), iy * Math.sin(w));
-  const cut = less(S(irisAt[0] + 6.6 * Math.cos(w), irisAt[1] + 6.6 * Math.sin(w)), 6.6 + reach - (o.whiteWidth ?? 1.15));
-  // The lower band: the iris less a disc above its centre, about 3.8 pt deep at the foot for the front's eye, in
-  // proportion here.
+  // The light's sliver: the iris less the iris moved toward the nose and up, away from `white`.
+  const w = (o.white * Math.PI) / 180;
+  const moved = S(irisAt[0] + o.whiteWidth * Math.cos(w), irisAt[1] - o.whiteWidth * Math.sin(w));
+  const cut = `M${fmt(c[0] - 30)} ${fmt(c[1] - 30)}H${fmt(c[0] + 30)}V${fmt(c[1] + 30)}H${fmt(c[0] - 30)}Z` + pathD(ellipse(moved, ix, iy, turn));
+  // The lower band: the iris less a disc above its centre, a little deeper than the front's (4.6 pt at the foot of
+  // its eye, in proportion here).
   const k = iy / 8.35;
-  const lower = less(S(irisAt[0], irisAt[1] - 8 * k), 12.55 * k);
+  const lower = less(S(irisAt[0], irisAt[1] - 8 * k), 11.75 * k);
   const [t0x, t0y] = S(0, -ry);
   const around = (from: number, to: number, grow: number, n = 41): P[] => Array.from({ length: n }, (_, i) => {
     const t = ((from + ((to - from) * i) / (n - 1)) * Math.PI) / 180;
@@ -321,22 +325,35 @@ function eye(c: P, o: { rx: number; ry: number; turn: number; noseward: 1 | -1; 
   });
   const lidLine = tapered(around(-35, 120, 0.25), 1.8, "outer", "eye lid", { taper: 9, tip: 0.3 });
   const haloBand = strokeOf(around(-125, 25, 1.1, 31), 1.7, { taper: 5, tip: 0.2 });
-  const big = S(o.shine[0], -o.shine[1]), warmAt = S(irisAt[0], irisAt[1] + 7.25 * k);
+  const big = S(o.shine[0], -o.shine[1]);
+  // The warm light across the band's upper part, above its foot, which stays the printed brown, and a smaller
+  // lighter core in it.
+  const glowAt = S(irisAt[0], irisAt[1] + 2.7 * k), warmAt = S(irisAt[0], irisAt[1] + 3.3 * k);
+  // Faint streaks rising from the band's foot toward the pupil, as the sheet's iris is painted.
+  const streaks = [-50, -25, 0, 25, 50].map((deg, i) => {
+    const t = ((90 + deg) * Math.PI) / 180, r0 = (3.2 + (i % 2) * 0.6) * k, r1 = 6.6 * k;
+    return tapered([S(irisAt[0] + r0 * Math.cos(t), irisAt[1] + r0 * Math.sin(t)), S(irisAt[0] + r1 * Math.cos(t), irisAt[1] + r1 * Math.sin(t))], 0.6, "inner", "iris streak",
+      { taper: 1.2, tip: 0.1 });
+  });
   const n = (p: P) => `${fmt(p[0])}" cy="${fmt(p[1])}`;
   const svg = `<defs><clipPath id="${clip}"><path d="${ball}"/></clipPath><clipPath id="${irisClip}"><path d="${irisOval}"/></clipPath>` +
     `<clipPath id="${outside}"><path d="${cut}" clip-rule="evenodd"/></clipPath><clipPath id="${above}"><path d="${lower}" clip-rule="evenodd"/></clipPath>` +
     `<linearGradient id="${rimFade}" gradientUnits="userSpaceOnUse" x1="${fmt(t0x)}" y1="${fmt(t0y)}" x2="${fmt(2 * c[0] - t0x)}" y2="${fmt(2 * c[1] - t0y)}">` +
     `<stop offset="0.62" stop-color="${C.eyeDark}"/><stop offset="0.85" stop-color="${C.dark}"/></linearGradient>` +
-    `${blur(warm, box, 0.45)}${blur(shine, box, 0.15)}${blur(edge, box, 0.22)}${blur(white, box, 0.25)}${blur(band, box, 0.55)}${blur(halo, box, 0.55)}${blur(core, box, 0.3)}</defs>` +
+    `${blur(warm, box, 0.5)}${blur(glow, box, 0.9)}${blur(shine, box, 0.15)}${blur(edge, box, 0.22)}${blur(white, box, 0.4)}${blur(band, box, 0.6)}` +
+    `${blur(halo, box, 0.55)}${blur(core, box, 0.3)}${blur(streak, box, 0.25)}</defs>` +
     `<path d="${haloBand.d}" fill="${C.fur}" opacity="0.8" filter="url(#${halo})"/>` +
     `<g filter="url(#${edge})"><path d="${ball}" fill="url(#${rimFade})"/><path d="${lidLine.d}" fill="${C.eyeDark}"/></g>` +
     `<g clip-path="url(#${clip})"><path d="${irisOval}" fill="${C.eyeDark}"/>` +
-    `<g clip-path="url(#${irisClip})"><g filter="url(#${band})"><path d="${irisOval}" fill="${C.dark}" clip-path="url(#${above})"/></g>` +
-    `<ellipse cx="${n(warmAt)}" rx="${fmt(3.7 * k)}" ry="${fmt(0.85 * k)}" transform="rotate(${fmt(turn)} ${fmt(warmAt[0])} ${fmt(warmAt[1])})" fill="${C.irisLight}" opacity="0.85" filter="url(#${warm})"/>` +
-    `<g filter="url(#${white})"><path d="${irisOval}" fill="${C.eyeWhite}" clip-path="url(#${outside})"/></g></g></g>` +
+    `<g clip-path="url(#${irisClip})">` +
+    `<g filter="url(#${band})"><path d="${irisOval}" fill="${C.dark}" clip-path="url(#${above})"/></g>` +
+    `<ellipse cx="${n(glowAt)}" rx="${fmt(4.8 * k)}" ry="${fmt(1.6 * k)}" transform="rotate(${fmt(turn)} ${fmt(glowAt[0])} ${fmt(glowAt[1])})" fill="${C.irisWarm}" opacity="0.9" filter="url(#${glow})"/>` +
+    `<ellipse cx="${n(warmAt)}" rx="${fmt(3.6 * k)}" ry="${fmt(1.05 * k)}" transform="rotate(${fmt(turn)} ${fmt(warmAt[0])} ${fmt(warmAt[1])})" fill="${C.irisLight}" opacity="0.9" filter="url(#${warm})"/>` +
+    `<g fill="${C.irisLight}" opacity="0.45" filter="url(#${streak})">${streaks.map((l) => `<path d="${l.d}"/>`).join("")}</g>` +
+    `<g filter="url(#${white})"><path d="${irisOval}" fill="${C.eyeWhite}" opacity="${o.whiteOpacity}" clip-path="url(#${outside})"/></g></g></g>` +
     `<ellipse cx="${n(big)}" rx="${fmt(o.shine[2])}" ry="${fmt(o.shine[2] * 0.94)}" fill="${C.light}" filter="url(#${shine})"/>` +
     `<ellipse cx="${n(big)}" rx="${fmt(o.shine[2] * 0.4)}" ry="${fmt(o.shine[2] * 0.35)}" fill="${C.dark}" opacity="0.1" filter="url(#${core})"/>`;
-  return piece(svg, box, { shapes: [], lines: [lidLine.line] });
+  return piece(svg, box, { shapes: [], lines: [lidLine.line, ...streaks.map((l) => l.line)] });
 }
 
 /** A brow, as the sheet paints it: a short, thick, rounded dab of tan, domed, its inner end no lower than its outer one; soft at its edges. */
@@ -348,51 +365,67 @@ function brow(pts: P[], width: number): Piece {
 }
 
 /**
- * The nose (front.ts's recipe, turned): a soft rounded wedge, broad across its top, its near side fuller than its
- * far side, running to a rounded point a little left of its middle that runs on into the philtrum's top; a soft
- * grey-brown sheen across its upper left.
+ * The nose (front.ts's recipe, turned): a rounded trapezoid, broad across its top and reaching further toward the
+ * near side, as the sheet draws it (11.9 pt across, 7.7 tall), its near end lower with the turn, its foot a round
+ * curve that runs on into the philtrum's top; a soft grey-brown sheen across its upper left.
  */
-const noseShape = smooth([[-68.4, -96], [-65.6, -95.6], [-63.6, -94.2], [-62.8, -92.4], [-63.8, -90.8], [-65.8, -89.6], [-67.6, -88.7], [-69.2, -89.2],
-  [-71.4, -90.6], [-72.9, -92.4], [-72.6, -94.2], [-70.8, -95.5]]);
+const noseShape = smooth([[-69.2, -96.5], [-65.4, -96.1], [-62.6, -95.1], [-61.2, -93.1], [-61.9, -91.2], [-64.1, -89.9], [-66.4, -89.1], [-67.9, -88.7],
+  [-69.6, -89.2], [-71.4, -90.5], [-72.6, -92.3], [-72.7, -94.3], [-71.4, -95.9]]);
 function nose(): Piece {
-  const f = uid("blur"), box: Box = [-76, -99, 16, 13];
-  return piece(`<defs>${blur(f, box, 0.7)}</defs><path d="${pathD(noseShape.segs)}" fill="${C.eyeDark}"/>` +
-    `<ellipse cx="-68.9" cy="-94.3" rx="2.7" ry="1" transform="rotate(-8 -68.9 -94.3)" fill="${C.noseSheen}" opacity="0.8" filter="url(#${f})"/>`, box);
+  const f = uid("blur"), e = uid("blur"), box: Box = [-76, -99, 18, 13];
+  // Its edge a little soft, as the sheet paints it (the eyes' own edge blur).
+  return piece(`<defs>${blur(f, box, 0.7)}${blur(e, box, 0.22)}</defs><path d="${pathD(noseShape.segs)}" fill="${C.eyeDark}" filter="url(#${e})"/>` +
+    `<ellipse cx="-68.4" cy="-94.4" rx="3.1" ry="1.05" transform="rotate(-6 -68.4 -94.4)" fill="${C.noseSheen}" opacity="0.8" filter="url(#${f})"/>`, box);
 }
 
 /**
- * The open happy mouth (front.ts's recipe, turned): the upper lip one inner line from the far corner's curl,
- * dipping under the philtrum's foot, down to the near corner's curl, deep red-brown over the opening and the
- * printed dark brown out along its ends; the opening hangs from it in a rounded wedge, deeper on the near side, the
- * dark red right up to the lip; the tongue a broad pink mound low in it with a soft light on its top.
+ * The open happy mouth (front.ts's recipe, turned), as the sheet draws it: the upper lip one inner line from the
+ * far corner's curl, over the opening's top in a shallow w that rises to meet the short philtrum, down to the near
+ * corner's curl, deep red-brown over the opening and the printed dark brown out along its ends. The opening hangs
+ * from it in a round U (its far side nearly upright, its near side sloping, its foot a full round curve 15.7 pt
+ * below the lip's corners); the dark red shows only as a band under the lip, deepest into the far corner; the broad
+ * pink tongue fills the rest from wall to wall, a little domed at its top, with a soft lighter middle and a faint
+ * groove down its centre; a dark red-brown rim runs down the opening's sides and round its foot.
  */
 function mouth(): Piece {
-  const lipPts: P[] = [[-77.6, -87.9], [-77.1, -86.8], [-75.8, -85.7], [-73.8, -84.9], [-71.6, -84.6], [-69.8, -85], [-67.6, -84.6], [-64.6, -83.4],
-    [-61.4, -82.2], [-58.6, -81.7], [-56.4, -82.2], [-55.2, -83.3], [-54.8, -84.6]];
+  const lipPts: P[] = [[-77.6, -87.4], [-76.4, -86], [-74.8, -85.2], [-72.6, -85.3], [-70.6, -85.8], [-69.4, -85.8], [-67.2, -84.5], [-64.2, -83],
+    [-61.2, -82.3], [-58.6, -82.1], [-56.6, -82.5], [-55.3, -83.4], [-54.8, -84.4]];
   const lipShape = smooth(lipPts, { closed: false });
   const lip = tapered(sample(lipShape.segs, 12, false), 0.9, "inner", "upper lip", { taper: 2.2, tip: 0.3 });
-  const opening = smooth([[-74.8, -85.2], [-71.6, -84.4], [-69.8, -84.8], [-67.6, -84.4], [-64.6, -83.2], [-61.4, -82], [-58.8, -81.6], [-60.4, -79.2],
-    [-62.3, -75.4], [-64.7, -71.8], [-68, -70.6], [-70.8, -71.6], [-72.7, -74.4], [-73.7, -78.2], [-74.4, -81.8]], { corners: [0, 6] });
+  const opening = smooth([[-74.4, -84.9], [-72.4, -85.2], [-70.4, -85.6], [-69.4, -85.5], [-67.2, -84.3], [-64.2, -82.8], [-61.2, -82.1], [-58, -81.8],
+    [-58.2, -80.4], [-59.4, -77.6], [-60.8, -74.6], [-62.7, -72.3], [-65, -70.7], [-67.8, -70.1], [-70.4, -71.1], [-71.9, -73.9], [-72.8, -77.8],
+    [-73.6, -81.6]], { corners: [0, 7] });
   const m = pathD(opening.segs);
-  const clip = uid("mouth"), softB = uid("blur"), lit = uid("blur"), lipFade = uid("lip");
-  const TONGUE = "M-73 -68 L-72.6 -76.4 C-71.6 -79 -70 -80.4 -67.4 -80.6 C-64.8 -80.7 -63.2 -79.6 -62 -77.2 L-61 -68Z";
-  const philtrum = innerLine([[-68.6, -88.9], [-69.6, -85.2]], 0.9, C.eyeDark, { taper: 0.9, tip: 0.75, wobble: 0 });
+  // The rim down the sides and round the foot: drawn twice its width centred on the edge inside the opening's clip,
+  // so the half that shows lies inside the opening.
+  const edge = sample(opening.segs, 16).filter(([, y]) => y > -81.4);
+  const start = edge.findIndex(([x], i) => i > 0 && x > -59 && edge[i - 1]![0] <= -59);
+  const along = start > 0 ? [...edge.slice(start), ...edge.slice(0, start)] : edge;
+  const doubled: [number, number] = [LIMITS.inner[0] * 2, LIMITS.inner[1] * 2];
+  const sides = strokeOf(along.filter(([x, y]) => y < -74 || x < -60), 1.6, { taper: 2.4, tip: 0.2, band: doubled });
+  const rimLine: DrawnLine = { kind: "inner", width: 0.8, where: "mouth rim", drawn: [sides.drawn[0] / 2, sides.drawn[1] / 2] };
+  const clip = uid("mouth"), softB = uid("blur"), lit = uid("blur"), lipFade = uid("lip"), rimB = uid("blur");
+  const TONGUE = "M-75.4 -69 L-74.6 -78.8 C-72 -80.2 -69 -80.9 -66 -80.8 C-62.8 -80.7 -60.2 -80.2 -57.4 -79 L-56.6 -69Z";
+  const groove = innerLine([[-66.5, -79.8], [-66.8, -77.4], [-67.2, -74.8]], 0.7, C.tongueRim, { taper: 1.2, tip: 0.1, opacity: 0.22 });
+  const philtrum = innerLine([[-68.3, -88.9], [-68.7, -87.5], [-69.4, -85.8]], 0.9, C.eyeDark, { taper: 0.8, tip: 0.6, wobble: 0 });
   const box: Box = [-80, -91, 28, 23];
-  const svg = `<defs><clipPath id="${clip}"><path d="${m}"/></clipPath>${blur(softB, box, 0.4)}${blur(lit, box, 1.1)}` +
+  const svg = `<defs><clipPath id="${clip}"><path d="${m}"/></clipPath>${blur(softB, box, 0.4)}${blur(lit, box, 1.2)}${blur(rimB, box, 0.2)}` +
     `<linearGradient id="${lipFade}" gradientUnits="userSpaceOnUse" x1="-78" y1="0" x2="-55" y2="0">` +
     `<stop offset="0.08" stop-color="${C.dark}"/><stop offset="0.25" stop-color="${C.lipLine}"/><stop offset="0.75" stop-color="${C.lipLine}"/>` +
     `<stop offset="0.92" stop-color="${C.dark}"/></linearGradient></defs>` +
     `<path d="${m}" fill="${C.mouthInside}"/><g clip-path="url(#${clip})">` +
-    `<path d="M-77 -88 L-55 -84 L-56 -81.4 C-62 -81.8 -68 -83.4 -77 -84.2Z" fill="${C.mouthDeep}" opacity="0.45" filter="url(#${softB})"/>` +
+    // Deepest right under the lip and back into the far corner.
+    `<path d="M-76 -86.6 L-57 -83.4 L-57 -81.4 C-62 -81.6 -67 -83 -71 -83.4 C-73 -82.6 -74 -81 -75 -79Z" fill="${C.mouthDeep}" opacity="0.5" filter="url(#${softB})"/>` +
     `<path d="${TONGUE}" fill="${C.tongue}" filter="url(#${softB})"/>` +
-    `<ellipse cx="-67.6" cy="-78.6" rx="2.4" ry="1.1" fill="${C.tongueShine}" opacity="0.55" filter="url(#${lit})"/></g>` +
+    `<ellipse cx="-66.6" cy="-76.4" rx="3.6" ry="2.6" fill="${C.tongueShine}" opacity="0.45" filter="url(#${lit})"/>${groove.svg}` +
+    `<path d="${sides.d}" fill="${C.mouthRim}" opacity="0.85" filter="url(#${rimB})"/></g>` +
     `<path d="${lip.d}" fill="url(#${lipFade})"/>${philtrum.svg}`;
-  return piece(svg, box, { shapes: [], lines: [lip.line, { ...philtrum.line, where: "philtrum" }] });
+  return piece(svg, box, { shapes: [], lines: [lip.line, rimLine, { ...groove.line, where: "tongue groove" }, { ...philtrum.line, where: "philtrum" }] });
 }
 
-/** The near cheek's blush, under the near eye's outer side, where the sheet's is (the far cheek shows none). */
+/** The near cheek's blush, a broad soft oval under the near eye spreading along the cheek, where the sheet's is (the far cheek shows none). */
 function blush(): Piece {
-  const [cx, cy] = [-34.8, -78.4], rx = 5.8, ry = 3.6, deg = -6;
+  const [cx, cy] = [-35.6, -78.6], rx = 8.4, ry = 4.2, deg = -8;
   const d = pathD(ellipse([cx, cy], rx, ry, deg));
   return soft(d, [cx - rx - 0.5, cy - ry - 0.8, 2 * rx + 1, 2 * ry + 1.6], C.blush, 2.2, Math.round(model.blush.restingLevel * 1.28 * 100) / 100);
 }
@@ -596,8 +629,8 @@ export function threeQuarter(): Drawn[] {
   add("head.patch.L", marking("head.patch.L", { shape: head, paint: headPaint }, patchL, { fill: C.patch, blur: 0.8, clip: false, fade: { from: [-43, -106], to: [-47, -103.4] } }));
   add("head.patch.R", marking("head.patch.R", { shape: head, paint: headPaint }, patchR, { fill: C.patch, blur: 0.8, clip: false, fade: { from: [-74, -114], to: [-69.8, -112.6] } }));
   add("blush.L", blush());
-  add("eye.L", eye([-37.8, -95.2], { rx: 10.1, ry: 10, turn: -4, noseward: -1, white: 38, whiteWidth: 1.5, shine: [3.6, 5.1, 1.75] }), "open");
-  add("eye.R", eye([-78.3, -104.8], { rx: 6.4, ry: 9, turn: 15, noseward: 1, white: 40, whiteWidth: 1.4, shine: [2.5, 4.1, 1.35] }), "open");
+  add("eye.L", eye([-37.8, -95.2], { rx: 10.1, ry: 10, turn: -4, noseward: -1, white: 8, whiteWidth: 1.3, whiteOpacity: 0.7, shine: [3.6, 5.1, 1.75] }), "open");
+  add("eye.R", eye([-78.3, -104.8], { rx: 6.4, ry: 9, turn: 15, noseward: 1, white: 2, whiteWidth: 1.1, whiteOpacity: 0.9, shine: [2.5, 4.1, 1.35] }), "open");
   add("brow.L", brow([[-36.9, -124.4], [-35.2, -125.5], [-33.4, -125.9], [-31.2, -125], [-29.4, -122.8]], 2.2));
   add("brow.R", brow([[-71.2, -131.4], [-72.8, -132], [-74.6, -131.6], [-76, -130.4]], 1.8));
   add("nose", nose());
