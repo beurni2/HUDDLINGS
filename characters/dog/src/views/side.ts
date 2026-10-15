@@ -105,7 +105,7 @@ const collar = smooth([[-61.8, -55.6], [-60.6, -58.6], [-55.3, -58.9], [-49.8, -
 // front's is 17.9), its notch barely showing, a blunt point at its foot,
 // hanging from its ring on the collar's front.
 const TAG_X = -59.5;
-const heart = smooth([[TAG_X, -50.6], [-62.4, -51.6], [-65, -50.2], [-66.3, -47.4], [-66.2, -43.8], [-64.8, -40.6], [-62.4, -38.3], [TAG_X, -37.3], [-56.6, -38.2],
+const heart = smooth([[TAG_X, -51.1], [-62.4, -51.6], [-65, -50.2], [-66.3, -47.4], [-66.2, -43.8], [-64.8, -40.6], [-62.4, -38.3], [TAG_X, -37.3], [-56.6, -38.2],
   [-54.2, -40.4], [-52.9, -43.8], [-53, -47.4], [-54.2, -50.2], [-56.7, -51.6]], { corners: [0] });
 const innerHeart = smooth([[TAG_X, -47.4], [-61.4, -48.4], [-63.2, -47], [-63.4, -44.6], [-62.2, -42.2], [TAG_X, -40.2], [-57, -42.2], [-55.8, -44.6], [-56, -47],
   [-57.6, -48.4]], { corners: [0] });
@@ -327,7 +327,11 @@ const headPaint: Paint = {
  * the chin and the jaw the outline's brown; and along the collar's top, under the chin's fur, a soft warm line.
  */
 const headLine: Outline = { ...OUTLINE, taper: 4, blur: 0.15, spans: [
-  { from: [-86, -102.4], to: [-63.4, -151], width: THIN, colour: C.crownLine },
+  // The bridge and the stop in the outline's brown; up the forehead the crown's light line, broken above the first
+  // lock's tip, where its curl hooks in.
+  { from: [-91, -100.4], to: [-84.4, -110.4], width: 1.3 },
+  { from: [-84.6, -108.4], to: foreLocks[0]!.tip, width: THIN, colour: C.crownLine },
+  { from: foreLocks[1]!.notches[0], to: [-63.4, -151], width: THIN, colour: C.crownLine },
   { from: [-3.6, -148.4], to: [3.6, -142.2], width: THIN, colour: C.fluffLine },
   { from: [-61, -59], to: [-95.8, -88], width: 1.3 },
 ] };
@@ -439,7 +443,7 @@ function tagPiece(): Piece {
     fill: C.tag,
     shade: { multiply: C.tagShadeBy, rim: { inset: 1.3, toLight: 1.3 }, blur: 1 },
     highlight: { d: "M-64 -46.4 a2.4 1.7 -40 1 0 4.8 0 a2.4 1.7 -40 1 0 -4.8 0", colour: C.tagShine, opacity: 0.45, blur: 1.4 },
-    inner: [{ pts: emboss, width: 0.7, colour: C.tagLine, opacity: 0.6 }],
+    inner: [{ pts: emboss, width: 0.7, colour: C.tagLine, opacity: 0.4 }],
     outline: { colour: C.tagLine, width: 1.3, taper: 2, blur: 0.2 },
   }));
 }
@@ -502,7 +506,7 @@ export function side(): Drawn[] {
   add("shadow", join(soft("M-80 -1.4 a64 4.2 0 1 0 128 0 a64 4.2 0 1 0 -128 0Z", [-80, -5.6, 128, 8.4], C.shadow, 2.4, 0.75),
     soft("M-70 0 a40 2.2 0 1 0 80 0 a40 2.2 0 1 0 -80 0Z", [-70, -2.2, 80, 4.4], C.shadow, 1.8, 0.5),
     ...([[-50, 13], [-20, 11], [6, 10], [-68.6, 7]] as [number, number][]).map(([x, rx]) =>
-      soft(`M${x - rx} -0.4 a${rx} 1.6 0 1 0 ${2 * rx} 0 a${rx} 1.6 0 1 0 ${-2 * rx} 0Z`, [x - rx, -2, 2 * rx, 3.2], C.contact, 1.2, 0.6))));
+      soft(`M${x - rx} -0.4 a${rx} 1.6 0 1 0 ${2 * rx} 0 a${rx} 1.6 0 1 0 ${-2 * rx} 0Z`, [x - rx, -2, 2 * rx, 3.2], C.contact, 1.2, 0.45))));
   add("tail", part("tail", tail, tailPaint));
   add("tail.base", marking("tail.base", { shape: tail, paint: tailPaint }, tailBase, { fill: C.marking, blur: 1.3, clip: true }));
   add("front.R", part("front.R", legFar, legFarPaint()));
