@@ -28,6 +28,8 @@ jobs:
         run: |
           pip install -r tools/requirements.txt
           python3 -m unittest discover -s tools/qa -v
+      - name: Pre-commit hook tests (the hook run in a repository of stand-ins)
+        run: python3 -m unittest discover -s tools -p test_precommit.py -v
 
   reference-prep:
     # Spec section 5b, phase 2: the reference prep's tests, and each species'

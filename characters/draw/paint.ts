@@ -7,6 +7,7 @@
 // patch darkens exactly like the fur around it.
 import { bbox, fracAt, pathD, v, type P, type Shape } from "./geom.ts";
 import { innerLine, ribbons, type Outline } from "./line.ts";
+import { reach } from "./lint.ts";
 import { blur, filter, mask, pad, piece, region, uid, type Box, type LineMeta, type Piece } from "./svg.ts";
 
 /** The light comes from the top left, a little more from above. A mirrored facing passes its own. */
@@ -31,7 +32,7 @@ export interface Highlight {
   colour: string;
   opacity: number;
   blur: number;
-  /** Placed from the light: the shape eroded by `inset`, minus itself moved `toLight` pt away from the light. */
+  /** Placed from the light: the shape eroded by `inset`, minus itself moved `toLight` pt away from the light (AUTO when neither this nor `d` is given). */
   auto?: { inset: number; toLight: number };
   /** Or a shape placed by hand, as path data, for one highlight across a light group. */
   d?: string;
@@ -52,10 +53,18 @@ export interface Paint {
 
 const xy = (p: P) => `${(Math.round(p[0] * 1000) / 1000).toString()} ${(Math.round(p[1] * 1000) / 1000).toString()}`;
 
-/** How far past the part's bounds its filters and masks reach. */
+/** The automatic highlight's placing, when a paint gives neither its own nor a hand-placed shape. */
+const AUTO = { inset: 3, toLight: 5 };
+
+/** How far the shade's mask reaches past the part, by lint.ts's rule: its blur, and its rim's erode and move toward the light. */
+const shadeReach = (s: Shade) => reach(s.blur, (s.rim?.inset ?? 0) + (s.rim?.toLight ?? 0));
+/** How far the highlight reaches: a hand-placed one its blur; one from the light its mask's blur, erode and move away from the light. */
+const highlightReach = (h: Highlight) => (h.d ? reach(h.blur, 0) : reach(h.blur, (h.auto ?? AUTO).inset + (h.auto ?? AUTO).toLight));
+
+/** How far past the part's bounds its filters and masks reach: the widest of them, each by lint.ts's one rule. */
 function reachOf(paint: Paint): number {
-  const s = paint.shade, h = paint.highlight;
-  return Math.max(2, s ? 3 * s.blur + (s.rim?.toLight ?? 0) + (s.rim?.inset ?? 0) : 0, h ? 3 * h.blur + (h.auto?.toLight ?? 0) : 0);
+  const { shade, highlight, outline } = paint;
+  return Math.max(reach(0, 0), shade ? shadeReach(shade) : 0, highlight ? highlightReach(highlight) : 0, outline?.blur ? reach(outline.blur, 0) : 0);
 }
 
 /** The shade's mask: the rim and the overhang shapes, minus the keep zones, through one blur. */
@@ -75,23 +84,28 @@ function shadeMask(shape: Shape, s: Shade, light: P, area: Box): { defs: string;
   return { defs: defs + mask(id, area, `<g filter="url(#${soft})">${content}</g>`), id };
 }
 
-/** The highlight: from the light, or a hand-placed shape. */
-function highlight(shape: Shape, h: Highlight, light: P, area: Box): string {
+/** The highlight: from the light, or a hand-placed shape. Its masked rect covers the part's box and its mask's reach. */
+function highlight(shape: Shape, h: Highlight, light: P, box: Box, area: Box): string {
   const soft = uid("blur");
   let defs = blur(soft, area, h.blur);
   if (h.d) return `<defs>${defs}</defs><path d="${h.d}" fill="${h.colour}" opacity="${h.opacity}" filter="url(#${soft})"/>`;
   // The shape inset, minus itself moved away from the light: a lit crescent on the side toward the light, whichever way the part faces.
-  const auto = h.auto ?? { inset: 3, toLight: 5 };
+  const auto = h.auto ?? AUTO;
   const id = uid("lit"), erode = uid("erode");
   const d = pathD(shape.segs);
   defs += filter(erode, area, `<feMorphology operator="erode" radius="${auto.inset}"/>`) +
     mask(id, area, `<g filter="url(#${soft})"><g filter="url(#${erode})"><path d="${d}" fill="#FFFFFF"/></g>` +
       `<path d="${d}" fill="#000000" transform="translate(${xy(v.mul(light, -auto.toLight))})"/></g>`);
-  return `<defs>${defs}</defs><rect ${region(area)} fill="${h.colour}" opacity="${h.opacity}" mask="url(#${id})"/>`;
+  return `<defs>${defs}</defs><rect ${region(pad(box, highlightReach(h)))} fill="${h.colour}" opacity="${h.opacity}" mask="url(#${id})"/>`;
 }
 
-/** Paint that sits inside the part's clip: the fill and its shade, the highlight, inner lines, the outline. */
-function layers(name: string, shape: Shape, paint: Paint, fill: string, area: Box, fillBox = area): { defs: string; body: string; lines: LineMeta[]; outlined: [number, number][] } {
+/**
+ * Paint that sits inside the part's clip: the fill and its shade, the highlight, inner lines, the outline. Filter
+ * and mask regions cover `area`, the part's `box` and its whole reach. A masked rect reaches only as far as its own
+ * mask does (lint.ts holds a masked shape to its innermost mask's reach): the fill, under no mask but a feather's or
+ * a marking's, covers `fillBox`, the box by default; the shade's and the highlight's cover the box and their reach.
+ */
+function layers(name: string, shape: Shape, paint: Paint, fill: string, box: Box, area: Box, fillBox = box): { defs: string; body: string; lines: LineMeta[]; outlined: [number, number][] } {
   const light = paint.light ?? LIGHT;
   let defs = "";
   // The isolated group carries its own copy of the fill, so the multiply darkens the fill and nothing behind the part.
@@ -100,10 +114,10 @@ function layers(name: string, shape: Shape, paint: Paint, fill: string, area: Bo
   if (paint.shade) {
     const m = shadeMask(shape, paint.shade, light, area);
     defs += m.defs;
-    shaded += `<rect ${region(area)} fill="${paint.shade.multiply}" mask="url(#${m.id})" style="mix-blend-mode:multiply"/>`;
+    shaded += `<rect ${region(pad(box, shadeReach(paint.shade)))} fill="${paint.shade.multiply}" mask="url(#${m.id})" style="mix-blend-mode:multiply"/>`;
   }
   let body = `<g style="isolation:isolate">${shaded}</g>`;
-  if (paint.highlight) body += highlight(shape, paint.highlight, light, area);
+  if (paint.highlight) body += highlight(shape, paint.highlight, light, box, area);
   const lines: LineMeta[] = [];
   for (const line of paint.inner ?? []) {
     const l = innerLine(line.pts, line.width, line.colour, { opacity: line.opacity });
@@ -147,7 +161,7 @@ export function part(name: string, shape: Shape, paint: Paint): Piece {
   const box = pad(shapeBox(shape), 1);
   const area = pad(box, reachOf(paint));
   const clip = uid("clip");
-  const l = layers(name, shape, paint, paint.fill, area);
+  const l = layers(name, shape, paint, paint.fill, box, area);
   let defs = `<clipPath id="${clip}"><path d="${pathD(shape.segs)}"/></clipPath>${l.defs}`;
   let svg = `<g clip-path="url(#${clip})">${l.body}</g>`;
   if (paint.feather) {
@@ -176,7 +190,7 @@ export function marking(name: string, on: { shape: Shape; paint: Paint }, patch:
   const paint: Paint = { ...on.paint, inner: undefined, under: undefined, feather: undefined, outline: opts.clip ? on.paint.outline : undefined };
   const area = pad(box, reachOf(paint));
   // Clipped, the colour fills the part; sliding, it fills the patch's own bounds, bleed and all.
-  const l = layers(name, on.shape, paint, opts.fill, area, opts.clip ? area : patchBox);
+  const l = layers(name, on.shape, paint, opts.fill, box, area, opts.clip ? box : patchBox);
   const shows = uid("patch"), soft = uid("blur"), clip = uid("clip");
   // A faded patch shows through a gradient that lives inside its mask: luminance, not paint.
   let shown = `<path d="${pathD(patch.segs)}" fill="#FFFFFF" filter="url(#${soft})"/>`;

@@ -1,15 +1,17 @@
 // Tests for the dog's source: the rest rig's pivots follow their rules from
 // model.json, the draw order follows spec L397, markings are overlays on their
-// own parts, and the package builds with its landmarks and report beside it.
+// own parts, and the package builds lint clean, its landmarks and report kept
+// out of it as development output for build/dev/dog/.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { join, relative } from "node:path";
 import { Resvg } from "@resvg/resvg-js";
 import { PNG } from "pngjs";
 import type { AtlasSet, Clip, Rig } from "../../../runtime-web/src/format.ts";
 import { validate } from "../../../runtime-web/src/format.ts";
 import { compile, drawList, evaluatePose } from "../../../runtime-web/src/rig.ts";
-import { buildPackage, readSource } from "../../build/build.ts";
+import { buildPackage, devFolder, packageFolder, readSource } from "../../build/build.ts";
 import { restTransform, toBone } from "../../draw/frame.ts";
 import { scopeIds } from "../../draw/svg.ts";
 import { front, landmarks } from "../src/views/front.ts";
@@ -130,12 +132,15 @@ test("moving a pivot leaves the rest frame where it was", () => {
   }
 });
 
-test("the dog builds, lint clean, with its landmarks and report in dev/ beside the package", async () => {
+test("the dog builds, lint clean, with its landmarks and report as development output for build/dev/dog/, outside the package", async () => {
   const source = await readSource("dog");
   const pkg = await buildPackage(source);
   const manifest = JSON.parse(pkg.files.get("package.json")!.toString("utf8"));
   assert.equal(manifest.species, "dog");
-  assert.ok(!Object.keys(manifest.files).some((f) => f.startsWith("dev/")), "dev/ is not part of the package");
+  // The package (build/characters/dog/, which the app bundles whole) holds neither; the build writes them to build/dev/dog/.
+  assert.deepEqual([...pkg.dev.keys()].sort(), ["landmarks.json", "report.json"]);
+  for (const file of pkg.dev.keys()) assert.ok(!pkg.files.has(file) && !(file in manifest.files), `${file} is in the package`);
+  assert.equal(relative(packageFolder("dog"), devFolder("dog")), join("..", "..", "dev", "dog"));
   const landmarks = JSON.parse(pkg.dev.get("landmarks.json")!.toString("utf8"));
   for (const name of ["paw.front.L", "paw.front.R", "paw.hind.L", "paw.hind.R", "tag.ring", "seat"]) assert.equal(landmarks.front[name].length, 2, name);
   // Each placed point lies within 3 pt of model.json's, where the sheet has one.

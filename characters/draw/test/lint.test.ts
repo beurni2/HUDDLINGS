@@ -6,7 +6,7 @@ import { rasterizeAll } from "../../build/raster.ts";
 import { furSpan } from "../fur.ts";
 import { smooth, type Node } from "../geom.ts";
 import { lintDrawing, reach } from "../lint.ts";
-import { part } from "../paint.ts";
+import { marking, part } from "../paint.ts";
 import { blur, mask, type Piece } from "../svg.ts";
 
 const PALETTE = ["#FFF4E8", "#91694A", "#FDEDDC", "#FFFFFF"];
@@ -53,6 +53,32 @@ test("lines outside their bands fail: outer 1.2 to 1.8 pt, inner 0.6 to 0.9 pt, 
   assert.deepEqual(lintOf(raw(`<path d="M0 0H5" stroke="#91694A" stroke-width="0.7"/>`)), []);
 });
 
+test("a stroke is held to its band as wide as it is drawn: scaled by its transforms, evenly, its width inherited", () => {
+  const say = (body: string) => lintOf(raw(body)).join("\n");
+  const line = (width: string) => `<path d="M0 0H5" stroke="#91694A" stroke-width="${width}"/>`;
+  // Scaled into a band it passes, out of both it fails, whatever it declares.
+  assert.equal(say(`<g transform="scale(2)">${line("0.7")}</g>`), "", "0.7 pt drawn 1.4 pt wide is an outer line");
+  assert.equal(say(`<g transform="scale(0.5)">${line("1.5")}</g>`), "", "1.5 pt drawn 0.75 pt wide is an inner line");
+  assert.match(say(`<g transform="scale(1.5)">${line("0.7")}</g>`), /a stroke 0.7 pt wide is drawn 1.05 pt wide by its transform, neither an outer line/);
+  assert.equal(say(`<g transform="matrix(0 3 -3 0 0 0)">${line("0.5")}</g>`), "", "turned a quarter and scaled 3 times, 0.5 pt is drawn 1.5 pt wide");
+  assert.equal(say(`<g transform="rotate(30) translate(4 2)">${line("0.7")}</g>`), "", "turning and moving leave its width");
+  // A shape scaled unevenly draws its line unevenly wide.
+  assert.match(say(`<g transform="scale(1 1.1)">${line("1.5")}</g>`), /a stroked <path> is scaled unevenly \(1.000 to 1.100\), drawing its 1.5 pt line 1.5 to 1.65 pt wide/);
+  assert.match(say(`<g transform="skewX(10)">${line("0.7")}</g>`), /scaled unevenly/);
+  // Drawn through a <use>, scaled by it; inherited from a group; 1 pt when nothing says.
+  assert.match(say(`<defs>${line("0.7").replace("<path", '<path id="p"')}</defs><use href="#p" transform="scale(1.5)"/>`), /a stroke 0.7 pt wide is drawn 1.05 pt wide/);
+  assert.match(say(`<g stroke="#91694A" stroke-width="1"><path d="M0 0H5"/></g>`), /a stroke 1 pt wide is neither/);
+  assert.match(say(`<path d="M0 0H5" stroke="#91694A"/>`), /a stroke 1 pt wide is neither/);
+  assert.equal(say(`<g stroke-width="1"><path d="M0 0H5" fill="#91694A"/></g>`), "", "an unstroked shape draws no line");
+  // A millionth of a point past an edge passes, what transforms leave in the last digits; more fails, and reads as
+  // past the edge: 1.196 pt reads 1.19, never 1.20.
+  assert.equal(say(`<g transform="scale(${(1.2 - 5e-7) / 0.6})">${line("0.6")}</g>`), "");
+  const short = say(`<g transform="scale(2)">${line("0.598")}</g>`);
+  assert.match(short, /a stroke 0.598 pt wide is drawn 1.19 pt wide by its transform/);
+  assert.doesNotMatch(short, /drawn 1\.2/);
+  assert.match(say(`<g transform="scale(2)">${line("0.9002")}</g>`), /drawn 1.81 pt wide/);
+});
+
 test("a filter or mask without an explicit, bounded sRGB region fails", () => {
   assert.match(lintOf(raw(`<filter id="f"><feGaussianBlur stdDeviation="2"/></filter>`)).join("\n"), /filter f needs an explicit userSpaceOnUse region/);
   assert.match(lintOf(raw(`<filter id="f" filterUnits="userSpaceOnUse" x="-30" y="-30" width="60" height="60"><feGaussianBlur stdDeviation="2"/></filter>`)).join("\n"), /sRGB/);
@@ -95,12 +121,68 @@ test("the rule refuses exactly the masked shapes that abort resvg 2.6.2, and pas
     "a far shape in the mask's own filtered content": raw(`<defs>${blur("b", [-30, -30, 60, 60], 2)}${mask("m", [-30, -30, 60, 60], `<g filter="url(#b)"><path d="${huge}" fill="#FFFFFF"/></g>`)}</defs>` +
       `<rect x="-30" y="-30" width="60" height="60" fill="#FDEDDC" mask="url(#m)"/>`),
     "a far shape under a filtered group in a masked group": doc(`<g mask="url(#m)"><g filter="url(#b)"><path d="${huge}" fill="#FDEDDC"/></g></g>`),
+    // Definitions are drawn where a <use> draws them, under its masks.
+    "an unmasked use of a masked far group in defs": doc(`<defs><g id="x" mask="url(#m)"><path d="M-250 -250H250V250H-250Z" fill="#FDEDDC"/></g></defs><use href="#x"/>`),
+    "a use of a symbol holding a masked far group": doc(`<defs><symbol id="s"><g mask="url(#m)"><path d="M-250 -250H250V250H-250Z" fill="#FDEDDC"/></g></symbol></defs><use href="#s"/>`),
+    "a masked use of a far path in defs": doc(`<defs><path id="p" d="M-250 -250H250V250H-250Z" fill="#FDEDDC"/></defs><g mask="url(#m)"><use href="#p"/></g>`),
+    "a use moving a small masked group far": doc(`<defs><g id="x" mask="url(#m)"><path d="M-5 -5H5V5H-5Z" fill="#FDEDDC"/></g></defs><use href="#x" x="-400"/>`),
+    "a masked group in defs that nothing uses": doc(`<defs><g id="x" mask="url(#m)"><path d="M-250 -250H250V250H-250Z" fill="#FDEDDC"/></g></defs>`),
   };
   for (const [name, d] of Object.entries(cases)) {
     const refused = lintOf(d).length > 0;
     const aborts = await rasterizeAll([d], [3]).then(() => false, (e: Error) => /SIGABRT|exit 134/.test(e.message));
     assert.equal(refused, aborts, `${name}: the lint ${refused ? "refuses" : "passes"} it, and resvg ${aborts ? "aborts" : "draws it"}`);
   }
+});
+
+test("a masked shape is held to its own mask's reach, from the filters that mask uses, never raised by the rest of the drawing", () => {
+  const say = (body: string) => lintOf(raw(`<defs>${blurred}</defs>${body}`)).join("\n");
+  // Mask m blurs by 2 pt: it reaches 6 pt past the canvas, and a masked rect 10 pt past it fails.
+  const past = `<rect x="-40" y="-20" width="20" height="20" fill="#FDEDDC" mask="url(#m)"/>`;
+  assert.match(say(past), /<rect> under a mask that reaches past the canvas and mask m's reach \(6 pt\)/);
+  // A wide blur the mask never uses, whether nothing uses it or another shape does, lends it nothing.
+  const wide = blur("w", [-90, -90, 180, 180], 20);
+  assert.match(say(`<defs>${wide}</defs>${past}`), /mask m's reach \(6 pt\)/);
+  assert.match(say(`<defs>${wide}</defs><path d="M0 0H5V5Z" fill="#FDEDDC" filter="url(#w)"/>${past}`), /mask m's reach \(6 pt\)/);
+  // Nor does a move in the mask that feeds no filter: paint.ts moves a light group only right under one.
+  const moved = mask("n", [-30, -30, 60, 60], `<g filter="url(#b)"><rect x="-30" y="-30" width="60" height="60" fill="#FFFFFF"/></g><g transform="translate(300 0)"><rect x="-5" y="-5" width="10" height="10" fill="#000000"/></g>`);
+  assert.match(say(`<defs>${moved}</defs>${past.replace("url(#m)", "url(#n)")}`), /mask n's reach \(6 pt\)/);
+  const fed = mask("l", [-30, -30, 60, 60], `<rect x="-30" y="-30" width="60" height="60" fill="#FFFFFF"/><g filter="url(#b)"><g transform="translate(8 0)"><rect x="-5" y="-5" width="10" height="10" fill="#000000"/></g></g>`);
+  assert.equal(say(`<defs>${fed}</defs>${past.replace("url(#m)", "url(#l)")}`), "", "the light group's 8 pt move counts: 6 + 8 pt");
+  // A mask with no filter (paint.ts's feather) reaches 2 pt, and a part's paint inside it reaches no further.
+  const feather = mask("f", [-30, -30, 60, 60], `<rect x="-30" y="-30" width="60" height="60" fill="#FFFFFF"/>`);
+  assert.match(say(`<defs>${feather}</defs><g mask="url(#f)"><rect x="-33" y="-20" width="20" height="20" fill="#FDEDDC"/></g>`), /mask f's reach \(2 pt\)/);
+  assert.equal(say(`<defs>${feather}</defs><g mask="url(#f)"><rect x="-31.5" y="-20" width="20" height="20" fill="#FDEDDC"/></g>`), "");
+  // The innermost mask counts: the shade's rect inside a feathered part is held to the shade's reach.
+  assert.equal(say(`<defs>${feather}</defs><g mask="url(#f)"><rect x="-35" y="-20" width="20" height="20" fill="#FDEDDC" mask="url(#m)"/></g>`), "");
+});
+
+test("paint.ts sizes each masked rect by its own mask's reach, so feathered parts and markings pass", () => {
+  const shade = { multiply: "#FDEDDC", rim: { inset: 2.5, toLight: 4 }, blur: 2.4 };
+  const feathered = part("part", smooth(round), { fill: "#FFF4E8", shade, highlight: { colour: "#FFFFFF", opacity: 0.8, blur: 2 }, feather: { from: [0, -20], to: [0, -10] } });
+  assert.deepEqual(lintOf(drawing(feathered)), []);
+  // The fill under the feather covers the part's box; the shade's and the highlight's rects their own reach past it.
+  const paintOf = (body: string) => body.replace(/<mask\b[\s\S]*?<\/mask>/g, "");
+  const rects = [...paintOf(feathered.svg).matchAll(/<rect x="([^"]+)"[^>]*? fill="([^"]+)"(?:[^>]*? mask="url\(#([a-z]+)\d+\)")?/g)].map((m) => [m[2], Number(m[1]), m[3]]);
+  assert.deepEqual(rects, [["#FFF4E8", -21, undefined], ["#FDEDDC", -21 - reach(2.4, 6.5), "shade"], ["#FFFFFF", -21 - reach(2, 8), "lit"]]);
+  const host = { shape: smooth(round), paint: { fill: "#FFF4E8", shade } };
+  const patch = smooth(round.map(([x, y]): Node => [x / 2, y / 2]));
+  for (const clip of [true, false]) assert.deepEqual(lintOf(drawing(marking("part", host, patch, { fill: "#91694A", blur: 1.2, clip }))), [], `clip ${clip}`);
+});
+
+test("definitions are bounded where a <use> draws them, moved and masked as it draws them", () => {
+  const say = (body: string) => lintOf(raw(`<defs>${blurred}</defs>${body}`)).join("\n");
+  const small = `<defs><g id="x" mask="url(#m)"><path d="M-5 -5H5V5H-5Z" fill="#FDEDDC"/></g></defs>`;
+  assert.equal(say(`${small}<use href="#x"/>`), "");
+  assert.match(say(`${small}<use href="#x" x="-400"/>`), /<path> under a mask that reaches past the canvas and mask m's reach/);
+  assert.match(say(`${small}<use href="#x" transform="translate(0 300)"/>`), /<path> under a mask that reaches past/);
+  assert.equal(say(`${small}<g transform="translate(400 0)"><use href="#x" x="-400"/></g>`), "");
+  // Through a symbol, through <use> in <use>, and a far path in defs used under a mask, each reported once.
+  assert.match(say(`<defs><symbol id="s"><g mask="url(#m)"><path d="${FAR}" fill="#FDEDDC"/></g></symbol><use id="u" href="#s"/></defs><use href="#u"/>`), /<path> under a mask that reaches past/);
+  const twice = lintOf(raw(`<defs>${blurred}<path id="p" d="${FAR}" fill="#FDEDDC"/></defs><g mask="url(#m)"><use href="#p"/><use href="#p"/></g>`));
+  assert.equal(twice.length, 1, twice.join("\n"));
+  // A <use> that draws itself is refused, not followed for ever.
+  assert.match(say(`<g id="a"><use href="#a"/></g>`), /<use> that draws itself/);
 });
 
 test("the reach is paint.ts's: a wide shade on a small part passes, and a region past it fails", () => {

@@ -3,7 +3,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { furEdge, furSpan } from "../fur.ts";
 import { arc, fracAt, onSpan, sample, smooth, spanPoints, v, type Node, type P } from "../geom.ts";
-import { mirrorSpans, ribbons, taperedStroke } from "../line.ts";
+import { mirrorSpans, ribbons, strokeOf, taperedStroke } from "../line.ts";
 
 const ring: Node[] = Array.from({ length: 10 }, (_, i): Node => [30 * Math.cos((i / 10) * 2 * Math.PI), 30 * Math.sin((i / 10) * 2 * Math.PI)]);
 
@@ -45,9 +45,11 @@ test("furSpan declares a span of hand nodes as fur", () => {
   assert.ok(onSpan(0.1, a, b) && !onSpan(0.6, a, b));
 });
 
-test("a tapered stroke is its width in the middle and thin at its ends", () => {
+test("a tapered stroke is its width in the middle and thin at its ends, and reports the widths it draws", () => {
   const line: P[] = Array.from({ length: 41 }, (_, i) => [i, 0]);
-  const d = taperedStroke(line, 2, { taper: 5, tip: 0.2 });
+  const { d, drawn } = taperedStroke(line, 2, { taper: 5, tip: 0.2 });
+  assert.deepEqual(drawn, [2, 2]);
+  assert.deepEqual(taperedStroke(line, 2, { taper: 5, tip: 0.2, wobble: 0.1 }).drawn, strokeOf(line, 2, { taper: 5, tip: 0.2, wobble: 0.1 }).drawn);
   const ys = [...d.matchAll(/([-\d.]+) ([-\d.]+)/g)].map((m) => [Number(m[1]), Number(m[2])]);
   const at = (x: number) => Math.max(...ys.filter((p) => p[0] === x).map((p) => Math.abs(p[1]!)));
   assert.equal(at(20), 1);
