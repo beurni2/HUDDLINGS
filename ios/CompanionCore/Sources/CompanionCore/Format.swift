@@ -182,6 +182,8 @@ public struct Clip: Codable, Equatable, Sendable {
     public var interruptAt: [Double]?
     /// Keys per bone, then per channel name ("rot", "squash").
     public var tracks: [String: [String: [Key]]]?
+    /// Each part's opacity over time, 0 to 1; 1, its rest value, where no clip keys it (README, Clips: alpha).
+    public var alpha: [String: [Key]]?
     public var states: [String: [DiscreteKey]]?
     public var views: ViewTracks?
     /// The body's draw-order variant over time; null is the view's own order.

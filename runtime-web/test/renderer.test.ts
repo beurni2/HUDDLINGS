@@ -30,10 +30,10 @@ function pagePng(width: number, height: number, texel: (x: number, y: number) =>
 }
 
 /** A quad covering texels [x0, x0 + w) × [y0, y0 + h) of a page, placed at points (px, py), its size in points w / scale. */
-function quad(part: string, page: { width: number; height: number }, x0: number, y0: number, w: number, h: number, scale: number, px: number, py: number, clipTo?: number): DrawItem {
+function quad(part: string, page: { width: number; height: number }, x0: number, y0: number, w: number, h: number, scale: number, px: number, py: number, clipTo?: number, alpha = 1): DrawItem {
   const l = px, t = py, r = px + w / scale, b = py + h / scale;
   const u0 = x0 / page.width, v0 = y0 / page.height, u1 = (x0 + w) / page.width, v1 = (y0 + h) / page.height;
-  return { part, region: part, page: 0, positions: [l, t, r, t, l, b, r, b], uvs: [u0, v0, u1, v0, u0, v1, u1, v1], columns: 1, rows: 1, clipTo };
+  return { part, region: part, page: 0, positions: [l, t, r, t, l, b, r, b], uvs: [u0, v0, u1, v0, u0, v1, u1, v1], columns: 1, rows: 1, clipTo, alpha };
 }
 
 async function render(size: [number, number], pages: string[], items: DrawItem[], stage = { x: 0, y: 0, pixelsPerPoint: 2 }, background: [number, number, number] = [1, 1, 1]) {
@@ -90,7 +90,7 @@ test("a mesh of rows draws the whole region, row by row", async () => {
     positions.push(1, y, 3, y);
     uvs.push(0, r / rows, 1, r / rows);
   }
-  const mesh: DrawItem = { part: "m", region: "m", page: 0, positions, uvs, columns: 1, rows };
+  const mesh: DrawItem = { part: "m", region: "m", page: 0, positions, uvs, columns: 1, rows, alpha: 1 };
   const at = await render([8, 12], [url], [mesh]);
   for (let y = 2; y < 10; y++) for (let x = 2; x < 6; x++) assert.deepEqual(at(x, y), [0, 128 + (y - 2) * 10, 0, 255], `pixel ${x}, ${y}`);
   assert.deepEqual(at(2, 10), [255, 255, 255, 255]);

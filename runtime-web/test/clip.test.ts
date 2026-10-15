@@ -180,6 +180,19 @@ test("validation refuses an easing that overshoots a limit between keys", () => 
   assert.deepEqual(validate(rig, [fine]), []);
 });
 
+test("validation keeps a part's alpha inside 0 to 1, at its keys and between them, and only on a part", () => {
+  const ok: Clip = { name: "blush", lengthMs: 600, alpha: { "eye.L": [[0, 0.2], [300, 0.8, "easeOutBack"], [600, 0]], body: [[0, 1]] } };
+  assert.deepEqual(validate(rig, [ok]), []);
+  const bad: Clip = {
+    name: "bad", lengthMs: 600,
+    alpha: { "eye.L": [[0, 0], [300, 1.2]], ghost: [[0, 1]], "eye.R": [[0, 0.5], [400, 1, "easeOutBack"]], "head.base": [[700, 0.5], [100, -0.1]] },
+  };
+  const problems = validate(rig, [bad]);
+  for (const expected of ["alpha of eye.L 1.2 leaves 0 to 1", "alpha of unknown part ghost", "alpha of eye.R overshoots to 1.0", "alpha of head.base key at 700 ms is outside the clip",
+    "alpha of head.base keys out of order at 100 ms", "alpha of head.base -0.1 leaves 0 to 1"]) expectProblem(problems, expected);
+  assert.equal(problems.length, 7, problems.join("\n"));
+});
+
 test("validation takes a null region, which needs nothing in the atlas, and names a view whose regions are all null", () => {
   const parts = rig.parts.map((p) =>
     p.name === "eye.L" ? { ...p, regions: { ...p.regions, "front:wink": null } } : p.name === "eye.R" ? { ...p, regions: { front: "eye.R/front", "front:closed": null } } : p);

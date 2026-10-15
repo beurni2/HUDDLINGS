@@ -161,6 +161,13 @@ test("of the state's key, the view's and the default state's, the first present 
   assert.equal(regionFor(eye, "back", "open"), undefined, "no key at all draws nothing");
 });
 
+test("each item carries its part's alpha, 1 where no clip keys it, and a part at 0 stays in the list", () => {
+  const pose = evaluatePose(c, { channels: {}, views: front });
+  const items = drawList(c, pose, atlas, { views: front, states: {}, alpha: { "head.base": 0, eye: 0.25 } });
+  assert.deepEqual(items.map((i) => [i.part, i.alpha]), [["tail", 1], ["body", 1], ["ear", 1], ["head.base", 0], ["eye", 0.25], ["eye.R", 1]]);
+  assert.equal(items[items.find((i) => i.part === "eye")!.clipTo!]!.part, "head.base", "a mask at 0 still clips its group");
+});
+
 test("a mask that draws nothing in a state hides its clip group", () => {
   const masked: Rig = { ...rig, parts: rig.parts.map((p) => (p.name === "head.base" ? { ...p, regions: { ...p.regions, "front:hidden": null } } : p)) };
   const cm = compile(masked);

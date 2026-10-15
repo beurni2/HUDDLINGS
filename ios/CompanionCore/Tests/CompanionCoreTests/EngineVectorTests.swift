@@ -82,7 +82,7 @@ final class EngineVectorTests: XCTestCase {
         try checkDrawLists("draw lists", compile(try loadVector(file.rig, as: Rig.self)), file.atlas, file.cases)
     }
 
-    /// Face states: null regions, a mask's among them, on the test rig the file holds.
+    /// Face states: null regions, a mask's among them, and parts at their alphas, on the test rig the file holds.
     func testDrawListsWithFaceStates() throws {
         struct File: Decodable { let rig: Rig; let atlas: AtlasSet; let cases: [DrawListCase] }
         let file = try loadVector("characters/format/vectors/drawlists-states.json", as: File.self)
@@ -122,6 +122,36 @@ final class EngineVectorTests: XCTestCase {
         let c = compile(try loadVector(file.rig, as: Rig.self))
         try runPlayer("player cuts", c, file.clips, file.script, file.frames, checkTurn: true)
     }
+
+    /// Alpha tracks: eased, jumping, looping, blended from a blend, cut, and blended back to 1 (README, Clips: alpha).
+    func testPlayerAlphaRun() throws {
+        struct Frame: Decodable { let t: Double; let alpha: [String: Double]; let angle: [Double]; let events: [String] }
+        struct File: Decodable { let rig: String; let clips: [Clip]; let script: [ScriptStep]; let frames: [Frame] }
+        let file = try loadVector("characters/format/vectors/player-alpha.json", as: File.self)
+        let c = compile(try loadVector(file.rig, as: Rig.self))
+        XCTAssertTrue(file.clips.contains { $0.alpha != nil }, "the clips key alpha")
+        let player = Player(rig: c, clips: file.clips)
+        let compare = Comparison()
+        var index = 0
+        for step in file.script {
+            if let clip = step.play {
+                try player.play(clip, at: try XCTUnwrap(step.t), blendMs: step.blendMs)
+                continue
+            }
+            let t = try XCTUnwrap(step.frame)
+            let frame = try player.advance(to: t)
+            guard index < file.frames.count else { XCTFail("player alpha: the script has more frames than the vectors"); break }
+            let x = file.frames[index]
+            index += 1
+            let at = "player alpha frame \(index - 1) at \(t) s"
+            XCTAssertEqual(Set(frame.state.alpha.keys), Set(x.alpha.keys), "\(at): keyed parts")
+            for (part, value) in x.alpha { compare.close(frame.state.alpha[part] ?? .nan, value, "\(at) \(part) alpha") }
+            compare.close(frame.pose.angle, x.angle, "\(at) angles")
+            XCTAssertEqual(frame.events.map { e in e.name.map { "\(e.type):\($0)" } ?? e.type }, x.events, at)
+        }
+        XCTAssertEqual(index, file.frames.count, "player alpha: frames run")
+        print("player alpha: \(index) frames, \(compare.count) numbers, largest difference \(compare.largest)")
+    }
 }
 
 /// A draw-list vector's case: a pose's input, the frame state, and the items the web runtime drew.
@@ -131,6 +161,7 @@ private struct DrawListCase: Decodable {
         let states: [String: String]
         let variant: String?
         let turn: Channels?
+        let alpha: [String: Double]?
     }
     struct Item: Decodable {
         let part: String
@@ -141,6 +172,7 @@ private struct DrawListCase: Decodable {
         let columns: Int
         let rows: Int
         let clipTo: Int?
+        let alpha: Double
     }
     let channels: [String: Channels]
     let springs: [String: Double]
@@ -155,7 +187,7 @@ private func checkDrawLists(_ name: String, _ c: CompiledRig, _ atlas: AtlasSet,
     let compare = Comparison()
     for (n, x) in cases.enumerated() {
         let pose = evaluatePose(c, PoseInput(channels: x.channels, springs: x.springs, views: x.views))
-        let frame = FrameState(views: x.state.views, states: x.state.states, variant: x.state.variant, turn: x.state.turn)
+        let frame = FrameState(views: x.state.views, states: x.state.states, variant: x.state.variant, turn: x.state.turn, alpha: x.state.alpha ?? [:])
         let items = drawList(c, pose, atlas, frame)
         XCTAssertEqual(items.map(\.part), x.items.map(\.part), "\(name) case \(n): parts in order")
         for (item, expected) in zip(items, x.items) {
@@ -166,6 +198,7 @@ private func checkDrawLists(_ name: String, _ c: CompiledRig, _ atlas: AtlasSet,
             XCTAssertEqual(item.columns, expected.columns, at)
             XCTAssertEqual(item.rows, expected.rows, at)
             XCTAssertEqual(item.clipTo, expected.clipTo, at)
+            compare.close(item.alpha, expected.alpha, "\(at) alpha")
             compare.close(item.positions, expected.positions, "\(at) positions")
             compare.close(item.uvs, expected.uvs, "\(at) uvs")
         }

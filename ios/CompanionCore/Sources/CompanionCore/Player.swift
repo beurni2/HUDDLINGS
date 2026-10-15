@@ -59,6 +59,12 @@ public struct Frame: Sendable {
     public var events: [ClipEvent]
 }
 
+/// What the clips key at one time, blended: each bone's channels and each part's alpha.
+private struct Sample {
+    var bones: [String: Channels]
+    var alpha: [String: Double]
+}
+
 public final class Player {
     public let rig: CompiledRig
     private let clips: [String: Clip]
@@ -124,9 +130,11 @@ public final class Player {
         var angles: [String: Double] = [:]
         for s in springs { angles[rig.rig.bones[s.bone].name] = s.previousTheta + (s.theta - s.previousTheta) * alpha }
         var state = stateAt(t)
-        let clipChannels = channels(at: t)
+        let clips = sample(t)
+        let clipChannels = clips.bones
         let pose = evaluatePose(rig, PoseInput(channels: clipChannels, springs: angles, views: state.views))
         if let turnBone = rig.rig.fakeTurn?.bone { state.turn = clipChannels[turnBone] }
+        state.alpha = clips.alpha
         var events = pending
         if let mixer { events.append(contentsOf: collectEvents(mixer, t)) }
         pending = []
@@ -141,7 +149,12 @@ public final class Player {
 
     /// The clip channels at time t, blended. It changes nothing, so a host may look ahead.
     public func channels(at t: Double) -> [String: Channels] {
-        mixer.map { evaluate($0, t) } ?? [:]
+        sample(t).bones
+    }
+
+    /// The clips' channels and part alphas at time t, blended.
+    private func sample(_ t: Double) -> Sample {
+        mixer.map { evaluate($0, t) } ?? Sample(bones: [:], alpha: [:])
     }
 
     private func checkTime(_ t: Double) throws {
@@ -149,7 +162,7 @@ public final class Player {
         now = max(now, t)
     }
 
-    private func evaluate(_ m: Mixer, _ t: Double) -> [String: Channels] {
+    private func evaluate(_ m: Mixer, _ t: Double) -> Sample {
         // Before its start a clip shows nothing of its own; the clip it replaces still plays.
         if let from = m.from, t < m.start { return evaluate(from, t) }
         let local = localTime(m.clip, (t - m.start) * 1000)
@@ -161,13 +174,15 @@ public final class Player {
             }
             out[bone] = ch
         }
-        guard let fromMixer = m.from else { return out }
+        var alpha: [String: Double] = [:]
+        for (part, keys) in m.clip.alpha ?? [:] { alpha[part] = sampleKeys(keys, local) }
+        guard let fromMixer = m.from else { return Sample(bones: out, alpha: alpha) }
         let w = weight(m, t)
-        if w >= 1 { return out }
+        if w >= 1 { return Sample(bones: out, alpha: alpha) }
         let from = evaluate(fromMixer, t)
         var blended: [String: Channels] = [:]
-        for bone in Set(from.keys).union(out.keys) {
-            let a = from[bone] ?? Channels()
+        for bone in Set(from.bones.keys).union(out.keys) {
+            let a = from.bones[bone] ?? Channels()
             let b = out[bone] ?? Channels()
             var ch = Channels()
             for name in Channel.allCases {
@@ -178,7 +193,14 @@ public final class Player {
             }
             blended[bone] = ch
         }
-        return blended
+        // A part's alpha blends as a channel does, from or to its rest value, 1.
+        var blendedAlpha: [String: Double] = [:]
+        for part in Set(from.alpha.keys).union(alpha.keys) {
+            let va = from.alpha[part] ?? 1
+            let vb = alpha[part] ?? 1
+            blendedAlpha[part] = va + (vb - va) * w
+        }
+        return Sample(bones: blended, alpha: blendedAlpha)
     }
 
     /// The blend weight of a clip over the one it replaces: easeInOut over its blend time.
