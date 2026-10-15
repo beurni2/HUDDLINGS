@@ -105,13 +105,18 @@ const ears = {
 // The head: a soft round mass with a full crown, widest at the cheeks. Its
 // sides run along the ears' inner edges, 93.3 pt apart (DECISIONS 7).
 let head = symmetric([[0, -151.8], [-16, -151.2], [-26, -149.4], [-32.4, -146.8], [-37.6, -143.4], [-41.6, -139.8], [-44.4, -136.2], [-45.8, -130],
-  [-46.4, -120], [-46.6, -110], [-46.4, -100], [-46, -94], [-47.2, -89.4], [-48.4, -85], [-48.4, -80.6], [-47.4, -77.4], [-46.6, -74.2],
-  [-44.6, -71.2], [-41.4, -69], [-37.6, -66.8], [-31, -63.8], [-21, -61.2], [-9, -58.6]], [0, -57.5]);
+  [-46.4, -120], [-46.6, -110], [-46.4, -100], [-46, -94], [-47.6, -89.6], [-49.4, -85], [-49.8, -80.4], [-48.8, -76.4], [-47.2, -72.8],
+  [-44.8, -70.2], [-41.4, -68.2], [-37.6, -66.4], [-31, -63.8], [-21, -61.2], [-9, -58.6]], [0, -57.5]);
 // The cheeks' fluff, as the hero and the front turnaround draw it: a round puff
 // on each side, spilling over the ear's inner edge and down over the collar,
 // with soft fur lines along its lower edge. Typed as nodes above, drawn as fur.
-head = furSpan(furSpan(head, [-47.2, -89.4], [-37.6, -66.8]), [37.6, -66.8], [47.2, -89.4]);
-const cheekStrokes: P[][] = [[[-44.6, -84.6], [-46.4, -82.2], [-47.6, -80.4]], [[-43.4, -77.6], [-45, -75.4], [-46, -74]], [[-40, -71.8], [-41.6, -70.2], [-42.6, -69.6]]];
+// Two shallow notches part each puff into round locks, as the sheet draws them.
+const puffLocks = [{ len: 0.7, w: 1.1, lean: 0.2 }, { len: 0.9, lean: 0.3 }, { len: 0.7, w: 0.9, lean: 0.4 }];
+head = furSpan(furSpan(head, [-47.6, -89.6], [-37.6, -66.4]), [37.6, -66.4], [47.6, -89.6]);
+head = furEdge(head, [-49.4, -84.6], [-40.4, -68], puffLocks, 0.75);
+head = furEdge(head, [40.4, -68], [49.4, -84.6], [...puffLocks].reverse().map((l) => ({ ...l, lean: -l.lean })), 0.75);
+// Short curved fur lines run in from each notch.
+const cheekStrokes: P[][] = [[[-49.6, -79.2], [-48, -80], [-46.8, -81.4]], [[-46.4, -72.4], [-44.8, -73.2], [-43.8, -74.6]], [[-38.6, -67.6], [-37.6, -69], [-37.2, -70.6]]];
 const furStrokes: P[][] = [...cheekStrokes, ...cheekStrokes.map((pts) => pts.map(([x, y]): P => [-x, y]))];
 
 // The topknot: three fur lobes, the middle one tallest, each ending in a curl,
@@ -150,7 +155,10 @@ const saddleL = smooth([[35.4, -48], [36.8, -42.6], [38.6, -37.6], [41, -34], [4
 
 // Paint.
 
-const headLight = "M-30 -146 C-18 -154 2 -154 10 -147 C6 -136 -18 -134 -28 -138Z";
+// The one highlight: the crown toward the light, and the tops of the cheeks' puffs, which the sheet paints whiter than the face.
+const headLight = "M-30 -146 C-18 -154 2 -154 10 -147 C6 -136 -18 -134 -28 -138Z " +
+  "M-44 -84 C-42 -88 -36 -89 -31 -87 C-30 -83 -34 -79 -39 -78 C-42 -79 -44 -81 -44 -84Z " +
+  "M44 -84 C42 -88 36 -89 31 -87 C30 -83 34 -79 39 -78 C42 -79 44 -81 44 -84Z";
 const furShade = (group: Shape[], shapes: string[] = [], keep: string[] = [], rim = { inset: 2.5, toLight: 4 }) =>
   ({ multiply: C.furShadeBy, rim, shapes, keep, group, blur: 2.4 });
 const bodyGroup = [chest, legs.R, legs.L];
@@ -165,7 +173,8 @@ const backPaint: Paint = {
 };
 const headPaint: Paint = {
   fill: C.fur,
-  shade: furShade(headGroup, ["M-40 -76 C-30 -67 -16 -63 0 -63 C16 -63 30 -67 40 -76 L46 -58 L-46 -58Z"], [], { inset: 3, toLight: 4.5 }),
+  // Under the jaw, where the head turns under toward the collar.
+  shade: furShade(headGroup, ["M-38 -69 C-28 -63.6 -14 -61.6 0 -61.6 C14 -61.6 28 -63.6 38 -69 L46 -58 L-46 -58Z"], [], { inset: 3, toLight: 4.5 }),
   highlight: { d: headLight, colour: C.light, opacity: 0.75, blur: 4 },
   inner: [
     ...furStrokes.map((pts) => ({ pts, width: 0.65, colour: C.furLine, opacity: 0.35 })),
@@ -180,24 +189,31 @@ const headPaint: Paint = {
 const headLine: Outline = { ...OUTLINE, taper: 5, spans: [
   { from: [-27, -148.2], to: [-44, -137], width: THIN, colour: C.fluffLine },
   { from: [-45.6, -131.6], to: [-46.1, -122], width: THIN, colour: C.marking },
-  { from: [-46.3, -120], to: [-46.2, -95], width: THIN, colour: C.junction },
+  { from: [-46.3, -120], to: [-46.4, -115], width: THIN, colour: C.junction },
+  { from: [-46.5, -113], to: [-46.4, -92], width: THIN, colour: C.earLine },
   { from: [-46.2, -92], to: [-35, -64.6], width: THIN, colour: C.fluffLine },
   { from: [-30, -63.4], to: [30, -63.4], width: THIN, colour: C.fluffLine },
   { from: [35, -64.6], to: [46.2, -92], width: THIN, colour: C.fluffLine },
-  { from: [46.2, -95], to: [46.3, -120], width: THIN, colour: C.junction },
+  { from: [46.4, -92], to: [46.5, -113], width: THIN, colour: C.earLine },
+  { from: [46.4, -115], to: [46.3, -120], width: THIN, colour: C.junction },
   { from: [46.1, -122], to: [45.6, -131.6], width: THIN, colour: C.marking },
   { from: [44, -137], to: [17, -150.8], width: THIN, colour: C.fluffLine },
 ] };
 
+/** Where each ear's tan tip melts into the head, the sheet draws the ear's inner edge on across it, down to the head's side. */
+const earTipEdges: P[][] = [[[-37.6, -128.4], [-39.6, -125], [-41.6, -121.6], [-43.6, -118], [-45.2, -115], [-46.3, -112.4]],
+  [[36.6, -128], [38.2, -125], [40.2, -122], [42.2, -119], [44.2, -116], [46.2, -112.4]]];
+
 /** head.line: the head's outline as its own unclipped region, drawn after the head's clip group, reaching 0.5 pt past the head. */
 function headLinePiece(): Piece {
   const r = ribbons(head, headLine, "head.line", 0.5);
+  const edges = earTipEdges.map((pts) => innerLine(pts, 0.9, C.earLine, { taper: 3, tip: 0.3 }));
   const f = uid("blur");
   const [x0, y0, x1, y1] = bbox(head.segs);
   const box = pad([x0, y0, x1 - x0, y1 - y0], 2);
-  return piece(`<defs>${blur(f, pad(box, 2), headLine.blur!)}</defs><g fill="${headLine.colour}" filter="url(#${f})">${r.svg}</g>`, box, {
+  return piece(`<defs>${blur(f, pad(box, 2), headLine.blur!)}</defs><g fill="${headLine.colour}" filter="url(#${f})">${r.svg}${edges.map((e) => e.svg).join("")}</g>`, box, {
     shapes: [{ name: "head.line", nodes: head.typed, segs: head.segs, outlined: r.outlined, fur: head.fur.map(([a, b]) => [fracAt(head, a), fracAt(head, b)]) }],
-    lines: r.lines,
+    lines: [...r.lines, ...edges.map((e) => ({ ...e.line, where: "ear tip edge" }))],
   });
 }
 
