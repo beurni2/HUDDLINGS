@@ -120,9 +120,12 @@ export const C = {
   tongueRim: mix(tongue, dark, 0.33),
   tongueShine: mix(tongue, light, 0.5),
   // The back view's lines (DECISIONS 83), each from the colours above by a rule.
-  /** The crown's line from behind: its light warm line a third of the way to the ears' outline, #B38868 (the sheet's
-   * crown line reads #C7A387 at its darkest where it blends with the cream at the crop's scale). */
-  crownWarm: mix(mix(outline, fur, 0.3), mix(darken(multiply(marking, marking), 0.12), marking, 0.33), 0.35),
+  /** The crown's line from behind: the faint fluff line a quarter of the way to the ears' outline, #C09B7F (the
+   * sheet's crown line reads #C7A387 at its darkest at the crop's scale; the fluff line alone, #C6AC96, is greyer). */
+  crownWarm: mix(mix(outline, fur, 0.45), mix(darken(multiply(marking, marking), 0.12), marking, 0.33), 0.25),
+  /** The haunches' line on the side away from the light: a third of the way to the warm line, #AA876C (the sheet's
+   * right haunch reads #AF896F at its darkest at the crop's scale, its left #B79B85). */
+  haunchShadeLine: mix(mix(outline, need(printed, "shadow"), 0.35), mix(outline, mix(darken(multiply(marking, marking), 0.12), marking, 0.33), 0.4), 0.3),
   /** Where the crown's line runs over an ear's root (DECISIONS 76): the crown's light warm line halfway to the
    * printed tan, #C59B79 against the sheet's #C2A07B and #CAA27F there. */
   rootTan: mix(mix(outline, fur, 0.3), marking, 0.5),
