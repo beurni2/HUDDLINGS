@@ -56,9 +56,10 @@ const back = smooth([[-30, -62.8], [-20, -63.6], [-11.6, -62.6], [-4, -59.4], [2
 // hidden behind the tag, to the tag's foot (x -63.6 at y -35.2), where its edge
 // shows for a short way, slanting back over the far leg to meet the near leg's
 // front (x -55.8 at y -25), as the sheet draws it; behind the near leg down to
-// the belly between the paws, and its back under the back body.
-const chest = smooth([[-61.8, -50], [-60.6, -58.6], [-50, -64.8], [-36, -66], [-24, -64], [-18.6, -57], [-17.6, -46], [-19, -34], [-22, -22], [-26.6, -10.6],
-  [-29.8, -4.4], [-34, -2.6], [-44, -2.4], [-53, -3.6], [-55.4, -12], [-55.2, -22.4], [-55.8, -25], [-59.8, -29.6], [-63.6, -35.2], [-63.2, -42]]);
+// the belly between the paws; its back reaches well in under the back body, so
+// the hips can turn without opening a gap.
+const chest = smooth([[-61.8, -50], [-60.6, -58.6], [-50, -64.8], [-36, -66], [-22, -64.4], [-12.4, -60.4], [-5.6, -53.6], [-4, -44], [-7.6, -32], [-16, -20],
+  [-26.6, -10.6], [-29.8, -4.4], [-34, -2.6], [-44, -2.4], [-53, -3.6], [-55.4, -12], [-55.2, -22.4], [-55.8, -25], [-59.8, -29.6], [-63.6, -35.2], [-63.2, -42]]);
 
 // The near front leg (front.L): it comes out of the chest with a faint front
 // edge (x -54 at y -32), runs down to a narrow wrist (x -56.6 at y -21.6) and
