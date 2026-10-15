@@ -53,11 +53,14 @@ no threshold tells them apart and the place of the anchors must.
 
 The head (lead decision: a face preset keeps the front's head): pinning at the
 nose cannot see a whole face moved on its head, so the face is also held to
-the render's own head. From the ID pass, head.base's pixels give the head's
-top, its middle across and its width, in the face's still and in the rest
-front's; the rest front's model.json nose and eyes' middle, carried from the
-rest's head onto the face's, are where the face's nose and eyes' middle must
-be, within 3% of the head's width.
+the render's own head. The head is head.base's pixels in the ID pass and those
+of every part clipped to it, holes filled; the face's head is laid on the rest
+front's by the shift that overlaps them most, so neither a notch between the
+tuft's lobes nor a cheek drawn fuller moves it. The rest front's model.json
+nose and eyes' middle, carried by that shift, are where the face's nose (found
+by the face rules) and eyes' middle (each eye's parts' pixels in the ID pass,
+which no eye state moves, or its dark mark where the ID pass names no eye
+part) must be, within 3% of the head's width.
 
 A preset no panel judges (hungry, huffy) and a primary panel that holds no
 anchor (the ear positions draw no face) are judged by eye beside the panels;
@@ -81,7 +84,7 @@ from pathlib import Path  # noqa: E402
 
 import numpy as np  # noqa: E402
 from PIL import Image, ImageDraw  # noqa: E402
-from scipy import ndimage  # noqa: E402
+from scipy import ndimage, signal  # noqa: E402
 
 import match  # noqa: E402  (puts characters/refprep on the path)
 import faces  # noqa: E402
@@ -360,30 +363,70 @@ def check_panel(still, panel, preset, model_front, tolerance, picture=True):
     return judge(measured, panel, preset, tolerance), rgb, measured["found"], measured["marks"]
 
 
-def head_frame(still):
-    """head.base's pixels in the still's ID pass, in model points: its top, the middle of its width, and its width."""
+def head_mask(still):
+    """The head in a still's ID pass: head.base's pixels and those of every part clipped to it (the face's features,
+    its patches, the ears' shadows on it), holes filled. A face's state draws inside it and leaves it as it was."""
     if HEAD_PART not in still.names:
         raise ValueError(f"the still names no {HEAD_PART} part, so the face cannot be held to its head")
-    ys, xs = np.nonzero(still.part == still.names.index(HEAD_PART))
-    if not len(xs):
+    indices = [i for i, n in enumerate(still.names) if n == HEAD_PART or still.meta["parts"][n].get("clipTo") == HEAD_PART]
+    mask = ndimage.binary_fill_holes(np.isin(still.part, indices))
+    if not mask.any():
         raise ValueError(f"the still's {HEAD_PART} draws no pixel")
-    left, right = (xs.min() - still.root[0]) / still.ppp, (xs.max() + 1 - still.root[0]) / still.ppp
-    return {"topPt": round(float((ys.min() - still.root[1]) / still.ppp), 3), "middlePt": round(float((left + right) / 2), 3),
-            "widthPt": round(float(right - left), 3)}
+    return mask
+
+
+def peak(values):
+    """Where a parabola through three samples peaks, from the middle one: -0.5 to 0.5."""
+    a, b, c = values
+    bend = a - 2 * b + c
+    return 0.0 if bend >= 0 else float(np.clip(0.5 * (a - c) / bend, -0.5, 0.5))
+
+
+def head_shift(still, rest):
+    """Where the face's head lies against the rest front's, in model points: the shift that lays the rest's head
+    pixels over the face's with the most overlap (a correlation, refined between pixels by a parabola), and that
+    overlap's IoU. The whole head decides it, so a pixel's notch between the tuft's lobes or a cheek drawn fuller
+    hardly moves it; the scale is the rest's, as a face preset keeps the front's head and both are drawn at one ppp."""
+    if abs(still.ppp - rest.ppp) > 1e-9:
+        raise ValueError(f"the face's still is drawn at {still.ppp} px/pt and the rest's at {rest.ppp}: render both alike")
+    boxes, crops = [], []
+    for mask in (head_mask(still), head_mask(rest)):
+        ys, xs = np.nonzero(mask)
+        boxes.append(np.array([xs.min(), ys.min()]))
+        crops.append(mask[ys.min():ys.max() + 1, xs.min():xs.max() + 1].astype(float))
+    a, b = crops
+    overlap = signal.fftconvolve(a, b[::-1, ::-1], mode="full")
+    iy, ix = np.unravel_index(int(np.argmax(overlap)), overlap.shape)
+    fine = [0.0, 0.0]
+    if 0 < ix < overlap.shape[1] - 1:
+        fine[0] = peak(overlap[iy, ix - 1:ix + 2])
+    if 0 < iy < overlap.shape[0] - 1:
+        fine[1] = peak(overlap[iy - 1:iy + 2, ix])
+    # overlap[iy, ix] lays the rest's crop pixel q on the face's crop pixel q + (ix, iy) - (b's width, height) + 1.
+    pixels = np.array([ix - (b.shape[1] - 1), iy - (b.shape[0] - 1)], float) + fine + boxes[0] - boxes[1]
+    shift = (pixels - still.root + rest.root) / still.ppp
+    best = float(np.round(overlap[iy, ix]))
+    return shift, best / (a.sum() + b.sum() - best)
+
+
+def eye_place(still, name):
+    """An eye's place on its head: the centroid of its parts' pixels in the ID pass (eye.R*, or eye.L*), in model
+    points. That is the footprint of whatever the eye draws, which a lid closing over it does not move, where the
+    centroid of its dark mark moves 3.9 pt. None when the still names no such part or it draws no pixel."""
+    indices = [i for i, n in enumerate(still.names) if match.matches(n, (name + "*",))]
+    ys, xs = np.nonzero(np.isin(still.part, indices))
+    if not len(xs):
+        return None
+    return (np.array([xs.mean(), ys.mean()]) + 0.5 - still.root) / still.ppp
 
 
 def check_head(still, rest, model):
-    """The face on its head: the rest front's model.json nose and eyes' middle carried from the rest's head (head.base's
-    top, middle and width) onto the face's, and the face's own nose and eyes' middle found there by the face rules,
-    within 3% of the head's width."""
+    """The face on its head: the face's head laid on the rest front's (head_shift), the rest front's model.json nose
+    and eyes' middle carried by that shift, and the face's own nose (found by the face rules) and eyes' middle (each
+    eye's parts' pixels, or its dark mark in a still whose ID pass names no eye part) within 3% of the head's width."""
     front = model["landmarks"]["front"]
-    face_head, rest_head = head_frame(still), head_frame(rest)
-    s = face_head["widthPt"] / rest_head["widthPt"]
-
-    def carried(p):
-        return np.array([face_head["middlePt"] + s * (p[0] - rest_head["middlePt"]), face_head["topPt"] + s * (p[1] - rest_head["topPt"])])
-
-    want = {"nose": carried(front["nose"]), "eye.R": carried(front["eye.R"]), "eye.L": carried(front["eye.L"])}
+    shift, iou = head_shift(still, rest)
+    want = {n: np.asarray(front[n], float) + shift for n in ("nose", "eye.R", "eye.L")}
     crop = model["crops"]["front"]
     k = float(crop["ptPerCropPx"])
     x0, y0, x1, y1 = HEAD_BOX_PT
@@ -392,27 +435,31 @@ def check_head(still, rest, model):
     rgb, _, part = lay(still, grid, origin)
     to_px = lambda p: list(origin - 0.5 + np.asarray(p) / k)  # noqa: E731
     to_pt = lambda q: (np.asarray(q) + 0.5 - origin) * k  # noqa: E731
-    width = float(model["proportions"]["headWidth"]) * s
+    width = float(model["proportions"]["headWidth"])
     found, _ = faces.find_face(rgb, np.ones(grid.shape, bool), {n: to_px(p) for n, p in want.items()}, width / k,
                                face_roll(model), allowed_parts(still, part))
     tolerance = LANDMARK_SHARE * width
-    result = {"head": face_head, "restHead": rest_head, "scale": round(s, 4), "thresholdPt": round(tolerance, 2), "rows": {}}
-    points = {"nose": (want["nose"], found.get("nose"))}
-    eyes = [found.get(n) for n in ("eye.R", "eye.L")]
-    points["eyes.middle"] = ((want["eye.R"] + want["eye.L"]) / 2, None if None in eyes else (np.asarray(eyes[0]) + eyes[1]) / 2)
+    result = {"headShiftPt": match.round2(shift), "headIoU": round(iou, 4), "thresholdPt": round(tolerance, 2), "rows": {}}
+    points = {"nose": (want["nose"], to_pt(found["nose"]) if "nose" in found else None)}
+    eyes = [eye_place(still, n) for n in ("eye.R", "eye.L")]
+    measured_by = "each eye's parts' pixels in the ID pass"
+    if any(e is None for e in eyes):
+        eyes = [to_pt(found[n]) if n in found else None for n in ("eye.R", "eye.L")]
+        measured_by = "each eye's dark mark (the ID pass names no eye part)"
+    points["eyes.middle"] = ((want["eye.R"] + want["eye.L"]) / 2, None if any(e is None for e in eyes) else (eyes[0] + eyes[1]) / 2)
     for name, (expected, got) in points.items():
         row = {"model": match.round2(expected)}
         if got is None:
             row.update(missing=True, **{"pass": False})
         else:
-            got = to_pt(got)
             err = float(np.hypot(*(got - expected)))
             row.update(found=match.round2(got), errPt=round(err, 2), **{"pass": err <= tolerance})
         result["rows"][name] = row
+    result["rows"]["eyes.middle"]["measuredBy"] = measured_by
     result["pass"] = all(r["pass"] for r in result["rows"].values())
     # For beside.png: the laid head, and each point where it should be and where it is, in its pixels.
     drawn = {"rgb": rgb, "width": width / k,
-             "points": {n: (to_px(e), None if g is None else np.asarray(g)) for n, (e, g) in points.items()}}
+             "points": {n: (to_px(e), None if g is None else to_px(g)) for n, (e, g) in points.items()}}
     return result, drawn
 
 

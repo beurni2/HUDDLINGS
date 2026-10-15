@@ -336,17 +336,61 @@ def own_on(a, b, preset):
 
 class Turnaround:
     """The turnaround's front as a still (test_sheetmatch's fixture: the crop, each region its own part): the rest
-    front's stand-in, its face where model.json's landmarks are."""
+    front's stand-in, its face where model.json's landmarks are. Faults are planted in the fixture's crop pixels."""
 
     @staticmethod
-    def still(folder, move_face=None):
+    def still(folder, move_face=None, plant=None, root_shift=(0, 0)):
         fixture = test_sheetmatch.Fixture("front")
         if move_face:
             dx, dy = move_face
             for name in ("eye.L", "eye.R", "nose", "mouth"):
                 fixture.move(name, dx, dy, "head.base")
-        fixture.write(folder)
+        if plant:
+            plant(fixture)
+        fixture.write(folder, root_shift=root_shift)
         return match.Still.load(folder)
+
+
+def fur_of(fixture):
+    return np.median(fixture.rgb[fixture.part == fixture.names.index("head.base")], axis=0)
+
+
+def half_lids(fixture):
+    """Each eye drawn as the sleepy half-lid is (expressions.eyes.sleepy-half-lid): its upper half covered by a lid in
+    the fur's colour with no outline, a dark lash line across its middle, every pixel still the eye's own part."""
+    fur = fur_of(fixture)
+    rows = np.arange(fixture.part.shape[0])[:, None]
+    for name in ("eye.R", "eye.L"):
+        eye = fixture.part == fixture.names.index(name)
+        ys = np.nonzero(eye)[0]
+        middle = (ys.min() + ys.max()) / 2
+        fixture.rgb[eye & (rows < middle)] = fur
+        fixture.rgb[eye & (np.abs(rows - middle) <= 1)] = (32, 12, 2)
+
+
+def unnamed_eyes(fixture):
+    """The eyes' pixels given to the head, as a still whose ID pass names no eye part draws them."""
+    for name in ("eye.R", "eye.L"):
+        fixture.relabel(name, "head.base")
+        fixture.gone.add(name)
+
+
+def puffed(points):
+    """head.base widened by so many points each side over its lower half, as cheeks drawn fuller into it would be."""
+    def plant(fixture):
+        head = fixture.part == fixture.names.index("head.base")
+        ys = np.nonzero(head)[0]
+        grow = int(round(points / fixture.k))
+        lower = (np.arange(head.shape[0]) > (ys.min() + ys.max()) / 2)[:, None]
+        # Only the card and the body round the head take it: the ears, and the face and patches on the head, stay.
+        kept = ("ear.L", "ear.R", "head.patch.L", "head.patch.R", "blush.L", "blush.R", "eye.L", "eye.R", "nose", "mouth")
+        added = ndimage.binary_dilation(head, structure=np.ones((1, 2 * grow + 1), bool)) & lower & ~head
+        added &= ~np.isin(fixture.part, [fixture.names.index(n) for n in kept])
+        fixture.part[added] = fixture.names.index("head.base")
+        fixture.rgb[added] = fur_of(fixture)
+        fixture.sil |= added
+        fixture.alpha[added] = 1.0
+    return plant
 
 
 class RestFrontTest(unittest.TestCase):
@@ -360,6 +404,9 @@ class RestFrontTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.tmp.cleanup()
+
+    def planted(self, name, **kwargs):
+        return Turnaround.still(Path(self.tmp.name) / name, **kwargs)
 
     def test_it_passes_as_neutral_and_fails_as_laughing_singing_and_excited(self):
         result, _ = facematch.check("dog", self.rest, self.rest, "neutral")
@@ -379,10 +426,11 @@ class RestFrontTest(unittest.TestCase):
         k = MODEL["crops"]["front"]["ptPerCropPx"]
         gate = facematch.check("dog", self.rest, self.rest, "neutral")[0]["headGate"]
         self.assertTrue(gate["pass"])
+        self.assertEqual(gate["headShiftPt"], [0.0, 0.0])
         for move in ((1, 0), (-1, 0), (0, 1), (0, -1)):
             px = int(round(4 / k))  # whole crop pixels, about 4 pt
-            with self.subTest(move=move), tempfile.TemporaryDirectory() as tmp:
-                moved = Turnaround.still(Path(tmp) / "moved", (move[0] * px, move[1] * px))
+            with self.subTest(move=move):
+                moved = self.planted(f"moved{move}", move_face=(move[0] * px, move[1] * px))
                 result, _ = facematch.check("dog", moved, self.rest, "neutral")
                 # Pinned at its own nose the face still matches the panel; on its head it does not.
                 self.assertTrue(result["records"][result["primary"]]["pass"], result["summary"])
@@ -391,16 +439,54 @@ class RestFrontTest(unittest.TestCase):
                 for row in result["headGate"]["rows"].values():
                     self.assertGreater(row["errPt"], TOLERANCE)
 
-    def test_the_head_is_head_base_s_pixels(self):
-        frame = facematch.head_frame(self.rest)
-        part = self.rest.part == self.rest.names.index("head.base")
-        ys, xs = np.nonzero(part)
-        self.assertAlmostEqual(frame["topPt"], (ys.min() - self.rest.root[1]) / self.rest.ppp, places=2)
-        self.assertAlmostEqual(frame["widthPt"], (xs.max() + 1 - xs.min()) / self.rest.ppp, places=2)
+    def test_a_half_lid_is_placed_by_its_eye_not_its_dark_mark(self):
+        # The half-lid's dark mark (the lower iris and the lash line) sits about 4 pt below the open eye's; the eye's own
+        # pixels do not move. In place it passes; the same eyes moved 4 pt fail; read from the dark marks alone (a still
+        # whose ID pass names no eye part), the half-lid in place would fail.
+        lids = facematch.check("dog", self.planted("lids", plant=half_lids), self.rest, "tender")[0]["headGate"]
+        self.assertTrue(lids["pass"], lids)
+        self.assertLess(lids["rows"]["eyes.middle"]["errPt"], 0.5)
+        self.assertIn("parts' pixels", lids["rows"]["eyes.middle"]["measuredBy"])
+        px = int(round(4 / MODEL["crops"]["front"]["ptPerCropPx"]))
+
+        def moved_lids(fixture):
+            for name in ("eye.R", "eye.L"):
+                fixture.move(name, 0, px, "head.base")
+            half_lids(fixture)
+        moved = facematch.check("dog", self.planted("lids-moved", plant=moved_lids), self.rest, "tender")[0]["headGate"]
+        self.assertFalse(moved["pass"])
+        self.assertGreater(moved["rows"]["eyes.middle"]["errPt"], TOLERANCE)
+
+        def marks_only(fixture):
+            half_lids(fixture)
+            unnamed_eyes(fixture)
+        dark = facematch.check("dog", self.planted("lids-unnamed", plant=marks_only), self.rest, "tender")[0]["headGate"]
+        self.assertIn("dark mark", dark["rows"]["eyes.middle"]["measuredBy"])
+        self.assertGreater(dark["rows"]["eyes.middle"]["errPt"], TOLERANCE)
+
+    def test_the_head_is_found_by_its_whole_shape(self):
+        # Cheeks drawn up to 3 pt fuller into head.base, and the whole dog drawn 5 pt off: the face stays on its head.
+        for points in (1.0, 2.0, 3.0):
+            with self.subTest(puffed_pt=points):
+                result = facematch.check("dog", self.planted(f"puff{points}", plant=puffed(points)), self.rest, "neutral")[0]
+                self.assertTrue(result["headGate"]["pass"], result["headGate"])
+                self.assertLess(float(np.hypot(*result["headGate"]["headShiftPt"])), 0.5)
+        shift = int(round(5 / MODEL["crops"]["front"]["ptPerCropPx"]))
+        away = facematch.check("dog", self.planted("away", root_shift=(shift, -shift)), self.rest, "neutral")[0]
+        self.assertTrue(away["pass"], away["summary"])
+        self.assertAlmostEqual(float(np.hypot(*away["headGate"]["headShiftPt"])), np.hypot(shift, shift) * MODEL["crops"]["front"]["ptPerCropPx"], delta=0.3)
+        self.assertGreater(away["headGate"]["headIoU"], 0.99)
+
+    def test_the_head_is_head_base_and_what_is_clipped_to_it(self):
+        mask = facematch.head_mask(self.rest)
+        indices = [self.rest.names.index(n) for n in ("head.base", "head.patch.L", "head.patch.R", "blush.L", "blush.R")]
+        self.assertTrue(mask[np.isin(self.rest.part, indices)].all())
+        # The face's features lie inside it, holes filled.
+        self.assertTrue(mask[np.isin(self.rest.part, [self.rest.names.index(n) for n in ("eye.L", "eye.R", "nose")])].all())
         no_head = match.Still(dict(self.rest.meta, parts={n: v for n, v in self.rest.meta["parts"].items() if n != "head.base"}),
                               self.rest.alpha, self.rest.premult, self.rest.part)
         with self.assertRaisesRegex(ValueError, "head.base"):
-            facematch.head_frame(no_head)
+            facematch.head_mask(no_head)
 
 
 class CommandTest(unittest.TestCase):
