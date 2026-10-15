@@ -142,7 +142,7 @@ const tuft = furSpan(smooth([[-66.6, -150.6], [-64.4, -155.4], [-59.4, -157.6], 
 const patchL = smooth([[-46.4, -104.8], [-43.6, -110.4], [-38, -113.6], [-31, -114.6], [-25, -113.8], [-21, -115.8], [-20.6, -121], [-22, -129.4], [-17, -132.8],
   [-10, -128], [-8, -116], [-8, -100], [-11, -86], [-15, -79.6], [-21, -79.6], [-25.4, -82.4], [-27.6, -87], [-28.6, -95], [-33, -103.6], [-40, -105.6],
   [-44.6, -102.6]]);
-const patchR = smooth([[-95, -142], [-85, -143], [-80.4, -139.6], [-79, -130], [-76.6, -121], [-72.4, -116.4], [-69.4, -112.6], [-72, -111.2],
+const patchR = smooth([[-95, -137], [-86.6, -137], [-83.4, -133.4], [-82.4, -126], [-79.4, -119.4], [-72.4, -116.4], [-69.4, -112.6], [-72, -111.2],
   [-76, -112.6], [-81, -111.6], [-84.6, -107.6], [-86.2, -102], [-87.2, -97.6], [-95, -97]]);
 
 // The body's markings, each clipped to its part (L395): the near half of the saddle, a streak of tan down the
@@ -188,8 +188,9 @@ const headPaint: Paint = {
   // a faint wash in the near hood just over the eye, under the brow.
   shade: furShade(headGroup, ["M-74 -64 C-56 -60 -36 -59 -14 -64 L-14 -52 L-74 -52Z", "M-94 -80 C-86 -70 -80 -66 -72 -64 L-72 -54 L-100 -60Z",
     `M${fmt(LM["eye.L"]![0] - 8)} ${fmt(LM["eye.L"]![1] - 10.4)} a8 2 0 1 0 16 0 a8 2 0 1 0 -16 0Z`],
-    // The crown stays light right out to its line, as the sheet paints it; and so does the far cheek's puff.
-    ["M-100 -172 L10 -172 L10 -140 L-100 -140Z", "M-100 -100 L-88 -100 L-88 -80 L-100 -80Z"], { inset: 3, toLight: 4.5 }),
+    // The crown stays light right out to its line, as the sheet paints it, the overhang over the near ear's root
+    // included; and so does the far cheek's puff.
+    ["M-100 -172 L10 -172 L10 -140 L-100 -140Z", "M-30 -141 L10 -141 L10 -131 L-30 -131Z", "M-100 -100 L-88 -100 L-88 -80 L-100 -80Z"], { inset: 3, toLight: 4.5 }),
   highlight: { d: headLight, colour: C.light, opacity: 0.4, blur: 4 },
 };
 
@@ -201,7 +202,7 @@ const SEAM_R = uid("seam"), SEAM_L = uid("seam");
 // far side of the jaw to the chin, a soft light line (the sheet's #BC997D). The far cheek's clumps carry their
 // own lines.
 const headLine: Outline = { ...OUTLINE, taper: 4, blur: 0.15, spans: [
-  { from: [-91, -102], to: [-85.6, -131], width: THIN, colour: `url(#${SEAM_R})` },
+  { from: [-91, -102], to: [-86.6, -127], width: THIN, colour: `url(#${SEAM_R})` },
   { from: [-16.4, -120], to: [-17, -73], width: THIN, colour: `url(#${SEAM_L})` },
   { from: [-74, -62.6], to: [-90.6, -76], width: THIN, colour: C.crownLine },
 ] };
@@ -231,7 +232,7 @@ function headLinePiece(): Piece {
   const seam = (id: string, top: number, bottom: number) => `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="0" y1="${top}" x2="0" y2="${bottom}">` +
     `<stop offset="0" stop-color="${C.earEdge}"/><stop offset="1" stop-color="${C.earLine}"/></linearGradient>`;
   return piece(`<defs>${blur(f, pad(box, 2), headLine.blur!)}${blur(g, pad(box, 2), 0.35)}${blur(s, pad(box, 2), 0.8)}` +
-    seam(SEAM_R, -132, -114) + seam(SEAM_L, -119, -106) + `</defs>` +
+    seam(SEAM_R, -126, -110) + seam(SEAM_L, -119, -106) + `</defs>` +
     `<path d="${feathered}" fill="${C.fur}" opacity="0.8" filter="url(#${s})"/>` +
     `<g fill="${headLine.colour}" filter="url(#${f})">${r.svg}</g>` +
     `<g filter="url(#${g})">${c.svg}</g>`, box, {
@@ -396,7 +397,7 @@ function earPaint(side: "L" | "R"): Paint {
     `<path d="${softly(light, 2.2)}" fill="${C.patch}" opacity="0.3" filter="url(#${along})"/>` +
     `<path d="${softly(dark, 1.5)}" fill="${C.earLow}" opacity="0.25" filter="url(#${parting})"/>`;
   // Along the inner edge, where the ear tucks under the head's side; for the near ear, under the near cheek too.
-  const innerD = side === "R" ? "M-80 -144 C-84 -128 -88 -110 -92 -96 L-98 -82 L-86 -82 L-76 -144Z" : "M-4 -140 C-12 -124 -14 -100 -15 -80 L-15 -62 L-4 -62 L4 -140Z";
+  const innerD = side === "R" ? "M-84 -144 C-88 -128 -92.6 -110 -96 -96 L-100 -82 L-86 -82 L-76 -144Z" : "M-4 -140 C-12 -124 -14 -100 -15 -80 L-15 -62 L-4 -62 L4 -140Z";
   const highlight = side === "R"
     ? "M-114 -110 C-112 -118 -104 -126 -94 -132 C-90 -130 -92 -122 -98 -116 C-104 -110 -110 -106 -114 -110Z"
     : "M0 -130 C6 -128 14 -120 20 -110 C24 -104 22 -98 16 -98 C10 -100 4 -110 0 -118 C-2 -124 -3 -130 0 -130Z";
