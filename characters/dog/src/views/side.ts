@@ -121,7 +121,7 @@ const earClumps: { tip: P; root: P; notches: [P, P] }[] = [];
 // Its foot hangs in three soft clumps of fur, the broadest under its middle, as the sheet draws them, each notch a soft dip.
 const ear = furEdge(smooth([[8.6, -134.4], [13.4, -125], [16.4, -114.6], [19.8, -104.6], [22.6, -95.4], [22.4, -85.4], [18.8, -77.6], [12.6, -71],
   [4, -66.4], [-5, -64], [-13, -62.8], [-21.2, -64.4], [-28.6, -69.6], [-34.6, -77], [-37.2, -85.6], [-36.8, -94.4], [-34, -103.6], [-30.8, -113.4],
-  [-29.4, -124], [-31.4, -134.4], [-26.6, -142.6], [-12.9, -145.4], [-4, -144.6], [3.4, -142.2]]), [20.6, -81.6], [-29.4, -70.4],
+  [-29.4, -124], [-31.4, -134.4], [-26.4, -141], [-12.9, -143.6], [-4, -142.8], [3.4, -140.8]]), [20.6, -81.6], [-29.4, -70.4],
 [{ len: 0.9, w: 1, lean: 0.15 }, { len: 1.3, w: 2.2, lean: 0.05 }, { len: 1, w: 1.5, lean: -0.1 }], 0.42,
 (tip, root, notches) => earClumps.push({ tip, root, notches }));
 
@@ -456,26 +456,26 @@ function tagPiece(): Piece {
  * front, round the foot and up the back. Its top lies under the crown's fur, feathered, with no line.
  */
 function earPaint(): Paint {
-  const deep = uid("deep"), top = uid("top"), parting = uid("blur"), along = uid("blur"), [ex0, ey0, ex1, ey1] = bbox(ear.segs);
+  const deep = uid("deep"), top = uid("top"), parting = uid("blur"), along = uid("blur"), crisp = uid("blur"), [ex0, ey0, ex1, ey1] = bbox(ear.segs);
   const earBox = pad([ex0, ey0, ex1 - ex0, ey1 - ey0], 2);
   const dark: P[][] = [[[-15.6, -100], [-16.6, -88], [-15.6, -76], [-14, -68]], [[2.6, -98], [4, -86], [3.2, -74]], [[-27, -96], [-28.6, -86], [-27, -76]]];
   const light: P[][] = [[[-8.6, -104], [-9, -90], [-7.6, -78]]];
   const softStrokes = (pts: P[][], width: number) => pts.map((l) => strokeOf(sample(smooth(l, { closed: false }).segs, 8, false), width, { taper: 6, tip: 0.2 }).d).join("");
-  const fold = strokeOf(sample(smooth([[-4.6, -135], [3, -128.6], [9.4, -120.6], [14.4, -112], [16.8, -106]], { closed: false }).segs, 8, false), 1.4, { taper: 5, tip: 0.2 }).d;
-  const crease = strokeOf(sample(smooth([[0.6, -134.4], [6.6, -127.4], [11.6, -119.6], [15.4, -111.6]], { closed: false }).segs, 8, false), 0.9, { taper: 5, tip: 0.2 }).d;
+  const fold = strokeOf(sample(smooth([[-14, -140.4], [-5, -135.4], [2.4, -129.4], [8.6, -122], [13, -114.6], [16, -107]], { closed: false }).segs, 8, false), 1.4, { taper: 5, tip: 0.2 }).d;
+  const crease = strokeOf(sample(smooth([[-9, -139.4], [-1, -134.2], [5.6, -128.2], [10.8, -120.8], [14.8, -113]], { closed: false }).segs, 8, false), 0.9, { taper: 5, tip: 0.2 }).d;
   const under = `<defs><linearGradient id="${deep}" gradientUnits="userSpaceOnUse" x1="-14" y1="-120" x2="-4" y2="-64">` +
     `<stop offset="0" stop-color="${C.earDeep}" stop-opacity="0"/><stop offset="0.45" stop-color="${C.earDeep}" stop-opacity="0.8"/>` +
     `<stop offset="0.8" stop-color="${C.earDeeper}"/><stop offset="1" stop-color="${C.earLow}"/></linearGradient>` +
     // Its top is lighter, the head patch's paler tan, where it comes out from under the crown's fur, as the sheet paints it.
     `<linearGradient id="${top}" gradientUnits="userSpaceOnUse" x1="0" y1="-146" x2="0" y2="-122">` +
     `<stop offset="0.15" stop-color="${C.patch}" stop-opacity="0.85"/><stop offset="1" stop-color="${C.patch}" stop-opacity="0"/></linearGradient>` +
-    `${blur(parting, earBox, 0.8)}${blur(along, earBox, 1.1)}</defs>` +
+    `${blur(parting, earBox, 0.8)}${blur(along, earBox, 1.1)}${blur(crisp, earBox, 0.45)}</defs>` +
     `<rect x="${fmt(ex0)}" y="${fmt(ey0)}" width="${fmt(ex1 - ex0)}" height="${fmt(ey1 - ey0)}" fill="url(#${deep})"/>` +
     `<rect x="${fmt(ex0)}" y="${fmt(ey0)}" width="${fmt(ex1 - ex0)}" height="${fmt(ey1 - ey0)}" fill="url(#${top})"/>` +
     `<path d="${softStrokes(light, 2.4)}" fill="${C.patch}" opacity="0.2" filter="url(#${along})"/>` +
     `<path d="${softStrokes(dark, 1.6)}" fill="${C.earLow}" opacity="0.25" filter="url(#${parting})"/>` +
-    `<path d="${fold}" fill="${C.patch}" opacity="0.9" filter="url(#${along})"/>` +
-    `<path d="${crease}" fill="${C.earLine}" opacity="0.75" filter="url(#${parting})"/>`;
+    `<path d="${fold}" fill="${C.patch}" filter="url(#${crisp})"/>` +
+    `<path d="${crease}" fill="${C.earLine}" opacity="0.8" filter="url(#${crisp})"/>`;
   const strand = uid("strand");
   const strands = `<defs><linearGradient id="${strand}" gradientUnits="userSpaceOnUse" x1="0" y1="-64" x2="0" y2="-72">` +
     `<stop offset="0" stop-color="${C.earLine}" stop-opacity="0.6"/><stop offset="1" stop-color="${C.earLine}" stop-opacity="0"/></linearGradient></defs>`;
@@ -488,14 +488,14 @@ function earPaint(): Paint {
       return { pts: [n, [n[0] + 0.3, n[1] - 2.6], [n[0] + 0.2, n[1] - 5]] as P[], width: 0.7, colour: `url(#${strand})` };
     }),
     // Its back, away from the light, and its foot.
-    shade: { multiply: C.furShadeBy, rim: { inset: 2.4, toLight: 4 }, shapes: ["M8 -128 C16 -116 22 -100 22 -82 L30 -82 L30 -128Z"], keep: ["M-40 -72 C-20 -70 0 -70 16 -76 L16 -56 L-40 -56Z"], blur: 3.2 },
+    shade: { multiply: C.furShadeBy, rim: { inset: 2.4, toLight: 4 }, shapes: ["M-6 -142 C4 -136 11 -126 15.6 -114 C18 -106 22 -96 22 -82 L30 -82 L30 -142Z"], keep: ["M-40 -72 C-20 -70 0 -70 16 -76 L16 -56 L-40 -56Z"], blur: 3.2 },
     highlight: { d: "M-30 -110 C-29 -120 -24 -130 -18 -132 C-19 -124 -24 -114 -27 -106 C-29 -104 -30 -106 -30 -110Z", colour: C.patch, opacity: 0.3, blur: 2.6 },
     outline: { ...OUTLINE, colour: C.warmLine, width: 1.3, taper: 6, blur: 0.25, spans: [
       { from: [5.2, -139.6], to: [22.6, -93.8], width: 1.4, colour: C.earLine },
       { from: [21.4, -98], to: [-30.4, -72], width: 1.3 },
       { from: [-26.4, -67.6], to: [-29.6, -130], colour: C.earEdge },
     ] },
-    feather: { from: [-12, -147.4], to: [-12, -141.4] },
+    feather: { from: [-12, -145.2], to: [-12, -139.8] },
   };
 }
 
