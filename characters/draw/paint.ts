@@ -208,6 +208,27 @@ function fadeGradient(id: string, f: Fade): string {
     `<stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#000000"/></linearGradient>`;
 }
 
+/**
+ * A painted fur grain (build time only; spec 5b, Paint at build time): seeded fractal noise, stretched along the
+ * fur, that lightens the fill under it toward `light` where the noise runs above its middle and darkens it toward
+ * `dark` where it runs below, each by at most about `amount` of the way, so a flat fill reads as soft painted fur
+ * and keeps its own colour as its mean. The noise lives in model space (`scale` is its feature size in points,
+ * across and along the fur), so a part's grain is the same pattern at every pixel density, and its fixed seed
+ * never changes between builds. It is drawn over `box`; put it in a part's `under`, inside the part's clip.
+ */
+export function grain(box: Box, o: { light: string; dark: string; amount: number; scale: [number, number]; seed: number }): string {
+  const lit = uid("grain"), dim = uid("grain");
+  // fractalNoise runs about 0.5 ± 0.25: a deviation of 0.25 reaches the full amount.
+  const k = o.amount / 0.25;
+  const n = (v: number) => (Math.round(v * 10000) / 10000).toString();
+  const noise = `<feTurbulence type="fractalNoise" baseFrequency="${n(1 / o.scale[0])} ${n(1 / o.scale[1])}" numOctaves="2" seed="${o.seed}" result="n"/>`;
+  const layer = (id: string, colour: string, sign: number) => filter(id, box, noise +
+    `<feColorMatrix in="n" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ${n(sign * k)} 0 0 0 ${n(-sign * k * 0.5)}" result="a"/>` +
+    `<feFlood flood-color="${colour}" result="c"/><feComposite in="c" in2="a" operator="in"/>`);
+  return `<defs>${layer(lit, o.light, 1)}${layer(dim, o.dark, -1)}</defs>` +
+    `<rect ${region(box)} filter="url(#${lit})"/><rect ${region(box)} filter="url(#${dim})"/>`;
+}
+
 /** A soft shape with no line: the ground shadow, a cast shadow, the blush. */
 export function soft(d: string, box: Box, colour: string, sd: number, opacity = 1): Piece {
   const f = uid("blur");

@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { Resvg } from "@resvg/resvg-js";
 import { PNG } from "pngjs";
 import { pathD, smooth, type Node } from "../geom.ts";
-import { LIGHT, darken, marking, mix, multiply, part, ratio } from "../paint.ts";
+import { LIGHT, darken, grain, marking, mix, multiply, part, ratio } from "../paint.ts";
 import type { Piece } from "../svg.ts";
 
 const FUR = "#FFF4E8", FUR_SHADE = "#FDE3C8", TAN = "#D9A379";
@@ -81,4 +81,21 @@ test("a faded marking shows fully at its fade's start and not at all past its en
   assert.ok(middle[2]! > 0x79 && middle[2]! < 0xE8, "halfway along, the patch is half shown");
   // The gradient sits inside the mask, so the palette lint never reads its stops as paint.
   assert.match(piece.svg, /<mask[^>]*>[^]*<linearGradient[^]*<\/mask>/);
+});
+
+test("a fur grain varies the fill both ways about its own colour, stays inside the part and never changes between builds", () => {
+  const GREY = "#808080";
+  const grained = () => render(part("fur", disc, { fill: GREY, under: grain([-21, -21, 42, 42], { light: "#FFFFFF", dark: "#000000", amount: 0.06, scale: [0.8, 3], seed: 3 }) }));
+  const a = grained(), b = grained();
+  assert.deepEqual(a.png.data, b.png.data);
+  // Inside the disc, the grey varies above and below itself, by a few percent, about its own value.
+  const values: number[] = [];
+  for (let y = -12; y <= 12; y += 0.5) for (let x = -12; x <= 12; x += 0.5) values.push(a.at(x, y)[0]!);
+  const mean = values.reduce((s, v) => s + v, 0) / values.length;
+  assert.ok(Math.abs(mean - 128) < 2, `the grain moves the grey's mean to ${mean.toFixed(1)}`);
+  assert.ok(Math.min(...values) < 124 && Math.max(...values) > 132, `the grain spans ${Math.min(...values)} to ${Math.max(...values)}`);
+  assert.ok(Math.min(...values) > 100 && Math.max(...values) < 156, "the grain stays a few percent");
+  // Outside the disc nothing is painted: the silhouette is still exactly the path.
+  assert.equal(a.at(25, 25)[3], 0);
+  assert.equal(a.at(-21.5, 0)[3], 0);
 });
