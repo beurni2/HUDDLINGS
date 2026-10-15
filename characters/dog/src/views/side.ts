@@ -78,7 +78,7 @@ const legNear = smooth([[-45, -44], [-52.4, -40.4], [-54, -32.4], [-55.8, -25], 
 // -71.6 at y -18.6) round a domed toe end (x -75) to its sole at y -4.6; the
 // rest lies behind the chest and the near leg, up to its top, hidden, by the
 // shoulder both front legs turn at (DECISIONS 38).
-const legFar = smooth([[-46, -40], [-53, -45], [-60.4, -42], [-63.6, -35.2], [-65.6, -29], [-67.2, -23.6], [-69, -20.4], [-71.8, -18.6], [-74, -16],
+const legFar = smooth([[-46, -40], [-53, -45], [-60.4, -42], [-63.6, -35.2], [-66.2, -29.4], [-67.8, -23.8], [-69.4, -20.6], [-71.8, -18.6], [-74, -16],
   [-75, -12], [-74.4, -8.2], [-72.2, -5.6], [-68.4, -4.6], [-61, -4.6], [-57, -8], [-55, -18], [-52.6, -28], [-48.6, -35]]);
 
 // The near hind paw (hind.L): a plump round stub tucked forward under the
@@ -91,16 +91,16 @@ const hindNear = smooth([[-30.8, -8.4], [-30, -12.4], [-27.6, -15.2], [-23.4, -1
 
 // The tail: a fluffy plume behind the rump, its tan root hugging the body from
 // y -10 to -35, its front contour rising from the rump to a curl that hooks
-// down and back toward the body at its front (x 16 at y -52), as the sheet
+// down and back toward the body at its front (x 15.4 at y -53), as the sheet
 // draws it; its outline one soft line broken only by a few uneven locks of fur:
 // a small one at the top of the curl, a bump where the plume turns down its
 // back, a smaller one lower on its back, and a little fringe notch on its
 // underside; its root hidden under the rump.
-const tail = furSpan(furEdge(furEdge(furEdge(furEdge(smooth([[10, -22], [17.4, -35.2], [20.4, -39], [21.2, -43.6], [20.2, -48.4], [17.4, -51], [16, -54.4],
-  [18, -57.6], [22.4, -60.4], [29, -61.8], [35.4, -60], [40.6, -56], [44.4, -50.6], [46.4, -43], [46.6, -35], [45.4, -28.6], [42.6, -22.8], [37.6, -18],
+const tail = furSpan(furEdge(furEdge(furEdge(furEdge(smooth([[10, -22], [17.4, -35.2], [19.8, -39.4], [20.8, -43.8], [19.6, -47.6], [17.2, -50.4], [15.4, -53.2],
+  [15.8, -56.4], [18.4, -59], [22.4, -60.6], [29, -61.6], [35.8, -59.2], [40.8, -55.2], [44, -50], [46, -42.4], [46.4, -35], [45.4, -28.6], [42.6, -22.8], [37.6, -18],
   [31.4, -13.4], [24.4, -10.6], [16.6, -9.8]]), [20.6, -59.6], [27.2, -61.8], [{ len: 1.5, w: 1, lean: 0.35 }], 0.3),
-[41.4, -55.2], [45.2, -48.6], [{ len: 1.3, w: 1, lean: 0.25 }], 0.32), [46.6, -37.4], [45.8, -30], [{ len: 1, w: 1, lean: 0.25 }], 0.34),
-[42.2, -22.4], [38.6, -18.8], [{ len: 0.8, w: 1, lean: 0.4 }], 0.3), [17.4, -51], [38.6, -18.8]);
+[41.2, -54.8], [44.8, -48.4], [{ len: 1.3, w: 1, lean: 0.25 }], 0.32), [46.6, -37.4], [45.8, -30], [{ len: 1, w: 1, lean: 0.25 }], 0.34),
+[42.2, -22.4], [38.6, -18.8], [{ len: 0.8, w: 1, lean: 0.4 }], 0.3), [17.2, -50.4], [38.6, -18.8]);
 
 // The collar: a band round the neck, almost as thick at its back as at its
 // front (10 pt under the chin, 7 pt by the ear), its front end a round turn
@@ -354,7 +354,7 @@ const tailPaint: Paint = {
   highlight: { d: "M22 -57 C28 -61 36 -60 41 -55 C36 -52 28 -52 22 -54Z", colour: C.light, opacity: 0.35, blur: 3 },
   inner: [
     // The curl's hook turns in under itself at the plume's front, its tip pointing back toward the body, as the sheet draws it.
-    { pts: sample(smooth([[16.8, -51.6], [19.2, -50.4], [21.4, -48.6], [22.4, -46.4]], { closed: false }).segs, 6, false), width: 0.85, colour: C.crownLine, opacity: 0.9 },
+    { pts: sample(smooth([[15.8, -53.4], [18.4, -52.2], [20.8, -50.2], [22.2, -47.6]], { closed: false }).segs, 6, false), width: 0.85, colour: C.crownLine, opacity: 0.9 },
     // A few soft strands of fur along the plume, combed round its curl and down its back.
     ...[[[26.4, -56.4], [30.6, -56.2], [34.4, -54]], [[39.6, -46.6], [41.6, -42.4], [42.2, -38]], [[31, -48.6], [33.8, -45.6], [35.2, -41.8]],
       [[38.4, -29.6], [37.6, -26.2], [35.6, -23.2]]].map((pts) => ({ pts: sample(smooth(pts as P[], { closed: false }).segs, 6, false), width: 0.7, colour: C.crownLine, opacity: 0.3 })),
@@ -385,7 +385,7 @@ const headPaint: Paint = {
   inner: foreLocks.map(({ tip, root, notches }) => {
     const into = v.norm(v.sub(root, tip)), up = v.norm(v.sub(notches[1], notches[0]));
     const at = (a: number, b: number): P => v.add(tip, v.add(v.mul(into, a), v.mul(up, b)));
-    return { pts: [at(0.15, 0), at(1.3, -0.55), at(2.7, -0.75), at(4, -0.45)], width: 0.85, colour: C.puffLine };
+    return { pts: [at(0.15, 0), at(1.4, -0.6), at(2.9, -0.8), at(4.4, -0.5)], width: 0.9, colour: C.puffLine };
   }),
 };
 
@@ -717,9 +717,9 @@ export function side(): Drawn[] {
     // The locks' hooks, as the sheet draws them: under the front lock's tip, back along its underside; the middle
     // dome's front curling down and in on itself; under the back lock's tip, back along its underside.
     inner: [
-      { pts: [[-59.6, -154.8], [-58, -153.4], [-55.6, -152.4], [-52.4, -152]], width: 0.85, colour: C.puffLine },
-      { pts: [[-42.6, -161.2], [-43.2, -158.8], [-42, -156.6], [-39.4, -155.3], [-36.4, -154.9]], width: 0.85, colour: C.puffLine },
-      { pts: [[-5.9, -152.6], [-7.6, -151.4], [-10.2, -151], [-13.2, -151.2]], width: 0.85, colour: C.puffLine },
+      { pts: [[-59.6, -154.8], [-58, -153.4], [-55.6, -152.4], [-52.4, -152]], width: 0.9, colour: C.puffLine },
+      { pts: [[-42.6, -161.2], [-43.2, -158.8], [-42, -156.6], [-39.4, -155.3], [-36.4, -154.9]], width: 0.9, colour: C.puffLine },
+      { pts: [[-5.9, -152.6], [-7.6, -151.4], [-10.2, -151], [-13.2, -151.2]], width: 0.9, colour: C.puffLine },
     ],
     // One line over the three locks, unbroken, tapering only at its two ends, where it runs on into the head's line.
     outline: { ...OUTLINE, colour: C.puffLine, width: 1.25, taper: 1.6, spans: [{ from: [-63, -150.6], to: [-5.8, -151.6] }] },
