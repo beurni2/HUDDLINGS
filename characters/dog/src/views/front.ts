@@ -70,7 +70,7 @@ const chest = symmetric([[0, -66], [-16, -65.4], [-25.6, -63.2], [-30, -59.6], [
   [-34.2, -34], [-33, -26], [-31, -17], [-28, -9], [-20, -5.6], [-8, -5]], [0, -5]);
 
 // The front legs: short chubby columns from the chest to round stub paws, the
-// two paws nearly touching at the middle.
+// two paws nearly touching at the middle; the toe lines divide each sole.
 const legR: Node[] = [[-6.4, -42], [-4.8, -31], [-3.2, -21], [-2.2, -13], [-1.4, -8.6], [-2.2, -4.8], [-5, -2.1], [-9, -1],
   [-15.4, -0.7], [-21.6, -1.2], [-26.2, -2.6], [-28.6, -5], [-29.9, -9.6], [-30.6, -15.4], [-31.8, -21.4], [-33.2, -28], [-34.4, -35], [-35, -43]];
 const legs = { R: smooth(legR), L: other(legR) };
@@ -283,8 +283,8 @@ function earEdge(k: number): string {
 /** The warm shadow between the front legs, painted into the chest under its shade. */
 function legGap(): string {
   const f = uid("blur"), box: Box = [-9, -36, 18, 36];
-  return `<defs>${blur(f, box, 1.3)}</defs><path d="M-3.6 -28 C-2.4 -20 -1.8 -10 -1.6 -3.4 L1.6 -3.4 C1.8 -10 2.4 -20 3.6 -28 C1.4 -30 -1.4 -30 -3.6 -28Z" ` +
-    `fill="${C.marking}" opacity="0.6" filter="url(#${f})"/>`;
+  return `<defs>${blur(f, box, 1)}</defs><path d="M-3.2 -26 C-2.2 -18 -1.6 -10 -1.4 -3.4 L1.4 -3.4 C1.6 -10 2.2 -18 3.2 -26 C1.2 -28 -1.2 -28 -3.2 -26Z" ` +
+    `fill="${C.marking}" opacity="0.7" filter="url(#${f})"/>`;
 }
 
 export function front(): Drawn[] {
@@ -302,7 +302,7 @@ export function front(): Drawn[] {
       // Round the outside, over the top and down the inner side to the front paw.
       // A lighter line over the top, where the paw lies on the haunch; the dark line round the outside and the sole.
       outline: { ...OUTLINE, width: 1.4, taper: 4, spans: bySide(side, [{ from: [-48.4, -15.2], to: [-30.4, -12.6], width: THIN, colour: C.furLine }, { from: [-29.8, -10.8], to: [-48.6, -13] }]) },
-      inner: [[[-41.6, -8.2], [-41.8, -4.4]], [[-35.4, -8.6], [-35.2, -4]]].map((pts) => ({ pts: flipX(pts as P[], side), width: INNER, colour: C.outline, opacity: 0.55 })),
+      inner: [[[-41.2, -11], [-41.5, -7.4], [-41.8, -3.8]], [[-35.2, -11.2], [-35.2, -7.6], [-35.2, -3.6]]].map((pts) => ({ pts: flipX(pts as P[], side), width: 0.8, colour: C.outline, opacity: 0.75 })),
     }));
   }
   add("body.front", part("body.front", chest, {
@@ -378,12 +378,12 @@ export function front(): Drawn[] {
       fill: C.fur,
       shade: furShade(bodyGroup, [], ["M-40 -60 L40 -60 L40 -34 L-40 -34Z"]),
       inner: [
-        // The toes, and the soft lines down the leg's inner side where it meets the other leg.
-        ...[[[-20.4, -7.4], [-20.6, -1.4]], [[-10.2, -7.6], [-10.3, -1.2]]].map((pts) => ({ pts: flipX(pts as P[], side), width: INNER, colour: C.outline, opacity: 0.65 })),
-        { pts: flipX([[-4, -26], [-2.9, -17], [-2, -10]], side), width: INNER, colour: C.furLine, opacity: 0.6 },
+        // The toes, and the soft line down the leg's inner side where it presses on the other leg.
+        ...[[[-20, -10.6], [-20.3, -5.6], [-20.6, -1.2]], [[-9.8, -10.8], [-10.1, -5.8], [-10.4, -1]]].map((pts) => ({ pts: flipX(pts as P[], side), width: 0.85, colour: C.outline, opacity: 0.8 })),
+        { pts: flipX([[-4.6, -29], [-3.4, -19], [-2.2, -9], [-1.8, -5]], side), width: 0.8, colour: C.outline, opacity: 0.6 },
       ],
       // Up the inner side from the toes, round the paw and up the outer side, where the line lightens toward the chest.
-      outline: { ...OUTLINE, width: 1.4, spans: bySide(side, [{ from: [-1.7, -9], to: [-30.2, -13] }, { from: [-30.4, -14], to: [-33.6, -30], width: THIN, colour: C.furLine }]), taper: 6 },
+      outline: { ...OUTLINE, width: 1.4, spans: bySide(side, [{ from: [-1.7, -9], to: [-30.2, -13] }, { from: [-30.4, -14], to: [-34.2, -35], width: THIN, colour: C.furLine }]), taper: 5 },
       feather: { from: [sx * 15, -44], to: [sx * 15, -36] },
     }));
   }
