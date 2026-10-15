@@ -144,3 +144,41 @@ Crops: `master.turnaround.front.png`, `master.feature.large-glossy-eyes.png`, `m
 
 **34. The saddle seen from the front runs up to the shoulders,** where the sheet paints tan beside the front legs. Its area is 1.4 (right) and 2.0 (left) times phase 2's patches, because phase 2's patch finder did not join that tan to the haunch patches. The marking check holds each patch's place both ways (its centroid inside the sheet's patch and the sheet's inside it), and passes.
 Crops: `master.turnaround.front.png`, overlay `markings-master.turnaround.front.png`.
+
+## Drawing the side view (phase 3)
+
+**35. The side view is drawn once, facing the sheet's left (`side.L`, 1),** every node typed from its own crop in model space and wrapped into the bones from the rig's side pivots (26). Where a part is the same thing turned (the ear, the eye, the nose, the collar, the tag, the paws), it is painted by the front's recipe in the front's colours; `side.R` is the mirror (2) and is not drawn here.
+Crop: `master.turnaround.side.png`.
+
+**36. The side's pivots follow the front's rules from the side's landmarks.** The root and the body sit on the ground under the seat, the middle of the haunch's underside (9). The hips are as high above the hind paw's centre as that is above the ground (−12.4). The profile has no chin (10), and the head's lower edge rests on the collar, so the neck, the head and the collar turn at the collar band's centroid (−41.5, −57), and the chest's centre is straight below it, halfway down (−28.5). The tag swings from its ring, the eye turns at its landmark, the brow sits a quarter of the head's height above it, the mouth under the nose, the tuft 15% of the head's height below the head's top. The ear turns at its root moved 3 pt into the head: down, under the crown's fur it comes out from, where the front moves it 3 pt in toward the midline.
+Overlay: `landmarks-side.L.png`; `characters/dog/test/side.test.ts` holds each rule.
+
+**37. The tail turns at its root on the rump** (spec: "every tail turns at its root"). From the front the root hides behind the hips and shares their pivot; in profile it shows, so its pivot is the middle of the tail's base where it leaves the rump's outline (the tail's tan crosses the outline from y −10 to −35), about 4 pt inside the rump: (15, −23).
+Crop: `master.turnaround.side.png` (the rump and the tail's tan root).
+
+**38. Both front legs turn at the near shoulder,** straight above the near paw at the chest's height (−47.4, −28.5); the hind leg at the hip, straight above its paw (−20.2, −12.4). The front's rule (each leg straight above its own paw) puts the far shoulder at x −67.6, about 3 pt in front of the chest's edge, in the air, so the far leg's top would swing out from behind the chest as it turns. In profile the shoulders lie one behind the other; the far paw sits ahead and higher because the far leg reaches forward, so the far leg is drawn running back up behind the chest to the shared shoulder.
+Crop: `master.turnaround.side.png` (the far leg shows only as a wedge in front of the chest's edge, from the tag's foot down).
+
+**39. The side's draw order, read off the crop (L298):** the ground shadow; the tail and its tan root (the rump's line crosses over the tail's tan); the far front leg (it shows only in front of the chest's edge); the chest; the back and haunch with the saddle and the rump's spot (the haunch's front arc is drawn over the chest's fur); the hind paw and the near front leg in front of both; the collar; the tag (over the legs' tops); then the head: its base, patch, blush, eye, brow, nose and smile, its line, the near ear (over the head's side, its top under the crown's fur) and the topknot. The profile hides the far eye, ear, brow, cheek and hind paw, which are not drawn; if phase 4's gaits need the far hind paw, it is drawn then.
+Crop: `master.turnaround.side.png`.
+
+**40. The paws' points are measured on the drawing as phase 2 measured them on the sheet** (11, `refmap/landmarks.json`): the near front paw from its toe end on over the belly's shade to the hind paw's toe (phase 2's box for it, x 669 to 711, runs on to the hind paw) and from its toe lines' top to its sole, (−47.7, −4.3), 2.7 pt from phase 2's (−47.4, −7.0), most of it in height; the far front paw at the centre of what shows of it, (−69.5, −12.5); the hind paw from its toe end to where its top line fades and from its toe lines' top to its sole, (−20.8, −4.35). Measured on the paw alone (its toe end to its heel), the near paw's point would sit 2.5 pt further forward, at x −50.2.
+Crops: `master.turnaround.side.png` (the paws, zoomed), overlay `landmarks-side.L.png`.
+
+**41. The far front leg is 7.1% darker than the near one, and warm** (spec L369): its fill is the fur under its own warm shade and a quarter of that shade again, `#FDDFC1` (`palette.ts`, `farFur`), never the plain darkening, which turns grey (`#EBE0D5`). It keeps a deeper shade where it comes out from under the chest and the tag, as the sheet paints that wedge. The sheet's far paw itself is only about 3% darker than its near paw; the spec's 6 to 10% wins.
+Crop: `master.turnaround.side.png` (the far front leg and paw).
+
+**42. The near side of the body is one light group** (the back and haunch, the chest, the near front leg, the hind paw), so where they join there is no rim, as on the sheet, where the chest, the near leg and the haunch melt into one another with only a faint line here and there: the chest's short edge over the far leg, the near leg's back on the chest, the haunch's front arc rising from behind the hind paw's top and fading by y −30, and the hind paw's top fading out along it.
+Crop: `master.turnaround.side.png`.
+
+**43. The head in profile:** the nose at the snout's tip, a near-black egg whose front is the head's edge (the head line runs round it in the nose's own colour, so the edge is the nose's); the closed smile, from the lip's turn under the nose back to a small upturned curl at the corner (the side's still sets the mouth's `smile` state; the side's other mouth and eye states come with the face library); the forehead breaking into two locks below a three-lobed topknot, the tall middle lobe the head's top; the eye a tall oval iris (about 11 by 21 pt, leaning 4° back) with a white crescent behind it inside a heavy lash arc and one catchlight high toward the nose (Q26's default); the brow a tan dab above the patch.
+Crops: `master.turnaround.side.png`, `master.feature.large-glossy-eyes.png`.
+
+**44. The ear in profile hangs over the head's side,** its top lighter and feathered under the crown's fur with no line, its foot in three soft clumps (the broadest under its middle), a fold along its upper back (a light streak beside a crease) where it turns over the back of the head, and its line in the ears' warm brown round its front, foot and back.
+Crop: `master.turnaround.side.png`.
+
+**45. The markings this facing shows** (`ref/markings.json`, the side crop): the head patch as a hood over the eye with a notch of cream between it and the ear's front, rising along the ear's front and running on under it, its lower edge slanting from the eye's foot to the ear, the blush and the cheek below it cream; the saddle as a soft blob on the back, its front end below the topline just behind the ear's foot, lying along the topline from x 0 to above the rump; the tail's tan root reaching highest at the rump and slanting down to the right in a few streaks, deepest by the rump; the rump's small spot fading inward from the outline at the tail's root. The head patch's area is 1.3 times phase 2's, because phase 2's patch for this sighting is clipped at x −35.7, short of the ear's front edge, where the drawing's tan runs on to the ear.
+Crops: `master.turnaround.side.png`, overlay `markings-master.turnaround.side.png`.
+
+**46. Known gap, as the front's (33): the cast shadows.** The chin's contact on the collar is painted as the collar's own contact shade, and the shade under the ear's foot on the back as the back's own shade under an overhang; spec L396 wants each as a part on the casting bone clipped to the part it falls on, which needs new parts in the rig.
+Crop: `master.turnaround.side.png`.

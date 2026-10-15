@@ -73,7 +73,7 @@ const legNear = smooth([[-45, -44], [-52.4, -40.4], [-54, -32.4], [-55.8, -25], 
 // foot (x -63.6 at y -35.2) widening down to a paw that sits a little ahead of
 // the near one and higher (its sole at y -4.8, its toe end at x -75); the rest
 // lies behind the chest and the near leg, up to its top, hidden, by the
-// shoulder both front legs turn at (DECISIONS 37).
+// shoulder both front legs turn at (DECISIONS 38).
 const legFar = smooth([[-46, -40], [-53, -45], [-60.4, -42], [-63.6, -35.2], [-65.4, -29], [-66.8, -23.4], [-68.4, -20.2], [-71.6, -18.6], [-74.2, -15.4],
   [-75, -11.4], [-74.2, -7.8], [-71.8, -5.6], [-67.6, -4.8], [-61, -4.6], [-57, -8], [-55, -18], [-52.6, -28], [-48.6, -35]]);
 
