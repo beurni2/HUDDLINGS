@@ -52,8 +52,8 @@
   "threshold": 0.85,
   "groundShadowLeftOut": true,
   "pass": true,
-  "iouHeadAligned": 0.9716,
-  "headCentreOffsetPt": [0.44, -0.34]
+  "iouHeadAligned": 0.9715,
+  "headCentreOffsetPt": [0.44, -0.33]
  },
  "landmarks": {
   "thresholdPt": 2.8,
@@ -84,9 +84,9 @@
    },
    "ear.L.root": {
     "how": "finder",
-    "found": [-40.76, -145.17],
+    "found": [-40.12, -144.38],
     "model": [-38.9, -146.0],
-    "errPt": 2.04,
+    "errPt": 2.03,
     "errShareOfHead": 0.022,
     "pass": true
    },
@@ -141,7 +141,7 @@
     "heldTo": "#FFF4E8",
     "heldBy": "palette.fur",
     "deltaE2000": 0.0,
-    "pixels": 15647,
+    "pixels": 15651,
     "pass": true
    },
    "furShade": {
@@ -149,7 +149,7 @@
     "heldTo": "#FDE3C8",
     "heldBy": "palettePainted.furShade",
     "deltaE2000": 2.33,
-    "pixels": 1446,
+    "pixels": 1441,
     "pass": true
    },
    "ears": {

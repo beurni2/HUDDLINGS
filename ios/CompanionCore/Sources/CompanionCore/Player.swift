@@ -193,11 +193,12 @@ public final class Player {
             }
             blended[bone] = ch
         }
-        // A part's alpha blends as a channel does, from or to its rest value, 1.
+        // A part's alpha blends as a channel does, from or to its rest value: the rig's rest alpha, 1 by default.
         var blendedAlpha: [String: Double] = [:]
         for part in Set(from.alpha.keys).union(alpha.keys) {
-            let va = from.alpha[part] ?? 1
-            let vb = alpha[part] ?? 1
+            let rest = rig.parts[part]?.alpha ?? 1
+            let va = from.alpha[part] ?? rest
+            let vb = alpha[part] ?? rest
             blendedAlpha[part] = va + (vb - va) * w
         }
         return Sample(bones: blended, alpha: blendedAlpha)

@@ -138,7 +138,8 @@ test("the back view's outer lines are the line rule's, as every view's, and its 
     const fills = [...pieces.get(name)!.svg.matchAll(/<path fill="(#[0-9A-F]{6})" d=/g)].map((m) => m[1]!);
     assert.ok(fills.some((c) => tones.has(c)), `${name} draws no line by the line rule`);
   }
-  // The only typed lines left: the collar's rim, as every view types it, and the crown's line over each ear's root (105).
+  // The only typed lines left: the collar's rim, as every view types it, and the crown's line over the right ear's root
+  // (105); over the left root the line is the rule's.
   const src = readFileSync(new URL("../src/views/back.ts", import.meta.url), "utf8");
   assert.equal(src.match(/\boutline: /g)?.length, 1, "a part other than the collar types its own outline");
   assert.equal(src.match(/\bribbons\(/g)?.length, 1, "the back types a line other than the root's stretch");

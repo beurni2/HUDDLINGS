@@ -356,3 +356,51 @@ const alphaFrames = alphaScript.flatMap((step) => {
   return [{ t: step.frame, alpha: f.state.alpha ?? {}, angle: f.pose.angle, events: f.events.map((e) => `${e.type}${e.name ? `:${e.name}` : ""}`) }];
 });
 write("player-alpha", { rig: "characters/test/src/rig.json", clips: alphaClips, script: alphaScript, frames: alphaFrames });
+
+// Parts' rest alphas (README, Rig: parts): the test rig with rest alphas on a mask, a clipped part, the bending tail,
+// a part hidden at rest and a part at 1, drawn where no clip keys them, and blended from and to when a clip that keys
+// a part replaces one that does not, or the other way. Each frame holds the keyed alphas and every drawn part's
+// alpha. The rig and the clips are in the file.
+const restRig: Rig = {
+  ...rig,
+  parts: rig.parts.map((p) => {
+    const rest: Record<string, number> = { "head.base": 0.6, "head.marking": 0.4, "eye.L": 0, nose: 0.75, tail: 0.5, shadow: 1 };
+    return rest[p.name] === undefined ? p : { ...p, alpha: rest[p.name] };
+  }),
+};
+const restClips: Clip[] = [
+  { name: "rest", lengthMs: 1000, tracks: { head: { rot: [[0, 0], [1000, 8, "linear"]] } } },
+  { name: "glow", lengthMs: 900, alpha: { "head.marking": [[0, 0], [400, 1, "easeOut"]], "eye.L": [[0, 1]], tail: [[0, 0.9], [600, 0.2]] } },
+  { name: "dim", lengthMs: 500, loop: true, alpha: { nose: [[0, 0.1], [250, 0.9], [500, 0.1]], "head.base": [[0, 0.2]] } },
+];
+const restProblems = validate(restRig, restClips, atlas);
+if (restProblems.length) throw new Error(restProblems.join("\n"));
+const rc = compile(restRig);
+const restPlays = new Map<number, { play: string; blendMs?: number }[]>([
+  [0, [{ play: "rest" }]],
+  [0.5, [{ play: "glow", blendMs: 250 }]],
+  [1.2, [{ play: "rest", blendMs: 300 }]],
+  [1.9, [{ play: "dim", blendMs: 0 }]],
+  [2.3, [{ play: "glow", blendMs: 200 }]],
+  [2.4, [{ play: "rest", blendMs: 150 }]],
+]);
+const restTimes = new Set<number>(restPlays.keys());
+for (let t = 0, i = 0; t < 3; i++) {
+  restTimes.add(Math.round(t * 1e9) / 1e9);
+  t += runGaps[i % runGaps.length]!;
+}
+const restScript: ({ play: string; t: number; blendMs?: number } | { frame: number })[] = [];
+for (const t of [...restTimes].sort((x, y) => x - y)) {
+  for (const p of restPlays.get(t) ?? []) restScript.push({ ...p, t });
+  restScript.push({ frame: t });
+}
+const restPlayer = new Player(rc, restClips);
+const restFrames = restScript.flatMap((step) => {
+  if ("play" in step) {
+    restPlayer.play(step.play, step.t, step.blendMs);
+    return [];
+  }
+  const f = restPlayer.advanceTo(step.frame);
+  return [{ t: step.frame, alpha: f.state.alpha ?? {}, items: drawList(rc, f.pose, atlas, f.state).map((i) => ({ part: i.part, alpha: i.alpha })) }];
+});
+write("player-rest-alpha", { rig: restRig, atlas, clips: restClips, script: restScript, frames: restFrames });

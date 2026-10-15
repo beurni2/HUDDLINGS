@@ -185,11 +185,12 @@ export class Player {
       }
       blended[bone] = ch;
     }
-    // A part's alpha blends as a channel does, from or to its rest value, 1.
+    // A part's alpha blends as a channel does, from or to its rest value: the rig's rest alpha, 1 by default.
     const blendedAlpha: Record<string, number> = {};
     for (const part of new Set([...Object.keys(from.alpha), ...Object.keys(alpha)])) {
-      const va = from.alpha[part] ?? 1;
-      const vb = alpha[part] ?? 1;
+      const rest = this.rig.parts.get(part)?.alpha ?? 1;
+      const va = from.alpha[part] ?? rest;
+      const vb = alpha[part] ?? rest;
       blendedAlpha[part] = va + (vb - va) * w;
     }
     return { bones: blended, alpha: blendedAlpha };

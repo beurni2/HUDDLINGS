@@ -159,7 +159,7 @@ export interface FrameState {
   variant?: string;
   /** The channels of the fake turn's bone (yaw, pitch), when the rig has one. */
   turn?: Channels;
-  /** Each keyed part's alpha; a part left out draws at 1. */
+  /** Each keyed part's alpha; a part left out draws at its rest alpha (the rig's, 1 by default). */
   alpha?: Record<string, number>;
 }
 
@@ -222,7 +222,7 @@ export function drawList(c: CompiledRig, pose: Pose, atlas: AtlasSet, frame: Fra
     const v0 = region.y / page.height;
     const u1 = (region.x + region.w) / page.width;
     const v1 = (region.y + region.h) / page.height;
-    const item: DrawItem = { part: name, region: regionName, page: region.page, positions: [], uvs: [], columns: 1, rows: 1, alpha: frame.alpha?.[name] ?? 1 };
+    const item: DrawItem = { part: name, region: regionName, page: region.page, positions: [], uvs: [], columns: 1, rows: 1, alpha: frame.alpha?.[name] ?? part.alpha ?? 1 };
     if (part.warp) {
       warpMesh(c, pose, part, frame.views, left, top, width, height, item);
       for (let r = 0; r <= item.rows; r++) {

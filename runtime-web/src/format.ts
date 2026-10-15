@@ -55,6 +55,8 @@ export interface Part {
   warp?: Warp;
   /** The state drawn when no clip sets one (for parts whose regions are all "view:state"). */
   defaultState?: string;
+  /** Its rest alpha, 0 to 1, 1 by default: its alpha where no clip keys it (the blush, drawn at full strength, rests at its sheet's level). */
+  alpha?: number;
 }
 
 export type TurnRole = "face" | "marking" | "ear";
@@ -115,7 +117,7 @@ export interface Clip {
   blendInMs?: number;
   interruptAt?: number[];
   tracks?: Record<string, Partial<Record<Channel, Key[]>>>;
-  /** Each part's opacity over time, 0 to 1; 1, its rest value, where no clip keys it (README, Clips: alpha). */
+  /** Each part's opacity over time, 0 to 1; where no clip keys it, its rest alpha, 1 unless the rig gives one (README, Clips: alpha). */
   alpha?: Record<string, Key[]>;
   states?: Record<string, DiscreteKey[]>;
   views?: Partial<Record<"body" | "head", DiscreteKey[]>>;
@@ -154,15 +156,47 @@ function bodyOrders(rig: Rig): [string, string[]][] {
   return [...Object.entries(rig.drawOrder).filter(([name]) => !name.startsWith("head.")), ...Object.entries(rig.drawOrderVariants ?? {})];
 }
 
+const EASING_NAMES = new Set(["linear", "step", "easeIn", "easeOut", "easeInOut", "easeOutBack"]);
+const finite = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v);
+/** A JSON object: not a list, not null. */
+const isMap = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
+
 /**
- * The checks every keyed track gets, a bone's channel or a part's alpha: keys in order and
- * inside the clip, CSS's rule for a Bézier's x1 and x2, each key's value (valueProblem), and,
- * given a limit, no overshoot past it between keys.
+ * Why a key's easing is not one the README names, or undefined when it is: a name, ["easeOutBack", s]
+ * or ["bezier", x1, y1, x2, y2], every number finite. A file is JSON, so anything can arrive here.
+ */
+function easingProblem(easing: unknown): string | undefined {
+  if (typeof easing === "string") return EASING_NAMES.has(easing) ? undefined : `an unknown easing ${JSON.stringify(easing)}`;
+  if (Array.isArray(easing) && easing[0] === "easeOutBack" && easing.length === 2 && finite(easing[1])) return undefined;
+  if (Array.isArray(easing) && easing[0] === "bezier" && easing.length === 5 && easing.slice(1).every(finite)) return undefined;
+  return `an easing that is not a name, ["easeOutBack", s] or ["bezier", x1, y1, x2, y2] with finite numbers: ${JSON.stringify(easing)}`;
+}
+
+/**
+ * The checks every keyed track gets, a bone's channel or a part's alpha: at least one key, each
+ * [time, value] or [time, value, easing] with a finite time and value and an easing the README
+ * names, keys in time order and inside the clip, CSS's rule for a Bézier's x1 and x2, each key's
+ * value (valueProblem), and, given a limit, no overshoot past it between keys. The runtimes sample
+ * only what passes: an empty track has no value, and a value or easing of another shape reaches
+ * the arithmetic as NaN or a string.
  */
 function keyProblems(clip: Clip, what: string, keys: Key[], limit: readonly [number, number] | undefined, valueProblem: (v: number) => string | undefined): string[] {
+  if (!Array.isArray(keys)) return [`clip ${clip.name}: ${what} is not a list of keys`];
+  if (keys.length === 0) return [`clip ${clip.name}: ${what} has no keys; a track needs at least one`];
   const problems: string[] = [];
   let last = -Infinity;
-  for (const key of keys) {
+  let shapes = true;
+  for (const [index, key] of keys.entries()) {
+    if (!Array.isArray(key) || (key.length !== 2 && key.length !== 3) || !finite(key[0]) || !finite(key[1])) {
+      problems.push(`clip ${clip.name}: ${what} key ${index} is not [time, value] or [time, value, easing] with a finite time and value: ${JSON.stringify(key) ?? String(key)}`);
+      shapes = false;
+      continue;
+    }
+    const easingIssue = key.length === 3 ? easingProblem(key[2]) : undefined;
+    if (easingIssue) {
+      problems.push(`clip ${clip.name}: ${what} key at ${key[0]} ms has ${easingIssue}`);
+      shapes = false;
+    }
     if (key[0] < last) problems.push(`clip ${clip.name}: ${what} keys out of order at ${key[0]} ms`);
     if (key[0] < 0 || key[0] > clip.lengthMs) problems.push(`clip ${clip.name}: ${what} key at ${key[0]} ms is outside the clip`);
     last = key[0];
@@ -172,8 +206,8 @@ function keyProblems(clip: Clip, what: string, keys: Key[], limit: readonly [num
     const problem = valueProblem(key[1]);
     if (problem) problems.push(`clip ${clip.name}: ${problem}`);
   }
-  // Between keys an easing can overshoot (easeOutBack, a bezier): sample each segment finely.
-  if (limit) {
+  // Between keys an easing can overshoot (easeOutBack, a bezier): sample each segment finely, once every key reads.
+  if (limit && shapes) {
     for (let k = 1; k < keys.length; k++) {
       const [t0, t1] = [keys[k - 1]![0], keys[k]![0]];
       for (let i = 1; i < 256 && t1 > t0; i++) {
@@ -218,6 +252,7 @@ export function validate(rig: Rig, clips: Clip[], atlas?: AtlasSet): string[] {
     if (parts.has(part.name)) problems.push(`part ${part.name}: listed twice`);
     parts.set(part.name, part);
     if (!bones.has(part.bone)) problems.push(`part ${part.name}: unknown bone ${part.bone}`);
+    if (part.alpha !== undefined && !(finite(part.alpha) && part.alpha >= 0 && part.alpha <= 1)) problems.push(`part ${part.name}: its rest alpha ${JSON.stringify(part.alpha)} is not a number from 0 to 1`);
     // Per view: whether any of its keys names a region. A null needs nothing in the atlas.
     const drawsIn = new Map<string, boolean>();
     for (const [view, region] of Object.entries(part.regions)) {
@@ -305,13 +340,21 @@ export function validate(rig: Rig, clips: Clip[], atlas?: AtlasSet): string[] {
 
   for (const clip of clips) {
     if (clip.blendInMs !== undefined && !(clip.blendInMs >= 150 && clip.blendInMs <= 300)) problems.push(`clip ${clip.name}: blendInMs ${clip.blendInMs} is outside 150 to 300 ms (section 5b)`);
-    for (const [boneName, channels] of Object.entries(clip.tracks ?? {})) {
+    // A clip file is JSON: a map of tracks that is not an object is named here, not iterated. A clip's own field may be
+    // null, which both runtimes read as absent; a bone's channels may not.
+    const entries = (what: string, of: string, map: unknown, absent = map === undefined || map === null): [string, unknown][] => {
+      if (absent) return [];
+      if (isMap(map)) return Object.entries(map);
+      problems.push(`clip ${clip.name}: ${what} is not a map of ${of}: ${JSON.stringify(map)}`);
+      return [];
+    };
+    for (const [boneName, channels] of entries("tracks", "bones", clip.tracks)) {
       const bone = bones.get(boneName);
       if (!bone) {
         problems.push(`clip ${clip.name}: unknown bone ${boneName}`);
         continue;
       }
-      for (const [channel, keys] of Object.entries(channels) as [Channel, Key[]][]) {
+      for (const [channel, keys] of entries(`tracks of ${boneName}`, "channels", channels, false) as [Channel, Key[]][]) {
         if (!CHANNELS.includes(channel)) problems.push(`clip ${clip.name}: ${boneName} has unknown channel ${channel}`);
         if ((channel === "yaw" || channel === "pitch") && boneName !== ft?.bone) problems.push(`clip ${clip.name}: ${boneName}.${channel}: only the fake turn's bone has ${channel}`);
         const limit = channel === "x" || channel === "y" ? undefined : bone[channel];
@@ -325,7 +368,7 @@ export function validate(rig: Rig, clips: Clip[], atlas?: AtlasSet): string[] {
       }
     }
     // A part's alpha keys like a channel, inside 0 to 1 (README, Clips: alpha).
-    for (const [partName, keys] of Object.entries(clip.alpha ?? {})) {
+    for (const [partName, keys] of entries("alpha", "parts", clip.alpha) as [string, Key[]][]) {
       if (!parts.has(partName)) problems.push(`clip ${clip.name}: alpha of unknown part ${partName}`);
       problems.push(...keyProblems(clip, `alpha of ${partName}`, keys, [0, 1], (v) => (v >= 0 && v <= 1 ? undefined : `alpha of ${partName} ${v} leaves 0 to 1`)));
     }
@@ -333,12 +376,34 @@ export function validate(rig: Rig, clips: Clip[], atlas?: AtlasSet): string[] {
       if (event.at < 0 || event.at > clip.lengthMs) problems.push(`clip ${clip.name}: event ${event.type} at ${event.at} ms is outside the clip`);
       if (clip.loop && event.at === clip.lengthMs) problems.push(`clip ${clip.name}: on a loop, an event at ${clip.lengthMs} ms is the event at 0 ms; put it at 0`);
     }
-    for (const [group, keys] of Object.entries(clip.views ?? {})) {
-      for (const [, view] of keys ?? []) if (!rig.views.includes(view)) problems.push(`clip ${clip.name}: ${group} view ${view} is unknown`);
-    }
-    for (const [, variant] of clip.order ?? []) {
-      if (variant !== null && !rig.views.some((view) => rig.drawOrderVariants?.[`${view}:${variant}`]))
-        problems.push(`clip ${clip.name}: order variant ${variant} exists in no view`);
+    // A discrete track holds its first value before its first key, so it needs one, as a keyed track does. Each key is
+    // [time, name] (an order key's name may be null, the view's own order), in time order, the order both samplers
+    // read them in; a name is looked up only once its key reads.
+    type Discrete = [what: string, keys: unknown, nullable: boolean, nameProblem: (name: string | null) => string | undefined];
+    const discrete: Discrete[] = [
+      ...entries("states", "parts", clip.states).map(([part, keys]): Discrete => [`states of ${part}`, keys, false, () => undefined]),
+      ...entries("views", "groups", clip.views).map(([group, keys]): Discrete =>
+        [`${group} views`, keys, false, (view) => (rig.views.includes(view!) ? undefined : `${group} view ${view} is unknown`)]),
+      ...(clip.order === undefined || clip.order === null ? [] : [["order", clip.order, true, (variant) =>
+        (variant === null || rig.views.some((view) => rig.drawOrderVariants?.[`${view}:${variant}`]) ? undefined : `order variant ${variant} exists in no view`)] as Discrete]),
+    ];
+    for (const [what, keys, nullable, nameProblem] of discrete) {
+      if (!Array.isArray(keys)) {
+        problems.push(`clip ${clip.name}: ${what} is not a list of keys`);
+        continue;
+      }
+      if (keys.length === 0) problems.push(`clip ${clip.name}: ${what} has no keys; a track needs at least one`);
+      let last = -Infinity;
+      for (const [index, key] of keys.entries()) {
+        if (!Array.isArray(key) || key.length !== 2 || !finite(key[0]) || !(typeof key[1] === "string" || (nullable && key[1] === null))) {
+          problems.push(`clip ${clip.name}: ${what} key ${index} is not [time, name] with a finite time and a name${nullable ? " or null" : ""}: ${JSON.stringify(key) ?? String(key)}`);
+          continue;
+        }
+        if (key[0] < last) problems.push(`clip ${clip.name}: ${what} keys out of order at ${key[0]} ms`);
+        last = key[0];
+        const problem = nameProblem(key[1]);
+        if (problem) problems.push(`clip ${clip.name}: ${problem}`);
+      }
     }
   }
   return problems;
