@@ -312,9 +312,9 @@ function legFarPaint(): Paint {
   const toe = uid("toe");
   return {
     fill: C.farFur,
-    // In shade under the chest and the tag, where it comes out from behind them, as the sheet paints the wedge; the paw
-    // below it only along its rim away from the light.
-    shade: { multiply: C.furShadeBy, rim: { inset: 1.4, toLight: 2.2 }, shapes: ["M-66 -40 L-56 -40 L-56 -22 C-60 -21 -64 -22 -67 -23Z"], blur: 2 },
+    // Its own darker fur is the wedge's colour as the sheet paints it (#FFDDBC); in shade only right under the tag and
+    // along its rim away from the light.
+    shade: { multiply: C.furShadeBy, rim: { inset: 1.4, toLight: 2.2 }, shapes: ["M-66 -40 L-58 -40 L-58 -34 C-61 -33 -64 -33 -66.4 -34Z"], blur: 2 },
     // The paw's dome catches the light from the top left, so it reads as the sheet's near-cream paw below the shaded wedge.
     highlight: { d: "M-74 -13 C-73.6 -16.4 -70.6 -18.4 -67.6 -17.6 C-66 -14.4 -66.6 -10 -68.6 -7.4 C-71.4 -7 -73.8 -9 -74 -13Z", colour: C.fur, opacity: 0.55, blur: 1.6 },
     under: `<defs>${toeFade(toe, -4.6, -14)}</defs>`,

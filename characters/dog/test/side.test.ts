@@ -1,9 +1,10 @@
 // Tests for the dog's side view (side.L, facing the sheet's left): its pivots
 // follow the front's rules from this view's landmarks, its draw order is the one
 // read off the side crop, it draws every part the crop shows and the markings
-// this facing shows, each clipped to its part, its placed landmarks lie on their
-// own parts, its far leg is darker but warm, and its WebGL rest frame matches
-// the resvg composite of its model-space drawings.
+// this facing shows, each clipped to its part, its nose has no rim of another
+// colour, its placed landmarks lie on their own parts, its far leg is darker but
+// warm, and its WebGL rest frame matches the resvg composite of its model-space
+// drawings.
 import { after, before, test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
@@ -116,6 +117,31 @@ test("the far leg is darker than the near one by 6 to 10%, and warm", () => {
   assert.ok(darker >= 0.06 && darker <= 0.1, `the far fur is ${(darker * 100).toFixed(1)}% darker`);
   // Darkened through the fur's own warm shade, it is warmer than the fur, never greyer (spec L369, Q27).
   assert.ok(warmth(C.farFur) > warmth(C.fur), `the far fur ${C.farFur} is no warmer than the fur ${C.fur}`);
+});
+
+test("the nose is the profile's tip with no rim: the head's line round its front is the nose's own near-black", () => {
+  // Each piece on its own at 4 px per pt over the head's front, as resvg draws it.
+  const draw = (part: string) => {
+    const p = side().find((d) => d.part === part)!.piece;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="-110 -110 20 20">${scopeIds(p.svg, "p")}</svg>`;
+    return PNG.sync.read(new Resvg(svg, { fitTo: { mode: "zoom", value: 4 } }).render().asPng());
+  };
+  const nose = draw("nose"), line = draw("head.line");
+  const at = (png: PNG, i: number, j: number) => [0, 1, 2, 3].map((c) => png.data[(j * png.width + i) * 4 + c]!);
+  // Across the nose's height round its landmark, the head's line within 1 pt in front of the nose's own front edge.
+  let seen = 0;
+  for (let y = L.nose![1] - 3; y <= L.nose![1] + 3; y += 0.5) {
+    const j = Math.floor((y + 110) * 4);
+    const front = Array.from({ length: 80 }, (_, i) => i).find((i) => at(nose, i, j)[3]! >= 128);
+    assert.ok(front !== undefined, `the nose has no pixels at y ${y}`);
+    for (let i = Math.max(0, front - 4); i <= front + 1; i++) {
+      const [r, g, b, a] = at(line, i, j);
+      if (a! < 128) continue;
+      seen++;
+      assert.ok(Math.max(r!, g!, b!) < 80, `the head's line at (${(i / 4 - 110).toFixed(2)}, ${y}) is rgb(${r}, ${g}, ${b}), not the nose's near-black`);
+    }
+  }
+  assert.ok(seen > 0, "the head's line covers the nose's front edge nowhere");
 });
 
 test("each placed landmark lies on its own part, the topmost there with alpha 0.5 or more", () => {
