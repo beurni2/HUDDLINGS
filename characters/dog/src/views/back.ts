@@ -465,8 +465,8 @@ function earPaint(side: "L" | "R"): Paint {
 
 /**
  * The tail's cast shadow on the haunches (spec L396; on the tail's bone, clipped to the body): the tail's own shape
- * moved away from the light, soft, in the fur's warm shade, so a band of it shows beside the tail's right side and
- * under its lower clumps, as the sheet paints it there.
+ * moved down and a little away from the light, soft, in the fur's warm shade, so it shows under the tail's foot, as
+ * the sheet paints it, and hardly beside it.
  */
 function tailOnBody(): Piece {
   const [x0, y0, x1, y1] = bbox(tail.segs);

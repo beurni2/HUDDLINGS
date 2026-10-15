@@ -28,7 +28,7 @@ export function landmarks(): Record<string, Record<string, [number, number]>> {
 export const lint: LintRules = {
   palette,
   corners: {
-    collar: "the band's narrow rounded ends tuck under the cheek fur (spec L394), as the turnaround draws them",
+    collar: "the band's narrow rounded ends tuck under the cheek fur (spec L394), and from behind its near-square ends sit in the neck's fur, as the turnarounds draw them",
     tag: "the heart's point, as the sheet draws it",
   },
 };
