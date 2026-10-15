@@ -233,7 +233,7 @@ const leftSide = ([x, y]: P): P => [x > 0 ? x - 2.4 * Math.min(1, Math.max(0, (y
 // the left, and the cheeks rolled with the face. The crown's part under the
 // topknot is hidden by it.
 const headHalf: Node[] = [[0, -151.8], [-32.4, -146.8], [-37.6, -143.4], [-42.2, -139.6], [-46.2, -133.6], [-41.2, -135.1], [-35.8, -134.5],
-  [-38.2, -128.6], [-42.4, -120.6], [-45.6, -114.4], [-47, -105], [-46.4, -97.4], [-44.4, -93], [-46.2, -90.2], [-46.2, -84], [-45.4, -77.8],
+  [-37.4, -128.4], [-41.6, -120.6], [-45.6, -114.4], [-47, -105], [-46.4, -97.4], [-44.4, -93], [-46.2, -90.2], [-46.2, -84], [-45.4, -77.8],
   [-42.6, -73.4], [-38.6, -70.2], [-31, -64.2], [-9, -59.4]];
 /**
  * The crown's overhang and the crescent's inner end, on the right: the lock's tip hanging just inside the ear's
@@ -244,10 +244,10 @@ const TEMPLE = [4, 5, 6];
 const PUFF = 12;
 /**
  * The left temple, typed where the sheet draws it in place of the right's mirror: a shorter overhang, the crown
- * meeting the ear at (41, -140), its underside arching in over the ear's tan to y -140.4 and rounding off into
- * the face's side at (30.8, -138.6), 5 pt higher and 6 pt further in than the right's.
+ * meeting the ear at (41, -140), its underside running in over the ear's tan at y -140.2 and the tan tapering
+ * in under the crown's fur to a point at (30.2, -138.8), 4 pt higher and 5.6 pt further in than the right's.
  */
-const leftTemple: Node[] = [[41, -140], [36.2, -140.4], [31.4, -139.6]];
+const leftTemple: Node[] = [[41, -140], [35.6, -140.2], [30.2, -138.8]];
 const mirroredHalf = mirrorX(headHalf, false).slice(0, -1);
 // The mirror runs from the chin up to the crown, so the right's temple nodes come in reverse; the left's replace the lock's tip and underside and the turn.
 const at = mirroredHalf.length - TEMPLE[2]!;
@@ -379,8 +379,8 @@ const SEAM = uid("seam");
 // and under the overhang the sheet draws no line. The cheeks' clumps carry
 // their own lines (clumpLines).
 const headLine: Outline = { ...OUTLINE, taper: 4, blur: 0.15, spans: [
-  { from: [-39.4, -126.6], to: [-44.8, -93.2], width: THIN, colour: `url(#${SEAM})` },
-  { from: [44.4, -93.2], to: [36.2, -127.6], width: THIN, colour: `url(#${SEAM})` },
+  { from: [-42.4, -119.4], to: [-44.8, -93.2], width: THIN, colour: `url(#${SEAM})` },
+  { from: [44.4, -93.2], to: [39.2, -123.4], width: THIN, colour: `url(#${SEAM})` },
 ].map((span) => ({ ...span, from: cheekRoll(span.from as P), to: cheekRoll(span.to as P) })) };
 /**
  * The crown's line, from under the topknot's side lobes over the crown's small lock and round the overhang's tip,
@@ -420,15 +420,18 @@ function headLinePiece(): Piece {
   const [x0, y0, x1, y1] = bbox(head.segs);
   const box = pad([x0, y0, x1 - x0, y1 - y0], 2);
   // Where the crown's fur and the face meet the ears' tan at the temples with no line, the sheet's edge is soft:
-  // the crown's cream fur lies out over the root's tan in a feathered edge along the underside of the overhang and
-  // down the face's side to where its line begins, so the root's tan comes out from under the cream.
+  // the crown's cream fur lies out over the root's tan in a feathered edge, softly along the underside of the
+  // overhang and more broadly (about 3 pt from tan to cream) round the tan's inner end and down the face's side
+  // to where its line begins, so the root's tan tucks in under the cream with no cut edge and no corner.
   const s = uid("blur");
-  const temples = ([[[-45.6, -134.8], [-39.6, -126]], [[36.4, -127], [40.6, -140.6]]] as [P, P][]).map(([a, b]): [P, P] => [cheekRoll(a), cheekRoll(b)]);
-  const soft = temples.map(([a, b]) => strokeOf(spanPoints(head, fracAt(head, a), fracAt(head, b)), 2.4, { taper: 3, tip: 0.4 }).d).join("");
-  return piece(`<defs>${blur(f, pad(box, 2), headLine.blur!)}${blur(g, pad(box, 2), 0.35)}${blur(s, pad(box, 2), 0.8)}` +
-    `<linearGradient id="${SEAM}" gradientUnits="userSpaceOnUse" x1="0" y1="-120" x2="0" y2="-102">` +
+  const feathered = (spans: [P, P][], width: number) => spans.map(([a, b]) =>
+    strokeOf(spanPoints(head, fracAt(head, cheekRoll(a)), fracAt(head, cheekRoll(b))), width, { taper: 3, tip: 0.4 }).d).join("");
+  const under = feathered([[[-45.6, -134.8], [-36.6, -134.6]], [[33, -139.6], [40.6, -140.6]]], 1.8);
+  const side = feathered([[[-39.4, -135], [-42.4, -119.4]], [[39.2, -123.4], [36, -140.4]]], 3.4);
+  return piece(`<defs>${blur(f, pad(box, 2), headLine.blur!)}${blur(g, pad(box, 2), 0.35)}${blur(s, pad(box, 2), 1)}` +
+    `<linearGradient id="${SEAM}" gradientUnits="userSpaceOnUse" x1="0" y1="-118" x2="0" y2="-104">` +
     `<stop offset="0" stop-color="${C.earEdge}"/><stop offset="1" stop-color="${C.earLine}"/></linearGradient></defs>` +
-    `<path d="${soft}" fill="${C.fur}" opacity="0.8" filter="url(#${s})"/>` +
+    `<path d="${under}" fill="${C.fur}" opacity="0.6" filter="url(#${s})"/><path d="${side}" fill="${C.fur}" opacity="0.85" filter="url(#${s})"/>` +
     `<g fill="${headLine.colour}" filter="url(#${f})">${r.svg}</g>` +
     `<g filter="url(#${g})">${c.svg}</g>`, box, {
     shapes: [{ name: "head.line", nodes: head.typed, segs: head.segs, outlined: [...r.outlined, ...c.outlined], fur: head.fur.map(([a, b]) => [fracAt(head, a), fracAt(head, b)]) }],
