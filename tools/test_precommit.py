@@ -77,6 +77,12 @@ if [ "$1" = runtime-web/lab/look.ts ]; then
 fi
 """
 
+# What touches what draws, renders or judges the dog, or what it is judged against; and what does not.
+FRONT = ["characters/dog/src/front.ts", "characters/draw/paint.ts", "characters/build/build.ts", "runtime-web/src/rig.ts",
+         "runtime-web/lab/look.ts", "characters/sheetmatch/match.py", "characters/refprep/prepare.py", "characters/dog/model.json",
+         "characters/dog/ref/sheet.txt", "characters/dog/refmap/map.json"]
+ELSEWHERE = ["docs/notes.md", "characters/dog/test/dog.test.ts", "characters/dog/DECISIONS.md", "runtime-web/test/rig.test.ts"]
+
 
 class HookTest(unittest.TestCase):
     def setUp(self):
@@ -134,6 +140,46 @@ class HookTest(unittest.TestCase):
         code, said, looks = self.hook("characters/dog/src/front.ts", HUDDLINGS_FRONT_MATCH="1", STUB_READ_SECONDS="1.2")
         self.assertEqual(code, 0, said)
         self.assertEqual(len(looks), 1, "the front match ran while they read")
+
+    def test_the_front_match_runs_by_default_on_what_draws_renders_or_judges_the_dog(self):
+        for name in FRONT:
+            with self.subTest(staged=name):
+                code, said, looks = self.hook(name)
+                self.assertEqual(code, 0, said)
+                self.assertEqual(len(looks), 1, said)
+                self.git("reset", "-q", "--hard")
+        for name in ELSEWHERE:
+            with self.subTest(staged=name):
+                code, said, looks = self.hook(name)
+                self.assertEqual((code, looks), (0, []), said)
+                self.git("reset", "-q", "--hard")
+
+    def test_huddlings_front_match_0_skips_it_and_says_so(self):
+        code, said, looks = self.hook("characters/dog/src/front.ts", HUDDLINGS_FRONT_MATCH="0")
+        self.assertEqual((code, looks), (0, []), said)
+        self.assertIn("the dog's front sheet match is skipped (HUDDLINGS_FRONT_MATCH=0)", said)
+        # Any other value runs it, as no value does.
+        code, said, looks = self.hook("characters/dog/src/front.ts", HUDDLINGS_FRONT_MATCH="1")
+        self.assertEqual((code, len(looks)), (0, 1), said)
+
+    def test_a_failing_front_match_fails_the_commit_and_keeps_its_evidence(self):
+        code, said, _ = self.hook("characters/draw/paint.ts", STUB_LOOK_EXIT="1")
+        self.assertEqual(code, 1)
+        self.assertIn("the dog's front fails its sheet match", said)
+        self.assertEqual((self.repo / "build/qa/front/compare.png").read_text(), "evidence\n")
+
+    def test_the_raster_cache_is_the_main_checkouts_in_a_worktree_too(self):
+        cache = str(self.repo.resolve() / "build" / "cache")
+        _, said, looks = self.hook("characters/dog/src/front.ts")
+        self.assertTrue(looks[0].endswith(f"--cache {cache}"), looks)
+        self.git("reset", "-q", "--hard")
+        worktree = self.root / "worktree"
+        self.git("worktree", "add", "-q", str(worktree))
+        (worktree / "node_modules").mkdir()
+        code, said, looks = self.hook("characters/dog/src/front.ts", cwd=worktree)
+        self.assertEqual(code, 0, said)
+        self.assertTrue(looks[0].endswith(f"--cache {cache}"), looks)
+
 
 if __name__ == "__main__":
     unittest.main()
