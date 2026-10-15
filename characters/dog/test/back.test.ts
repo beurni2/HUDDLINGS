@@ -221,6 +221,39 @@ after(async () => {
   rmSync(dir, { recursive: true, force: true });
 });
 
+test("the back view's rest frame has no hole: every pixel inside the dog's outline is covered", () => {
+  // Where parts meet (the ears under the crown's crescents, the heels under the haunches, the collar's ends) a gap
+  // would show the ground through the dog: flood the background in from the still's border, and every pixel it cannot
+  // reach must be covered by half or more.
+  const white = PNG.sync.read(readFileSync(join(dir, VIEW, "white.png"))), black = PNG.sync.read(readFileSync(join(dir, VIEW, "black.png")));
+  const [w, h] = info.sizePx;
+  const covered = new Uint8Array(w * h);
+  for (let i = 0; i < w * h; i++) {
+    const k = i * 4;
+    const alpha = 1 - (white.data[k]! - black.data[k]! + white.data[k + 1]! - black.data[k + 1]! + white.data[k + 2]! - black.data[k + 2]!) / 3 / 255;
+    covered[i] = alpha >= 0.5 ? 1 : 0;
+  }
+  const outside = new Uint8Array(w * h);
+  const stack: number[] = [];
+  for (let i = 0; i < w; i++) stack.push(i, (h - 1) * w + i);
+  for (let j = 0; j < h; j++) stack.push(j * w, j * w + w - 1);
+  while (stack.length) {
+    const i = stack.pop()!;
+    if (outside[i] || covered[i]) continue;
+    outside[i] = 1;
+    const x = i % w, y = (i - x) / w;
+    if (x > 0) stack.push(i - 1);
+    if (x < w - 1) stack.push(i + 1);
+    if (y > 0) stack.push(i - w);
+    if (y < h - 1) stack.push(i + w);
+  }
+  const holes: string[] = [];
+  for (let i = 0; i < w * h; i++) {
+    if (!covered[i] && !outside[i]) holes.push(`(${((i % w - info.rootPx[0]) / SCALE).toFixed(1)}, ${((Math.floor(i / w) - info.rootPx[1]) / SCALE).toFixed(1)})`);
+  }
+  assert.equal(holes.length, 0, `${holes.length} uncovered pixels inside the outline, from ${holes.slice(0, 4).join(" ")}`);
+});
+
 test("the WebGL still of the back view reproduces the resvg composite of its model-space drawings", (t) => {
   const png = (name: string) => PNG.sync.read(readFileSync(join(dir, VIEW, name)));
   const white = png("white.png"), black = png("black.png");

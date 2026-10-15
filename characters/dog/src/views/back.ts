@@ -108,12 +108,12 @@ const tuft = furSpan(smooth([[-16.6, -154.8], [-16.4, -158.6], [-14.6, -161.8], 
 // round, hanging in a few soft clumps, lowest under its middle (the tips), its
 // inner bottom corner clear of the head's lower corner, its inner edge running
 // up under the head's side, hidden.
-const earLNodes: Node[] = [[-31, -141.4], [-34.6, -143.8], [-38.6, -144.2], [-42.2, -142.2], [-43.6, -141], [-49.6, -135.1], [-56.6, -128.6], [-62.6, -120.2], [-68.4, -114.4],
+const earLNodes: Node[] = [[-28.4, -141.8], [-34.6, -143.8], [-38.6, -144.2], [-42.2, -142.2], [-43.6, -141], [-49.6, -135.1], [-56.6, -128.6], [-62.6, -120.2], [-68.4, -114.4],
   [-73, -108.4], [-76.2, -101], [-77.4, -92.4], [-76.2, -86.6], [-73.4, -81.6], [-69, -76.8], [-63.6, -72.4], [-57, -69.4], [-49.6, -67.8], [-44.2, -68.4],
-  [-40.4, -71.2], [-38.4, -76.2], [-35.6, -88], [-34.4, -104], [-33, -124]];
-const earRNodes: Node[] = [[33.4, -143], [37.4, -145], [41.4, -146], [44.8, -143], [47.4, -140.6], [49.6, -138], [55.8, -131.5], [61.2, -124.6], [67, -118.8],
+  [-40.4, -71.2], [-38.4, -76.2], [-35.6, -88], [-34.4, -104], [-31.6, -126]];
+const earRNodes: Node[] = [[28.6, -142.6], [37.4, -145], [41.4, -146], [44.8, -143], [47.4, -140.6], [49.6, -138], [55.8, -131.5], [61.2, -124.6], [67, -118.8],
   [72.2, -112.6], [75, -105.8], [76, -97], [75.6, -88.6], [73.2, -82], [68.6, -76.8], [62.2, -72.4], [54, -69.8], [48, -68.8], [44, -69.6],
-  [40.4, -71.8], [38.4, -76], [36.2, -88], [35.4, -104], [34, -124]];
+  [40.4, -71.8], [38.4, -76], [36.2, -88], [35.4, -104], [31.8, -126]];
 /**
  * Each ear's foot, as the sheet draws it from behind: a full round clump at its outer corner, the broadest under its
  * middle, and a smaller one at its inner corner, each tucked under the next at a parting.
@@ -142,8 +142,8 @@ const earShadow = {
 // the nape (its top 75.3 pt high at the middle, its foot 66.3), about 9 pt deep
 // at the middle and 8 at its ends, which turn round the neck as small rounded
 // squares, the right reaching a little further out, as the sheet draws it.
-const collar = smooth([[-28.2, -69.8], [-25, -72.4], [-18, -74], [-9, -75], [0, -75.3], [9, -75], [17, -74.2], [24.6, -72.6], [29, -70.4], [30.4, -66.2],
-  [29.6, -62.6], [24, -63.2], [16, -64.9], [6, -66], [-6, -66.1], [-16, -65.4], [-23.6, -63.8], [-28.4, -62], [-29.2, -66]]);
+const collar = smooth([[-28.6, -70.4], [-25, -72.6], [-18, -74], [-9, -75], [0, -75.3], [9, -75], [17, -74.2], [24.6, -72.6], [29.4, -70.8], [30.4, -66.2],
+  [29.8, -62.4], [24, -63.2], [16, -64.9], [6, -66], [-6, -66.1], [-16, -65.4], [-23.6, -63.8], [-28.8, -62], [-29.4, -66.2]]);
 
 // The body from behind: the shoulders come out from under the collar's ends
 // and run down and out, breaking into a small lock under each collar end, to a
@@ -210,12 +210,14 @@ export const TAIL_ROOT: P = [-5, -24];
 // on the left flank a strip of it shows just inside the outline from y -54 to
 // -40, where the saddle wraps round the side. Typed with bleed under the tail
 // and past the body's edge, which the tail and the body's clip hide.
-const saddleL = furEdge(smooth([[3.6, -60.4], [-3, -60.4], [-8.6, -59.2], [-12.8, -57.4], [-15.4, -54.2], [-17.6, -50.4], [-20.2, -46.4], [-21.4, -41.6],
-  [-20.6, -37], [-18.8, -32.6], [-15.8, -29.4], [-11.8, -26.8], [-8.4, -24.8], [-3, -24.4], [3, -30], [4.6, -40], [4.2, -52]]), [-14.8, -55.4], [-17, -30.4],
+const saddleL = furEdge(furEdge(smooth([[3.6, -59.6], [-3, -59.6], [-8.6, -58.4], [-12.8, -56.6], [-15.4, -54.2], [-17.6, -50.4], [-20.2, -46.4], [-21.4, -41.6],
+  [-20.6, -37], [-18.8, -32.6], [-15.8, -29.4], [-11.8, -26.8], [-8.4, -24.8], [-3, -24.4], [3, -30], [4.6, -40], [4.2, -52]]), [-1, -59.6], [-13.6, -56],
+[{ len: 0.8, w: 1, lean: 0.1 }, { len: 1, w: 1.2, lean: 0 }, { len: 0.7, w: 0.9, lean: -0.1 }], 0.45), [-14.8, -55.4], [-17, -30.4],
 [{ len: 0.9, w: 1, lean: 0.1 }, { len: 1.2, w: 1.3, lean: 0 }, { len: 0.8, w: 1, lean: -0.1 }, { len: 1.1, w: 1.2, lean: -0.1 }], 0.45);
 const flankL = smooth([[-41.6, -53], [-37.6, -54.6], [-35.4, -50.6], [-35.4, -45.4], [-36.8, -41.4], [-39.8, -39.2], [-42, -44]]);
-const saddleR = smooth([[-1.2, -60.8], [4, -59.8], [8.4, -58.8], [12.4, -57.2], [16, -55], [19, -52.2], [20.8, -48.8], [21.6, -45], [19, -42], [10, -44],
-  [1, -44], [-1.4, -52]]);
+const saddleR = furEdge(smooth([[-1.2, -60], [4, -59.2], [8.4, -58.2], [12.4, -56.8], [16, -54.8], [19, -52.2], [20.8, -48.8], [21.6, -45], [19, -42], [10, -44],
+  [1, -44], [-1.4, -52]]), [1.4, -59.6], [20.4, -49.4], [{ len: 0.8, w: 1, lean: 0.1 }, { len: 1, w: 1.1, lean: 0.1 }, { len: 0.9, w: 1, lean: 0.15 },
+  { len: 0.7, w: 0.9, lean: 0.2 }], 0.45);
 // The tail's tan root, where it shows from behind at the tail's upper left, below the saddle's edge: pale, the paler
 // painted tan, as the sheet paints it there (#F0BC8B; DECISIONS 17), fading into the plume's cream.
 const tailBase = smooth([[-12, -20], [-11.4, -25], [-7.6, -29], [-2.4, -31.6], [0.6, -29.4], [-0.6, -25.4], [-3.6, -21.8], [-8, -19.4]]);
@@ -495,8 +497,9 @@ export function back(): Drawn[] {
   // shade where it turns under toward the shoulders, and a dark blue rim all round, as the sheet paints it.
   add("collar", part("collar", collar, {
     fill: C.collar,
-    shade: { multiply: C.shadeBy, shapes: ["M-32 -66.4 C-16 -68.4 16 -68.4 32 -66.4 L32 -58 L-32 -58Z"], blur: 1.2 },
-    highlight: { d: "M-25 -71.2 C-15 -73.4 0 -74 13 -73.4 L13 -71.6 C0 -72.4 -15 -71.8 -25 -69.4Z", colour: C.collarHighlight, opacity: 0.45, blur: 0.9 },
+    // Its lower part in shade, where it turns under toward the shoulders: about two fifths of the band, as the sheet paints it.
+    shade: { multiply: C.shadeBy, shapes: ["M-32 -67.4 C-16 -69.8 16 -69.8 32 -67.4 L32 -58 L-32 -58Z"], blur: 0.8 },
+    highlight: { d: "M-26 -71.4 C-15 -73.8 0 -74.4 16 -73.8 L16 -70.8 C0 -71.6 -15 -71.2 -26 -68.8Z", colour: C.collarHighlight, opacity: 0.5, blur: 1 },
     outline: { colour: C.collarLine, width: THIN, taper: 3, blur: 0.2 },
   }));
   return out;
