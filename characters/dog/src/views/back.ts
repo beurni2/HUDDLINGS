@@ -315,20 +315,28 @@ const headPaint: Paint = {
  */
 const SIDE = uid("side");
 const headLine: Outline = { ...OUTLINE, taper: 4, blur: 0.15, spans: [
-  { from: [-16.8, -155.3], to: [-36, -147.4], width: THIN, colour: C.fluffLine },
+  { from: [-16.8, -155.3], to: [-37, -146.8], width: THIN, colour: C.fluffLine },
   { from: [-38, -119], to: [-29, -73.2], width: 1.3, colour: `url(#${SIDE})` },
   { from: [29, -73.2], to: [38, -119], width: 1.3, colour: `url(#${SIDE})` },
-  { from: [37.6, -150.2], to: [17, -155.3], width: THIN, colour: C.fluffLine },
+  { from: [38.2, -149.8], to: [17, -155.3], width: THIN, colour: C.fluffLine },
 ] };
 /**
  * Where the crown's line runs on over each ear's root, from the root down to where the ear comes out under the
  * fringe, the sheet draws it in the ears' tan (L* 65 to 80 there, against 48 to 60 round the ears), the ear's own
  * edge showing along the crown's: a line in the tan, barely tapered at its foot, where the ear's line takes it on.
  */
+const ROOT = { L: uid("root"), R: uid("root") };
+const rootSpans = { L: [[-35.6, -147.6], [-41.8, -142.4]] as [P, P], R: [[36.2, -151], [44.4, -143.2]] as [P, P] };
 const rootLine: Outline = { colour: C.marking, width: 1.8, taper: 1.2, blur: 0.15, spans: [
-  { from: [-36.6, -146.8], to: [-41.8, -142.4], colour: C.marking },
-  { from: [44.4, -143.2], to: [37, -150.6], colour: C.marking },
+  { from: rootSpans.L[0], to: rootSpans.L[1], colour: `url(#${ROOT.L})` },
+  { from: rootSpans.R[1], to: rootSpans.R[0], colour: `url(#${ROOT.R})` },
 ] };
+/** Each root line comes out of the crown's light line and turns to the ears' tan by its middle. */
+const rootGradient = (side: "L" | "R", tan: number) => {
+  const [[x1, y1], [x2, y2]] = rootSpans[side];
+  return `<linearGradient id="${ROOT[side]}" gradientUnits="userSpaceOnUse" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}">` +
+    `<stop offset="0" stop-color="${C.fluffLine}"/><stop offset="${tan}" stop-color="${C.marking}"/></linearGradient>`;
+};
 
 function headLinePiece(): Piece {
   const f = uid("blur"), s = uid("blur");
@@ -341,12 +349,13 @@ function headLinePiece(): Piece {
     strokeOf(spanPoints(head, fracAt(head, a), fracAt(head, b)), width, { taper: 3, tip: 0.4 }).d).join("");
   const edge = feathered([[[-40.6, -141.8], [-37.4, -121.4]], [[37.4, -121.4], [43.2, -142.6]]], 1.4);
   // The crown's lock tip hooks in over the ear's root, a short stroke curling back along the overhang's underside.
-  const hooks = [[[-36, -147.2], [-34.6, -147], [-33.4, -146.2], [-32.8, -145]], [[37.2, -150.8], [35.8, -150.4], [34.6, -149.6], [34, -148.4]]]
+  const hooks = [[[-36.8, -147], [-35.4, -146.8], [-34.2, -146], [-33.6, -144.8]], [[37.6, -150.4], [36.2, -150], [35, -149.2], [34.4, -148]]]
     .map((pts) => tapered(curve(pts as P[], 6), 0.85, "inner", "crown hook", { taper: 1.4, tip: 0.2 }));
   return piece(`<defs>${blur(f, pad(box, 2), headLine.blur!)}${blur(s, pad(box, 2), 0.55)}` +
     `<linearGradient id="${SIDE}" gradientUnits="userSpaceOnUse" x1="0" y1="-120" x2="0" y2="-74">` +
     `<stop offset="0" stop-color="${C.earEdge}" stop-opacity="0"/><stop offset="0.25" stop-color="${C.earEdge}"/><stop offset="0.45" stop-color="${C.earLine}"/>` +
-    `<stop offset="0.62" stop-color="${C.earLine}"/><stop offset="0.85" stop-color="${C.warmLine}"/><stop offset="1" stop-color="${C.haunchLine}"/></linearGradient></defs>` +
+    `<stop offset="0.62" stop-color="${C.earLine}"/><stop offset="0.85" stop-color="${C.warmLine}"/><stop offset="1" stop-color="${C.haunchLine}"/></linearGradient>` +
+    `${rootGradient("L", 0.5)}${rootGradient("R", 0.3)}</defs>` +
     `<path d="${edge}" fill="${C.fur}" opacity="0.4" filter="url(#${s})"/>` +
     `<g fill="${headLine.colour}" filter="url(#${f})">${r.svg}</g>` +
     `<g fill="${C.crownLine}" filter="url(#${f})">${hooks.map((h) => `<path d="${h.d}"/>`).join("")}</g>`, box, {
@@ -407,7 +416,7 @@ function earPaint(side: "L" | "R"): Paint {
     inner: [...dark.map((pts) => ({ pts: curve(pts.slice(-3)), width: 0.7, colour: `url(#${strand})` })),
       // A short parting up from each notch between the foot's clumps, fading out upward.
       ...clumps.map((n) => ({ pts: curve([n, [n[0] - k * 0.5, n[1] - 3.4], [n[0] - k * 0.4, n[1] - 7]]), width: 0.75, colour: `url(#${strand})` }))],
-    outline: { ...OUTLINE, colour: C.warmLine, width: 1.3, taper: 6, blur: 0.15, spans: side === "L"
+    outline: { ...OUTLINE, colour: C.warmLine, width: 1.3, taper: 2.5, blur: 0.15, spans: side === "L"
       ? [{ from: [-42.2, -142.2], to: [-76.8, -88], width: THIN, colour: `url(#${toRoot})` }, { from: [-77, -90], to: [-38.6, -78], width: 1.45, colour: C.soleLine }]
       : [{ from: [44.8, -143], to: [75.8, -88], width: 1.3, colour: `url(#${toRoot})` }, { from: [75.8, -90], to: [38.2, -80], width: 1.5, colour: C.soleLine }] },
   };
