@@ -316,10 +316,8 @@ const headPaint: Paint = {
   // under the brow's overhang, where the sheet's tan deepens (#ECB888 against the hood's #F0BC92).
   shade: furShade(headGroup, ["M-38 -67.4 C-28 -62.4 -14 -60.4 0 -60.4 C14 -60.4 28 -62.4 38 -67.4 L46 -56 L-46 -56Z",
     ...[EYE_R, EYE_L].map(([x, y]) => `M${fmt(x - 8)} ${fmt(y - 9.6)} a8 2 0 1 0 16 0 a8 2 0 1 0 -16 0Z`)],
-    // The crown stays light right out to its line, as the sheet paints it, the overhangs over the ears' roots included;
-    // and so do the cheeks' puffs, whose clumps carry their own shade.
-    ["M-52 -172 L52 -172 L52 -137 L-52 -137Z", ...[-1, 1].map((sx) => { const [cx, cy] = cheekRoll([sx * 42.4, -79.4]); return `M${fmt(cx - 6.4)} ${fmt(cy)} a6.4 9.2 0 1 0 12.8 0 a6.4 9.2 0 1 0 -12.8 0Z`; })],
-    { inset: 2.6, toLight: 3.4 }),
+    // The crown stays light right out to its line, as the sheet paints it, the overhangs over the ears' roots included.
+    ["M-52 -172 L52 -172 L52 -137 L-52 -137Z"], { inset: 3, toLight: 4.5 }),
   highlight: { d: headLight, colour: C.light, opacity: 0.4, blur: 4 },
 };
 /** The side's line darkens as it comes down from the ear's root: the ear's tan at the root, its deep tan from mid-eye down. */
@@ -419,12 +417,12 @@ function eye(landmark: P, noseward: number): Piece {
   const lidLine = tapered(around(-20, 150, 0.2), 1.7, "outer", "eye lid", { taper: 8, tip: 0.3 });
   // The halo: a soft pale band just outside the rim, from below the eye round its outer side.
   const haloBand = strokeOf(around(-125, 25, 1.1, 31), 1.7, { taper: 5, tip: 0.2 });
-  const big = S(3.9, -4.3), small = S(2.4, 5.4);
+  const big = S(3.9, -4.3), small = S(2.4, 5.4), glowAt = S(0.4, 1.6);
   const n = (p: P) => `${fmt(p[0])}" cy="${fmt(p[1])}`;
   const svg = `<defs><clipPath id="${clip}"><path d="${ball}"/></clipPath><clipPath id="${irisClip}"><path d="${irisOval}"/></clipPath>` +
     `<clipPath id="${outside}"><path d="${cut}" clip-rule="evenodd"/></clipPath>` +
     `<radialGradient id="${iris}" gradientUnits="userSpaceOnUse" cx="${fmt(gx)}" cy="${fmt(gy)}" r="10">` +
-    `<stop offset="0.5" stop-color="${C.dark}"/><stop offset="0.66" stop-color="${C.dark}"/><stop offset="0.92" stop-color="${C.irisWarm}"/></radialGradient>` +
+    `<stop offset="0.5" stop-color="${C.dark}"/><stop offset="0.66" stop-color="${C.dark}"/><stop offset="0.9" stop-color="${C.irisWarm}"/></radialGradient>` +
     `<linearGradient id="${lid}" gradientUnits="userSpaceOnUse" x1="${fmt(t0x)}" y1="${fmt(t0y)}" x2="${fmt(t1x)}" y2="${fmt(t1y)}">` +
     `<stop offset="0.35" stop-color="${C.eyeDark}"/><stop offset="1" stop-color="${C.eyeDark}" stop-opacity="0"/></linearGradient>` +
     // The rim warms from near-black along the lid to the printed dark brown round the eye's foot, as the sheet's does.
@@ -434,6 +432,9 @@ function eye(landmark: P, noseward: number): Piece {
     `<path d="${haloBand.d}" fill="${C.fur}" opacity="0.8" filter="url(#${halo})"/>` +
     `<g filter="url(#${edge})"><path d="${ball}" fill="url(#${rimFade})"/><path d="${lidLine.d}" fill="${C.eyeDark}"/></g>` +
     `<g clip-path="url(#${clip})"><path d="${irisOval}" fill="url(#${iris})"/>` +
+    // A soft warm glow low round the pupil's foot, so the lower iris reads warm red-brown as the sheet's does, kept
+    // mostly above the eye's lowest quarter, where the printed brown stays the dominant colour.
+    `<ellipse cx="${n(glowAt)}" rx="4.6" ry="1.6" fill="${C.irisWarm}" opacity="0.55" filter="url(#${pupil})"/>` +
     `<ellipse cx="${n([px, py])}" rx="3.8" ry="4.2" fill="${C.eyeDark}" opacity="0.75" filter="url(#${pupil})"/>` +
     `<path d="${ball}" fill="url(#${lid})"/>` +
     `<g clip-path="url(#${irisClip})"><g filter="url(#${white})"><path d="${irisOval}" fill="${C.eyeWhite}" clip-path="url(#${outside})"/></g></g></g>` +
@@ -496,10 +497,11 @@ function mouth(): Piece {
   const rimEnd = rimPts.findIndex(([x, y], i) => i > 4 && x < -9 && y < 17.5);
   const rimStroke = strokeOf(rimEnd > 0 ? rimPts.slice(0, rimEnd + 1) : rimPts, 1.6, { taper: 3, tip: 0.1, band: [LIMITS.inner[0] * 2, LIMITS.inner[1] * 2] });
   const rimLine: DrawnLine = { kind: "inner", width: 0.8, where: "mouth rim", drawn: [rimStroke.drawn[0] / 2, rimStroke.drawn[1] / 2] };
-  const clip = uid("mouth"), soft = uid("blur"), deep = uid("blur"), lit = uid("blur"), edge = uid("blur"), rim = uid("rim");
+  const clip = uid("mouth"), soft = uid("blur"), deep = uid("blur"), lit = uid("blur"), edge = uid("blur"), rim = uid("rim"), tongueClip = uid("tongue");
+  const TONGUE = "M-11 31 L-11 18.9 C-6.4 19.4 -3.2 20.3 0 20.3 C3.2 20.3 6.4 19.4 11 18.9 L11 31Z";
   const philtrum = innerLine([[0, 11.2], [0, 14.4]], 0.8, C.dark, { taper: 0.8, tip: 0.6, wobble: 0 });
   const box: Box = [-15, 10, 30, 21];
-  const svg = `<defs><clipPath id="${clip}"><path d="${m}"/></clipPath>${blur(soft, box, 0.5)}${blur(deep, box, 0.9)}${blur(lit, box, 1.4)}${blur(edge, box, 0.2)}` +
+  const svg = `<defs><clipPath id="${clip}"><path d="${m}"/></clipPath><clipPath id="${tongueClip}"><path d="${TONGUE}"/></clipPath>${blur(soft, box, 0.5)}${blur(deep, box, 0.9)}${blur(lit, box, 1.4)}${blur(edge, box, 0.2)}` +
     `<linearGradient id="${rim}" gradientUnits="userSpaceOnUse" x1="0" y1="18" x2="0" y2="28.7">` +
     `<stop offset="0.35" stop-color="${C.mouthRim}"/><stop offset="1" stop-color="${C.tongueRim}"/></linearGradient></defs>` +
     `<path d="${m}" fill="${C.mouthInside}"/><g clip-path="url(#${clip})">` +
@@ -507,10 +509,11 @@ function mouth(): Piece {
     `<path d="M-10 14 L10 14 L10 17.3 C6 17.5 3 16.5 0 16.3 C-3 16.5 -6 17.5 -10 17.3Z" fill="${C.mouthDeep}" opacity="0.55" filter="url(#${deep})"/>` +
     // The tongue: the full width of the opening, filling its lower 58% at the middle and rising at the sides to
     // within about 1.7 pt of the lip, its top edge soft where it melts into the dark; lighter through its middle.
-    `<path d="M-11 31 L-11 18.9 C-6.4 19.4 -3.2 20.3 0 20.3 C3.2 20.3 6.4 19.4 11 18.9 L11 31Z" fill="${C.tongue}" filter="url(#${soft})"/>` +
-    // In the dark's shade where it goes in under it, lighter through its middle.
-    `<path d="M-11 18.9 C-6.4 19.4 -3.2 20.3 0 20.3 C3.2 20.3 6.4 19.4 11 18.9 L11 21.2 C6.4 21.7 3.2 22.4 0 22.4 C-3.2 22.4 -6.4 21.7 -11 21.2Z" ` +
-    `fill="${C.tongueRim}" opacity="0.3" filter="url(#${deep})"/>` +
+    `<path d="${TONGUE}" fill="${C.tongue}" filter="url(#${soft})"/>` +
+    // In the dark's shade where it goes in under it (kept on the tongue, so the dark keeps its own red), lighter
+    // through its middle.
+    `<g clip-path="url(#${tongueClip})"><path d="M-11 18.9 C-6.4 19.4 -3.2 20.3 0 20.3 C3.2 20.3 6.4 19.4 11 18.9 L11 21.2 C6.4 21.7 3.2 22.4 0 22.4 ` +
+    `C-3.2 22.4 -6.4 21.7 -11 21.2Z" fill="${C.tongueRim}" opacity="0.3" filter="url(#${deep})"/></g>` +
     `<ellipse cx="-0.3" cy="24.8" rx="3.4" ry="1.9" fill="${C.tongueShine}" opacity="0.4" filter="url(#${lit})"/>` +
     `<path d="${rimStroke.d}" fill="url(#${rim})" filter="url(#${edge})"/></g>` +
     `<path d="${lip.d}" fill="${C.dark}"/>${flicks.map((f) => `<path d="${f.d}" fill="${C.dark}"/>`).join("")}${philtrum.svg}`;
