@@ -556,7 +556,7 @@ function tagPiece(): Piece {
   rim.push(rim[0]!);
   return join(strap, part("tag", heart, {
     fill: C.tag,
-    shade: { multiply: C.tagShadeBy, rim: { inset: 1.2, toLight: 1.4 }, shapes: ["M-67 -50 C-66 -44 -64 -40 -60.6 -38.6 L-60 -36 L-68 -36Z"], blur: 1 },
+    shade: { multiply: C.tagShadeBy, rim: { inset: 0.9, toLight: 1 }, shapes: ["M-67.6 -49 C-66.8 -44 -65 -40.6 -61.6 -38.6 L-61 -36 L-68 -36Z"], blur: 1 },
     highlight: { d: "M-64.6 -47.6 a2.2 1.5 -50 1 0 4.4 0 a2.2 1.5 -50 1 0 -4.4 0", colour: C.tagShine, opacity: 0.4, blur: 1.3 },
     under: `<defs>${blur(g, [-68, -54, 16, 18], 0.4)}</defs><path d="${emboss}" fill="${C.tagShine}" opacity="0.3" filter="url(#${g})"/>`,
     inner: [{ pts: rim, width: 0.7, colour: C.tagLine, opacity: 0.45 }],
