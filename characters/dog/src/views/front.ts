@@ -139,9 +139,19 @@ const earR: Node[] = [[-37.5, -141.4], [-29.4, -138.6], [-28.2, -132.4], [-34, -
   [-53.4, -62.3], [-58.6, -63.5], [-63.6, -64.5], [-68.6, -67.9], [-73.4, -71], [-77.4, -76.4], [-80.4, -82], [-81, -88.4], [-80.4, -94.4],
   [-78.2, -100.2], [-73.6, -106.2], [-66.8, -111.6], [-60.8, -117.4], [-56, -125.6], [-50.2, -131.2], [-44.6, -135.6]];
 const EAR_L_HANG = 2.8, EAR_L_ROOT: P = [37.5, -138];
-const ears = { R: smooth(rollN(earR)), L: smooth(rollN(rotate(mirrorX(earR), EAR_L_HANG, EAR_L_ROOT))) };
-/** A head-frame place on the dog's right ear, or the same place on its left ear, rolled. */
-const onEar = (side: "L" | "R", p: P): P => rollP(side === "R" ? p : (rotate([[-p[0], p[1]]], EAR_L_HANG, EAR_L_ROOT)[0] as P));
+/**
+ * Each ear's length below its root: the face's roll turns the ears' tips 7 pt apart in height where the sheet
+ * hangs them 3.1 pt apart (its roots 4.7), so the right ear is drawn 2% shorter and the left 3% longer, each
+ * scaled down its length from its top.
+ */
+const EAR_TOP = -141.4, EAR_LENGTH = { R: 0.98, L: 1.03 };
+const hang = (side: "L" | "R", nodes: Node[]): Node[] => {
+  const long = nodes.map((n): Node => (n.length === 3 ? [n[0], EAR_TOP + (n[1] - EAR_TOP) * EAR_LENGTH[side], n[2]] : [n[0], EAR_TOP + (n[1] - EAR_TOP) * EAR_LENGTH[side]]));
+  return rollN(side === "R" ? long : rotate(mirrorX(long), EAR_L_HANG, EAR_L_ROOT));
+};
+const ears = { R: smooth(hang("R", earR)), L: smooth(hang("L", earR)) };
+/** A head-frame place on the dog's right ear, or the same place on its left ear, hung and rolled as the ear is. */
+const onEar = (side: "L" | "R", p: P): P => hang(side, [p])[0] as P;
 /** Path data on the dog's right ear, or the same on its left (the hang is small enough to leave out of soft paint), rolled. */
 const earD = (side: "L" | "R", d: string) => rollD(side === "R" ? d : mirrorD(d));
 
@@ -165,8 +175,8 @@ const crownLift = ([x, y]: P): P => [x, y - 1.8 * Math.min(1, Math.max(0, (x - 1
 // its right half, mirrored, then the crown lifted on the left and the cheeks
 // rolled with the face.
 const headHalf: Node[] = [[0, -151.8], [-16, -151.2], [-26, -149.4], [-32.4, -146.8], [-37.6, -143.4], [-41.6, -139.8], [-44.4, -136.2], [-45.8, -130],
-  [-46.4, -120], [-46.6, -110], [-46.4, -100], [-46, -94], [-47.6, -89.6], [-49.4, -85], [-49.8, -80.4], [-48.8, -76.4], [-47.2, -72.8],
-  [-44.8, -70.2], [-41.4, -68.2], [-37.6, -66.4], [-31, -63.8], [-21, -61.2], [-9, -58.6]];
+  [-46.4, -120], [-46.6, -110], [-46.4, -100], [-46, -94], [-45.6, -89.6], [-45.4, -85], [-45.6, -80.6], [-44.8, -76.6], [-43.4, -72.8],
+  [-41.2, -70], [-38.2, -67.8], [-34.8, -65.8], [-31, -63.8], [-21, -61.2], [-9, -58.6]];
 let head = smooth([...headHalf, [0, -57.5], ...mirrorX(headHalf, false).slice(0, -1)].map(([x, y]): Node => cheekRoll(crownLift([x, y]))), { typed: headHalf.length + 1 });
 // The cheeks' fluff, as the hero and the front turnaround draw it: a round puff
 // on each side, spilling over the ear's inner edge and down over the collar.
@@ -178,14 +188,14 @@ const strokeTo = (tip: P, root: P) => {
   const d: P = [tip[0] - root[0], tip[1] - root[1]], l = Math.hypot(d[0], d[1]) || 1, u: P = [d[0] / l, d[1] / l];
   furStrokes.push([[root[0] - u[0] * 3, root[1] - u[1] * 3], [root[0] + u[0] * 0.4, root[1] + u[1] * 0.4], [tip[0] - u[0] * 1.1, tip[1] - u[1] * 1.1]]);
 };
-const cheekLocks = [{ len: 2, w: 0.9, lean: 0.35 }, { len: 3.2, w: 1.2, lean: 0.55 }, { len: 2.6, w: 1, lean: 0.65 }];
+const cheekLocks = [{ len: 1.4, w: 0.9, lean: 0.35 }, { len: 2.2, w: 1.2, lean: 0.55 }, { len: 1.8, w: 1, lean: 0.65 }];
 const jawLocks = [{ len: 2.4, w: 1.1, lean: 0.5 }, { len: 2.8, w: 1.2, lean: 0.45 }];
 const lefthand = (locks: typeof cheekLocks) => [...locks].reverse().map((l) => ({ ...l, lean: -l.lean }));
-head = furSpan(furSpan(head, cheekRoll([-47.6, -89.6]), cheekRoll([-37.6, -66.4])), cheekRoll([37.6, -66.4]), cheekRoll([47.6, -89.6]));
-head = furEdge(head, cheekRoll([-48.4, -88]), cheekRoll([-43.6, -69.6]), cheekLocks, 0.34, strokeTo);
-head = furEdge(head, cheekRoll([43.6, -69.6]), cheekRoll([48.4, -88]), lefthand(cheekLocks), 0.34, strokeTo);
-head = furEdge(head, cheekRoll([-38.6, -66.2]), cheekRoll([-29, -63.2]), jawLocks, 0.4, strokeTo);
-head = furEdge(head, cheekRoll([29, -63.2]), cheekRoll([38.6, -66.2]), lefthand(jawLocks), 0.4, strokeTo);
+head = furSpan(furSpan(head, cheekRoll([-45.6, -89.6]), cheekRoll([-34.8, -65.8])), cheekRoll([34.8, -65.8]), cheekRoll([45.6, -89.6]));
+head = furEdge(head, cheekRoll([-45.6, -88]), cheekRoll([-41.2, -70]), cheekLocks, 0.34, strokeTo);
+head = furEdge(head, cheekRoll([41.2, -70]), cheekRoll([45.6, -88]), lefthand(cheekLocks), 0.34, strokeTo);
+head = furEdge(head, cheekRoll([-37.6, -67]), cheekRoll([-29, -63.2]), jawLocks, 0.4, strokeTo);
+head = furEdge(head, cheekRoll([29, -63.2]), cheekRoll([37.6, -67]), lefthand(jawLocks), 0.4, strokeTo);
 
 // The topknot: three fur lobes, the middle one tallest, each ending in a curl,
 // typed node by node (the sheet's tuft).
@@ -200,7 +210,7 @@ const tuft = furSpan(smooth([[-31, -149.2], [-29.6, -152.8], [-26.6, -155.6], [-
 // head's roll), with about 4 pt of bleed past the head's edge.
 const patches = {
   R: smooth([[-50, -126], [-44.6, -125.6], [-41.4, -124.4], [-40.4, -121.4], [-40.8, -117.4],
-    [-38.4, -113.6], [-35.4, -115.6], [-31, -117.6], [-25.4, -118.4], [-20, -116.6], [-16.2, -112], [-14.6, -105.6], [-16.4, -93.8], [-20, -90], [-25, -88.4],
+    [-38.4, -113.6], [-35.4, -114.8], [-31, -116.2], [-25.4, -116.6], [-20, -115], [-16.2, -111], [-14.6, -105.2], [-16.4, -93.8], [-20, -90], [-25, -88.4],
     [-31, -89.4], [-36.6, -90.4], [-41.6, -89.8], [-50, -88], [-51, -112]]),
   L: smooth([[48.6, -122], [41.4, -122.6], [37.6, -122.8], [35.6, -120.6], [33.7, -118.6],
     [30.5, -120.2], [25.8, -121.6], [20.2, -121.6], [15.1, -119], [11.9, -114], [11.2, -107.4], [14.7, -96], [18.7, -92.7], [23.9, -91.8], [29.7, -93.6],
@@ -247,7 +257,7 @@ const headPaint: Paint = {
   inner: [
     ...furStrokes.map((pts) => ({ pts, width: 0.65, colour: C.furLine, opacity: 0.4 })),
     // The top of each cheek's fluff, where it spills over the patch and the ear.
-    ...([1, -1] as const).map((sx) => ({ pts: ([[-37.6, -91.2], [-42.4, -90.4], [-46.4, -87.4]] as P[]).map(([x, y]): P => [sx * x, y]), width: 0.8, colour: C.furLine, opacity: 0.3 })),
+    ...([1, -1] as const).map((sx) => ({ pts: ([[-36.6, -91], [-41, -90.2], [-44.4, -88]] as P[]).map(([x, y]): P => [sx * x, y]), width: 0.8, colour: C.furLine, opacity: 0.3 })),
   ],
 };
 // The head's line runs all round it: a light line on the crown's fur; where the
@@ -304,7 +314,7 @@ function eye(landmark: P, noseward: number): Piece {
   const ball = oval([cx, cy], rx, ry);
   // The iris: the ball moved toward the nose and up, and a little smaller, so the white shows only as a crescent
   // low on the outer side, about 2 pt at its widest, thinning round the bottom and gone by the top.
-  const ic = E(noseward * 1.4, -0.9);
+  const ic = E(noseward * 1.2, -0.8);
   const [gx, gy] = E(noseward * 1.7, 2.6), [fx, fy] = E(noseward * 1.4, 8.2);
   const big = E(noseward * 3.4, -4.2), small = E(out * 2.8, 5.2);
   // The lid: from just below the outer corner, over the top, to high on the nose side, on the ball's rim.
@@ -320,7 +330,7 @@ function eye(landmark: P, noseward: number): Piece {
     `<stop offset="0.62" stop-color="${C.eyeDark}"/></radialGradient>` +
     `${blur(soft, box, 0.4)}${blur(white, box, 0.3)}${blur(shine, box, 0.22)}</defs>` +
     `<path d="${ball}" fill="${C.eyeDark}"/>` +
-    `<g clip-path="url(#${clip})"><path d="${oval([cx, cy], rx - 0.6, ry - 0.6)}" fill="${C.eyeWhite}" opacity="0.95" filter="url(#${white})"/>` +
+    `<g clip-path="url(#${clip})"><path d="${oval([cx, cy], rx - 0.6, ry - 0.6)}" fill="${C.eyeWhite}" opacity="0.88" filter="url(#${white})"/>` +
     `<path d="${oval(ic, rx - 1, ry - 0.8)}" fill="url(#${iris})" filter="url(#${soft})"/></g>` +
     `<path d="${lidLine.d}" fill="${C.eyeDark}"/>` +
     `<ellipse cx="${n(big)}" rx="1.9" ry="1.8" fill="${C.light}" filter="url(#${shine})"/>` +
@@ -411,7 +421,7 @@ function earPaint(side: "L" | "R"): Paint {
     `<stop offset="1" stop-color="${C.earDeeper}"/></linearGradient></defs>` +
     `<rect x="${fmt(ex0)}" y="${fmt(ey0)}" width="${fmt(ex1 - ex0)}" height="${fmt(ey1 - ey0)}" fill="url(#${deep})"/>`;
   const shadeD = "M-90 -96 C-80 -84 -62 -76 -40 -74 L-40 -50 L-90 -50Z";
-  const cheekD = "M-38 -96 C-44 -92 -50 -84 -51 -74 C-50 -66 -46 -62 -40 -60Z";
+  const cheekD = "M-38 -96 C-43 -92 -47.6 -84 -48.6 -74 C-48 -66 -45 -62 -40 -60Z";
   const root = "M-50 -146 L-30 -146 L-30 -112 L-50 -112Z";
   const locks: P[][] = [[[-74.4, -92], [-76.8, -84], [-77.2, -77.8]], [[-67.6, -90], [-69.8, -80], [-68.6, -69.2]], [[-59, -88], [-60.6, -76], [-58.8, -65]]];
   const ends: [P, P] = [onEar(side, [-41.6, -67.2]), onEar(side, [-44.6, -135.4])];
