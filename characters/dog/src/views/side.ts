@@ -135,7 +135,7 @@ const ear = furEdge(smooth([[8.6, -134.4], [13.4, -125], [16.4, -114.6], [19.8, 
 const foreLocks: { tip: P; root: P; notches: [P, P] }[] = [];
 const head = furEdge(smooth([[-59.8, -58.4], [-70, -62.2], [-80.4, -65.6], [-91.8, -76.2], [-92.8, -80.2], [-95.2, -85.6], [-96.8, -92.6], [-95.6, -97.8],
   [-92.2, -100.2], [-87.4, -100.6], [-85, -104.4], [-84, -112.6], [-81, -124.4], [-77.8, -132.6], [-74, -140.2], [-69, -146.4], [-62.6, -151.4],
-  [-20, -156], [0, -146.8], [10, -131], [17, -110], [14, -78], [-28, -62.4], [-44, -59.6]]), [-80.9, -127], [-65.8, -149.6],
+  [-20, -156], [0, -146.8], [10, -131], [17, -110], [14, -78], [-28, -63.8], [-44, -60.6]]), [-80.9, -127], [-65.8, -149.6],
 // The forehead's fur breaks into two soft locks below the topknot, their tips hanging forward and curling in, as the sheet draws them.
 [{ len: 1.3, w: 1, lean: -0.4 }, { len: 1.7, w: 1.2, lean: -0.45 }], 0.3, (tip, root, notches) => foreLocks.push({ tip, root, notches }));
 
@@ -264,7 +264,7 @@ function legFarPaint(): Paint {
   return {
     fill: C.farFur,
     // In shade under the chest and the tag, where it comes out from behind them, as the sheet paints the wedge.
-    shade: { multiply: C.furShadeBy, rim: { inset: 2.5, toLight: 4 }, shapes: ["M-66 -40 L-56 -40 L-56 -21 C-60 -20 -64 -21 -68 -22Z"], blur: 2 },
+    shade: { multiply: C.furShadeBy, rim: { inset: 2, toLight: 3 }, shapes: ["M-66 -40 L-56 -40 L-56 -22 C-60 -21 -64 -22 -67 -23Z"], blur: 2 },
     inner: [{ pts: [[-69.4, -5.4], [-69.8, -7.6], [-69.7, -9.8], [-69.2, -11.6]], width: 0.75, colour: C.pawLine, opacity: 0.6 }],
     outline: { ...OUTLINE, colour: C.pawLine, width: 1.35, taper: 4, spans: [{ from: [-63.6, -35.2], to: [-66.6, -4.8] }] },
   };
