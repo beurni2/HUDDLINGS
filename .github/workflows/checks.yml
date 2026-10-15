@@ -42,6 +42,10 @@ jobs:
       - run: pip install -r tools/requirements.txt
       - name: Tests
         run: python3 -m unittest discover -s characters/refprep -v
+      - name: Sheet match tests (planted failures, the crop self-check, exit codes)
+        run: python3 -m unittest discover -s characters/sheetmatch -v
+      - name: Placement guide tests
+        run: python3 -m unittest discover -s tools/guide -v
       - name: References are current
         run: |
           for refmap in characters/*/refmap; do
@@ -102,6 +106,35 @@ jobs:
             build/qa/web/**/*-sheet.png
             build/qa/web/**/*.mp4
             build/qa/web/**/report.json
+          retention-days: 14
+
+  sheet-match:
+    # Spec section 5b, The sheet match, and the phase 3 plan (section 4): the
+    # dog built from its source, its front still rendered through the WebGL
+    # runtime and matched against the turnaround crop. The job fails when a
+    # gating check fails (look.ts exits 1) or anything errs (2). The evidence
+    # (compare.png, phone.png, match.json) is uploaded either way.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22.22"
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - run: pip install -r tools/requirements.txt
+      - name: Build the dog
+        run: node characters/build/build.ts dog
+      - name: The front's sheet match
+        run: node runtime-web/lab/look.ts dog front --qa build/qa
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: sheet-match-dog-front
+          path: build/qa/front
           retention-days: 14
 
   swift-linux:
