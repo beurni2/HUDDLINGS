@@ -20,7 +20,7 @@ Kept current every session (CLAUDE.md). One section per lane; each lane edits on
   | side.L | 0.965 | 2.44 pt | 2.21 | 3.5–4 / 3.5–4 / 3 |
   | back | 0.973 | 1.99 pt | 1.22 | 3–4 / 3 / 2.5–3 |
 
-  On-model is close to 4 everywhere; charm stays at 3. Many rounds have stopped moving it: what reviewers still want is the sheet's painterly softness in the fur, which you judge at Gate A.
+  On-model is close to 4 everywhere; charm stays at 3 under the reviewers. You looked at the four views on Oct 15 and said they are all good (`GATES.md`; an early look, not a gate), so the views stay as they are and the work moves on to what Gate A still needs.
 - In review: https://github.com/beurni2/HUDDLINGS/pull/4, an early look so you can stop me if the look is wrong. It is not a gate.
 - Next: the right-facing views; the back view onto the shared line rule (DECISIONS 74; it keeps its own lines for now); the null region and the alpha channel in both runtimes (the face states need them); the face panels' crop records and the Faces check; then every face state, the presets, the hungry and huffy faces, and Gate A.
 
