@@ -389,70 +389,69 @@ function headLinePiece(): Piece {
 }
 
 /**
- * An open eye at its landmark, as the turnaround, the hero and the expression sheet's open eyes paint it: a
- * slightly tall oval, its top leaning toward the nose (and rolled with the face), its edge a little soft. The
- * rim is heaviest along the upper lid and the outer side, warms from near-black there to the printed dark brown
- * round the eye's foot, and thins toward the lower inner side, where the
- * iris sits closest to it; a wide crescent of white lies low on the outer side inside the rim (centred about
- * 15 degrees below level, 2.1 pt at its widest, its inner edge soft); the iris is the printed brown round a
- * darker pupil, in the lid's shadow above and warming toward its foot (DECISIONS 18); one large catchlight
- * high on the nose side, where the sheet's sits, with a faint soft glow round it, and the spec's small one
- * (L446, L509), crisp, low on the nose side of the iris (the sheet draws only the large one: a question for the founder). A
- * faint pale halo lies outside the rim round its lower outer side, between the eye and the hood's tan.
- * `noseward` is +1 when the nose is to its right.
+ * An open eye at its landmark, as the turnaround, the hero and the expression sheet's open eyes paint it: an
+ * oval about as tall as it is wide (19.4 pt on the sheet), its top leaning toward the nose (and rolled with the
+ * face), its edge a little soft. The rim is a lash line, heaviest along the upper lid and the upper outer side,
+ * near-black there and warming to the printed dark brown round the eye's foot, thinnest along the lower inner
+ * side; a thin sliver of white lies high on the outer side inside the rim (from about 60 degrees above level to
+ * 25 below, 1.15 pt at its widest, its inner edge soft). The iris is the near-black of the pupils down to a
+ * distinct lower band in the printed dark brown (DECISIONS 18), as the hero paints it, warming in its middle;
+ * and one catchlight, high on the nose side where the sheet's sits, crisp, with a faint grey core. The sheets
+ * draw no small catchlight (the turnaround, the hero, the glossy-eyes panel and the expression sheet's open
+ * eyes each draw exactly one), so none is drawn: the spec's "one or two small ones" (L446, L509) is a question
+ * for the founder. A faint pale halo lies outside the rim round its lower outer side, between the eye and the
+ * hood's tan. `noseward` is +1 when the nose is to its right.
  */
 function eye(landmark: P, noseward: number): Piece {
-  const rx = 9.5, ry = 9.95, turn = 14 * noseward + ROLL_DEG, out = -noseward;
-  // The ball sits a hair out and down from the landmark, the dark iris's own centre (DECISIONS 10).
-  const [cx, cy]: P = [landmark[0] + out * 0.5 * cosR - 0.3 * sinR, landmark[1] + out * 0.5 * sinR + 0.3 * cosR];
+  const rx = 9.4, ry = 9.35, turn = 14 * noseward + ROLL_DEG, out = -noseward;
+  // The ball sits a hair out from the landmark and 0.55 pt below it, so the dark iris's own centre (DECISIONS 10)
+  // lands on the landmark with the eye's foot where the sheet's is.
+  const [cx, cy]: P = [landmark[0] + out * 0.2 * cosR - 0.55 * sinR, landmark[1] + out * 0.2 * sinR + 0.55 * cosR];
   /** A point in the eye's own frame, rolled with the face: x toward the nose, y down. */
   const S = (x: number, y: number): P => [cx + noseward * x * cosR - y * sinR, cy + noseward * x * sinR + y * cosR];
   const oval = (c: P, a: number, b: number, deg = turn) => pathD(ellipse(c, a, b, deg));
-  const clip = uid("eye"), irisClip = uid("eye"), iris = uid("iris"), lid = uid("lid"), outside = uid("crescent"), rimFade = uid("rim");
-  const pupil = uid("blur"), shine = uid("blur"), edge = uid("blur"), white = uid("blur"), glow = uid("blur"), halo = uid("blur");
+  const clip = uid("eye"), irisClip = uid("eye"), outside = uid("crescent"), above = uid("band"), rimFade = uid("rim");
+  const warm = uid("blur"), shine = uid("blur"), edge = uid("blur"), white = uid("blur"), band = uid("blur"), halo = uid("blur"), core = uid("blur");
   const box: Box = [cx - 14, cy - 14, 28, 28];
   const ball = oval([cx, cy], rx, ry);
-  // The iris inside the rim, set 0.3 pt toward the nose and 0.35 pt down, so the rim is 1.4 pt over the top and
-  // the outer side and 0.7 pt along the lower inner side.
-  const rim = 1.05, irisOval = oval(S(0.3, 0.35), rx - rim, ry - rim);
-  // The white: the iris less a disc 13.05 pt in radius set 6.6 pt toward the nose and 15 degrees up, which leaves a
-  // crescent 2.1 pt wide at about half past 8 on the viewer's left eye that thins to nothing about 60 degrees either side.
-  const [bx, by] = S(6.6 * 0.966, -6.6 * 0.259);
-  const cut = `M${fmt(cx - 30)} ${fmt(cy - 30)}H${fmt(cx + 30)}V${fmt(cy + 30)}H${fmt(cx - 30)}Z` + pathD(ellipse([bx, by], 13.05, 13.05));
-  // The iris: the printed brown round a darker pupil, warming toward its foot, under the lid's shadow.
-  const [gx, gy] = S(0.8, -0.65), [px, py] = S(0.6, -0.4), [t0x, t0y] = S(0, -ry), [t1x, t1y] = S(0, -0.5);
-  // The lid: from below the outer corner, over the top, to high on the nose side, on the ball's rim, heaviest on top.
+  // The iris inside the rim, set 0.35 pt toward the nose and 0.4 pt down, so the rim is 1.4 pt over the top and
+  // the outer side and 0.6 pt along the lower inner side.
+  const rim = 1, irisAt: [number, number] = [0.35, 0.4], irisOval = oval(S(...irisAt), rx - rim, ry - rim);
+  /** A disc's clip: everything round it but the disc, so what it clips is the iris less the disc. */
+  const less = (c: P, r: number) => `M${fmt(cx - 30)} ${fmt(cy - 30)}H${fmt(cx + 30)}V${fmt(cy + 30)}H${fmt(cx - 30)}Z` + pathD(ellipse(c, r, r));
+  // The white: the iris less a disc 13.85 pt in radius set 6.6 pt from the iris's centre toward the nose and 12
+  // degrees down, which leaves a sliver 1.15 pt wide about 12 degrees above level on the outer side that thins to
+  // nothing about 45 degrees either side.
+  const cut = less(S(irisAt[0] + 6.6 * Math.cos(0.21), irisAt[1] + 6.6 * Math.sin(0.21)), 13.85);
+  // The lower band: the iris less a disc 12.55 pt in radius set 8 pt above its centre, 3.8 pt deep at the foot and
+  // running out about 80 degrees either side of it, so its top follows the eye's round.
+  const lower = less(S(irisAt[0], irisAt[1] - 8), 12.55);
+  const [t0x, t0y] = S(0, -ry);
+  // The lash line: from below the outer corner, over the top, to the nose side's upper quarter, on the ball's rim.
   const around = (from: number, to: number, grow: number, n = 41): P[] => Array.from({ length: n }, (_, k) => {
     const a = ((from + ((to - from) * k) / (n - 1)) * Math.PI) / 180;
     return S(-(rx + grow) * Math.cos(a), -(ry + grow) * Math.sin(a));
   });
-  const lidLine = tapered(around(-20, 150, 0.2), 1.7, "outer", "eye lid", { taper: 8, tip: 0.3 });
+  const lidLine = tapered(around(-35, 120, 0.25), 1.8, "outer", "eye lid", { taper: 9, tip: 0.3 });
   // The halo: a soft pale band just outside the rim, from below the eye round its outer side.
   const haloBand = strokeOf(around(-125, 25, 1.1, 31), 1.7, { taper: 5, tip: 0.2 });
-  const big = S(3.9, -4.3), small = S(2.4, 5.4), glowAt = S(0.4, 1.6);
+  const big = S(3.6, -4.55), warmAt = S(irisAt[0], irisAt[1] + 7.25);
   const n = (p: P) => `${fmt(p[0])}" cy="${fmt(p[1])}`;
   const svg = `<defs><clipPath id="${clip}"><path d="${ball}"/></clipPath><clipPath id="${irisClip}"><path d="${irisOval}"/></clipPath>` +
-    `<clipPath id="${outside}"><path d="${cut}" clip-rule="evenodd"/></clipPath>` +
-    `<radialGradient id="${iris}" gradientUnits="userSpaceOnUse" cx="${fmt(gx)}" cy="${fmt(gy)}" r="10">` +
-    `<stop offset="0.5" stop-color="${C.dark}"/><stop offset="0.66" stop-color="${C.dark}"/><stop offset="0.9" stop-color="${C.irisWarm}"/></radialGradient>` +
-    `<linearGradient id="${lid}" gradientUnits="userSpaceOnUse" x1="${fmt(t0x)}" y1="${fmt(t0y)}" x2="${fmt(t1x)}" y2="${fmt(t1y)}">` +
-    `<stop offset="0.35" stop-color="${C.eyeDark}"/><stop offset="1" stop-color="${C.eyeDark}" stop-opacity="0"/></linearGradient>` +
+    `<clipPath id="${outside}"><path d="${cut}" clip-rule="evenodd"/></clipPath><clipPath id="${above}"><path d="${lower}" clip-rule="evenodd"/></clipPath>` +
     // The rim warms from near-black along the lid to the printed dark brown round the eye's foot, as the sheet's does.
     `<linearGradient id="${rimFade}" gradientUnits="userSpaceOnUse" x1="${fmt(t0x)}" y1="${fmt(t0y)}" x2="${fmt(2 * cx - t0x)}" y2="${fmt(2 * cy - t0y)}">` +
-    `<stop offset="0.6" stop-color="${C.eyeDark}"/><stop offset="0.8" stop-color="${C.dark}"/></linearGradient>` +
-    `${blur(pupil, box, 0.7)}${blur(shine, box, 0.2)}${blur(edge, box, 0.22)}${blur(white, box, 0.3)}${blur(glow, box, 0.8)}${blur(halo, box, 0.55)}</defs>` +
+    `<stop offset="0.62" stop-color="${C.eyeDark}"/><stop offset="0.85" stop-color="${C.dark}"/></linearGradient>` +
+    `${blur(warm, box, 0.45)}${blur(shine, box, 0.15)}${blur(edge, box, 0.22)}${blur(white, box, 0.25)}${blur(band, box, 0.55)}${blur(halo, box, 0.55)}${blur(core, box, 0.3)}</defs>` +
     `<path d="${haloBand.d}" fill="${C.fur}" opacity="0.8" filter="url(#${halo})"/>` +
     `<g filter="url(#${edge})"><path d="${ball}" fill="url(#${rimFade})"/><path d="${lidLine.d}" fill="${C.eyeDark}"/></g>` +
-    `<g clip-path="url(#${clip})"><path d="${irisOval}" fill="url(#${iris})"/>` +
-    // A soft warm glow low round the pupil's foot, so the lower iris reads warm red-brown as the sheet's does, kept
-    // mostly above the eye's lowest quarter, where the printed brown stays the dominant colour.
-    `<ellipse cx="${n(glowAt)}" rx="4.6" ry="1.6" fill="${C.irisWarm}" opacity="0.55" filter="url(#${pupil})"/>` +
-    `<ellipse cx="${n([px, py])}" rx="3.8" ry="4.2" fill="${C.eyeDark}" opacity="0.75" filter="url(#${pupil})"/>` +
-    `<path d="${ball}" fill="url(#${lid})"/>` +
-    `<g clip-path="url(#${irisClip})"><g filter="url(#${white})"><path d="${irisOval}" fill="${C.eyeWhite}" clip-path="url(#${outside})"/></g></g></g>` +
-    `<circle cx="${n(big)}" r="2.9" fill="${C.light}" opacity="0.22" filter="url(#${glow})"/>` +
-    `<ellipse cx="${n(big)}" rx="1.95" ry="1.85" fill="${C.light}" filter="url(#${shine})"/>` +
-    `<circle cx="${n(small)}" r="0.7" fill="${C.light}" opacity="0.95"/>`;
+    `<g clip-path="url(#${clip})"><path d="${irisOval}" fill="${C.eyeDark}"/>` +
+    // The lower band, its top edge soft but defined, warming through its middle above the foot.
+    `<g clip-path="url(#${irisClip})"><g filter="url(#${band})"><path d="${irisOval}" fill="${C.dark}" clip-path="url(#${above})"/></g>` +
+    `<ellipse cx="${n(warmAt)}" rx="3.7" ry="0.85" fill="${C.irisLight}" opacity="0.85" filter="url(#${warm})"/>` +
+    `<g filter="url(#${white})"><path d="${irisOval}" fill="${C.eyeWhite}" clip-path="url(#${outside})"/></g></g></g>` +
+    `<ellipse cx="${n(big)}" rx="1.75" ry="1.65" fill="${C.light}" filter="url(#${shine})"/>` +
+    `<ellipse cx="${n(big)}" rx="0.7" ry="0.6" fill="${C.dark}" opacity="0.1" filter="url(#${core})"/>`;
   return piece(svg, box, { shapes: [], lines: [lidLine.line] });
 }
 
@@ -469,67 +468,73 @@ function brow(sx: number): Piece {
 }
 
 /**
- * The nose in the face frame: a rounded inverted triangle, domed on top, broadest a third of the way down with
- * round side corners, narrowing to a soft point over the philtrum (the sheet's is 11.7 pt wide and about 7.4 pt
- * tall), with a soft warm sheen on its upper middle.
+ * The nose in the face frame, as the turnaround, the blush-cheeks panel and the hero draw it: a soft inverted
+ * triangle, its top a gentle dome, broadest a little above its middle with round shoulders (the sheet's is 12.2 pt
+ * wide there and about 7.7 pt tall), its sides running in full to a rounded point at the bottom centre that runs on
+ * into the philtrum's top; a soft grey-brown sheen across its upper left, as the hero paints it.
  */
-const noseShape = symmetric([[0, 4.5], [-2.8, 4.75], [-4.8, 5.35], [-5.8, 6.5], [-5.8, 8.5], [-5, 10.1], [-3.4, 11.3], [-1.4, 12]], [0, 12.2]);
+const noseShape = symmetric([[0, 4.35], [-2.3, 4.55], [-4, 5.05], [-5.1, 5.7], [-5.85, 6.55], [-6.1, 7.5], [-5.9, 8.6], [-5.1, 9.65], [-3.8, 10.6], [-2.3, 11.35],
+  [-1.1, 11.9], [-0.5, 12.3]], [0, 12.5]);
 function nose(): Piece {
   const f = uid("blur"), box: Box = [-8, 2, 16, 13];
-  return piece(inFace(`<defs>${blur(f, box, 0.9)}</defs>` +`<path d="${pathD(noseShape.segs)}" fill="${C.eyeDark}"/>` +
-    `<ellipse cx="-0.6" cy="6.3" rx="2.6" ry="1.1" fill="${C.irisWarm}" opacity="0.7" filter="url(#${f})"/>`), faceBox(box));
+  return piece(inFace(`<defs>${blur(f, box, 0.7)}</defs>` +`<path d="${pathD(noseShape.segs)}" fill="${C.eyeDark}"/>` +
+    `<ellipse cx="-1.3" cy="6.05" rx="2.9" ry="1.05" transform="rotate(-6 -1.3 6.05)" fill="${C.noseSheen}" opacity="0.8" filter="url(#${f})"/>`), faceBox(box));
 }
 
 /**
- * The open happy mouth in the face frame, as the sheet draws it. The upper lip is one line (the muzzle line, an
- * inner line: 0.7 pt through the middle, 0.9 pt along the flicks, tapering to fine points at its tips) from the
- * philtrum's foot down to the opening's top corners, about 9.4 pt either side, then on in a short gentle flick up to its tips
- * (12.9 pt out and 1.75 pt up, about 22 degrees). The lip IS the opening's top edge: the opening hangs from it,
- * widest at the top and narrowing to a rounded bottom. Its sides and bottom carry a thin rim, dark red-brown at
- * the sides and lighter where the tongue meets it; the inside is the dark red, a band under the lip deepest at
- * its top and back into the corners, and the tongue fills the opening's width and its lower 58%, rising toward
- * the lip at the sides.
+ * The open happy mouth in the face frame, as the turnaround, the hero and the expression sheet's happy face draw
+ * it. The upper lip is one line (the muzzle line, an inner line, 0.9 pt, tapering to fine points at its tips), a
+ * deep red-brown over the opening and the printed dark brown out along its ends: from the philtrum's foot down
+ * to the opening's top corners, about 9.3 pt either side, then on in a short flick that hooks up into a small
+ * curl at each tip (12.9 pt out and 3 pt up). The lip IS the opening's top edge: the opening hangs straight
+ * from it, widest at the top and narrowing in a rounded wedge to its foot (29.4 pt, as deep as the sheet's).
+ * Inside, the dark red fills the opening right up to the line across its width and runs down both sides; the
+ * tongue is a rounded pink lobe set low and centred, its top a convex mound (the sheet's peaks 4.6 pt under the
+ * lip and meets the sides about 6 pt lower), with dark red showing round it at both sides and a soft light on
+ * its top. The opening's sides carry a dark red-brown rim, heavier than the light one where the tongue meets
+ * its foot.
  */
 function mouth(): Piece {
-  // One half of the lip, typed on the dog's left (the viewer's right), from the philtrum's foot to the flick's tip.
-  const half: P[] = [[0, 14.2], [1.4, 15], [3.2, 15.8], [5.4, 16.5], [7.6, 16.9], [9.4, 17], [10.7, 16.7], [11.9, 16], [12.9, 15.2]];
+  // One half of the lip, typed on the dog's left (the viewer's right), from the philtrum's foot to the curl's tip.
+  const half: P[] = [[0, 14.2], [1.4, 15], [3.2, 15.8], [5.4, 16.5], [7.6, 16.95], [9.3, 17.05], [10.6, 16.75], [11.7, 16], [12.5, 15], [12.9, 14]];
   const lipShape = smooth([...mirrorX(half, false).slice(0, -1), ...half], { closed: false });
-  const lipPts = sample(lipShape.segs, 12, false);
-  // Fine through the middle, bolder from the corners out along each flick, as the sheet's line is.
-  const lip = tapered(lipPts, 0.7, "inner", "upper lip", { taper: 2.6, tip: 0.25 });
-  const flicks = ([1, -1] as const).map((sx) => tapered(lipPts.filter(([x]) => sx * x >= 7.4).sort((a, b) => sx * (a[0] - b[0])), 0.9, "inner", "lip flick", { taper: 1.4, tip: 0.35 }));
-  // The opening: along the lip from corner to corner, then down sides that slope in to a round bottom.
-  const opening = smooth([[0, 14.4], [3.2, 16], [5.4, 16.7], [7.6, 17.1], [9.3, 17.2], [9, 19.8], [8.1, 22.5], [6.9, 24.9], [5.3, 26.7], [3, 28.1], [0, 28.7],
-    [-3, 28.1], [-5.3, 26.7], [-6.9, 24.9], [-8.1, 22.5], [-9, 19.8], [-9.3, 17.2], [-7.6, 17.1], [-5.4, 16.7], [-3.2, 16]], { corners: [0, 4, 16] });
+  const lip = tapered(sample(lipShape.segs, 12, false), 0.9, "inner", "upper lip", { taper: 2.2, tip: 0.3 });
+  // The opening: along the lip from corner to corner, then down sides that slope in to a round foot.
+  const opening = smooth([[0, 14.4], [3.2, 16], [5.4, 16.75], [7.6, 17.15], [9.2, 17.25], [8.55, 20.2], [7.45, 22.9], [6.3, 25.2], [4.85, 27.3], [2.7, 28.8], [0, 29.4],
+    [-2.7, 28.8], [-4.85, 27.3], [-6.3, 25.2], [-7.45, 22.9], [-8.55, 20.2], [-9.2, 17.25], [-7.6, 17.15], [-5.4, 16.75], [-3.2, 16]], { corners: [0, 4, 16] });
   const m = pathD(opening.segs);
-  // The rim, from one top corner down round the bottom to the other, drawn twice its width centred on the edge
-  // inside the opening's clip, so the half that shows lies inside the opening.
-  const rimPts = sample(opening.segs.slice(opening.segs.findIndex((g) => g[0][0] === 9.3 && g[0][1] === 17.2)), 16, false)
-    .filter(([x, y]) => y > 17.5 || Math.abs(x) > 9);
-  const rimEnd = rimPts.findIndex(([x, y], i) => i > 4 && x < -9 && y < 17.5);
-  const rimStroke = strokeOf(rimEnd > 0 ? rimPts.slice(0, rimEnd + 1) : rimPts, 1.6, { taper: 3, tip: 0.1, band: [LIMITS.inner[0] * 2, LIMITS.inner[1] * 2] });
-  const rimLine: DrawnLine = { kind: "inner", width: 0.8, where: "mouth rim", drawn: [rimStroke.drawn[0] / 2, rimStroke.drawn[1] / 2] };
-  const clip = uid("mouth"), soft = uid("blur"), deep = uid("blur"), lit = uid("blur"), edge = uid("blur"), rim = uid("rim"), tongueClip = uid("tongue");
-  const TONGUE = "M-11 31 L-11 18.9 C-6.4 19.4 -3.2 20.3 0 20.3 C3.2 20.3 6.4 19.4 11 18.9 L11 31Z";
-  const philtrum = innerLine([[0, 11.2], [0, 14.4]], 0.8, C.dark, { taper: 0.8, tip: 0.6, wobble: 0 });
+  // The rim down each side, from the top corner to where the tongue meets the side, drawn twice its width centred
+  // on the edge inside the opening's clip, so the half that shows lies inside the opening; and a lighter one round
+  // the foot under the tongue.
+  const edgePts = sample(opening.segs.slice(opening.segs.findIndex((g) => g[0][0] === 9.2 && g[0][1] === 17.25)), 16, false)
+    .filter(([x, y]) => y > 17.6 || Math.abs(x) > 9);
+  const end = edgePts.findIndex(([x, y], i) => i > 4 && x < -9 && y < 17.6);
+  const along = end > 0 ? edgePts.slice(0, end + 1) : edgePts;
+  const doubled: [number, number] = [LIMITS.inner[0] * 2, LIMITS.inner[1] * 2];
+  const sides = ([1, -1] as const).map((sx) => strokeOf(along.filter(([x, y]) => sx * x > 0 && y < 24.4).sort((a, b) => a[1] - b[1]), 1.8, { taper: 2.6, tip: 0.2, band: doubled }));
+  const foot = strokeOf(along.filter(([, y]) => y > 21.6), 1.2, { taper: 3, tip: 0.1, band: doubled });
+  const rimLines: DrawnLine[] = [...sides.map((s) => ({ kind: "inner" as const, width: 0.9, where: "mouth side", drawn: [s.drawn[0] / 2, s.drawn[1] / 2] as [number, number] })),
+    { kind: "inner", width: 0.6, where: "mouth foot", drawn: [foot.drawn[0] / 2, foot.drawn[1] / 2] }];
+  const clip = uid("mouth"), soft = uid("blur"), deep = uid("blur"), lit = uid("blur"), edge = uid("blur"), lipFade = uid("lip");
+  // The tongue's top: a convex mound peaking 5 pt under the lip and running down to meet each side 5.5 pt lower.
+  const TONGUE = "M-7.6 31 L-7.6 25.6 C-7.1 24.2 -6.6 23 -6 22 C-4.7 20.3 -2.6 19.4 0 19.35 C2.6 19.4 4.7 20.3 6 22 C6.6 23 7.1 24.2 7.6 25.6 L7.6 31Z";
+  const philtrum = innerLine([[0, 11.4], [0, 14.4]], 0.9, C.eyeDark, { taper: 0.9, tip: 0.75, wobble: 0 });
   const box: Box = [-15, 10, 30, 21];
-  const svg = `<defs><clipPath id="${clip}"><path d="${m}"/></clipPath><clipPath id="${tongueClip}"><path d="${TONGUE}"/></clipPath>${blur(soft, box, 0.5)}${blur(deep, box, 0.9)}${blur(lit, box, 1.4)}${blur(edge, box, 0.2)}` +
-    `<linearGradient id="${rim}" gradientUnits="userSpaceOnUse" x1="0" y1="18" x2="0" y2="28.7">` +
-    `<stop offset="0.35" stop-color="${C.mouthRim}"/><stop offset="1" stop-color="${C.tongueRim}"/></linearGradient></defs>` +
+  const svg = `<defs><clipPath id="${clip}"><path d="${m}"/></clipPath>${blur(soft, box, 0.4)}${blur(deep, box, 0.8)}${blur(lit, box, 1.1)}${blur(edge, box, 0.2)}` +
+    `<linearGradient id="${lipFade}" gradientUnits="userSpaceOnUse" x1="-13" y1="0" x2="13" y2="0">` +
+    `<stop offset="0.08" stop-color="${C.dark}"/><stop offset="0.25" stop-color="${C.lipLine}"/><stop offset="0.75" stop-color="${C.lipLine}"/>` +
+    `<stop offset="0.92" stop-color="${C.dark}"/></linearGradient></defs>` +
     `<path d="${m}" fill="${C.mouthInside}"/><g clip-path="url(#${clip})">` +
-    // Deepest right under the lip and back into its corners, easing to the mouth's own red above the tongue.
-    `<path d="M-10 14 L10 14 L10 17.3 C6 17.5 3 16.5 0 16.3 C-3 16.5 -6 17.5 -10 17.3Z" fill="${C.mouthDeep}" opacity="0.55" filter="url(#${deep})"/>` +
-    // The tongue: the full width of the opening, filling its lower 58% at the middle and rising at the sides to
-    // within about 1.7 pt of the lip, its top edge soft where it melts into the dark; lighter through its middle.
+    // Deepest right under the lip and back into its corners, easing to the mouth's own red.
+    `<path d="M-10 14 L10 14 L10 18 C6 18.1 3 17.2 0 17 C-3 17.2 -6 18.1 -10 18Z" fill="${C.mouthDeep}" opacity="0.6" filter="url(#${soft})"/>` +
+    // The cavity in shade down both sides beside the tongue, as the sheet paints it a deeper maroon there.
+    `<path d="M-10 17 L-7 17.4 C-7.2 19.6 -7.4 22.4 -8 25.4 L-10 25.4Z M10 17 L7 17.4 C7.2 19.6 7.4 22.4 8 25.4 L10 25.4Z" fill="${C.mouthDeep}" opacity="0.4" filter="url(#${soft})"/>` +
+    // The tongue, its top soft where it meets the dark, with a soft light on its mound.
     `<path d="${TONGUE}" fill="${C.tongue}" filter="url(#${soft})"/>` +
-    // In the dark's shade where it goes in under it (kept on the tongue, so the dark keeps its own red), lighter
-    // through its middle.
-    `<g clip-path="url(#${tongueClip})"><path d="M-11 18.9 C-6.4 19.4 -3.2 20.3 0 20.3 C3.2 20.3 6.4 19.4 11 18.9 L11 21.2 C6.4 21.7 3.2 22.4 0 22.4 ` +
-    `C-3.2 22.4 -6.4 21.7 -11 21.2Z" fill="${C.tongueRim}" opacity="0.3" filter="url(#${deep})"/></g>` +
-    `<ellipse cx="-0.3" cy="24.8" rx="3.4" ry="1.9" fill="${C.tongueShine}" opacity="0.4" filter="url(#${lit})"/>` +
-    `<path d="${rimStroke.d}" fill="url(#${rim})" filter="url(#${edge})"/></g>` +
-    `<path d="${lip.d}" fill="${C.dark}"/>${flicks.map((f) => `<path d="${f.d}" fill="${C.dark}"/>`).join("")}${philtrum.svg}`;
-  return piece(inFace(svg), faceBox(box), { shapes: [], lines: [lip.line, ...flicks.map((f) => f.line), rimLine, { ...philtrum.line, where: "philtrum" }] });
+    `<ellipse cx="-0.4" cy="21.6" rx="2.9" ry="1.25" fill="${C.tongueShine}" opacity="0.55" filter="url(#${lit})"/>` +
+    `<g filter="url(#${edge})">${sides.map((s) => `<path d="${s.d}" fill="${C.mouthRim}"/>`).join("")}<path d="${foot.d}" fill="${C.tongueRim}"/></g></g>` +
+    `<path d="${lip.d}" fill="url(#${lipFade})"/>${philtrum.svg}`;
+  return piece(inFace(svg), faceBox(box), { shapes: [], lines: [lip.line, ...rimLines, { ...philtrum.line, where: "philtrum" }] });
 }
 
 /** A blush in the face frame, under the eye's outer side: an ellipse turned with the face. */

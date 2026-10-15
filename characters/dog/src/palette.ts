@@ -79,6 +79,14 @@ export const C = {
   /** The warm light low in the iris: the printed iris brown a fifth of the way to the mouth's red and a tenth
    * toward the gold, #5F331A against the sheet's #5B3119. */
   irisWarm: mix(mix(dark, mouthInside, 0.2), tag, 0.1),
+  /** The upper lip over the open mouth: the mouth's red a little over halfway to the near-black, #591710 against
+   * the sheet's #581A0F. */
+  lipLine: mix(mouthInside, eyeDark, 0.55),
+  /** The nose's sheen: the printed dark brown 15% toward the light, #584437 against the hero's #594338. */
+  noseSheen: mix(dark, light, 0.15),
+  /** The lower iris's warm light near its foot: the iris's warm brown a tenth of the way to the light, #6F4731
+   * against the turnaround's #694632 there. */
+  irisLight: mix(mix(mix(dark, mouthInside, 0.2), tag, 0.1), light, 0.1),
   /** The mouth's inside in its own shade under the lip and in the corners: a quarter darker. */
   mouthDeep: darken(mouthInside, 0.25),
   /** The thin rim round the opening's sides: the mouth's inside halfway to the printed dark brown, #6C2417. */
