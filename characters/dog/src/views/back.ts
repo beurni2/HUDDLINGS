@@ -115,6 +115,8 @@ const earRNodes: Node[] = [[28.6, -142.6], [36.4, -145.2], [41, -145.4], [44, -1
 /** Each ear's foot from its outer side in: a small step, a middle clump and the big inner clump, lowest under its middle. */
 const footLocks: Lock[] = [{ len: 0.8, w: 0.95, lean: 0.3 }, { len: 1.5, w: 1.45, lean: 0.2 }, { len: 1.6, w: 1.75, lean: 0.05 }];
 const footLocksR: Lock[] = [{ len: 0.8, w: 0.95, lean: 0.3 }, { len: 1.4, w: 1.4, lean: 0.2 }, { len: 1.6, w: 1.85, lean: 0.05 }];
+/** The fine strands painted in each ear, as the lint sees them. */
+const earStrands: Record<"L" | "R", DrawnLine[]> = { L: [], R: [] };
 /** Each clump of each ear's foot: its tip, root and notches, for the partings drawn up into it. */
 const earClumps: Record<"L" | "R", { tip: P; root: P; notches: [P, P] }[]> = { L: [], R: [] };
 const ears = {
@@ -237,7 +239,7 @@ const backPaint: Paint = {
   // haunch's lower half, turning under toward the ground, deepest at its outer bottom; the right haunch's round, away
   // from the light; and the rim away from the light.
   shade: furShade(hipGroup, ["M-31 -63.6 C-20 -57 20 -57 31 -63.6 L31 -70 L-31 -70Z",
-    pathD(ellipse([-28, -3], 17, 7, -8)), pathD(ellipse([30, -3], 18, 7.6, 8)), pathD(ellipse([48, -24], 4, 13, 0))], [], { inset: 2.5, toLight: 4 }, 4.2),
+    pathD(ellipse([-30, -2], 19, 9.4, -8)), pathD(ellipse([31, -2], 19, 9.6, 8)), pathD(ellipse([48, -24], 4, 13, 0))], [], { inset: 2.5, toLight: 4 }, 4.2),
   // The light from the top left on the left haunch's round and the left shoulder.
   highlight: { d: `${pathD(ellipse([-36, -29], 7.5, 11, 10))} ${pathD(ellipse([-27, -52], 5, 3.4, -30))}`, colour: C.light, opacity: 0.3, blur: 4.5 },
   // Lines as the sheet draws them from behind: down each shoulder from under the collar's end the haunches' line,
@@ -260,7 +262,7 @@ function hindPaint(side: "L" | "R"): Paint {
   const sx = side === "L" ? -1 : 1, sole = uid("sole");
   return {
     fill: C.fur,
-    shade: furShade(hipGroup, [pathD(ellipse([-28, -3], 17, 7, -8)), pathD(ellipse([30, -3], 18, 7.6, 8))], [], { inset: 2.5, toLight: 4 }, 4.2),
+    shade: furShade(hipGroup, [pathD(ellipse([-30, -2], 19, 9.4, -8)), pathD(ellipse([31, -2], 19, 9.6, 8))], [], { inset: 2.5, toLight: 4 }, 4.2),
     under: `<defs><linearGradient id="${sole}" gradientUnits="userSpaceOnUse" x1="0" y1="-12" x2="0" y2="-3">` +
       `<stop offset="0" stop-color="${side === "L" ? C.haunchLine : C.warmLine}"/><stop offset="1" stop-color="${C.outline}"/></linearGradient></defs>`,
     outline: { ...OUTLINE, colour: `url(#${sole})`, width: 1.5, taper: 3, spans: side === "L"
@@ -333,7 +335,7 @@ const headPaint: Paint = {
   under: furGrain(boxOf(head), 5) + whorlStrokes(),
   // Low on the back of the head, where it warms toward the collar and turns under it; and the rim away from the
   // light. The crown stays light out to its line, as the sheet paints it.
-  shade: furShade(headGroup, ["M-38 -80 C-22 -73 22 -73 38 -80 L38 -60 L-38 -60Z"], ["M-50 -172 L50 -172 L50 -138 L-50 -138Z"], { inset: 3, toLight: 4.5 }, 3.2),
+  shade: furShade(headGroup, ["M-41 -92 C-32 -78 -14 -75 0 -75 C14 -75 32 -78 41 -92 L41 -60 L-41 -60Z"], ["M-50 -172 L50 -172 L50 -138 L-50 -138Z"], { inset: 3, toLight: 4.5 }, 3.6),
   highlight: { d: headLight, colour: C.light, opacity: 0.32, blur: 6 },
 };
 
@@ -427,8 +429,12 @@ function earPaint(side: "L" | "R"): Paint {
     [[-52, -103], [-53.2, -93], [-53.8, -83], [-53.6, -76]], [[-46.6, -95], [-47.4, -86], [-47.8, -77]], [[-66.6, -86], [-65.4, -79.6]],
     [[-61.4, -86], [-62.6, -79], [-62.4, -73.6]], [[-56.6, -84], [-56.8, -77], [-56, -72]], [[-50.4, -86], [-50.6, -79], [-50, -73]]]);
   const light = flip([[[-58.4, -118], [-62, -108], [-64, -98]], [[-50.4, -114], [-52.2, -103], [-53, -94]], [[-45, -106], [-46, -97]]]);
-  const fine = (pts: P[][], width: number, seed: number) =>
-    pts.map((l, i) => strokeOf(curve(l), width, { taper: 3, tip: 0.1, wobble: 0.12, seed: seed + i }).d).join("");
+  // Each strand is an inner line (0.6 to 0.9 pt), softened by a slight blur; the lint holds the widths it draws.
+  const fine = (pts: P[][], width: number, seed: number) => pts.map((l, i) => {
+    const s = strokeOf(curve(l), width, { taper: 3, tip: 0.1, wobble: 0.12, seed: seed + i, band: LIMITS.inner });
+    earStrands[side].push({ kind: "inner", width, where: `ear.${side} strand`, drawn: s.drawn });
+    return s.d;
+  }).join("");
   const under = `<defs><linearGradient id="${deep}" gradientUnits="userSpaceOnUse" x1="0" y1="-120" x2="0" y2="-66">` +
     `<stop offset="0" stop-color="${C.earDeep}" stop-opacity="0"/><stop offset="0.45" stop-color="${C.earDeep}" stop-opacity="0.8"/>` +
     `<stop offset="0.8" stop-color="${C.earDeeper}"/><stop offset="1" stop-color="${C.earFoot}"/></linearGradient>` +
@@ -519,7 +525,11 @@ export function back(): Drawn[] {
     ...([[-38, 11], [37, 10], [6, 12]] as [number, number][]).map(([x, rx]) =>
       soft(`M${x - rx} -0.8 a${rx} 1.8 0 1 0 ${2 * rx} 0 a${rx} 1.8 0 1 0 ${-2 * rx} 0Z`, [x - rx, -2.6, 2 * rx, 3.6], C.contact, 1.2, 0.5))));
   for (const side of ["L", "R"] as const) add(`hind.${side}`, roomy(part(`hind.${side}`, hind[side], hindPaint(side)), 6));
-  for (const side of ["L", "R"] as const) add(`ear.${side}`, part(`ear.${side}`, ears[side], earPaint(side)));
+  for (const side of ["L", "R"] as const) {
+    earStrands[side].length = 0;
+    const p = part(`ear.${side}`, ears[side], earPaint(side));
+    add(`ear.${side}`, { ...p, meta: { ...p.meta, lines: [...p.meta.lines, ...earStrands[side]] } });
+  }
   add("head.base", part("head.base", head, headPaint));
   add("shadow.ear.L", earOnHead("L"));
   add("shadow.ear.R", earOnHead("R"));

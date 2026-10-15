@@ -52,8 +52,8 @@
   "threshold": 0.85,
   "groundShadowLeftOut": true,
   "pass": true,
-  "iouHeadAligned": 0.9718,
-  "headCentreOffsetPt": [0.42, -0.27]
+  "iouHeadAligned": 0.9717,
+  "headCentreOffsetPt": [0.43, -0.28]
  },
  "landmarks": {
   "thresholdPt": 2.8,
@@ -145,11 +145,11 @@
     "pass": true
    },
    "furShade": {
-    "dominant": "#FDE6CE",
+    "dominant": "#FDE4CA",
     "heldTo": "#FDE3C8",
     "heldBy": "palettePainted.furShade",
-    "deltaE2000": 1.32,
-    "pixels": 1044,
+    "deltaE2000": 0.44,
+    "pixels": 1281,
     "pass": true
    },
    "ears": {
