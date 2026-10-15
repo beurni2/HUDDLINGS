@@ -397,8 +397,10 @@ function blush(sx: number): Piece {
  * and the smaller heart embossed on it, a warm line with the light catching its lower edge.
  */
 function tagPiece(): Piece {
-  const ring = piece(`<rect x="-1.4" y="-57.2" width="2.8" height="7.2" rx="1.4" fill="${C.collar}" stroke="${C.collarLine}" stroke-width="0.6"/>` +
-    `<rect x="-0.7" y="-56.6" width="0.8" height="5.6" rx="0.4" fill="${C.collarHighlight}"/>`, [-2.5, -58, 5, 9], { shapes: [], lines: [{ kind: "inner", width: 0.6, where: "tag ring" }] });
+  // The ring's edge is a plain stroke, drawn exactly as wide as it is declared.
+  const ringLine: DrawnLine = { kind: "inner", width: 0.6, where: "tag ring", drawn: [0.6, 0.6] };
+  const ring = piece(`<rect x="-1.4" y="-57.2" width="2.8" height="7.2" rx="1.4" fill="${C.collar}" stroke="${C.collarLine}" stroke-width="${ringLine.width}"/>` +
+    `<rect x="-0.7" y="-56.6" width="0.8" height="5.6" rx="0.4" fill="${C.collarHighlight}"/>`, [-2.5, -58, 5, 9], { shapes: [], lines: [ringLine] });
   const emboss = sample(innerHeart.segs, 10);
   emboss.push(emboss[0]!);
   return join(ring, part("tag", heart, {
@@ -414,9 +416,11 @@ function tagPiece(): Piece {
  * An ear's paint (front c's, on front a's ears): the tan deepening down the ear and toward its outer edge
  * under the fur's own warm shade, as the sheet paints it, reaching about the sheet's #D89464 low down; the
  * shade on the rim away from the light and where the cheek's fluff hangs over it, none where the root shows
- * under the crown, where it is the same flat tan as the root's tan on the head beside it; three faint lock
- * lines flowing down to the lobes of its lower edge; and its line in the warmer, lighter brown, from where it comes out from under
- * the cheek round the bottom and up the outside to where it tucks under the crown.
+ * under the crown, where it is the same flat tan as the root's tan on the head beside it; the upper ear a
+ * little lighter in its middle, clear of the head's edge (the sheet's L* 73 to 74 there against the tan's 71);
+ * three faint lock lines flowing down to the lobes of its lower edge; and its line in the warmer, lighter
+ * brown, from where it comes out from under the cheek round the bottom and up the outside to where it tucks
+ * under the crown.
  */
 function earPaint(side: "L" | "R"): Paint {
   const k = side === "R" ? 1 : -1;
@@ -435,6 +439,7 @@ function earPaint(side: "L" | "R"): Paint {
     fill: C.marking,
     under,
     shade: { multiply: C.furShadeBy, rim: { inset: 2.2, toLight: 3.6 }, shapes: [earD(side, shadeD), earD(side, cheekD)], keep: [earD(side, root)], blur: 4 },
+    highlight: { d: earD(side, "M-65 -106 C-65 -114 -59.6 -122.6 -54.6 -123.6 C-52.2 -119 -52.8 -110 -56.6 -104.4 C-59.4 -101.4 -65 -101.6 -65 -106Z"), colour: C.patch, opacity: 0.5, blur: 2.6 },
     inner: locks.map((pts) => ({ pts: pts.map((p) => onEar(side, p)), width: 0.9, colour: C.earLine, opacity: 0.26 })),
     outline: { ...OUTLINE, colour: C.warmLine, taper: 6, spans: [side === "R" ? { from: ends[0], to: ends[1] } : { from: ends[1], to: ends[0] }] },
   };
