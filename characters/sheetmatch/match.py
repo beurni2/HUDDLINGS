@@ -68,6 +68,7 @@ MATCH_RADIUS_SHARE = 0.2  # of the head's width: how near a marking painted into
 MARKING_PLACE_SHARE = 0.03  # of the head's width (L523's 3%): how far each patch is grown to hold the other's centroid
 EDGE_P95_PT = 2.0  # advisory target for the edge distance
 PART_IOU = 0.85  # advisory target for each part the sheet's finders give
+COVERAGE = 0.5  # a crop pixel is in the silhouette, or a part's, when this much of it is covered
 PHONE_PPP = 3
 ZOOM = 3
 CARD = (251, 245, 236)  # a light card for areas outside the crop
@@ -274,9 +275,9 @@ class Render:
         over = premult + (1 - self.alpha[..., None]) * (frame.card / 255)
         self.rgb = np.clip(np.round(over * 255), 0, 255).astype(np.uint8)
         shadow = self.coverage.get(GROUND_SHADOW, np.zeros(grid.shape))
-        self.sil = (self.alpha >= 0.5) & (shadow < 0.5)
+        self.sil = (self.alpha >= COVERAGE) & (shadow < COVERAGE)
 
-    def mask(self, names, threshold=0.5):
+    def mask(self, names, threshold=COVERAGE):
         """Where the named parts together cover at least threshold of a pixel."""
         total = np.zeros(self.alpha.shape)
         for name in names:
@@ -311,6 +312,22 @@ def best_shift(sil, sheet):
     fx = vertex(scores[iy, ix - 1], scores[iy, ix], scores[iy, ix + 1]) if 0 < ix < 2 * r else 0.0
     fy = vertex(scores[iy - 1, ix], scores[iy, ix], scores[iy + 1, ix]) if 0 < iy < 2 * r else 0.0
     return [ix - r + fx, iy - r + fy], float(scores[iy, ix])
+
+
+def thresholds(frame):
+    """Every threshold the checks use, as match.json records them."""
+    return {"silhouetteIoUMin": IOU_MIN[frame.kind], "coverage": COVERAGE, "shiftMaxPx": SHIFT_MAX_PX, "shiftSearchPx": SHIFT_SEARCH_PX,
+            "landmarkShareOfHead": LANDMARK_SHARE, "landmarkPt": round(LANDMARK_SHARE * frame.head_width, 2), "deltaE2000Max": DELTA_E_MAX,
+            "idTolerance": ID_TOLERANCE, "blushRestingSpread": frame.model["blush"]["restingSpread"], "blushMinPx": BLUSH_MIN_PX,
+            "shownPt2": SHOWN_PT2, "bakedMinPx": BAKED_MIN_PX, "matchRadiusShareOfHead": MATCH_RADIUS_SHARE,
+            "markingPlaceShareOfHead": MARKING_PLACE_SHARE, "edgeP95Pt": EDGE_P95_PT, "partIoU": PART_IOU}
+
+
+def repo_path(path):
+    """A path as match.json records it: from the repository's root when inside it, so evidence never names a
+    machine's folders."""
+    path = Path(path).resolve()
+    return path.relative_to(sheets.ROOT).as_posix() if path.is_relative_to(sheets.ROOT) else str(path)
 
 
 def round2(values):
@@ -684,12 +701,13 @@ def atlas_share(species, still, views):
     """The share of the 3x atlas pages the still's drawn parts take in its views (the 48 MB budget, section 5b)."""
     path = sheets.ROOT / "build" / "characters" / species / "atlas.json"
     if not path.exists():
-        return {"note": f"no package at {path.parent}"}
+        return {"note": f"no package at {repo_path(path.parent)}"}
     sets = {s["name"]: s for s in json.loads(path.read_text())["sets"]}
     chosen = sets.get("3x") or max(sets.values(), key=lambda s: s["scale"])
     pages = sum(p["width"] * p["height"] for p in chosen["pages"])
     regions = chosen["regions"]
     drawn = {n for n in still.drawn}
+
     mine = sum(r["w"] * r["h"] for key, r in regions.items()
                if key.split("/")[0] in drawn and len(key.split("/")) > 1 and key.split("/")[1] in views)
     total = sum(r["w"] * r["h"] for r in regions.values())
@@ -716,7 +734,7 @@ def match(species, still_dir, landmarks_path=None):
     sheet = grid.pad(frame.sil, False)
     result = {"species": species, "still": {k: still.meta.get(k) for k in ("still", "clip", "views", "ppp", "sizePx", "rootPx")},
               "view": frame.view, "crop": frame.rec["crop"], "mirroredFrom": frame.source if frame.mirrored else None,
-              "ptPerCropPx": frame.k, "landmarkSource": str(path) if source else None}
+              "ptPerCropPx": frame.k, "landmarkSource": repo_path(path) if source else None, "thresholds": thresholds(frame)}
 
     score = iou(render.sil, sheet)
     shift, shifted_iou = best_shift(render.sil, sheet)

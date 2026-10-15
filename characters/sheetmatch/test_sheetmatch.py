@@ -13,6 +13,7 @@ import copy
 import io
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -660,6 +661,26 @@ class PlantedTest(unittest.TestCase):
         with contextlib.redirect_stderr(io.StringIO()) as said:
             self.assertEqual(match.main(["dog", "--still", str(Path(self.folder.name) / "none"), "--out", str(out)]), 2)
         self.assertIn("still.json", said.getvalue())
+
+    def test_match_json_names_paths_from_the_repository_and_records_every_threshold(self):
+        # Inside the repository, as the look loop's stills and landmarks are.
+        folder = sheets.ROOT / "build" / "sheetmatch-test"
+        try:
+            self.fixture().write(folder)
+            (folder / "landmarks.json").write_text(json.dumps(self.fixtures["front"].source()))
+            result, _ = match.match("dog", folder, folder / "landmarks.json")
+        finally:
+            shutil.rmtree(folder, ignore_errors=True)
+        self.assertEqual(result["landmarkSource"], "build/sheetmatch-test/landmarks.json")
+        self.assertNotIn(str(sheets.ROOT), json.dumps(result))
+        recorded = result["thresholds"]
+        self.assertEqual((recorded["shownPt2"], recorded["bakedMinPx"], recorded["silhouetteIoUMin"]), (match.SHOWN_PT2, match.BAKED_MIN_PX, match.IOU_MIN["front"]))
+        self.assertEqual(recorded["blushRestingSpread"], MODEL["blush"]["restingSpread"])
+        # Every numeric constant of the module is a threshold match.json records, but the images' own settings.
+        constants = {name: value for name, value in vars(match).items() if name.isupper() and isinstance(value, (int, float))}
+        for name, value in constants.items():
+            if name not in ("PHONE_PPP", "ZOOM"):
+                self.assertIn(value, recorded.values(), name)
 
     def test_any_error_exits_2_and_leaves_no_verdict(self):
         """1 means only that a gating check failed: a crash anywhere is 2, and no match.json, old or half-made, stays."""
