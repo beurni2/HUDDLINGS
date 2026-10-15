@@ -184,6 +184,44 @@ test("every part of the back view that turns runs under the part covering it for
   }
 });
 
+test("the back view's ears come out from under the crown: above the crown's lowest lock tips no ear shows", () => {
+  // The sheet draws each ear's root under the crown's fringe, its top never seen: the crown's line runs on into the
+  // ear's outer edge at the lowest lock's tip, (-41.6, -144) on the left and (44, -143.6) on the right (DECISIONS 76).
+  const scale = 3, r = rasters(scale), head = r.get("head.base")!;
+  for (const [side, tipY] of [["L", -144], ["R", -143.6]] as const) {
+    const ear = r.get(`ear.${side}`)!;
+    let shown = 0, at = "";
+    for (let j = 0; j < ear.height; j++) {
+      const y = BOX.y + (j + 0.5) / scale;
+      if (y > tipY - 0.6) break;
+      for (let i = 0; i < ear.width; i++) {
+        const k = (j * ear.width + i) * 4 + 3;
+        if (ear.data[k]! >= 128 && head.data[k]! < 128) {
+          shown++;
+          at ||= `(${(BOX.x + (i + 0.5) / scale).toFixed(1)}, ${y.toFixed(1)})`;
+        }
+      }
+    }
+    assert.equal(shown, 0, `ear.${side} shows ${shown} px above its root's lock tip, from ${at}`);
+  }
+});
+
+test("the back view's head rests on the collar's ends: beside each end the ground shows only below the band's middle", () => {
+  // On the sheet the head's lower fur stays full down onto the collar, and the notch between the ear, the head and the
+  // shoulder opens only from y -71 (the band's ends run from -70 to -62): no gap above it beside either end.
+  const r = rasters(2);
+  const drawn = order.filter((n) => n !== "shadow").map((n) => r.get(n)!);
+  const gaps: string[] = [];
+  for (const sx of [-1, 1]) {
+    for (let x = 30; x <= 37.6; x += 0.5) {
+      for (let y = -82; y <= -71.8; y += 0.5) {
+        if (!drawn.some((png) => alphaAt(png, 2, [sx * x, y]) >= 0.5)) gaps.push(`(${sx * x}, ${y})`);
+      }
+    }
+  }
+  assert.equal(gaps.length, 0, `the ground shows beside the collar's ends at ${gaps.slice(0, 4).join(" ")}`);
+});
+
 test("moving a pivot leaves the back view's rest frame where it was", () => {
   const moved: Rig = { ...rig, bones: rig.bones.map((b, i) => {
     if (!b.parent) return b;

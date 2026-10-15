@@ -139,9 +139,9 @@ const earShadow = { L: smooth(earShadowL), R: smooth(mirrorX(earShadowL)) };
 // the middle and 8 at its ends, which drop as they turn round the neck and end
 // near square, sunk in the fur, the right reaching a little further out, as the
 // sheet draws it.
-const collar = smooth([[-27.2, -70.2], [-24.8, -71.5], [-18, -73.4], [-9, -74.6], [0, -74.9], [9, -74.6], [17, -73.6], [24.4, -71.7], [29.2, -70.2], [30.3, -68.9],
-  [30.5, -66], [30.3, -63], [29.2, -62.3], [24, -63.2], [16, -64.6], [6, -65.5], [-6, -65.5], [-16, -64.8], [-23.6, -63.2], [-27.4, -62], [-28.5, -62.7],
-  [-28.7, -66], [-28.5, -69.3]]);
+const collar = smooth([[-27.6, -70.3], [-24.8, -71.5], [-18, -73.4], [-9, -74.6], [0, -74.9], [9, -74.6], [17, -73.6], [24.4, -71.7], [29.6, -70.2], [30.4, -69.2],
+  [30.5, -66], [30.4, -62.9], [29.6, -62.2], [24, -63.2], [16, -64.6], [6, -65.5], [-6, -65.5], [-16, -64.8], [-23.6, -63.2], [-27.8, -61.9], [-28.6, -62.6],
+  [-28.7, -66], [-28.6, -69.4]]);
 
 // The body from behind: the shoulders come out from under the collar's ends
 // and run down and out, a soft lock or two under each collar end, to a notch at
@@ -151,8 +151,8 @@ const collar = smooth([[-27.2, -70.2], [-24.8, -71.5], [-18, -73.4], [-9, -74.6]
 // out below it; the bottom runs along the ground between the haunches, behind
 // the tail's foot. Typed as its left half, mirrored, the right haunch drawn in.
 const bodyHalf: Node[] = [[0, -67], [-24, -66.4], [-29.4, -61.8], [-32.8, -57.6], [-36.2, -51.6], [-38.4, -45.6], [-39.6, -40.6], [-43.4, -38.4],
-  [-46.8, -34.6], [-48.9, -29], [-49.4, -23], [-48.6, -17], [-46.4, -12.6], [-42.2, -8], [-36, -4.6], [-28.6, -2.6], [-14, -1.7]];
-const BODY_FOOT: Node = [0, -1.7];
+  [-46.8, -34.6], [-48.9, -29], [-49.4, -23], [-48.6, -17], [-46.4, -12.6], [-42.2, -8], [-36, -4.4], [-28.4, -1.9], [-14, -1.5]];
+const BODY_FOOT: Node = [0, -1.5];
 /** The notch where each haunch's round begins outside the shoulder (a concave corner). */
 const NOTCH_B = 6;
 /** The right haunch is narrower than the left on the sheet (x 46.9 at its widest against -49.4): drawn in by up to 2.5 pt round y -24. */
@@ -188,9 +188,9 @@ const TAIL_TIP = 0, TAIL_BEND = 3;
 /** Each clump of the plume: its tip, root and notches, for the shades and partings drawn inside it. */
 const tailLocks: { tip: P; root: P; notches: [P, P] }[] = [];
 const tail = furSpan(furEdge(smooth([[-9.8, -24.2], [-5.6, -28.4], [-1.4, -31.2], [0.9, -33.8], [0.8, -39.6], [2.6, -45], [7, -48.6], [13.6, -49],
-  [20.4, -46], [26.8, -39.6], [29.6, -31], [29.4, -24.6], [28.4, -18.6], [24.6, -10.6], [20.2, -5.4], [13, -2.8], [7.2, -2.2], [0, -1.2], [-5.6, -3.2],
+  [20.4, -46], [27.2, -39.8], [30.1, -31], [30, -24.6], [28.9, -18.4], [25, -10.2], [20.4, -5], [13, -2.6], [7.2, -2.1], [0, -1.2], [-5.6, -3.2],
   [-9.6, -8.2], [-11, -15]], { corners: [TAIL_TIP] }),
-[20.4, -46], [7.2, -2.2], [{ len: 1.5, w: 1.9, lean: 0.3 }, { len: 1.9, w: 1.2, lean: 0.25 }, { len: 2.1, w: 1.6, lean: 0.25 }, { len: 1.3, w: 1.35, lean: 0.2 }], 0.42,
+[20.4, -46], [7.2, -2.1], [{ len: 1.1, w: 1.9, lean: 0.3 }, { len: 1.4, w: 1.2, lean: 0.25 }, { len: 1.6, w: 1.6, lean: 0.25 }, { len: 1.1, w: 1.35, lean: 0.2 }], 0.42,
 (tip, root, notches) => tailLocks.push({ tip, root, notches })), [-9, -25.2], [-10.4, -21.6]);
 /**
  * The tail's root, where it leaves the rump (rig.json's tail pivot in this view): the middle of its tan root as it shows
@@ -237,8 +237,7 @@ const backPaint: Paint = {
   // haunch's lower half, turning under toward the ground, deepest at its outer bottom; the right haunch's round, away
   // from the light; and the rim away from the light.
   shade: furShade(hipGroup, ["M-31 -63.6 C-20 -57 20 -57 31 -63.6 L31 -70 L-31 -70Z",
-    "M-52 -14 C-44 -22 -30 -22 -16 -12 L-16 0 L-52 0Z", "M52 -14 C44 -24 30 -24 16 -12 L16 0 L52 0Z",
-    pathD(ellipse([48, -24], 4, 13, 0))], [], { inset: 2.5, toLight: 4 }, 3.4),
+    pathD(ellipse([-28, -3], 17, 7, -8)), pathD(ellipse([30, -3], 18, 7.6, 8)), pathD(ellipse([48, -24], 4, 13, 0))], [], { inset: 2.5, toLight: 4 }, 4.2),
   // The light from the top left on the left haunch's round and the left shoulder.
   highlight: { d: `${pathD(ellipse([-36, -29], 7.5, 11, 10))} ${pathD(ellipse([-27, -52], 5, 3.4, -30))}`, colour: C.light, opacity: 0.3, blur: 4.5 },
   // Lines as the sheet draws them from behind: down each shoulder from under the collar's end the haunches' line,
@@ -249,7 +248,7 @@ const backPaint: Paint = {
     { from: [-29.4, -61.6], to: [-39.4, -41.4], width: THIN },
     { from: [-39.8, -40.2], to: [-46.6, -13.4], width: 1.25 },
     { from: [-46.2, -12.4], to: [-37.4, -6], width: 1.2, colour: C.softLine },
-    { from: [-27, -2.5], to: [27, -2.5], width: 1.6, colour: C.outline },
+    { from: [-26, -1.7], to: [26, -1.7], width: 1.6, colour: C.outline },
     { from: [38.4, -6.4], to: [44.8, -11.6], width: 1.2, colour: C.softLine },
     { from: [45.4, -12.6], to: [39.8, -40.2], width: 1.35, colour: C.haunchShadeLine },
     { from: [39.4, -41.4], to: [29.4, -61.6], width: THIN },
@@ -261,7 +260,7 @@ function hindPaint(side: "L" | "R"): Paint {
   const sx = side === "L" ? -1 : 1, sole = uid("sole");
   return {
     fill: C.fur,
-    shade: furShade(hipGroup, ["M-52 -14 C-44 -22 -30 -22 -16 -12 L-16 0 L-52 0Z", "M52 -14 C44 -24 30 -24 16 -12 L16 0 L52 0Z"], [], { inset: 2.5, toLight: 4 }, 3.4),
+    shade: furShade(hipGroup, [pathD(ellipse([-28, -3], 17, 7, -8)), pathD(ellipse([30, -3], 18, 7.6, 8))], [], { inset: 2.5, toLight: 4 }, 4.2),
     under: `<defs><linearGradient id="${sole}" gradientUnits="userSpaceOnUse" x1="0" y1="-12" x2="0" y2="-3">` +
       `<stop offset="0" stop-color="${side === "L" ? C.haunchLine : C.warmLine}"/><stop offset="1" stop-color="${C.outline}"/></linearGradient></defs>`,
     outline: { ...OUTLINE, colour: `url(#${sole})`, width: 1.5, taper: 3, spans: side === "L"
@@ -290,10 +289,12 @@ const tailPaint: Paint = {
   highlight: { d: `${pathD(ellipse([8.6, -44], 7.6, 3.6, -8))} ${pathD(ellipse([-4, -12], 4.4, 6, 0))}`, colour: C.light, opacity: 0.4, blur: 2.8 },
   inner: [
     // Where each clump tucks under the one above, its edge runs on a little way into the plume, as the sheet draws it.
-    ...tailLocks.slice(1).map(({ notches }, k) => {
-      const n = notches[0], into = v.norm(v.sub([10, -22], n)), along = v.norm(v.sub(tailLocks[k]!.tip, n));
-      const p1 = v.add(n, v.add(v.mul(into, 1.6), v.mul(along, -0.4))), p2 = v.add(n, v.add(v.mul(into, 3.4 + 0.6 * k), v.mul(along, 0.6)));
-      return { pts: curve([n, p1, p2], 6), width: 0.75, colour: C.softLine, opacity: 0.9 };
+    // Each clump lies over the one above it: from each notch its upper edge runs on inside the plume, round the clump
+    // a couple of points in from its edge, as the sheet draws it (the longest round the lower right clump).
+    ...tailLocks.slice(1).map(({ notches, tip }) => {
+      const n = notches[0], into = v.norm(v.sub([10, -22], n)), towards = v.sub(tip, n);
+      const p1 = v.add(v.add(n, v.mul(towards, 0.3)), v.mul(into, 1.7)), p2 = v.add(v.add(n, v.mul(towards, 0.75)), v.mul(into, 2.6));
+      return { pts: curve([n, p1, p2], 6), width: 0.7, colour: C.softLine, opacity: 0.85 };
     }),
     // The curl's head: its fur rolling over at the top, and a strand down the hook.
     { pts: curve([[14.6, -45.4], [18.4, -44], [21.4, -41.2]], 6), width: 0.7, colour: C.softLine, opacity: 0.85 },
@@ -508,13 +509,6 @@ function strands(name: string, shape: Shape, sd: number, lines: P[][], o: { colo
   drawn.map((d) => ({ kind: "inner" as const, width: o.width, where: "strands", drawn: d.drawn })));
 }
 
-/** The saddle's core, a little deeper than its edge, as the sheet paints it (its #D9A379 deepening toward #D29563 inside). */
-function saddleCore(): Piece {
-  const f = uid("blur");
-  const core = `${pathD(ellipse([-9.6, -45], 7.4, 10, 10))} ${pathD(ellipse([4, -53.4], 9, 3.4, 4))}`;
-  return within("back.patch.L", saddleL, 0.4, (box) => `<defs>${blur(f, pad(box, 4), 2.6)}</defs><path d="${core}" fill="${C.earDeep}" opacity="0.45" filter="url(#${f})"/>`);
-}
-
 export function back(): Drawn[] {
   const out: Drawn[] = [];
   const add = (name: string, p: Piece, state?: string) => out.push({ part: name, piece: p, ...(state ? { state } : {}) });
@@ -547,11 +541,10 @@ export function back(): Drawn[] {
     feather: { from: [0, -150.8], to: [0, -154.6] },
   }));
   add("body.back", roomy(part("body.back", body, backPaint), 1));
-  // The saddle's left half, its edge lumpy, a little deeper in its core, a few darker strands in it following the
-  // back's round; its strip on the left flank; its right half over the spine above the tail.
+  // The saddle's left half, its edge lumpy, a few darker strands in it following the back's round; its strip on the
+  // left flank; its right half over the spine above the tail.
   add("back.patch.L", join(marking("back.patch.L", { shape: body, paint: backPaint }, saddleL, { fill: C.marking, blur: 0.4, clip: true }),
     marking("back.patch.L", { shape: body, paint: backPaint }, flankL, { fill: C.marking, blur: 0.6, clip: true }),
-    saddleCore(),
     strands("back.patch.L", saddleL, 0.4, [[[-14, -50], [-15.6, -44], [-15.4, -37.4]], [[-8.4, -55], [-10.6, -48], [-10.8, -40]], [[-3.4, -56], [-5, -50], [-5.4, -43]]],
       { colour: C.earDeep, opacity: 0.25, width: 0.75 })));
   add("back.patch.R", marking("back.patch.R", { shape: body, paint: backPaint }, saddleR, { fill: C.marking, blur: 0.4, clip: true }));
@@ -568,7 +561,7 @@ export function back(): Drawn[] {
     fill: C.collar,
     under: `<path d="${streaks.map((l) => strokeOf(curve(l), 0.8, { taper: 6, tip: 0.1, wobble: 0.2, seed: 2 }).d).join("")}" fill="${C.collarHighlight}" opacity="0.3"/>`,
     // Its lower part in shade, where it turns under toward the shoulders: about two fifths of the band, as the sheet paints it.
-    shade: { multiply: C.shadeBy, shapes: ["M-32 -66.2 C-16 -69.2 16 -69.2 32 -66.2 L32 -58 L-32 -58Z"], blur: 0.9 },
+    shade: { multiply: C.shadeBy, shapes: ["M-32 -66.2 C-16 -69.2 16 -69.2 32 -66.2 L32 -58 L-32 -58Z", pathD(ellipse([-29.6, -66], 2.6, 6, 0)), pathD(ellipse([31.4, -66], 2.6, 6, 0))], blur: 0.9 },
     highlight: { d: "M-27 -70.6 C-15 -73.6 0 -74.4 16 -73.8 C22 -73.4 26 -72.6 29.6 -71 L29.6 -68.6 C20 -71 0 -72 -27 -68Z", colour: C.collarHighlight, opacity: 0.4, blur: 0.8 },
     outline: { colour: C.collarRim, width: 1.3, taper: 2, blur: 0.2 },
   }));
