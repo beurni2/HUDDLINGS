@@ -110,7 +110,7 @@ const ears = { R: earR, L: earL };
 // to the chin, dipping lowest under the near cheek, and rises from the chin up the far side of the jaw to the far
 // cheek's puff, which bulges out over the far ear; above it the face's far side runs up over the far ear to its
 // root and the crown.
-const headNodes: Node[] = [[-70, -149.3], [-46, -154], [-12.4, -150.8], [-1.6, -144.8], [2.6, -137], [0.4, -135.4], [-18.2, -132.2], [-19.8, -129.4], [-14.6, -115],
+const headNodes: Node[] = [[-68.6, -149.6], [-46, -152.6], [-11.2, -149.6], [-2.4, -144.2], [3.6, -136.6], [1.6, -134.8], [-18.2, -132.2], [-19.8, -129.4], [-14.6, -115],
   [-12.4, -104], [-14.2, -91], [-17.4, -78], [-15.8, -67.2], [-26, -61.4], [-42.8, -57.9], [-61.7, -59.8], [-73.5, -62.4], [-84.2, -68.6], [-90.8, -76.2],
   [-96.6, -84.2], [-97.6, -93.4], [-91.2, -100.6], [-86.4, -128], [-79.6, -143.8]];
 /**
@@ -129,13 +129,18 @@ const clumps: { tip: P; root: P; notches: [P, P] }[] = [];
 head = furEdge(head, [-24, -61.8], [-70, -61.6], chinLocks, 0.24);
 head = furEdge(head, [-90.8, -76.2], [-97.4, -94], cheekLocks, 0.5, (tip, root, notches) => clumps.push({ tip, root, notches }));
 // The crown's fur where it overhangs the near ear's root is a lock of fur, its tip a fur span.
-head = furSpan(head, [2.2, -137.4], [-1.6, -135]);
+head = furSpan(head, [3.2, -137.2], [0.4, -134.9]);
 
-// The topknot: three fur lobes, typed node by node (the sheet's tuft, seen turned): the left lobe low and broad,
-// the middle one tallest, its top the head's highest point, curling at its right foot, and the right lobe low.
-const tuft = furSpan(smooth([[-66.6, -150.6], [-64.4, -155.4], [-59.4, -157.6], [-54.7, -157.7], [-50.9, -156.8], [-48.6, -155.2], [-46.6, -159.4],
-  [-42.8, -162.6], [-37.8, -163.8], [-34.4, -164.2], [-31, -163.2], [-29.4, -159.6], [-30.4, -155.8], [-25.4, -157.2], [-20.6, -157.3], [-16.4, -156.2],
-  [-13.6, -154.2], [-13.2, -151.6], [-16, -146.5], [-38, -145.5], [-62, -146.5]], { corners: [5, 12] }), [-66.4, -151], [-13.4, -151.8]);
+// The topknot: an upright sprig of three fur lobes, typed node by node (the sheet's tuft, seen turned), each side
+// lobe a petal of fur: the left one low and broad, pointing out to its tip at the left (x -67.2) and drawn back
+// under itself along its lower edge; the middle one tall and leaning a little, its top the head's highest point, its
+// right foot curling in under itself; the right one low, pointing out to its tip at the right (x -9.9) and drawn
+// back under over the crown's edge. Its foot lies hidden in the crown.
+const TUFT_NOTCHES = [6, 13];
+const tuft = furSpan(smooth([[-55.6, -149.2], [-60.2, -150], [-64.4, -151.6], [-67.2, -153.8], [-65.4, -156.2], [-58.4, -158.3], [-52.2, -157.9],
+  [-48.6, -154.9], [-46.2, -159.8], [-40.9, -163.4], [-35.2, -164.6], [-30.6, -162.6], [-29.4, -159], [-30.4, -155.6], [-31.4, -154.4],
+  [-27.4, -156.1], [-22, -156.9], [-15.2, -155.6], [-10.6, -153.6], [-9.9, -151.7], [-12.2, -149.8], [-15, -148.5], [-18.6, -147.6], [-40, -145.6]],
+  { corners: [3, 7, 14, 19] }), [-55.6, -149.2], [-18.6, -147.6]);
 
 // The head patches, in the paler tan (DECISIONS 18). The near one (the dog's left) is a broad hood over the
 // top and the outer side of the near eye, its top edge about 9 pt above the eye with the brow in the cream above
@@ -254,7 +259,7 @@ const headLine: Outline = { ...OUTLINE, taper: 4, blur: 0.15, spans: [
 ] };
 const crownLine: Outline = { ...headLine, taper: 1.4, spans: [
   { from: [-85.4, -138.6], to: [-66, -150.6], width: THIN, colour: C.crownLine },
-  { from: [-14.6, -150.6], to: [-1.6, -134.2], width: THIN, colour: C.crownLine },
+  { from: [-11.4, -149.6], to: [0.8, -134.8], width: THIN, colour: C.crownLine },
 ] };
 /** The far cheek's clumps' line, following the scalloped edge on through the notches, in the lighter warm line the front's cheek puffs take. */
 function clumpLines(): Outline {
@@ -636,17 +641,19 @@ export function threeQuarter(): Drawn[] {
   add("nose", nose());
   add("mouth", mouth(), "open");
   add("head.line", headLinePiece());
+  // The topknot's line, light and warm, breaking at each notch between the lobes; strand strokes running down from
+  // the notches into the crown, as the sheet draws them; its shade only a thin rim on the lobes' far sides, so it reads as
+  // fur standing up from the crown, not a cap on it.
+  const strands: P[][] = [[[-48.6, -154.4], [-48.8, -151.8], [-48.2, -149.2]], [[-30.6, -156], [-32.4, -154.6], [-34.4, -153.8]],
+    [[-31.6, -154], [-30.4, -151.8], [-29.4, -149.8]]];
   add("tuft", part("tuft", tuft, {
     fill: C.fur,
-    shade: { multiply: C.furShadeBy, rim: { inset: 3, toLight: 4.5 }, group: headGroup, keep: ["M-80 -152 L10 -152 L10 -130 L-80 -130Z"], blur: 2.4 },
+    shade: { multiply: C.furShadeBy, rim: { inset: 2, toLight: 2.6 }, group: headGroup, keep: ["M-80 -152 L10 -152 L10 -130 L-80 -130Z"], blur: 2 },
     highlight: { d: headLight, colour: C.light, opacity: 0.4, blur: 4 },
-    inner: [
-      { pts: [[-31.4, -159.4], [-30.6, -157.6], [-31.4, -156.2]], width: 0.8, colour: C.crownLine, opacity: 0.7 },
-      { pts: [[-49.8, -156.4], [-48.4, -154.8], [-48.8, -153.2]], width: 0.8, colour: C.crownLine, opacity: 0.7 },
-    ],
-    outline: { ...OUTLINE, colour: C.crownLine, width: THIN, taper: 2.6, spans: [{ from: [-66.4, -151], to: [-49.2, -156.2] },
-      { from: [-48, -156.4], to: [-30.2, -157.2] }, { from: [-29.6, -157.6], to: [-13.4, -152] }] },
-    feather: { from: [-38, -146.5], to: [-38, -150.5] },
+    inner: strands.map((pts) => ({ pts: sample(smooth(pts, { closed: false }).segs, 6, false), width: 0.75, colour: C.crownLine, opacity: 0.7 })),
+    outline: { ...OUTLINE, colour: C.crownLine, width: THIN, taper: 2, spans: [{ from: [-56.6, -149.4], to: [-48.6, -154.9] },
+      { from: [-48.6, -154.9], to: [-31.4, -154.4] }, { from: [-31.4, -154.4], to: [-18.6, -147.6] }] },
+    feather: { from: [-38, -146.2], to: [-38, -149.8] },
   }));
   // The near leg's line: up its back edge from the paw's heel it fades out before the thigh, as the sheet's does,
   // so the leg is no column; round the paw it is the paws' grey-brown line; up its front from the wrist it lightens
