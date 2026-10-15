@@ -169,15 +169,21 @@ const cheekRoll = ([x, y]: P): P => [x, y + x * Math.tan(ROLL) * Math.min(1, Mat
  * out toward the topknot and down toward the ear root.
  */
 const crownLift = ([x, y]: P): P => [x, y - 1.8 * Math.min(1, Math.max(0, (x - 18) / 6)) * Math.min(1, Math.max(0, (-140 - y) / 4))];
+/**
+ * The head's left side, between the ear's root and the cheek, runs 2 pt inside its mirror: the sheet draws
+ * the line where it meets the ear at x 43 to 44.5 there, against -44.5 to -47 on the right (the face turned a
+ * hair toward the dog's left). Fades out at the root and above the cheek.
+ */
+const leftSide = ([x, y]: P): P => [x > 0 ? x - 2 * Math.min(1, Math.max(0, (y + 130) / 8)) * Math.min(1, Math.max(0, (-88 - y) / 6)) : x, y];
 
 // The head: a soft round mass with a full crown, widest at the cheeks. Its
 // sides run along the ears' inner edges, 93.3 pt apart (DECISIONS 7). Typed as
-// its right half, mirrored, then the crown lifted on the left and the cheeks
-// rolled with the face.
+// its right half, mirrored, then the crown lifted and the side drawn in on the
+// left, and the cheeks rolled with the face.
 const headHalf: Node[] = [[0, -151.8], [-16, -151.2], [-26, -149.4], [-32.4, -146.8], [-37.6, -143.4], [-41.6, -139.8], [-44.4, -136.2], [-45.8, -130],
   [-46.4, -120], [-46.6, -110], [-46.4, -100], [-46, -94], [-45.6, -89.6], [-45.4, -85], [-45.6, -80.6], [-44.8, -76.6], [-43.4, -72.8],
   [-41.2, -70], [-38.2, -67.8], [-34.8, -65.8], [-31, -63.8], [-21, -61.2], [-9, -58.6]];
-let head = smooth([...headHalf, [0, -57.5], ...mirrorX(headHalf, false).slice(0, -1)].map(([x, y]): Node => cheekRoll(crownLift([x, y]))), { typed: headHalf.length + 1 });
+let head = smooth([...headHalf, [0, -57.5], ...mirrorX(headHalf, false).slice(0, -1)].map(([x, y]): Node => cheekRoll(leftSide(crownLift([x, y])))), { typed: headHalf.length + 1 });
 // The cheeks' fluff, as the hero and the front turnaround draw it: a round puff
 // on each side, spilling over the ear's inner edge and down over the collar.
 // Where it spills over the ear it breaks into three pointed locks combed down
@@ -348,8 +354,8 @@ function brow(sx: number): Piece {
 
 /** The nose in the face frame (front a's): a rounded triangle with a flat top, broadest a little below it, with a soft shine on its upper left. */
 function nose(): Piece {
-  return piece(inFace(`<path d="M0 4.6 C3.9 4.5 6.4 5 6.4 6.9 C6.4 8.4 2.4 11 0 11.1 C-2.4 11 -6.4 8.4 -6.4 6.9 C-6.4 5 -3.9 4.5 0 4.6Z" fill="${C.eyeDark}"/>` +
-    `<ellipse cx="-2.2" cy="6.4" rx="2" ry="0.85" fill="${C.light}" opacity="0.18"/>`), faceBox([-8, 2, 16, 12]));
+  return piece(inFace(`<path d="M0 4.9 C3.9 4.8 6.4 5.3 6.4 7.2 C6.4 8.7 2.4 11.3 0 11.4 C-2.4 11.3 -6.4 8.7 -6.4 7.2 C-6.4 5.3 -3.9 4.8 0 4.9Z" fill="${C.eyeDark}"/>` +
+    `<ellipse cx="-2.2" cy="6.7" rx="2" ry="0.85" fill="${C.light}" opacity="0.18"/>`), faceBox([-8, 2, 16, 12]));
 }
 
 /**
@@ -360,19 +366,19 @@ function nose(): Piece {
  * sides, about 40% of the opening, as the sheet paints it.
  */
 function mouth(): Piece {
-  const m = "M0 14.4 C2.8 16.4 6.4 18.2 9.4 18.4 C10.2 24.2 7.4 29.2 0 29.4 C-7.4 29.2 -10.2 24.2 -9.4 18.4 C-6.4 18.2 -2.8 16.4 0 14.4Z";
+  const m = "M0 13.2 C2.8 14.8 6.4 16.2 9.4 16.4 C10 22.6 6.8 29 0 29.2 C-6.8 29 -10 22.6 -9.4 16.4 C-6.4 16.2 -2.8 14.8 0 13.2Z";
   const clip = uid("mouth");
   // Each half of the upper lip, from the peak along the opening's top to the corner, then up into the hook.
-  const top = sample([[[0, 14.4], [2.8, 16.4], [6.4, 18.2], [9.4, 18.4]]], 10, false);
-  const upper = (sx: number): P[] => ([...top, [11.2, 17.8], [12.4, 16.6], [12.9, 15.1]] as P[]).map(([x, y]): P => [sx * x, y]);
-  const lips = [upper(-1), upper(1)].map((pts) => tapered(pts, 1.2, "outer", "upper lip", { taper: 2.6, tip: 0.3 }));
+  const top = sample([[[0, 13.2], [2.8, 14.8], [6.4, 16.2], [9.4, 16.4]]], 10, false);
+  const upper = (sx: number): P[] => ([...top, [11.2, 16.1], [12.4, 15.3], [13.2, 14.5]] as P[]).map(([x, y]): P => [sx * x, y]);
+  const lips = [upper(-1), upper(1)].map((pts) => tapered(pts, 1.2, "outer", "upper lip", { taper: 2.6, tip: 0.5 }));
   // The opening's own edge, down each side and round the bottom, dark and soft.
-  const edge = sample([[[-9.4, 18.4], [-10.2, 24.2], [-7.4, 29.2], [0, 29.4]], [[0, 29.4], [7.4, 29.2], [10.2, 24.2], [9.4, 18.4]]], 10, false);
+  const edge = sample([[[-9.4, 16.4], [-10, 22.6], [-6.8, 29], [0, 29.2]], [[0, 29.2], [6.8, 29], [10, 22.6], [9.4, 16.4]]], 10, false);
   const lower = tapered(edge, 0.75, "inner", "lower lip", { taper: 5, tip: 0.2 });
-  const philtrum = innerLine([[0, 10.6], [0, 14.6]], 0.9, C.dark, { taper: 1, tip: 0.6, wobble: 0 });
+  const philtrum = innerLine([[0, 10.9], [0, 13.4]], 0.9, C.dark, { taper: 1, tip: 0.6, wobble: 0 });
   const svg = `<defs><clipPath id="${clip}"><path d="${m}"/></clipPath></defs>` +
-    `<path d="${m}" fill="${C.mouthInside}"/><g clip-path="url(#${clip})"><path d="M-10.4 24.4 C-7.4 21.4 -3.8 20.3 0 20.3 C3.8 20.3 7.4 21.4 10.4 24.4 L10.4 30 L-10.4 30Z" fill="${C.tongue}"/>` +
-    `<ellipse cx="-3" cy="23.6" rx="2.2" ry="1.1" fill="${C.tongueShine}" opacity="0.55"/></g>` +
+    `<path d="${m}" fill="${C.mouthInside}"/><g clip-path="url(#${clip})"><path d="M-10.4 24.2 C-7.4 20.9 -3.8 19.8 0 19.8 C3.8 19.8 7.4 20.9 10.4 24.2 L10.4 31 L-10.4 31Z" fill="${C.tongue}"/>` +
+    `<ellipse cx="-3" cy="23.2" rx="2.2" ry="1.1" fill="${C.tongueShine}" opacity="0.55"/></g>` +
     `<path d="${lower.d}" fill="${C.dark}" opacity="0.55"/>${lips.map((l) => `<path d="${l.d}" fill="${C.dark}"/>`).join("")}${philtrum.svg}`;
   return piece(inFace(svg), faceBox([-15, 10, 30, 21]), { shapes: [], lines: [...lips.map((l) => l.line), lower.line, { ...philtrum.line, where: "philtrum" }] });
 }
