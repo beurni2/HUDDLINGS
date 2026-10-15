@@ -66,11 +66,8 @@ const hind = { R: smooth(hindR), L: other(hindR) };
 
 // The chest: its edge is the silhouette from under the cheek to the top of the
 // haunch, then the soft line where the chest meets the haunch, melting into the leg.
-let chest = symmetric([[0, -66], [-16, -65.4], [-25.6, -63.2], [-30, -59.6], [-32.6, -55.4], [-34.4, -50.6], [-35.2, -45.4], [-35, -40],
+const chest = symmetric([[0, -66], [-16, -65.4], [-25.6, -63.2], [-30, -59.6], [-32.6, -55.4], [-34.4, -50.6], [-35.2, -45.4], [-35, -40],
   [-34.2, -34], [-33, -26], [-31, -17], [-28, -9], [-20, -5.6], [-8, -5]], [0, -5]);
-// Fluff at the shoulders, just under the cheeks, as the sheet draws it.
-chest = furEdge(chest, [-31.6, -57.4], [-34.2, -50.4], [{ len: 0.9, lean: 0.5 }, { len: 1.2, w: 1.2, lean: 0.4 }], 0.35);
-chest = furEdge(chest, [34.2, -50.4], [31.6, -57.4], [{ len: 1.2, w: 1.2, lean: -0.4 }, { len: 0.9, lean: -0.5 }], 0.35);
 
 // The front legs: short chubby columns from the chest to round stub paws, the
 // two paws nearly touching at the middle.
@@ -80,8 +77,8 @@ const legs = { R: smooth(legR), L: other(legR) };
 
 // The collar: a band round the neck, its ends running up under the cheek fur.
 // The sheet's head roll tips it a little: its left end sits higher.
-const collar = smooth([[-28.6, -63.4], [-21, -60.4], [-10, -58.2], [0, -57.6], [10, -58.6], [20.5, -61], [29.6, -64.6],
-  [29.4, -62.2], [26.4, -59.4], [22.6, -55.8], [12, -52], [0, -51], [-12, -52], [-21.4, -55.2], [-25.6, -58.4], [-28, -61.4]]);
+const collar = smooth([[-27.6, -62.8], [-21, -61.6], [-10, -59], [0, -58.2], [10, -59.4], [20.5, -62], [28.6, -63.6],
+  [28.2, -61.6], [25.4, -58.4], [21.4, -54.4], [12, -51], [0, -50.2], [-12, -51], [-20.4, -53.8], [-24.8, -57.4], [-26.9, -60.4]]);
 
 const heart = smooth([[0, -46.8], [-3.6, -50.6], [-7.2, -49.6], [-8.2, -45], [-6, -40.2], [0, -35.2], [6, -40.2], [8.2, -45], [7.2, -49.6], [3.6, -50.6]], { corners: [0, 5] });
 
@@ -94,27 +91,24 @@ const earR = smooth([[-35.6, -136.6], [-44, -133.8], [-53.4, -130.6], [-59.8, -1
 const earL = smooth([[33.4, -143.2], [40.6, -138.8], [46.4, -135.2], [52.2, -129.8], [57.2, -124.4], [62.8, -117.6], [68.6, -110.8], [73.4, -104.8],
   [76.4, -98.8], [77.9, -92], [77.8, -85.4], [76.4, -79.4], [73.8, -73.8], [70, -69.4], [64.4, -65.8], [58.4, -64], [52.6, -63.2], [47, -63.6],
   [42.4, -65.8], [39, -71.4], [36.8, -90], [35.6, -112], [33.6, -132]]);
+const fringe = [{ len: 1.1, w: 0.8, lean: 0.35 }, { len: 1.5, lean: 0.3 }, { len: 1.2, w: 1.1, lean: 0.2 }];
 const ears = {
-  R: furEdge(earR, [-81.1, -83], [-63, -62], [{ len: 0.9, w: 0.7, lean: 0.4 }, { len: 1.3, lean: 0.5 }, { len: 0.9, w: 0.8, lean: 0.5 }, { len: 1.1, lean: 0.4 }], 0.35),
-  L: furEdge(earL, [77.8, -82], [62, -64.8], [{ len: 0.9, w: 0.7, lean: 0.4 }, { len: 1.3, lean: 0.5 }, { len: 0.9, w: 0.8, lean: 0.5 }, { len: 1.1, lean: 0.4 }], 0.35),
+  R: furEdge(earR, [-80.4, -77], [-61, -61.2], fringe, 0.42),
+  L: furEdge(earL, [76.8, -78], [59, -64.1], fringe, 0.42),
 };
 
 // The head: a soft round mass, widest at the cheeks, narrowing to the crown.
 // Its sides run along the ears' inner edges (DECISIONS 7); high up, where the
 // sheet shows each ear's tan tip reaching into the head, they draw in.
-let head = symmetric([[0, -151.8], [-12, -151.2], [-22, -149.6], [-29.5, -147], [-35.2, -143.4], [-38.6, -139], [-39.6, -133.6], [-40, -127.6],
-  [-41, -121.4], [-43.4, -116.6], [-45.2, -110.6], [-45.9, -103], [-45.6, -95], [-46.6, -88.6], [-47.6, -82], [-46.6, -75.4], [-43, -70.6], [-38.2, -66.6], [-31, -63],
-  [-21, -60], [-10.5, -58.1]], [0, -57.5]);
-// Fur strokes: for each lock a short tapered stroke from inside the edge out toward its tip, as the sheet's fur lines run.
-const furStrokes: P[][] = [];
-const strokeTo = (tip: P, root: P) => {
-  const d: P = [tip[0] - root[0], tip[1] - root[1]], l = Math.hypot(d[0], d[1]) || 1, u: P = [d[0] / l, d[1] / l];
-  furStrokes.push([[root[0] - u[0] * 3.4, root[1] - u[1] * 3.4], [root[0] + u[0] * 0.4, root[1] + u[1] * 0.4], [tip[0] - u[0] * 1.2, tip[1] - u[1] * 1.2]]);
-};
-// Cheek fluff, as the hero and the front turnaround draw it: locks combed down and out over the ears' inner edges and the collar.
-const cheekLocks = [{ len: 1.2, w: 1.4, lean: 0.4 }, { len: 2.4, w: 1.2, lean: 0.55 }, { len: 2.2, lean: 0.65 }, { len: 1.4, w: 0.8, lean: 0.75 }];
-head = furEdge(head, [-46.6, -86], [-36, -65.4], cheekLocks, 0.3, strokeTo);
-head = furEdge(head, [36, -65.4], [46.6, -86], [...cheekLocks].reverse().map((l) => ({ ...l, lean: -l.lean })), 0.3, strokeTo);
+let head = symmetric([[0, -151.8], [-22, -149.6], [-29.5, -147], [-35.2, -143.4], [-38.6, -139], [-39.6, -133.6], [-40, -127.6],
+  [-41, -121.4], [-43.4, -116.6], [-45.2, -110.6], [-45.9, -103], [-45.6, -95], [-46.8, -89.4], [-48.4, -85], [-48.4, -80.6], [-47.4, -77.4], [-46.6, -74.2],
+  [-44.6, -71.2], [-41.4, -69], [-37.6, -66.8], [-31, -63.8], [-21, -61.2], [-9, -58.6]], [0, -57.5]);
+// The cheeks' fluff, as the hero and the front turnaround draw it: a round puff
+// on each side, spilling over the ear's inner edge and down over the collar,
+// with soft fur lines along its lower edge. Typed as nodes above, drawn as fur.
+head = furSpan(furSpan(head, [-46.8, -89.4], [-37.6, -66.8]), [37.6, -66.8], [46.8, -89.4]);
+const cheekStrokes: P[][] = [[[-44.6, -84.6], [-46.4, -82.2], [-47.6, -80.4]], [[-43.4, -77.6], [-45, -75.4], [-46, -74]], [[-40, -71.8], [-41.6, -70.2], [-42.6, -69.6]]];
+const furStrokes: P[][] = [...cheekStrokes, ...cheekStrokes.map((pts) => pts.map(([x, y]): P => [-x, y]))];
 
 // The topknot: three fur lobes, the middle one tallest, each ending in a curl,
 // typed node by node (the sheet's tuft).
@@ -128,9 +122,9 @@ const tuft = furSpan(smooth([[-31, -149.2], [-29.6, -152.6], [-26.6, -154.9], [-
 // to its root, where the sheet draws the ear's tip melting into the head.
 // Typed for the dog's right eye with about 4 pt of bleed past the head's edge;
 // the left is its mirror across the face's own centre line.
-const patchR: Node[] = [[-42.4, -135], [-39.8, -133.4], [-37, -133], [-35.4, -131], [-36.2, -127], [-37.8, -122.6], [-39, -117.6],
-  [-37.6, -113.6], [-35, -115.4], [-31, -117.4], [-25.4, -118.2], [-20, -116.4], [-16.2, -111.8], [-14.6, -105.6], [-14.8, -99.6], [-16.4, -93.8], [-20, -90],
-  [-25, -88.4], [-31, -88.8], [-36.6, -89], [-41.6, -88], [-48.4, -86.4], [-50, -104], [-46.6, -122]];
+const patchR: Node[] = [[-42.4, -135], [-39.8, -133.4], [-37.2, -133], [-36.4, -131], [-37.4, -127], [-38.6, -122.6], [-39.4, -117.6],
+  [-37.8, -113], [-35, -115.2], [-31, -117.4], [-25.4, -118.2], [-20, -116.4], [-16.2, -111.8], [-14.6, -105.6], [-14.8, -99.6], [-16.4, -93.8], [-20, -90],
+  [-25, -88.4], [-31, -89.4], [-36.6, -90.4], [-41.6, -89.8], [-48.4, -88], [-50, -104], [-46.6, -122]];
 /** A point mirrored across the face's centre line, the eyes' perpendicular bisector. */
 const faceMirror = ([x, y]: P): P => {
   const along = (x - FC[0]) * cosR + (y - FC[1]) * sinR;
@@ -155,28 +149,32 @@ const mirrorD = (d: string) => d.replace(/(-?\d+(?:\.\d+)?) (-?\d+(?:\.\d+)?)/g,
 const backPaint: Paint = {
   fill: C.fur,
   shade: furShade(hipGroup),
-  outline: { ...OUTLINE, spans: [{ from: [-34.6, -51], to: [-47.4, -11] }, { from: [47.4, -11], to: [34.6, -51] }] },
+  outline: { ...OUTLINE, width: 1.4, spans: [{ from: [-34.6, -51], to: [-47.4, -11] }, { from: [47.4, -11], to: [34.6, -51] }] },
 };
 const headPaint: Paint = {
   fill: C.fur,
   shade: furShade(headGroup, ["M-40 -76 C-30 -67 -16 -63 0 -63 C16 -63 30 -67 40 -76 L46 -58 L-46 -58Z"], [], { inset: 3, toLight: 4.5 }),
   highlight: { d: headLight, colour: C.light, opacity: 0.75, blur: 4 },
-  inner: furStrokes.map((pts) => ({ pts, width: 0.65, colour: C.furLine, opacity: 0.45 })),
+  inner: [
+    ...furStrokes.map((pts) => ({ pts, width: 0.65, colour: C.furLine, opacity: 0.35 })),
+    // The top of each cheek's fluff, where it spills over the patch and the ear.
+    ...([1, -1] as const).map((sx) => ({ pts: ([[-37.6, -91.2], [-42.4, -90.4], [-46.4, -87.4]] as P[]).map(([x, y]): P => [sx * x, y]), width: 0.8, colour: C.furLine, opacity: 0.3 })),
+  ],
 };
 // The head's line runs all round it: a light line on the crown's fur; where the
 // head meets an ear, a seam in the patches' tan where the ear's tip melts into
 // the head and the ear's own tan below it (DECISIONS 7); a light line on the
 // cheeks' fluff, and the jaw's line over the collar.
 const headLine: Outline = { ...OUTLINE, taper: 5, spans: [
-  { from: [-24, -149.2], to: [-38.4, -138], width: THIN, colour: C.furLine },
+  { from: [-27, -148.2], to: [-38.4, -138], width: THIN, colour: C.furLine },
   { from: [-39.4, -135.6], to: [-40.6, -123], width: THIN, colour: C.patch },
-  { from: [-41.4, -120.4], to: [-45.8, -96], width: THIN, colour: C.junction },
-  { from: [-46.2, -92], to: [-35, -64.6], width: THIN, colour: C.furLine },
-  { from: [-30, -62.6], to: [30, -62.6], width: THIN, colour: C.furLine },
-  { from: [35, -64.6], to: [46.2, -92], width: THIN, colour: C.furLine },
-  { from: [45.8, -96], to: [41.4, -120.4], width: THIN, colour: C.junction },
+  { from: [-41.4, -120.4], to: [-45.8, -96], width: THIN, colour: C.patch },
+  { from: [-46.2, -92], to: [-35, -64.6], width: THIN, colour: C.fluffLine },
+  { from: [-30, -63.4], to: [30, -63.4], width: THIN, colour: C.fluffLine },
+  { from: [35, -64.6], to: [46.2, -92], width: THIN, colour: C.fluffLine },
+  { from: [45.8, -96], to: [41.4, -120.4], width: THIN, colour: C.patch },
   { from: [40.6, -123], to: [39.4, -135.6], width: THIN, colour: C.patch },
-  { from: [38.4, -138], to: [24, -149.2], width: THIN, colour: C.furLine },
+  { from: [38.4, -138], to: [17, -150.8], width: THIN, colour: C.furLine },
 ] };
 
 /** head.line: the head's outline as its own unclipped region, drawn after the head's clip group, reaching 0.5 pt past the head. */
@@ -195,8 +193,8 @@ function headLinePiece(): Piece {
 function eye([cx, cy]: P, noseward: number): Piece {
   const rx = 9.6, ry = 9.6;
   const at = (dx: number, dy: number): P => [cx + dx * cosR - dy * sinR, cy + dx * sinR + dy * cosR];
-  const [ix, iy] = at(noseward * 1.3, -0.2);
-  const [gx, gy] = at(noseward * 1.3, 2.8), [fx, fy] = at(noseward * 1.3, 8.6);
+  const [ix, iy] = at(noseward * 0.9, -0.2);
+  const [gx, gy] = at(noseward * 0.9, 2.6), [fx, fy] = at(noseward * 0.9, 8.4);
   const [sx, sy] = at(noseward * 3.4, -4.2), [dx, dy] = at(-noseward * 3.3, 5);
   const clip = uid("eye"), iris = uid("iris"), shine = uid("blur");
   const box: Box = [cx - 12, cy - 12, 24, 24];
@@ -207,11 +205,11 @@ function eye([cx, cy]: P, noseward: number): Piece {
   const n = (v: number) => r3(v);
   const svg = `<defs><clipPath id="${clip}"><ellipse cx="${n(cx)}" cy="${n(cy)}" rx="${rx}" ry="${ry}"/></clipPath>` +
     // The iris: near-black above, the lighter printed brown below (DECISIONS 18).
-    `<radialGradient id="${iris}" gradientUnits="userSpaceOnUse" cx="${n(gx)}" cy="${n(gy)}" r="11" fx="${n(fx)}" fy="${n(fy)}">` +
-    `<stop offset="0.3" stop-color="${C.dark}"/><stop offset="0.72" stop-color="${C.eyeDark}"/></radialGradient>` +
+    `<radialGradient id="${iris}" gradientUnits="userSpaceOnUse" cx="${n(gx)}" cy="${n(gy)}" r="12" fx="${n(fx)}" fy="${n(fy)}">` +
+    `<stop offset="0.42" stop-color="${C.dark}"/><stop offset="0.78" stop-color="${C.eyeDark}"/></radialGradient>` +
     `${blur(shine, box, 0.22)}</defs>` +
     `<ellipse cx="${n(cx)}" cy="${n(cy)}" rx="${rx}" ry="${ry}" fill="${C.eyeWhite}"/>` +
-    `<g clip-path="url(#${clip})"><ellipse cx="${n(ix)}" cy="${n(iy)}" rx="${rx - 0.6}" ry="${ry - 0.2}" fill="url(#${iris})"/></g>` +
+    `<g clip-path="url(#${clip})"><ellipse cx="${n(ix)}" cy="${n(iy)}" rx="${rx - 0.3}" ry="${ry - 0.15}" fill="url(#${iris})"/></g>` +
     `<path d="${taperedStroke(lid, 1.4, { taper: 8, tip: 0.3 })}" fill="${C.eyeDark}"/>` +
     `<ellipse cx="${n(sx)}" cy="${n(sy)}" rx="2.2" ry="2.1" fill="${C.light}" filter="url(#${shine})"/>` +
     `<circle cx="${n(dx)}" cy="${n(dy)}" r="0.9" fill="${C.light}" opacity="0.7"/>`;
@@ -223,12 +221,12 @@ function brow(sx: number): Piece {
   const pts: P[] = [[sx * 27.2, -24.6], [sx * 25.4, -27.4], [sx * 22.4, -29], [sx * 19, -28.2]];
   const f = uid("blur"), box = faceBox([sx > 0 ? 15 : -31, -33, 16, 12]);
   return piece(`<defs>${blur(f, box, 0.35)}</defs><g filter="url(#${f})">` +
-    inFace(`<path d="${taperedStroke(pts, 2.6, { taper: 3, tip: 1.1 })}" fill="${C.marking}"/>`) + "</g>", box);
+    inFace(`<path d="${taperedStroke(pts, 2.6, { taper: 3, tip: 1.1 })}" fill="${C.marking}" opacity="0.85"/>`) + "</g>", box);
 }
 
 /** The nose in the face frame: a rounded triangle, wide on top. */
 function nose(): Piece {
-  return piece(inFace(`<path d="M-6.8 6.6 C-7 4.2 -3.4 3.6 0 3.6 C3.4 3.6 7 4.2 6.8 6.6 C6.5 9.2 2.8 12.1 0 12.3 C-2.8 12.1 -6.5 9.2 -6.8 6.6Z" fill="${C.eyeDark}"/>` +
+  return piece(inFace(`<path d="M-6.8 6.6 C-7 4.2 -3.4 3.6 0 3.6 C3.4 3.6 7 4.2 6.8 6.6 C6.2 9.4 2.2 12.2 0 12.4 C-2.2 12.2 -6.2 9.4 -6.8 6.6Z" fill="${C.eyeDark}"/>` +
     `<ellipse cx="-2" cy="5.6" rx="2.2" ry="0.9" fill="${C.light}" opacity="0.25"/>`), faceBox([-8, 2, 16, 12]));
 }
 
@@ -268,6 +266,13 @@ function tagPiece(): Piece {
   }));
 }
 
+/** The deeper tan along an ear's outer edge and fringe (k = 1 for the right ear, −1 for the left). */
+function earEdge(k: number): string {
+  const f = uid("blur"), box: Box = k > 0 ? [-90, -140, 52, 84] : [38, -144, 52, 84];
+  const d = "M-54 -134 C-58 -126 -66 -114 -71 -104 C-75 -96 -76.4 -86 -75.6 -79 C-74.8 -72 -68 -68 -60 -66 C-55 -65 -50 -65.4 -46 -66 L-46 -54 L-92 -54 L-92 -134Z";
+  return `<defs>${blur(f, box, 3)}</defs><path d="${k > 0 ? d : mirrorD(d)}" fill="${C.junction}" opacity="0.8" filter="url(#${f})"/>`;
+}
+
 /** The warm shadow between the front legs, painted into the chest under its shade. */
 function legGap(): string {
   const f = uid("blur"), box: Box = [-9, -36, 18, 36];
@@ -289,7 +294,7 @@ export function front(): Drawn[] {
       shade: furShade(hipGroup, [], [`M${cx - 12} ${cy - 12} L${cx + 12} ${cy - 12} L${cx + 12} ${cy - 3} L${cx - 12} ${cy - 3}Z`]),
       // Round the outside, over the top and down the inner side to the front paw.
       // A lighter line over the top, where the paw lies on the haunch; the dark line round the outside and the sole.
-      outline: { ...OUTLINE, taper: 4, spans: bySide(side, [{ from: [-48.4, -15.2], to: [-30.4, -12.6], width: THIN, colour: C.furLine }, { from: [-29.8, -10.8], to: [-48.6, -13] }]) },
+      outline: { ...OUTLINE, width: 1.4, taper: 4, spans: bySide(side, [{ from: [-48.4, -15.2], to: [-30.4, -12.6], width: THIN, colour: C.furLine }, { from: [-29.8, -10.8], to: [-48.6, -13] }]) },
       inner: [[[-41.6, -8.2], [-41.8, -4.4]], [[-35.4, -8.6], [-35.2, -4]]].map((pts) => ({ pts: flipX(pts as P[], side), width: INNER, colour: C.outline, opacity: 0.55 })),
     }));
   }
@@ -304,25 +309,32 @@ export function front(): Drawn[] {
   add("shadow.chin", soft("M-26 -59 C-12 -53 12 -53 26 -59 L26 -66 L-26 -66Z", [-26, -66, 52, 10], C.furShade, 2.4));
   add("collar", part("collar", collar, {
     fill: C.collar,
-    shade: { multiply: C.shadeBy, shapes: ["M-32 -55 C-12 -49 12 -49 32 -57 L32 -48 L-32 -48Z"], blur: 1.5 },
-    highlight: { d: "M-24 -60.6 C-10 -57.2 10 -57.2 25 -61.6 L25 -59.6 C10 -55.4 -10 -55.4 -24 -58.8Z", colour: C.collarHighlight, opacity: 0.9, blur: 0.7 },
-    outline: { colour: C.collarLine, width: THIN, spans: [{ from: [29.4, -62.2], to: [-28, -61.4] }], taper: 4, blur: 0.25 },
+    shade: { multiply: C.shadeBy, shapes: ["M-32 -57 C-12 -51 12 -51 32 -59 L32 -46 L-32 -46Z"], blur: 1.5 },
+    highlight: { d: "M-24 -59.8 C-10 -56.4 10 -56.4 25 -60.8 L25 -59.4 C10 -55.2 -10 -55.2 -24 -58.6Z", colour: C.collarHighlight, opacity: 0.8, blur: 0.6 },
+    outline: { colour: C.collarLine, width: THIN, spans: [{ from: [28.2, -61.6], to: [-26.9, -60.4] }], taper: 4, blur: 0.25 },
   }));
   add("tag", tagPiece());
   for (const side of ["R", "L"] as const) {
     const k = side === "R" ? 1 : -1;
     const shape = ears[side];
     const shadeD = "M-92 -88 C-74 -84 -56 -79 -38 -74 L-38 -50 L-92 -50Z M-56 -138 C-62 -124 -72 -110 -76 -96 C-78 -88 -77 -80 -74 -74 L-92 -74 L-92 -138Z";
-    const inner = [[[-73.8, -84], [-73.6, -77], [-71.4, -71.4]], [[-64.6, -82], [-64.4, -73], [-62.2, -66.4]], [[-55.4, -80], [-55.2, -72], [-53.6, -65.4]]];
+    const inner = [[[-74.4, -86], [-74, -78], [-71.4, -71.6]], [[-65.4, -84], [-64.8, -74], [-62.4, -66.6]], [[-56.6, -80], [-56, -71.4], [-54, -65.8]]];
+    // The crease where the ear turns in toward the head, from its root down to the cheek.
+    const crease: P[] = [[-45.2, -133], [-47.2, -125], [-48, -116], [-47.8, -106], [-47.2, -97], [-46.6, -90]];
     add(`ear.${side}`, part(`ear.${side}`, shape, {
       fill: C.marking,
+      under: earEdge(k),
       // The tan's own warm shade, deepest toward the bottom and the outer edge, as the sheet paints its ears.
       shade: { multiply: C.furShadeBy, rim: { inset: 2.4, toLight: 4 }, shapes: [k > 0 ? shadeD : mirrorD(shadeD)], blur: 3.2 },
       // The upper ear is lighter where it leaves the head.
-      highlight: { d: k > 0 ? "M-62 -118 C-56 -128 -47 -136 -41 -132 C-40 -120 -46 -104 -54 -100 C-60 -102 -63 -110 -62 -118Z" : "M41 -136 C48 -134 56 -126 60 -116 C58 -106 52 -102 46 -104 C41 -110 40 -126 41 -136Z", colour: C.patch, opacity: 0.8, blur: 3.6 },
-      inner: inner.map((pts) => ({ pts: pts.map(([x, y]) => [k * x!, y!] as P), width: INNER, colour: C.outline, opacity: 0.32 })),
+      // Lighter on its inner side, inside the crease, and where it leaves the head.
+      highlight: { d: k > 0 ? "M-58 -126 C-53 -132 -46 -137 -40 -134 L-38 -90 L-47.6 -90 C-48.4 -100 -49 -112 -51 -118 C-54 -120 -57 -122 -58 -126Z" : "M58 -126 C53 -132 46 -139 40 -137 L38 -90 L47.6 -90 C48.4 -100 49 -112 51 -118 C54 -120 57 -122 58 -126Z", colour: C.patch, opacity: 0.8, blur: 2.4 },
+      inner: [
+        ...inner.map((pts) => ({ pts: pts.map(([x, y]) => [k * x!, y!] as P), width: INNER, colour: C.outline, opacity: 0.32 })),
+        { pts: crease.map(([x, y]) => [k * x, y] as P), width: 0.9, colour: C.outline, opacity: 0.85 },
+      ],
       // From where the ear comes out from behind the head, round to where its inner edge goes back under the cheek.
-      outline: { ...OUTLINE, width: 1.4, spans: side === "R" ? [{ from: [-41.4, -136.8], to: [-40.2, -68.8] }] : [{ from: [40.6, -139.6], to: [40.2, -70.4] }], taper: 9 },
+      outline: { ...OUTLINE, width: 1.3, spans: side === "R" ? [{ from: [-41.4, -136.8], to: [-40.2, -68.8] }] : [{ from: [40.6, -139.6], to: [40.2, -70.4] }], taper: 10 },
     }));
   }
   add("head.base", part("head.base", head, headPaint));
@@ -344,10 +356,10 @@ export function front(): Drawn[] {
     highlight: { d: headLight, colour: C.light, opacity: 0.75, blur: 4 },
     // The curls where each lobe ends, and a stroke where the left lobe leaves the crown.
     inner: [
-      { pts: [[-13.4, -155.4], [-11.6, -153.6], [-11, -151.4]], width: 0.7, colour: C.furLine, opacity: 0.7 },
-      { pts: [[5, -160.4], [5, -157.6], [3.4, -155.2]], width: 0.7, colour: C.furLine, opacity: 0.7 },
-      { pts: [[22.8, -155.2], [21.4, -152.4], [18.6, -151]], width: 0.7, colour: C.furLine, opacity: 0.7 },
-      { pts: [[-29.8, -150.6], [-26, -149.4], [-22.4, -148.4]], width: 0.7, colour: C.furLine, opacity: 0.6 },
+      { pts: [[-13.4, -155.4], [-11.6, -153.6], [-11.2, -151.2]], width: 0.9, colour: C.furLine, opacity: 0.95 },
+      { pts: [[5.2, -160.4], [5, -157.4], [3, -154.6]], width: 0.9, colour: C.furLine, opacity: 0.95 },
+      { pts: [[22.8, -155.2], [21.2, -152.2], [17.6, -150.6]], width: 0.9, colour: C.furLine, opacity: 0.95 },
+      { pts: [[-30.2, -150.6], [-26.4, -149.2], [-22.2, -148.4]], width: 0.9, colour: C.furLine, opacity: 0.9 },
     ],
     outline: { ...OUTLINE, colour: C.furLine, width: THIN, spans: [{ from: [-30.6, -150.4], to: [22.6, -153] }], taper: 4 },
     feather: { from: [0, -146.5], to: [0, -150.5] },
@@ -359,11 +371,11 @@ export function front(): Drawn[] {
       shade: furShade(bodyGroup, [], ["M-40 -60 L40 -60 L40 -34 L-40 -34Z"]),
       inner: [
         // The toes, and the soft lines down the leg's inner side where it meets the other leg.
-        ...[[[-20.2, -7.6], [-20.3, -2.2]], [[-10.1, -7.8], [-10.2, -2.1]]].map((pts) => ({ pts: flipX(pts as P[], side), width: INNER, colour: C.outline, opacity: 0.55 })),
-        { pts: flipX([[-5.4, -34], [-3.4, -22], [-2.2, -12]], side), width: INNER, colour: C.furLine, opacity: 0.6 },
+        ...[[[-20.4, -7.4], [-20.6, -1.4]], [[-10.2, -7.6], [-10.3, -1.2]]].map((pts) => ({ pts: flipX(pts as P[], side), width: INNER, colour: C.outline, opacity: 0.65 })),
+        { pts: flipX([[-4, -26], [-2.9, -17], [-2, -10]], side), width: INNER, colour: C.furLine, opacity: 0.6 },
       ],
       // Up the inner side from the toes, round the paw and up the outer side, where the line lightens toward the chest.
-      outline: { ...OUTLINE, spans: bySide(side, [{ from: [-1.7, -9], to: [-30.2, -13] }, { from: [-30.4, -14], to: [-33.6, -30], width: THIN, colour: C.furLine }]), taper: 6 },
+      outline: { ...OUTLINE, width: 1.4, spans: bySide(side, [{ from: [-1.7, -9], to: [-30.2, -13] }, { from: [-30.4, -14], to: [-33.6, -30], width: THIN, colour: C.furLine }]), taper: 6 },
       feather: { from: [sx * 15, -44], to: [sx * 15, -36] },
     }));
   }

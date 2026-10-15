@@ -41,6 +41,8 @@ export const C = {
   shadeBy: darken(light, 0.1),
   /** The lighter line on fur spans. */
   furLine: mix(outline, fur, 0.14),
+  /** The faint line round the cheeks' fluff, which the sheet barely outlines. */
+  fluffLine: mix(outline, fur, 0.45),
   /** Where a patch meets its ear, the sheet draws no outline: a line in the ear's own tan, a little deeper (DECISIONS 7). */
   junction: mix(marking, outline, 0.25),
   collarLine: darken(collar, 0.25),
