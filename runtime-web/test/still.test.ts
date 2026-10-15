@@ -1,8 +1,9 @@
-// The stills renderer (runtime-web/lab/still.ts) on the test character with two
+// The stills renderer (runtime-web/lab/still.ts) on the test character with three
 // still clips added: the files follow the contract, the white and black passes
-// give the package's own alpha, the ID pass paints each part flat where it draws
-// and keeps the clip to head.base, model points land on rootPx + ppp·(x, y), and
-// the same still renders the same bytes twice. The reference is composited on the
+// give the package's own alpha (times each part's), the ID pass paints each part
+// flat where it draws and keeps the clip to head.base, whatever the parts' alphas,
+// model points land on rootPx + ppp·(x, y), and the same still renders the same
+// bytes twice. The reference is composited on the
 // CPU straight from the atlas page, for every part drawn unrotated on whole pixels.
 // A still never comes out half-written or at another size, and the look loop
 // (look.ts) never reads a crash of the sheet match as failed checks.
@@ -16,35 +17,53 @@ import { buildPackage, pngChunks, readSource, writePackage } from "../../charact
 import type { Clip } from "../src/format.ts";
 import { compile, drawList, evaluatePose, type DrawItem } from "../src/rig.ts";
 import { MASK_ALPHA } from "../src/renderer.ts";
-import { hex, idColour, inPart, largestAlpha, recolour } from "../lab/ids.ts";
+import { hex, idColour, inPart, largestAlpha, MASK_ONLY, recolour } from "../lab/ids.ts";
 import { failures, matchVerdict } from "../lab/look.ts";
 import { MARGIN, openStills, type StillInfo, type Stills } from "../lab/still.ts";
 
 const PPP = 3;
 const still = (name: string, view: string): Clip => ({ name, lengthMs: 1000, views: { body: [[0, view]], head: [[0, view]] } });
+// The front with parts faded: the mask head.base (its own ID colour gone, its clip group whole), a clipped
+// part, the soft shadow, and an eye at 0.
+const fadedAlpha: Record<string, number> = { "head.base": 0.3, "head.marking": 0.6, shadow: 0.5, "eye.L": 0, nose: 0.9 };
+const faded: Clip = { ...still("still_faded", "front"), alpha: Object.fromEntries(Object.entries(fadedAlpha).map(([part, a]) => [part, [[0, a]]])) };
 const source = await readSource("test");
-const pkg = await buildPackage({ ...source, clips: [...source.clips, still("still_front", "front"), still("still_side.R", "side.R")] });
+const pkg = await buildPackage({ ...source, clips: [...source.clips, still("still_front", "front"), still("still_side.R", "side.R"), faded] });
 const set = pkg.atlas.sets.find((s) => s.name === "3x")!;
 const pages = set.pages.map((p) => PNG.sync.read(pkg.files.get(p.file)!));
 const rig = compile(source.rig);
 const views = { body: "front", head: "front" };
-// The frame a still shows: the rest pose, springs at rest, default states.
+// The frame a still shows: the rest pose, springs at rest, default states; and the faded one, each part at its alpha.
 const items = drawList(rig, evaluatePose(rig, { channels: {}, views }), set, { views, states: {} });
+const fadedItems = drawList(rig, evaluatePose(rig, { channels: {}, views }), set, { views, states: {}, alpha: fadedAlpha });
 
 const dir = mkdtempSync(join(tmpdir(), "huddlings-still-"));
 writePackage(pkg, join(dir, "package"));
 let stills: Stills;
 let info: StillInfo;
 let white: PNG, black: PNG, ids: PNG;
+/** A rendered still with the draw list it shows. */
+interface Shot {
+  info: StillInfo;
+  items: DrawItem[];
+  white: PNG;
+  black: PNG;
+  ids: PNG;
+}
+let front: Shot, fadedShot: Shot;
 const read = (folder: string, name: string) => readFileSync(join(dir, folder, name));
+
+async function shoot(name: string, folder: string, shown: DrawItem[]): Promise<Shot> {
+  const still = await stills.render(name, join(dir, folder));
+  return { info: still, items: shown, white: PNG.sync.read(read(folder, "white.png")), black: PNG.sync.read(read(folder, "black.png")), ids: PNG.sync.read(read(folder, "ids.png")) };
+}
 
 before(async () => {
   stills = await openStills(join(dir, "package"));
   await stills.load(PPP);
-  info = await stills.render("still_front", join(dir, "a"));
-  white = PNG.sync.read(read("a", "white.png"));
-  black = PNG.sync.read(read("a", "black.png"));
-  ids = PNG.sync.read(read("a", "ids.png"));
+  front = await shoot("still_front", "a", items);
+  ({ info, white, black, ids } = front);
+  fadedShot = await shoot("still_faded", "faded", fadedItems);
 });
 after(async () => {
   await stills?.close();
@@ -60,9 +79,9 @@ interface Placed {
   h: number;
 }
 
-function place(item: DrawItem): Placed | undefined {
+function place(item: DrawItem, at = info): Placed | undefined {
   if (item.rows !== 1) return undefined;
-  const px = item.positions.map((v, k) => info.rootPx[k % 2]! + PPP * v);
+  const px = item.positions.map((v, k) => at.rootPx[k % 2]! + PPP * v);
   const whole = px.map(Math.round);
   if (px.some((v, k) => Math.abs(v - whole[k]!) > 1e-9)) return undefined;
   const [l, t, r, t2, l2, b] = whole as [number, number, number, number, number, number];
@@ -78,9 +97,12 @@ function alphaAt(p: Placed, i: number, j: number): number {
   return page.data[((region.y + j - p.top) * page.width + region.x + i - p.left) * 4 + 3]!;
 }
 
-/** Whether the part's texel under pixel (i, j) is in its part for the ID pass: at least half its region's largest alpha. */
-function inItsPart(p: Placed, i: number, j: number): boolean {
-  return inPart(alphaAt(p, i, j), largest(p.item.region));
+/**
+ * Whether the part's texel under pixel (i, j) is in its part for the ID pass: at least half its region's largest
+ * alpha, times the part's alpha; as a mask, at full alpha whatever its own.
+ */
+function inItsPart(p: Placed, i: number, j: number, asMask = false): boolean {
+  return inPart(alphaAt(p, i, j), largest(p.item.region), asMask ? 1 : p.item.alpha);
 }
 const largestOf = new Map<string, number>();
 function largest(name: string): number {
@@ -90,21 +112,21 @@ function largest(name: string): number {
 }
 
 /** The pixels a part's quads could touch, a pixel wider all round. */
-function box(item: DrawItem): [number, number, number, number] {
-  const xs = item.positions.filter((_, k) => k % 2 === 0).map((v) => info.rootPx[0] + PPP * v);
-  const ys = item.positions.filter((_, k) => k % 2 === 1).map((v) => info.rootPx[1] + PPP * v);
+function box(item: DrawItem, at = info): [number, number, number, number] {
+  const xs = item.positions.filter((_, k) => k % 2 === 0).map((v) => at.rootPx[0] + PPP * v);
+  const ys = item.positions.filter((_, k) => k % 2 === 1).map((v) => at.rootPx[1] + PPP * v);
   return [Math.floor(Math.min(...xs)) - 1, Math.floor(Math.min(...ys)) - 1, Math.ceil(Math.max(...xs)) + 1, Math.ceil(Math.max(...ys)) + 1];
 }
 
 /** Every part placed, its mask's placing, and the bending tail's box, where the CPU reference does not reach. */
-function reference() {
-  const placed = items.map((item) => [item, place(item)] as const);
+function reference(shot = front) {
+  const placed = shot.items.map((item) => [item, place(item, shot.info)] as const);
   const bent = placed.filter(([, p]) => !p).map(([item]) => item);
   assert.deepEqual(bent.map((i) => i.part), ["tail"], "every part but the bending tail is drawn unrotated on whole pixels");
-  const tail = box(bent[0]!);
+  const tail = box(bent[0]!, shot.info);
   const inTail = (i: number, j: number) => i >= tail[0] && i <= tail[2] && j >= tail[1] && j <= tail[3];
   const byPart = new Map(placed.filter(([, p]) => p).map(([item, p]) => [item.part, p!]));
-  const maskOf = (p: Placed) => (p.item.clipTo === undefined ? undefined : byPart.get(items[p.item.clipTo]!.part)!);
+  const maskOf = (p: Placed) => (p.item.clipTo === undefined ? undefined : byPart.get(shot.items[p.item.clipTo]!.part)!);
   return { placed: [...byPart.values()], inTail, byPart, maskOf };
 }
 
@@ -143,23 +165,29 @@ test("a still writes 8-bit RGBA PNGs and still.json as the contract says", () =>
   assert.ok(Math.max(...xs) <= info.sizePx[0] - MARGIN * PPP && Math.max(...ys) <= info.sizePx[1] - MARGIN * PPP, "margin right and bottom");
 });
 
-test("alpha from the white and black passes is the package's own alpha", (t) => {
-  const { placed, inTail, maskOf } = reference();
+/**
+ * The white and black passes' alpha against the CPU's: premultiplied "over" in draw order, each texel times its part's
+ * alpha. Over white and over black every channel moves by the same 255·(1 − alpha), give or take the 8-bit rounding of
+ * each translucent layer, `spread` at most.
+ */
+function alphaCheck(shot: Shot, spread = 1) {
+  const { info, white, black } = shot;
+  const { placed, inTail, maskOf } = reference(shot);
   const [w, h] = info.sizePx;
-  let worst = 0, compared = 0, soft = 0;
+  let worst = 0, compared = 0, soft = 0, widest = 0;
   for (let j = 0; j < h; j++) {
     for (let i = 0; i < w; i++) {
       const W = pixel(white, i, j), B = pixel(black, i, j);
-      // Over white and over black every channel moves by the same 255·(1 − alpha).
       const gaps = [0, 1, 2].map((c) => W[c]! - B[c]!);
-      assert.ok(Math.max(...gaps) - Math.min(...gaps) <= 1 && Math.min(...gaps) >= 0, `pixel ${i}, ${j}: white ${W} and black ${B} disagree`);
+      widest = Math.max(widest, Math.max(...gaps) - Math.min(...gaps));
+      assert.ok(Math.max(...gaps) - Math.min(...gaps) <= spread && Math.min(...gaps) >= 0, `pixel ${i}, ${j}: white ${W} and black ${B} disagree`);
       if (inTail(i, j)) continue;
-      // Premultiplied "over" in draw order, a clipped part only where its mask's alpha is 0.05 or more.
+      // Premultiplied "over" in draw order, a clipped part only where its mask's own texel alpha is 0.05 or more.
       let alpha = 0;
       for (const p of placed) {
         const mask = maskOf(p);
         if (mask && alphaAt(mask, i, j) / 255 < MASK_ALPHA) continue;
-        const a = alphaAt(p, i, j) / 255;
+        const a = (alphaAt(p, i, j) / 255) * p.item.alpha;
         alpha = a + (1 - a) * alpha;
       }
       const measured = 1 - (gaps[0]! + gaps[1]! + gaps[2]!) / 3 / 255;
@@ -168,13 +196,23 @@ test("alpha from the white and black passes is the package's own alpha", (t) => 
       if (alpha > 0 && alpha < 1) soft++;
     }
   }
+  return { worst, compared, soft, widest };
+}
+
+test("alpha from the white and black passes is the package's own alpha", (t) => {
+  const { worst, compared, soft } = alphaCheck(front);
   t.diagnostic(`alpha: ${compared} pixels (${soft} soft), worst difference ${(worst * 255).toFixed(2)}/255`);
   assert.ok(soft > 1000, "the comparison covers soft edges and the shadow");
   assert.ok(worst <= 2 / 255, `alpha differs by up to ${(worst * 255).toFixed(2)}/255`);
 });
 
-test("the ID pass paints each part flat where its alpha is half its largest or more, inside its mask", () => {
-  const { placed, inTail, byPart, maskOf } = reference();
+/**
+ * The ID pass against the CPU's: each pixel the topmost part whose texel, times the part's alpha, is half its
+ * region's largest or more, where its mask (cut the same way, at full alpha) covers it. Returns the pixels that differ.
+ */
+function idCheck(shot: Shot): number {
+  const { info, ids } = shot;
+  const { placed, inTail, maskOf } = reference(shot);
   const [w, h] = info.sizePx;
   const colourOf = new Map(Object.entries(info.parts).map(([name, p]) => [p.id, name]));
   let wrong = 0;
@@ -183,16 +221,28 @@ test("the ID pass paints each part flat where its alpha is half its largest or m
       const got = hex(pixel(ids, i, j).slice(0, 3));
       assert.ok(got === "#000000" || colourOf.has(got), `pixel ${i}, ${j} is ${got}, no part's colour`);
       if (inTail(i, j)) continue;
-      // The topmost part at half its largest alpha or more there, whose mask (cut the same way in this pass) covers it.
       let want = "#000000";
       for (const p of placed) {
         const mask = maskOf(p);
-        if (mask && !inItsPart(mask, i, j)) continue;
+        if (mask && !inItsPart(mask, i, j, true)) continue;
         if (inItsPart(p, i, j)) want = info.parts[p.item.part]!.id;
       }
       if (got !== want) wrong++;
     }
   }
+  return wrong;
+}
+
+/** How many pixels of the ID pass show a part. */
+const idPixels = (shot: Shot, part: string) => {
+  let n = 0;
+  for (let k = 0; k < shot.ids.data.length; k += 4) if (hex([...shot.ids.data.subarray(k, k + 3)]) === shot.info.parts[part]!.id) n++;
+  return n;
+};
+
+test("the ID pass paints each part flat where its alpha is half its largest or more, inside its mask", () => {
+  const { byPart } = reference();
+  const wrong = idCheck(front);
   assert.equal(wrong, 0, `${wrong} pixels show the wrong part`);
   // The stripe runs past the head on both sides; there the clip hides it.
   const marking = byPart.get("head.marking")!, head = byPart.get("head.base")!;
@@ -209,6 +259,29 @@ test("the ID pass paints each part flat where its alpha is half its largest or m
   }
   assert.ok(outside > 500 && shown > 1000, `stripe: ${outside} pixels outside the head, ${shown} shown inside`);
   for (const eye of ["eye.L", "eye.R"]) assert.ok(ids.data.some((_, k) => k % 4 === 0 && hex([...ids.data.subarray(k, k + 3)]) === info.parts[eye]!.id), `${eye} shows`);
+});
+
+test("a still draws each part at its alpha; in the ID pass a faded part keeps fewer pixels and a faded mask still clips whole", (t) => {
+  assert.deepEqual(Object.fromEntries(fadedItems.filter((i) => i.alpha !== 1).map((i) => [i.part, i.alpha])), fadedAlpha, "the faded still's draw list holds each part's alpha");
+  assert.deepEqual(fadedShot.info.drawn, items.map((i) => i.part), "a part at alpha 0 stays in the draw list");
+  // Up to three translucent layers stack here (the body, head.base at 0.3, the marking at 0.6), each rounded to 8 bits
+  // over white and over black on its own, so the channels' gaps may differ by 2 where the opaque front's differ by 1.
+  const { worst, compared, widest } = alphaCheck(fadedShot, 2);
+  t.diagnostic(`faded alpha: ${compared} pixels, worst difference ${(worst * 255).toFixed(2)}/255, channel gaps apart by up to ${widest}`);
+  assert.ok(worst <= 2 / 255, `alpha differs by up to ${(worst * 255).toFixed(2)}/255`);
+  assert.ok(!fadedShot.white.data.equals(front.white.data), "the faded still looks different");
+  const wrong = idCheck(fadedShot);
+  assert.equal(wrong, 0, `${wrong} pixels show the wrong part`);
+  // head.base at 0.3 is under half everywhere, so its own colour is gone, but its clip group draws as before.
+  assert.equal(idPixels(fadedShot, "head.base"), 0);
+  assert.equal(idPixels(fadedShot, "eye.L"), 0, "an eye at 0");
+  assert.equal(idPixels(fadedShot, "eye.R"), idPixels(front, "eye.R"), "eye.R, at 1, clipped to the faded head.base");
+  const nose = [idPixels(fadedShot, "nose"), idPixels(front, "nose")];
+  assert.ok(nose[0]! > 0.8 * nose[1]! && nose[0]! <= nose[1]!, `the nose at 0.9 loses only its edge: ${nose[0]} of ${nose[1]} pixels`);
+  const marking = [idPixels(fadedShot, "head.marking"), idPixels(front, "head.marking")];
+  assert.ok(marking[0]! > 1000 && marking[0]! <= marking[1]!, `the marking at 0.6 keeps its core: ${marking[0]} of ${marking[1]} pixels`);
+  const shadow = [idPixels(fadedShot, "shadow"), idPixels(front, "shadow")];
+  assert.ok(shadow[0]! > 0 && shadow[0]! < shadow[1]!, `the soft shadow at 0.5 keeps only its strongest texels: ${shadow[0]} of ${shadow[1]} pixels`);
 });
 
 test("model points land on rootPx + ppp·(x, y)", () => {
@@ -307,6 +380,21 @@ test("the ID pages keep each region's texels from half its largest alpha up, its
   const of = (x: number) => shadow[(1 * 10 + x) * 4 + 3];
   assert.deepEqual([4, 5, 6, 7].map(of), [0, 0, 255, 255], "of 46: 0 and 22 are out, 23 and 46 in");
   assert.deepEqual([inPart(0, 0), inPart(1, 1), inPart(64, 128), inPart(63, 128)], [false, true, true, false]);
+});
+
+test("the ID pages hold a part's alpha: texel × alpha from half the largest up draws, the rest of its part only masks", () => {
+  // A 3 × 1 region with alphas 128, 200, 255 (largest 255), drawn at alpha 0.6: 2·a·0.6 ≥ 255 keeps a ≥ 212.5.
+  const page = new Uint8Array(5 * 1 * 4);
+  [128, 200, 255].forEach((a, k) => page.set([9, 9, 9, a], (1 + k) * 4));
+  const at = (alpha: number) => {
+    const out = recolour(page, 5, 1, [{ x: 1, y: 0, w: 3, h: 1, colour: [10, 20, 30], alpha }]);
+    return [1, 2, 3].map((x) => out[x * 4 + 3]);
+  };
+  assert.deepEqual(at(0.6), [MASK_ONLY, MASK_ONLY, 255]);
+  assert.deepEqual(at(1), [255, 255, 255], "at full alpha as before");
+  assert.deepEqual(at(0), [MASK_ONLY, MASK_ONLY, MASK_ONLY], "at 0 the part only masks");
+  assert.ok(MASK_ONLY / 255 >= MASK_ALPHA && MASK_ONLY / 255 < 0.5, "the renderer's mask cut keeps MASK_ONLY, and the ID pass's colour cut leaves it out");
+  assert.deepEqual([inPart(255, 255, 0.5), inPart(254, 255, 0.5), inPart(255, 255, 0)], [true, false, false]);
 });
 
 test("the ground shadow, a soft part, shows in the ID pass", () => {

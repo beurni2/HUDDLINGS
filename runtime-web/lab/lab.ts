@@ -5,7 +5,7 @@ import type { AtlasSet, Clip, Rig } from "../src/format.ts";
 import { compile, drawList, type CompiledRig, type DrawItem } from "../src/rig.ts";
 import { Player } from "../src/player.ts";
 import { chooseSet, CONTEXT_ATTRIBUTES, Renderer, type Stage } from "../src/renderer.ts";
-import { hex, idColour, recolour, type IdRect } from "./ids.ts";
+import { hex, ID_CUT, idColour, recolour, type IdRect } from "./ids.ts";
 
 interface Loaded {
   rig: CompiledRig;
@@ -38,8 +38,8 @@ class Lab {
   private loaded: Loaded | undefined;
   private player: Player | undefined;
   private pages: HTMLImageElement[] = [];
-  /** The ID pass's own renderer, holding the recoloured pages, and its nearest sampler. */
-  private ids: { renderer: Renderer; sampler: WebGLSampler; current: boolean } | undefined;
+  /** The ID pass's own renderer, holding the recoloured pages, its nearest sampler, and the part alphas its pages were recoloured for. */
+  private ids: { renderer: Renderer; sampler: WebGLSampler; alphas: string | undefined } | undefined;
   /** The still's frame, posed by still() and drawn by drawStill(). */
   private held: DrawItem[] = [];
   private stage: Stage = { x: 200, y: 370, pixelsPerPoint: 2 };
@@ -65,7 +65,7 @@ class Lab {
       : chooseSet(atlas.sets, options.sizeShare ?? 1, options.stage.pixelsPerPoint);
     this.pages = await Promise.all(set.pages.map((p) => image(`${base}/${p.file}`)));
     this.renderer.loadPages(this.pages);
-    if (this.ids) this.ids.current = false;
+    if (this.ids) this.ids.alphas = undefined;
     this.loaded = { rig: compile(rig), clips, set };
     this.player = new Player(this.loaded.rig, clips);
     document.getElementById("status")!.textContent = `${rig.species}: ${clips.length} clips, set ${set.name}`;
@@ -137,12 +137,16 @@ class Lab {
     const { renderer, sampler } = this.idPass();
     // A sampler on the renderer's texture unit overrides its linear filtering, so every pixel takes one texel's flat colour.
     gl.bindSampler(0, sampler);
-    renderer.draw(this.held, o.stage, o.background);
+    // Each part's alpha is in its ID pages already, so every part draws flat, at 1.
+    renderer.draw(this.held.map((item) => ({ ...item, alpha: 1 })), o.stage, o.background, ID_CUT);
     gl.bindSampler(0, null);
     return base64(renderer.readPixels());
   }
 
-  /** The ID pass: a recoloured copy of the set's pages (ids.ts) in a renderer of its own, so the package's pages stay as they are. */
+  /**
+   * The ID pass: a recoloured copy of the set's pages (ids.ts) in a renderer of its own, so the
+   * package's pages stay as they are, recoloured again when the still's part alphas change.
+   */
   private idPass() {
     const gl = this.renderer!.gl;
     if (!this.ids) {
@@ -151,9 +155,12 @@ class Lab {
       gl.samplerParameteri(sampler, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
       gl.samplerParameteri(sampler, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
       gl.samplerParameteri(sampler, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-      this.ids = { renderer: new Renderer(gl), sampler, current: false };
+      this.ids = { renderer: new Renderer(gl), sampler, alphas: undefined };
     }
-    if (!this.ids.current) {
+    // A region belongs to one part, and the still draws it at that part's alpha.
+    const alphaOf = new Map(this.held.filter((item) => item.alpha !== 1).map((item) => [item.region, item.alpha]));
+    const alphas = JSON.stringify([...alphaOf]);
+    if (this.ids.alphas !== alphas) {
       const { rig, set } = this.loaded!;
       const owner = new Map<string, number>();
       rig.rig.parts.forEach((part, i) => {
@@ -171,14 +178,14 @@ class Lab {
         const rects: IdRect[] = [];
         for (const [name, r] of Object.entries(set.regions)) {
           const part = owner.get(name);
-          if (r.page === page && part !== undefined) rects.push({ x: r.x, y: r.y, w: r.w, h: r.h, colour: idColour(part) });
+          if (r.page === page && part !== undefined) rects.push({ x: r.x, y: r.y, w: r.w, h: r.h, colour: idColour(part), alpha: alphaOf.get(name) ?? 1 });
         }
         // Only alpha is read back, and a 2D canvas keeps alpha exactly.
         const texels = recolour(context.getImageData(0, 0, img.width, img.height).data, img.width, img.height, rects);
         return new ImageData(texels, img.width, img.height);
       });
       this.ids.renderer.loadPages(pages);
-      this.ids.current = true;
+      this.ids.alphas = alphas;
     }
     return this.ids;
   }
