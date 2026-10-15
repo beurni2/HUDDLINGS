@@ -266,7 +266,7 @@ let head = smooth([...headHalf, [0, -58.4], ...leftHalf].map(([x, y]): Node => c
 // row of small pointed tufts, uneven, combed out from its middle.
 const cheekLocks = {
   R: [{ len: 2.3, w: 1.75, lean: 0.25 }, { len: 0.9, w: 0.55, lean: 0.45 }, { len: 1.9, w: 1.25, lean: 0.55 }, { len: 1.3, w: 0.7, lean: 0.8 }],
-  L: [{ len: 2.5, w: 1.6, lean: 0.2 }, { len: 1.5, w: 1, lean: 0.35 }, { len: 1.9, w: 0.9, lean: 0.65 }, { len: 0.8, w: 0.55, lean: 0.5 }, { len: 1.2, w: 0.75, lean: 0.75 }],
+  L: [{ len: 2.6, w: 1.9, lean: 0.2 }, { len: 1.7, w: 1.1, lean: 0.35 }, { len: 1.5, w: 0.7, lean: 0.7 }, { len: 0.7, w: 0.45, lean: 0.5 }, { len: 1.1, w: 0.75, lean: 0.8 }],
 };
 const chinLocks = [{ len: 0.55, w: 0.8, lean: -0.35 }, { len: 0.85, w: 1.1, lean: -0.3 }, { len: 0.6, w: 0.9, lean: -0.2 }, { len: 0.9, w: 1.2, lean: -0.1 },
   { len: 0.7, w: 1, lean: 0 }, { len: 0.85, w: 1.15, lean: 0.1 }, { len: 0.6, w: 0.9, lean: 0.2 }, { len: 0.8, w: 1.05, lean: 0.3 }, { len: 0.55, w: 0.85, lean: 0.35 }];
@@ -404,7 +404,8 @@ function clumpLines(): Outline {
   // Each stroke runs on 1 pt past its notch, under the next clump's root, so even a small clump's stroke swells to
   // its width between its tapered ends.
   const past = 1 / arc(sample(head.segs, 48)).at(-1)!;
-  const spans: Span[] = clumps.map(({ tip, notches }) => {
+  // Only the fuller clumps (standing out 1.5 pt or more) carry one; the small tufts between them are fur alone.
+  const spans: Span[] = clumps.filter(({ tip, root }) => v.len(v.sub(tip, root)) >= 1.5).map(({ tip, notches }) => {
     // The path runs down the right cheek and up the left, so a clump's lower notch is its second on the right.
     const right = tip[0] < 0, below = right ? notches[1] : notches[0];
     const span = right ? { from: fracAt(head, tip), to: fracAt(head, below) + past } : { from: fracAt(head, below) - past, to: fracAt(head, tip) };
