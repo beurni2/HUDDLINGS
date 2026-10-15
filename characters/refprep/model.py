@@ -3,15 +3,19 @@ section 5b, Appendix F), from the measurements, the palette and the marking map.
 
     python3 characters/refprep/model.py dog
 
-Reads ref/measurements.json, ref/palette.json, ref/markings.json and
-refmap/markings.json (run measure.py, palette.py and markings.py first).
+Reads ref/measurements.json, ref/palette.json, ref/markings.json,
+refmap/markings.json and ref/faces.json (run measure.py, palette.py,
+markings.py and faces.py first).
 Landmarks are in points at the 164 pt height, from the ground point under the
 seat, y down. The palette is the sheet's printed values (spec section 5, L189),
 with the outline sampled from the linework; palettePainted holds the colours
 the sheet paints that the printed palette lacks, each for its own region, as
 the founder decided (docs/QUESTIONS.md, Q24). Each crop record keeps its box
 in sheet pixels and its anchors in crop pixels, with the crop's scale in points
-per crop pixel. The model is a proposal until the founder approves it at Gate A."""
+per crop pixel; faceCrops does the same for each expression panel a face
+preset is judged against (the Faces check), with its roll, the areas of its
+marks, the anchors each preset is held to and the presets it is the primary
+panel of. The model is a proposal until the founder approves it at Gate A."""
 import sys
 
 import numpy as np
@@ -72,7 +76,19 @@ def build(species):
         "outline": {"outerPt": measured["outline"]["outerPt"], "innerPt": INNER_LINE_PT},
         "markings": plan["markings"],
         "crops": crops,
+        "faceCrops": face_crops(folder),
     }
+
+
+FACE_KEYS = ("crop", "sheet", "boxSheetPx", "presets", "primaryFor", "view", "facing", "measureZoom", "ptPerCropPx",
+             "rollDeg", "turnAcrossPt", "turned", "headWidthCropPx", "anchorsCropPx", "shapesPt2", "drawn", "eyeStates",
+             "gates", "mask")
+
+
+def face_crops(folder):
+    """The face panels' records (faces.py), without the hand-placed seeds and widths that ref/faces.json keeps."""
+    records = sheets.json.loads((folder / "ref" / "faces.json").read_text())["records"]
+    return {pid: {key: record[key] for key in FACE_KEYS} for pid, record in records.items()}
 
 
 def main(argv):
@@ -82,7 +98,7 @@ def main(argv):
     model = build(argv[0])
     sheets.write_json(sheets.ROOT / "characters" / argv[0] / "model.json", model)
     print(f"model: {len(model['landmarks'])} views, {sum(len(v) for v in model['landmarks'].values())} landmarks, "
-          f"{len(model['markings'])} markings")
+          f"{len(model['markings'])} markings, {len(model['faceCrops'])} face crops")
     return 0
 
 
