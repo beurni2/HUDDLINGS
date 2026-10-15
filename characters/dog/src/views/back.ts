@@ -178,8 +178,11 @@ const TAIL_NOTCHES = [10, 13, 15, 19];
 const tail = smooth([[-9.8, -23.2], [-5.6, -27], [-1.6, -29.2], [0.8, -32.4], [2.4, -37.6], [1.2, -42.2], [2.6, -46.4], [6.4, -48.9], [11, -49.4],
   [16, -48.4], [19.8, -45.6], [25.2, -42.6], [28.8, -37.6], [29.6, -32.8], [31.6, -27], [29.8, -20.6], [29.2, -14.8], [25.6, -9.8], [16.6, -6.6],
   [8.2, -3.8], [1, -0.4], [-7.8, -2.4], [-10.4, -11], [-10, -19]], { corners: TAIL_NOTCHES });
-/** The tail's root, where it leaves the body on the spine (rig.json's tail pivot in this view): on the tail, at its tan root's height. */
-export const TAIL_ROOT: P = [0, -23];
+/**
+ * The tail's root, where it leaves the rump (rig.json's tail pivot in this view): the middle of its tan root as it shows
+ * from behind (phase 2's patch there centres on -5.7, -23.7), at the side view's root height (-23), on the tail.
+ */
+export const TAIL_ROOT: P = [-5, -24];
 
 // Markings.
 
