@@ -294,10 +294,11 @@ head = furEdge(furEdge(head, [-35.6, -145.1], [-38.6, -142.6], crownLocks, 0.26)
 
 // The topknot: three fur lobes, typed node by node (the sheet's tuft): the side
 // lobes low and broad, the middle one tall and a little pointed, like a flame
-// leaning right, each ending in a curl.
-const tuft = furSpan(smooth([[-31, -149.2], [-29.6, -152.8], [-26.6, -155.6], [-22, -157], [-17.4, -157.4], [-13.4, -156.4], [-11.2, -154],
+// leaning right, each ending in a curl, the side lobes coming down to the
+// crown's line at their feet, where the two lines meet in a point.
+const tuft = furSpan(smooth([[-31, -147.6], [-29.8, -152.6], [-26.6, -155.6], [-22, -157], [-17.4, -157.4], [-13.4, -156.4], [-11.2, -154],
   [-9.6, -158], [-6.8, -161.4], [-3.6, -163.5], [0.7, -164.4], [3.4, -163.2], [5, -160.8], [5.2, -158], [8.6, -159.4], [12.4, -160.2], [16.6, -159.8],
-  [20.8, -158.4], [23.2, -155.6], [22.6, -152.2], [14, -146.6], [0, -145.4], [-18, -146.2]], { corners: [6, 13] }), [-30.6, -150.4], [22.8, -153]);
+  [20.8, -158.4], [23.2, -155.6], [22.4, -150.6], [14, -146.6], [0, -145.4], [-18, -146.2]], { corners: [6, 13] }), [-31, -147.6], [22.4, -150.6]);
 
 // The head patches, as the sheet paints them: a rounded hood over the top and
 // outer side of each eye, like the rim of a pair of round spectacles, its top
@@ -337,9 +338,9 @@ const saddleL = smooth([[27, -64.2], [31.6, -63.4], [36.2, -55.6], [38.8, -47.4]
 
 // Paint.
 
-// The one highlight: the crown toward the light, and the cheeks' puffs out to their rims, which the sheet paints
-// whitest at their outer edge, rim-lit against the ear.
-const headLight = "M-30 -146 C-18 -154 2 -154 10 -147 C6 -136 -18 -134 -28 -138Z " +
+// The one highlight: a small soft patch on the crown's left, toward the light, so the crown keeps its warm cream,
+// and the cheeks' puffs out to their rims, which the sheet paints whitest at their outer edge, rim-lit against the ear.
+const headLight = "M-27 -145 C-19 -151 -6 -151 -1 -146 C-4 -139 -17 -137 -25 -140Z " +
   "M-48 -82 C-47 -87.6 -42 -89 -37.6 -86.8 C-36.4 -81.6 -38.4 -75.6 -42.6 -72.6 C-46 -73.6 -48.4 -77.4 -48 -82Z " +
   "M48 -86.6 C47 -92.2 42 -93.6 37.6 -91.4 C36.4 -86.2 38.4 -80.2 42.6 -77.2 C46 -78.2 48.4 -82 48 -86.6Z";
 const furShade = (group: Shape[], shapes: string[] = [], keep: string[] = [], rim = { inset: 2.5, toLight: 4 }) =>
@@ -547,15 +548,16 @@ function eye(landmark: P, noseward: number): Piece {
 }
 
 /**
- * A brow in the face frame, as the sheet paints it: a short, thick, rounded dab of tan in the cream above the
- * hood, about 7.5 pt long and 2.2 pt thick, domed, its peak a third of the way in from its inner end and that
- * end lower than the peak, so the face reads happy rather than worried; soft at its edges.
+ * A brow in the face frame, as the sheet paints it: a thick tan comma in the cream above the hood, about 9 pt
+ * long and 2.8 pt thick at its middle, tapering round to both ends, one gentle arch whose crown sits a little
+ * nearer its inner end, which lies higher than its outer end, so the face reads happy rather than worried; soft
+ * at its edges.
  */
 function brow(sx: number): Piece {
-  const pts: P[] = [[sx * 26.3, -25.9], [sx * 24.4, -28.6], [sx * 21.9, -29.8], [sx * 19, -28.4]];
+  const pts: P[] = ([[27.4, -25.4], [26, -27.4], [24.2, -28.8], [22.2, -29.4], [20.2, -29.1], [18.6, -28.2]] as P[]).map(([x, y]): P => [sx * x, y]);
   const f = uid("blur"), box = faceBox([sx > 0 ? 15 : -31, -34, 16, 12]);
   return piece(`<defs>${blur(f, box, 0.35)}</defs><g filter="url(#${f})">` +
-    inFace(`<path d="${strokeOf(pts, 2.2, { taper: 2.4, tip: 1 }).d}" fill="${C.marking}" opacity="0.72"/>`) + "</g>", box);
+    inFace(`<path d="${strokeOf(sample(smooth(pts, { closed: false }).segs, 8, false), 2.8, { taper: 3.4, tip: 0.6 }).d}" fill="${C.marking}" opacity="0.85"/>`) + "</g>", box);
 }
 
 /**
@@ -851,14 +853,14 @@ export function front(): Drawn[] {
     // notch under the tall middle lock, the middle lock's right side curling in over the right lobe, and the right
     // lobe's end hooking back under itself, as the sheet draws them.
     inner: [
-      { pts: [[-26.8, -150.2], [-28.8, -150.4], [-30.3, -151.4]], width: 0.85, colour: C.crownLine, opacity: 0.8 },
+      { pts: [[-26.2, -149.3], [-28.5, -148.9], [-30.5, -148.2]], width: 0.85, colour: C.crownLine, opacity: 0.8 },
       { pts: [[-12.6, -155.8], [-11.4, -154], [-11.8, -152.4]], width: 0.8, colour: C.crownLine, opacity: 0.7 },
       { pts: [[5.2, -159.8], [5, -157.6], [3.9, -156.2], [2.6, -155.9]], width: 0.8, colour: C.crownLine, opacity: 0.7 },
       { pts: [[22.6, -153.8], [21.2, -152.6], [19, -152.3]], width: 0.85, colour: C.crownLine, opacity: 0.8 },
     ],
-    // Each lobe's line its own tapered stroke, stopping short at the notches, where the curls take over.
-    outline: { ...OUTLINE, colour: C.crownLine, width: THIN, taper: 2.6, spans: [{ from: [-30.6, -150.4], to: [-11.8, -154.8] },
-      { from: [-10.8, -155.8], to: [5.1, -159.2] }, { from: [6.4, -158.8], to: [22.8, -153] }] },
+    // One continuous line from where the left lobe meets the crown, round all three lobes and into their notches,
+    // to where the right lobe meets it again, so the tuft and the crown's line read as one outline.
+    outline: { ...OUTLINE, colour: C.crownLine, width: THIN, taper: 1.6, spans: [{ from: [-31, -147.6], to: [22.4, -150.6] }] },
     feather: { from: [0, -146.5], to: [0, -150.5] },
   }));
   for (const side of ["R", "L"] as const) {

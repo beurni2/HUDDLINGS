@@ -41,8 +41,8 @@
  },
  "alignment": {
   "rootOnCropGroundPlusHalf": true,
-  "bestFitShiftPx": [-0.11, 0.06],
-  "bestFitShiftPt": [-0.08, 0.05],
+  "bestFitShiftPx": [-0.11, 0.07],
+  "bestFitShiftPt": [-0.09, 0.05],
   "iouAtBestWholePixelShift": 0.9783,
   "thresholdPx": 2.0,
   "pass": true
@@ -52,8 +52,8 @@
   "threshold": 0.9,
   "groundShadowLeftOut": true,
   "pass": true,
-  "iouHeadAligned": 0.9784,
-  "headCentreOffsetPt": [0.05, -0.14]
+  "iouHeadAligned": 0.9783,
+  "headCentreOffsetPt": [0.05, -0.17]
  },
  "landmarks": {
   "thresholdPt": 2.8,
@@ -248,7 +248,7 @@
     "heldTo": "#FFF4E8",
     "heldBy": "palette.fur",
     "deltaE2000": 0.0,
-    "pixels": 14815,
+    "pixels": 14795,
     "pass": true
    },
    "furShade": {
@@ -256,7 +256,7 @@
     "heldTo": "#FDE3C8",
     "heldBy": "palettePainted.furShade",
     "deltaE2000": 0.44,
-    "pixels": 1348,
+    "pixels": 1335,
     "pass": true
    },
    "eyes": {
@@ -493,7 +493,7 @@
  "advisory": {
   "edgeDistance": {
    "meanRenderToSheetPt": 0.62,
-   "p95RenderToSheetPt": 1.74,
+   "p95RenderToSheetPt": 1.81,
    "meanSheetToRenderPt": 0.61,
    "p95SheetToRenderPt": 1.74,
    "targetP95Pt": 2.0,
