@@ -20,7 +20,7 @@ import { MARGIN, openStills, type StillInfo, type Stills } from "../lab/still.ts
 const PPP = 3;
 const still = (name: string, view: string): Clip => ({ name, lengthMs: 1000, views: { body: [[0, view]], head: [[0, view]] } });
 const source = await readSource("test");
-const pkg = buildPackage({ ...source, clips: [...source.clips, still("still_front", "front"), still("still_side.R", "side.R")] });
+const pkg = await buildPackage({ ...source, clips: [...source.clips, still("still_front", "front"), still("still_side.R", "side.R")] });
 const set = pkg.atlas.sets.find((s) => s.name === "3x")!;
 const pages = set.pages.map((p) => PNG.sync.read(pkg.files.get(p.file)!));
 const rig = compile(source.rig);
