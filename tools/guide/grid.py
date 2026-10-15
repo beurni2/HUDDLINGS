@@ -18,7 +18,9 @@ point p sits on crop pixel ground + 0.5 + p / ptPerCropPx. Options:
 A .R facing shows the mirror of its .L crop, as the sheet match holds it.
 
 Rule R8: no node is ever taken from the sheet by code. The trace exists only
-in this image, is never kept, and this tool never writes under characters/."""
+in this image, is never kept, and this tool never writes under characters/,
+build/characters/, ios/, web/ or runtime-web/ (--out may name build/guides/ or
+any folder outside the repository)."""
 import argparse
 import json
 import shutil
@@ -41,6 +43,9 @@ GRID = (0, 110, 230)
 AXIS = (220, 30, 60)
 LANDMARK = (200, 0, 90)
 TRACE = (20, 20, 20)
+# A guide holds the sheet's pixels and maybe a trace: never where the drawing code reads (characters/) or in anything
+# the app or the web page ships (the packages the app bundles, ios/, web/, runtime-web/).
+REFUSED = (("characters",), ("build", "characters"), ("ios",), ("web",), ("runtime-web",))
 
 
 class Guide:
@@ -151,13 +156,18 @@ def landmarks(image, guide):
 
 
 def out_path(args):
+    """Where the guide goes: build/guides/ by default, or anywhere outside what the drawing code reads and what the
+    app and the web page ship (REFUSED), symbolic links followed and case ignored."""
     if args.out:
         path = Path(args.out).resolve()
     else:
         suffix = "_" + "_".join(f"{v:g}" for v in args.box) if args.box else ""
         path = ROOT / "build" / "guides" / args.species / f"{args.view}{suffix}.png"
-    if path.is_relative_to(ROOT / "characters"):
-        raise SystemExit("guide: a guide never goes under characters/ (rule R8); it lives in build/guides/")
+    if path.is_relative_to(ROOT):
+        parts = tuple(p.casefold() for p in path.relative_to(ROOT).parts)
+        for folder in REFUSED:
+            if parts[:len(folder)] == folder:
+                raise SystemExit(f"guide: a guide never goes under {'/'.join(folder)}/ (rule R8); it lives in build/guides/")
     return path
 
 

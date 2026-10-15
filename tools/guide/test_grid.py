@@ -42,13 +42,28 @@ class GuideTest(unittest.TestCase):
         self.assertAlmostEqual(guide.to_pt((0, 0))[0], -20, places=6)
         self.assertAlmostEqual(guide.to_pt(guide.size)[1], -80, delta=0.15)
 
-    def test_a_guide_never_goes_under_characters(self):
-        args = grid.argparse.Namespace(out=str(grid.ROOT / "characters/dog/ref/guide.png"), species="dog", view="front", box=None)
-        with self.assertRaises(SystemExit):
-            grid.out_path(args)
+    def test_a_guide_never_goes_where_drawing_code_reads_or_anything_ships(self):
+        args = grid.argparse.Namespace(out=None, species="dog", view="front", box=None)
+        for place in ("characters/dog/ref/guide.png", "build/characters/dog/guide.png", "ios/App/guide.png", "web/guide.png",
+                      "runtime-web/lab/guide.png", "Characters/dog/guide.png", "build/../ios/guide.png"):
+            with self.subTest(out=place):
+                args.out = str(grid.ROOT / place)
+                with self.assertRaises(SystemExit):
+                    grid.out_path(args)
         with tempfile.TemporaryDirectory() as folder:
+            # Nor through a link that leads there.
+            link = Path(folder) / "link"
+            link.symlink_to(grid.ROOT / "web")
+            args.out = str(link / "g.png")
+            with self.assertRaises(SystemExit):
+                grid.out_path(args)
             args.out = str(Path(folder) / "g.png")
             self.assertEqual(grid.out_path(args), Path(folder).resolve() / "g.png")
+        for place in ("build/guides/dog/front.png", "build/guides/g.png"):
+            args.out = str(grid.ROOT / place)
+            self.assertEqual(grid.out_path(args), grid.ROOT / place)
+        args.out = None
+        self.assertEqual(grid.out_path(args), grid.ROOT / "build/guides/dog/front.png")
 
     def test_the_guide_uses_the_sheet_matchs_frame(self):
         self.assertIs(grid.match, match)
