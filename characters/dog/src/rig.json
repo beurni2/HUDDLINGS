@@ -39,6 +39,7 @@
     { "name": "body.front", "bone": "chest", "group": "body", "regions": { "front": "body.front/front" } },
     { "name": "shadow.chin", "bone": "head", "group": "head", "clipTo": "body.front", "regions": { "front": "shadow.chin/front" } },
     { "name": "collar", "bone": "collar", "group": "body", "regions": { "front": "collar/front" } },
+    { "name": "shadow.chin.collar", "bone": "head", "group": "head", "clipTo": "collar", "regions": { "front": "shadow.chin.collar/front" } },
     { "name": "tag", "bone": "tag", "group": "body", "regions": { "front": "tag/front" } },
     { "name": "ear.L", "bone": "ear.L", "group": "head", "regions": { "front": "ear.L/front" } },
     { "name": "ear.R", "bone": "ear.R", "group": "head", "regions": { "front": "ear.R/front" } },
@@ -59,7 +60,7 @@
     { "name": "front.R", "bone": "front.R", "group": "body", "regions": { "front": "front.R/front" } }
   ],
   "drawOrder": {
-    "front": ["shadow", "tail", "body.back", "back.patch.R", "back.patch.L", "hind.L", "hind.R", "body.front", "shadow.chin", "collar", "tag", "@head", "front.L", "front.R"],
+    "front": ["shadow", "tail", "body.back", "back.patch.R", "back.patch.L", "hind.L", "hind.R", "body.front", "shadow.chin", "collar", "shadow.chin.collar", "tag", "@head", "front.L", "front.R"],
     "head.front": ["ear.L", "ear.R", "head.base", "head.patch.L", "head.patch.R", "blush.L", "blush.R", "eye.L", "eye.R", "brow.L", "brow.R", "nose", "mouth", "head.line", "tuft"]
   },
   "fakeTurn": {

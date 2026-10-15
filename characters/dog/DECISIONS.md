@@ -140,7 +140,8 @@ Crops: `master.turnaround.front.png`, `master.feature.large-glossy-eyes.png`, `m
 
 **32. Fur and corners.** The crown's fur where it overhangs each ear's root is declared fur, as the sheet draws it, so the 4 pt corner rule (L510) does not round it away. The lint's only part exceptions are the collar's narrow ends, which tuck under the cheek fur, and the tag's point (`characters/dog/src/drawings.ts`).
 
-**33. Known gap: the chin's shadow on the collar** is painted as the collar's own contact shade. Spec L396 wants a cast shadow on the bone that casts it, clipped to the part it falls on, so it moves with the head. That needs a new part (the chin's shadow on the head bone, clipped to the collar) and is done before Gate A. The chin's shade on the shoulders is already such a part.
+**33. The chin's shadow on the collar is a cast shadow (done).** It was painted as the collar's own contact shade; spec L396 wants a cast shadow on the bone that casts it, clipped to the part it falls on, so it moves with the head. It is now its own part, `shadow.chin.collar`, on the head bone and clipped to the collar: the collar's dark rim right under the chin's fur and a soft shade of the band's blue under that, drawn right after the collar as the collar's clip group (a clip group is contiguous and comes after its mask, `characters/format/README.md`), before the tag. The chin's shade on the shoulders is `shadow.chin`, on the head bone and clipped to the chest.
+Crop: `master.turnaround.front.png`.
 
 **34. The saddle seen from the front runs up to the shoulders,** where the sheet paints tan beside the front legs. Its area is 1.4 (right) and 2.0 (left) times phase 2's patches, because phase 2's patch finder did not join that tan to the haunch patches. The marking check holds each patch's place both ways (its centroid inside the sheet's patch and the sheet's inside it), and passes.
 Crops: `master.turnaround.front.png`, overlay `markings-master.turnaround.front.png`.

@@ -72,7 +72,7 @@ test("the rig and its clips are sound, and the front order is spec L397's", () =
   assert.equal(clips[0]!.lengthMs, 1000);
   const order = rig.drawOrder.front!.flatMap((e) => (e === "@head" ? rig.drawOrder["head.front"]! : [e]));
   const stages = [
-    ["shadow"], ["tail"], ["body.back", "back.patch.R", "back.patch.L"], ["hind.L", "hind.R"], ["body.front", "shadow.chin"], ["collar"], ["tag"],
+    ["shadow"], ["tail"], ["body.back", "back.patch.R", "back.patch.L"], ["hind.L", "hind.R"], ["body.front", "shadow.chin"], ["collar", "shadow.chin.collar"], ["tag"],
     ["ear.L", "ear.R"], ["head.base"], ["head.patch.L", "head.patch.R"], ["blush.L", "blush.R", "eye.L", "eye.R", "brow.L", "brow.R", "nose", "mouth"],
     ["head.line"], ["tuft"], ["front.L", "front.R"],
   ];

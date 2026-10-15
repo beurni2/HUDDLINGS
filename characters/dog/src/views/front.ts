@@ -723,17 +723,19 @@ function between(): string {
 }
 
 /**
- * Where the chin's fur lies on the collar, as the sheet paints it: the collar's dark rim right under the fur's
- * edge, following its tufts, and a soft shade of the band's own blue under that. Drawn centred on the chin's edge
- * (the head's own path), so only its lower half shows below the fur.
+ * The chin's shadow on the collar (spec L396, DECISIONS 33), a part of its own on the head bone, clipped to the
+ * collar, so it moves with the head and never leaves the band: where the chin's fur lies on the collar, as the
+ * sheet paints it, the collar's dark rim right under the fur's edge, following its tufts, and a soft shade of the
+ * band's own blue under that. Drawn centred on the chin's edge (the head's own path), so only its lower half shows
+ * below the fur.
  */
-function collarContact(): string {
-  const f = uid("blur"), g = uid("blur");
+function chinOnCollar(): Piece {
+  const f = uid("blur"), g = uid("blur"), box: Box = [-34, -70, 68, 24];
   const chin = spanPoints(head, fracAt(head, cheekRoll([-32.4, -65.4])), fracAt(head, cheekRoll([32.4, -65.4])));
   const rim = strokeOf(chin, 2.1, { taper: 2.5, tip: 0.6 }).d;
   const shade = strokeOf(chin, 5, { taper: 4, tip: 1 }).d;
-  return `<defs>${blur(f, [-31, -67, 62, 18], 0.3)}${blur(g, [-31, -67, 62, 18], 0.9)}</defs>` +
-    `<path d="${shade}" fill="${C.collarLine}" opacity="0.45" filter="url(#${g})"/><path d="${rim}" fill="${C.collarRim}" opacity="0.9" filter="url(#${f})"/>`;
+  return piece(`<defs>${blur(f, box, 0.3)}${blur(g, box, 0.9)}</defs>` +
+    `<path d="${shade}" fill="${C.collarLine}" opacity="0.45" filter="url(#${g})"/><path d="${rim}" fill="${C.collarRim}" opacity="0.9" filter="url(#${f})"/>`, box);
 }
 
 export function front(): Drawn[] {
@@ -781,16 +783,17 @@ export function front(): Drawn[] {
   const jawShade = ([[-42, -71.6], [0, -61.6], [42, -71.6], [40.4, -66.6], [31, -61.6], [21, -58.6], [9, -56.4], [0, -55.8], [-9, -56.4], [-21, -58.6],
     [-31, -61.6], [-40.4, -66.6]] as P[]).map(cheekRoll);
   add("shadow.chin", soft(pathD(smooth(jawShade, { corners: [0, 2] }).segs), [-43, -74.6, 86, 20], C.furShade, 1.3));
-  // The collar (the sheet's paint): its dark rim right under the chin's fur, then the band's blue, lit along its
-  // middle; the keeper the tag's ring hangs from; and a dark blue rim all round its lower edge and its ends
-  // (#597C8F on the sheet), tucked under the cheeks' fur at the top.
+  // The collar (the sheet's paint): the band's blue, lit along its middle; the keeper the tag's ring hangs from;
+  // and a dark blue rim all round its lower edge and its ends (#597C8F on the sheet), tucked under the cheeks' fur
+  // at the top. The chin's shadow on it is its own part (chinOnCollar), cast by the head.
   add("collar", part("collar", collar, {
     fill: C.collar,
     shade: { multiply: C.shadeBy, shapes: ["M-32 -57.4 C-16 -49.4 16 -49.4 32 -58.4 L32 -46 L-32 -46Z"], blur: 0.9 },
     highlight: { d: "M-21 -57.6 C-11 -54.4 10 -54.4 21 -58.8 L21 -56.6 C10 -52.4 -11 -52.4 -21 -55.6Z", colour: C.collarHighlight, opacity: 0.3, blur: 0.9 },
-    under: `<rect x="-1.5" y="-60" width="4.4" height="10.4" rx="1.2" fill="${C.collarLine}" opacity="0.3"/>` + collarContact(),
+    under: `<rect x="-1.5" y="-60" width="4.4" height="10.4" rx="1.2" fill="${C.collarLine}" opacity="0.3"/>`,
     outline: { colour: C.collarRim, width: THIN, taper: 3, blur: 0.2, spans: [{ from: [26.2, -64], to: [-26.2, -62.7] }] },
   }));
+  add("shadow.chin.collar", chinOnCollar());
   add("tag", tagPiece());
   for (const side of ["R", "L"] as const) add(`ear.${side}`, part(`ear.${side}`, ears[side], earPaint(side)));
   add("head.base", part("head.base", head, headPaint));
