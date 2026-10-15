@@ -2,7 +2,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { localTime, sampleDiscrete, sampleKeys } from "../src/clip.ts";
-import { validate, type Clip, type Key, type Rig } from "../src/format.ts";
+import { validate, type AtlasSet, type Clip, type Key, type Rig } from "../src/format.ts";
 
 const close = (a: number, b: number, eps = 1e-12) => assert.ok(Math.abs(a - b) <= eps, `${a} vs ${b}`);
 
@@ -178,4 +178,17 @@ test("validation refuses an easing that overshoots a limit between keys", () => 
   expectProblem(validate(rig, [over]), "head.rot overshoots to 18.");
   const fine: Clip = { name: "fine", lengthMs: 500, tracks: { head: { rot: [[0, 0], [400, 16, "easeOutBack"]] } } };
   assert.deepEqual(validate(rig, [fine]), []);
+});
+
+test("validation takes a null region, which needs nothing in the atlas, and names a view whose regions are all null", () => {
+  const parts = rig.parts.map((p) =>
+    p.name === "eye.L" ? { ...p, regions: { ...p.regions, "front:wink": null } } : p.name === "eye.R" ? { ...p, regions: { front: "eye.R/front", "front:closed": null } } : p);
+  const named = parts.flatMap((p) => Object.values(p.regions)).filter((r) => r !== null);
+  const atlas: AtlasSet = {
+    name: "2x", scale: 2, pages: [{ file: "p.png", scale: 2, width: 64, height: 64 }],
+    regions: Object.fromEntries(named.map((r) => [r, { page: 0, x: 0, y: 0, w: 2, h: 2, anchorX: 1, anchorY: 1 }])),
+  };
+  assert.deepEqual(validate({ ...rig, parts }, [], atlas), []);
+  const allNull = parts.map((p) => (p.name === "eye.R" ? { ...p, regions: { "front:closed": null, "front:wink": null } } : p));
+  assert.deepEqual(validate({ ...rig, parts: allNull }, [], atlas), ["part eye.R: every region in view front is null; leave the view out instead"]);
 });

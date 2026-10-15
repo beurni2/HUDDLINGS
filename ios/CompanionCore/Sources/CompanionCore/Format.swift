@@ -68,8 +68,9 @@ public struct Part: Codable, Equatable, Sendable {
     public var name: String
     public var bone: String
     public var group: PartGroup
-    /// Region name per view, or per view and state ("front" or "front:closed").
-    public var regions: [String: String]
+    /// Region name per view, or per view and state ("front" or "front:closed"); a JSON null
+    /// (nil here) draws nothing there, and a key left out is no key at all (`regionFor`).
+    public var regions: [String: String?]
     public var clipTo: String?
     public var warp: Warp?
     /// The state drawn when no clip sets one (for parts whose regions are all "view:state").

@@ -128,10 +128,17 @@ export interface DrawItem {
 /** Sub-rows per control row when a bending part's grid is expanded (characters/format/README.md, Bending parts). */
 export const WARP_SUBDIVISIONS = 4;
 
-/** The region a part draws for a view and a state, or undefined when the part is not drawn in that view. */
+/**
+ * The region a part draws for a view and a state, or undefined when it draws nothing
+ * (README, Rig: parts): of "view:state" (the default state when no clip gives one),
+ * "view" and "view:defaultState", the first key present decides, and a null draws nothing.
+ */
 export function regionFor(part: Part, view: string, state: string | undefined): string | undefined {
-  if (state !== undefined && part.regions[`${view}:${state}`]) return part.regions[`${view}:${state}`];
-  return part.regions[view] ?? part.regions[`${view}:${part.defaultState ?? "open"}`];
+  const fallback = part.defaultState ?? "open";
+  for (const key of [`${view}:${state ?? fallback}`, view, `${view}:${fallback}`]) {
+    if (Object.hasOwn(part.regions, key)) return part.regions[key] ?? undefined;
+  }
+  return undefined;
 }
 
 /** The parts in drawing order for the current views and draw-order variant (a variant of another view is ignored). */

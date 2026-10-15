@@ -49,8 +49,8 @@ export interface Part {
   name: string;
   bone: string;
   group: "body" | "head";
-  /** Region name per view, or per view and state ("front" or "front:closed"). */
-  regions: Record<string, string>;
+  /** Region name per view, or per view and state ("front" or "front:closed"); null draws nothing there (regionFor). */
+  regions: Record<string, string | null>;
   clipTo?: string;
   warp?: Warp;
   /** The state drawn when no clip sets one (for parts whose regions are all "view:state"). */
@@ -182,11 +182,15 @@ export function validate(rig: Rig, clips: Clip[], atlas?: AtlasSet): string[] {
     if (parts.has(part.name)) problems.push(`part ${part.name}: listed twice`);
     parts.set(part.name, part);
     if (!bones.has(part.bone)) problems.push(`part ${part.name}: unknown bone ${part.bone}`);
+    // Per view: whether any of its keys names a region. A null needs nothing in the atlas.
+    const drawsIn = new Map<string, boolean>();
     for (const [view, region] of Object.entries(part.regions)) {
       const viewName = view.split(":")[0]!;
       if (!rig.views.includes(viewName)) problems.push(`part ${part.name}: unknown view ${viewName}`);
-      if (atlas && !atlas.regions[region]) problems.push(`part ${part.name}: region ${region} is not in the atlas`);
+      drawsIn.set(viewName, (drawsIn.get(viewName) ?? false) || region !== null);
+      if (region !== null && atlas && !atlas.regions[region]) problems.push(`part ${part.name}: region ${region} is not in the atlas`);
     }
+    for (const [view, draws] of drawsIn) if (!draws) problems.push(`part ${part.name}: every region in view ${view} is null; leave the view out instead`);
     if (part.warp) {
       const chain = part.warp.chain;
       for (const b of chain) if (!bones.has(b)) problems.push(`part ${part.name}: warp chain bone ${b} is unknown`);

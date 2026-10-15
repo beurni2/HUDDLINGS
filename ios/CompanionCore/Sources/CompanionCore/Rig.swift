@@ -184,10 +184,16 @@ public struct DrawItem: Equatable, Sendable {
 /// Sub-rows per control row when a bending part's grid is expanded (README, Bending parts).
 public let warpSubdivisions = 4
 
-/// The region a part draws for a view and a state, or nil when the part is not drawn in that view (README, Rig: parts).
+/// The region a part draws for a view and a state, or nil when it draws nothing (README,
+/// Rig: parts): of "view:state" (the default state when no clip gives one), "view" and
+/// "view:defaultState", the first key present decides, and a null draws nothing.
 public func regionFor(_ part: Part, _ view: String, _ state: String?) -> String? {
-    if let state, let region = part.regions["\(view):\(state)"] { return region }
-    return part.regions[view] ?? part.regions["\(view):\(part.defaultState ?? "open")"]
+    let fallback = part.defaultState ?? "open"
+    for key in ["\(view):\(state ?? fallback)", view, "\(view):\(fallback)"] {
+        // A key present holds String?: nil is the file's null.
+        if let region = part.regions[key] { return region }
+    }
+    return nil
 }
 
 /// The parts in drawing order for the current views and draw-order variant: the head's

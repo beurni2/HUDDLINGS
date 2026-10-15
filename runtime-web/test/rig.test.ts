@@ -1,7 +1,7 @@
 // Tests for pose evaluation and the draw list, from characters/format/README.md.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import type { AtlasSet, Rig } from "../src/format.ts";
+import type { AtlasSet, Part, Rig } from "../src/format.ts";
 import { compile, drawList, evaluatePose, fakeTurn, orderFor, partMatrix, regionFor, WARP_SUBDIVISIONS } from "../src/rig.ts";
 import { apply } from "../src/math.ts";
 import { validate } from "../src/format.ts";
@@ -142,6 +142,32 @@ test("a part draws its state's region, its default state, or nothing in a view i
   assert.equal(regionFor(eye, "front", "closed"), "eye/closed");
   assert.equal(regionFor(eye, "front", undefined), "eye/open");
   assert.equal(regionFor(eye, "side.R", undefined), undefined);
+});
+
+test("of the state's key, the view's and the default state's, the first present decides, and null draws nothing", () => {
+  const eye: Part = {
+    name: "eye", bone: "head", group: "head", defaultState: "open",
+    regions: { "front:open": "eye/open", "front:closed": null, "front:wink": "eye/closed", "side.R:open": "eye/side", "side.R:wide": "eye/wide", "side.R": null },
+  };
+  assert.equal(regionFor(eye, "front", "wink"), "eye/closed");
+  assert.equal(regionFor(eye, "front", "closed"), undefined, "the closed eye draws no open iris under its lid");
+  assert.equal(regionFor(eye, "front", "happy"), "eye/open", "a state with no key falls back to the default state's");
+  // A view's null stops that fallback: in side.R only the named states draw.
+  assert.equal(regionFor(eye, "side.R", "wide"), "eye/wide");
+  assert.equal(regionFor(eye, "side.R", "happy"), undefined);
+  // With no clip state the default state's key comes first, so the view's null never hides it.
+  assert.equal(regionFor(eye, "side.R", undefined), "eye/side");
+  assert.equal(regionFor({ ...eye, defaultState: undefined }, "front", undefined), "eye/open", "open by default");
+  assert.equal(regionFor(eye, "back", "open"), undefined, "no key at all draws nothing");
+});
+
+test("a mask that draws nothing in a state hides its clip group", () => {
+  const masked: Rig = { ...rig, parts: rig.parts.map((p) => (p.name === "head.base" ? { ...p, regions: { ...p.regions, "front:hidden": null } } : p)) };
+  const cm = compile(masked);
+  const draw = (states: Record<string, string>) => drawList(cm, evaluatePose(cm, { channels: {}, views: front }), atlas, { views: front, states }).map((i) => i.part);
+  assert.deepEqual(draw({}), ["tail", "body", "ear", "head.base", "eye", "eye.R"]);
+  assert.deepEqual(draw({ "head.base": "hidden" }), ["tail", "body", "ear"]);
+  assert.deepEqual(draw({ eye: "closed" }), ["tail", "body", "ear", "head.base", "eye", "eye.R"]);
 });
 
 test("a quad's anchor sits on the bone's pivot, and clipped parts point at their mask", () => {

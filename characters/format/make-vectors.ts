@@ -6,8 +6,8 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { apply, catmullRom, compose, ease, fnv1a32, IDENTITY, mulberry32, randomStream, softLimit, type Easing } from "../../runtime-web/src/math.ts";
 import { sampleDiscrete, sampleKeys } from "../../runtime-web/src/clip.ts";
-import { validate, type Clip, type DiscreteKey, type Key, type Rig } from "../../runtime-web/src/format.ts";
-import { compile, drawList, evaluatePose, type Channels, type FrameState } from "../../runtime-web/src/rig.ts";
+import { validate, type Clip, type DiscreteKey, type Key, type Part, type Rig } from "../../runtime-web/src/format.ts";
+import { compile, drawList, evaluatePose, regionFor, type Channels, type FrameState } from "../../runtime-web/src/rig.ts";
 import { Player } from "../../runtime-web/src/player.ts";
 import { readSource } from "../build/build.ts";
 import { buildAtlas } from "../build/atlas.ts";
@@ -107,11 +107,16 @@ const source = await readSource("test");
 const rig: Rig = source.rig;
 const c = compile(rig);
 const { atlas } = buildAtlas("2x", source.drawings, 2, (i) => `atlas@2x-${i}.png`);
-const poseRng = mulberry32(2026);
-const pick = <T,>(list: readonly T[]) => list[Math.floor(poseRng() * list.length)]!;
-const within = ([lo, hi]: readonly [number, number]) => lo + (hi - lo) * poseRng();
+/** Picks and ranges drawn from one random source, so each vector file's draws are its own. */
+const sampler = (rng: () => number) => ({
+  rng,
+  pick: <T,>(list: readonly T[]) => list[Math.floor(rng() * list.length)]!,
+  within: ([lo, hi]: readonly [number, number]) => lo + (hi - lo) * rng(),
+});
+const poseRng = sampler(mulberry32(2026));
+const { pick } = poseRng;
 
-function randomInput() {
+function randomInput({ rng, pick, within } = poseRng) {
   const channels: Record<string, Channels> = {};
   const springs: Record<string, number> = {};
   for (const bone of rig.bones) {
@@ -121,8 +126,8 @@ function randomInput() {
     if (bone.scale) ch.scale = within(bone.scale);
     if (bone.yaw) ch.yaw = within(bone.yaw);
     if (bone.pitch) ch.pitch = within(bone.pitch);
-    if (poseRng() < 0.5) ch.x = within([-10, 10]);
-    if (poseRng() < 0.5) ch.y = within([-10, 10]);
+    if (rng() < 0.5) ch.x = within([-10, 10]);
+    if (rng() < 0.5) ch.y = within([-10, 10]);
     channels[bone.name] = ch;
     if (bone.spring) springs[bone.name] = within([-60, 60]);
   }
@@ -153,6 +158,59 @@ write("drawlists", {
       turn: input.channels.head,
     };
     return { ...input, state: { ...state, variant: state.variant ?? null }, items: drawList(c, pose, atlas, state).map((i) => ({ ...i, clipTo: i.clipTo ?? null })) };
+  }),
+});
+
+// Region lookups (README, Rig: parts): of the state's key (the default state's when no clip
+// gives one), the view's and the default state's, the first present decides; null draws nothing.
+const lookupParts: Part[] = [
+  { name: "eye", bone: "head", group: "head", defaultState: "open",
+    regions: { "front:open": "eye/open", "front:closed": null, "front:wink": "eye/wink", "side.R:open": "eye/side", "side.R:wide": "eye/wide", "side.R": null } },
+  { name: "mouth", bone: "head", group: "head", regions: { front: "mouth/front", "front:open": "mouth/open", "front:yawn": null } },
+  { name: "lid", bone: "head", group: "head", defaultState: "closed", regions: { "front:closed": "lid/closed", "front:open": null, "side.R": "lid/side" } },
+  { name: "blush", bone: "head", group: "head", regions: { front: "blush/front", "side.R": null, "side.R:shy": "blush/side" } },
+];
+const lookupStates = [null, "open", "closed", "wink", "wide", "yawn", "shy", "happy"];
+write("regions", {
+  parts: lookupParts,
+  cases: lookupParts.flatMap((part) => ["front", "side.R", "back"].flatMap((view) =>
+    lookupStates.map((state) => ({ part: part.name, view, state, region: regionFor(part, view, state ?? undefined) ?? null })))),
+});
+
+// Draw lists with face states: the test rig with null regions, among them a mask's (head.base
+// draws nothing in side.R when hidden, so its clip group goes too). The rig is in the file.
+const faceRig: Rig = {
+  ...rig,
+  parts: rig.parts.map((p) => {
+    const extra: Record<string, Record<string, null>> = {
+      "eye.L": { "front:happy": null },
+      "eye.R": { "side.R": null },
+      "head.base": { "side.R:hidden": null },
+      nose: { "front:sniff": null },
+    };
+    return extra[p.name] ? { ...p, regions: { ...p.regions, ...extra[p.name] } } : p;
+  }),
+};
+const faceProblems = validate(faceRig, [], atlas);
+if (faceProblems.length) throw new Error(faceProblems.join("\n"));
+const fc = compile(faceRig);
+const faceRng = sampler(mulberry32(2027));
+const faceStates: Record<string, (string | undefined)[]> = {
+  "eye.L": [undefined, "open", "closed", "happy"], "eye.R": [undefined, "open", "closed", "happy"], "head.base": [undefined, "hidden"], nose: [undefined, "sniff"],
+};
+write("drawlists-states", {
+  rig: faceRig,
+  atlas,
+  cases: Array.from({ length: 32 }, () => {
+    const input = randomInput(faceRng);
+    const pose = evaluatePose(fc, input);
+    const states: Record<string, string> = {};
+    for (const [part, choices] of Object.entries(faceStates)) {
+      const s = faceRng.pick(choices);
+      if (s !== undefined) states[part] = s;
+    }
+    const state: FrameState = { views: input.views, states, variant: faceRng.pick([undefined, "front:pawsBack"]), turn: input.channels.head };
+    return { ...input, state: { ...state, variant: state.variant ?? null }, items: drawList(fc, pose, atlas, state).map((i) => ({ ...i, clipTo: i.clipTo ?? null })) };
   }),
 });
 

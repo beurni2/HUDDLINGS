@@ -158,6 +158,7 @@ class Lab {
       const owner = new Map<string, number>();
       rig.rig.parts.forEach((part, i) => {
         for (const region of Object.values(part.regions)) {
+          if (region === null) continue;
           const other = owner.get(region);
           if (other !== undefined && other !== i) throw new Error(`region ${region} belongs to both ${rig.rig.parts[other]!.name} and ${part.name}; the ID pass needs one part per region`);
           owner.set(region, i);

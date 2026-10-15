@@ -77,52 +77,35 @@ final class EngineVectorTests: XCTestCase {
     }
 
     func testDrawLists() throws {
-        struct State: Decodable {
-            let views: Views
-            let states: [String: String]
-            let variant: String?
-            let turn: Channels?
-        }
-        struct Item: Decodable {
-            let part: String
-            let region: String
-            let page: Int
-            let positions: [Double]
-            let uvs: [Double]
-            let columns: Int
-            let rows: Int
-            let clipTo: Int?
-        }
-        struct Case: Decodable {
-            let channels: [String: Channels]
-            let springs: [String: Double]
-            let views: Views
-            let state: State
-            let items: [Item]
-        }
-        struct File: Decodable { let rig: String; let atlas: AtlasSet; let cases: [Case] }
+        struct File: Decodable { let rig: String; let atlas: AtlasSet; let cases: [DrawListCase] }
         let file = try loadVector("characters/format/vectors/drawlists.json", as: File.self)
-        let c = compile(try loadVector(file.rig, as: Rig.self))
+        try checkDrawLists("draw lists", compile(try loadVector(file.rig, as: Rig.self)), file.atlas, file.cases)
+    }
+
+    /// Face states: null regions, a mask's among them, on the test rig the file holds.
+    func testDrawListsWithFaceStates() throws {
+        struct File: Decodable { let rig: Rig; let atlas: AtlasSet; let cases: [DrawListCase] }
+        let file = try loadVector("characters/format/vectors/drawlists-states.json", as: File.self)
+        try checkDrawLists("draw lists with face states", compile(file.rig), file.atlas, file.cases)
+    }
+
+    /// README, Rig: parts. Of the state's key, the view's and the default state's, the first present decides; null draws nothing.
+    func testRegionLookups() throws {
+        struct Case: Decodable { let part: String; let view: String; let state: String?; let region: String? }
+        struct File: Decodable { let parts: [Part]; let cases: [Case] }
+        let file = try loadVector("characters/format/vectors/regions.json", as: File.self)
+        let parts = Dictionary(file.parts.map { ($0.name, $0) }, uniquingKeysWith: { _, last in last })
         XCTAssertFalse(file.cases.isEmpty)
-        let compare = Comparison()
-        for (n, x) in file.cases.enumerated() {
-            let pose = evaluatePose(c, PoseInput(channels: x.channels, springs: x.springs, views: x.views))
-            let frame = FrameState(views: x.state.views, states: x.state.states, variant: x.state.variant, turn: x.state.turn)
-            let items = drawList(c, pose, file.atlas, frame)
-            XCTAssertEqual(items.map(\.part), x.items.map(\.part), "case \(n): parts in order")
-            for (item, expected) in zip(items, x.items) {
-                let at = "case \(n) \(item.part)"
-                XCTAssertEqual(item.part, expected.part, at)
-                XCTAssertEqual(item.region, expected.region, at)
-                XCTAssertEqual(item.page, expected.page, at)
-                XCTAssertEqual(item.columns, expected.columns, at)
-                XCTAssertEqual(item.rows, expected.rows, at)
-                XCTAssertEqual(item.clipTo, expected.clipTo, at)
-                compare.close(item.positions, expected.positions, "\(at) positions")
-                compare.close(item.uvs, expected.uvs, "\(at) uvs")
-            }
+        XCTAssertTrue(file.cases.contains { $0.region == nil }, "the vectors hold parts drawing nothing")
+        for x in file.cases {
+            let part = try XCTUnwrap(parts[x.part])
+            XCTAssertEqual(regionFor(part, x.view, x.state), x.region, "\(x.part) in \(x.view), state \(x.state ?? "none")")
         }
-        print("draw lists: \(file.cases.count) cases, \(compare.count) numbers, largest difference \(compare.largest)")
+        // A null is kept apart from a key left out: it decides, where a missing key falls through.
+        let eye = try XCTUnwrap(parts["eye"])
+        XCTAssertEqual(eye.regions["front:closed"], .some(nil), "a null is a key present, holding nil")
+        XCTAssertFalse(eye.regions.keys.contains("front:happy"))
+        print("region lookups: \(file.cases.count) cases")
     }
 
     func testPlayerRun() throws {
@@ -139,6 +122,55 @@ final class EngineVectorTests: XCTestCase {
         let c = compile(try loadVector(file.rig, as: Rig.self))
         try runPlayer("player cuts", c, file.clips, file.script, file.frames, checkTurn: true)
     }
+}
+
+/// A draw-list vector's case: a pose's input, the frame state, and the items the web runtime drew.
+private struct DrawListCase: Decodable {
+    struct State: Decodable {
+        let views: Views
+        let states: [String: String]
+        let variant: String?
+        let turn: Channels?
+    }
+    struct Item: Decodable {
+        let part: String
+        let region: String
+        let page: Int
+        let positions: [Double]
+        let uvs: [Double]
+        let columns: Int
+        let rows: Int
+        let clipTo: Int?
+    }
+    let channels: [String: Channels]
+    let springs: [String: Double]
+    let views: Views
+    let state: State
+    let items: [Item]
+}
+
+/// Draws each case's pose and frame state and compares every item with the web runtime's.
+private func checkDrawLists(_ name: String, _ c: CompiledRig, _ atlas: AtlasSet, _ cases: [DrawListCase]) throws {
+    XCTAssertFalse(cases.isEmpty)
+    let compare = Comparison()
+    for (n, x) in cases.enumerated() {
+        let pose = evaluatePose(c, PoseInput(channels: x.channels, springs: x.springs, views: x.views))
+        let frame = FrameState(views: x.state.views, states: x.state.states, variant: x.state.variant, turn: x.state.turn)
+        let items = drawList(c, pose, atlas, frame)
+        XCTAssertEqual(items.map(\.part), x.items.map(\.part), "\(name) case \(n): parts in order")
+        for (item, expected) in zip(items, x.items) {
+            let at = "\(name) case \(n) \(item.part)"
+            XCTAssertEqual(item.part, expected.part, at)
+            XCTAssertEqual(item.region, expected.region, at)
+            XCTAssertEqual(item.page, expected.page, at)
+            XCTAssertEqual(item.columns, expected.columns, at)
+            XCTAssertEqual(item.rows, expected.rows, at)
+            XCTAssertEqual(item.clipTo, expected.clipTo, at)
+            compare.close(item.positions, expected.positions, "\(at) positions")
+            compare.close(item.uvs, expected.uvs, "\(at) uvs")
+        }
+    }
+    print("\(name): \(cases.count) cases, \(compare.count) numbers, largest difference \(compare.largest)")
 }
 
 /// A player vector's script step: {play, t, blendMs?}, {frame: t} or {cut: t}.
