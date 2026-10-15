@@ -789,18 +789,22 @@ export function front(): Drawn[] {
   add("back.patch.R", marking("back.patch.R", { shape: back, paint: backPaint }, saddleR, { fill: C.marking, blur: 1.2, clip: true }));
   add("back.patch.L", marking("back.patch.L", { shape: back, paint: backPaint }, saddleL, { fill: C.marking, blur: 0.9, clip: true }));
   for (const side of ["R", "L"] as const) {
-    const sx = side === "R" ? -1 : 1, cx = sx * 37.6, cy = -10.9;
+    const sx = side === "R" ? -1 : 1, cx = sx * 37.6, cy = -10.9, hindToe = uid("toe");
     add(`hind.${side}`, roomy(part(`hind.${side}`, hind[side], {
       fill: C.fur,
+      // The toe lines fade out toward their tops.
+      under: `<defs><linearGradient id="${hindToe}" gradientUnits="userSpaceOnUse" x1="0" y1="-3" x2="0" y2="-12">` +
+        `<stop offset="0.2" stop-color="${C.warmLine}"/><stop offset="1" stop-color="${C.warmLine}" stop-opacity="0.2"/></linearGradient></defs>`,
       shade: furShade(hipGroup, [], [`M${cx - 12} ${cy - 12} L${cx + 12} ${cy - 12} L${cx + 12} ${cy - 4} L${cx - 12} ${cy - 4}Z`]),
       // Over its top, where it lies on the haunch, a soft light line that tapers off into the haunch at each end, as
       // the sheet draws it; then the warm line down its outer side, and under the sole the figure's darkest line, as
       // under the front paws, to where it goes behind the front paw. Each cross-fades into the next.
       outline: { ...OUTLINE, colour: C.warmLine, width: 1.3, taper: 4, spans: bySide(side, [{ from: [-33.4, -17.6], to: [-48.4, -13.6], width: THIN, colour: C.softLine },
         { from: [-47, -15.8], to: [-46.2, -6], width: 1.3 }, { from: [-47.6, -9], to: [-29.2, -4.6], width: 1.4, colour: C.soleLine }]) },
-      // Two toe lines rising from the sole about 6.5 pt up the paw, each bowing a little away from the middle toe.
-      inner: [[[-41.6, -3.4], [-42.3, -5.8], [-42.2, -8.1], [-41.6, -10]], [[-35.6, -3.1], [-34.9, -5.5], [-34.9, -7.8], [-35.4, -9.7]]]
-        .map((pts) => ({ pts: flipX(pts as P[], side), width: INNER, colour: C.warmLine, opacity: 0.65 })),
+      // Two toe lines rising from the sole about 9 pt up the paw, each bowing away from the middle toe and curving
+      // in over it at the top, as the sheet draws them, so the paw reads as three round toes.
+      inner: [[[-41.6, -3.4], [-42.5, -6.4], [-42.4, -9.4], [-41.2, -12]], [[-35.6, -3.1], [-34.8, -6], [-34.9, -9], [-35.9, -11.6]]]
+        .map((pts) => ({ pts: flipX(pts as P[], side), width: INNER, colour: `url(#${hindToe})`, opacity: 0.8 })),
     }), 6));
   }
   // Its canvas a point roomier than the chest, so the light group's shade, which reaches 13.7 pt past it, stays
