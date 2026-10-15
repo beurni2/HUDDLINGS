@@ -79,6 +79,11 @@ head = furEdge(head, [-25.4, -154.6], [-35.4, -147.8], fringe, 0.42);
 head = furEdge(head, [-40.2, -141.6], [-32, -140.2], overhang, 0.4);
 head = furEdge(head, [-37.6, -88], [-29.8, -74.2], corner, 0.4);
 head = furEdge(head, [29.8, -74.2], [37.6, -88], reversed(corner), 0.4);
+// Down each side, where the head lies over the ear, the fur's edge breaks into a few small, uneven locks combed
+// down, as the sheet draws it there, so the side does not read as a ruled line.
+const side: Lock[] = [{ len: 0.6, w: 1, lean: 0.4 }, { len: 0.8, w: 1.3, lean: 0.45 }, { len: 0.5, w: 0.8, lean: 0.4 }];
+head = furEdge(head, [-39.8, -112], [-38.6, -92.6], side, 0.35);
+head = furEdge(head, [38.6, -92.6], [39.8, -112], reversed(side), 0.35);
 head = furEdge(head, [32, -140.2], [42.8, -142.4], reversed(overhang), 0.4);
 head = furEdge(head, [35.4, -151.8], [24.6, -154.6], [{ len: 1, w: 1, lean: -0.3 }, { len: 1.1, w: 1.1, lean: -0.25 }], 0.42);
 /** Each lowest lock's tip: a fur span. */
@@ -107,15 +112,20 @@ const earLNodes: Node[] = [[-31, -141.4], [-34.6, -143.8], [-38.6, -144.2], [-42
   [-73, -108.4], [-76.2, -101], [-77.4, -92.4], [-76.2, -86.6], [-73.4, -81.6], [-69, -76.8], [-63.6, -72.4], [-57, -69.4], [-49.6, -67.8], [-44.2, -68.4],
   [-40.4, -71.2], [-38.4, -76.2], [-35.6, -88], [-34.4, -104], [-33, -124]];
 const earRNodes: Node[] = [[33.4, -143], [37.4, -145], [41.4, -146], [44.8, -143], [47.4, -140.6], [49.6, -138], [55.8, -131.5], [61.2, -124.6], [67, -118.8],
-  [72.2, -112.6], [75, -105.8], [76, -97], [75.6, -88.6], [73.2, -82], [68.6, -76.8], [62.2, -72.2], [55, -69.4], [49.6, -68.9], [44.4, -69.6],
+  [72.2, -112.6], [75, -105.8], [76, -97], [75.6, -88.6], [73.2, -82], [68.6, -76.8], [62.2, -72.4], [54, -69.8], [48, -68.8], [44, -69.6],
   [40.4, -71.8], [38.4, -76], [36.2, -88], [35.4, -104], [34, -124]];
-/** Each ear's foot: a small pointed clump at its outer corner, then broad soft ones, each tucked under the next at a short parting. */
-const footLocks: Lock[] = [{ len: 1.5, w: 0.7, lean: 0.4 }, { len: 1, w: 1.5, lean: 0.15 }, { len: 0.8, w: 1.8, lean: 0 }, { len: 0.6, w: 1.2, lean: -0.1 }];
+/**
+ * Each ear's foot, as the sheet draws it from behind: a full round clump at its outer corner, the broadest under its
+ * middle, and a smaller one at its inner corner, each tucked under the next at a parting.
+ */
+const footLocks: Lock[] = [{ len: 2, w: 1.3, lean: 0.3 }, { len: 1.5, w: 1.9, lean: 0.1 }, { len: 0.9, w: 1, lean: 0 }];
+/** The right ear's outer clump is the broader, so its lowest point lies under its middle, as the sheet's does (x 49.6). */
+const footLocksR: Lock[] = [{ len: 2, w: 1.7, lean: 0.3 }, { len: 1.5, w: 1.9, lean: 0.1 }, { len: 0.9, w: 0.8, lean: 0 }];
 /** Each clump of each ear's foot: its tip, root and notches, for the partings drawn up into it. */
 const earClumps: Record<"L" | "R", { tip: P; root: P; notches: [P, P] }[]> = { L: [], R: [] };
 const ears = {
   L: furEdge(smooth(earLNodes), [-76.6, -88.4], [-41.6, -69.8], footLocks, 0.42, (tip, root, notches) => earClumps.L.push({ tip, root, notches })),
-  R: furEdge(smooth(earRNodes), [75.4, -86.6], [41.6, -71.6], footLocks, 0.42, (tip, root, notches) => earClumps.R.push({ tip, root, notches })),
+  R: furEdge(smooth(earRNodes), [75.4, -86.6], [41.6, -71.6], footLocksR, 0.42, (tip, root, notches) => earClumps.R.push({ tip, root, notches })),
 };
 
 // The ears' soft contact shadow on the head (DECISIONS 25): a warm band of the
@@ -394,7 +404,7 @@ function earPaint(side: "L" | "R"): Paint {
     highlight: { d: lightD, colour: C.patch, opacity: 0.3, blur: 2.6 },
     inner: [...dark.map((pts) => ({ pts: curve(pts.slice(-3)), width: 0.7, colour: `url(#${strand})` })),
       // A short parting up from each notch between the foot's clumps, fading out upward.
-      ...clumps.map((n) => ({ pts: [n, [n[0] - k * 0.3, n[1] - 2.6], [n[0] - k * 0.2, n[1] - 5]] as P[], width: 0.7, colour: `url(#${strand})` }))],
+      ...clumps.map((n) => ({ pts: curve([n, [n[0] - k * 0.5, n[1] - 3.4], [n[0] - k * 0.4, n[1] - 7]]), width: 0.75, colour: `url(#${strand})` }))],
     outline: { ...OUTLINE, colour: C.warmLine, width: 1.3, taper: 6, blur: 0.15, spans: side === "L"
       ? [{ from: [-42.2, -142.2], to: [-76.8, -88], width: THIN, colour: `url(#${toRoot})` }, { from: [-77, -90], to: [-38.6, -78], width: 1.45, colour: C.soleLine }]
       : [{ from: [44.8, -143], to: [75.8, -88], width: 1.3, colour: `url(#${toRoot})` }, { from: [75.8, -90], to: [38.2, -80], width: 1.5, colour: C.soleLine }] },
