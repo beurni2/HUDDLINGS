@@ -53,6 +53,32 @@ test("lines outside their bands fail: outer 1.2 to 1.8 pt, inner 0.6 to 0.9 pt, 
   assert.deepEqual(lintOf(raw(`<path d="M0 0H5" stroke="#91694A" stroke-width="0.7"/>`)), []);
 });
 
+test("a stroke is held to its band as wide as it is drawn: scaled by its transforms, evenly, its width inherited", () => {
+  const say = (body: string) => lintOf(raw(body)).join("\n");
+  const line = (width: string) => `<path d="M0 0H5" stroke="#91694A" stroke-width="${width}"/>`;
+  // Scaled into a band it passes, out of both it fails, whatever it declares.
+  assert.equal(say(`<g transform="scale(2)">${line("0.7")}</g>`), "", "0.7 pt drawn 1.4 pt wide is an outer line");
+  assert.equal(say(`<g transform="scale(0.5)">${line("1.5")}</g>`), "", "1.5 pt drawn 0.75 pt wide is an inner line");
+  assert.match(say(`<g transform="scale(1.5)">${line("0.7")}</g>`), /a stroke 0.7 pt wide is drawn 1.05 pt wide by its transform, neither an outer line/);
+  assert.equal(say(`<g transform="matrix(0 3 -3 0 0 0)">${line("0.5")}</g>`), "", "turned a quarter and scaled 3 times, 0.5 pt is drawn 1.5 pt wide");
+  assert.equal(say(`<g transform="rotate(30) translate(4 2)">${line("0.7")}</g>`), "", "turning and moving leave its width");
+  // A shape scaled unevenly draws its line unevenly wide.
+  assert.match(say(`<g transform="scale(1 1.1)">${line("1.5")}</g>`), /a stroked <path> is scaled unevenly \(1.000 to 1.100\), drawing its 1.5 pt line 1.5 to 1.65 pt wide/);
+  assert.match(say(`<g transform="skewX(10)">${line("0.7")}</g>`), /scaled unevenly/);
+  // Drawn through a <use>, scaled by it; inherited from a group; 1 pt when nothing says.
+  assert.match(say(`<defs>${line("0.7").replace("<path", '<path id="p"')}</defs><use href="#p" transform="scale(1.5)"/>`), /a stroke 0.7 pt wide is drawn 1.05 pt wide/);
+  assert.match(say(`<g stroke="#91694A" stroke-width="1"><path d="M0 0H5"/></g>`), /a stroke 1 pt wide is neither/);
+  assert.match(say(`<path d="M0 0H5" stroke="#91694A"/>`), /a stroke 1 pt wide is neither/);
+  assert.equal(say(`<g stroke-width="1"><path d="M0 0H5" fill="#91694A"/></g>`), "", "an unstroked shape draws no line");
+  // A millionth of a point past an edge passes, what transforms leave in the last digits; more fails, and reads as
+  // past the edge: 1.196 pt reads 1.19, never 1.20.
+  assert.equal(say(`<g transform="scale(${(1.2 - 5e-7) / 0.6})">${line("0.6")}</g>`), "");
+  const short = say(`<g transform="scale(2)">${line("0.598")}</g>`);
+  assert.match(short, /a stroke 0.598 pt wide is drawn 1.19 pt wide by its transform/);
+  assert.doesNotMatch(short, /drawn 1\.2/);
+  assert.match(say(`<g transform="scale(2)">${line("0.9002")}</g>`), /drawn 1.81 pt wide/);
+});
+
 test("a filter or mask without an explicit, bounded sRGB region fails", () => {
   assert.match(lintOf(raw(`<filter id="f"><feGaussianBlur stdDeviation="2"/></filter>`)).join("\n"), /filter f needs an explicit userSpaceOnUse region/);
   assert.match(lintOf(raw(`<filter id="f" filterUnits="userSpaceOnUse" x="-30" y="-30" width="60" height="60"><feGaussianBlur stdDeviation="2"/></filter>`)).join("\n"), /sRGB/);

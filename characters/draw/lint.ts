@@ -235,7 +235,24 @@ function geometry(tag: Tag): [number, number][] | undefined {
 }
 
 const isNumber = (s: string | undefined) => s !== undefined && Number.isFinite(length(s, NaN));
-const inBand = (w: number, [lo, hi]: [number, number]) => w >= lo - 1e-9 && w <= hi + 1e-9;
+const inBand = (w: number, [lo, hi]: [number, number], tolerance = 1e-9) => w >= lo - tolerance && w <= hi + tolerance;
+/** How far past a band's edge a stroke's drawn width may fall: what composing transforms leaves in its last digits. */
+const STROKE_EDGE_PT = 1e-6;
+/** The elements a stroke draws a line around. */
+const SHAPES = new Set(["path", "rect", "circle", "ellipse", "line", "polyline", "polygon"]);
+
+/** The least and the most a transform scales a length by: its singular values. */
+function scales([a, b, c, d]: Affine): [number, number] {
+  const sum = a * a + b * b + c * c + d * d, det = Math.abs(a * d - b * c);
+  const spread = Math.sqrt(Math.max(0, sum * sum - 4 * det * det));
+  return [Math.sqrt(Math.max(0, (sum - spread) / 2)), Math.sqrt((sum + spread) / 2)];
+}
+
+/** A width to 0.01 pt, rounded away from the nearest band edge, so a width just past an edge never reads as the edge (1.196 pt reads 1.19). */
+function shown(w: number): string {
+  const edge = [...LIMITS.inner, ...LIMITS.outer].reduce((a, b) => (Math.abs(b - w) < Math.abs(a - w) ? b : a));
+  return String((w < edge ? Math.floor(w * 100 + 1e-9) : Math.ceil(w * 100 - 1e-9)) / 100);
+}
 /** A reference to an element of the same drawing: the only kind a part may hold. */
 const SAME_DOCUMENT = /^#[A-Za-z_][\w.:-]*$/;
 const uses = (value: string | undefined) => value !== undefined && value.trim() !== "none";
@@ -397,6 +414,9 @@ export function lintDrawing(d: Drawing, rules: LintRules = {}): string[] {
     paint: boolean;
     /** The <use> elements it is drawn through, outermost first. */
     through: Node[];
+    /** The stroke and its width, as the element inherits them. */
+    stroke?: string;
+    strokeWidth?: string;
   }
   const walk = (n: Node, parent: Frame, drawnByUse = false) => {
     const { tag } = n, p = tag.props;
@@ -419,6 +439,8 @@ export function lintDrawing(d: Drawing, rules: LintRules = {}): string[] {
       definition: parent.definition || (DEFINITIONS.has(tag.local) && !(drawnByUse && tag.local === "symbol")),
       paint: parent.paint && tag.local !== "mask" && tag.local !== "clippath",
       through: parent.through,
+      stroke: p.stroke ?? parent.stroke,
+      strokeWidth: p["stroke-width"] ?? parent.strokeWidth,
     };
     if (tag.local === "filter" || tag.local === "mask") {
       if (first) {
@@ -445,9 +467,19 @@ export function lintDrawing(d: Drawing, rules: LintRules = {}): string[] {
         if (value === undefined || value === "none" || /^url\(\s*["']?#/.test(value)) continue;
         if (!/^#[0-9a-fA-F]{6}$/.test(value) || !palette.has(value.toUpperCase())) say(`colour ${value} is not in the species' palette`);
       }
-      const w = p["stroke-width"];
-      if (w !== undefined && !inBand(length(w, NaN), LIMITS.outer) && !inBand(length(w, NaN), LIMITS.inner))
-        say(`a stroke ${w} pt wide is neither an outer line (1.2 to 1.8) nor an inner one (0.6 to 0.9)`);
+    }
+    // A stroked shape's line, as wide as it is drawn: its stroke-width (inherited, 1 by default) scaled by everything
+    // that places it, a <use> included, held to one band at both its narrowest and its widest. A shape scaled unevenly
+    // draws its line unevenly wide, which no band describes. Read where it is drawn, and where the document puts it.
+    if (rules.palette && frame.paint && (!frame.definition || first) && SHAPES.has(tag.local) && uses(frame.stroke)) {
+      const declared = frame.strokeWidth ?? "1", w = length(declared, NaN);
+      const [least, most] = scales(m), [lo, hi] = [w * least, w * most];
+      const held = (band: [number, number]) => inBand(lo, band, STROKE_EDGE_PT) && inBand(hi, band, STROKE_EDGE_PT);
+      const scaled = Math.abs(least - 1) > 1e-9 || Math.abs(most - 1) > 1e-9;
+      if (hi - lo > STROKE_EDGE_PT)
+        say(`a stroked <${tag.local}> is scaled unevenly (${least.toFixed(3)} to ${most.toFixed(3)}), drawing its ${declared} pt line ${shown(lo)} to ${shown(hi)} pt wide; scale a stroked shape evenly`);
+      else if (!Number.isFinite(w) || !(held(LIMITS.outer) || held(LIMITS.inner)))
+        say(`a stroke ${declared} pt wide${scaled ? ` is drawn ${shown(lo)} pt wide by its transform,` : " is"} neither an outer line (1.2 to 1.8) nor an inner one (0.6 to 0.9)`);
     }
 
     for (const child of n.children) walk(child, frame);
@@ -485,7 +517,7 @@ export function lintDrawing(d: Drawing, rules: LintRules = {}): string[] {
     if (!inBand(line.width, band)) say(`${line.kind} line ${line.width} pt in ${line.where} is outside ${band[0]} to ${band[1]} pt`);
     // What the wobble and the taper actually draw, away from the tapered ends, holds to the same band.
     else if (line.drawn && !(inBand(line.drawn[0], band) && inBand(line.drawn[1], band)))
-      say(`${line.kind} line ${line.width} pt in ${line.where} is drawn ${line.drawn.map((w) => w.toFixed(2)).join(" to ")} pt wide, outside ${band[0]} to ${band[1]} pt`);
+      say(`${line.kind} line ${line.width} pt in ${line.where} is drawn ${line.drawn.map(shown).join(" to ")} pt wide, outside ${band[0]} to ${band[1]} pt`);
   }
   // A definition drawn by several <use>s can break a rule the same way at each.
   return [...new Set(problems)];
