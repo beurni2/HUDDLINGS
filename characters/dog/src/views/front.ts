@@ -244,6 +244,9 @@ const noteClump = (tip: P, root: P, notches: [P, P]) => clumps.push({ tip, root,
 head = furEdge(head, cheekRoll([-45.4, -91.8]), cheekRoll([-36.4, -68.8]), cheekLocks, 0.36, noteClump);
 head = furEdge(head, cheekRoll([36.4, -68.8]), cheekRoll([45.4, -91.8]), lefthand(cheekLocks), 0.36, noteClump);
 head = furEdge(head, cheekRoll([-32.4, -65.4]), cheekRoll([32.4, -65.4]), chinLocks, 0.5);
+// The crown's fur where it overhangs each ear's root is a lock of fur, its tip a fur span, so the crown's line can
+// run on round it into the ear's own line, unbroken, as the sheet draws it.
+head = furSpan(furSpan(head, [-45, -135.6], [-44.4, -134.3]), [39.4, -140.4], [40.2, -141.6]);
 
 // The topknot: three fur lobes, the middle one tallest, each ending in a curl,
 // typed node by node (the sheet's tuft).
@@ -323,7 +326,10 @@ const headPaint: Paint = {
     ["M-52 -172 L52 -172 L52 -137 L-52 -137Z"], { inset: 3, toLight: 4.5 }),
   highlight: { d: headLight, colour: C.light, opacity: 0.4, blur: 4 },
 };
-/** The side's line darkens as it comes down from the ear's root: the ear's tan at the root, its deep tan from mid-eye down. */
+/**
+ * The side's line, thinner than the ear's silhouette line, comes in light from the ear's root and deepens only
+ * from the brow down to the ear's deep tan by the eye's middle, where the sheet's is darkest.
+ */
 const SEAM = uid("seam");
 // The head's line, where the sheet draws one: on the crown's fur one
 // continuous light warm line from the topknot down to just short of the
@@ -335,10 +341,10 @@ const SEAM = uid("seam");
 // and under the overhang the sheet draws no line. The cheeks' clumps carry
 // their own lines (clumpLines).
 const headLine: Outline = { ...OUTLINE, taper: 4, blur: 0.15, spans: [
-  { from: [-27, -148.4], to: [-45.2, -135.8], width: THIN, colour: C.crownLine },
-  { from: [-39.4, -126.6], to: [-44.8, -93.2], width: 1.25, colour: `url(#${SEAM})` },
-  { from: [44.4, -93.2], to: [36.2, -127.6], width: 1.25, colour: `url(#${SEAM})` },
-  { from: [39.6, -142], to: [17, -150.8], width: THIN, colour: C.crownLine },
+  { from: [-27, -148.4], to: [-45.6, -134.6], width: THIN, colour: C.crownLine },
+  { from: [-39.4, -126.6], to: [-44.8, -93.2], width: THIN, colour: `url(#${SEAM})` },
+  { from: [44.4, -93.2], to: [36.2, -127.6], width: THIN, colour: `url(#${SEAM})` },
+  { from: [40.8, -140.3], to: [17, -150.8], width: THIN, colour: C.crownLine },
 ].map((span) => ({ ...span, from: cheekRoll(span.from as P), to: cheekRoll(span.to as P) })) };
 /**
  * The cheek clumps' lines, following the scalloped edge on through the notches as the sheet draws them, in two
@@ -372,7 +378,7 @@ function headLinePiece(): Piece {
   const feathers = ([[[-45.6, -134.8], [-39.6, -126]], [[36.4, -127], [40.6, -140.6]]] as [P, P][])
     .map(([a, b]) => strokeOf(spanPoints(head, fracAt(head, cheekRoll(a)), fracAt(head, cheekRoll(b))), 1.8, { taper: 3, tip: 0.3 }).d).join("");
   return piece(`<defs>${blur(f, pad(box, 2), headLine.blur!)}${blur(g, pad(box, 2), 0.35)}${blur(e, pad(box, 2), 0.8)}` +
-    `<linearGradient id="${SEAM}" gradientUnits="userSpaceOnUse" x1="0" y1="-128" x2="0" y2="-116">` +
+    `<linearGradient id="${SEAM}" gradientUnits="userSpaceOnUse" x1="0" y1="-120" x2="0" y2="-102">` +
     `<stop offset="0" stop-color="${C.earEdge}"/><stop offset="1" stop-color="${C.earLine}"/></linearGradient></defs>` +
     `<path d="${feathers}" fill="${C.fur}" opacity="0.75" filter="url(#${e})"/>` +
     `<g fill="${headLine.colour}" filter="url(#${f})">${r.svg}</g>` +
