@@ -400,8 +400,8 @@ const headPaint: Paint = {
  * the collar's top, under the chin's fur, the collar's own contact rim (collarContact).
  */
 const headLine = (warming: string): Outline => ({ ...OUTLINE, taper: 4, blur: 0.15, spans: [
-  { from: [-88.8, -100.6], to: [-54, -153.4], width: 1.25, colour: `url(#${warming})` },
-  { from: [-14, -154], to: [6.6, -136.4], width: 1.25, colour: C.puffLine },
+  { from: [-88.8, -100.6], to: [-54, -153.4], width: THIN, colour: `url(#${warming})` },
+  { from: [-14, -154], to: [6.6, -136.4], width: THIN, colour: C.puffLine },
   { from: [-61.6, -60.2], to: [-92.5, -79.4], width: 1.3, colour: C.furLine },
 ] });
 /**
@@ -722,7 +722,7 @@ export function side(): Drawn[] {
       { pts: [[-5.9, -152.6], [-7.6, -151.4], [-10.2, -151], [-13.2, -151.2]], width: 0.9, colour: C.puffLine },
     ],
     // One line over the three locks, unbroken, tapering only at its two ends, where it runs on into the head's line.
-    outline: { ...OUTLINE, colour: C.puffLine, width: 1.25, taper: 1.6, spans: [{ from: [-63, -150.6], to: [-5.8, -151.6] }] },
+    outline: { ...OUTLINE, colour: C.puffLine, width: THIN, taper: 1.6, spans: [{ from: [-63, -150.6], to: [-5.8, -151.6] }] },
     feather: { from: [0, -146.4], to: [0, -150.4] },
   }));
   return out;
