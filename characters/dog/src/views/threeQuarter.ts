@@ -36,7 +36,7 @@ const roomy = (p: Piece, by: number): Piece => ({ ...p, box: pad(p.box, by) });
 // the sloping back to the rump, round the haunch's rear and down to the ground behind the hind paw, then along
 // the haunch's underside under the paw; the rest lies hidden under the chest, the near front leg and the collar.
 const back = smooth([[-36, -63], [-25, -66.5], [-17, -62], [-10, -55.3], [0.2, -48.5], [8.7, -40.9], [12.6, -34.4], [14.7, -26], [14.7, -17.5],
-  [12, -10.2], [7.8, -5.9], [1.5, -1.8], [-9, -1.2], [-17, -1.6], [-23.4, -3.4], [-27.6, -6.6], [-30.8, -8.2], [-35, -20], [-36, -42]]);
+  [12, -10.2], [7.8, -5.9], [1.5, -1.8], [-9, -1.2], [-17, -1.6], [-23.4, -3.2], [-27.8, -4.2], [-31.4, -5.6], [-35, -20], [-36, -42]]);
 
 // The near hind paw: a round bun of a paw tucked in at the haunch's front, as the sheet draws it, its own shape
 // under the thigh: its top an arc from its toe end (x -26.8), where it comes out beside the near front paw, up
@@ -223,13 +223,14 @@ const THIGH = uid("thigh"), GAP = uid("gap"), GAP_BLUR = uid("blur");
  * patch; the sheet's own gap is darker.
  */
 const thighPts: P[] = [[-15.4, -33], [-17.6, -30], [-19.8, -26.4], [-21.6, -22], [-22.8, -18], [-23.6, -14.6]];
-const gapNodes: P[] = [[-24.4, -27], [-22.8, -21.6], [-23.4, -16.4], [-25.2, -11.8], [-27.1, -6.8], [-28.6, -5.6], [-30.6, -6.6], [-28.6, -11.4],
+const gapNodes: P[] = [[-24.4, -27], [-22.8, -21.6], [-23.4, -16.4], [-25.2, -11.8], [-26.6, -6.4], [-28.2, -4.6], [-30.8, -5.8], [-28.6, -11.4],
   [-26.8, -16.6], [-25.6, -22]];
 const thighLayers = `<defs><linearGradient id="${THIGH}" gradientUnits="userSpaceOnUse" x1="0" y1="-33" x2="0" y2="-20">` +
   `<stop offset="0" stop-color="${C.softLine}" stop-opacity="0"/><stop offset="1" stop-color="${C.softLine}"/></linearGradient>` +
   `<linearGradient id="${GAP}" gradientUnits="userSpaceOnUse" x1="0" y1="-28" x2="0" y2="-6">` +
-  `<stop offset="0" stop-color="${C.earDeep}" stop-opacity="0"/><stop offset="0.5" stop-color="${C.earDeep}" stop-opacity="0.22"/>` +
-  `<stop offset="1" stop-color="${C.earDeep}" stop-opacity="0.28"/></linearGradient>${blur(GAP_BLUR, [-36, -32, 18, 30], 0.7)}</defs>` +
+  `<stop offset="0" stop-color="${C.earDeep}" stop-opacity="0"/><stop offset="0.45" stop-color="${C.earDeep}" stop-opacity="0.26"/>` +
+  `<stop offset="0.8" stop-color="${C.earDeep}" stop-opacity="0.28"/><stop offset="1" stop-color="${C.earDeep}" stop-opacity="0.08"/></linearGradient>` +
+  `${blur(GAP_BLUR, [-36, -32, 18, 30], 0.7)}</defs>` +
   `<path d="${pathD(smooth(gapNodes).segs)}" fill="url(#${GAP})" filter="url(#${GAP_BLUR})"/>`;
 
 const backPaint: Paint = {
@@ -241,7 +242,7 @@ const backPaint: Paint = {
   // The back's line, from under the ear down the sloping back and round the rump to the ground, in the outline's
   // brown the sheet draws there (#865C43 to #86512F), lighter where it comes out from under the ear; along the
   // ground under the haunch, the same line, deepening.
-  outline: { ...OUTLINE, width: 1.45, taper: 5, spans: [{ from: [-17, -62], to: [8.7, -40.9], width: 1.3, colour: C.warmLine }, { from: [6, -43], to: [-29.8, -7.8] }] },
+  outline: { ...OUTLINE, width: 1.45, taper: 5, spans: [{ from: [-17, -62], to: [8.7, -40.9], width: 1.3, colour: C.warmLine }, { from: [6, -43], to: [-31, -5.4] }] },
 };
 
 const headLight = "M-64 -150 C-52 -158 -30 -158 -18 -152 C-24 -142 -50 -140 -62 -144Z " +
@@ -638,6 +639,9 @@ export function threeQuarter(): Drawn[] {
     // Down the chest's far side, away from the light; the jaw's shadow on it is shadow.chin's, which turns with the head.
     shade: furShade(bodyGroup),
     under: between(),
+    // A few soft fur strokes down the chest's far side under the collar's end, as the sheet draws them.
+    inner: [[[-72, -47.4], [-72.8, -43], [-72.4, -38.6]], [[-67.6, -45.6], [-68.6, -41.6], [-69.2, -37.8]], [[-59.8, -27.6], [-59, -25.8], [-58.8, -24.2]]]
+      .map((pts) => ({ pts: sample(smooth(pts as P[], { closed: false }).segs, 6, false), width: 0.7, colour: C.crownLine, opacity: 0.4 })),
     // The chest's front edge, the silhouette from the collar down to the far leg, a light warm line (the sheet's
     // #B89778); and its lower edge's long diagonal from under the tag to the slot between the legs, coming in
     // faint as fur and deepening where it meets the slot.
