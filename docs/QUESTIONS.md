@@ -43,6 +43,12 @@ Where the spec is silent or contradicts itself, I don't invent the answer. The q
 - **Default:** one catchlight, as the sheets draw it (`characters/dog/DECISIONS.md` 29). Adding the small ones is one line per eye.
 - **Owner:** founder
 
+### Q27. Two choices in the Faces check: how to hold faces whose panels turn the head, and whether an open mouth passes as cheeky
+- **The spec says:** L525 holds each face preset to "its expression-sheet panel" by "the landmark check on eyes and mouth"; L480-498 name Curious, Shy, Sleepy and Mischievous as those panels; a face preset keeps the front's head (the lead's decision for the Faces check).
+- **Why it matters:** (a) Both Curious panels, the only Shy and both Sleepy panels turn the head: their eyes sit 3.0 to 5.1 pt across from where the front puts them. Held by place against the nose, a correct curious or shy face on the front's head failed by 5 to 6 pt and could pass only with its eyes slid against its nose. (b) The master sheet's Cheeky, the lead's choice for mischievous and sly, draws the tongue out over a closed smile; the expression sheet's Mischievous draws an open mouth with the tongue in it. Every shape gate lets an open mouth pass Cheeky's mouth; only the share of deep red inside the mouth tells them apart (Cheeky 0.14, the open mouths 0.35 to 0.40, Mischievous 0.27, the face library's cheeky still 0.32).
+- **Default:** (a) each keeps its own panel, recorded as turned, where the eyes are held by their shapes and their spacing and their place is held on the render's own head; the alternative is to hold curious and shy to the master sheet's Happy, level and front-on, as proud is held to Content (sleepy has no level panel with closed eyes). (b) an open mouth may pass mischievous and sly; the deep-red share is reported in every mouth row and judged by eye. A gate on it would fail the expression sheet's own Mischievous and the face library's cheeky mouth. (`characters/dog/DECISIONS.md` 110 and 118.)
+- **Owner:** founder
+
 ## Needed by phase 4 (the rig and Visual QA)
 
 ### Q3. As the spec words them, four Visual QA checks would fail good animation. May I narrow them?

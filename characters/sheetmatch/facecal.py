@@ -11,7 +11,7 @@ and the best different-state pair (geometrically for a ratio). This prints both
 ends of each measure, the threshold they give, the one facematch.py uses, and
 every pair on the wrong side of it. A pair's places pass when its held anchors
 do: each anchor on a level record, the pair's spacing on a record that turns
-the head. It takes about a minute and a half.
+the head. It takes a little over a minute.
 
 PanelStill, a panel carried into a still the way a render arrives, is the
 fixture the tests use too."""
