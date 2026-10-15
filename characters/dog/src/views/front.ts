@@ -230,8 +230,8 @@ const leftSide = ([x, y]: P): P => [x > 0 ? x - 2.4 * Math.min(1, Math.max(0, (y
 // Typed as its right half, mirrored, the crown lifted and the side drawn in on
 // the left, and the cheeks rolled with the face. The crown's part under the
 // topknot is hidden by it.
-const headHalf: Node[] = [[0, -151.8], [-32.4, -146.8], [-37.6, -143.4], [-42.2, -139.6], [-46.2, -133.6], [-41.2, -135.1], [-35.8, -134.5],
-  [-37.4, -128.4], [-41.6, -120.6], [-45.6, -114.4], [-47, -105], [-46.4, -97.4], [-44.4, -93], [-46.2, -90.2], [-46.2, -84], [-45.4, -77.8],
+const headHalf: Node[] = [[0, -151.8], [-32.4, -146.8], [-37.6, -143.4], [-42.2, -139.6], [-46.2, -133.6], [-40.4, -135.3], [-33.8, -134.9],
+  [-36.9, -129.4], [-41.6, -120.6], [-45.6, -114.4], [-47, -105], [-46.4, -97.4], [-44.4, -93], [-46.4, -88.6], [-45.4, -77.8],
   [-42.6, -73.4], [-38.6, -70.2], [-31, -64.2], [-9, -59.4]];
 /**
  * The crown's overhang and the crescent's inner end, on the right: the lock's tip hanging just inside the ear's
@@ -242,14 +242,16 @@ const TEMPLE = [4, 5, 6];
 const PUFF = 12;
 /**
  * The left temple, typed where the sheet draws it in place of the right's mirror: a shorter overhang, the crown
- * meeting the ear at (41, -140), its underside running in over the ear's tan at y -140.2 and the tan tapering
- * in under the crown's fur to a point at (30.2, -138.8), 4 pt higher and 5.6 pt further in than the right's.
+ * meeting the ear at (41, -140), its underside running in over the ear's tan at y -140.3 and the tan tapering
+ * in under the crown's fur to a point at (28.2, -138.6), 4 pt higher and 5.6 pt further in than the right's;
+ * from there the face's side runs down and out in one diagonal to (33.4, -130), where the sheet's line begins.
  */
-const leftTemple: Node[] = [[41, -140], [35.6, -140.2], [30.2, -138.8]];
+const leftTemple: Node[] = [[41, -140], [34.4, -140.3], [28.2, -138.6], [33.4, -130]];
 const mirroredHalf = mirrorX(headHalf, false).slice(0, -1);
-// The mirror runs from the chin up to the crown, so the right's temple nodes come in reverse; the left's replace the lock's tip and underside and the turn.
+// The mirror runs from the chin up to the crown, so the right's temple nodes come in reverse; the left's replace the
+// face's side above the line, the turn, the lock's underside and its tip.
 const at = mirroredHalf.length - TEMPLE[2]!;
-const leftHalf = [...mirroredHalf.slice(0, at).map(([x, y]): Node => leftSide([x, y])), ...[...leftTemple].reverse(),
+const leftHalf = [...mirroredHalf.slice(0, at - 1).map(([x, y]): Node => leftSide([x, y])), ...[...leftTemple].reverse(),
   ...mirroredHalf.slice(at + TEMPLE.length + 1).map(([x, y]): Node => crownLift([x, y]))];
 // The cheeks' puffs, and the inner end of each root's tan under the crown, a wedge pointing in under the crown's
 // fur where the face's side comes down from it (concave corners, which the corner rule leaves alone).
@@ -292,26 +294,23 @@ const tuft = furSpan(smooth([[-31, -149.2], [-29.6, -152.8], [-26.6, -155.6], [-
 
 // The head patches, as the sheet paints them: a rounded hood over the top and
 // outer side of each eye, like the rim of a pair of round spectacles, its top
-// edge about 9 pt above the eye with the brow in the cream above it, its nose
-// end down the eye's inner side to about mid-eye; and a band of the same tan
-// down the face's side, inside its line, from where the line begins to the
-// cheek's puff. Between the two a crescent of cream comes down from the
-// forehead round the hood's outer top to about the eye's top (a concave corner
-// at its tip). Below the eye and the hood the face is cream. Typed per side,
-// as the sheet draws them (the left about 3 pt higher, with the head's roll),
-// with about 4 pt of bleed past the head's edge; the eye covers what is typed
-// under it. Their edges are soft but defined: a sigma of 0.5 pt; along each
-// hood's top the tan breaks into a row of small soft points of fur where the
-// cream above runs down into it, as the sheet paints it, not a clean curve.
-const hoodLocks = [{ len: 0.65, w: 1, lean: 0.2 }, { len: 0.95, w: 1.3, lean: 0.1 }, { len: 0.55, w: 0.9, lean: -0.1 }, { len: 0.85, w: 1.2, lean: -0.2 },
-  { len: 0.5, w: 0.8, lean: -0.3 }];
+// edge one smooth arch about 9 pt above the eye with the brow in the cream
+// above it, its nose end down the eye's inner side to about mid-eye; and a band
+// of the same tan down the face's side, inside its line, from where the ear's
+// root shows under the crown down to the cheek's puff. Between the two a strip
+// of cream comes down from the forehead round the hood's outer top to a point
+// about level with the eye's top (a concave corner at its tip); on the right the
+// band reaches up under the head's edge, so it runs on into the root's tan.
+// Below the eye and the hood the face is cream. Typed per side, as the sheet
+// draws them (the left about 3 pt higher, with the head's roll), with about 4
+// pt of bleed past the head's edge; the eye covers what is typed under it.
+// Their edges are soft but defined: a sigma of 0.5 pt.
 const patches = {
-  R: furEdge(smooth([[-43, -86.6], [-49.6, -86], [-50, -106], [-48.4, -121.4], [-41.6, -122.6], [-39.6, -118], [-38.4, -112.6], [-35.8, -114.8], [-32.2, -117.2],
-    [-28, -117.8], [-22, -116.8], [-18.2, -113.2], [-15.8, -108.2], [-15.6, -102.4], [-18, -98], [-26, -93.4], [-33.4, -90.2], [-38.4, -88.4]], { corners: [6] }),
-    [-34.6, -115.8], [-19.6, -115], hoodLocks, 0.28),
-  L: furEdge(smooth([[43.4, -91.4], [49, -90.4], [49.4, -110], [44.6, -125], [37.6, -131.4], [35.4, -126], [35, -121], [34.6, -117.4], [32.6, -119.4], [29.6, -120.8],
-    [26, -121.2], [20.2, -121], [16.2, -118.6], [13.6, -114], [12.6, -108.4], [13.2, -103.4], [18, -96.6], [28, -94.4], [34.4, -94.2], [39.6, -93.2]], { corners: [7] }),
-    [33.6, -118.6], [17.4, -119.6], lefthandOf(hoodLocks), 0.28),
+  R: smooth([[-43, -86.6], [-49.6, -86], [-50, -106], [-48.6, -124], [-44.4, -130.6], [-39.6, -129.2], [-37.6, -126.4], [-38.8, -122.2], [-39.6, -119.2],
+    [-39, -116.2], [-37.8, -113.4], [-35.4, -115.6], [-32.4, -118.4], [-28.4, -118.8], [-22.4, -117.6], [-18.4, -114.6], [-15.8, -108.6], [-15.6, -102.4],
+    [-18, -98], [-26, -93.4], [-33.4, -90.2], [-38.4, -88.4]], { corners: [10] }),
+  L: smooth([[43.4, -91.4], [49, -90.4], [49.4, -110], [44.6, -125], [39.4, -131.8], [34.6, -131.2], [33, -127], [32.4, -123.2], [31.2, -121.2],
+    [28.4, -121.8], [24, -122.2], [19.6, -121.4], [16, -118.8], [13.6, -114], [12.6, -108.4], [13.2, -103.4], [18, -96.6], [28, -94.4], [34.4, -94.2], [39.6, -93.2]], { corners: [8] }),
 };
 /** Each hood's end toward the nose softens a little more than its edge, as the sheet's does. */
 const patchFade = { R: { from: [-16.8, -105.4], to: [-13.6, -104.4] }, L: { from: [14.2, -109.6], to: [11, -108.6] } } satisfies Record<string, Fade>;
@@ -382,8 +381,8 @@ const SEAM = uid("seam");
 // and under the overhang the sheet draws no line. The cheeks' clumps carry
 // their own lines (clumpLines).
 const headLine: Outline = { ...OUTLINE, taper: 4, blur: 0.15, spans: [
-  { from: [-42.4, -119.4], to: [-44.8, -93.2], width: THIN, colour: `url(#${SEAM})` },
-  { from: [44.4, -93.2], to: [39.2, -123.4], width: THIN, colour: `url(#${SEAM})` },
+  { from: [-39.9, -123.8], to: [-44.8, -93.2], width: THIN, colour: `url(#${SEAM})` },
+  { from: [44.4, -93.2], to: [33.7, -129.4], width: THIN, colour: `url(#${SEAM})` },
 ].map((span) => ({ ...span, from: cheekRoll(span.from as P), to: cheekRoll(span.to as P) })) };
 /**
  * The crown's line, from under the topknot's side lobes over the crown's small lock and round the overhang's tip,
@@ -432,14 +431,14 @@ function headLinePiece(): Piece {
   const s = uid("blur");
   const feathered = (spans: [P, P][], width: number) => spans.map(([a, b]) =>
     strokeOf(spanPoints(head, fracAt(head, cheekRoll(a)), fracAt(head, cheekRoll(b))), width, { taper: 3, tip: 0.4 }).d).join("");
-  const under = feathered([[[-45.6, -134.8], [-36.6, -134.6]], [[33, -139.6], [40.6, -140.6]]], 1.8);
-  const side = feathered([[[-39.4, -135], [-42.4, -119.4]], [[39.2, -123.4], [36, -140.4]]], 3.4);
+  const under = feathered([[[-45.6, -134.8], [-34.6, -135]], [[33, -139.6], [40.6, -140.6]]], 1.4);
+  const side = feathered([[[-34.4, -134.4], [-41.4, -121.4]], [[39.2, -123.4], [31.6, -139.2]]], 1.6);
   // And the cheeks' fluff is soft at its edge, its cream thinning out over the ear's tan, as the sheet paints it.
   const fluff = feathered([[[-45.4, -91.8], [-36.4, -68.8]], [[36.4, -68.8], [45.4, -91.8]]], 1.6);
-  return piece(`<defs>${blur(f, pad(box, 2), headLine.blur!)}${blur(g, pad(box, 2), 0.35)}${blur(s, pad(box, 2), 1)}` +
-    `<linearGradient id="${SEAM}" gradientUnits="userSpaceOnUse" x1="0" y1="-118" x2="0" y2="-104">` +
-    `<stop offset="0" stop-color="${C.earEdge}"/><stop offset="1" stop-color="${C.earLine}"/></linearGradient></defs>` +
-    `<path d="${under}" fill="${C.fur}" opacity="0.6" filter="url(#${s})"/><path d="${side}" fill="${C.fur}" opacity="0.85" filter="url(#${s})"/>` +
+  return piece(`<defs>${blur(f, pad(box, 2), headLine.blur!)}${blur(g, pad(box, 2), 0.35)}${blur(s, pad(box, 2), 0.55)}` +
+    `<linearGradient id="${SEAM}" gradientUnits="userSpaceOnUse" x1="0" y1="-131" x2="0" y2="-104">` +
+    `<stop offset="0" stop-color="${C.crownLine}"/><stop offset="0.4" stop-color="${C.earEdge}"/><stop offset="1" stop-color="${C.earLine}"/></linearGradient></defs>` +
+    `<path d="${under}" fill="${C.fur}" opacity="0.55" filter="url(#${s})"/><path d="${side}" fill="${C.fur}" opacity="0.6" filter="url(#${s})"/>` +
     `<path d="${fluff}" fill="${C.fur}" opacity="0.55" filter="url(#${s})"/>` +
     `<g fill="${headLine.colour}" filter="url(#${f})">${r.svg}</g>` +
     `<g filter="url(#${g})">${c.svg}</g>`, box, {

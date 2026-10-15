@@ -53,7 +53,7 @@
   "groundShadowLeftOut": true,
   "pass": true,
   "iouHeadAligned": 0.9793,
-  "headCentreOffsetPt": [0.05, -1.14]
+  "headCentreOffsetPt": [0.03, -0.58]
  },
  "landmarks": {
   "thresholdPt": 2.8,
@@ -68,9 +68,9 @@
    },
    "collar": {
     "how": "finder",
-    "found": [1.05, -55.6],
+    "found": [1.05, -55.61],
     "model": [1.3, -55.8],
-    "errPt": 0.32,
+    "errPt": 0.31,
     "errShareOfHead": 0.003,
     "pass": true
    },
@@ -92,10 +92,10 @@
    },
    "ear.L.root": {
     "how": "finder",
-    "found": [37.83, -139.91],
+    "found": [35.81, -139.91],
     "model": [36.7, -138.4],
-    "errPt": 1.88,
-    "errShareOfHead": 0.02,
+    "errPt": 1.75,
+    "errShareOfHead": 0.019,
     "pass": true
    },
    "ear.L.tip": {
@@ -108,10 +108,10 @@
    },
    "ear.R.root": {
     "how": "finder",
-    "found": [-41.25, -134.46],
+    "found": [-38.84, -134.46],
     "model": [-40.1, -133.7],
-    "errPt": 1.38,
-    "errShareOfHead": 0.015,
+    "errPt": 1.47,
+    "errShareOfHead": 0.016,
     "pass": true
    },
    "ear.R.tip": {
@@ -248,7 +248,7 @@
     "heldTo": "#FFF4E8",
     "heldBy": "palette.fur",
     "deltaE2000": 0.0,
-    "pixels": 14736,
+    "pixels": 14700,
     "pass": true
    },
    "furShade": {
@@ -256,7 +256,7 @@
     "heldTo": "#FDE3C8",
     "heldBy": "palettePainted.furShade",
     "deltaE2000": 0.44,
-    "pixels": 1489,
+    "pixels": 1490,
     "pass": true
    },
    "eyes": {
@@ -304,7 +304,7 @@
     "heldTo": "#D9A379",
     "heldBy": "palette.marking",
     "deltaE2000": 1.01,
-    "pixels": 5805,
+    "pixels": 5882,
     "pass": true
    },
    "headPatches": {
@@ -312,7 +312,7 @@
     "heldTo": "#F0BC92",
     "heldBy": "palettePainted.markingLight",
     "deltaE2000": 0.3,
-    "pixels": 1451,
+    "pixels": 1505,
     "pass": true
    },
    "bodyMarkings": {
@@ -328,7 +328,7 @@
     "heldTo": "#7DB7E8",
     "heldBy": "palette.collar",
     "deltaE2000": 1.53,
-    "pixels": 348,
+    "pixels": 349,
     "pass": true
    },
    "tag": {
@@ -427,7 +427,7 @@
    },
    "back.patch.R": {
     "part": "back.patch.R",
-    "shownPt2": 315.7,
+    "shownPt2": 315.8,
     "shows": true,
     "expected": true,
     "host": "body.back",
@@ -447,7 +447,7 @@
    },
    "head.patch.L": {
     "part": "head.patch.L",
-    "shownPt2": 530.0,
+    "shownPt2": 553.7,
     "shows": true,
     "expected": true,
     "host": "head.base",
@@ -458,16 +458,16 @@
      "renderCentroidInSheetPatch": true,
      "sheetCentroidInRender": true,
      "advisory": {
-      "areaRatio": 1.216,
-      "centroidOffsetPt": [0.32, 2.09],
-      "centroidDistancePt": 2.11
+      "areaRatio": 1.27,
+      "centroidOffsetPt": [0.4, 1.58],
+      "centroidDistancePt": 1.63
      },
      "pass": true
     }
    },
    "head.patch.R": {
     "part": "head.patch.R",
-    "shownPt2": 534.0,
+    "shownPt2": 551.0,
     "shows": true,
     "expected": true,
     "host": "head.base",
@@ -478,9 +478,9 @@
      "renderCentroidInSheetPatch": true,
      "sheetCentroidInRender": true,
      "advisory": {
-      "areaRatio": 1.232,
-      "centroidOffsetPt": [0.08, 0.7],
-      "centroidDistancePt": 0.7
+      "areaRatio": 1.269,
+      "centroidOffsetPt": [0.17, 0.33],
+      "centroidDistancePt": 0.37
      },
      "pass": true
     }
@@ -501,7 +501,7 @@
   },
   "partIoU": {
    "collar": {
-    "iou": 0.698,
+    "iou": 0.7,
     "target": 0.85,
     "meetsTarget": false
    },
@@ -511,12 +511,12 @@
     "meetsTarget": false
    },
    "ear.R": {
-    "iou": 0.692,
+    "iou": 0.697,
     "target": 0.85,
     "meetsTarget": false
    },
    "ear.L": {
-    "iou": 0.671,
+    "iou": 0.678,
     "target": 0.85,
     "meetsTarget": false
    }
@@ -525,8 +525,8 @@
    "set": "3x",
    "pages": 1,
    "pageAreaPx": 1048576,
-   "allRegionsShare": 0.496,
-   "thisStillShare": 0.496
+   "allRegionsShare": 0.497,
+   "thisStillShare": 0.497
   }
  },
  "failed": [],
