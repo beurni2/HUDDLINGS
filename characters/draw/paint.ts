@@ -170,7 +170,7 @@ export function part(name: string, shape: Shape, paint: Paint): Piece {
  * is the part's own; one that slides with the fake turn (head patches) relies
  * on the runtime's stencil, and head.line restores the edge over it.
  */
-export function marking(name: string, on: { shape: Shape; paint: Paint }, patch: Shape, opts: { fill: string; blur: number; clip: boolean }): Piece {
+export function marking(name: string, on: { shape: Shape; paint: Paint }, patch: Shape, opts: { fill: string; blur: number; clip: boolean; fade?: Fade }): Piece {
   const patchBox = pad(shapeBox(patch), 3 * opts.blur);
   const box = opts.clip ? pad(shapeBox(on.shape), 1) : pad(patchBox, 1);
   const paint: Paint = { ...on.paint, inner: undefined, under: undefined, feather: undefined, outline: opts.clip ? on.paint.outline : undefined };
@@ -178,7 +178,13 @@ export function marking(name: string, on: { shape: Shape; paint: Paint }, patch:
   // Clipped, the colour fills the part; sliding, it fills the patch's own bounds, bleed and all.
   const l = layers(name, on.shape, paint, opts.fill, area, opts.clip ? area : patchBox);
   const shows = uid("patch"), soft = uid("blur"), clip = uid("clip");
-  let defs = l.defs + blur(soft, area, opts.blur) + mask(shows, area, `<path d="${pathD(patch.segs)}" fill="#FFFFFF" filter="url(#${soft})"/>`);
+  // A faded patch shows through a gradient that lives inside its mask: luminance, not paint.
+  let shown = `<path d="${pathD(patch.segs)}" fill="#FFFFFF" filter="url(#${soft})"/>`;
+  if (opts.fade) {
+    const g = uid("fade");
+    shown = fadeGradient(g, opts.fade) + shown.replace('fill="#FFFFFF"', `fill="url(#${g})"`);
+  }
+  let defs = l.defs + blur(soft, area, opts.blur) + mask(shows, area, shown);
   let body = l.body;
   if (opts.clip) {
     defs += `<clipPath id="${clip}"><path d="${pathD(on.shape.segs)}"/></clipPath>`;
@@ -188,6 +194,18 @@ export function marking(name: string, on: { shape: Shape; paint: Paint }, patch:
     shapes: [{ name, nodes: patch.typed, segs: patch.segs, outlined: [], fur: [] }],
     lines: l.lines,
   });
+}
+
+/** A marking that fades: fully shown at `from`, gone at `to`, along the line between them (the sheet's head patches fading toward the nose). */
+export interface Fade {
+  from: P;
+  to: P;
+}
+
+/** A luminance gradient for a mask, white at a fade's `from` and black at its `to`. */
+function fadeGradient(id: string, f: Fade): string {
+  return `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${xy(f.from).replace(" ", '" y1="')}" x2="${xy(f.to).replace(" ", '" y2="')}">` +
+    `<stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#000000"/></linearGradient>`;
 }
 
 /** A soft shape with no line: the ground shadow, a cast shadow, the blush. */

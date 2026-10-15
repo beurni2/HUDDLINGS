@@ -65,3 +65,20 @@ test("the shade falls away from the light and the highlight toward it; a mirrore
   const right = render(paint([-LIGHT[0], LIGHT[1]]));
   assert.ok(sum(right.at(11, -11)) > sum(right.at(-11, 11)), "a light from the top right shades the bottom left");
 });
+
+test("a faded marking shows fully at its fade's start and not at all past its end, its gradient kept out of the paint", () => {
+  const shade = { multiply: ratio(FUR, FUR_SHADE), shapes: [], blur: 1.5 };
+  const paint = { fill: FUR, shade };
+  const piece = marking("patch", { shape: disc, paint }, disc, { fill: TAN, blur: 0.5, clip: true, fade: { from: [-10, 0], to: [10, 0] } });
+  const r = render(part("fur", disc, paint), piece);
+  const near = (x: number, hex: string) => {
+    const want = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+    r.at(x, 0).slice(0, 3).forEach((c, i) => assert.ok(Math.abs(c - want[i]!) <= 1, `${r.hex(x, 0)} at x ${x}, not ${hex}`));
+  };
+  near(-14, TAN);
+  near(14, FUR);
+  const middle = r.at(0, 0);
+  assert.ok(middle[2]! > 0x79 && middle[2]! < 0xE8, "halfway along, the patch is half shown");
+  // The gradient sits inside the mask, so the palette lint never reads its stops as paint.
+  assert.match(piece.svg, /<mask[^>]*>[^]*<linearGradient[^]*<\/mask>/);
+});
