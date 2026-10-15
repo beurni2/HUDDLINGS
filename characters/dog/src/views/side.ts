@@ -374,33 +374,41 @@ const headPaint: Paint = {
  */
 const [lock1, lock2] = foreLocks as [Lock, Lock, Lock];
 const headSpans: LitSpan[] = [
-  // The bridge, from the nose's top to the stop, the muzzle's own line, deeper than the crown's (the sheet's #987A5F).
-  { from: [-88.8, -100.6], to: [-84.6, -108.6], under: 0.55, taper: [2, 3] },
-  // Up the forehead and round each of its two locks, each lock its own line breaking at its notches, on up to the
-  // topknot's front curl.
-  { from: [-85.2, -106.6], to: lock1.notches[0], taper: [3, 1.2] },
+  // From the nose's top up the bridge, through the gentle stop and up the forehead, one unbroken line, deepest by the
+  // nose and lightening up the forehead, the muzzle's front a place of its own (the sheet's #8B6D53 at the stop, #A07C64
+  // and #AE8565 up the forehead); round each of the forehead's two locks its own line, breaking at its notches, on up
+  // to the topknot's front curl.
+  { from: [-91.2, -100.9], to: lock1.notches[0], under: (p: P) => 0.65 * Math.min(1, Math.max(0, (p[1] + 124) / 20)), taper: [0.3, 1.2] },
   { from: lock1.notches[0], to: lock1.notches[1], taper: 1.4 },
   { from: lock2.notches[0], to: lock2.notches[1], taper: 1.4 },
   { from: lock2.notches[1], to: [-62.2, -151.2], taper: [1.2, 3] },
   // Down the back of the head, unbroken over its small lock, to the ear's top.
   { from: [-14, -154], to: [6.6, -136.4], taper: [3, 4] },
-  // Under the chin and along the jaw (the sheet's #AC8D74).
-  { from: [-61.6, -60.2], to: [-92.5, -79.4], under: 0.4, taper: 4 },
+  // Under the chin and along the jaw, branching from the lip's notch in a Y with the smile, as dark as the mouth's line
+  // there and lightening back along the jaw (the sheet's #977A67 by the notch, #A78A70 to #B09074 along the jaw).
+  { from: [-61.6, -60.2], to: [-92.6, -79.8], under: (p: P) => 0.35 + 0.35 * Math.min(1, Math.max(0, (p[0] + 84) / -8)), taper: [4, 0.6] },
 ];
 /**
  * Round the nose's front, where the nose is the head's edge, a line in the nose's own near-black, so the stencil's
  * hard edge is covered and the nose has no rim of any other colour, as the sheet draws it.
  */
-const noseEdge: Outline = { colour: C.eyeDark, width: THIN, taper: 1.5, blur: 0.15, spans: [{ from: [-95.4, -90.4], to: [-91.4, -100.3] }] };
+const noseEdge: Outline = { colour: C.eyeDark, width: THIN, taper: 1.5, blur: 0.15, spans: [{ from: [-96.2, -90.6], to: [-92, -100.5] }] };
+/**
+ * The upper lip's line down the profile from the nose's foot to the lip's notch, on the head's edge: drawn here,
+ * unclipped, so the head's stencil never cuts it into steps (the mouth draws the smile from the notch on, inside the
+ * head), in the printed dark brown seen through 90% of itself, as the smile is.
+ */
+const lipEdge: Outline = { colour: C.dark, width: THIN, taper: 0.8, blur: 0.15, spans: [{ from: [-92.7, -80], to: [-96.4, -90.9] }] };
 
 function headLinePiece(): Piece {
   const f = uid("blur");
   const [x0, y0, x1, y1] = bbox(head.segs);
   const box = pad([x0, y0, x1 - x0, y1 - y0], 2);
-  const r = litEdge(head, headSpans, "head.line", box, { reach: 0.5 }), n = ribbons(head, noseEdge, "head.line", 0.5);
-  return piece(`<defs>${r.defs}${blur(f, pad(box, 2), 0.15)}</defs>${r.body}<g fill="${noseEdge.colour}" filter="url(#${f})">${n.svg}</g>`, box, {
-    shapes: [{ name: "head.line", nodes: head.typed, segs: head.segs, outlined: [...r.outlined, ...n.outlined], fur: head.fur.map(([a, b]) => [fracAt(head, a), fracAt(head, b)]) }],
-    lines: [...r.lines, ...n.lines],
+  const r = litEdge(head, headSpans, "head.line", box, { reach: 0.5 }), n = ribbons(head, noseEdge, "head.line", 0.5), l = ribbons(head, lipEdge, "upper lip", 0.5);
+  return piece(`<defs>${r.defs}${blur(f, pad(box, 2), 0.15)}</defs>${r.body}<g fill="${noseEdge.colour}" filter="url(#${f})">${n.svg}</g>` +
+    `<g fill="${lipEdge.colour}" opacity="0.9" filter="url(#${f})">${l.svg}</g>`, box, {
+    shapes: [{ name: "head.line", nodes: head.typed, segs: head.segs, outlined: [...r.outlined, ...n.outlined, ...l.outlined], fur: head.fur.map(([a, b]) => [fracAt(head, a), fracAt(head, b)]) }],
+    lines: [...r.lines, ...n.lines, ...l.lines],
   });
 }
 
@@ -427,17 +435,18 @@ function brow(): Piece {
 }
 
 /**
- * The nose at the snout's tip, as the sheet draws it in profile: a near-black egg (8 pt across, 10 pt tall), broad
- * at its top and front and narrowing to its foot, its front the head's own edge, a touch past it so it fills the
- * head's clip to its edge; a soft grey-brown sheen across its upper middle, as the front's.
+ * The nose at the snout's tip, as the sheet draws it in profile: a near-black rounded wedge (7.7 pt across, 10.4
+ * tall), its top nearly flat where it runs on into the bridge's line, its front full and round, its back running down
+ * in a diagonal to a slightly pointed lower-back corner where the lip's line starts; its front the head's own edge, a
+ * touch past it so it fills the head's clip to its edge; a soft dull sheen across its top.
  */
-const noseShape = smooth([[-93, -100.3], [-90.6, -99.6], [-89.2, -98], [-88.8, -95.8], [-89.6, -93.4], [-91.4, -91.4], [-93.4, -90.2], [-95.4, -90.1],
-  [-96.6, -92], [-97, -94.6], [-96.2, -97.8], [-94.8, -99.6]]);
+const noseShape = smooth([[-93.6, -101], [-91.4, -101.3], [-89.6, -100.6], [-88.9, -98.8], [-89.5, -96.4], [-90.9, -93.9], [-92.5, -92], [-94.1, -90.7], [-95.5, -90.2],
+  [-96.6, -91.1], [-97, -93.2], [-97, -95.8], [-96.5, -98.2], [-95.2, -99.8]]);
 function nose(): Piece {
   const f = uid("blur"), e = uid("blur"), box: Box = [-99, -103, 12, 16];
   // Its edge a touch soft, as the sheet's, so it does not read as cut out.
   return piece(`<defs>${blur(f, box, 0.7)}${blur(e, box, 0.15)}</defs><path d="${pathD(noseShape.segs)}" fill="${C.eyeDark}" filter="url(#${e})"/>` +
-    `<ellipse cx="-92.4" cy="-97.4" rx="2.3" ry="1.05" transform="rotate(-16 -92.4 -97.4)" fill="${C.noseSheen}" opacity="0.8" filter="url(#${f})"/>`, box);
+    `<ellipse cx="-93.2" cy="-98.4" rx="2.3" ry="0.95" transform="rotate(-6 -93.2 -98.4)" fill="${C.noseSheen}" opacity="0.7" filter="url(#${f})"/>`, box);
 }
 
 /**
@@ -449,13 +458,14 @@ function nose(): Piece {
  * lighter than the front's open lip.
  */
 function mouth(): Piece {
-  const lipPts = sample(smooth([[-95.9, -90.4], [-96, -88.4], [-95.6, -86], [-94.8, -83.4], [-93.6, -81.4], [-92.5, -80.5]], { closed: false }).segs, 8, false);
-  const smilePts = sample(smooth([[-93.2, -80.7], [-91.6, -79.9], [-89.6, -79.5], [-87.6, -79.6], [-86, -80.1], [-84.9, -80.9], [-84.4, -82.2]], { closed: false }).segs, 8, false);
-  const lip = tapered(lipPts, 1.2, "outer", "upper lip", { taper: 2.6, tip: 0.5 });
+  // The smile, from the lip's notch, where the head's line (lipEdge) brings the upper lip down, a short curve back along
+  // the muzzle ending in a definite upturned hook at its corner (mouth.L), as the sheet draws it; inside the head, so
+  // its edge is its own soft edge, never the stencil's.
+  const smilePts = sample(smooth([[-92.8, -80.2], [-91.4, -79.6], [-89.4, -79.4], [-87.6, -79.7], [-86.2, -80.4], [-85.3, -81.4], [-84.9, -82.6]], { closed: false }).segs, 8, false);
   const smile = tapered(smilePts, 0.9, "inner", "smile", { taper: 1, tip: 0.5 });
   const f = uid("blur"), box: Box = [-98, -93, 16, 15];
-  return piece(`<defs>${blur(f, box, 0.12)}</defs><g fill="${C.dark}" opacity="0.9" filter="url(#${f})"><path d="${lip.d}"/><path d="${smile.d}"/></g>`, box,
-    { shapes: [], lines: [lip.line, smile.line] });
+  return piece(`<defs>${blur(f, box, 0.15)}</defs><g fill="${C.dark}" opacity="0.9" filter="url(#${f})"><path d="${smile.d}"/></g>`, box,
+    { shapes: [], lines: [smile.line] });
 }
 
 /**
