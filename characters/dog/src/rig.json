@@ -20,7 +20,7 @@
     { "name": "brow.R", "parent": "head", "x": -24.2, "y": -68.125, "views": { "threeQuarter.L": { "x": -29.9, "y": -72.125 } } },
     { "name": "mouth", "parent": "head", "x": -0.2, "y": -34.9, "views": { "threeQuarter.L": { "x": -19.5, "y": -32.7 } } },
     { "name": "tuft", "parent": "head", "x": 0.8, "y": -91.205, "rot": [-6, 6], "views": { "threeQuarter.L": { "x": 13.5, "y": -88.205 } } },
-    { "name": "tail", "parent": "hips", "rot": [-25, 25], "views": { "threeQuarter.L": { "x": 11, "y": -9.4 } } },
+    { "name": "tail", "parent": "hips", "rot": [-25, 25], "views": { "threeQuarter.L": { "x": 11.9, "y": -9.4 } } },
     { "name": "front.L", "parent": "chest", "x": 13.7, "rot": [-60, 90], "views": { "threeQuarter.L": { "x": 3.3 } } },
     { "name": "front.R", "parent": "chest", "x": -15.1, "rot": [-60, 90], "views": { "threeQuarter.L": { "x": -23.1 } } },
     { "name": "hind.L", "parent": "hips", "x": 37.8, "rot": [-45, 60], "views": { "threeQuarter.L": { "x": -19.6 } } },
