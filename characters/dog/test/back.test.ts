@@ -4,7 +4,8 @@
 // order is the one the crop shows (the tail in front of the body, L298); it draws
 // exactly the markings phase 2 sighted on its crop, each clipped to its part, and
 // no face; its cast shadows ride the bone that casts them, clipped to what they
-// fall on (L396); every part that turns reaches under the part covering it
+// fall on (L396); its outer lines are the line rule's (DECISIONS 74, 104); every
+// part that turns reaches under the part covering it
 // (L394); its placed landmarks lie on their own parts; and its WebGL rest frame
 // is the resvg composite of its model-space drawings.
 import { after, before, test } from "node:test";
@@ -22,6 +23,7 @@ import { buildPackage, readSource, writePackage } from "../../build/build.ts";
 import { restTransform, toBone } from "../../draw/frame.ts";
 import { scopeIds } from "../../draw/svg.ts";
 import { BOX, composite, type Layer } from "../../draw/test/composite.ts";
+import { C, LINES } from "../src/palette.ts";
 import { back, landmarks, TAIL_ROOT } from "../src/views/back.ts";
 
 const VIEW = "back";
@@ -127,6 +129,20 @@ test("the back view draws the markings phase 2 sighted on its crop, each an over
   for (const hidden of ["eye.L", "eye.R", "brow.L", "brow.R", "nose", "mouth", "blush.L", "blush.R", "tag", "body.front", "front.L", "front.R"]) {
     assert.ok(!pieces.has(hidden), `${hidden} is drawn from behind`);
   }
+});
+
+test("the back view's outer lines are the line rule's, as every view's (DECISIONS 104, 105)", () => {
+  // Each lined part draws its line by parts/lines.ts: its ribbons are the ladders' tones.
+  const tones = new Set([...LINES.cream, ...LINES.tan]);
+  for (const name of ["body.back", "hind.L", "hind.R", "tail", "tuft", "ear.L", "ear.R", "head.line", "back.patch.L", "back.patch.R", "tail.base"]) {
+    const fills = [...pieces.get(name)!.svg.matchAll(/<path fill="(#[0-9A-F]{6})" d=/g)].map((m) => m[1]!);
+    assert.ok(fills.some((c) => tones.has(c)), `${name} draws no line by the line rule`);
+  }
+  // The only typed lines left: the collar's rim, as every view types it, and the crown's line over each ear's root (105).
+  const src = readFileSync(new URL("../src/views/back.ts", import.meta.url), "utf8");
+  assert.equal(src.match(/\boutline: /g)?.length, 1, "a part other than the collar types its own outline");
+  assert.equal(src.match(/\bribbons\(/g)?.length, 1, "the back types a line other than the root's stretch");
+  for (const gone of ["haunchLine", "haunchShadeLine", "crownWarm", "earFootLine"]) assert.ok(!(gone in C), `palette.ts still holds ${gone}`);
 });
 
 test("the back view's cast shadows ride the bone that casts them, clipped to the part they fall on (L396)", () => {

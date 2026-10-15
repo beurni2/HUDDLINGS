@@ -41,19 +41,19 @@
  },
  "alignment": {
   "rootOnCropGroundPlusHalf": true,
-  "bestFitShiftPx": [0.28, -0.14],
-  "bestFitShiftPt": [0.22, -0.11],
-  "iouAtBestWholePixelShift": 0.9727,
+  "bestFitShiftPx": [0.28, -0.12],
+  "bestFitShiftPt": [0.22, -0.09],
+  "iouAtBestWholePixelShift": 0.9726,
   "thresholdPx": 2.0,
   "pass": true
  },
  "silhouette": {
-  "iou": 0.9727,
+  "iou": 0.9726,
   "threshold": 0.85,
   "groundShadowLeftOut": true,
   "pass": true,
-  "iouHeadAligned": 0.9717,
-  "headCentreOffsetPt": [0.43, -0.28]
+  "iouHeadAligned": 0.9716,
+  "headCentreOffsetPt": [0.44, -0.34]
  },
  "landmarks": {
   "thresholdPt": 2.8,
@@ -84,18 +84,18 @@
    },
    "ear.L.root": {
     "how": "finder",
-    "found": [-40.45, -145.95],
+    "found": [-40.76, -145.17],
     "model": [-38.9, -146.0],
-    "errPt": 1.55,
-    "errShareOfHead": 0.017,
+    "errPt": 2.04,
+    "errShareOfHead": 0.022,
     "pass": true
    },
    "ear.L.tip": {
     "how": "finder",
-    "found": [-49.21, -68.27],
+    "found": [-48.8, -68.27],
     "model": [-49.3, -68.3],
-    "errPt": 0.1,
-    "errShareOfHead": 0.001,
+    "errPt": 0.5,
+    "errShareOfHead": 0.005,
     "pass": true
    },
    "ear.R.root": {
@@ -108,10 +108,10 @@
    },
    "ear.R.tip": {
     "how": "finder",
-    "found": [48.48, -69.05],
+    "found": [48.06, -69.05],
     "model": [49.6, -69.8],
-    "errPt": 1.35,
-    "errShareOfHead": 0.014,
+    "errPt": 1.71,
+    "errShareOfHead": 0.018,
     "pass": true
    },
    "ground": {
@@ -141,7 +141,7 @@
     "heldTo": "#FFF4E8",
     "heldBy": "palette.fur",
     "deltaE2000": 0.0,
-    "pixels": 15611,
+    "pixels": 15647,
     "pass": true
    },
    "furShade": {
@@ -149,7 +149,7 @@
     "heldTo": "#FDE3C8",
     "heldBy": "palettePainted.furShade",
     "deltaE2000": 0.44,
-    "pixels": 1259,
+    "pixels": 1148,
     "pass": true
    },
    "ears": {
@@ -157,7 +157,7 @@
     "heldTo": "#D9A379",
     "heldBy": "palette.marking",
     "deltaE2000": 1.13,
-    "pixels": 6567,
+    "pixels": 6581,
     "pass": true
    },
    "bodyMarkings": {
@@ -208,7 +208,7 @@
   "rows": {
    "back.patch.L": {
     "part": "back.patch.L",
-    "shownPt2": 606.0,
+    "shownPt2": 605.9,
     "shows": true,
     "expected": true,
     "host": "body.back",
@@ -219,8 +219,8 @@
      "renderCentroidInSheetPatch": true,
      "sheetCentroidInRender": true,
      "advisory": {
-      "areaRatio": 1.001,
-      "centroidOffsetPt": [0.39, -1.33],
+      "areaRatio": 1.002,
+      "centroidOffsetPt": [0.32, -1.35],
       "centroidDistancePt": 1.39
      },
      "pass": true
@@ -228,7 +228,7 @@
    },
    "back.patch.R": {
     "part": "back.patch.R",
-    "shownPt2": 231.3,
+    "shownPt2": 229.8,
     "shows": true,
     "expected": true,
     "host": "body.back",
@@ -239,9 +239,9 @@
      "renderCentroidInSheetPatch": true,
      "sheetCentroidInRender": true,
      "advisory": {
-      "areaRatio": 0.995,
-      "centroidOffsetPt": [0.08, -1.8],
-      "centroidDistancePt": 1.8
+      "areaRatio": 0.989,
+      "centroidOffsetPt": [0.06, -1.82],
+      "centroidDistancePt": 1.82
      },
      "pass": true
     }
@@ -278,7 +278,7 @@
    },
    "tail.base": {
     "part": "tail.base",
-    "shownPt2": 91.6,
+    "shownPt2": 92.3,
     "shows": true,
     "expected": true,
     "host": "tail",
@@ -289,9 +289,9 @@
      "renderCentroidInSheetPatch": true,
      "sheetCentroidInRender": true,
      "advisory": {
-      "areaRatio": 2.042,
-      "centroidOffsetPt": [1.49, -1.25],
-      "centroidDistancePt": 1.94
+      "areaRatio": 2.056,
+      "centroidOffsetPt": [1.51, -1.28],
+      "centroidDistancePt": 1.98
      },
      "pass": true
     }
@@ -317,12 +317,12 @@
     "meetsTarget": true
    },
    "ear.L": {
-    "iou": 0.869,
+    "iou": 0.866,
     "target": 0.85,
     "meetsTarget": true
    },
    "ear.R": {
-    "iou": 0.816,
+    "iou": 0.813,
     "target": 0.85,
     "meetsTarget": false
    }
@@ -331,8 +331,8 @@
    "set": "3x",
    "pages": 1,
    "pageAreaPx": 4194304,
-   "allRegionsShare": 0.451,
-   "thisStillShare": 0.099
+   "allRegionsShare": 0.678,
+   "thisStillShare": 0.1
   }
  },
  "failed": [],
