@@ -171,9 +171,12 @@ const earD = (side: "L" | "R", d: string) => rollD(side === "R" ? d : mirrorD(d)
  * The face's roll carried down into the cheeks and jaw (DECISIONS 8): below the
  * eyes each point is lifted on the dog's left and lowered on its right by its
  * distance from the midline times the roll, fading out above the eyes, where
- * the crown and the topknot stay level as the sheet draws them.
+ * the crown and the topknot stay level as the sheet draws them, and easing to
+ * about half under the jaw, where the sheet's jaw lies near level over the
+ * collar (y -63.3 on the right and -64.5 on the left at x 31, where the full
+ * roll would put them 4.3 pt apart, the left one off the collar's end).
  */
-const cheekRoll = ([x, y]: P): P => [x, y + x * Math.tan(ROLL) * Math.min(1, Math.max(0, (y + 118) / 20))];
+const cheekRoll = ([x, y]: P): P => [x, y + x * Math.tan(ROLL) * Math.min(1, Math.max(0, (y + 118) / 20)) * (0.45 + 0.55 * Math.min(1, Math.max(0, (-58 - y) / 10)))];
 
 /**
  * The crown to the right of the topknot sits higher on the sheet than its mirror on the left (the silhouette
@@ -635,6 +638,14 @@ function collarContact(): string {
   return `<defs>${blur(f, [-30, -66, 60, 17], 0.6)}</defs><path d="${pathD(smooth(band, { corners: [0, 7] }).segs)}" fill="${C.collarLine}" opacity="0.85" filter="url(#${f})"/>`;
 }
 
+/** The collar's darker underside, where the band turns under toward the chest: a soft band of its line colour along its lower edge. */
+function collarUnderside(): string {
+  const f = uid("blur");
+  const band = ([[-27, -60.4], [-20, -55.6], [-10, -52.6], [0, -51.8], [12, -52.8], [21, -56.4], [28, -60.4], [27.6, -57], [21, -53.6], [12, -50.4], [0, -49.6],
+    [-12, -50.4], [-21, -53.2], [-27.6, -57.6]] as P[]);
+  return `<defs>${blur(f, [-30, -66, 60, 17], 0.8)}</defs><path d="${pathD(smooth(band, { corners: [0, 6] }).segs)}" fill="${C.collarLine}" opacity="0.4" filter="url(#${f})"/>`;
+}
+
 export function front(): Drawn[] {
   const out: Drawn[] = [];
   const add = (name: string, p: Piece, state?: string) => out.push({ part: name, piece: p, ...(state ? { state } : {}) });
@@ -687,10 +698,10 @@ export function front(): Drawn[] {
   add("collar", part("collar", collar, {
     fill: C.collar,
     shade: { multiply: C.shadeBy, shapes: ["M-32 -66 L32 -68 L32 -62.6 C14 -57.6 -12 -57.2 -32 -61Z", "M-32 -57 C-16 -49 16 -49 32 -58 L32 -46 L-32 -46Z"], blur: 0.9 },
-    highlight: { d: "M-21 -58.4 C-11 -55.2 10 -55.2 21 -59.6 L21 -57.6 C10 -53.4 -11 -53.4 -21 -56.6Z", colour: C.collarHighlight, opacity: 0.55, blur: 0.7 },
+    highlight: { d: "M-21 -58.4 C-11 -55.2 10 -55.2 21 -59.6 L21 -57.6 C10 -53.4 -11 -53.4 -21 -56.6Z", colour: C.collarHighlight, opacity: 0.3, blur: 0.9 },
     // The keeper; and under the chin's scallops the chin's contact shadow, darkest right under the fur's edge, as
     // the sheet paints it (#456C82 there against the band's #7DB7E8).
-    under: `<rect x="-2" y="-60" width="4.4" height="10" rx="1.2" fill="${C.collarLine}" opacity="0.3"/>` + collarContact(),
+    under: `<rect x="-2" y="-60" width="4.4" height="10" rx="1.2" fill="${C.collarLine}" opacity="0.3"/>` + collarContact() + collarUnderside(),
     outline: { colour: C.collarLine, width: THIN, spans: [{ from: [27.6, -59.4], to: [-26.4, -58.6] }], taper: 3, blur: 0.2 },
   }));
   add("tag", tagPiece());
