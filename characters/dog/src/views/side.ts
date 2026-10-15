@@ -119,11 +119,12 @@ const innerHeart = smooth([[TAG_X, -47.4], [-61.4, -48.4], [-63.2, -47], [-63.4,
 // out to x 22.6, as the sheet draws it.
 /** Each clump of the ear's foot: its tip, root and notches (path order), for the creases drawn up into it. */
 const earClumps: { tip: P; root: P; notches: [P, P] }[] = [];
-// Its foot hangs in three soft clumps of fur, the broadest under its middle, as the sheet draws them, each notch a soft dip.
+// Its foot hangs in three soft clumps of fur, as the sheet draws them: one low on its back, the broadest under its middle
+// and a smaller one at its front, each notch a soft dip.
 const ear = furEdge(smooth([[8.6, -134.4], [13.4, -125], [16.4, -114.6], [19.8, -104.6], [22.6, -95.4], [22.4, -85.4], [18.8, -77.6], [12.6, -71],
   [4, -66.4], [-5, -64], [-13, -62.8], [-21.2, -64.4], [-28.6, -69.6], [-34.6, -77], [-37.2, -85.6], [-36.8, -94.4], [-34, -103.6], [-30.8, -113.4],
-  [-29.4, -124], [-31.4, -134.4], [-26.4, -141], [-14, -144.2], [-4, -142.6], [3.4, -140.8]]), [20.6, -81.6], [-29.4, -70.4],
-[{ len: 0.9, w: 1, lean: 0.15 }, { len: 1.3, w: 2.2, lean: 0.05 }, { len: 1, w: 1.5, lean: -0.1 }], 0.42,
+  [-29.4, -124], [-31.4, -134.4], [-26.4, -141], [-14, -144.2], [-4, -142.6], [3.4, -140.8]]), [22.4, -93.6], [-29.4, -70.4],
+[{ len: 1.3, w: 1.3, lean: 0.2 }, { len: 1.3, w: 2.2, lean: 0.05 }, { len: 1, w: 1.5, lean: -0.1 }], 0.42,
 (tip, root, notches) => earClumps.push({ tip, root, notches }));
 
 // The head: the muzzle's profile from the nose's front round its foot and the
@@ -454,8 +455,9 @@ function tagPiece(): Piece {
  * The ear's paint (the front's recipe, turned): the tan deepening down the ear to a browner tan at its foot and
  * along its back, under the fur's own warm shade; a few soft locks, darker partings and lighter strokes, curving down
  * with its round; a fold along its upper back, a light streak beside a darker crease, where it turns over the back
- * of the head; and its line in the warm brown the sheet draws round the ears, from under the crown's fur down the
- * front, round the foot and up the back. Its top lies under the crown's fur, feathered, with no line.
+ * of the head; and its line in the ears' deep warm brown, which the side crop draws round its front, foot and back
+ * (#9E6031 to #A76744 at its core), from under the patch's tan down the front, round the foot and up the back. Its top
+ * lies under the crown's fur, feathered, with no line.
  */
 function earPaint(): Paint {
   const deep = uid("deep"), top = uid("top"), parting = uid("blur"), along = uid("blur"), crisp = uid("blur"), [ex0, ey0, ex1, ey1] = bbox(ear.segs);
@@ -494,8 +496,8 @@ function earPaint(): Paint {
     highlight: { d: "M-30 -110 C-29 -120 -24 -130 -18 -132 C-19 -124 -24 -114 -27 -106 C-29 -104 -30 -106 -30 -110Z", colour: C.patch, opacity: 0.3, blur: 2.6 },
     outline: { ...OUTLINE, colour: C.warmLine, width: 1.3, taper: 6, blur: 0.25, spans: [
       { from: [5.2, -139.6], to: [22.6, -93.8], width: 1.4, colour: C.earLine },
-      { from: [21.4, -98], to: [-30.4, -72], width: 1.3 },
-      { from: [-26.4, -67.6], to: [-29.6, -130], colour: C.earEdge },
+      { from: [21.4, -98], to: [-30.4, -72], width: 1.3, colour: C.earLine },
+      { from: [-26.4, -67.6], to: [-29.6, -130], colour: C.earLine },
     ] },
     feather: { from: [-12, -146.2], to: [-12, -141.6] },
   };
