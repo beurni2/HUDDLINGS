@@ -24,6 +24,21 @@ test("furEdge keeps the base exactly outside its span and adds two cubics a lock
   assert.throws(() => furEdge(base, [-17.6, 24.3], [0, 30], [{ len: 2 }]), /must not wrap/);
 });
 
+test("furEdge tells each lock's tip, root and notches, the notches on the path and shared by neighbours", () => {
+  const base = smooth(ring, { corners: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] });
+  const heard: { tip: P; root: P; notches: [P, P] }[] = [];
+  const fur = furEdge(base, [0, 30], [-17.6, 24.3], [{ len: 2 }, { len: 3, lean: 0.4 }, { len: 2, w: 0.8 }], 0.3, (tip, root, notches) => heard.push({ tip, root, notches }));
+  assert.equal(heard.length, 3);
+  const path = sample(fur.segs, 64);
+  const onPath = (p: P) => Math.min(...path.map((q) => v.len(v.sub(p, q)))) < 0.05;
+  for (const { tip, root, notches } of heard) {
+    assert.ok(onPath(tip) && notches.every(onPath), "the tip and the notches lie on the furred path");
+    // The tip stands out from its root by about the lock's length (2 or 3 pt), never inward.
+    assert.ok(v.len(tip) > v.len(root) + 1.5, `the tip at ${tip} stands outside its root at ${root}`);
+  }
+  for (let i = 1; i < heard.length; i++) assert.deepEqual(heard[i]!.notches[0], heard[i - 1]!.notches[1]);
+});
+
 test("furSpan declares a span of hand nodes as fur", () => {
   const s = furSpan(smooth(ring), [30, 0], [0, 30]);
   const [a, b] = s.fur[0]!.map((p) => fracAt(s, p)) as [number, number];

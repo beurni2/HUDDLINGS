@@ -49,6 +49,9 @@ export const C = {
   earLow: darken(multiply(multiply(marking, furShadeBy), furShadeBy), 0.08),
   /** The lighter line on fur spans. */
   furLine: mix(outline, fur, 0.14),
+  /** The crown's and the topknot's one light warm line: the outline 30% of the way to the cream, #B29379 against the
+   * sheet's #B29576 on the crown. */
+  crownLine: mix(outline, fur, 0.3),
   /** The faint line round the cheeks' fluff and the topknot, which the sheet barely outlines. */
   fluffLine: mix(outline, fur, 0.45),
   /** The outline warmed toward the ears' deep brown: the sheet's line round the haunches, the paws and under the
