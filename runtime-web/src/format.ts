@@ -154,15 +154,45 @@ function bodyOrders(rig: Rig): [string, string[]][] {
   return [...Object.entries(rig.drawOrder).filter(([name]) => !name.startsWith("head.")), ...Object.entries(rig.drawOrderVariants ?? {})];
 }
 
+const EASING_NAMES = new Set(["linear", "step", "easeIn", "easeOut", "easeInOut", "easeOutBack"]);
+const finite = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v);
+
 /**
- * The checks every keyed track gets, a bone's channel or a part's alpha: keys in order and
- * inside the clip, CSS's rule for a Bézier's x1 and x2, each key's value (valueProblem), and,
- * given a limit, no overshoot past it between keys.
+ * Why a key's easing is not one the README names, or undefined when it is: a name, ["easeOutBack", s]
+ * or ["bezier", x1, y1, x2, y2], every number finite. A file is JSON, so anything can arrive here.
+ */
+function easingProblem(easing: unknown): string | undefined {
+  if (typeof easing === "string") return EASING_NAMES.has(easing) ? undefined : `an unknown easing ${JSON.stringify(easing)}`;
+  if (Array.isArray(easing) && easing[0] === "easeOutBack" && easing.length === 2 && finite(easing[1])) return undefined;
+  if (Array.isArray(easing) && easing[0] === "bezier" && easing.length === 5 && easing.slice(1).every(finite)) return undefined;
+  return `an easing that is not a name, ["easeOutBack", s] or ["bezier", x1, y1, x2, y2] with finite numbers: ${JSON.stringify(easing)}`;
+}
+
+/**
+ * The checks every keyed track gets, a bone's channel or a part's alpha: at least one key, each
+ * [time, value] or [time, value, easing] with a finite time and value and an easing the README
+ * names, keys in time order and inside the clip, CSS's rule for a Bézier's x1 and x2, each key's
+ * value (valueProblem), and, given a limit, no overshoot past it between keys. The runtimes sample
+ * only what passes: an empty track has no value, and a value or easing of another shape reaches
+ * the arithmetic as NaN or a string.
  */
 function keyProblems(clip: Clip, what: string, keys: Key[], limit: readonly [number, number] | undefined, valueProblem: (v: number) => string | undefined): string[] {
+  if (!Array.isArray(keys)) return [`clip ${clip.name}: ${what} is not a list of keys`];
+  if (keys.length === 0) return [`clip ${clip.name}: ${what} has no keys; a track needs at least one`];
   const problems: string[] = [];
   let last = -Infinity;
-  for (const key of keys) {
+  let shapes = true;
+  for (const [index, key] of keys.entries()) {
+    if (!Array.isArray(key) || (key.length !== 2 && key.length !== 3) || !finite(key[0]) || !finite(key[1])) {
+      problems.push(`clip ${clip.name}: ${what} key ${index} is not [time, value] or [time, value, easing] with a finite time and value: ${JSON.stringify(key) ?? String(key)}`);
+      shapes = false;
+      continue;
+    }
+    const easingIssue = key.length === 3 ? easingProblem(key[2]) : undefined;
+    if (easingIssue) {
+      problems.push(`clip ${clip.name}: ${what} key at ${key[0]} ms has ${easingIssue}`);
+      shapes = false;
+    }
     if (key[0] < last) problems.push(`clip ${clip.name}: ${what} keys out of order at ${key[0]} ms`);
     if (key[0] < 0 || key[0] > clip.lengthMs) problems.push(`clip ${clip.name}: ${what} key at ${key[0]} ms is outside the clip`);
     last = key[0];
@@ -172,8 +202,8 @@ function keyProblems(clip: Clip, what: string, keys: Key[], limit: readonly [num
     const problem = valueProblem(key[1]);
     if (problem) problems.push(`clip ${clip.name}: ${problem}`);
   }
-  // Between keys an easing can overshoot (easeOutBack, a bezier): sample each segment finely.
-  if (limit) {
+  // Between keys an easing can overshoot (easeOutBack, a bezier): sample each segment finely, once every key reads.
+  if (limit && shapes) {
     for (let k = 1; k < keys.length; k++) {
       const [t0, t1] = [keys[k - 1]![0], keys[k]![0]];
       for (let i = 1; i < 256 && t1 > t0; i++) {
@@ -333,6 +363,10 @@ export function validate(rig: Rig, clips: Clip[], atlas?: AtlasSet): string[] {
       if (event.at < 0 || event.at > clip.lengthMs) problems.push(`clip ${clip.name}: event ${event.type} at ${event.at} ms is outside the clip`);
       if (clip.loop && event.at === clip.lengthMs) problems.push(`clip ${clip.name}: on a loop, an event at ${clip.lengthMs} ms is the event at 0 ms; put it at 0`);
     }
+    // A discrete track holds its first value before its first key, so it needs one, as a keyed track does.
+    const discrete = [...Object.entries(clip.states ?? {}).map(([part, keys]) => [`states of ${part}`, keys] as const),
+      ...Object.entries(clip.views ?? {}).map(([group, keys]) => [`${group} views`, keys] as const), ...(clip.order ? [["order", clip.order] as const] : [])];
+    for (const [what, keys] of discrete) if (!Array.isArray(keys) || keys.length === 0) problems.push(`clip ${clip.name}: ${what} has no keys; a track needs at least one`);
     for (const [group, keys] of Object.entries(clip.views ?? {})) {
       for (const [, view] of keys ?? []) if (!rig.views.includes(view)) problems.push(`clip ${clip.name}: ${group} view ${view} is unknown`);
     }
