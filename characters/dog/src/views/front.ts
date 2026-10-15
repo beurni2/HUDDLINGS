@@ -204,8 +204,8 @@ const leftSide = ([x, y]: P): P => [x > 0 ? x - 2.4 * Math.min(1, Math.max(0, (y
 // the left, and the cheeks rolled with the face. The crown's part under the
 // topknot is hidden by it.
 const headHalf: Node[] = [[0, -151.8], [-32.4, -146.8], [-37.6, -143.4], [-42.2, -139.6], [-46.2, -133.6], [-41, -134.9], [-36.6, -133.4],
-  [-38.2, -128.6], [-42.4, -120.6], [-45.6, -114.4], [-47, -105], [-46.4, -97.4], [-44.4, -93], [-46.2, -90.2], [-46.4, -83.2], [-43.4, -74],
-  [-38.6, -69.6], [-31, -64.6], [-21, -61.8], [-9, -59.4]];
+  [-38.2, -128.6], [-42.4, -120.6], [-45.6, -114.4], [-47, -105], [-46.4, -97.4], [-44.4, -93], [-46.2, -90.2], [-46.2, -84], [-45.4, -77.8],
+  [-42.6, -73.4], [-38.6, -70.2], [-31, -64.6], [-9, -59.4]];
 /**
  * The crown's overhang and the crescent's inner end, on the right: the lock's tip hanging just inside the ear's
  * edge, its underside arching over the root's tan to y -134.9, and the rounded turn into the face's side.
@@ -231,15 +231,15 @@ let head = smooth([...headHalf, [0, -58.4], ...leftHalf].map(([x, y]): Node => c
 // combed down and out, the second the fullest, each lined in a soft warm brown
 // and with a soft shade under it; and the chin hangs over the collar in five
 // shallow scallops.
-const cheekLocks = [{ len: 1.45, w: 1.1, lean: 0.05 }, { len: 1.6, w: 1.25, lean: 0.12 }, { len: 1.3, w: 1.1, lean: 0.22 }, { len: 1.1, w: 1, lean: 0.3 }];
+const cheekLocks = [{ len: 1.4, w: 1, lean: 0.04 }, { len: 2, w: 1.45, lean: 0.08 }, { len: 1.6, w: 1.2, lean: 0.14 }, { len: 1, w: 0.8, lean: 0.2 }];
 const chinLocks = [{ len: 0.75, w: 0.9, lean: -0.25 }, { len: 0.95, w: 1.1, lean: -0.12 }, { len: 1.1, w: 1.25, lean: 0.02 }, { len: 0.9, w: 1.05, lean: 0.14 },
   { len: 0.7, w: 0.85, lean: 0.24 }];
 const lefthand = (locks: typeof cheekLocks) => [...locks].reverse().map((l) => ({ ...l, lean: -l.lean }));
 /** Each cheek clump's tip, root and notches (path order), for its line and the shade under it. */
 const clumps: { tip: P; root: P; notches: [P, P] }[] = [];
 const noteClump = (tip: P, root: P, notches: [P, P]) => clumps.push({ tip, root, notches });
-head = furEdge(head, cheekRoll([-45.4, -91.8]), cheekRoll([-36.4, -68.8]), cheekLocks, 0.5, noteClump);
-head = furEdge(head, cheekRoll([36.4, -68.8]), cheekRoll([45.4, -91.8]), lefthand(cheekLocks), 0.5, noteClump);
+head = furEdge(head, cheekRoll([-45.4, -91.8]), cheekRoll([-36.4, -68.8]), cheekLocks, 0.36, noteClump);
+head = furEdge(head, cheekRoll([36.4, -68.8]), cheekRoll([45.4, -91.8]), lefthand(cheekLocks), 0.36, noteClump);
 head = furEdge(head, cheekRoll([-32.4, -65.4]), cheekRoll([32.4, -65.4]), chinLocks, 0.5);
 
 // The topknot: three fur lobes, the middle one tallest, each ending in a curl,
@@ -338,20 +338,23 @@ const headLine: Outline = { ...OUTLINE, taper: 4, blur: 0.15, spans: [
   { from: [39.6, -142], to: [17, -150.8], width: THIN, colour: C.crownLine },
 ].map((span) => ({ ...span, from: cheekRoll(span.from as P), to: cheekRoll(span.to as P) })) };
 /**
- * Each cheek clump's own line, from notch to notch with a hair's gap at each, tapered at both ends as the sheet
- * draws them: the upper clumps in the lighter warm brown where they lie on the ear's light tan, the lower ones
- * deeper where they lie on its shaded foot (the sheet's #B17546 above to #9D5C31 below).
+ * The cheek clumps' lines, following the scalloped edge on through the notches as the sheet draws them, in two
+ * tapered runs a cheek: the upper clumps in the lighter warm brown where they lie on the ear's light tan, the
+ * lower ones deeper where they lie on its shaded foot (the sheet's #B17546 above to #9D5C31 below).
  */
 function clumpLines(): Outline {
-  const gap = 0.35 / arc(sample(head.segs, 64)).at(-1)!;
-  const spans = clumps.map(({ notches }, i) => {
-    const [a, b] = notches.map((n) => fracAt(head, n)) as [number, number];
-    const k = i % cheekLocks.length, rank = i < cheekLocks.length ? k : cheekLocks.length - 1 - k;
-    return { from: a + gap, to: b - gap, colour: rank < 2 ? C.earEdge : C.earLine };
-  });
-  return { ...OUTLINE, width: THIN, taper: 1.6, blur: 0.2, spans };
+  const n = cheekLocks.length, spans: Span[] = [];
+  for (let c = 0; c < clumps.length; c += n) {
+    const cheek = clumps.slice(c, c + n);
+    // The path runs down the right cheek and up the left, so the upper clumps come first on the right.
+    const rightSide = cheek[0]!.tip[0] < 0;
+    [cheek.slice(0, n / 2), cheek.slice(n / 2)].forEach((run, k) => {
+      const upper = rightSide === (k === 0);
+      spans.push({ from: fracAt(head, run[0]!.notches[0]), to: fracAt(head, run.at(-1)!.notches[1]), colour: upper ? C.earEdge : C.earLine });
+    });
+  }
+  return { ...OUTLINE, width: THIN, taper: 2.2, blur: 0.2, spans };
 }
-
 /** head.line: the head's outline as its own unclipped region, drawn after the head's clip group, reaching 0.5 pt past the head. */
 function headLinePiece(): Piece {
   const r = ribbons(head, headLine, "head.line", 0.5);
@@ -365,7 +368,7 @@ function headLinePiece(): Piece {
   const e = uid("blur");
   const feathers = ([[[-45.6, -134.8], [-39.6, -126]], [[36.4, -127], [40.6, -140.6]]] as [P, P][])
     .map(([a, b]) => strokeOf(spanPoints(head, fracAt(head, cheekRoll(a)), fracAt(head, cheekRoll(b))), 1.8, { taper: 3, tip: 0.3 }).d).join("");
-  return piece(`<defs>${blur(f, pad(box, 2), headLine.blur!)}${blur(g, pad(box, 2), 0.2)}${blur(e, pad(box, 2), 0.8)}` +
+  return piece(`<defs>${blur(f, pad(box, 2), headLine.blur!)}${blur(g, pad(box, 2), 0.35)}${blur(e, pad(box, 2), 0.8)}` +
     `<linearGradient id="${SEAM}" gradientUnits="userSpaceOnUse" x1="0" y1="-128" x2="0" y2="-116">` +
     `<stop offset="0" stop-color="${C.earEdge}"/><stop offset="1" stop-color="${C.earLine}"/></linearGradient></defs>` +
     `<path d="${feathers}" fill="${C.fur}" opacity="0.75" filter="url(#${e})"/>` +
