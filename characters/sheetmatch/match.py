@@ -97,6 +97,11 @@ REGIONS = {
 }
 BLUSH_PARTS = ("blush*",)
 BLUSH_MIN_PX = 6  # crop px: a blush part covering less is a speck, not a cheek
+DARK_L_MAX = 40  # L*: the eyes' and the nose's pixels held to their dark values are darker than this
+# palette.blush's own rule for the light pixels it fits a cheek's level on (phase 2): L* over 70, chroma under 30.
+BLUSH_LIGHT_L_MIN = 70
+BLUSH_LIGHT_CHROMA_MAX = 30
+BLUSH_LEVEL_MIN = 0.05  # a level at or below this is no blush: the core colour is the peak itself, not carried to full strength
 # The part each source landmark must lie on: the spec's part names, then the art prototype's.
 SOURCE_PARTS = {
     "paw.front.L": ("front.L", "paw.front.L"), "paw.front.R": ("front.R", "paw.front.R"),
@@ -318,7 +323,8 @@ def thresholds(frame):
     """Every threshold the checks use, as match.json records them."""
     return {"silhouetteIoUMin": IOU_MIN[frame.kind], "coverage": COVERAGE, "shiftMaxPx": SHIFT_MAX_PX, "shiftSearchPx": SHIFT_SEARCH_PX,
             "landmarkShareOfHead": LANDMARK_SHARE, "landmarkPt": round(LANDMARK_SHARE * frame.head_width, 2), "deltaE2000Max": DELTA_E_MAX,
-            "idTolerance": ID_TOLERANCE, "blushRestingSpread": frame.model["blush"]["restingSpread"], "blushMinPx": BLUSH_MIN_PX,
+            "idTolerance": ID_TOLERANCE, "darkLMax": DARK_L_MAX, "blushRestingSpread": frame.model["blush"]["restingSpread"], "blushMinPx": BLUSH_MIN_PX,
+            "blushLightLMin": BLUSH_LIGHT_L_MIN, "blushLightChromaMax": BLUSH_LIGHT_CHROMA_MAX, "blushLevelMin": BLUSH_LEVEL_MIN,
             "shownPt2": SHOWN_PT2, "bakedMinPx": BAKED_MIN_PX, "matchRadiusShareOfHead": MATCH_RADIUS_SHARE,
             "markingPlaceShareOfHead": MARKING_PLACE_SHARE, "edgeP95Pt": EDGE_P95_PT, "partIoU": PART_IOU}
 
@@ -583,9 +589,9 @@ def palette_masks(frame, render, still):
     if fur.any():
         found["furShade"] = palette.fur_shade(cls, lab, fur, float(np.median(cls.L[fur])), eye_area)
     if eye_masks:
-        found["eyes"] = np.any(eye_masks, axis=0) & (cls.L < 40)
+        found["eyes"] = np.any(eye_masks, axis=0) & (cls.L < DARK_L_MAX)
         found["lowerIris"] = palette.lower_iris([e for e in eye_masks if e.any()], cls.L)
-    found["nose"] = masks_for(render, still, ("nose*",))[1] & (cls.L < 40)
+    found["nose"] = masks_for(render, still, ("nose*",))[1] & (cls.L < DARK_L_MAX)
     _, mouth = masks_for(render, still, MOUTH_PARTS)
     found["tongue"] = mouth & cls.pink
     found["mouthInside"] = palette.mouth_inside(lab, mouth, cls.pink)
@@ -634,13 +640,13 @@ def check_blush(frame, render, still):
         ys, xs = np.nonzero(blob)
         box = render.rgb[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
         centre = round2(measure.centroid(blob))
-        # palette.blush fits the box's light pixels (L* over 70, chroma under 30); a box with none has no level.
+        # palette.blush fits the box's light pixels (BLUSH_LIGHT_L_MIN, BLUSH_LIGHT_CHROMA_MAX); a box with none has no level.
         lab = sheets.to_lab(box.reshape(-1, 3))
-        if not ((lab[:, 0] > 70) & (np.hypot(lab[:, 1], lab[:, 2]) < 30)).any():
+        if not ((lab[:, 0] > BLUSH_LIGHT_L_MIN) & (np.hypot(lab[:, 1], lab[:, 2]) < BLUSH_LIGHT_CHROMA_MAX)).any():
             cheeks.append({"centrePx": centre, "problem": "no light pixels in its box, so no level can be fitted", "pass": False})
             continue
         level, peak = palette.blush(box, fur_hex, pink_hex)
-        core = fur + (peak - fur) / level if level > 0.05 else peak
+        core = fur + (peak - fur) / level if level > BLUSH_LEVEL_MIN else peak
         de = palette.delta(np.clip(core, 0, 255), pink_hex)
         cheeks.append({"centrePx": centre, "level": round(level, 3), "peak": sheets.rgb_to_hex(peak),
                        "coreColour": sheets.rgb_to_hex(np.clip(core, 0, 255)), "coreDeltaE2000": round(de, 2),

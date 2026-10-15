@@ -683,6 +683,38 @@ class PlantedTest(unittest.TestCase):
             if name not in ("PHONE_PPP", "ZOOM"):
                 self.assertIn(value, recorded.values(), name)
 
+    def test_the_gating_limits_inside_the_checks_are_named_recorded_and_used(self):
+        """The eyes' and nose's dark limit and the blush's light pixels and least level are module constants, each
+        recorded by name in match.json and read by its check: moved out of reach, each one fails its check."""
+        folder = Path(self.folder.name) / "limits"
+        self.fixture().write(folder)
+        (folder / "landmarks.json").write_text(json.dumps(self.fixtures["front"].source()))
+        result, _ = match.match("dog", folder, folder / "landmarks.json")
+        self.assertFailed(result, [])
+        recorded = result["thresholds"]
+        self.assertEqual((recorded["darkLMax"], recorded["blushLightLMin"], recorded["blushLightChromaMax"], recorded["blushLevelMin"]),
+                         (40, 70, 30, 0.05))
+        self.assertEqual((match.DARK_L_MAX, match.BLUSH_LIGHT_L_MIN, match.BLUSH_LIGHT_CHROMA_MAX, match.BLUSH_LEVEL_MIN), (40, 70, 30, 0.05))
+
+        def under(name, value):
+            original = getattr(match, name)
+            setattr(match, name, value)
+            try:
+                return match.match("dog", folder, folder / "landmarks.json")[0]
+            finally:
+                setattr(match, name, original)
+
+        dark = under("DARK_L_MAX", 0)
+        self.assertTrue(dark["palette"]["rows"]["eyes"]["missing"] and dark["palette"]["rows"]["nose"]["missing"])
+        for name, value in (("BLUSH_LIGHT_L_MIN", 100), ("BLUSH_LIGHT_CHROMA_MAX", 0)):
+            with self.subTest(limit=name):
+                cheeks = under(name, value)["blush"]["cheeks"]
+                self.assertEqual({c.get("problem") for c in cheeks}, {"no light pixels in its box, so no level can be fitted"})
+        # At or below the least level a cheek's core is its peak, not carried to full strength: far from the printed pink.
+        weak = under("BLUSH_LEVEL_MIN", 1)["blush"]
+        self.assertTrue(all(c["coreDeltaE2000"] > match.DELTA_E_MAX for c in weak["cheeks"]))
+        self.assertFalse(weak["pass"])
+
     def test_the_atlas_share_counts_every_state_of_the_views_parts(self):
         regions = {"eye.L/front:open": (10, 10), "eye.L/front:closed": (10, 5), "head.base/front": (20, 10), "head.base/side.L": (30, 10), "tail/front": (5, 5)}
         atlas = {"sets": [{"name": "3x", "scale": 3, "pages": [{"width": 100, "height": 100}],
