@@ -178,7 +178,7 @@ const headPaint: Paint = {
 // the head and the ear's own tan below it (DECISIONS 7); a light line on the
 // cheeks' fluff, and the jaw's line over the collar.
 const headLine: Outline = { ...OUTLINE, taper: 5, spans: [
-  { from: [-27, -148.2], to: [-44, -137], width: THIN, colour: C.furLine },
+  { from: [-27, -148.2], to: [-44, -137], width: THIN, colour: C.fluffLine },
   { from: [-45.6, -131.6], to: [-46.1, -122], width: THIN, colour: C.marking },
   { from: [-46.3, -120], to: [-46.2, -95], width: THIN, colour: C.junction },
   { from: [-46.2, -92], to: [-35, -64.6], width: THIN, colour: C.fluffLine },
@@ -186,7 +186,7 @@ const headLine: Outline = { ...OUTLINE, taper: 5, spans: [
   { from: [35, -64.6], to: [46.2, -92], width: THIN, colour: C.fluffLine },
   { from: [46.2, -95], to: [46.3, -120], width: THIN, colour: C.junction },
   { from: [46.1, -122], to: [45.6, -131.6], width: THIN, colour: C.marking },
-  { from: [44, -137], to: [17, -150.8], width: THIN, colour: C.furLine },
+  { from: [44, -137], to: [17, -150.8], width: THIN, colour: C.fluffLine },
 ] };
 
 /** head.line: the head's outline as its own unclipped region, drawn after the head's clip group, reaching 0.5 pt past the head. */
@@ -205,9 +205,9 @@ function headLinePiece(): Piece {
 function eye([cx, cy]: P, noseward: number): Piece {
   const rx = 9.6, ry = 9.6;
   const at = (dx: number, dy: number): P => [cx + dx * cosR - dy * sinR, cy + dx * sinR + dy * cosR];
-  const [ix, iy] = at(noseward * 0.9, -0.2);
-  const [gx, gy] = at(noseward * 0.9, 2.6), [fx, fy] = at(noseward * 0.9, 8.4);
-  const [sx, sy] = at(noseward * 3.4, -4.2), [dx, dy] = at(-noseward * 3.3, 5);
+  const [ix, iy] = at(noseward * 1.4, -0.3);
+  const [gx, gy] = at(noseward * 1.4, 2.6), [fx, fy] = at(noseward * 1.4, 8.4);
+  const [sx, sy] = at(noseward * 3.6, -3.8), [dx, dy] = at(-noseward * 2.6, 5.4);
   const clip = uid("eye"), iris = uid("iris"), shine = uid("blur");
   const box: Box = [cx - 12, cy - 12, 24, 24];
   const lid: P[] = Array.from({ length: 41 }, (_, k) => {
@@ -221,11 +221,11 @@ function eye([cx, cy]: P, noseward: number): Piece {
     `<stop offset="0.42" stop-color="${C.dark}"/><stop offset="0.78" stop-color="${C.eyeDark}"/></radialGradient>` +
     `${blur(shine, box, 0.22)}</defs>` +
     `<ellipse cx="${n(cx)}" cy="${n(cy)}" rx="${rx}" ry="${ry}" fill="${C.eyeWhite}"/>` +
-    `<g clip-path="url(#${clip})"><ellipse cx="${n(ix)}" cy="${n(iy)}" rx="${rx - 0.3}" ry="${ry - 0.15}" fill="url(#${iris})"/></g>` +
-    `<path d="${taperedStroke(lid, 1.4, { taper: 8, tip: 0.3 })}" fill="${C.eyeDark}"/>` +
-    `<ellipse cx="${n(sx)}" cy="${n(sy)}" rx="2.2" ry="2.1" fill="${C.light}" filter="url(#${shine})"/>` +
-    `<circle cx="${n(dx)}" cy="${n(dy)}" r="0.9" fill="${C.light}" opacity="0.7"/>`;
-  return piece(svg, box, { shapes: [], lines: [{ kind: "outer", width: 1.4, where: "eye lid" }] });
+    `<g clip-path="url(#${clip})"><ellipse cx="${n(ix)}" cy="${n(iy)}" rx="${rx - 0.4}" ry="${ry - 0.2}" fill="url(#${iris})"/></g>` +
+    `<path d="${taperedStroke(lid, 1.7, { taper: 8, tip: 0.3 })}" fill="${C.eyeDark}"/>` +
+    `<ellipse cx="${n(sx)}" cy="${n(sy)}" rx="1.9" ry="1.8" fill="${C.light}" filter="url(#${shine})"/>` +
+    `<circle cx="${n(dx)}" cy="${n(dy)}" r="0.7" fill="${C.light}" opacity="0.45"/>`;
+  return piece(svg, box, { shapes: [], lines: [{ kind: "outer", width: 1.7, where: "eye lid" }] });
 }
 
 /** A brow in the face frame: a short soft arch in tan, thickest in the middle, its inner end higher. */
@@ -295,7 +295,7 @@ function legGap(): string {
 export function front(): Drawn[] {
   const out: Drawn[] = [];
   const add = (name: string, p: Piece, state?: string) => out.push({ part: name, piece: p, ...(state ? { state } : {}) });
-  add("shadow", soft("M-62 -1.5 a62 4.5 0 1 0 124 0 a62 4.5 0 1 0 -124 0Z", [-62, -6, 124, 9], C.shadow, 2.5));
+  add("shadow", soft("M-64 -3 a64 4.6 0 1 0 128 0 a64 4.6 0 1 0 -128 0Z", [-64, -7.6, 128, 9.2], C.shadow, 2.5));
   add("body.back", part("body.back", back, backPaint));
   add("back.patch.R", marking("back.patch.R", { shape: back, paint: backPaint }, saddleR, { fill: C.marking, blur: 1.2, clip: true }));
   add("back.patch.L", marking("back.patch.L", { shape: back, paint: backPaint }, saddleL, { fill: C.marking, blur: 1.2, clip: true }));
@@ -369,12 +369,12 @@ export function front(): Drawn[] {
     highlight: { d: headLight, colour: C.light, opacity: 0.75, blur: 4 },
     // The curls where each lobe ends, and a stroke where the left lobe leaves the crown.
     inner: [
-      { pts: [[-13.4, -155.4], [-11.6, -153.6], [-11.2, -151.2]], width: 0.9, colour: C.furLine, opacity: 0.95 },
-      { pts: [[5.2, -160.4], [5, -157.4], [3, -154.6]], width: 0.9, colour: C.furLine, opacity: 0.95 },
-      { pts: [[22.8, -155.2], [21.2, -152.2], [17.6, -150.6]], width: 0.9, colour: C.furLine, opacity: 0.95 },
-      { pts: [[-30.2, -150.6], [-26.4, -149.2], [-22.2, -148.4]], width: 0.9, colour: C.furLine, opacity: 0.9 },
+      { pts: [[-13.4, -155.4], [-11.6, -153.6], [-11.2, -151.2]], width: 0.9, colour: C.furLine, opacity: 0.7 },
+      { pts: [[5.2, -160.4], [5, -157.4], [3, -154.6]], width: 0.9, colour: C.furLine, opacity: 0.7 },
+      { pts: [[22.8, -155.2], [21.2, -152.2], [17.6, -150.6]], width: 0.9, colour: C.furLine, opacity: 0.7 },
+      { pts: [[-30.2, -150.6], [-26.4, -149.2], [-22.2, -148.4]], width: 0.9, colour: C.furLine, opacity: 0.6 },
     ],
-    outline: { ...OUTLINE, colour: C.furLine, width: THIN, spans: [{ from: [-30.6, -150.4], to: [22.6, -153] }], taper: 4 },
+    outline: { ...OUTLINE, colour: C.fluffLine, width: THIN, spans: [{ from: [-30.6, -150.4], to: [22.6, -153] }], taper: 4 },
     feather: { from: [0, -146.5], to: [0, -150.5] },
   }));
   for (const side of ["R", "L"] as const) {
