@@ -353,11 +353,12 @@ const backPaint: Paint = {
   fill: C.fur,
   shade: furShade(hipGroup),
   // From under the collar's end down the shoulder, the lighter fur line, coming out from under the collar; round
-  // the haunch, the warm brown the sheet draws there (#9B6946 at its darkest), lighter and thinner on the side
-  // toward the light. The two cross-fade where the shoulder meets the haunch, their tapers overlapping.
+  // the haunch, the warm brown the sheet draws there (#A1714E at its darkest on the right), a little lighter on the
+  // left haunch, as the sheet's is (#B08C71). The two cross-fade where the shoulder meets the haunch, their tapers
+  // overlapping.
   outline: { ...OUTLINE, colour: C.warmLine, width: 1.25, taper: 6, spans: [
-    { from: [-29.2, -61.4], to: [-38.8, -42.6], width: THIN, colour: C.furLine }, { from: [-35.6, -47.6], to: [-47.4, -11], colour: C.outline },
-    { from: [47.4, -11], to: [35.6, -47.6], width: 1.4 }, { from: [38.8, -42.6], to: [29.2, -61.4], width: THIN, colour: C.furLine }] },
+    { from: [-29.2, -61.4], to: [-38.8, -42.6], width: THIN, colour: C.furLine }, { from: [-35.6, -47.6], to: [-47.4, -11], width: 1.35 },
+    { from: [47.4, -11], to: [35.6, -47.6], width: 1.3, colour: C.puffLine }, { from: [38.8, -42.6], to: [29.2, -61.4], width: THIN, colour: C.furLine }] },
 };
 const headPaint: Paint = {
   fill: C.fur,
@@ -445,7 +446,7 @@ function headLinePiece(): Piece {
     `<linearGradient id="${SEAM}" gradientUnits="userSpaceOnUse" x1="0" y1="-131" x2="0" y2="-104">` +
     `<stop offset="0" stop-color="${C.crownLine}"/><stop offset="0.4" stop-color="${C.earEdge}"/><stop offset="1" stop-color="${C.earLine}"/></linearGradient>` +
     `<linearGradient id="${CHEEK}" gradientUnits="userSpaceOnUse" x1="0" y1="-92" x2="0" y2="-66">` +
-    `<stop offset="0" stop-color="${C.earEdge}"/><stop offset="1" stop-color="${C.warmLine}"/></linearGradient></defs>` +
+    `<stop offset="0" stop-color="${C.earEdge}"/><stop offset="0.5" stop-color="${C.warmLine}"/><stop offset="1" stop-color="${C.warmLine}"/></linearGradient></defs>` +
     `<path d="${under}" fill="${C.fur}" opacity="0.55" filter="url(#${s})"/><path d="${side}" fill="${C.fur}" opacity="0.6" filter="url(#${s})"/>` +
     `<g fill="${headLine.colour}" filter="url(#${f})">${r.svg}</g>` +
     `<g filter="url(#${g})">${c.svg}${strokes.map((l) => l.svg).join("")}</g>`, box, {
@@ -704,8 +705,8 @@ function earPaint(side: "L" | "R"): Paint {
     `<stop offset="0.72" stop-color="${C.earDeeper}"/><stop offset="1" stop-color="${C.earFoot}"/></linearGradient>` +
     `${blur(parting, earBox, 0.7)}${blur(along, earBox, 1)}</defs>` +
     `<rect x="${fmt(ex0)}" y="${fmt(ey0)}" width="${fmt(ex1 - ex0)}" height="${fmt(ey1 - ey0)}" fill="url(#${deep})"/>` +
-    `<path d="${soft(light, 2.2)}" fill="${C.patch}" opacity="0.3" filter="url(#${along})"/>` +
-    `<path d="${soft(dark, 1.5)}" fill="${C.earLow}" opacity="0.4" filter="url(#${parting})"/>`;
+    `<path d="${soft(light, 2.2)}" fill="${C.patch}" opacity="0.12" filter="url(#${along})"/>` +
+    `<path d="${soft(dark, 1.5)}" fill="${C.earLow}" opacity="0.3" filter="url(#${parting})"/>`;
   const shadeD = "M-90 -92 C-80 -80 -62 -72 -40 -70 L-40 -50 L-90 -50Z";
   const cheekD = "M-38 -98 C-43 -93 -48.6 -85 -49.8 -74 C-49 -66 -45 -62 -40 -60Z";
   // Along the inner edge, where the ear tucks under the head's side.
@@ -728,7 +729,7 @@ function earPaint(side: "L" | "R"): Paint {
     highlight: { d: earD(side, "M-74 -101 C-74 -106 -70 -111 -66 -112 C-64 -109 -66 -102 -69.6 -99 C-72 -98 -74 -99 -74 -101Z"), colour: C.patch, opacity: 0.3, blur: 2.6 },
     inner: dark.map((pts) => ({ pts: sample(smooth(pts.slice(-3).map((p) => onEar(side, p)), { closed: false }).segs, 8, false), width: 0.7, colour: `url(#${strand})` })),
     // A little lighter on the ear toward the light, heavier on the one away from it, and along each one's bottom.
-    outline: { ...OUTLINE, colour: C.warmLine, width: 1.2, taper: 7, blur: 0.25, spans: side === "R"
+    outline: { ...OUTLINE, colour: C.warmLine, width: 1.2, taper: 7, blur: 0.15, spans: side === "R"
       ? [{ from: ends[0], to: lower, width: 1.4 }, { from: upper, to: ends[1], colour: `url(#${toRoot})` }]
       : [{ from: ends[1], to: lower, width: 1.3, colour: `url(#${toRoot})` }, { from: upper, to: ends[0], width: 1.65 }] },
   };
@@ -788,13 +789,13 @@ export function front(): Drawn[] {
       fill: C.fur,
       shade: furShade(hipGroup, [], [`M${cx - 12} ${cy - 12} L${cx + 12} ${cy - 12} L${cx + 12} ${cy - 4} L${cx - 12} ${cy - 4}Z`]),
       // Over its top, where it lies on the haunch, a soft light line that tapers off into the haunch at each end, as
-      // the sheet draws it; then the warm line down its outer side and along the sole, to where it goes behind the
-      // front paw. The two cross-fade on its outer side.
-      outline: { ...OUTLINE, colour: C.pawLine, width: 1.3, taper: 4, spans: bySide(side, [{ from: [-33.4, -17.6], to: [-48.4, -13.6], width: THIN, colour: C.softLine },
-        { from: [-47, -15.8], to: [-29.2, -4.6], width: 1.45 }]) },
+      // the sheet draws it; then the warm line down its outer side, and under the sole the figure's darkest line, as
+      // under the front paws, to where it goes behind the front paw. Each cross-fades into the next.
+      outline: { ...OUTLINE, colour: C.warmLine, width: 1.3, taper: 4, spans: bySide(side, [{ from: [-33.4, -17.6], to: [-48.4, -13.6], width: THIN, colour: C.softLine },
+        { from: [-47, -15.8], to: [-46.2, -6], width: 1.3 }, { from: [-47.6, -9], to: [-29.2, -4.6], width: 1.4, colour: C.soleLine }]) },
       // Two toe lines rising from the sole about 6.5 pt up the paw, each bowing a little away from the middle toe.
       inner: [[[-41.6, -3.4], [-42.3, -5.8], [-42.2, -8.1], [-41.6, -10]], [[-35.6, -3.1], [-34.9, -5.5], [-34.9, -7.8], [-35.4, -9.7]]]
-        .map((pts) => ({ pts: flipX(pts as P[], side), width: INNER, colour: C.pawLine, opacity: 0.65 })),
+        .map((pts) => ({ pts: flipX(pts as P[], side), width: INNER, colour: C.warmLine, opacity: 0.65 })),
     }), 6));
   }
   // Its canvas a point roomier than the chest, so the light group's shade, which reaches 13.7 pt past it, stays
@@ -895,7 +896,7 @@ export function front(): Drawn[] {
       // From the V's point down the inner side; under the paw; up its outer side, fading out below the shoulder. Their tapers overlap, so
       // each line hands on to the next with no join.
       outline: { ...OUTLINE, taper: 4, spans: bySide(side, [{ from: [-1.8, -31], to: [-5.6, -1.6], width: 1.25, colour: `url(#${fade})` },
-        { from: [-3.6, -4.2], to: [-30, -8.6], width: 1.4, colour: C.soleLine }, { from: [-29.4, -5.6], to: [-35, -40], width: 1.25, colour: `url(#${rise})` }]) },
+        { from: [-3.6, -4.2], to: [-29.2, -6], width: 1.4, colour: C.soleLine }, { from: [-28.4, -3.6], to: [-35, -40], width: 1.25, colour: `url(#${rise})` }]) },
       // Its top fades in under the shoulder, so it comes out from under the saddle's tan with no edge.
       feather: { from: [sx * 31, -45.6], to: [sx * 31, -41.8] },
     }));
