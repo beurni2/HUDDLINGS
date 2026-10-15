@@ -278,13 +278,14 @@ const headPaint: Paint = {
 // The head's line runs all round it: a light line on the crown's fur in the
 // light; down each side, where the head lies over the ear, one crisp curve in
 // the ear's deep tan (the sheet's #AB6839 there, DECISIONS 7), from where the
-// crown's fur covers the ear's root to the cheek's puff; a lighter warm line
-// round the puffs; and under the chin, over the collar, the heavier warm line.
+// crown's fur covers the ear's root to the cheek's puff; and a lighter warm
+// line round the puffs and under the chin, over the collar, a little heavier
+// there in the chin's shade.
 const headLine: Outline = { ...OUTLINE, taper: 5, blur: 0.15, spans: [
   { from: [-27, -148.2], to: [-44, -137], width: THIN, colour: C.fluffLine },
   { from: [-45.2, -133.4], to: [-45.2, -91.4], width: 1.25, colour: C.earLine },
   { from: [-45.4, -90.6], to: [-35, -64.8], width: THIN, colour: C.puffLine },
-  { from: [-31, -63.6], to: [31, -63.6], width: 1.5, colour: C.warmLine },
+  { from: [-31, -63.6], to: [31, -63.6], width: 1.4, colour: C.puffLine },
   { from: [35, -64.8], to: [45.4, -90.6], width: THIN, colour: C.puffLine },
   { from: [43.4, -91.4], to: [41.6, -136.2], width: 1.25, colour: C.earLine },
   { from: [44, -137], to: [17, -150.8], width: THIN, colour: C.fluffLine },
@@ -539,7 +540,7 @@ export function front(): Drawn[] {
   add("head.base", part("head.base", head, headPaint));
   for (const side of ["L", "R"] as const) {
     add(`head.patch.${side}`, join(
-      marking(`head.patch.${side}`, { shape: head, paint: headPaint }, patches[side], { fill: C.patch, blur: 0.9, clip: false, fade: patchFade[side] }),
+      marking(`head.patch.${side}`, { shape: head, paint: headPaint }, patches[side], { fill: C.patch, blur: 1.3, clip: false, fade: patchFade[side] }),
       // The ear root's tan, unshaded as the ear is there, fading down into the patch: the ear's own on the dog's
       // left, where the sheet paints it as dark as the ear, the patch's paler tan on its right, where it does not.
       marking(`head.patch.${side}`, { shape: head, paint: { ...headPaint, shade: undefined, highlight: undefined } }, earRoots[side],
