@@ -293,10 +293,14 @@ const tailPaint: Paint = {
     // Where each clump tucks under the one above, its edge runs on a little way into the plume, as the sheet draws it.
     // Each clump lies over the one above it: from each notch its upper edge runs on inside the plume, round the clump
     // a couple of points in from its edge, as the sheet draws it (the longest round the lower right clump).
-    ...tailLocks.slice(1).map(({ notches, tip }) => {
+    ...tailLocks.slice(1).map(({ notches, tip }, k) => {
       const n = notches[0], into = v.norm(v.sub([10, -22], n)), towards = v.sub(tip, n);
       const p1 = v.add(v.add(n, v.mul(towards, 0.3)), v.mul(into, 1.7)), p2 = v.add(v.add(n, v.mul(towards, 0.75)), v.mul(into, 2.6));
-      return { pts: curve([n, p1, p2], 6), width: 0.7, colour: C.softLine, opacity: 0.85 };
+      // Round the fullest clump, the lower right one, the line runs on past its middle toward its foot.
+      const far = notches[1], tipIn = v.add(tip, v.mul(v.norm(v.sub([10, -22], tip)), 2.8));
+      const long = k === 1 ? [v.add(v.add(tip, v.mul(v.sub(far, tip), 0.6)), v.mul(v.norm(v.sub([10, -22], far)), 3)),
+        v.add(v.add(far, v.mul(v.norm(v.sub([10, -22], far)), 2.2)), [-3.6, 0] as P)] : [];
+      return { pts: curve(k === 1 ? [n, p1, tipIn, ...long] : [n, p1, p2], 6), width: 0.7, colour: C.softLine, opacity: 0.85 };
     }),
     // The curl's head: its fur rolling over at the top, and a strand down the hook.
     { pts: curve([[14.6, -45.4], [18.4, -44], [21.4, -41.2]], 6), width: 0.7, colour: C.softLine, opacity: 0.85 },
