@@ -450,74 +450,93 @@ function headLinePiece(): Piece {
 
 /**
  * An open eye at its landmark, as the turnaround, the hero and the expression sheet's open eyes paint it: an
- * oval about as tall as it is wide (19.4 pt on the sheet), its top leaning toward the nose (and rolled with the
- * face), its edge a little soft. The rim is a lash line, heaviest along the upper lid and the upper outer side,
- * near-black there and warming to the printed dark brown round the eye's foot, thinnest along the foot. Inside
- * it the white of the eye shows as a clean warm-white crescent between the rim and the iris on the outer side,
- * from high on that side down to the foot, widest just below level, its top greying a little in the upper lid's
- * shade; its edges are crisp, so it reads as the eye's white, not a reflection. The iris is the near-black of
- * the pupils down to a distinct lower band in the printed dark brown (DECISIONS 18), as the hero paints it,
- * warming in its middle;
- * and one catchlight, high on the nose side where the sheet's sits, crisp, with a faint grey core. The sheets
- * draw no small catchlight (the turnaround, the hero, the glossy-eyes panel and the expression sheet's open
- * eyes each draw exactly one), so none is drawn: the spec's "one or two small ones" (L446, L509) is a question
- * for the founder. A faint pale halo lies outside the rim round its lower outer side, between the eye and the
- * hood's tan. `noseward` is +1 when the nose is to its right.
+ * oval a little taller than it is wide (the sheet's dark eye fits 18.5 by 19.5 pt), rolled with the face, its
+ * edge a little soft. The rim is a lash line, heaviest along the upper lid and the upper outer side, where it
+ * flicks a little out past the ball at the outer top corner, near-black there and warming to the printed dark
+ * brown round the eye's foot, thinnest along the foot. Inside it the iris fills the eye: the near-black of the
+ * pupil over its upper two thirds, then a lower third that warms through the printed dark brown (DECISIONS 18)
+ * to a soft reddish-brown glow above the foot, as the hero paints it. The white of the eye is a thin warm sliver
+ * between the rim and the iris low on the outer side, where the sheet draws it: from a little above level down
+ * to below the eye's outer foot, widest (1.4 pt, about 8% of the eye's width, as the sheet's measures) a third
+ * of the way round below level, tapering to nothing at both ends and greying toward its top in the lid's shade;
+ * its inner edge crisp, so it reads as the eye's white, never as a reflection. One catchlight, high on the nose
+ * side where the sheet's sits, crisp, with a faint grey core. The sheets draw no small catchlight (the
+ * turnaround, the hero, the glossy-eyes panel and the expression sheet's open eyes each draw exactly one), so
+ * none is drawn: the spec's "one or two small ones" (L446, L509) is a question for the founder (Q26). A faint
+ * pale halo lies outside the rim round its lower outer side, between the eye and the hood's tan. `noseward` is
+ * +1 when the nose is to its right.
  */
 function eye(landmark: P, noseward: number): Piece {
-  const rx = 9.4, ry = 9.35, turn = 14 * noseward + ROLL_DEG, out = -noseward;
-  // The ball sits a hair out from the landmark and 0.55 pt below it, so the dark iris's own centre (DECISIONS 10)
+  const rx = 8.8, ry = 9.5, turn = 20 * noseward + ROLL_DEG, out = -noseward;
+  // The ball sits a hair out from the landmark and 0.45 pt below it, so the dark eye's own centre (DECISIONS 10)
   // lands on the landmark with the eye's foot where the sheet's is.
-  const [cx, cy]: P = [landmark[0] + out * 0.2 * cosR - 0.55 * sinR, landmark[1] + out * 0.2 * sinR + 0.55 * cosR];
+  const [cx, cy]: P = [landmark[0] + out * 0.15 * cosR - 0.45 * sinR, landmark[1] + out * 0.15 * sinR + 0.45 * cosR];
   /** A point in the eye's own frame, rolled with the face: x toward the nose, y down. */
   const S = (x: number, y: number): P => [cx + noseward * x * cosR - y * sinR, cy + noseward * x * sinR + y * cosR];
   const oval = (c: P, a: number, b: number, deg = turn) => pathD(ellipse(c, a, b, deg));
-  const clip = uid("eye"), irisClip = uid("eye"), above = uid("band"), rimFade = uid("rim");
-  const warm = uid("blur"), shine = uid("blur"), edge = uid("blur"), crisp = uid("blur"), band = uid("blur"), halo = uid("blur"), core = uid("blur");
+  const clip = uid("eye"), rimFade = uid("rim"), lowFade = uid("iris"), greys = uid("white");
+  const shine = uid("blur"), edge = uid("blur"), crisp = uid("blur"), band = uid("blur"), halo = uid("blur"), core = uid("blur"), glow = uid("blur");
   const box: Box = [cx - 14, cy - 14, 28, 28];
   const ball = oval([cx, cy], rx, ry);
   // The eye's opening inside the dark rim, which is 1 pt wide down both sides, 1.3 pt over the top and 0.8 pt
-  // along the foot; the white of the eye fills it.
-  const opening = oval(S(0, 0.25), rx - 1, ry - 1.05);
-  // The iris: an oval 16.4 by 18.4 pt set 2 pt toward the nose, its top leaning 12 degrees away from it, so it
-  // fills the opening on the nose's side, over the top and along the foot, and on the outer side leaves the white
-  // as a crescent between it and the rim, as every sheet paints it: 2.25 pt wide at its widest, just below the
-  // eye's level (12% of the eye's width, 16% of the iris's), thinning to nothing 65 degrees above level and at
-  // the eye's foot.
-  const irisOval = oval(S(2, -0.2), 8.2, 9.2, ROLL_DEG - 12 * noseward);
-  /** A disc's clip: everything round it but the disc, so what it clips is the iris less the disc. */
-  const less = (c: P, r: number) => `M${fmt(cx - 30)} ${fmt(cy - 30)}H${fmt(cx + 30)}V${fmt(cy + 30)}H${fmt(cx - 30)}Z` + pathD(ellipse(c, r, r));
-  // The lower band: the iris less a disc 12.55 pt in radius whose foot lies 3.6 pt above the opening's foot, so the
-  // band is 3.6 pt deep at the foot and runs out about 80 degrees either side of it, its top following the eye's round.
-  const lower = less(S(1.4, -7.6), 12.55);
+  // along the foot; the iris fills it.
+  const [ox, oy] = [rx - 1, ry - 1.05], oc = S(0, 0.25);
+  const opening = oval(oc, ox, oy);
+  /** A point on an oval about the opening's centre, `a` degrees round from the outer side (up positive), in the eye's frame turned with it. */
+  const tilt = ((turn - ROLL_DEG) * Math.PI) / 180 * noseward;
+  const onOpening = (a: number, inset: number): P => {
+    const r = (a * Math.PI) / 180;
+    const [x, y] = [-(ox - inset) * Math.cos(r), -(oy - inset) * Math.sin(r)];
+    return S(0 + x * Math.cos(tilt) - y * Math.sin(tilt), 0.25 + x * Math.sin(tilt) + y * Math.cos(tilt));
+  };
+  // The white: a sliver from 26 degrees above the outer side's level to 64 below, its width rising and falling
+  // like a beta curve that peaks a third of the way round below level, its outer edge just under the rim.
+  const [a1, a2, wide] = [38, -74, 1.6];
+  const steps = 28, peak = (t: number) => Math.pow(4 * Math.pow(t, 1.25) * (1 - Math.pow(t, 1.25)), 0.6);
+  const top = 1;
+  const outerEdge: P[] = [], innerEdge: P[] = [];
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps, a = a1 + (a2 - a1) * t;
+    outerEdge.push(onOpening(a, -0.3));
+    innerEdge.push(onOpening(a, (wide * peak(t)) / top));
+  }
+  const sliver = polyD([...outerEdge, ...innerEdge.reverse()]);
+  const [s0, s1] = [onOpening(a1, 0.5), onOpening(-20, 0.5)];
   const [t0x, t0y] = S(0, -ry);
-  // The lash line: from below the outer corner, over the top, to the nose side's upper quarter, on the ball's rim.
-  const around = (from: number, to: number, grow: number, n = 41): P[] => Array.from({ length: n }, (_, k) => {
-    const a = ((from + ((to - from) * k) / (n - 1)) * Math.PI) / 180;
-    return S(-(rx + grow) * Math.cos(a), -(ry + grow) * Math.sin(a));
+  // The lash line: from the outer side a little above level, over the top, to the nose side's upper quarter, on
+  // the ball's rim; its outer end swings out a little past the ball, the lid's small flick at the outer corner.
+  const around = (from: number, to: number, grow: (a: number) => number, n = 41): P[] => Array.from({ length: n }, (_, k) => {
+    const deg = from + ((to - from) * k) / (n - 1), a = (deg * Math.PI) / 180;
+    return S(-(rx + grow(deg)) * Math.cos(a), -(ry + grow(deg)) * Math.sin(a));
   });
-  const lidLine = tapered(around(-35, 120, 0.25), 1.8, "outer", "eye lid", { taper: 9, tip: 0.3 });
+  const flick = (a: number) => 0.25 + 0.25 * Math.exp(-(((a - 30) / 22) ** 2));
+  const lidLine = tapered(around(-18, 122, flick), 1.8, "outer", "eye lid", { taper: 8, tip: 0.3 });
   // The halo: a soft pale band just outside the rim, from below the eye round its outer side.
-  const haloBand = strokeOf(around(-125, 25, 1.1, 31), 1.7, { taper: 5, tip: 0.2 });
-  const big = S(3.6, -4.55), warmAt = S(1.6, 7.4);
+  const haloBand = strokeOf(around(-125, 25, () => 1.1, 31), 1.7, { taper: 5, tip: 0.2 });
+  const big = S(3.5, -4.6), glowAt = S(1, 5.2);
   const n = (p: P) => `${fmt(p[0])}" cy="${fmt(p[1])}`;
-  const svg = `<defs><clipPath id="${clip}"><path d="${opening}"/></clipPath><clipPath id="${irisClip}"><path d="${irisOval}"/></clipPath>` +
-    `<clipPath id="${above}"><path d="${lower}" clip-rule="evenodd"/></clipPath>` +
+  // The lower third: down the eye's own axis, clear above, the printed dark brown from a little below level to
+  // the foot, which the rim's warm brown meets.
+  const [l0x, l0y] = S(0, -2.5), [l1x, l1y] = S(0, 5.4);
+  const svg = `<defs><clipPath id="${clip}"><path d="${opening}"/></clipPath>` +
     // The rim warms from near-black along the lid to the printed dark brown round the eye's foot, as the sheet's does.
     `<linearGradient id="${rimFade}" gradientUnits="userSpaceOnUse" x1="${fmt(t0x)}" y1="${fmt(t0y)}" x2="${fmt(2 * cx - t0x)}" y2="${fmt(2 * cy - t0y)}">` +
     `<stop offset="0.62" stop-color="${C.eyeDark}"/><stop offset="0.85" stop-color="${C.dark}"/></linearGradient>` +
-    `${blur(warm, box, 0.45)}${blur(shine, box, 0.15)}${blur(edge, box, 0.22)}${blur(crisp, box, 0.18)}${blur(band, box, 0.55)}${blur(halo, box, 0.55)}${blur(core, box, 0.3)}</defs>` +
+    `<linearGradient id="${lowFade}" gradientUnits="userSpaceOnUse" x1="${fmt(l0x)}" y1="${fmt(l0y)}" x2="${fmt(l1x)}" y2="${fmt(l1y)}">` +
+    `<stop offset="0" stop-color="${C.dark}" stop-opacity="0"/><stop offset="0.55" stop-color="${C.dark}" stop-opacity="0.55"/><stop offset="1" stop-color="${C.dark}"/></linearGradient>` +
+    // The white greys toward its top, under the lid's shade.
+    `<linearGradient id="${greys}" gradientUnits="userSpaceOnUse" x1="${fmt(s0[0])}" y1="${fmt(s0[1])}" x2="${fmt(s1[0])}" y2="${fmt(s1[1])}">` +
+    `<stop offset="0" stop-color="${C.dark}" stop-opacity="0.45"/><stop offset="1" stop-color="${C.dark}" stop-opacity="0"/></linearGradient>` +
+    `${blur(shine, box, 0.15)}${blur(edge, box, 0.22)}${blur(crisp, box, 0.16)}${blur(band, box, 0.5)}${blur(halo, box, 0.55)}${blur(core, box, 0.3)}${blur(glow, box, 0.9)}</defs>` +
     `<path d="${haloBand.d}" fill="${C.fur}" opacity="0.8" filter="url(#${halo})"/>` +
     `<g filter="url(#${edge})"><path d="${ball}" fill="url(#${rimFade})"/><path d="${lidLine.d}" fill="${C.eyeDark}"/></g>` +
-    // The white of the eye in the opening, greying a little under the upper lid's shade toward the crescent's top
-    // as the sheet's does, then the iris over it, their edges crisp, as the sheet paints them.
-    `<g clip-path="url(#${clip})"><path d="${opening}" fill="${C.eyeWhite}"/>` +
-    `<ellipse cx="${n(S(-4.5, -6.5))}" rx="6" ry="4.5" fill="${C.dark}" opacity="0.22" filter="url(#${warm})"/>` +
-    `<g filter="url(#${crisp})"><path d="${irisOval}" fill="${C.eyeDark}"/></g>` +
-    // The lower band, its top edge soft but defined, warming through its middle above the foot.
-    `<g clip-path="url(#${irisClip})"><g filter="url(#${band})"><path d="${irisOval}" fill="${C.dark}" clip-path="url(#${above})"/></g>` +
-    `<ellipse cx="${n(warmAt)}" rx="3.7" ry="0.85" fill="${C.irisLight}" opacity="0.85" filter="url(#${warm})"/></g></g>` +
-    `<ellipse cx="${n(big)}" rx="1.75" ry="1.65" fill="${C.light}" filter="url(#${shine})"/>` +
+    // The iris in the opening: the pupil's near-black, its lower third warming through the dark brown to a soft
+    // reddish glow above the foot; then the white over it, crisp.
+    `<g clip-path="url(#${clip})"><path d="${opening}" fill="${C.eyeDark}"/>` +
+    `<g filter="url(#${band})"><path d="${opening}" fill="url(#${lowFade})"/></g>` +
+    `<ellipse cx="${n(glowAt)}" rx="4.6" ry="1.9" transform="rotate(${fmt(turn)} ${fmt(glowAt[0])} ${fmt(glowAt[1])})" fill="${C.irisWarm}" opacity="0.5" filter="url(#${glow})"/>` +
+    `<g filter="url(#${crisp})"><path d="${sliver}" fill="${C.fur}"/><path d="${sliver}" fill="url(#${greys})"/></g></g>` +
+    `<ellipse cx="${n(big)}" rx="1.85" ry="1.75" fill="${C.light}" filter="url(#${shine})"/>` +
     `<ellipse cx="${n(big)}" rx="0.7" ry="0.6" fill="${C.dark}" opacity="0.1" filter="url(#${core})"/>`;
   return piece(svg, box, { shapes: [], lines: [lidLine.line] });
 }
