@@ -4,7 +4,7 @@
 // light across joined parts (head and tuft, chest and front legs, haunches and
 // hind paws); joins are feathered and carry no rim and no line.
 import { furEdge, furSpan } from "../../../draw/fur.ts";
-import { bbox, fracAt, mirrorX, smooth, symmetric, type Node, type P, type Shape } from "../../../draw/geom.ts";
+import { bbox, fracAt, mirrorX, sample, smooth, symmetric, type Node, type P, type Shape } from "../../../draw/geom.ts";
 import { innerLine, mirrorSpans, ribbons, taperedStroke, type Outline, type Span } from "../../../draw/line.ts";
 import { marking, part, soft, type Paint } from "../../../draw/paint.ts";
 import { blur, join, pad, piece, uid, type Box, type Piece } from "../../../draw/svg.ts";
@@ -80,7 +80,12 @@ const legs = { R: smooth(legR), L: other(legR) };
 const collar = smooth([[-27.6, -62.8], [-21, -61.6], [-10, -59], [0, -58.2], [10, -59.4], [20.5, -62], [28.6, -63.6],
   [28.2, -61.6], [25.4, -58.4], [21.4, -54.4], [12, -51], [0, -50.2], [-12, -51], [-20.4, -53.8], [-24.8, -57.4], [-26.9, -60.4]]);
 
-const heart = smooth([[0, -46.8], [-3.6, -50.6], [-7.2, -49.6], [-8.2, -45], [-6, -40.2], [0, -35.2], [6, -40.2], [8.2, -45], [7.2, -49.6], [3.6, -50.6]], { corners: [0, 5] });
+// The tag: a round gold heart with a shallow notch and a soft point, and the
+// smaller heart embossed on it.
+const heart = smooth([[0, -48.6], [-3.4, -51], [-6.8, -50.6], [-8.6, -47.8], [-8.4, -44], [-6.4, -40.4], [-3.2, -37.6], [0, -36.2], [3.2, -37.6],
+  [6.4, -40.4], [8.4, -44], [8.6, -47.8], [6.8, -50.6], [3.4, -51]], { corners: [0, 7] });
+const innerHeart = smooth([[0, -45.6], [-2.4, -47.6], [-4.8, -47.2], [-5.8, -44.8], [-4.8, -41.8], [-2.4, -39.8], [0, -38.8], [2.4, -39.8], [4.8, -41.8],
+  [5.8, -44.8], [4.8, -47.2], [2.4, -47.6]], { corners: [0, 6] });
 
 // The ears: tan droplets hanging from high on the head's sides, narrow at the
 // root, widest low down, their tops hidden under the crown. The sheet draws the
@@ -231,25 +236,24 @@ function brow(sx: number): Piece {
     inFace(`<path d="${taperedStroke(pts, 2.6, { taper: 3, tip: 1.1 })}" fill="${C.marking}" opacity="0.85"/>`) + "</g>", box);
 }
 
-/** The nose in the face frame: a rounded triangle, wide on top. */
+/** The nose in the face frame: a rounded triangle, wide on top, its bottom round. */
 function nose(): Piece {
-  return piece(inFace(`<path d="M-6.8 6.6 C-7 4.2 -3.4 3.6 0 3.6 C3.4 3.6 7 4.2 6.8 6.6 C6.2 9.4 2.2 12.2 0 12.4 C-2.2 12.2 -6.2 9.4 -6.8 6.6Z" fill="${C.eyeDark}"/>` +
-    `<ellipse cx="-2" cy="5.6" rx="2.2" ry="0.9" fill="${C.light}" opacity="0.25"/>`), faceBox([-8, 2, 16, 12]));
+  return piece(inFace(`<path d="M-6.4 6.8 C-6.8 4.6 -3.4 4 0 4 C3.4 4 6.8 4.6 6.4 6.8 C6 9.4 3.2 11.8 0 11.9 C-3.2 11.8 -6 9.4 -6.4 6.8Z" fill="${C.eyeDark}"/>` +
+    `<ellipse cx="-1.8" cy="5.7" rx="1.7" ry="0.8" fill="${C.light}" opacity="0.3"/>`), faceBox([-8, 2, 16, 12]));
 }
 
 /** The open happy mouth in the face frame: a small opening under a short line from the nose, its corners curling up, the tongue filling most of it. */
 function mouth(): Piece {
-  const m = "M0 14.4 C2.8 16.4 6.4 18.2 9.6 18.4 C9.8 23.4 5.6 28.6 0 28.8 C-5.6 28.6 -9.8 23.4 -9.6 18.4 C-6.4 18.2 -2.8 16.4 0 14.4Z";
+  const m = "M0 14.4 C2.8 16.4 6.4 18.2 9.4 18.4 C9.6 22.6 5.8 28.6 0 28.8 C-5.8 28.6 -9.6 22.6 -9.4 18.4 C-6.4 18.2 -2.8 16.4 0 14.4Z";
   const clip = uid("mouth");
-  const corner = (sx: number): P[] => [[sx * 9.2, 18.4], [sx * 11.2, 17.8], [sx * 12.5, 16.4], [sx * 12.9, 15]];
-  const lines = [corner(-1), corner(1)].map((pts) => `<path d="${taperedStroke(pts, 1.2, { taper: 2, tip: 0.35 })}" fill="${C.dark}"/>`).join("");
+  const corner = (sx: number): P[] => [[sx * 9, 18.4], [sx * 11.2, 17.8], [sx * 12.5, 16.4], [sx * 12.9, 15]];
+  const lines = [corner(-1), corner(1)].map((pts) => `<path d="${taperedStroke(pts, 1.2, { taper: 2.4, tip: 0.3 })}" fill="${C.dark}"/>`).join("");
   const philtrum = innerLine([[0, 11.8], [0, 14.6]], 0.9, C.dark, { taper: 1, tip: 0.6, wobble: 0 });
-  const rim = `<path d="${m}" fill="none" stroke="${C.dark}" stroke-width="0.8"/>`;
+  const rim = `<path d="${m}" fill="none" stroke="${C.dark}" stroke-width="0.7"/>`;
   const svg = `<defs><clipPath id="${clip}"><path d="${m}"/></clipPath></defs>` +
     `<path d="${m}" fill="${C.mouthInside}"/><g clip-path="url(#${clip})"><path d="M-10 20.8 C-6.4 18.4 6.4 18.4 10 20.8 L10 30 L-10 30Z" fill="${C.tongue}"/>` +
-    `<path d="M0 20.6 L0 24.6" stroke="${C.tongueLine}" stroke-width="0.7" stroke-linecap="round"/>` +
     `<ellipse cx="-3" cy="22.4" rx="2.2" ry="1.1" fill="${C.tongueShine}" opacity="0.55"/></g>${rim}${lines}${philtrum.svg}`;
-  return piece(inFace(svg), faceBox([-15, 10, 30, 21]), { shapes: [], lines: [{ kind: "inner", width: 0.8, where: "mouth" }, { kind: "outer", width: 1.2, where: "mouth corners" }, philtrum.line] });
+  return piece(inFace(svg), faceBox([-15, 10, 30, 21]), { shapes: [], lines: [{ kind: "inner", width: 0.7, where: "mouth" }, { kind: "outer", width: 1.2, where: "mouth corners" }, philtrum.line] });
 }
 
 /** A blush in the face frame, under the eye's outer side: an ellipse turned with the face. */
@@ -262,13 +266,14 @@ function blush(sx: number): Piece {
 
 /** The tag and the ring it swings from, which the turnaround paints blue on the blue collar. */
 function tagPiece(): Piece {
-  const ring = piece(`<rect x="-1.7" y="-58.2" width="3.4" height="8.4" rx="1.7" fill="${C.collar}" stroke="${C.collarLine}" stroke-width="0.6"/>` +
-    `<rect x="-0.9" y="-57.5" width="0.9" height="6.6" rx="0.45" fill="${C.collarHighlight}"/>`, [-2.5, -59, 5, 10], { shapes: [], lines: [{ kind: "inner", width: 0.6, where: "tag ring" }] });
+  const ring = piece(`<rect x="-1.4" y="-57.2" width="2.8" height="7.2" rx="1.4" fill="${C.collar}" stroke="${C.collarLine}" stroke-width="0.6"/>` +
+    `<rect x="-0.7" y="-56.6" width="0.8" height="5.6" rx="0.4" fill="${C.collarHighlight}"/>`, [-2.5, -58, 5, 9], { shapes: [], lines: [{ kind: "inner", width: 0.6, where: "tag ring" }] });
+  const emboss = sample(innerHeart.segs, 10);
   return join(ring, part("tag", heart, {
     fill: C.tag,
     shade: { multiply: C.shadeBy, rim: { inset: 1.3, toLight: 2.2 }, blur: 1.5 },
-    highlight: { d: "M-6.4 -46.2 a2.4 1.5 -40 1 0 4.8 0 a2.4 1.5 -40 1 0 -4.8 0", colour: C.tagShine, opacity: 0.85, blur: 0.7 },
-    inner: [{ pts: [[0, -43], [-2.4, -45.2], [-4, -43.4], [-2.8, -40.8], [0, -38.8], [2.8, -40.8], [4, -43.4], [2.4, -45.2], [0, -43]], width: 0.65, colour: C.tagLine, opacity: 0.85 }],
+    highlight: { d: "M-6.6 -47.4 a1.9 1.2 -40 1 0 3.8 0 a1.9 1.2 -40 1 0 -3.8 0", colour: C.tagShine, opacity: 0.8, blur: 0.6 },
+    inner: [{ pts: [...emboss, emboss[0]!], width: 0.7, colour: C.tagLine, opacity: 0.7 }],
     outline: { colour: C.tagLine, width: THIN, taper: 2, blur: 0.2 },
   }));
 }
