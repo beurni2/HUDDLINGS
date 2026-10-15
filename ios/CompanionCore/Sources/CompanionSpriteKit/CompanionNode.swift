@@ -1,9 +1,10 @@
 // Draws a companion's draw list with SpriteKit (characters/format/README.md,
 // Rendering). The shared engine computes every transform, so this node only
 // places sprites: one per part, its frame as position and rotation and its own
-// scale as its size, so no node ever needs a shear. Each clip group sits in one
-// SKCropNode whose mask copies the mask part. Bending parts draw their dense
-// mesh as a warp grid with no further subdivision. Nothing here keeps time.
+// scale as its size, so no node ever needs a shear, and its alpha as the
+// sprite's. Each clip group sits in one SKCropNode whose mask copies the mask
+// part at alpha 1. Bending parts draw their dense mesh as a warp grid with no
+// further subdivision. Nothing here keeps time.
 #if canImport(SpriteKit)
 import CompanionCore
 import SpriteKit
@@ -52,13 +53,16 @@ public final class CompanionNode: SKNode {
         for (index, item) in items.enumerated() {
             guard let sprite = sprites[item.part] else { continue }
             try place(sprite, item)
+            // SpriteKit multiplies the premultiplied texel by the node's alpha, as the web renderer does.
+            sprite.alpha = CGFloat(item.alpha)
             sprite.zPosition = CGFloat(index)
             sprite.isHidden = false
             if let maskIndex = item.clipTo {
                 let mask = items[maskIndex]
                 guard let crop = crops[mask.part], let maskSprite = maskSprites[mask.part] else { continue }
                 if crop.isHidden {
-                    // The group draws at its first part's place in the order.
+                    // The group draws at its first part's place in the order. The mask copy's alpha stays 1:
+                    // a part's alpha never changes what its mask lets through.
                     crop.isHidden = false
                     crop.zPosition = CGFloat(index)
                     try place(maskSprite, mask)
