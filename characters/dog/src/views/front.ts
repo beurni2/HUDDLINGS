@@ -216,12 +216,12 @@ const NOTCH = { R: TEMPLE[2]!, L: headHalf.length + 1 + at };
 let head = smooth([...headHalf, [0, -57.5], ...leftHalf].map(([x, y]): Node => cheekRoll([x, y])),
   { typed: headHalf.length + 1 + leftTemple.length, corners: [NOTCH.R, NOTCH.L] });
 // The cheeks' fluff, as the hero and the front turnaround draw it: on each
-// side one big round puff that bulges out over the ear (to x -48.5 on the
-// right), a smaller one under it and a little third at the jaw's corner,
-// combed down and out, and under the jaw two soft scallops over the collar's
-// ends. The sheet draws no line round them: the cream lies on the ear's tan,
-// with a few wisps over its edge and a soft shade on the ear below.
-const cheekLocks = [{ len: 3.2, w: 1.5, lean: 0.16 }, { len: 2.2, w: 1, lean: 0.24 }, { len: 1.2, w: 0.55, lean: 0.3 }];
+// side one big round puff over the ear's edge (out to x -46.8 at y -79 on the
+// right and 45.5 at -86 on the left), a smaller one under it and a little third
+// at the jaw's corner, combed down and out, and under the jaw two soft scallops
+// over the collar's ends; a few wisps cross the edge onto the ear's tan, with a
+// soft shade on the ear below.
+const cheekLocks = [{ len: 1.7, w: 1.5, lean: 0.16 }, { len: 1.2, w: 1, lean: 0.24 }, { len: 0.7, w: 0.55, lean: 0.3 }];
 const jawLocks = [{ len: 0.9, w: 1, lean: 0.18 }];
 const lefthand = (locks: typeof cheekLocks) => [...locks].reverse().map((l) => ({ ...l, lean: -l.lean }));
 head = furSpan(furSpan(head, cheekRoll([-45.2, -90.6]), cheekRoll([-34.6, -66])), cheekRoll([34.6, -66]), cheekRoll([45.2, -90.6]));
@@ -321,14 +321,20 @@ const headPaint: Paint = {
 // overhang's tip, where the ear's own line takes over; down each side, where
 // the face lies over the ear, one round curve in the ear's deep tan (the
 // sheet's #9E5C2C there, DECISIONS 7), fading in from where it begins below
-// the notch and out above the cheek's puff; and under the chin, over the
-// collar, a faint warm line in the chin's shade. Round the cheeks' puffs, over
-// the temples' tan and under the overhang the sheet draws no line.
+// the notch and out above the cheek's puff; on round the puffs, where the
+// cream lies on the ear, a lighter warm line (the sheet's #AE734B to #B17B4C
+// there), broken at the notch between the two puffs; and under the chin, over
+// the collar, a faint warm line in the chin's shade. Over the temples' tan and
+// under the overhang the sheet draws no line.
 const headLine: Outline = { ...OUTLINE, taper: 4, blur: 0.15, spans: [
   { from: [-27, -148.4], to: [-34.6, -145], width: THIN, colour: C.fluffLine },
   { from: [-36.4, -143.8], to: [-44.6, -136.2], width: THIN, colour: C.fluffLine },
   { from: [-40.4, -123.8], to: [-45.6, -91.2], width: 1.25, colour: C.earLine },
+  { from: [-45.6, -89.6], to: [-45.8, -81], width: THIN, colour: C.earEdge },
+  { from: [-45.6, -79.4], to: [-40.4, -70], width: THIN, colour: C.earEdge },
   { from: [-30, -63.4], to: [30, -63.4], width: THIN, colour: C.fluffLine },
+  { from: [40.4, -70], to: [45.6, -79.4], width: THIN, colour: C.earEdge },
+  { from: [45.8, -81], to: [45.6, -89.6], width: THIN, colour: C.earEdge },
   { from: [44.2, -92], to: [36.4, -127], width: 1.25, colour: C.earLine },
   { from: [39.6, -142], to: [32, -147.6], width: THIN, colour: C.fluffLine },
   { from: [30.4, -148.4], to: [17, -150.8], width: THIN, colour: C.fluffLine },
