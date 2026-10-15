@@ -80,7 +80,7 @@ fi
 # What touches what draws, renders or judges the dog, or what it is judged against; and what does not.
 FRONT = ["characters/dog/src/front.ts", "characters/draw/paint.ts", "characters/build/build.ts", "runtime-web/src/rig.ts",
          "runtime-web/lab/look.ts", "characters/sheetmatch/match.py", "characters/refprep/prepare.py", "characters/dog/model.json",
-         "characters/dog/ref/sheet.txt", "characters/dog/refmap/map.json"]
+         "characters/dog/ref/sheet.txt", "characters/dog/refmap/map.json", "package.json", "package-lock.json", "tools/requirements.txt"]
 ELSEWHERE = ["docs/notes.md", "characters/dog/test/dog.test.ts", "characters/dog/DECISIONS.md", "runtime-web/test/rig.test.ts"]
 
 
@@ -153,6 +153,12 @@ class HookTest(unittest.TestCase):
                 code, said, looks = self.hook(name)
                 self.assertEqual((code, looks), (0, []), said)
                 self.git("reset", "-q", "--hard")
+
+    def test_a_file_moved_out_of_what_draws_the_dog_still_runs_the_front_match(self):
+        (self.repo / "docs").mkdir(exist_ok=True)
+        self.git("mv", "characters/draw/paint.ts", "docs/paint.ts")
+        code, said, looks = self.hook()
+        self.assertEqual((code, len(looks)), (0, 1), said)
 
     def test_huddlings_front_match_0_skips_it_and_says_so(self):
         code, said, looks = self.hook("characters/dog/src/front.ts", HUDDLINGS_FRONT_MATCH="0")

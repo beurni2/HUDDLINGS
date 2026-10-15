@@ -142,13 +142,18 @@ def inside(box, outer):
     return ox <= x and oy <= y and x + w <= ox + ow and y + h <= oy + oh
 
 
+# The light pixels a cheek's blush level is fitted on: the fur and its blush, not the eye or its lines.
+LIGHT_L_MIN = 70
+LIGHT_CHROMA_MAX = 30
+
+
 def blush(rgb, fur_hex, blush_hex):
     """The blush in a box drawn around a cheek: the reddest tenth of its light pixels (L* above 70, the eye
     and its lines left out), and how opaque the printed blush over the printed fur must be to give it,
     fitted in sRGB. The spec makes the blush a level from 0 to 100% (L474)."""
     pixels = rgb.reshape(-1, 3)
     lab = sheets.to_lab(pixels)
-    light = (lab[:, 0] > 70) & (np.hypot(lab[:, 1], lab[:, 2]) < 30)
+    light = (lab[:, 0] > LIGHT_L_MIN) & (np.hypot(lab[:, 1], lab[:, 2]) < LIGHT_CHROMA_MAX)
     values = lab[light, 1]
     peak = pixels[light][values >= np.quantile(values, 0.9)].astype(float).mean(axis=0)
     fur, pink = sheets.hex_to_rgb(fur_hex).astype(float), sheets.hex_to_rgb(blush_hex).astype(float)

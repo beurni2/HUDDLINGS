@@ -372,6 +372,11 @@ export function lintDrawing(d: Drawing, rules: LintRules = {}): string[] {
     say(`viewBox "${root.viewBox}" does not match the canvas`);
   else if (!Number.isInteger(view[0]) || !Number.isInteger(view[1])) say(`viewBox "${root.viewBox}" does not start on whole points`);
   const [vx = 0, vy = 0, vw = 0, vh = 0] = view;
+  // A nested <svg>, a <symbol> drawn by a <use> and a marker each set up a viewport of their own that the bounds
+  // below do not model, so they are refused rather than followed.
+  if (tags.filter((t) => t.local === "svg" && !t.close).length > 1) say("has a nested <svg>; its viewport cannot be bounded");
+  if (tags.some((t) => t.local === "marker" || Object.keys(t.props).some((k) => /^marker(-start|-mid|-end)?$/.test(k))))
+    say("has a marker; its viewport cannot be bounded");
 
   // How far each mask and filter reaches (reach()): a filter by its own primitives; a mask by the filters its
   // content uses and the moves paint.ts makes of a light group in it. A mask's reach bounds what is drawn under it,
@@ -486,6 +491,10 @@ export function lintDrawing(d: Drawing, rules: LintRules = {}): string[] {
     if (tag.local === "use") {
       const target = ids.get(hrefId(p) ?? "");
       if (!target) return;
+      if (target.tag.local === "symbol" || target.tag.local === "svg") {
+        say(`has a <use> of a <${target.tag.local}>, whose viewport cannot be bounded: ${tag.text.slice(0, 80)}`);
+        return;
+      }
       if (frame.through.includes(n) || frame.through.length >= USE_DEPTH) {
         say(`has a <use> that draws itself, or <use>s nested deeper than ${USE_DEPTH}: ${tag.text.slice(0, 80)}`);
         return;

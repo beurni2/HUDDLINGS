@@ -14,23 +14,26 @@ sheetmatch="" hooktests=""
 # An early exit stops the background tests too; a failing kill must not become the hook's own status.
 trap 'for pid in $sheetmatch $hooktests; do kill "$pid" 2> /dev/null || true; done; rm -rf "$tmp"' EXIT
 git -C "$top" checkout-index -a --prefix="$tmp/"
-staged=$(git -C "$top" diff --cached --name-only)
+# --no-renames lists a moved file at both its old and its new path, so moving one out of a watched folder counts.
+staged=$(git -C "$top" diff --cached --name-only --no-renames)
 
 # The sheet match's tests take the longest of the Python ones and need nothing
 # else, so they run beside everything below and are waited for at the end. They
 # read their own copy of characters/, so nothing below changes what they read
 # while they run: the reference prep's check rewrites ref/ and model.json, and
 # the front's match builds the dog into build/, whose atlas.json the match reads.
+# Their temporary files go under $tmp, so the exit trap removes whatever a killed suite leaves behind.
+mkdir "$tmp/bg"
 if [ -d "$tmp/characters/sheetmatch" ]; then
   mkdir "$tmp/sheetmatch-tests"
   cp -R "$tmp/characters" "$tmp/sheetmatch-tests/characters"
-  PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s "$tmp/sheetmatch-tests/characters/sheetmatch" -q > "$tmp/sheetmatch.log" 2>&1 &
+  TMPDIR="$tmp/bg" PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s "$tmp/sheetmatch-tests/characters/sheetmatch" -q > "$tmp/sheetmatch.log" 2>&1 &
   sheetmatch=$!
 fi
 # This hook's own tests, on the hook being committed, beside the rest too: they spend most of their time waiting on
 # the stand-ins they run it with, in repositories of their own.
 if [ -f "$tmp/tools/test_precommit.py" ]; then
-  PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s "$tmp/tools" -p test_precommit.py -q > "$tmp/hooktests.log" 2>&1 &
+  TMPDIR="$tmp/bg" PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s "$tmp/tools" -p test_precommit.py -q > "$tmp/hooktests.log" 2>&1 &
   hooktests=$!
 fi
 
@@ -89,7 +92,8 @@ if [ -f "$tmp/package.json" ]; then
   # to build/qa/front. HUDDLINGS_FRONT_MATCH=0 skips it, for a commit that must land while the front fails.
   # The raster cache is the main checkout's build/cache, which its worktrees share: rasters are keyed on what makes
   # them (characters/build/raster.ts), so any checkout's are good in any other and only changed parts are drawn.
-  front='^(characters/(dog/src|draw|build|sheetmatch|refprep)/|runtime-web/(src|lab)/|characters/dog/(model\.json$|ref/|refmap/))'
+  # The installed tools count too: a new resvg, Playwright or numpy can change the still or the match.
+  front='^(characters/(dog/src|draw|build|sheetmatch|refprep)/|runtime-web/(src|lab)/|characters/dog/(model\.json$|ref/|refmap/)|(package(-lock)?\.json|tools/requirements\.txt)$)'
   if [ -d "$tmp/characters/dog/src" ] && echo "$staged" | grep -Eq "$front"; then
     common=$(git -C "$top" rev-parse --path-format=absolute --git-common-dir)
     cache="$top/build/cache"

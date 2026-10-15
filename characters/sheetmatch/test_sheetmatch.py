@@ -782,6 +782,8 @@ class PlantedTest(unittest.TestCase):
         self.assertEqual((recorded["darkLMax"], recorded["blushLightLMin"], recorded["blushLightChromaMax"], recorded["blushLevelMin"]),
                          (40, 70, 30, 0.05))
         self.assertEqual((match.DARK_L_MAX, match.BLUSH_LIGHT_L_MIN, match.BLUSH_LIGHT_CHROMA_MAX, match.BLUSH_LEVEL_MIN), (40, 70, 30, 0.05))
+        # The blush's light-pixel rule is palette.blush's own, so what match.json records is what the fit uses.
+        self.assertEqual((match.BLUSH_LIGHT_L_MIN, match.BLUSH_LIGHT_CHROMA_MAX), (match.palette.LIGHT_L_MIN, match.palette.LIGHT_CHROMA_MAX))
 
         def under(name, value):
             original = getattr(match, name)

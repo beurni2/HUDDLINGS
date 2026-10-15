@@ -177,12 +177,19 @@ test("definitions are bounded where a <use> draws them, moved and masked as it d
   assert.match(say(`${small}<use href="#x" x="-400"/>`), /<path> under a mask that reaches past the canvas and mask m's reach/);
   assert.match(say(`${small}<use href="#x" transform="translate(0 300)"/>`), /<path> under a mask that reaches past/);
   assert.equal(say(`${small}<g transform="translate(400 0)"><use href="#x" x="-400"/></g>`), "");
-  // Through a symbol, through <use> in <use>, and a far path in defs used under a mask, each reported once.
-  assert.match(say(`<defs><symbol id="s"><g mask="url(#m)"><path d="${FAR}" fill="#FDEDDC"/></g></symbol><use id="u" href="#s"/></defs><use href="#u"/>`), /<path> under a mask that reaches past/);
+  // A symbol sets up a viewport of its own, so drawing one is refused rather than bounded.
+  assert.match(say(`<defs><symbol id="s" viewBox="0 0 10 10"><g mask="url(#m)"><path d="M-5 -5H5V5H-5Z" fill="#FDEDDC"/></g></symbol><use id="u" href="#s" width="400" height="400"/></defs><use href="#u"/>`), /<use> of a <symbol>, whose viewport cannot be bounded/);
+  // Through <use> in <use>, and a far path in defs used under a mask, each reported once.
+  assert.match(say(`<defs><g id="t" mask="url(#m)"><path d="${FAR}" fill="#FDEDDC"/></g><use id="u" href="#t"/></defs><use href="#u"/>`), /<path> under a mask that reaches past/);
   const twice = lintOf(raw(`<defs>${blurred}<path id="p" d="${FAR}" fill="#FDEDDC"/></defs><g mask="url(#m)"><use href="#p"/><use href="#p"/></g>`));
   assert.equal(twice.length, 1, twice.join("\n"));
   // A <use> that draws itself is refused, not followed for ever.
   assert.match(say(`<g id="a"><use href="#a"/></g>`), /<use> that draws itself/);
+});
+
+test("a nested <svg> or a marker fails: each sets up a viewport the bounds do not model", () => {
+  assert.match(lintOf(raw(`<svg x="-400" viewBox="0 0 1 1" width="800" height="800"><path d="M0 0H1V1Z" fill="#FDEDDC"/></svg>`)).join("\n"), /nested <svg>/);
+  assert.match(lintOf(raw(`<defs><marker id="k"><path d="M0 0H1V1Z" fill="#FDEDDC"/></marker></defs><path d="M0 0H5" stroke="#91694A" stroke-width="1.5" marker-end="url(#k)"/>`)).join("\n"), /marker/);
 });
 
 test("the reach is paint.ts's: a wide shade on a small part passes, and a region past it fails", () => {

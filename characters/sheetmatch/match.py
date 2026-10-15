@@ -99,9 +99,10 @@ REGIONS = {
 BLUSH_PARTS = ("blush*",)
 BLUSH_MIN_PX = 6  # crop px: a blush part covering less is a speck, not a cheek
 DARK_L_MAX = 40  # L*: the eyes' and the nose's pixels held to their dark values are darker than this
-# palette.blush's own rule for the light pixels it fits a cheek's level on (phase 2): L* over 70, chroma under 30.
-BLUSH_LIGHT_L_MIN = 70
-BLUSH_LIGHT_CHROMA_MAX = 30
+# palette.blush's own rule for the light pixels it fits a cheek's level on (phase 2), read from it so the
+# thresholds match.json records are the ones the fit uses.
+BLUSH_LIGHT_L_MIN = palette.LIGHT_L_MIN
+BLUSH_LIGHT_CHROMA_MAX = palette.LIGHT_CHROMA_MAX
 BLUSH_LEVEL_MIN = 0.05  # a level at or below this is no blush: the core colour is the peak itself, not carried to full strength
 BLUSH_PLACE_SHARE = 0.03  # of the head's width (L523's 3%): how far each of the sheet's blush boxes is grown to hold its cheek
 # The part each source landmark must lie on: the spec's part names, then the art prototype's.
