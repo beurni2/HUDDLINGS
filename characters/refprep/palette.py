@@ -61,13 +61,39 @@ HELD_TO = {
 }
 
 
+def lower_iris(eye_masks, L):
+    """The lighter lower iris: each eye's lowest quarter, catchlights and the white rim left out."""
+    lower = np.zeros(L.shape, bool)
+    for eye in eye_masks:
+        rows = np.nonzero(eye)[0]
+        band_eye = eye.copy()
+        band_eye[:int(rows.max() - 0.25 * (rows.max() - rows.min())), :] = False
+        lower |= band_eye & (L > 12) & (L < 50)
+    return lower
+
+
+def mouth_inside(lab, near, opening):
+    """The open mouth's dark red inside, near its pink opening (the tongue) and not part of it."""
+    L, a, b = lab[..., 0], lab[..., 1], lab[..., 2]
+    hue = np.degrees(np.arctan2(b, a)) % 360
+    return near & (a > 20) & (L < 50) & (hue < 45) & ~opening
+
+
+def fur_shade(cls, lab, inside, fur_l, eye_area):
+    """The fur's soft shade: cream 3 to 12 L* darker than the fur (fur_l), not tan, not a line, not a feature,
+    and yellower than the blush's wash (hue above 65 degrees; the blush sits at 50 to 60)."""
+    hue = np.degrees(np.arctan2(lab[..., 2], lab[..., 1])) % 360
+    others = ndimage.binary_dilation(cls.tan | cls.line | cls.pink | cls.blue | cls.gold, iterations=2) | eye_area
+    return (inside & ~others & (cls.L >= fur_l - 12) & (cls.L <= fur_l - 3) & (cls.C < 26)
+            & (hue > 65) & (hue < 100))
+
+
 def regions(rgb, sil, view):
     """The masks of the palette's regions in one turnaround crop."""
     cls = measure.Classes(rgb, sil)
     lab = sheets.to_lab(rgb)
     L, a, b = lab[..., 0], lab[..., 1], lab[..., 2]
     C = np.hypot(a, b)
-    hue = np.degrees(np.arctan2(b, a)) % 360
     band, _ = measure.collar(cls)
     _, ears = measure.ears(cls, 1 if view == "side.L" else 2, band)
     tag_mask, _ = measure.tag(cls)
@@ -81,26 +107,14 @@ def regions(rgb, sil, view):
         eye_area = np.any([ndimage.binary_dilation(e, iterations=3) for e in eye_masks], axis=0)
         nose, mouth_open = measure.nose_and_mouth(cls, eye_masks, "front" if view == "front" else "left")
         found["eyes"] = np.any(eye_masks, axis=0) & (L < 40)
-        # The lighter lower iris: the eye's lowest quarter, catchlights and the white rim left out.
-        lower = np.zeros_like(sil)
-        for eye in eye_masks:
-            rows = np.nonzero(eye)[0]
-            band_eye = eye.copy()
-            band_eye[:int(rows.max() - 0.25 * (rows.max() - rows.min())), :] = False
-            lower |= band_eye & (L > 12) & (L < 50)
-        found["lowerIris"] = lower
+        found["lowerIris"] = lower_iris(eye_masks, L)
         found["nose"] = nose & (L < 40)
         if mouth_open is not None:
             found["tongue"] = mouth_open
-            near = ndimage.binary_dilation(mouth_open, iterations=6)
-            found["mouthInside"] = near & (a > 20) & (L < 50) & (hue < 45) & ~mouth_open
+            found["mouthInside"] = mouth_inside(lab, ndimage.binary_dilation(mouth_open, iterations=6), mouth_open)
     fur = inside & (L >= 88) & (C < 20) & ~eye_area & ~ndimage.binary_dilation(cls.blue | cls.gold, iterations=3)
     found["fur"] = fur
-    # The fur's soft shade: cream 3 to 12 L* darker than the fur, not tan, not a line, not a feature, and
-    # yellower than the blush's wash (hue above 65 degrees; the blush sits at 50 to 60).
-    fur_l = float(np.median(L[fur]))
-    others = ndimage.binary_dilation(cls.tan | cls.line | cls.pink | cls.blue | cls.gold, iterations=2) | eye_area
-    found["furShade"] = inside & ~others & (L >= fur_l - 12) & (L <= fur_l - 3) & (C < 26) & (hue > 65) & (hue < 100)
+    found["furShade"] = fur_shade(cls, lab, inside, float(np.median(L[fur])), eye_area)
     # The outline: the core of the outer line, within two pixels of the silhouette's edge.
     found["outline"] = sil & ~ndimage.binary_erosion(sil, iterations=2) & (L < 55) & (C > 8)
     # The ground shadow: below the body, outside the silhouette, darker than the card and nearly neutral.
@@ -128,13 +142,18 @@ def inside(box, outer):
     return ox <= x and oy <= y and x + w <= ox + ow and y + h <= oy + oh
 
 
+# The light pixels a cheek's blush level is fitted on: the fur and its blush, not the eye or its lines.
+LIGHT_L_MIN = 70
+LIGHT_CHROMA_MAX = 30
+
+
 def blush(rgb, fur_hex, blush_hex):
     """The blush in a box drawn around a cheek: the reddest tenth of its light pixels (L* above 70, the eye
     and its lines left out), and how opaque the printed blush over the printed fur must be to give it,
     fitted in sRGB. The spec makes the blush a level from 0 to 100% (L474)."""
     pixels = rgb.reshape(-1, 3)
     lab = sheets.to_lab(pixels)
-    light = (lab[:, 0] > 70) & (np.hypot(lab[:, 1], lab[:, 2]) < 30)
+    light = (lab[:, 0] > LIGHT_L_MIN) & (np.hypot(lab[:, 1], lab[:, 2]) < LIGHT_CHROMA_MAX)
     values = lab[light, 1]
     peak = pixels[light][values >= np.quantile(values, 0.9)].astype(float).mean(axis=0)
     fur, pink = sheets.hex_to_rgb(fur_hex).astype(float), sheets.hex_to_rgb(blush_hex).astype(float)

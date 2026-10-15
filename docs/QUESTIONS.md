@@ -37,6 +37,12 @@ Where the spec is silent or contradicts itself, I don't invent the answer. The q
 - **Default:** for the dog (and later the rabbit), squeeze becomes the happy crescents, as L482 already allows for excited, and sparkle becomes happy crescents with star particles beside the head, as the dog's Proud panel draws. At Gate A I also show a dog-style `> <` and star eye, labelled "not on the dog sheet", so you can choose.
 - **Owner:** founder
 
+### Q26. The sheets draw one catchlight in each eye; the spec asks for two or three. Which do I follow?
+- **The spec says:** L446 "each eye (... two or three catchlights ...)"; L509 "one large catchlight high on the side toward the nose and one or two small ones, placed as the sheets draw them"; L504 "The sheet is the model".
+- **Why it matters:** the dog's turnaround, hero, glossy-eyes panel and expression sheet each draw one catchlight per open eye. A second small one makes the eyes glossier but less like the sheet.
+- **Default:** one catchlight, as the sheets draw it (`characters/dog/DECISIONS.md` 29). Adding the small ones is one line per eye.
+- **Owner:** founder
+
 ## Needed by phase 4 (the rig and Visual QA)
 
 ### Q3. As the spec words them, four Visual QA checks would fail good animation. May I narrow them?

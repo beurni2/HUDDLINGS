@@ -372,6 +372,21 @@ class MeasureTest(unittest.TestCase):
         ear[5:35, 10:30] = True
         self.assertEqual(measure.head_width(lone, [ear], 5, 35, 60)[0], 90 - 31)
 
+    def test_a_piece_of_line_is_never_the_nose(self):
+        # Turned left, the nose is the leftmost dark blob; a mouth corner's line, cut off from the nose when the
+        # mouth's inside is lighter than the sheet's (#9E241A, Q24), lies further left and is too thin to be one.
+        image = card(100, 80)
+        draw = ImageDraw.Draw(image)
+        for x in (40, 75):
+            draw.ellipse([x - 5, 15, x + 5, 25], fill=(30, 12, 2))
+        draw.ellipse([20, 34, 32, 44], fill=(30, 12, 2))
+        draw.rectangle([8, 46, 16, 47], fill=(30, 12, 2))
+        rgb = np.asarray(image)
+        classes = measure.Classes(rgb, np.ones(rgb.shape[:2], bool))
+        eyes = [m for m in measure.components(classes.dark, 30) if measure.centroid(m)[1] < 30]
+        nose, _ = measure.nose_and_mouth(classes, eyes, "left")
+        np.testing.assert_allclose(measure.centroid(nose), [26, 39], atol=1)
+
     def test_points_are_in_points_from_the_ground_y_down(self):
         points = measure.to_points({"head.top": [100, 10], "ground": [100, 210]}, [100, 210], 0.82)
         self.assertEqual(points, {"head.top": [0.0, -164.0], "ground": [0.0, 0.0]})

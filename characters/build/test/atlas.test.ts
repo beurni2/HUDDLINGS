@@ -35,11 +35,11 @@ function randomRasters(n: number, seed: number): Raster[] {
 
 test("packing gives power-of-two pages and keeps every region 16 px from its neighbours and the edge", () => {
   for (const seed of [1, 2, 3]) {
-    const { placed, sizes } = packRasters(randomRasters(60, seed));
-    for (const size of sizes) assert.equal(size & (size - 1), 0, `page ${size} is not a power of two`);
+    const { placed, pages } = packRasters(randomRasters(60, seed));
+    for (const { width, height } of pages) assert.ok((width & (width - 1)) === 0 && (height & (height - 1)) === 0, `page ${width} × ${height} is not a power of two`);
     for (const p of placed) {
-      const size = sizes[p.page]!;
-      assert.ok(p.x >= GAP && p.y >= GAP && p.x + p.raster.w + GAP <= size && p.y + p.raster.h + GAP <= size);
+      const { width, height } = pages[p.page]!;
+      assert.ok(p.x >= GAP && p.y >= GAP && p.x + p.raster.w + GAP <= width && p.y + p.raster.h + GAP <= height);
     }
     for (let i = 0; i < placed.length; i++) {
       for (let j = i + 1; j < placed.length; j++) {
@@ -56,7 +56,7 @@ test("a region's edge pixels are extruded by 2 px and the rest of the gap stays 
   const data = Buffer.alloc(3 * 2 * 4);
   for (let i = 0; i < 6; i++) data.set([10 * i, 20, 30, 255], i * 4);
   const raster: Raster = { region: "e", w: 3, h: 2, data, anchorX: 0, anchorY: 0 };
-  const [page] = paintPages([{ raster, page: 0, x: GAP, y: GAP }], [64]);
+  const [page] = paintPages([{ raster, page: 0, x: GAP, y: GAP }], [{ width: 64, height: 64 }]);
   const at = (x: number, y: number) => Array.from(page!.data.subarray((y * 64 + x) * 4, (y * 64 + x) * 4 + 4));
   assert.deepEqual(at(GAP - 1, GAP), at(GAP, GAP)); // left of the first column
   assert.deepEqual(at(GAP - EXTRUDE, GAP), at(GAP, GAP));
@@ -90,10 +90,29 @@ test("buildAtlas writes page images whose regions hold the drawings", () => {
 test("a region wider than the area suggests still lands inside its page", () => {
   const wide: Raster = { region: "wide", w: 900, h: 4, data: Buffer.alloc(900 * 4 * 4, 255), anchorX: 0, anchorY: 0 };
   const small: Raster[] = Array.from({ length: 3 }, (_, i) => ({ region: `s${i}`, w: 4, h: 4, data: Buffer.alloc(64, 255), anchorX: 0, anchorY: 0 }));
-  const { placed, sizes } = packRasters([wide, ...small]);
-  for (const p of placed) assert.ok(p.x + p.raster.w + GAP <= sizes[p.page]!, `${p.raster.region} ends at ${p.x + p.raster.w} on a ${sizes[p.page]} px page`);
+  const { placed, pages } = packRasters([wide, ...small]);
+  for (const p of placed) assert.ok(p.x + p.raster.w + GAP <= pages[p.page]!.width, `${p.raster.region} ends at ${p.x + p.raster.w} on a ${pages[p.page]!.width} px page`);
 });
 
 test("a drawing that is not a whole number of pixels at its scale is refused, never stretched", () => {
   assert.throws(() => rasterize({ region: "odd", svg: rect(10, 21, "#000000"), anchor: [0, 0] }, 0.75), /not a whole number of pixels/);
+});
+
+test("a set that needs several pages ends on the smallest power-of-two rectangle that holds its last regions", () => {
+  // Five 900 px squares: four fill a 2048 px page, the fifth starts a second.
+  const big: Raster[] = Array.from({ length: 5 }, (_, i) => ({ region: `b${i}`, w: 900, h: 900, data: Buffer.alloc(0), anchorX: 0, anchorY: 0 }));
+  const { placed, pages } = packRasters(big);
+  assert.deepEqual(pages, [{ width: 2048, height: 2048 }, { width: 1024, height: 1024 }]);
+  for (const p of placed) {
+    assert.ok(p.x + p.raster.w + GAP <= pages[p.page]!.width && p.y + p.raster.h + GAP <= pages[p.page]!.height, `${p.raster.region} leaves its page`);
+  }
+  // A short last shelf makes a wide, low page.
+  const flat: Raster[] = [...big.slice(0, 4), { region: "flat", w: 1500, h: 300, data: Buffer.alloc(0), anchorX: 0, anchorY: 0 }];
+  assert.deepEqual(packRasters(flat).pages.at(-1), { width: 2048, height: 512 });
+});
+
+test("a set that fits one page keeps its square page", () => {
+  const { pages } = packRasters(randomRasters(10, 4));
+  assert.equal(pages.length, 1);
+  assert.equal(pages[0]!.width, pages[0]!.height);
 });

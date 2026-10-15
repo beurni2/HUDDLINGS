@@ -4,18 +4,25 @@ Kept current every session (CLAUDE.md). One section per lane; each lane edits on
 
 ## Lead: platform and the dog (M0)
 
-**Done: phases 0 and 1** (spec section 5b), both merged into main on Oct 14, 2026 at your request (`GATES.md`)
+**Done: phases 0 to 2** (spec section 5b), all merged into main on Oct 14, 2026 at your request (`GATES.md`)
 - Phase 0, https://github.com/beurni2/HUDDLINGS/pull/1: `PLAN.md`, `QUESTIONS.md`, `LIMITATIONS.md`, `GATES.md`, the copy lint and its catalogue, `LICENSE` (all rights reserved), the session hook.
 - Phase 1, https://github.com/beurni2/HUDDLINGS/pull/2: the package format and contract (`characters/format/README.md`); the web runtime (WebGL2) and the Swift engine with its SpriteKit adapter, held to the same vectors; the test character; the app shell with the Lab's Diagnostics; CI on Linux and on GitHub's Mac (Xcode 26.3); the Visual QA render job; parity green on the character (full 0.986, small 0.979, `qa/phase1/parity/`); SpriteKit's warp split and mipmaps measured (E17, E21); the TestFlight lane, gated on every check.
+- Phase 2, https://github.com/beurni2/HUDDLINGS/pull/3: `characters/refprep/` (one command, `python3 characters/refprep/prepare.py dog`, crops all 116 panels, cuts out the turnaround, measures landmarks, proportions and outlines, samples the palette, shows the proposed marking map and writes `characters/dog/model.json`, byte for byte reproducible); `characters/dog/DECISIONS.md` with 25 decisions, each with its crop; Q24 and Q25 decided by you, both the default. Deferred on purpose: the face panels' crop records (phase 3, before Gate A) and the motion poses' (phase 4), each with its mask (`DECISIONS.md` 14).
 
-**In review: phase 2, the dog's references** (section 5b; `PLAN.md`), https://github.com/beurni2/HUDDLINGS/pull/3
-- `characters/refprep/`: one command, `python3 characters/refprep/prepare.py dog`, crops all 116 panels of the four sheets, cuts out the turnaround, measures landmarks, proportions and outlines, samples the palette, shows the proposed marking map and writes `characters/dog/model.json`. Byte for byte reproducible; CI and the pre-commit hook rerun it.
-- `characters/dog/DECISIONS.md`: 25 decisions, each with its crop. Q24 and Q25 decided by you on Oct 14, both the default: the dog is drawn in the colours its sheet paints (eyes and nose, head patches, the fur's shade, the tongue, the mouth's inside), and the blush is checked as a level.
-- I'm watching the pull request for CI failures and review comments, at your request.
-- Two review rounds of four fresh reviewers, each finding checked by a refuting verifier; every confirmed finding is fixed or recorded.
-- Deferred, on purpose: the face panels' crop records (phase 3, before Gate A) and the motion poses' (phase 4), each with its mask (`DECISIONS.md` 14).
+**In progress: phase 3, drawing the dog** (section 5b; `PLAN.md`), ending at Gate A: every part in its six facings and every face state, drawn in TypeScript from `model.json`, beside the sheet crops, with the sheet match. The plan, from a design panel of three independent prototyped designs, is `docs/phase3-plan.md`.
+- Done on the branch: the drawing kit (`characters/draw/`, with a lint that refuses images, unbounded masks, off-palette colours and lines outside their bands as drawn), the build in crash-isolated child processes with a raster cache, the stills renderer and look loop (`npm run look -- dog front`, about 5 s), and the automated sheet match (`characters/sheetmatch/`) in CI and the pre-commit hook.
+- Four views drawn, each from its own turnaround crop, every sheet-match gate green (`qa/phase3/<view>/`), with one finish pass of shared recipes (eye, line by light, topknot, ear, paw, tag, marking: `characters/dog/src/parts/`):
 
-**Next: phase 3, drawing the dog** (section 5b), ending at Gate A: each view and every face state drawn as parts from `model.json`, beside the sheet crops, with the sheet match.
+  | View | Silhouette IoU | Worst landmark | Worst colour ΔE | Reviewers (on-model / face / charm) |
+  | --- | --- | --- | --- | --- |
+  | front | 0.978 | 1.98 pt | 1.92 | 3–3.5 / 3–4 / 3 |
+  | threeQuarter.L | 0.966 | 2.59 pt | 1.92 | 3.5–4 / 3–3.5 / 3 |
+  | side.L | 0.965 | 2.44 pt | 2.21 | 3.5–4 / 3.5–4 / 3 |
+  | back | 0.973 | 1.99 pt | 1.22 | 3–4 / 3 / 2.5–3 |
+
+  On-model is close to 4 everywhere; charm stays at 3 under the reviewers. You looked at the four views on Oct 15 and said they are all good (`GATES.md`; an early look, not a gate), so the views stay as they are and the work moves on to what Gate A still needs.
+- In review: https://github.com/beurni2/HUDDLINGS/pull/4, an early look so you can stop me if the look is wrong. It is not a gate.
+- Next: the right-facing views; the back view onto the shared line rule (DECISIONS 74; it keeps its own lines for now); the null region and the alpha channel in both runtimes (the face states need them); the face panels' crop records and the Faces check; then every face state, the presets, the hungry and huffy faces, and Gate A.
 
 **Blockers**
 - For TestFlight at the end of phase 1: the Apple pieces in `PLAN.md`, What I need from you (Team ID, API key, your iPhone registered once, the app record and bundle ID).

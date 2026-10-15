@@ -119,16 +119,16 @@ def nose_and_mouth(cls, eye_masks, facing):
     snout's tip); the mouth is the pink opening and the dark line around it."""
     eye_bottom = max(np.nonzero(m)[0].max() for m in eye_masks)
     eye_top = min(np.nonzero(m)[0].min() for m in eye_masks)
-    candidates = [m for m in components(cls.dark, 8) if not any((m & e).any() for e in eye_masks)]
+    # A thin dark line joins the nose to the smile on these sheets, as dark as the nose itself. The nose is
+    # the blob thicker than NOSE_CORE px: an opening with that disk leaves out the lines. A blob with no such
+    # core is a piece of line (a mouth corner the mouth's lighter inside leaves on its own) and never the nose.
+    candidates = [m for m in components(cls.dark, 8) if not any((m & e).any() for e in eye_masks)
+                  and np.nonzero(m)[0].min() >= eye_top and ndimage.binary_opening(m, disk(NOSE_CORE // 2)).any()]
     if facing == "left":
-        candidates = [m for m in candidates if np.nonzero(m)[0].min() >= eye_top]
         merged = min(candidates, key=lambda m: np.nonzero(m)[1].min())
     else:
-        candidates = [m for m in candidates if np.nonzero(m)[0].min() >= eye_top]
         mid = np.mean([centroid(e)[0] for e in eye_masks])
         merged = min(candidates, key=lambda m: abs(centroid(m)[0] - mid) + abs(np.nonzero(m)[0].min() - eye_bottom))
-    # A thin dark line joins the nose to the smile on these sheets, as dark as the nose itself. The nose is
-    # the blob thicker than NOSE_CORE px: an opening with that disk leaves out the lines.
     nose = components(ndimage.binary_opening(merged, disk(NOSE_CORE // 2)), 4)[0]
     mouth_open = None
     below = [m for m in components(cls.pink, 6) if np.nonzero(m)[0].min() > np.nonzero(nose)[0].min()]
@@ -287,8 +287,10 @@ def check_required(view, points, required, hand=()):
         raise ValueError(f"{view}: the hand-placed {', '.join(unknown)} is not in this view's required set")
 
 
-def measure_view(view, rgb, hand):
-    sil = silhouette.cut_out(rgb)
+def measure_view(view, rgb, hand, sil=None):
+    """A view's landmarks. A render brings its own silhouette (its alpha, characters/sheetmatch); a sheet's crop
+    is cut out."""
+    sil = silhouette.cut_out(rgb) if sil is None else sil
     cls = Classes(rgb, sil)
     ys, xs = np.nonzero(sil)
     points, method = {}, {}

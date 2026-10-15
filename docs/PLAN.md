@@ -37,7 +37,7 @@ The critical path: one dog that feels alive under your finger before anything el
 
 **Phase 2, the dog's references (about 0.5 week).** A script crops every panel of the four dog sheets into `characters/dog/ref/` at its original size, cuts out the turnaround silhouettes, measures proportions and landmarks per view, samples the palette against the printed values (ΔE2000), and proposes the marking map. It writes `model.json` and `DECISIONS.md`, each decision with the crop that settled it.
 
-**Phase 3, drawing the dog (about 1.5 weeks), ending at Gate A.**
+**Phase 3, drawing the dog (about 3 weeks, re-estimated from 1.5 after the design panel; I re-plan once the front view shows the real pace), ending at Gate A.** The working plan, with the slices in order, is `docs/phase3-plan.md`.
 - Every part of the parts table, drawn in TypeScript that writes SVG: hand-placed Bézier paths with few nodes, cleaned with a curve fitter. An automatic trace may sit underneath as a faint guide and is never kept.
 - Flat fill, one soft shade, one soft highlight, light from the top left, a warm brown outline on outer edges only; painted at build time and rasterized into the atlases at 2x, 3x and 5x.
 - Four views (front, three-quarter and side in both facings, back), each facing with its own markings, and every face state.
@@ -137,7 +137,7 @@ In the order they come up. Weeks count from your `go`. Secrets go in GitHub (Set
 
 **Around week 3:** allow `commons.wikimedia.org` and `upload.wikimedia.org` for Muybridge's plates, needed in phase 4 (Edit the environment, Network access: https://code.claude.com/docs/en/cloud-environments#network-access), or upload the plates. Slow-motion video of a real puppy helps too, if you have some. Nothing else is needed; I work around the other blocked sites (`LIMITATIONS.md`).
 
-**Around week 3 to 4, at Gate A:** approve the dog's look: the views, the faces, the marking map and the collar blue; answer Q2 (the dog's squeeze and sparkle eyes); a first look at the new hungry and huffy faces. Q3 (four Visual QA checks) by phase 4.
+**Around week 3 to 4, at Gate A:** approve the dog's look: the views, the faces, the marking map and the collar blue; answer Q2 (the dog's squeeze and sparkle eyes) and Q26 (one catchlight per eye, as the sheets draw it, or the spec's two or three); a first look at the new hungry and huffy faces. Q3 (four Visual QA checks) by phase 4.
 
 **Around week 5, at Gate B:** answer Q4 (temporary licensed sounds are fine for Gate B).
 
