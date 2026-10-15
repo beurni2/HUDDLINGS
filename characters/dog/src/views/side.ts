@@ -6,7 +6,7 @@
 // part is the same thing turned (the ear, the eye, the nose, the collar, the
 // tag, the paws). One light group holds the whole near side of the body (back
 // and haunch, chest, near legs), so their joins carry no rim; the far front
-// leg is painted on its own, darker.
+// leg is painted on its own, darker. side.R is this view mirrored (views/facing.ts): side() takes the facing.
 import { furEdge, furSpan } from "../../../draw/fur.ts";
 import { bbox, ellipse, fracAt, pathD, sample, smooth, spanPoints, v, type P, type Shape } from "../../../draw/geom.ts";
 import { ribbons, strokeOf, type DrawnLine, type Outline, type Stroke } from "../../../draw/line.ts";
@@ -23,6 +23,7 @@ import { toes } from "../parts/paw.ts";
 import { tagPaint } from "../parts/tag.ts";
 import { deepen, strands } from "../parts/marking.ts";
 import type { Drawn } from "./front.ts";
+import { facing, type Facing, type Side } from "./facing.ts";
 
 const INNER = model.outline.innerPt;
 /** Lines on fur spans and small parts: lighter, and never under 1.2 pt (as the front draws them). */
@@ -38,6 +39,11 @@ function tapered(pts: P[], width: number, kind: "outer" | "inner", where: string
 }
 /** A part's canvas grown to hold its light group's shade where the group reaches past the part. */
 const roomy = (p: Piece, by: number): Piece => ({ ...p, box: pad(p.box, by) });
+/** A shape's middle across, about which a light typed toward the top left is reflected for the other facing. */
+const middle = (s: Shape) => {
+  const [x0, , x1] = bbox(s.segs);
+  return (x0 + x1) / 2;
+};
 /** A box round some points. */
 const boxOf = (pts: P[], by = 0): Box => {
   const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]);
@@ -246,7 +252,7 @@ const bodyGroup = [back, chest, legNear, hindNear];
 const headGroup = [head, ...tuftShapes];
 
 const THIGH = uid("thigh");
-const backPaint: Paint = {
+const backPaint = (F: Facing): Paint => ({
   fill: C.fur,
   // The haunch's underside and its back, away from the light; and under the ear and the collar's back end, where the
   // ear hangs over the neck.
@@ -257,16 +263,18 @@ const backPaint: Paint = {
   under: `<defs><linearGradient id="${THIGH}" gradientUnits="userSpaceOnUse" x1="0" y1="-31" x2="0" y2="-12">` +
     `<stop offset="0" stop-color="${C.softLine}" stop-opacity="0"/><stop offset="0.7" stop-color="${C.softLine}"/></linearGradient></defs>`,
   inner: [{ pts: sample(smooth([[-29, -8.4], [-28.6, -13], [-27, -19], [-24.6, -25], [-22, -31]], { closed: false }).segs, 8, false), width: 0.85, colour: `url(#${THIGH})` }],
-};
+  light: F.light,
+});
 /**
  * The back's line (parts/lines.ts): the topline, where the saddle's tan lies along it, on the tan (the sheet's
- * #9C673F to #A86C47); round the rump, where the tail's tan crosses it, on the tan, deeper and more orange (#A8622E to
- * #AB673A); along the underside, on the ground, the darkest. The thigh's front is the paint's own faint line.
+ * #9C673F to #A86C47); round the rump, where the tail's tan crosses it and the rump's spot lies on it, on the tan,
+ * deeper and more orange (#A8622E to #AB673A), and on the cream in a facing with no rump spot (side.R); along the
+ * underside, on the ground, the darkest. The thigh's front is the paint's own faint line.
  */
-const backLines: LitSpan[] = [{ from: [-11, -62.4], to: [14.6, -38.6], on: "tan", taper: 6 }, { from: [12.6, -42.6], to: [12, -4.6], on: "tan", taper: 6 },
-  { from: [14.6, -6.6], to: [-6, -1.6], taper: 6 }];
+const backLines = (F: Facing): LitSpan[] => [{ from: [-11, -62.4], to: [14.6, -38.6], on: "tan", taper: 6 },
+  { from: [12.6, -42.6], to: [12, -4.6], on: F.shows("rump.patch.L") ? "tan" : "cream", taper: 6 }, { from: [14.6, -6.6], to: [-6, -1.6], taper: 6 }];
 
-function chestPaint(): Paint {
+function chestPaint(F: Facing): Paint {
   return {
   fill: C.fur,
   // In shade under the collar, a little way down the chest; a soft band of shade in front of the thigh's round, where the belly turns away under
@@ -274,6 +282,7 @@ function chestPaint(): Paint {
   shade: furShade(bodyGroup, ["M-62 -52 C-50 -45 -32 -45 -18 -52 L-18 -62 L-62 -62Z",
     "M-30.6 -6 C-31.2 -14 -29.4 -22 -26.6 -28 C-24.8 -32 -22.8 -35 -20.6 -38 L-24.6 -40.4 C-28.2 -35 -31.4 -28.6 -33.4 -21 C-34.6 -15 -34.8 -9 -34.4 -4Z"]),
   under: belly(),
+  light: F.light,
   };
 }
 
@@ -291,7 +300,7 @@ function belly(): string {
     `<path d="${d}" fill="url(#${g})" filter="url(#${f})"/>`;
 }
 
-function legNearPaint(): Paint {
+function legNearPaint(F: Facing): Paint {
   // Toe lines rising from the sole at the paw's front a third of the way up its dome, curving with it, the third the
   // shortest, as the sheet draws them (parts/paw.ts); and the soft crease where the bun of the paw meets the leg.
   const t = toes({ lines: [[[-61.6, -2.8], [-62.6, -4.8], [-62.6, -7], [-61.8, -8.8]], [[-57.6, -1.4], [-58.4, -3.6], [-58.4, -5.8], [-57.8, -7.6]],
@@ -304,26 +313,30 @@ function legNearPaint(): Paint {
     inner: [...t.inner!, { pts: sample(smooth([[-59.4, -19], [-54.8, -19.8], [-49.6, -19], [-45, -17]], { closed: false }).segs, 6, false), width: 0.8, colour: C.warmLine, opacity: 0.35 }],
     // Its top fades in on the chest, so it comes out of the chest's fur with no edge.
     feather: { from: [-44, -42], to: [-46, -36] },
+    light: F.light,
   };
 }
 
-function legFarPaint(): Paint {
+function legFarPaint(F: Facing): Paint {
   const t = toes({ lines: [[[-72.6, -6], [-73.6, -8], [-73.6, -10.2], [-72.8, -12]], [[-69.8, -5], [-70.6, -7], [-70.6, -9.2], [-69.9, -10.8]]], fade: [-5, -12] });
   return {
     fill: C.farFur,
     // Its own darker fur is the wedge's colour as the sheet paints it (#FFDDBC); in shade only right under the tag and
     // along its rim away from the light.
     shade: { multiply: C.furShadeBy, rim: { inset: 1.4, toLight: 2.2 }, shapes: ["M-66 -40 L-58 -40 L-58 -34 C-61 -33 -64 -33 -66.4 -34Z"], blur: 2 },
-    // The paw's dome catches the light from the top left, so it reads as the sheet's near-cream paw below the shaded wedge.
-    highlight: { d: "M-74 -13 C-73.6 -16.4 -70.6 -18.4 -67.6 -17.6 C-66 -14.4 -66.6 -10 -68.6 -7.4 C-71.4 -7 -73.8 -9 -74 -13Z", colour: C.fur, opacity: 0.55, blur: 1.6 },
+    // The paw's dome catches the light from the top left, so it reads as the sheet's near-cream paw below the shaded
+    // wedge; the light lies on the dome's side toward the light in either facing (across the paw's middle, its centre).
+    highlight: { d: F.lit("M-74 -13 C-73.6 -16.4 -70.6 -18.4 -67.6 -17.6 C-66 -14.4 -66.6 -10 -68.6 -7.4 C-71.4 -7 -73.8 -9 -74 -13Z", landmarks["paw.front.R"]![0]),
+      colour: C.fur, opacity: 0.55, blur: 1.6 },
     // Two toe lines curving up its front, as the sheet draws them (parts/paw.ts), and the soft crease where the bun of
     // the paw meets the leg.
     under: t.under,
     inner: [...t.inner!, { pts: sample(smooth([[-71.6, -19.2], [-68.6, -20.2], [-65.2, -19.8]], { closed: false }).segs, 6, false), width: 0.8, colour: C.warmLine, opacity: 0.4 }],
+    light: F.light,
   };
 }
 
-function hindPaint(): Paint {
+function hindPaint(F: Facing): Paint {
   return {
     fill: C.fur,
     shade: furShade(bodyGroup),
@@ -332,32 +345,39 @@ function hindPaint(): Paint {
     ...toes({ lines: [[[-28.6, -2.4], [-29.6, -4.6], [-29.6, -6.8], [-28.8, -8.6]], [[-24.6, -1.3], [-25.4, -3.6], [-25.4, -5.8], [-24.8, -7.6]],
       [[-20.6, -1], [-21.1, -2.8], [-21, -4.8]]], fade: [-1.4, -9] }),
     feather: { from: [-10.8, -9], to: [-14.6, -9] },
+    light: F.light,
   };
 }
 
-const tailPaint: Paint = {
+const tailPaint = (F: Facing): Paint => ({
   fill: C.fur,
   // Its foot away from the light, and the tan root's core by the rump, where the sheet's tan is deepest.
   shade: { multiply: C.furShadeBy, rim: { inset: 2.5, toLight: 4 }, shapes: ["M10 -14 C24 -6 40 -12 48 -24 L48 -4 L10 -4Z",
     "M16 -34 C20 -33 24 -27 24.6 -20 C24.8 -15 23 -12 20 -11 L16 -11Z"], blur: 2.4 },
-  highlight: { d: "M22 -57 C28 -61 36 -60 41 -55 C36 -52 28 -52 22 -54Z", colour: C.light, opacity: 0.35, blur: 3 },
+  // The plume's top, toward the light, across the plume's middle in either facing.
+  highlight: { d: F.lit("M22 -57 C28 -61 36 -60 41 -55 C36 -52 28 -52 22 -54Z", middle(tail)), colour: C.light, opacity: 0.35, blur: 3 },
   inner: [
     // The curl's hook turns in under itself at the plume's front, its tip pointing back toward the body, as the sheet draws it.
     { pts: sample(smooth([[15.8, -53.4], [18.4, -52.2], [20.8, -50.2], [22.2, -47.6]], { closed: false }).segs, 6, false), width: 0.85, colour: C.crownLine, opacity: 0.9 },
   ],
+  light: F.light,
+});
 
-};
-
-const headLight = "M-82 -128 C-74 -146 -56 -154 -38 -152 C-46 -146 -62 -140 -72 -126Z " +
+/**
+ * The head's light, one for the head and the topknot's light group: on the forehead's slope up to the crown, toward
+ * the top-left light (in the other facing across the head's middle, on the back of the crown, toward the light), and
+ * along the bridge's top, which faces up in either facing.
+ */
+const headLight = (F: Facing) => `${F.lit("M-82 -128 C-74 -146 -56 -154 -38 -152 C-46 -146 -62 -140 -72 -126Z", middle(head))} ` +
   "M-90 -103 C-87 -106 -80 -107 -76 -104 C-79 -101 -86 -100 -90 -103Z";
-const headPaint: Paint = {
+const headPaint = (F: Facing): Paint => ({
   fill: C.fur,
   // Under the jaw, where the head turns under toward the collar; and down the cheek along the ear's front, where the
   // ear hangs over it, deepest under the ear's foot, as the sheet paints it (#F8CAA6 to #FEDAB8 there).
   shade: furShade(headGroup, ["M-92 -76 C-84 -66 -72 -63 -56 -61 L-30 -62 L-30 -56 L-92 -56Z",
     "M-33 -106 C-37.4 -100 -40 -94 -40.4 -86 C-41 -80 -42.6 -74 -45 -70 C-46 -66 -46 -60 -45 -56 L-22 -56 L-22 -62.6 L-30 -62.6 L-30 -106Z"],
     ["M-100 -172 L20 -172 L20 -140 L-100 -140Z"], { inset: 3, toLight: 4.5 }),
-  highlight: { d: headLight, colour: C.light, opacity: 0.4, blur: 4 },
+  highlight: { d: headLight(F), colour: C.light, opacity: 0.4, blur: 4 },
   // Where the forehead's upper lock meets the one under it, the line dips into a V and runs on as one short stroke
   // back into the fur under the upper lock, as the sheet draws it (its "<" under each lock), in the crown line's own
   // tone; it starts a little outside the head, where the head's clip hides its first taper.
@@ -366,7 +386,8 @@ const headPaint: Paint = {
     const back = v.norm(v.sub(V, to));
     return { pts: sample(smooth([v.add(V, v.mul(back, 2.4)), V, v.add(V, v.mul(v.sub(to, V), 0.5)), to], { closed: false }).segs, 8, false), width: 0.85, colour: LINES.cream[1]!, opacity: 0.9 };
   }),
-};
+  light: F.light,
+});
 
 /**
  * The head's line, where the sheet draws one, in one warm brown: up from the nose's top, the bridge and the stop in
@@ -406,11 +427,11 @@ const noseEdge: Outline = { colour: C.eyeDark, width: THIN, taper: 1.5, blur: 0.
  */
 const lipEdge: Outline = { colour: C.dark, width: THIN, taper: 0.8, blur: 0.15, spans: [{ from: [-92.7, -80], to: [-96.4, -90.9] }] };
 
-function headLinePiece(): Piece {
+function headLinePiece(F: Facing): Piece {
   const f = uid("blur");
   const [x0, y0, x1, y1] = bbox(head.segs);
   const box = pad([x0, y0, x1 - x0, y1 - y0], 2);
-  const r = litEdge(head, headSpans, "head.line", box, { reach: 0.5 }), n = ribbons(head, noseEdge, "head.line", 0.5), l = ribbons(head, lipEdge, "upper lip", 0.5);
+  const r = litEdge(head, headSpans, "head.line", box, { reach: 0.5, light: F.light }), n = ribbons(head, noseEdge, "head.line", 0.5), l = ribbons(head, lipEdge, "upper lip", 0.5);
   return piece(`<defs>${r.defs}${blur(f, pad(box, 2), 0.15)}</defs>${r.body}<g fill="${noseEdge.colour}" filter="url(#${f})">${n.svg}</g>` +
     `<g fill="${lipEdge.colour}" opacity="0.9" filter="url(#${f})">${l.svg}</g>`, box, {
     shapes: [{ name: "head.line", nodes: head.typed, segs: head.segs, outlined: [...r.outlined, ...n.outlined, ...l.outlined], fur: head.fur.map(([a, b]) => [fracAt(head, a), fracAt(head, b)]) }],
@@ -491,16 +512,17 @@ function blush(): Piece {
  * tag's pivot, the ring's top on the collar (rig.json), lies on a short strap in the band's own darker blue at its
  * front turn, so at rest the strap is the band's front turn itself.
  */
-function tagPiece(): Piece {
+function tagPiece(F: Facing): Piece {
   const strapLine: DrawnLine = { kind: "inner", width: 0.7, where: "tag ring", drawn: [0.7, 0.7] };
   const f = uid("blur"), box: Box = [-64, -61, 8, 11];
   const strap = piece(`<defs>${blur(f, box, 0.5)}</defs>` +
     `<path d="M-60.8 -58.8 C-61 -57.6 -60.8 -56.6 -60.4 -55.8 L-58.6 -55.8 C-58.3 -56.8 -58.3 -57.8 -58.5 -58.9 C-59.2 -59.5 -60.2 -59.4 -60.8 -58.8Z" ` +
     `fill="${C.collarLine}" opacity="0.6" filter="url(#${f})"/>` +
     `<ellipse cx="-60.4" cy="-51.2" rx="0.85" ry="0.75" fill="${C.tagEdge}" stroke="${C.tagEdge}" stroke-width="${strapLine.width}"/>`, box, { shapes: [], lines: [strapLine] });
-  // The dog's one tag recipe (parts/tag.ts), its turned coin's edge down its left side in the deeper shade.
-  return join(strap, part("tag", heart, tagPaint({ emboss: embossed, light: "M-64.4 -47.2 a2 1.4 -50 1 0 4 0 a2 1.4 -50 1 0 -4 0",
-    shade: ["M-67.6 -49 C-66.8 -44 -65 -40.6 -61.6 -38.6 L-61 -36 L-68 -36Z"], rim: THIN, shadeRim: { inset: 0.9, toLight: 1 } })));
+  // The dog's one tag recipe (parts/tag.ts), its turned coin's edge down its left side in the deeper shade; its light
+  // on the lobe toward the light, across the heart's middle in either facing.
+  return join(strap, part("tag", heart, { ...tagPaint({ emboss: embossed, light: F.lit("M-64.4 -47.2 a2 1.4 -50 1 0 4 0 a2 1.4 -50 1 0 -4 0", middle(heart)),
+    shade: ["M-67.6 -49 C-66.8 -44 -65 -40.6 -61.6 -38.6 L-61 -36 L-68 -36Z"], rim: THIN, shadeRim: { inset: 0.9, toLight: 1 } }), light: F.light }));
 }
 
 /**
@@ -511,7 +533,7 @@ function tagPiece(): Piece {
  * soft clumps; its back, away from the light, in the fur's warm shade. Its top lies under the crown's fur, feathered
  * into it, with no light band and no line.
  */
-function earPaint(): Paint {
+function earPaint(F: Facing): Paint {
   return {
     ...earFur({
       ear, axis: [[-6, -143], [-8, -63]], deepen: [0.4, 1.1],
@@ -522,11 +544,13 @@ function earPaint(): Paint {
       fold: { line: [[-3.4, -138.4], [4, -132.6], [10, -124.6], [14.6, -115.6], [17.8, -106.6], [19.2, -99]],
         back: "M-4 -141 L4.6 -134.6 L10.8 -126.4 L15.6 -117 L19 -107.6 L20.6 -99 L30 -99 L30 -146 L-4 -146Z" },
       dips: earClumps.slice(1).map(({ notches }) => notches[0]),
-      light: "M-33 -100 C-33 -112 -29 -124 -20 -132 C-14 -134 -12 -128 -16 -120 C-20 -112 -24 -104 -27.6 -98 C-30 -95 -33 -96 -33 -100Z",
+      // On its front shoulder, toward the light; across the ear's middle, on its back shoulder, in the other facing.
+      light: F.lit("M-33 -100 C-33 -112 -29 -124 -20 -132 C-14 -134 -12 -128 -16 -120 C-20 -112 -24 -104 -27.6 -98 C-30 -95 -33 -96 -33 -100Z", middle(ear)),
       under: ["M-6 -142 C4 -136 11 -126 15.6 -114 C18 -106 22 -96 22 -82 L30 -82 L30 -142Z"],
     }),
     // Its top melts into the crown's fur from its front corner, where the crown's fur lies over it, no edge and no line along it.
     feather: { from: [-24.4, -143.4], to: [-18.4, -137.2] },
+    light: F.light,
   };
 }
 
@@ -552,7 +576,10 @@ function collarContact(): string {
     `<path d="${shade}" fill="${C.collarLine}" opacity="0.4" filter="url(#${g})"/><path d="${rim}" fill="${C.collarRim}" opacity="0.85" filter="url(#${f})"/>`;
 }
 
-export function side(): Drawn[] {
+/** The side view in a facing: side.L as the crop draws it, or side.R, its mirror lit from the top left (views/facing.ts). */
+export function side(facingSide: Side = "L"): Drawn[] {
+  const F = facing(facingSide);
+  const backPaintF = backPaint(F), backLinesF = backLines(F), tailPaintF = tailPaint(F), headPaintF = headPaint(F);
   const out: Drawn[] = [];
   const add = (name: string, p: Piece, state?: string) => out.push({ part: name, piece: p, ...(state ? { state } : {}) });
   // The ground shadow: a wide soft warm oval under the dog, densest under its paws and the haunch, as the sheet paints it.
@@ -565,29 +592,30 @@ export function side(): Drawn[] {
   const tailLines: LitSpan[] = [{ from: [17.6, -35.8], to: [20.6, -45.4], on: "tan", taper: 3 }, { from: [20.4, -43.6], to: tailLobes[0]![0], taper: [3, 1.4] },
     ...tailLobes.map(([a, b]): LitSpan => ({ from: a, to: b, taper: 1.4 })), { from: tailLobes.at(-1)![1], to: [30, -13.4], taper: [1.4, 3] },
     { from: [31.6, -12.8], to: [17.4, -9.8], on: "tan", taper: 3 }];
-  add("tail", litPart("tail", tail, tailPaint, tailLines));
+  add("tail", litPart("tail", tail, tailPaintF, tailLines));
   // The tail's tan root, soft but defined, with a few darker streaks in it radiating from the rump along the fur.
-  add("tail.base", join(litMarking("tail.base", { shape: tail, paint: tailPaint, spans: tailLines }, tailBase, { fill: C.marking, blur: 0.9 }),
+  add("tail.base", join(litMarking("tail.base", { shape: tail, paint: tailPaintF, spans: tailLines }, tailBase, { fill: C.marking, blur: 0.9 }),
     strands("tail.base", tailBase, 0.9, [[[15.6, -31.4], [20.4, -33], [24.6, -32.2]], [[16.6, -25.4], [21.6, -26], [26.4, -24.6]], [[16.4, -19.2], [21.4, -18.2], [25.6, -15.6]],
       [[14.4, -13.4], [18.6, -11.4], [22.2, -9.6]]], { colour: C.earLow, opacity: 0.35, width: 0.8 }),
     strands("tail.base", tailBase, 0.9, [[[18, -29], [22.6, -29.6], [27.6, -27.6]], [[18.4, -22.4], [23, -21.8], [27.6, -19.6]]], { colour: C.fur, opacity: 0.4, width: 0.9 })));
-  add("front.R", litPart("front.R", legFar, legFarPaint(), [{ from: [-63.6, -35.2], to: [-66.6, -4.8], taper: 4 }]));
+  add("front.R", litPart("front.R", legFar, legFarPaint(F), [{ from: [-63.6, -35.2], to: [-66.6, -4.8], taper: 4 }]));
   // Only the chest's front edge between the tag's foot and the near leg shows over the far leg: a couple of short
   // tapered fur strokes, as the sheet draws it, not a hooked line.
-  add("body.front", roomy(litPart("body.front", chest, { ...chestPaint(), inner: [[[-63.4, -35.4], [-61.8, -32.6], [-60.4, -30.6]], [[-60, -29.8], [-58.2, -27.6], [-56.4, -25.6]]]
+  add("body.front", roomy(litPart("body.front", chest, { ...chestPaint(F), inner: [[[-63.4, -35.4], [-61.8, -32.6], [-60.4, -30.6]], [[-60, -29.8], [-58.2, -27.6], [-56.4, -25.6]]]
     .map((pts) => ({ pts: sample(smooth(pts as P[], { closed: false }).segs, 6, false), width: 0.8, colour: LINES.cream[3]!, opacity: 0.75 })) }, []), 1));
-  add("body.back", roomy(litPart("body.back", back, backPaint, backLines), 1));
+  add("body.back", roomy(litPart("body.back", back, backPaintF, backLinesF), 1));
   // The saddle, soft but defined, with a few darker strands in it following the back's curve, as the sheet paints them.
-  add("back.patch.L", join(litMarking("back.patch.L", { shape: back, paint: backPaint, spans: backLines }, saddle, { fill: C.marking, blur: 0.45 }),
+  add("back.patch.L", join(litMarking("back.patch.L", { shape: back, paint: backPaintF, spans: backLinesF }, saddle, { fill: C.marking, blur: 0.45 }),
     strands("back.patch.L", saddle, 0.45, [[[-8, -55], [-2.6, -52.4], [3.4, -47.6]], [[-4.4, -47.4], [1.6, -44.8], [7.4, -41]], [[3, -56], [7.6, -51.6], [11.8, -45.4]],
       [[-11, -51], [-7.4, -48], [-3.6, -45]]], { colour: C.earDeep, opacity: 0.38, width: 0.8 })));
-  add("rump.patch.L", litMarking("rump.patch.L", { shape: back, paint: backPaint, spans: backLines }, rump, { fill: C.marking, blur: 0.7, fade: rumpFade }));
+  // The rump's spot is the left side's only (model.json's marking map): side.R shows none.
+  if (F.shows("rump.patch.L")) add("rump.patch.L", litMarking("rump.patch.L", { shape: back, paint: backPaintF, spans: backLinesF }, rump, { fill: C.marking, blur: 0.7, fade: rumpFade }));
   // The hind paw a bun closed where it shows: one line along its sole, darkest on the ground, round its domed front and
   // on over its crown under the thigh, fading only where its back runs into the haunch.
-  add("hind.L", roomy(litPart("hind.L", hindNear, hindPaint(), [{ from: [-15.4, -1.3], to: [-12.6, -14.4], taper: [4, 8] }]), 6));
+  add("hind.L", roomy(litPart("hind.L", hindNear, hindPaint(F), [{ from: [-15.4, -1.3], to: [-12.6, -14.4], taper: [4, 8] }]), 6));
   // The near leg's line from the wrist, where the chest's edge meets it, round the paw's domed front and along its sole
   // to the heel, darkest where it meets the ground (the sheet's #795030 at its toe end).
-  add("front.L", roomy(litPart("front.L", legNear, legNearPaint(), [{ from: [-55.8, -25.2], to: [-35.8, -7.2], taper: 5 }]), 1));
+  add("front.L", roomy(litPart("front.L", legNear, legNearPaint(F), [{ from: [-55.8, -25.2], to: [-35.8, -7.2], taper: 5 }]), 1));
   const turn = uid("blur");
   add("collar", part("collar", collar, {
     fill: C.collar,
@@ -598,21 +626,22 @@ export function side(): Drawn[] {
     under: `<path d="M-63 -60 C-61 -60.4 -59.4 -60 -58.4 -59 C-58 -56.4 -58.2 -53.6 -59 -51 C-60.6 -50.4 -62 -51 -63 -52Z" fill="${C.collarLine}" opacity="0.55" filter="url(#${turn})"/>` +
       `<defs>${blur(turn, [-66, -63, 12, 15], 0.6)}</defs>` + collarContact(),
     outline: { colour: C.collarRim, width: THIN, taper: 3, blur: 0.2, spans: [{ from: [-17.8, -62.6], to: [-62, -57.4] }] },
+    light: F.light,
   }));
-  add("tag", tagPiece());
-  add("head.base", part("head.base", head, headPaint));
+  add("tag", tagPiece(F));
+  add("head.base", part("head.base", head, headPaintF));
   // The head patch, soft but defined, deepening a little toward the ear, as the sheet paints it.
-  add("head.patch.L", join(marking("head.patch.L", { shape: head, paint: headPaint }, patch, { fill: C.patch, blur: 0.5, clip: false }),
+  add("head.patch.L", join(marking("head.patch.L", { shape: head, paint: headPaintF }, patch, { fill: C.patch, blur: 0.5, clip: false }),
     deepen("head.patch.L", patch, 0.5, [-46, 0], [-28, 0], 0.5)));
   add("blush.L", blush());
   add("eye.L", eye(EYE), "open");
   add("brow.L", brow());
   add("nose", nose());
   add("mouth", mouth(), "smile");
-  add("head.line", headLinePiece());
-  add("ear.L", litPart("ear.L", ear, earPaint(), earSpans));
-  add("tuft", topknot(CURLS, { fill: C.fur, highlight: { d: headLight, colour: C.light, opacity: 0.4, blur: 4 }, feather: { from: [0, -146.4], to: [0, -150.4] } }));
-  return out;
+  add("head.line", headLinePiece(F));
+  add("ear.L", litPart("ear.L", ear, earPaint(F), earSpans));
+  add("tuft", topknot(CURLS, { fill: C.fur, highlight: { d: headLight(F), colour: C.light, opacity: 0.4, blur: 4 }, feather: { from: [0, -146.4], to: [0, -150.4] }, light: F.light }));
+  return F.finish(out);
 }
 
 /**

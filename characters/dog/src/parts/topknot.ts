@@ -7,7 +7,7 @@
 // itself. Each view types its curls' nodes, lines and notch strokes from its own crop.
 import { furSpan } from "../../../draw/fur.ts";
 import { pathD, sample, smooth, v, type Node, type P, type Shape } from "../../../draw/geom.ts";
-import type { Paint } from "../../../draw/paint.ts";
+import { LIGHT, type Paint } from "../../../draw/paint.ts";
 import { join, type Piece } from "../../../draw/svg.ts";
 import { C, LINES } from "../palette.ts";
 import { litPart, type LitSpan } from "./lines.ts";
@@ -50,9 +50,12 @@ export function topknot(curls: Curl[], paint: Paint): Piece {
   if (curls.length < 3 || curls.length > 5) throw new Error(`a topknot is 3 to 5 curls, not ${curls.length}`);
   const shapes = curlShapes(curls);
   const notchTone = LINES.cream[1]!;
+  // The curls drawn after this one lie in front of it: each casts its shade down and across away from the light (down
+  // and right under the top-left light; a facing drawn in its mirror passes the light it is drawn in).
+  const light = paint.light ?? LIGHT;
+  const away: P = [-Math.sign(light[0]) * 0.9, -Math.sign(light[1]) * 1.1];
   return join(...curls.map((c, k) => {
-    // The curls drawn after this one lie in front of it: each casts its shade down and right, away from the light.
-    const cast = shapes.slice(k + 1).map((s) => pathD(s.segs.map((g) => g.map(([x, y]): P => [x + 0.9, y + 1.1]) as typeof g)));
+    const cast = shapes.slice(k + 1).map((s) => pathD(s.segs.map((g) => g.map(([x, y]): P => [x + away[0], y + away[1]]) as typeof g)));
     return litPart("tuft", shapes[k]!, {
       ...paint,
       under: (paint.under ?? "") + (c.under ?? ""),
