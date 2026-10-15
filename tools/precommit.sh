@@ -1,11 +1,11 @@
 #!/bin/sh
 # Runs before every commit (spec section 5b, Guard rails) on exactly what is
 # being committed, the index, not the working tree: the copy lint and its
-# tests, the app code's strings, the QA tools' tests, the reference prep's
-# tests and outputs, the sheet match's and the placement guide's tests, the
-# runtimes' typecheck and tests, a check that the shared test vectors match the
-# code that writes them, and, when a commit touches what draws or judges the
-# dog, its front's sheet match. A fast Visual QA subset joins in phase 4, with the checks (PLAN.md).
+# tests, the app code's strings, the QA tools' tests, this hook's own tests, the
+# reference prep's tests and outputs, the sheet match's and the placement
+# guide's tests, the runtimes' typecheck and tests, a check that the shared test
+# vectors match the code that writes them, and, when a commit touches what draws
+# or judges the dog, its front's sheet match. A fast Visual QA subset joins in phase 4, with the checks (PLAN.md).
 set -e
 top=$(git rev-parse --show-toplevel)
 tmp=$(mktemp -d)
@@ -16,9 +16,14 @@ git -C "$top" checkout-index -a --prefix="$tmp/"
 staged=$(git -C "$top" diff --cached --name-only)
 
 # The sheet match's tests take the longest of the Python ones and need nothing
-# else, so they run beside everything below and are waited for at the end.
+# else, so they run beside everything below and are waited for at the end. They
+# read their own copy of characters/, so nothing below changes what they read
+# while they run: the reference prep's check rewrites ref/ and model.json, and
+# the front's match builds the dog into build/, whose atlas.json the match reads.
 if [ -d "$tmp/characters/sheetmatch" ]; then
-  PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s "$tmp/characters/sheetmatch" -q > "$tmp/sheetmatch.log" 2>&1 &
+  mkdir "$tmp/sheetmatch-tests"
+  cp -R "$tmp/characters" "$tmp/sheetmatch-tests/characters"
+  PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s "$tmp/sheetmatch-tests/characters/sheetmatch" -q > "$tmp/sheetmatch.log" 2>&1 &
   sheetmatch=$!
 fi
 
@@ -31,6 +36,10 @@ fi
 # The Visual QA tools' own tests (the E1 check and parity).
 if [ -d "$tmp/tools/qa" ]; then
   python3 -m unittest discover -s "$tmp/tools/qa" -q
+fi
+# This hook's own tests, on the hook being committed.
+if [ -f "$tmp/tools/test_precommit.py" ]; then
+  PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s "$tmp/tools" -p test_precommit.py -q
 fi
 # The placement guide's tests.
 if [ -d "$tmp/tools/guide" ]; then

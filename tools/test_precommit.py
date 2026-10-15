@@ -1,0 +1,139 @@
+"""Tests for the pre-commit hook (tools/precommit.sh), run as git runs it, in a
+small repository of stand-ins: the copy lint, the reference prep and the sheet
+match's tests are stub scripts, and node, npm and npx are stubs that record the
+front's sheet match and build into build/ as look.ts does.
+
+    python3 -m unittest discover -s tools -p test_precommit.py -v
+
+The repository lives in a temporary folder and its git commands never see the
+repository the tests run in: every GIT_ variable a running commit exports is
+dropped from their environment."""
+import os
+import shutil
+import subprocess
+import tempfile
+import unittest
+from pathlib import Path
+
+HOOK = Path(__file__).resolve().parent / "precommit.sh"
+PASSES = "import unittest\n\n\nclass Stub(unittest.TestCase):\n    def test_stub(self):\n        pass\n"
+
+# The stand-ins, by path in the little repository.
+FILES = {
+    ".gitignore": "node_modules\n/build/\n",
+    "tools/copylint/copylint.py": "",
+    "tools/copylint/test_stub.py": PASSES,
+    "characters/refprep/test_stub.py": PASSES,
+    # Writes the species' ref/ again, as the real prep does: deleted, then written STUB_PREPARE_SECONDS later.
+    "characters/refprep/prepare.py": (
+        "import os\nimport shutil\nimport sys\nimport time\nfrom pathlib import Path\n\n"
+        "folder = Path(__file__).resolve().parents[1] / sys.argv[1] / 'ref'\n"
+        "text = (folder / 'sheet.txt').read_text()\nshutil.rmtree(folder)\n"
+        "time.sleep(float(os.environ.get('STUB_PREPARE_SECONDS', '0')))\n"
+        "folder.mkdir()\n(folder / 'sheet.txt').write_text(text)\n"),
+    # Reads what the sheet match's tests read, for STUB_READ_SECONDS, and fails if it changes under it: the
+    # references, and the dog's package in build/, whose atlas.json the match reads.
+    "characters/sheetmatch/test_reads.py": (
+        "import os\nimport time\nimport unittest\nfrom pathlib import Path\n\n"
+        "ROOT = Path(__file__).resolve().parents[2]\n\n\n"
+        "class Reads(unittest.TestCase):\n"
+        "    def test_what_it_reads_holds_still(self):\n"
+        "        sheet = ROOT / 'characters/dog/ref/sheet.txt'\n"
+        "        first = sheet.read_text()\n"
+        "        end = time.monotonic() + float(os.environ.get('STUB_READ_SECONDS', '0'))\n"
+        "        while True:\n"
+        "            self.assertEqual(sheet.read_text(), first)\n"
+        "            self.assertFalse((ROOT / 'build/characters/dog').exists(), 'the front match built under the tests')\n"
+        "            if time.monotonic() > end:\n"
+        "                break\n"
+        "            time.sleep(0.01)\n"),
+    "characters/sheetmatch/match.py": "",
+    "characters/dog/ref/sheet.txt": "the sheet\n",
+    "characters/dog/refmap/map.json": "{}\n",
+    "characters/dog/model.json": "{}\n",
+    "characters/dog/src/front.ts": "",
+    "characters/dog/test/dog.test.ts": "",
+    "characters/dog/DECISIONS.md": "",
+    "characters/draw/paint.ts": "",
+    "characters/build/build.ts": "",
+    "characters/format/vectors/v.json": "{}\n",
+    "runtime-web/src/rig.ts": "",
+    "runtime-web/lab/look.ts": "",
+    "runtime-web/test/rig.test.ts": "",
+    "docs/notes.md": "",
+    "package.json": "{}\n",
+    "tsconfig.json": "{}\n",
+}
+
+# node records the front match's folder and arguments and builds into build/ as look.ts does; npm and npx pass.
+NODE = """#!/bin/sh
+if [ "$1" = runtime-web/lab/look.ts ]; then
+  echo "$PWD $*" >> "$STUB_LOG"
+  mkdir -p build/characters/dog build/qa/front
+  echo '{}' > build/characters/dog/atlas.json
+  echo evidence > build/qa/front/compare.png
+  sleep "${STUB_LOOK_SECONDS:-0}"
+  exit "${STUB_LOOK_EXIT:-0}"
+fi
+"""
+
+
+class HookTest(unittest.TestCase):
+    def setUp(self):
+        self.folder = tempfile.TemporaryDirectory()
+        self.root = Path(self.folder.name)
+        self.repo = self.root / "repo"
+        self.log = self.root / "look.log"
+        bin_dir = self.root / "bin"
+        bin_dir.mkdir()
+        for name, script in (("node", NODE), ("npm", "#!/bin/sh\n"), ("npx", "#!/bin/sh\n")):
+            (bin_dir / name).write_text(script)
+            (bin_dir / name).chmod(0o755)
+        # Nothing of a running commit's git state reaches the little repository's git.
+        self.env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_") and k != "HUDDLINGS_FRONT_MATCH"}
+        self.env.update(PATH=f"{bin_dir}{os.pathsep}{os.environ['PATH']}", STUB_LOG=str(self.log), GIT_CONFIG_NOSYSTEM="1",
+                        GIT_AUTHOR_NAME="Hook test", GIT_AUTHOR_EMAIL="hook@example.com", GIT_COMMITTER_NAME="Hook test",
+                        GIT_COMMITTER_EMAIL="hook@example.com")
+        for name, text in FILES.items():
+            path = self.repo / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(text)
+        (self.repo / "tools").mkdir(exist_ok=True)
+        shutil.copy(HOOK, self.repo / "tools" / "precommit.sh")
+        (self.repo / "node_modules").mkdir()
+        self.git("init", "-q")
+        self.git("add", "-A")
+        self.git("-c", "core.hooksPath=/dev/null", "-c", "commit.gpgsign=false", "commit", "-q", "-m", "stand-ins")
+
+    def tearDown(self):
+        self.folder.cleanup()
+
+    def git(self, *args, cwd=None):
+        return subprocess.run(["git", *args], cwd=cwd or self.repo, env=self.env, check=True, capture_output=True, text=True).stdout
+
+    def hook(self, *changed, cwd=None, **env):
+        """Changes and stages each file, then runs the hook as git would: its exit code, what it said, and the
+        front match's runs."""
+        cwd = cwd or self.repo
+        for name in changed:
+            with open(cwd / name, "a") as f:
+                f.write("\n")
+            self.git("add", name, cwd=cwd)
+        self.log.unlink(missing_ok=True)
+        ran = subprocess.run(["sh", "tools/precommit.sh"], cwd=cwd, env={**self.env, **env}, capture_output=True, text=True)
+        looks = self.log.read_text().splitlines() if self.log.exists() else []
+        return ran.returncode, ran.stdout + ran.stderr, looks
+
+    def test_the_reference_prep_check_never_rewrites_what_the_sheet_match_tests_read(self):
+        # Before, it deleted and wrote ref/ again in the one checkout while they read it.
+        code, said, _ = self.hook("characters/dog/refmap/map.json", HUDDLINGS_FRONT_MATCH="0", STUB_READ_SECONDS="1.2", STUB_PREPARE_SECONDS="0.3")
+        self.assertEqual(code, 0, said)
+
+    def test_the_front_match_never_builds_where_the_sheet_match_tests_read(self):
+        # Before, it built the dog into the one checkout's build/, whose atlas.json the match reads, while they ran.
+        code, said, looks = self.hook("characters/dog/src/front.ts", HUDDLINGS_FRONT_MATCH="1", STUB_READ_SECONDS="1.2")
+        self.assertEqual(code, 0, said)
+        self.assertEqual(len(looks), 1, "the front match ran while they read")
+
+if __name__ == "__main__":
+    unittest.main()
