@@ -41,19 +41,19 @@
  },
  "alignment": {
   "rootOnCropGroundPlusHalf": true,
-  "bestFitShiftPx": [-0.12, 0.07],
-  "bestFitShiftPt": [-0.1, 0.06],
-  "iouAtBestWholePixelShift": 0.979,
+  "bestFitShiftPx": [-0.13, -0.06],
+  "bestFitShiftPt": [-0.1, -0.05],
+  "iouAtBestWholePixelShift": 0.9782,
   "thresholdPx": 2.0,
   "pass": true
  },
  "silhouette": {
-  "iou": 0.979,
+  "iou": 0.9782,
   "threshold": 0.9,
   "groundShadowLeftOut": true,
   "pass": true,
-  "iouHeadAligned": 0.9789,
-  "headCentreOffsetPt": [0.04, -0.6]
+  "iouHeadAligned": 0.9782,
+  "headCentreOffsetPt": [-0.01, -0.12]
  },
  "landmarks": {
   "thresholdPt": 2.8,
@@ -148,10 +148,10 @@
    },
    "head.top": {
     "how": "finder",
-    "found": [0.05, -164.0],
+    "found": [-0.33, -164.0],
     "model": [0.8, -164.0],
-    "errPt": 0.75,
-    "errShareOfHead": 0.008,
+    "errPt": 1.13,
+    "errShareOfHead": 0.012,
     "pass": true
    },
    "mouth.L": {
@@ -248,7 +248,7 @@
     "heldTo": "#FFF4E8",
     "heldBy": "palette.fur",
     "deltaE2000": 0.0,
-    "pixels": 14853,
+    "pixels": 14766,
     "pass": true
    },
    "furShade": {
@@ -256,7 +256,7 @@
     "heldTo": "#FDE3C8",
     "heldBy": "palettePainted.furShade",
     "deltaE2000": 0.44,
-    "pixels": 1272,
+    "pixels": 1219,
     "pass": true
    },
    "eyes": {
@@ -512,12 +512,12 @@
  },
  "advisory": {
   "edgeDistance": {
-   "meanRenderToSheetPt": 0.6,
-   "p95RenderToSheetPt": 1.74,
-   "meanSheetToRenderPt": 0.59,
-   "p95SheetToRenderPt": 1.74,
+   "meanRenderToSheetPt": 0.62,
+   "p95RenderToSheetPt": 2.2,
+   "meanSheetToRenderPt": 0.61,
+   "p95SheetToRenderPt": 1.97,
    "targetP95Pt": 2.0,
-   "meetsTarget": true
+   "meetsTarget": false
   },
   "partIoU": {
    "collar": {
@@ -545,7 +545,7 @@
    "set": "3x",
    "pages": 1,
    "pageAreaPx": 4194304,
-   "allRegionsShare": 0.353,
+   "allRegionsShare": 0.352,
    "thisStillShare": 0.125
   }
  },

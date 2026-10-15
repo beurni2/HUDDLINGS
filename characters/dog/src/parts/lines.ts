@@ -84,7 +84,9 @@ export function litRibbons(shape: Shape, spans: LitSpan[], where: string, o: Lit
       for (let j = i + 1; j < pts.length && at[j]! - at[i]! <= 1.5; j++) (sum += raw[j]!, n++);
       return sum / n;
     });
-    const [t0, t1] = typeof span.taper === "object" ? span.taper : [span.taper ?? Math.min(5, length / 3), span.taper ?? Math.min(5, length / 3)];
+    const [a0, a1] = typeof span.taper === "object" ? span.taper : [span.taper ?? Math.min(5, length / 3), span.taper ?? Math.min(5, length / 3)];
+    // A short span tapers over no more than three quarters of its length, so it always swells to its full width.
+    const fit = Math.min(1, (0.75 * length) / (a0 + a1)), t0 = a0 * fit, t1 = a1 * fit;
     const phase = [(k * 2.39) % 6.28, (k * 4.11) % 6.28];
     const w = d.map((di, i) => {
       const s = at[i]!;

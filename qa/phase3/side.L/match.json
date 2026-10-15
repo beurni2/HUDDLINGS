@@ -41,19 +41,19 @@
  },
  "alignment": {
   "rootOnCropGroundPlusHalf": true,
-  "bestFitShiftPx": [0.17, 0.68],
-  "bestFitShiftPt": [0.13, 0.53],
-  "iouAtBestWholePixelShift": 0.9674,
+  "bestFitShiftPx": [0.15, 0.8],
+  "bestFitShiftPt": [0.12, 0.62],
+  "iouAtBestWholePixelShift": 0.9683,
   "thresholdPx": 2.0,
   "pass": true
  },
  "silhouette": {
-  "iou": 0.9657,
+  "iou": 0.965,
   "threshold": 0.85,
   "groundShadowLeftOut": true,
   "pass": true,
-  "iouHeadAligned": 0.9649,
-  "headCentreOffsetPt": [0.31, -0.45]
+  "iouHeadAligned": 0.9637,
+  "headCentreOffsetPt": [0.4, -0.77]
  },
  "landmarks": {
   "thresholdPt": 2.8,
@@ -199,7 +199,7 @@
     "heldTo": "#FFF4E8",
     "heldBy": "palette.fur",
     "deltaE2000": 0.0,
-    "pixels": 13017,
+    "pixels": 13070,
     "pass": true
    },
    "furShade": {
@@ -207,7 +207,7 @@
     "heldTo": "#FDE3C8",
     "heldBy": "palettePainted.furShade",
     "deltaE2000": 0.44,
-    "pixels": 1772,
+    "pixels": 1796,
     "pass": true
    },
    "eyes": {
@@ -431,9 +431,9 @@
  },
  "advisory": {
   "edgeDistance": {
-   "meanRenderToSheetPt": 0.91,
+   "meanRenderToSheetPt": 0.93,
    "p95RenderToSheetPt": 2.33,
-   "meanSheetToRenderPt": 0.84,
+   "meanSheetToRenderPt": 0.87,
    "p95SheetToRenderPt": 2.2,
    "targetP95Pt": 2.0,
    "meetsTarget": false
@@ -459,8 +459,8 @@
    "set": "3x",
    "pages": 1,
    "pageAreaPx": 4194304,
-   "allRegionsShare": 0.353,
-   "thisStillShare": 0.107
+   "allRegionsShare": 0.352,
+   "thisStillShare": 0.106
   }
  },
  "failed": [],

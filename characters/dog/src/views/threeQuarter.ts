@@ -13,6 +13,7 @@ import { model } from "../model.ts";
 import { C } from "../palette.ts";
 import { eye, type EyeSpec } from "../parts/eye.ts";
 import { litEdge, litMarking, litPart, withDefaults, type LitSpan } from "../parts/lines.ts";
+import { curlShapes, topknot, type Curl } from "../parts/topknot.ts";
 import type { Drawn } from "./front.ts";
 
 const INNER = model.outline.innerPt;
@@ -144,16 +145,24 @@ head = furSpan(head, [3.2, -137.4], [0.4, -135.5]);
 // draws them, so the root has no flat top edge.
 head = furEdge(head, [-3.8, -135], [-15.4, -131], [{ len: 1.8, w: 1.3, lean: 0.3 }, { len: 0.9, w: 0.9, lean: 0.25 }, { len: 1.4, w: 1.1, lean: 0.3 }], 0.42);
 
-// The topknot: an upright sprig of three fur lobes, typed node by node (the sheet's tuft, seen turned), each side
-// lobe a petal of fur: the left one low and broad, pointing out to its tip at the left (x -67.2) and drawn back
-// under itself along its lower edge; the middle one tall and leaning a little, its top the head's highest point, its
-// right foot curling in under itself; the right one low, pointing out to its tip at the right (x -9.9) and drawn
-// back under over the crown's edge. Its foot lies hidden in the crown.
-const TUFT_NOTCHES = [6, 13];
-const tuft = furSpan(smooth([[-55.6, -149.2], [-60.2, -150], [-64.4, -151.6], [-67.2, -153.8], [-65.4, -156.2], [-58.4, -158.3], [-52.2, -157.9],
-  [-48.6, -154.9], [-46.2, -159.8], [-40.9, -163.4], [-35.2, -164.6], [-30.6, -162.6], [-29.4, -159], [-30.4, -155.6], [-31.4, -154.4],
-  [-27.4, -156.1], [-22, -156.9], [-15.2, -155.6], [-10.6, -153.6], [-9.9, -151.7], [-12.2, -149.8], [-15, -148.5], [-18.6, -147.6], [-40, -145.6]],
-  { corners: [3, 7, 14, 19] }), [-55.6, -149.2], [-18.6, -147.6]);
+// The topknot (parts/topknot.ts): three separate curls of fur, seen turned, as the sheet draws them, back to front.
+// The left curl low and broad, pointing out to its tip at the left (x -67.2), its line running from under the tip
+// round it and over its crown (y -158.4) to where it tucks behind the middle one; the right curl low, rising from
+// behind the middle one over its crown (y -157) to its tip at the right (x -9.6), which hooks back in under itself;
+// and in front the tall middle curl, its top the head's highest point (y -164.5), its right foot looping in under it.
+// Each curl's hidden foot lies in the crown, feathered into it.
+const CURLS: Curl[] = [
+  { nodes: [[-67.2, -153.8], [-65.4, -156.2], [-61.4, -157.8], [-56.6, -158.4], [-52.2, -157.6], [-48.8, -154.8], [-46.4, -151], [-50, -147.4], [-56, -148.2],
+    [-61.4, -150.4], [-64.6, -151.8]],
+    line: { from: [-61.6, -150.4], to: [-48.8, -154.8], taper: [2, 2.4] }, hooks: [[[-64.4, -152.6], [-62, -152.4], [-59.4, -151.6]]] },
+  { nodes: [[-32, -152], [-30, -155.2], [-26.4, -156.6], [-21.4, -157], [-16.4, -156.2], [-12.2, -153.8], [-9.6, -151], [-11.4, -148.8], [-16.6, -147.6],
+    [-24, -147], [-31, -148.4]],
+    line: { from: [-30.4, -155], to: [-16.6, -147.6], taper: [2.4, 1.4] }, hooks: [[[-10.4, -151.2], [-12.6, -150.4], [-15.2, -150.2]]] },
+  { nodes: [[-48.6, -154.4], [-46.4, -159.4], [-41.6, -163], [-35.6, -164.5], [-31, -162.8], [-29.4, -159.4], [-30.2, -155.6], [-31.6, -153.6], [-33, -150],
+    [-40, -146.6], [-46, -149]],
+    line: { from: [-48.6, -154.4], to: [-31.6, -153.6], taper: [2, 2.2] }, hooks: [[[-31.4, -153.8], [-33, -153.2], [-34.8, -153.8], [-35.6, -155.2]]] },
+];
+const tuftShapes = curlShapes(CURLS);
 
 // The head patches, in the paler tan (DECISIONS 18). The near one (the dog's left) is a broad hood arching over
 // the top and the outer side of the near eye, its top edge about 9 pt above the eye with the brow in the cream above
@@ -213,7 +222,7 @@ const furShade = (group: Shape[], shapes: string[] = [], keep: string[] = [], ri
 const hipGroup = [back, hind];
 /** The chest and both front legs share one light, so neither leg's join with the chest takes a rim of shade. */
 const bodyGroup = [chest, legL, legR];
-const headGroup = [head, tuft];
+const headGroup = [head, ...tuftShapes];
 
 /** The thigh's front line, the gap's shade beside it and the line's fade, painted into the back body (thighLayers). */
 const THIGH = uid("thigh"), GAP = uid("gap"), GAP_BLUR = uid("blur");
@@ -615,19 +624,7 @@ export function threeQuarter(): Drawn[] {
   add("nose", nose());
   add("mouth", mouth(), "open");
   add("head.line", headLinePiece());
-  // The topknot's line, light and warm, breaking at each notch between the lobes; strand strokes running down from
-  // the notches into the crown, as the sheet draws them; its shade only a thin rim on the lobes' far sides, so it reads as
-  // fur standing up from the crown, not a cap on it.
-  const strands: P[][] = [[[-48.6, -154.4], [-48.8, -151.8], [-48.2, -149.2]], [[-30.6, -156], [-32.4, -154.6], [-34.4, -153.8]],
-    [[-31.6, -154], [-30.4, -151.8], [-29.4, -149.8]]];
-  add("tuft", litPart("tuft", tuft, {
-    fill: C.fur,
-    shade: { multiply: C.furShadeBy, rim: { inset: 2, toLight: 2.6 }, group: headGroup, keep: ["M-80 -152 L10 -152 L10 -130 L-80 -130Z"], blur: 2 },
-    highlight: { d: headLight, colour: C.light, opacity: 0.4, blur: 4 },
-    inner: strands.map((pts) => ({ pts: sample(smooth(pts, { closed: false }).segs, 6, false), width: 0.75, colour: C.crownLine, opacity: 0.7 })),
-    feather: { from: [-38, -146.2], to: [-38, -149.8] },
-  }, withDefaults({ taper: 2 }, [{ from: [-56.6, -149.4], to: [-48.6, -154.9] }, { from: [-48.6, -154.9], to: [-31.4, -154.4] },
-    { from: [-31.4, -154.4], to: [-18.6, -147.6] }])));
+  add("tuft", topknot(CURLS, { fill: C.fur, highlight: { d: headLight, colour: C.light, opacity: 0.4, blur: 4 }, feather: { from: [-38, -146.2], to: [-38, -149.8] } }));
   // The near leg's line: up its back edge from the paw's heel it fades out before the thigh, as the sheet's does,
   // so the leg is no column; round the paw it is the paws' grey-brown line; up its front from the wrist it lightens
   // and fades out where the leg leaves the chest. Inside its back edge, the leg's own shade where it turns away

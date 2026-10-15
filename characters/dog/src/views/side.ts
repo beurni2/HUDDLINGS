@@ -17,6 +17,7 @@ import { model } from "../model.ts";
 import { C } from "../palette.ts";
 import { eye, type EyeSpec } from "../parts/eye.ts";
 import { litEdge, litMarking, litPart, type LitSpan } from "../parts/lines.ts";
+import { curlShapes, topknot, type Curl } from "../parts/topknot.ts";
 import type { Drawn } from "./front.ts";
 
 const INNER = model.outline.innerPt;
@@ -155,7 +156,8 @@ const ear = furEdge(furEdge(smooth([[8.6, -134.4], [13.4, -125], [16.4, -114.6],
 // small lock above the ear (x 3 at y -143), and behind the ear and along the
 // collar's top, hidden.
 /** Each forehead lock's tip, its root and its notches (path order), for the hook drawn into it. */
-const foreLocks: { tip: P; root: P; notches: [P, P] }[] = [];
+type Lock = { tip: P; root: P; notches: [P, P] };
+const foreLocks: Lock[] = [];
 const noteLock = (tip: P, root: P, notches: [P, P]) => foreLocks.push({ tip, root, notches });
 const head = furEdge(furEdge(smooth([[-60.8, -59.6], [-70, -63.8], [-80.6, -67.4], [-91.8, -76.2], [-92.8, -80.2], [-95.2, -85.6], [-96.6, -92.2],
   [-96, -97.2], [-92.4, -100.3], [-85, -104.4], [-84, -112.6], [-81, -124.4], [-77.8, -132.6], [-74, -140.2], [-69, -146.4], [-62.6, -151.4],
@@ -166,16 +168,25 @@ const head = furEdge(furEdge(smooth([[-60.8, -59.6], [-70, -63.8], [-80.6, -67.4
 // Down the back of the head, between the topknot and the ear's top, one small lock, its tip hooking in, as the sheet draws it.
 [-1.6, -147.6], [5, -138.6], [{ len: 1.1, w: 1, lean: -0.35 }], 0.32, noteLock);
 
-// The topknot (tuft): three fur locks on the crown, front to back, as the
-// sheet draws them: a low one over the forehead, its tip combed forward (x
-// -59.8 at y -155.2) and hooking back under itself; the tall middle one, a
-// round dome (the head's top, x -37.7) whose front curls in on itself; and a
-// lower one at the back whose tip hooks back in (x -6.4 at y -153). Each notch
-// between them is a soft dip; its foot lies on the crown, feathered.
-const TUFT_NOTCHES = [6, 16];
-const tuft = furSpan(smooth([[-63, -150.6], [-61.8, -153.4], [-59.8, -155.2], [-57.4, -156.6], [-54.2, -157.2], [-51, -156.4], [-48.4, -154.6], [-46, -157],
-  [-43.4, -161.2], [-40.6, -163.6], [-37.4, -164.5], [-33.8, -164.2], [-30.2, -163.2], [-27, -161.4], [-24.4, -159], [-22.6, -157], [-21, -156.4], [-16.6, -156.8],
-  [-11.6, -156.4], [-7.8, -155], [-5.6, -152.6], [-6.2, -149.8], [-22, -147], [-56, -146.6]], { corners: TUFT_NOTCHES }), [-63, -150.6], [-5.6, -152.6]);
+// The topknot (parts/topknot.ts): five curls in profile, stepping up from the forehead to the tall one and down the
+// back of the head, as the sheet draws them. The forehead's two locks are the head's own edge (above), each with its
+// own line; the topknot proper is three separate curls, back to front: a low one over the forehead, its tip combed
+// forward (x -63.2) and hooking back under itself, its crown at y -158.2; a lower one at the back, coming out from
+// behind the tall one, whose tip hooks back in (x -5.6 at y -152.6); and in front the tall middle one, a round dome
+// (the head's top, x -36.8 at y -164.5) whose front curls in and loops round inside it. Each curl's foot lies on the
+// crown, feathered into it.
+const CURLS: Curl[] = [
+  { nodes: [[-63.2, -150.8], [-62.2, -154], [-59.6, -156.6], [-56, -158.2], [-52.4, -158.2], [-49.4, -156.6], [-47.4, -153.6], [-46, -150], [-52, -147.4],
+    [-58, -147.6], [-61.6, -149]],
+    line: { from: [-63, -150.6], to: [-47.6, -154], taper: [1.4, 2.4] }, hooks: [[[-61.6, -154.4], [-59.8, -153], [-57.4, -152.4], [-55, -152.4]]] },
+  { nodes: [[-23.6, -153], [-21, -156.6], [-16.6, -157.2], [-11.6, -156.6], [-7.8, -155.2], [-5.6, -152.6], [-6.4, -150], [-12, -148.4], [-20, -147.6]],
+    line: { from: [-21.4, -156.4], to: [-6.4, -150], taper: [2.4, 1.4] }, hooks: [[[-5.9, -152.6], [-7.6, -151.4], [-10.2, -151], [-13.2, -151.2]]] },
+  { nodes: [[-48.8, -154.4], [-46.6, -158], [-43.6, -161.6], [-40.4, -163.6], [-36.8, -164.5], [-33, -164.2], [-29.4, -162.8], [-26.2, -160.6], [-23.6, -158.2],
+    [-21.8, -156.4], [-22.6, -152], [-30, -148], [-42, -148], [-48, -150.6]],
+    line: { from: [-48.8, -154.4], to: [-21.8, -156.4], taper: [2, 2] },
+    hooks: [[[-42.6, -161.2], [-43.2, -158.8], [-42, -156.6], [-39.4, -155.3], [-36.4, -154.9]]] },
+];
+const tuftShapes = curlShapes(CURLS);
 
 // Markings.
 
@@ -223,7 +234,7 @@ const furShade = (group: Shape[], shapes: string[] = [], keep: string[] = [], ri
   ({ multiply: C.furShadeBy, rim, shapes, keep, group, blur: 2.4 });
 /** The near side of the body is one light group: back and haunch, chest, near legs. */
 const bodyGroup = [back, chest, legNear, hindNear];
-const headGroup = [head, tuft];
+const headGroup = [head, ...tuftShapes];
 
 const backPaint: Paint = {
   fill: C.fur,
@@ -362,11 +373,20 @@ const headPaint: Paint = {
  * the puffs' warm line (`puffLine`, #A77A58 against the sheet's #AC835F), where the front's crown is lighter. Along
  * the collar's top, under the chin's fur, the collar's own contact rim (collarContact).
  */
+const [lock1, lock2, backLock] = foreLocks as [Lock, Lock, Lock];
 const headSpans: LitSpan[] = [
   // The bridge, from the nose's top to the stop, the muzzle's own line, deeper than the crown's (the sheet's #987A5F).
   { from: [-88.8, -100.6], to: [-84.6, -108.6], under: 0.55, taper: [2, 3] },
-  { from: [-85.2, -106.6], to: [-54, -153.4], taper: [3, 4] },
-  { from: [-14, -154], to: [6.6, -136.4], taper: 4 },
+  // Up the forehead and round each of its two locks, each lock its own line breaking at its notches, on up to the
+  // topknot's front curl.
+  { from: [-85.2, -106.6], to: lock1.notches[0], taper: [3, 1.2] },
+  { from: lock1.notches[0], to: lock1.notches[1], taper: 1.4 },
+  { from: lock2.notches[0], to: lock2.notches[1], taper: 1.4 },
+  { from: lock2.notches[1], to: [-62.2, -151.2], taper: [1.2, 3] },
+  // Down the back of the head, round its small lock, to the ear's top.
+  { from: [-14, -154], to: backLock.notches[0], taper: [3, 1.2] },
+  { from: backLock.notches[0], to: backLock.notches[1], taper: 1.4 },
+  { from: backLock.notches[1], to: [6.6, -136.4], taper: [1.2, 4] },
   // Under the chin and along the jaw (the sheet's #AC8D74).
   { from: [-61.6, -60.2], to: [-92.5, -79.4], under: 0.4, taper: 4 },
 ];
@@ -638,19 +658,7 @@ export function side(): Drawn[] {
   add("mouth", mouth(), "smile");
   add("head.line", headLinePiece());
   add("ear.L", litPart("ear.L", ear, earPaint(), earSpans));
-  add("tuft", litPart("tuft", tuft, {
-    fill: C.fur,
-    shade: { multiply: C.furShadeBy, rim: { inset: 3, toLight: 4.5 }, group: headGroup, keep: ["M-70 -168 L0 -168 L0 -150 L-70 -150Z"], blur: 2.4 },
-    highlight: { d: headLight, colour: C.light, opacity: 0.4, blur: 4 },
-    // The locks' hooks, as the sheet draws them: under the front lock's tip, back along its underside; the middle
-    // dome's front curling down and in on itself; under the back lock's tip, back along its underside.
-    inner: [
-      { pts: [[-59.6, -154.8], [-58, -153.4], [-55.6, -152.4], [-52.4, -152]], width: 0.9, colour: C.puffLine },
-      { pts: [[-42.6, -161.2], [-43.2, -158.8], [-42, -156.6], [-39.4, -155.3], [-36.4, -154.9]], width: 0.9, colour: C.puffLine },
-      { pts: [[-5.9, -152.6], [-7.6, -151.4], [-10.2, -151], [-13.2, -151.2]], width: 0.9, colour: C.puffLine },
-    ],
-    feather: { from: [0, -146.4], to: [0, -150.4] },
-  }, [{ from: [-63, -150.6], to: [-5.8, -151.6], taper: 1.6 }]));
+  add("tuft", topknot(CURLS, { fill: C.fur, highlight: { d: headLight, colour: C.light, opacity: 0.4, blur: 4 }, feather: { from: [0, -146.4], to: [0, -150.4] } }));
   return out;
 }
 
