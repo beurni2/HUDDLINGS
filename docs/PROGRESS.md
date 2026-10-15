@@ -11,9 +11,9 @@ Kept current every session (CLAUDE.md). One section per lane; each lane edits on
 
 **In progress: phase 3, drawing the dog** (section 5b; `PLAN.md`), ending at Gate A: every part in its six facings and every face state, drawn in TypeScript from `model.json`, beside the sheet crops, with the sheet match. The plan, from a design panel of three independent prototyped designs, is `docs/phase3-plan.md`.
 - Done on the branch: the drawing kit (`characters/draw/`, with a lint that refuses images, unbounded masks, off-palette colours and lines outside their bands as drawn), the build in crash-isolated child processes with a raster cache, the stills renderer and look loop (`npm run look -- dog front`, about 5 s), and the automated sheet match (`characters/sheetmatch/`) in CI and the pre-commit hook.
-- The front view: three independent redraws judged against the sheet, the best (front b) grafted with the others' best parts, then three judged polish rounds. Every sheet-match gate passes: silhouette IoU 0.98, all 22 landmarks within 2.8 pt, every palette region within ΔE 1.4, both cheeks' blush at 0.34, markings placed. Fresh judges score it 3 to 4 out of 5 on on-model, face and charm; what holds it back is a vector finish where the sheet is a soft painting.
-- In progress: a final judged polish round (fur grain, cheek puffs, ear roots, mouth, legs and paws), and the harness review's last fixes.
-- Next: the front view in its own pull request, so you can stop me early if the look is wrong. It is not a gate.
+- The front view: three independent redraws judged against the sheet, the best (front b) grafted with the others' best parts, then five judged polish rounds. Every sheet-match gate passes: silhouette IoU 0.978, all 22 landmarks within 2.8 pt, every palette region within ΔE 1.1, both cheeks' blush at 0.34 and 0.35, markings placed (`qa/phase3/front/`). Fresh reviewers score it 4 on-model and 3 to 3.5 on face and charm (`qa/phase3/front/review.md`); the eyes' white crescent, the ear roots, the legs and the cheek fluff are what they still want.
+- In review: the front view's pull request, an early look so you can stop me if the look is wrong. It is not a gate.
+- Next, while you look: the reviewers' fixes on the front, the chin's shadow on the collar (`DECISIONS.md` 33), then the three-quarter and side views (`docs/phase3-plan.md`).
 
 **Blockers**
 - For TestFlight at the end of phase 1: the Apple pieces in `PLAN.md`, What I need from you (Team ID, API key, your iPhone registered once, the app record and bundle ID).
