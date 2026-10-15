@@ -117,25 +117,26 @@ const ears = { R: earR, L: earL };
 // to the chin, dipping lowest under the near cheek, and rises from the chin up the far side of the jaw to the far
 // cheek's puff, which bulges out over the far ear; above it the face's far side runs up over the far ear to its
 // root and the crown.
-const headNodes: Node[] = [[-68.6, -149.6], [-46, -152.6], [-11.2, -149.6], [-2.4, -144.2], [3.6, -136.8], [1.4, -135.6], [-18.2, -132.2], [-19.8, -129.4], [-13.6, -115.4],
-  [-11.4, -105], [-14.2, -91], [-17.4, -78], [-15.8, -67.2], [-26, -61.4], [-48, -58.4], [-61.7, -59.8], [-73.5, -62.4], [-84.2, -68.6], [-90.8, -76.2],
-  [-96.6, -84.2], [-97.6, -93.4], [-91.2, -100.6], [-88.8, -121.6], [-79.6, -143.8]];
+const headNodes: Node[] = [[-68.6, -149.6], [-11.2, -149.6], [-2.4, -144.2], [3.6, -136.8], [1.4, -135.6], [-18.2, -132.2], [-19.8, -129.4], [-13.6, -115.4],
+  [-11.4, -105], [-14.2, -91], [-17.4, -78], [-15.8, -67.2], [-26, -61.4], [-48, -58.4], [-73.5, -62.4], [-84.2, -68.6], [-90.6, -74.4],
+  [-96.4, -79.2], [-99.6, -84.4], [-100.4, -90.4], [-96.6, -97.4], [-91.2, -100.6], [-88.8, -121.6], [-79.6, -143.8]];
 /**
  * The overhang's tip over the near ear's root; where the face's near side leaves the overhang's underside, a concave
  * corner; and where the far cheek's puff comes out from under the side's line.
  */
-const OVERHANG = 5, TEMPLE = 7, PUFF = 21;
+const OVERHANG = 4, TEMPLE = 6, PUFF = 21;
 let head = smooth(headNodes, { corners: [OVERHANG, TEMPLE, PUFF] });
 // The far cheek's puff breaks into a few soft clumps of fur along its lower and outer edge, and the jaw's fur
 // hangs over the collar in a row of small uneven tufts, as the sheet draws them.
-const cheekLocks: Lock[] = [{ len: 0.8, w: 0.9, lean: 0.25 }, { len: 1.5, w: 1.4, lean: 0.35 }, { len: 0.7, w: 0.8, lean: 0.3 }, { len: 1.2, w: 1.2, lean: 0.4 }];
+const cheekLocks: Lock[] = [{ len: 0.6, w: 0.9, lean: 0.25 }, { len: 1.1, w: 1.4, lean: 0.35 }, { len: 0.5, w: 0.8, lean: 0.3 }, { len: 0.9, w: 1.2, lean: 0.4 },
+  { len: 0.6, w: 0.9, lean: 0.35 }];
 // Under the chin the fur hangs over the collar in a few soft tufts of uneven size, not a row of even scallops.
 const chinLocks: Lock[] = [{ len: 0.9, w: 1.3, lean: 0.35 }, { len: 0.5, w: 0.7, lean: 0.25 }, { len: 1.3, w: 1.6, lean: 0.3 }, { len: 0.6, w: 0.8, lean: 0.1 },
   { len: 1.1, w: 1.4, lean: -0.05 }, { len: 0.7, w: 0.9, lean: -0.15 }];
 /** Each cheek clump's tip, root and notches (path order), for its line. */
 const clumps: { tip: P; root: P; notches: [P, P] }[] = [];
 head = furEdge(head, [-24, -61.8], [-70, -61.6], chinLocks, 0.34);
-head = furEdge(head, [-90.8, -76.2], [-97.4, -94], cheekLocks, 0.4, (tip, root, notches) => clumps.push({ tip, root, notches }));
+head = furEdge(head, [-91.4, -75], [-99.2, -94.2], cheekLocks, 0.4, (tip, root, notches) => clumps.push({ tip, root, notches }));
 // The crown's fur where it overhangs the near ear's root is a lock of fur, its tip a fur span.
 head = furSpan(head, [3.2, -137.4], [0.4, -135.5]);
 // Under the overhang the crown's cream fur hangs down over the near ear's root in a few soft locks, as the sheet
@@ -246,16 +247,16 @@ const backPaint: Paint = {
 };
 
 const headLight = "M-64 -150 C-52 -158 -30 -158 -18 -152 C-24 -142 -50 -140 -62 -144Z " +
-  "M-97 -91 C-96.6 -96 -93 -98 -89.6 -96.6 C-88.4 -92 -89.6 -87 -92.6 -84.6 C-95.4 -85.4 -97.2 -88 -97 -91Z";
+  "M-99.4 -90 C-99 -95 -95.4 -97.6 -91.6 -96.4 C-90.2 -92 -91.4 -86 -94.6 -83.4 C-97.6 -84.2 -99.6 -86.8 -99.4 -90Z";
 const headPaint: Paint = {
   fill: C.fur,
   // Under the jaw over the collar, where the head turns under; the far side of the jaw away from the light; and
   // a faint wash in the near hood just over the eye, under the brow.
-  shade: furShade(headGroup, ["M-74 -64 C-56 -60 -36 -59 -14 -64 L-14 -52 L-74 -52Z", "M-94 -80 C-86 -70 -80 -66 -72 -64 L-72 -54 L-100 -60Z",
+  shade: furShade(headGroup, ["M-74 -64 C-56 -60 -36 -59 -14 -64 L-14 -52 L-74 -52Z", "M-96 -79 C-87 -70 -80 -66 -72 -64 L-72 -54 L-102 -60Z",
     `M${fmt(LM["eye.L"]![0] - 8)} ${fmt(LM["eye.L"]![1] - 10.4)} a8 2 0 1 0 16 0 a8 2 0 1 0 -16 0Z`],
     // The crown stays light right out to its line, as the sheet paints it, the overhang over the near ear's root
     // included; and so does the far cheek's puff.
-    ["M-100 -172 L10 -172 L10 -140 L-100 -140Z", "M-30 -141 L10 -141 L10 -131 L-30 -131Z", "M-100 -100 L-88 -100 L-88 -80 L-100 -80Z"], { inset: 3, toLight: 4.5 }),
+    ["M-100 -172 L10 -172 L10 -140 L-100 -140Z", "M-30 -141 L10 -141 L10 -131 L-30 -131Z", "M-103 -101 L-88 -101 L-88 -80 L-103 -80Z"], { inset: 3, toLight: 4.5 }),
   highlight: { d: headLight, colour: C.light, opacity: 0.4, blur: 4 },
 };
 
@@ -269,7 +270,7 @@ const SEAM_R = uid("seam"), SEAM_L = uid("seam");
 const headLine: Outline = { ...OUTLINE, taper: 4, blur: 0.15, spans: [
   { from: [-91, -102], to: [-82.4, -139.6], width: THIN, colour: `url(#${SEAM_R})` },
   { from: [-16.4, -120], to: [-17, -73], width: THIN, colour: `url(#${SEAM_L})` },
-  { from: [-74, -62.6], to: [-90.6, -76], width: THIN, colour: C.crownLine },
+  { from: [-74, -62.6], to: [-91, -74.8], width: THIN, colour: C.crownLine },
 ] };
 const crownLine: Outline = { ...headLine, taper: 1.4, spans: [
   { from: [-85.4, -138.6], to: [-66, -150.6], width: THIN, colour: C.crownLine },
@@ -713,13 +714,15 @@ export function threeQuarter(): Drawn[] {
 /** Points the sheet has no finder for, where this drawing puts them (dev output for the sheet match). */
 export const landmarks: Record<string, P> = {
   // Each paw's centre (DECISIONS 11), the middle of its rounded end: midway between its sides and between the wrist,
-  // where its round begins, and its sole. The near front paw: sides x -59.8 and -28.2, round from y -15.6 to -1.2.
-  "paw.front.L": [-44, -8.4],
-  // The far front paw: from its toe end (x -83.1) to where it goes behind the near paw (-59.6), round from y -18.4 to -3.
-  "paw.front.R": [-71.4, -10.7],
-  // The near hind paw: from its toe end (x -30.6) to where its top line fades into the haunch (-9.2), round from y -17.1
-  // to its sole at -1.
-  "paw.hind.L": [-19.9, -9],
+  // where its round begins, and its sole. The near front paw: from its front (x -59.1) to its heel (-30.2), round from
+  // the wrist (y -15.8) to its sole (-1.5).
+  "paw.front.L": [-44.7, -8.7],
+  // The far front paw: from its toe end (x -83.2) to where it goes behind the near paw (-59.1), round from its wrist
+  // (y -19.6) to its sole (-3.5).
+  "paw.front.R": [-71.2, -11.6],
+  // The near hind paw: from its toe end (x -26.8) to where its back end begins to fade into the haunch (-10), round
+  // from its crown (y -16.7) to its sole (-1.5).
+  "paw.hind.L": [-18.4, -9.1],
   // The ring's top as it shows below the jaw, from which the tag swings.
   "tag.ring": [TAG_X, LM["tag.ring"]![1] + 0.4],
   // The seat: the haunch's underside on the midline, behind the hind paw, at y -1.6, taken 0.8 pt inside.
