@@ -13,8 +13,9 @@ the sheet paints that the printed palette lacks, each for its own region, as
 the founder decided (docs/QUESTIONS.md, Q24). Each crop record keeps its box
 in sheet pixels and its anchors in crop pixels, with the crop's scale in points
 per crop pixel; faceCrops does the same for each expression panel a face
-preset is judged against (the Faces check), with its roll and the anchors each
-preset is held to. The model is a proposal until the founder approves it at Gate A."""
+preset is judged against (the Faces check), with its roll, the areas of its
+marks, the anchors each preset is held to and the presets it is the primary
+panel of. The model is a proposal until the founder approves it at Gate A."""
 import sys
 
 import numpy as np
@@ -79,8 +80,8 @@ def build(species):
     }
 
 
-FACE_KEYS = ("crop", "sheet", "boxSheetPx", "presets", "view", "facing", "ptPerCropPx", "rollDeg", "headWidthCropPx",
-             "anchorsCropPx", "drawn", "gates", "mask")
+FACE_KEYS = ("crop", "sheet", "boxSheetPx", "presets", "primaryFor", "view", "facing", "measureZoom", "ptPerCropPx",
+             "rollDeg", "headWidthCropPx", "anchorsCropPx", "shapesPt2", "drawn", "eyeStates", "gates", "mask")
 
 
 def face_crops(folder):

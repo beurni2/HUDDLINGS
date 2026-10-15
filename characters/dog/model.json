@@ -236,6 +236,534 @@
   }
  },
  "faceCrops": {
+  "master.expression.happy": {
+   "crop": "master.expression.happy",
+   "sheet": "master",
+   "boxSheetPx": [19, 803, 142, 113],
+   "presets": [
+    "neutral",
+    "happy",
+    "singing"
+   ],
+   "primaryFor": [
+    "neutral",
+    "happy"
+   ],
+   "view": "front",
+   "facing": "front",
+   "measureZoom": 2,
+   "ptPerCropPx": 1.20696,
+   "rollDeg": -9.66,
+   "headWidthCropPx": 77.3,
+   "anchorsCropPx": {
+    "head.top": [67.84, 4.07],
+    "nose": [72.36, 66.31],
+    "eye.R": [51.12, 62.78],
+    "eye.L": [90.06, 56.15],
+    "mouth.R": [62.43, 73.98],
+    "mouth.L": [84.1, 70.25]
+   },
+   "shapesPt2": {
+    "eye.R": {
+     "areaPt2": 303.0
+    },
+    "eye.L": {
+     "areaPt2": 299.7
+    },
+    "mouth": {
+     "areaPt2": 269.5,
+     "openPt2": 230.2
+    }
+   },
+   "drawn": {
+    "eyes": "open",
+    "mouth": "open"
+   },
+   "eyeStates": {
+    "eye.R": "open",
+    "eye.L": "open"
+   },
+   "gates": {
+    "neutral": [
+     "eye.R",
+     "eye.L"
+    ],
+    "happy": [
+     "eye.R",
+     "eye.L",
+     "mouth.R",
+     "mouth.L"
+    ],
+    "singing": []
+   },
+   "mask": "ref/faces/master.expression.happy.png"
+  },
+  "master.expression.excited": {
+   "crop": "master.expression.excited",
+   "sheet": "master",
+   "boxSheetPx": [161, 804, 133, 112],
+   "presets": [
+    "excited",
+    "ticklish"
+   ],
+   "primaryFor": [
+    "excited"
+   ],
+   "view": "front",
+   "facing": "front",
+   "measureZoom": 2,
+   "ptPerCropPx": 1.23556,
+   "rollDeg": -11.75,
+   "headWidthCropPx": 75.51,
+   "anchorsCropPx": {
+    "head.top": [64.83, 3.6],
+    "nose": [67.85, 62.73],
+    "eye.R": [46.04, 62.08],
+    "eye.L": [86.9, 53.58],
+    "mouth.R": [56.5, 70.29],
+    "mouth.L": [81.0, 65.67]
+   },
+   "shapesPt2": {
+    "eye.R": {
+     "areaPt2": 98.8
+    },
+    "eye.L": {
+     "areaPt2": 100.0
+    },
+    "mouth": {
+     "areaPt2": 352.6,
+     "openPt2": 311.0
+    }
+   },
+   "drawn": {
+    "eyes": "happy",
+    "mouth": "open"
+   },
+   "eyeStates": {
+    "eye.R": "happy",
+    "eye.L": "happy"
+   },
+   "gates": {
+    "excited": [
+     "eye.R",
+     "eye.L",
+     "mouth.R",
+     "mouth.L"
+    ],
+    "ticklish": [
+     "eye.R",
+     "eye.L"
+    ]
+   },
+   "mask": "ref/faces/master.expression.excited.png"
+  },
+  "master.expression.laughing": {
+   "crop": "master.expression.laughing",
+   "sheet": "master",
+   "boxSheetPx": [294, 803, 139, 113],
+   "presets": [
+    "laughing",
+    "singing",
+    "ticklish"
+   ],
+   "primaryFor": [
+    "laughing",
+    "singing",
+    "ticklish"
+   ],
+   "view": "front",
+   "facing": "front",
+   "measureZoom": 2,
+   "ptPerCropPx": 1.21811,
+   "rollDeg": -11.9,
+   "headWidthCropPx": 76.59,
+   "anchorsCropPx": {
+    "head.top": [62.23, 4.61],
+    "nose": [69.19, 61.71],
+    "eye.R": [47.23, 61.36],
+    "eye.L": [88.63, 52.64],
+    "mouth.R": [57.5, 69.61],
+    "mouth.L": [82.16, 64.57]
+   },
+   "shapesPt2": {
+    "eye.R": {
+     "areaPt2": 104.6
+    },
+    "eye.L": {
+     "areaPt2": 107.6
+    },
+    "mouth": {
+     "areaPt2": 458.1,
+     "openPt2": 415.5
+    }
+   },
+   "drawn": {
+    "eyes": "happy",
+    "mouth": "laugh"
+   },
+   "eyeStates": {
+    "eye.R": "happy",
+    "eye.L": "happy"
+   },
+   "gates": {
+    "laughing": [
+     "eye.R",
+     "eye.L",
+     "mouth.R",
+     "mouth.L"
+    ],
+    "singing": [
+     "eye.R",
+     "eye.L"
+    ],
+    "ticklish": [
+     "eye.R",
+     "eye.L",
+     "mouth.R",
+     "mouth.L"
+    ]
+   },
+   "mask": "ref/faces/master.expression.laughing.png"
+  },
+  "master.expression.curious": {
+   "crop": "master.expression.curious",
+   "sheet": "master",
+   "boxSheetPx": [434, 796, 129, 120],
+   "presets": [
+    "curious"
+   ],
+   "primaryFor": [
+    "curious"
+   ],
+   "view": "front",
+   "facing": "front",
+   "measureZoom": 2,
+   "ptPerCropPx": 1.28807,
+   "rollDeg": 20.88,
+   "headWidthCropPx": 72.43,
+   "anchorsCropPx": {
+    "head.top": [56.44, 15.09],
+    "nose": [50.64, 72.05],
+    "eye.R": [39.87, 59.16],
+    "eye.L": [74.0, 72.18]
+   },
+   "shapesPt2": {
+    "eye.R": {
+     "areaPt2": 281.6
+    },
+    "eye.L": {
+     "areaPt2": 355.5
+    }
+   },
+   "drawn": {
+    "eyes": "open",
+    "mouth": "downturned"
+   },
+   "eyeStates": {
+    "eye.R": "open",
+    "eye.L": "open"
+   },
+   "gates": {
+    "curious": [
+     "eye.R",
+     "eye.L"
+    ]
+   },
+   "mask": "ref/faces/master.expression.curious.png"
+  },
+  "master.expression.sleepy": {
+   "crop": "master.expression.sleepy",
+   "sheet": "master",
+   "boxSheetPx": [563, 814, 136, 99],
+   "presets": [
+    "sleepy"
+   ],
+   "primaryFor": [
+    "sleepy"
+   ],
+   "view": "front",
+   "facing": "front",
+   "measureZoom": 2,
+   "ptPerCropPx": 1.22682,
+   "rollDeg": 8.78,
+   "headWidthCropPx": 76.05,
+   "anchorsCropPx": {
+    "head.top": [74.25, 3.56],
+    "nose": [64.05, 71.62],
+    "eye.R": [46.12, 63.53],
+    "eye.L": [87.78, 69.96]
+   },
+   "shapesPt2": {
+    "eye.R": {
+     "areaPt2": 85.8
+    },
+    "eye.L": {
+     "areaPt2": 91.4
+    }
+   },
+   "drawn": {
+    "eyes": "closed",
+    "mouth": "downturned"
+   },
+   "eyeStates": {
+    "eye.R": "closed",
+    "eye.L": "closed"
+   },
+   "gates": {
+    "sleepy": [
+     "eye.R",
+     "eye.L"
+    ]
+   },
+   "mask": "ref/faces/master.expression.sleepy.png"
+  },
+  "master.expression.surprised": {
+   "crop": "master.expression.surprised",
+   "sheet": "master",
+   "boxSheetPx": [699, 803, 134, 113],
+   "presets": [
+    "surprised"
+   ],
+   "primaryFor": [],
+   "view": "front",
+   "facing": "front",
+   "measureZoom": 2,
+   "ptPerCropPx": 1.27563,
+   "rollDeg": -13.12,
+   "headWidthCropPx": 73.14,
+   "anchorsCropPx": {
+    "head.top": [61.75, 3.69],
+    "nose": [70.25, 63.31],
+    "eye.R": [48.32, 61.01],
+    "eye.L": [84.57, 52.56],
+    "mouth.R": [69.11, 76.87],
+    "mouth.L": [75.69, 74.84]
+   },
+   "shapesPt2": {
+    "eye.R": {
+     "areaPt2": 341.3
+    },
+    "eye.L": {
+     "areaPt2": 301.4
+    },
+    "mouth": {
+     "areaPt2": 70.4,
+     "openPt2": 53.3
+    }
+   },
+   "drawn": {
+    "eyes": "wide",
+    "mouth": "o"
+   },
+   "eyeStates": {
+    "eye.R": "wide",
+    "eye.L": "wide"
+   },
+   "gates": {
+    "surprised": [
+     "eye.R",
+     "eye.L",
+     "mouth.R",
+     "mouth.L"
+    ]
+   },
+   "mask": "ref/faces/master.expression.surprised.png"
+  },
+  "master.expression.winking": {
+   "crop": "master.expression.winking",
+   "sheet": "master",
+   "boxSheetPx": [834, 805, 141, 111],
+   "presets": [
+    "mischievous",
+    "sly"
+   ],
+   "primaryFor": [],
+   "view": "front",
+   "facing": "front",
+   "measureZoom": 2,
+   "ptPerCropPx": 1.27366,
+   "rollDeg": -0.48,
+   "headWidthCropPx": 73.25,
+   "anchorsCropPx": {
+    "head.top": [65.25, 4.03],
+    "nose": [67.06, 66.72],
+    "eye.R": [48.56, 59.96],
+    "eye.L": [88.31, 59.62],
+    "mouth.R": [58.28, 74.05],
+    "mouth.L": [78.08, 72.65]
+   },
+   "shapesPt2": {
+    "eye.R": {
+     "areaPt2": 311.5
+    },
+    "eye.L": {
+     "areaPt2": 109.5
+    },
+    "mouth": {
+     "areaPt2": 45.8,
+     "openPt2": 0.0
+    }
+   },
+   "drawn": {
+    "eyes": "wink",
+    "mouth": "smile",
+    "wink": "eye.L"
+   },
+   "eyeStates": {
+    "eye.R": "open",
+    "eye.L": "happy"
+   },
+   "gates": {
+    "mischievous": [
+     "eye.R",
+     "eye.L"
+    ],
+    "sly": [
+     "eye.R",
+     "eye.L"
+    ]
+   },
+   "mask": "ref/faces/master.expression.winking.png"
+  },
+  "master.expression.cheeky": {
+   "crop": "master.expression.cheeky",
+   "sheet": "master",
+   "boxSheetPx": [975, 803, 140, 113],
+   "presets": [
+    "mischievous",
+    "sly"
+   ],
+   "primaryFor": [
+    "mischievous",
+    "sly"
+   ],
+   "view": "front",
+   "facing": "front",
+   "measureZoom": 2,
+   "ptPerCropPx": 1.20449,
+   "rollDeg": -6.57,
+   "headWidthCropPx": 77.46,
+   "anchorsCropPx": {
+    "head.top": [67.78, 4.09],
+    "nose": [70.76, 65.36],
+    "eye.R": [49.74, 61.06],
+    "eye.L": [91.22, 56.28],
+    "mouth.R": [60.36, 73.24],
+    "mouth.L": [83.14, 69.58]
+   },
+   "shapesPt2": {
+    "eye.R": {
+     "areaPt2": 301.4
+    },
+    "eye.L": {
+     "areaPt2": 88.1
+    },
+    "mouth": {
+     "areaPt2": 359.4,
+     "openPt2": 305.8
+    }
+   },
+   "drawn": {
+    "eyes": "wink",
+    "mouth": "cheeky",
+    "wink": "eye.L"
+   },
+   "eyeStates": {
+    "eye.R": "open",
+    "eye.L": "happy"
+   },
+   "gates": {
+    "mischievous": [
+     "eye.R",
+     "eye.L",
+     "mouth.R",
+     "mouth.L"
+    ],
+    "sly": [
+     "eye.R",
+     "eye.L",
+     "mouth.R",
+     "mouth.L"
+    ]
+   },
+   "mask": "ref/faces/master.expression.cheeky.png"
+  },
+  "master.expression.content": {
+   "crop": "master.expression.content",
+   "sheet": "master",
+   "boxSheetPx": [1115, 801, 143, 115],
+   "presets": [
+    "proud",
+    "content",
+    "tender",
+    "blissful"
+   ],
+   "primaryFor": [
+    "proud",
+    "content",
+    "tender",
+    "blissful"
+   ],
+   "view": "front",
+   "facing": "front",
+   "measureZoom": 2,
+   "ptPerCropPx": 1.19228,
+   "rollDeg": -0.52,
+   "headWidthCropPx": 78.25,
+   "anchorsCropPx": {
+    "head.top": [78.08, 3.08],
+    "nose": [69.45, 64.98],
+    "eye.R": [48.47, 59.5],
+    "eye.L": [91.6, 59.11],
+    "mouth.R": [58.78, 71.46],
+    "mouth.L": [81.26, 71.32]
+   },
+   "shapesPt2": {
+    "eye.R": {
+     "areaPt2": 91.7
+    },
+    "eye.L": {
+     "areaPt2": 98.8
+    },
+    "mouth": {
+     "areaPt2": 42.6,
+     "openPt2": 0.0
+    }
+   },
+   "drawn": {
+    "eyes": "happy",
+    "mouth": "smile"
+   },
+   "eyeStates": {
+    "eye.R": "happy",
+    "eye.L": "happy"
+   },
+   "gates": {
+    "proud": [
+     "eye.R",
+     "eye.L",
+     "mouth.R",
+     "mouth.L"
+    ],
+    "content": [
+     "eye.R",
+     "eye.L",
+     "mouth.R",
+     "mouth.L"
+    ],
+    "tender": [
+     "mouth.R",
+     "mouth.L"
+    ],
+    "blissful": [
+     "eye.R",
+     "eye.L",
+     "mouth.R",
+     "mouth.L"
+    ]
+   },
+   "mask": "ref/faces/master.expression.content.png"
+  },
   "expressions.expression.happy": {
    "crop": "expressions.expression.happy",
    "sheet": "expressions",
@@ -245,8 +773,10 @@
     "happy",
     "singing"
    ],
+   "primaryFor": [],
    "view": "front",
    "facing": "front",
+   "measureZoom": 1,
    "ptPerCropPx": 0.67881,
    "rollDeg": -11.79,
    "headWidthCropPx": 137.45,
@@ -258,9 +788,25 @@
     "mouth.R": [115.29, 120.4],
     "mouth.L": [151.07, 113.49]
    },
+   "shapesPt2": {
+    "eye.R": {
+     "areaPt2": 291.2
+    },
+    "eye.L": {
+     "areaPt2": 290.8
+    },
+    "mouth": {
+     "areaPt2": 241.4,
+     "openPt2": 205.0
+    }
+   },
    "drawn": {
     "eyes": "open",
     "mouth": "open"
+   },
+   "eyeStates": {
+    "eye.R": "open",
+    "eye.L": "open"
    },
    "gates": {
     "neutral": [
@@ -285,8 +831,10 @@
     "excited",
     "ticklish"
    ],
+   "primaryFor": [],
    "view": "front",
    "facing": "front",
+   "measureZoom": 1,
    "ptPerCropPx": 0.68367,
    "rollDeg": -12.13,
    "headWidthCropPx": 136.47,
@@ -298,9 +846,25 @@
     "mouth.R": [112.37, 122.84],
     "mouth.L": [151.71, 114.33]
    },
+   "shapesPt2": {
+    "eye.R": {
+     "areaPt2": 90.2
+    },
+    "eye.L": {
+     "areaPt2": 82.7
+    },
+    "mouth": {
+     "areaPt2": 304.8,
+     "openPt2": 260.8
+    }
+   },
    "drawn": {
     "eyes": "happy",
     "mouth": "open"
+   },
+   "eyeStates": {
+    "eye.R": "happy",
+    "eye.L": "happy"
    },
    "gates": {
     "excited": [
@@ -325,8 +889,10 @@
     "singing",
     "ticklish"
    ],
+   "primaryFor": [],
    "view": "front",
    "facing": "front",
+   "measureZoom": 1,
    "ptPerCropPx": 0.70232,
    "rollDeg": -20.01,
    "headWidthCropPx": 132.85,
@@ -338,9 +904,25 @@
     "mouth.R": [104.7, 118.13],
     "mouth.L": [142.83, 104.95]
    },
+   "shapesPt2": {
+    "eye.R": {
+     "areaPt2": 85.8
+    },
+    "eye.L": {
+     "areaPt2": 89.8
+    },
+    "mouth": {
+     "areaPt2": 332.5,
+     "openPt2": 298.4
+    }
+   },
    "drawn": {
     "eyes": "happy",
     "mouth": "laugh"
+   },
+   "eyeStates": {
+    "eye.R": "happy",
+    "eye.L": "happy"
    },
    "gates": {
     "laughing": [
@@ -369,8 +951,10 @@
    "presets": [
     "curious"
    ],
+   "primaryFor": [],
    "view": "front",
    "facing": "front",
+   "measureZoom": 1,
    "ptPerCropPx": 0.73381,
    "rollDeg": 21.15,
    "headWidthCropPx": 127.14,
@@ -380,9 +964,21 @@
     "eye.R": [75.6, 105.67],
     "eye.L": [133.51, 128.08]
    },
+   "shapesPt2": {
+    "eye.R": {
+     "areaPt2": 287.0
+    },
+    "eye.L": {
+     "areaPt2": 331.2
+    }
+   },
    "drawn": {
     "eyes": "open",
     "mouth": "downturned"
+   },
+   "eyeStates": {
+    "eye.R": "open",
+    "eye.L": "open"
    },
    "gates": {
     "curious": [
@@ -399,8 +995,10 @@
    "presets": [
     "sleepy"
    ],
+   "primaryFor": [],
    "view": "front",
    "facing": "front",
+   "measureZoom": 1,
    "ptPerCropPx": 0.7023,
    "rollDeg": 9.54,
    "headWidthCropPx": 132.85,
@@ -410,9 +1008,21 @@
     "eye.R": [75.23, 116.93],
     "eye.L": [144.25, 128.54]
    },
+   "shapesPt2": {
+    "eye.R": {
+     "areaPt2": 67.6
+    },
+    "eye.L": {
+     "areaPt2": 69.5
+    }
+   },
    "drawn": {
     "eyes": "closed",
     "mouth": "downturned"
+   },
+   "eyeStates": {
+    "eye.R": "closed",
+    "eye.L": "closed"
    },
    "gates": {
     "sleepy": [
@@ -429,8 +1039,12 @@
    "presets": [
     "surprised"
    ],
+   "primaryFor": [
+    "surprised"
+   ],
    "view": "front",
    "facing": "front",
+   "measureZoom": 1,
    "ptPerCropPx": 0.709,
    "rollDeg": -2.78,
    "headWidthCropPx": 131.59,
@@ -442,9 +1056,25 @@
     "mouth.R": [121.52, 130.67],
     "mouth.L": [133.37, 129.6]
    },
+   "shapesPt2": {
+    "eye.R": {
+     "areaPt2": 331.8
+    },
+    "eye.L": {
+     "areaPt2": 330.8
+    },
+    "mouth": {
+     "areaPt2": 74.4,
+     "openPt2": 68.4
+    }
+   },
    "drawn": {
     "eyes": "wide",
     "mouth": "o"
+   },
+   "eyeStates": {
+    "eye.R": "wide",
+    "eye.L": "wide"
    },
    "gates": {
     "surprised": [
@@ -463,8 +1093,12 @@
    "presets": [
     "shy"
    ],
+   "primaryFor": [
+    "shy"
+   ],
    "view": "front",
    "facing": "front",
+   "measureZoom": 1,
    "ptPerCropPx": 0.7023,
    "rollDeg": -9.49,
    "headWidthCropPx": 132.85,
@@ -474,9 +1108,21 @@
     "eye.R": [67.83, 106.9],
     "eye.L": [132.75, 96.04]
    },
+   "shapesPt2": {
+    "eye.R": {
+     "areaPt2": 282.6
+    },
+    "eye.L": {
+     "areaPt2": 338.3
+    }
+   },
    "drawn": {
     "eyes": "open",
     "mouth": "downturned"
+   },
+   "eyeStates": {
+    "eye.R": "open",
+    "eye.L": "open"
    },
    "gates": {
     "shy": [
@@ -493,8 +1139,10 @@
    "presets": [
     "proud"
    ],
+   "primaryFor": [],
    "view": "front",
    "facing": "front",
+   "measureZoom": 1,
    "ptPerCropPx": 0.70625,
    "rollDeg": -10.66,
    "headWidthCropPx": 132.11,
@@ -506,9 +1154,25 @@
     "mouth.R": [119.59, 104.85],
     "mouth.L": [155.55, 98.75]
    },
+   "shapesPt2": {
+    "eye.R": {
+     "areaPt2": 87.3
+    },
+    "eye.L": {
+     "areaPt2": 78.3
+    },
+    "mouth": {
+     "areaPt2": 50.9,
+     "openPt2": 17.0
+    }
+   },
    "drawn": {
     "eyes": "happy",
     "mouth": "smile"
+   },
+   "eyeStates": {
+    "eye.R": "happy",
+    "eye.L": "happy"
    },
    "gates": {
     "proud": [
@@ -528,8 +1192,10 @@
     "mischievous",
     "sly"
    ],
+   "primaryFor": [],
    "view": "front",
    "facing": "front",
+   "measureZoom": 1,
    "ptPerCropPx": 0.69432,
    "rollDeg": -11.79,
    "headWidthCropPx": 134.38,
@@ -541,9 +1207,26 @@
     "mouth.R": [126.59, 117.61],
     "mouth.L": [166.57, 113.66]
    },
+   "shapesPt2": {
+    "eye.R": {
+     "areaPt2": 92.1
+    },
+    "eye.L": {
+     "areaPt2": 242.5
+    },
+    "mouth": {
+     "areaPt2": 291.7,
+     "openPt2": 254.1
+    }
+   },
    "drawn": {
     "eyes": "wink",
-    "mouth": "cheeky"
+    "mouth": "cheeky",
+    "wink": "eye.R"
+   },
+   "eyeStates": {
+    "eye.R": "happy",
+    "eye.L": "open"
    },
    "gates": {
     "mischievous": [
@@ -568,18 +1251,24 @@
    "presets": [
     "listening"
    ],
+   "primaryFor": [
+    "listening"
+   ],
    "view": "front",
    "facing": "front",
+   "measureZoom": 1,
    "ptPerCropPx": 1.03667,
    "rollDeg": 0.0,
    "headWidthCropPx": 90.0,
    "anchorsCropPx": {
     "head.top": [80.15, 4.69]
    },
+   "shapesPt2": {},
    "drawn": {
     "eyes": "none",
     "mouth": "none"
    },
+   "eyeStates": {},
    "gates": {
     "listening": []
    },

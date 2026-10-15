@@ -1,13 +1,16 @@
 """The face panels' crop records (spec section 5b, The sheet match: Faces, L525;
-L529; DECISIONS.md 14): each expression-sheet panel a face preset is judged
-against, with its view, facing, scale, roll, anchors and mask.
+L529; DECISIONS.md 14): each expression panel a face preset is judged against
+(the expression sheet's, and the master sheet's expression row), with its view,
+facing, scale, roll, anchors, the shapes of its marks and its mask.
 
     python3 characters/refprep/faces.py dog
 
-Reads refmap/faces.json (written by hand: which panels judge which preset,
-what each panel draws, its anchors placed by hand in the sheet's pixels, the
-head's width across its cheeks, and the boxes of labels, motion marks and
-neighbours' slivers to leave out) and ref/panels.json (run crop.py first).
+Reads refmap/faces.json (written by hand: for each preset its one primary
+panel, whose held anchors and shapes gate, and the panels shown beside it,
+measured but never gating; what each panel draws, its anchors placed by hand
+in the sheet's pixels, the head's width across its cheeks, and the boxes of
+labels, motion marks and neighbours' slivers to leave out) and
+ref/panels.json (run crop.py first).
 Writes ref/faces.json (the records model.py puts into model.json as
 faceCrops), a mask per panel in ref/faces/<panel>.png (255 where the panel is
 compared, 0 where a box leaves it out) and an overlay per panel in
@@ -15,12 +18,17 @@ ref/overlays/faces-<panel>.png, every anchor and the head's width drawn, to be
 checked by eye.
 
 Each anchor is placed by hand, because the automatic nose finder lands on an
-eye in 4 of the 10 expression panels (phase 3 plan, section 5), then refined
-by the rule for its feature below, the same rule the Faces check applies to a
-render (characters/sheetmatch/facematch.py), so the two are measured alike. A
+eye in 4 of the expression sheet's 10 expressions (phase 3 plan, section 5),
+then refined by the rule for its feature below, the same rule the Faces check
+applies to a render (characters/sheetmatch/facematch.py), so the two are
+measured alike; the master sheet's smaller panels are measured on a canvas
+enlarged twice (SHEET_ZOOM), and every number is kept in the crop's pixels. A
 hand anchor further than SNAP_PX from its refined point, or one whose feature
 is out of order (a nose that is not below and between the eyes, a corner on
-the wrong side, a head top below the eyes), fails the run.
+the wrong side, a head top below the eyes), fails the run. The same rules give
+each eye's mark and the mouth's (its holes filled, and the part of it open:
+pink or the inside's deep red), whose areas the record keeps and whose shapes
+the check compares with a render's.
 
 Rule R3: no record may name the Sad, Angry or Pout panels, the drooped ears,
 or any panel whose label pairs a face with them, and no preset outside the
@@ -52,10 +60,45 @@ TOUCH_SHARE = 0.05  # of the head's width: how near a seed a piece of the mouth 
 TOP_SHARE = 0.15  # of the head's width: the head top is the highest line this near its seed (the tuft, not a perked ear)
 NOSE_CORE = measure.NOSE_CORE
 EYE_MIN_PX = 20  # an eye's mark is at least this many pixels; less is grain
+# An open mouth's inside: pink (the tongue, measure.py's class) or a deep red at least this saturated, under this hue
+# and darker than this L*. The mouth's brown line is under C* 20 on both sheets; the inside's red is 30 to 58.
+OPEN_CHROMA = 30
+OPEN_HUE = 50
+OPEN_L = 60
 SOFT_L = (50, 70)  # L*: a mark's pixel counts in full at the first, not at all at the second (around the line's 60)
 END_PX = 2.0  # pixels' worth of a mouth's weight beyond its corner, so one pixel of grain does not move the corner
 WIDEST_SHARE = 0.98  # the hand-placed row's run must be this share of the cheeks' widest at least
+# The master sheet draws its expression row at about 0.55 times the expression sheet's size (heads 72 to 78 px across
+# the cheeks against 127 to 137), its mouths' lines 1 to 2 px wide: its panels are measured enlarged twice, so the
+# rules' sizes in pixels (a mark's least area, a corner's last two pixels, the nose's core) mean about what they mean
+# on the expression sheet. Every record keeps its numbers in the crop's own pixels.
+SHEET_ZOOM = {"master": 2}
 ZOOM = 4
+
+
+def enlarge(rgb, zoom):
+    """A crop enlarged zoom times, bicubic: crop pixel i's centre lands on canvas pixel (i + 0.5) zoom - 0.5."""
+    if zoom == 1:
+        return rgb
+    h, w = rgb.shape[:2]
+    return np.asarray(Image.fromarray(rgb).resize((w * zoom, h * zoom), Image.BICUBIC))
+
+
+def enlarge_mask(mask, zoom):
+    return np.repeat(np.repeat(mask, zoom, axis=0), zoom, axis=1)
+
+
+def to_canvas(point, zoom):
+    return [(point[0] + 0.5) * zoom - 0.5, (point[1] + 0.5) * zoom - 0.5]
+
+
+def to_crop(point, zoom):
+    return [(point[0] + 0.5) / zoom - 0.5, (point[1] + 0.5) / zoom - 0.5]
+
+
+def sheet_ok(panel):
+    """Whether a panel can judge a face: any panel of the expression sheet, or the master sheet's expression row."""
+    return panel["sheet"] == "expressions" or (panel["sheet"] == "master" and panel.get("kind") == "expression")
 
 
 def forbidden(panel):
@@ -186,6 +229,53 @@ def soft_end(reach, weight, xs, ys):
     end = far[min(int(np.searchsorted(np.cumsum(w), END_PX)), len(far) - 1)]
     taper = weight * np.clip((reach - end + 2.0) / 2.0, 0, 1)
     return [float((taper * xs).sum() / taper.sum()), float((taper * ys).sum() / taper.sum())]
+
+
+def open_pixels(rgb):
+    """Where a mouth is open: pink, or the inside's deep red (OPEN_CHROMA, OPEN_HUE, OPEN_L)."""
+    lab = sheets.to_lab(rgb)
+    L, a, b = lab[..., 0], lab[..., 1], lab[..., 2]
+    C, hue = np.hypot(a, b), np.degrees(np.arctan2(b, a)) % 360
+    pink = (a > 16) & (L > 45) & (hue < 40)  # measure.py's pink
+    return pink | ((C > OPEN_CHROMA) & (hue < OPEN_HUE) & (L < OPEN_L))
+
+
+def shapes(rgb, masks):
+    """The marks whose shapes the Faces check compares: each eye's, the mouth's with its holes filled, and the open part
+    of the mouth."""
+    out = {n: masks[n] for n in ("eye.R", "eye.L") if n in masks}
+    if "mouth" in masks:
+        out["mouth"] = ndimage.binary_fill_holes(masks["mouth"])
+        out["mouth.open"] = out["mouth"] & open_pixels(rgb)
+    return out
+
+
+def aligned_iou(a, b):
+    """The IoU of two marks on one grid with a's centroid moved onto b's: by the whole pixels nearest, then the best of
+    the shifts a pixel either way, so the rounding never costs a thin arc its overlap. 0 when either is empty."""
+    if not a.any() or not b.any():
+        return 0.0
+    ya, xa = np.nonzero(a)
+    yb, xb = np.nonzero(b)
+    dy, dx = int(round(yb.mean() - ya.mean())), int(round(xb.mean() - xa.mean()))
+
+    def keys(y, x):
+        return (y.astype(np.int64) + 4096) * 16384 + x + 4096
+
+    theirs = keys(yb, xb)
+    best = 0
+    for ey in (-1, 0, 1):
+        for ex in (-1, 0, 1):
+            best = max(best, len(np.intersect1d(keys(ya + dy + ey, xa + dx + ex), theirs, assume_unique=True)))
+    return float(best / (len(ya) + len(yb) - best))
+
+
+def eye_states(drawn):
+    """Each eye's drawn state: on a wink panel the winking eye is the happy crescent, as the sheets draw it, and the
+    other is open; elsewhere both eyes draw the panel's state."""
+    if drawn["eyes"] == "wink":
+        return {n: "happy" if n == drawn["wink"] else "open" for n in ("eye.R", "eye.L")}
+    return {n: drawn["eyes"] for n in ("eye.R", "eye.L")}
 
 
 def head_line(rgb):
@@ -333,9 +423,10 @@ def remove_mask(shape, boxes, origin):
 
 
 def gates(drawn, preset, aliases):
-    """The anchors a preset is held to on a panel: the eyes when the panel draws an eye state the preset uses, the
-    mouth's corners when it draws a mouth state the preset uses (spec L476-498; the dog's squeeze and sparkle are its
-    happy crescents, docs/QUESTIONS.md Q2). Anchors of a state the preset never shows are reported, never held."""
+    """The anchors a preset is held to on a panel, each with its mark's shape: the eyes when the panel draws an eye state
+    the preset uses, the mouth's corners when it draws a mouth state the preset uses (spec L476-498; the dog's squeeze
+    and sparkle are its happy crescents, docs/QUESTIONS.md Q2). Anchors of a state the preset never shows are reported,
+    never held. They gate only on the preset's primary panel; on the panels beside it they are measured and shown."""
     eyes = {aliases.get(e, e) for e in preset["eyes"]}
     mouths = set(preset["mouth"])
     held = []
@@ -353,77 +444,98 @@ def measure_panel(species, pid, entry, panel, names, presets, aliases, head_widt
     drawn = entry["drawn"]
     if drawn["eyes"] not in EYE_STATES | UNHELD or drawn["mouth"] not in MOUTH_STATES | UNHELD:
         raise ValueError(f"{where}: draws {drawn}, outside the spec's eye and mouth states")
+    if (drawn["eyes"] == "wink") != ("wink" in drawn) or drawn.get("wink", "eye.L") not in ("eye.R", "eye.L"):
+        raise ValueError(f"{where}: a wink panel names the eye that winks (drawn.wink, eye.R or eye.L), and only a wink panel")
     x0, y0, w, h = panel["box"]
-    rgb = sheets.load_sheet(species, panel["sheet"])[y0:y0 + h, x0:x0 + w]
-    keep = remove_mask((h, w), [b for boxes in entry["remove"].values() for b in boxes], (x0, y0))
-    hand = {n: [p[0] - x0, p[1] - y0] for n, p in entry["anchors"].items()}
-    if set(hand) - set(FACE_ANCHORS):
-        raise ValueError(f"{where}: unknown anchors {sorted(set(hand) - set(FACE_ANCHORS))}")
-    if drawn["mouth"] in UNHELD and ({"mouth.R", "mouth.L"} & set(hand)):
+    crop = sheets.load_sheet(species, panel["sheet"])[y0:y0 + h, x0:x0 + w]
+    keep_crop = remove_mask((h, w), [b for boxes in entry["remove"].values() for b in boxes], (x0, y0))
+    hand_crop = {n: [p[0] - x0, p[1] - y0] for n, p in entry["anchors"].items()}
+    if set(hand_crop) - set(FACE_ANCHORS):
+        raise ValueError(f"{where}: unknown anchors {sorted(set(hand_crop) - set(FACE_ANCHORS))}")
+    if drawn["mouth"] in UNHELD and ({"mouth.R", "mouth.L"} & set(hand_crop)):
         raise ValueError(f"{where}: a {drawn['mouth']} mouth gets no corners (R3: nothing is held to it)")
-    if drawn["eyes"] in UNHELD and ({"eye.R", "eye.L", "nose"} & set(hand)):
+    if drawn["eyes"] in UNHELD and ({"eye.R", "eye.L", "nose"} & set(hand_crop)):
         raise ValueError(f"{where}: a panel that draws no face gets no face anchors")
-    for name, (x, y) in hand.items():
-        if not (0 <= x < w and 0 <= y < h) or not keep[int(round(y)), int(round(x))]:
+    for name, (x, y) in hand_crop.items():
+        if not (0 <= x < w and 0 <= y < h) or not keep_crop[int(round(y)), int(round(x))]:
             raise ValueError(f"{where}: {name} at {[x + x0, y + y0]} is off the panel or in a left-out box")
-    # The head's width: the cheeks' widest run near a row placed by hand (two ends); the expressions' median for a
-    # panel that hides its cheeks ({"from": "expressions"}); or, on a drawing with no cheeks to run across, two ends
-    # placed by hand on the head's outline ({"hand": ends}).
+    # The rules run on the canvas, the crop enlarged by its sheet's zoom; every number is kept in crop pixels.
+    z = SHEET_ZOOM.get(panel["sheet"], 1)
+    rgb, keep = enlarge(crop, z), enlarge_mask(keep_crop, z)
+    hand = {n: to_canvas(p, z) for n, p in hand_crop.items()}
+
+    def on_sheet(point):
+        return np.round(np.add(to_crop(point, z), [x0, y0]), 1).tolist()
+
+    # The head's width: the cheeks' widest run near a row placed by hand (two ends); its sheet's expressions' median
+    # for a panel that hides its cheeks ({"from": "expressions"}); or, on a drawing with no cheeks to run across, two
+    # ends placed by hand on the head's outline ({"hand": ends}).
     given = entry["headWidth"]
     measured = isinstance(given, list)
     placed = given if measured else given.get("hand")
-    hand_ends = [[p[0] - x0, p[1] - y0] for p in placed] if placed else None
-    reach_width = float(np.hypot(*np.subtract(hand_ends[1], hand_ends[0]))) if hand_ends else shared_width
+    hand_ends_crop = [[p[0] - x0, p[1] - y0] for p in placed] if placed else None
+    hand_ends = [to_canvas(p, z) for p in hand_ends_crop] if placed else None
+    reach_width = float(np.hypot(*np.subtract(hand_ends[1], hand_ends[0]))) if hand_ends else shared_width * z
     hand_roll = roll_of(hand["eye.R"], hand["eye.L"]) if "eye.R" in hand else roll_of(*hand_ends)
-    found, _ = find_face(rgb, keep, hand, reach_width, hand_roll)
+    found, masks = find_face(rgb, keep, hand, reach_width, hand_roll)
     for name, point in hand.items():
         if name not in found:
-            raise ValueError(f"{where}: no {name} near the hand anchor at {[point[0] + x0, point[1] + y0]}")
-        off = float(np.hypot(found[name][0] - point[0], found[name][1] - point[1]))
+            raise ValueError(f"{where}: no {name} near the hand anchor at {entry['anchors'][name]}")
+        off = float(np.hypot(found[name][0] - point[0], found[name][1] - point[1])) / z
         if off > SNAP_PX:
-            raise ValueError(f"{where}: the hand anchor {name} at {[point[0] + x0, point[1] + y0]} is {off:.1f} px "
-                             f"from its feature at {np.round(np.add(found[name], [x0, y0]), 1).tolist()}")
+            raise ValueError(f"{where}: the hand anchor {name} at {entry['anchors'][name]} is {off:.1f} px "
+                             f"from its feature at {on_sheet(found[name])}")
     roll = roll_of(found["eye.R"], found["eye.L"]) if "eye.R" in found else hand_roll
     record = {"crop": pid, "sheet": panel["sheet"], "boxSheetPx": panel["box"], "presets": names,
-              "view": panel["view"], "facing": panel["facing"]}
+              "primaryFor": [n for n in names if presets[n].get("primary") == pid],
+              "view": panel["view"], "facing": panel["facing"], "measureZoom": z}
     if measured:
         # A panel with no face takes the width's middle as the head's axis, where the nose would be.
         axis = found.get("nose", list(np.mean(hand_ends, axis=0)))
         ends = head_width(rgb, keep, axis, roll, hand_ends)
         across, _ = frame(roll)
-        if ends is None or any(abs(np.subtract(e, k) @ across) > SNAP_PX for e, k in zip(ends, hand_ends)):
-            got = "no run" if ends is None else np.round(np.add(ends, [x0, y0]), 1).tolist()
+        if ends is None or any(abs(np.subtract(e, k) @ across) / z > SNAP_PX for e, k in zip(ends, hand_ends)):
+            got = "no run" if ends is None else [on_sheet(e) for e in ends]
             raise ValueError(f"{where}: the head's width by hand, {entry['headWidth']}, is not the cheeks' widest run near "
                              f"that row ({got})")
         width_px = float(np.hypot(*np.subtract(ends[1], ends[0])))
         widest = widest_run(rgb, keep, axis, roll, width_px)
         if width_px < WIDEST_SHARE * widest:
-            raise ValueError(f"{where}: the head's width by hand, {entry['headWidth']}, runs {width_px:.1f} px; the cheeks' "
-                             f"widest run, from the nose's row down a third of the head, is {widest:.1f} px")
-        record.update(headWidthCropPx=round(width_px, 2), headWidthEndsCropPx=[[round(v, 2) for v in e] for e in ends],
-                      headWidthHandCropPx=hand_ends)
+            raise ValueError(f"{where}: the head's width by hand, {entry['headWidth']}, runs {width_px / z:.1f} px; the "
+                             f"cheeks' widest run, from the nose's row down a third of the head, is {widest / z:.1f} px")
+        record.update(headWidthCropPx=round(width_px / z, 2),
+                      headWidthEndsCropPx=[[round(v, 2) for v in to_crop(e, z)] for e in ends], headWidthHandCropPx=hand_ends_crop)
     elif hand_ends:
         line = keep & (sheets.to_lab(rgb)[..., 0] < 70)  # the outline's core, darker than a patch's tan
-        for end in hand_ends:
+        for end, given_end in zip(hand_ends, placed):
             x, y = int(round(end[0])), int(round(end[1]))
-            if not line[max(y - 1, 0):y + 2, max(x - 1, 0):x + 2].any():
-                raise ValueError(f"{where}: the head's width placed by hand ends at {[end[0] + x0, end[1] + y0]}, off the head's outline")
+            if not line[max(y - z, 0):y + z + 1, max(x - z, 0):x + z + 1].any():
+                raise ValueError(f"{where}: the head's width placed by hand ends at {given_end}, off the head's outline")
         width_px = float(np.hypot(*np.subtract(hand_ends[1], hand_ends[0])))
-        record.update(headWidthCropPx=round(width_px, 2), headWidthEndsCropPx=hand_ends, headWidthHandCropPx=hand_ends,
-                      headWidthFrom="hand: the head's outline")
+        record.update(headWidthCropPx=round(width_px / z, 2), headWidthEndsCropPx=hand_ends_crop,
+                      headWidthHandCropPx=hand_ends_crop, headWidthFrom="hand: the head's outline")
     else:
-        width_px = shared_width
-        record.update(headWidthCropPx=round(width_px, 2), headWidthFrom=given["from"])
+        width_px = shared_width * z
+        record.update(headWidthCropPx=round(shared_width, 2), headWidthFrom=given["from"])
     check_order(where, found, roll, width_px)
+    k = head_width_pt / (width_px / z)
+    pt2 = (k / z) ** 2  # square points per canvas pixel
+    marks = shapes(rgb, masks)
+    measured_shapes = {n: {"areaPt2": round(float(marks[n].sum()) * pt2, 1)} for n in ("eye.R", "eye.L") if n in marks and n in hand}
+    if "mouth" in marks and {"mouth.R", "mouth.L"} & set(hand):
+        measured_shapes["mouth"] = {"areaPt2": round(float(marks["mouth"].sum()) * pt2, 1),
+                                    "openPt2": round(float(marks["mouth.open"].sum()) * pt2, 1)}
     record.update({
-        "ptPerCropPx": round(head_width_pt / width_px, 5), "rollDeg": round(roll, 2),
-        "anchorsCropPx": {n: [round(found[n][0], 2), round(found[n][1], 2)] for n in FACE_ANCHORS if n in found},
-        "handCropPx": {n: hand[n] for n in FACE_ANCHORS if n in hand},
+        "ptPerCropPx": round(k, 5), "rollDeg": round(roll, 2),
+        "anchorsCropPx": {n: [round(v, 2) for v in to_crop(found[n], z)] for n in FACE_ANCHORS if n in found},
+        "handCropPx": {n: hand_crop[n] for n in FACE_ANCHORS if n in hand_crop},
+        "shapesPt2": measured_shapes,
         "drawn": drawn,
+        "eyeStates": eye_states(drawn) if drawn["eyes"] not in UNHELD else {},
         "gates": {name: gates(drawn, presets[name], aliases) for name in names},
         "mask": f"ref/faces/{pid}.png",
     })
-    return record, rgb, keep
+    return record, crop, keep_crop
 
 
 def build(species, plan=None, images=None):
@@ -442,7 +554,12 @@ def build(species, plan=None, images=None):
         raise ValueError(f"faces.json leaves out the presets {', '.join(missing)}; list each, with no panels if it has none")
     judged = {}
     for name, preset in presets.items():
-        for pid in preset["panels"]:
+        primary, beside = preset.get("primary"), preset.get("beside", [])
+        if beside and not primary:
+            raise ValueError(f"faces.json {name}: panels beside it but no primary panel to gate it")
+        if primary in beside or len(set(beside)) != len(beside):
+            raise ValueError(f"faces.json {name}: names a panel twice")
+        for pid in ([primary] if primary else []) + beside:
             judged.setdefault(pid, []).append(name)
     for pid in sorted(set(judged) | set(plan["panels"])):
         where = f"faces.json {pid}"
@@ -450,8 +567,9 @@ def build(species, plan=None, images=None):
             raise ValueError(f"{where}: no such panel in ref/panels.json")
         if forbidden(panels[pid]):
             raise ValueError(f"{where}: rule R3 bars this panel ({panels[pid].get('label', pid)}): its face is never drawn or used")
-        if panels[pid]["sheet"] != "expressions":
-            raise ValueError(f"{where}: the Faces check holds a preset to its expression-sheet panel (L525)")
+        if not sheet_ok(panels[pid]):
+            raise ValueError(f"{where}: the Faces check holds a preset to an expression panel (L525): the expression "
+                             "sheet's, or the master sheet's expression row")
         if pid not in judged:
             raise ValueError(f"{where}: no preset is judged against it")
         if pid not in plan["panels"]:
@@ -469,17 +587,22 @@ def build(species, plan=None, images=None):
     for pid, entry in plan["panels"].items():
         if isinstance(entry["headWidth"], list) or "hand" in entry["headWidth"]:
             records[pid] = one(pid)
-    # The ten expressions are drawn at one size on the sheet: where one hides its cheeks (a paw, an ear across them),
-    # it takes the median width of those that show theirs.
-    shown = [r["headWidthCropPx"] for pid, r in records.items() if panels[pid]["kind"] == "expression"]
+    # Each sheet draws its expressions at one size: where one hides its cheeks (a paw, an ear across them), it takes
+    # the median width of its own sheet's expressions that show theirs.
+    shown = {}
+    for pid, r in records.items():
+        if panels[pid]["kind"] == "expression":
+            shown.setdefault(panels[pid]["sheet"], []).append(r["headWidthCropPx"])
     for pid, entry in plan["panels"].items():
         if pid not in records:
-            if entry["headWidth"].get("from") != "expressions" or panels[pid]["kind"] != "expression" or not shown:
-                raise ValueError(f"faces.json {pid}: headWidth is two ends, or from the expressions for an expression panel")
-            records[pid] = one(pid, float(np.median(shown)))
+            same = shown.get(panels[pid]["sheet"])
+            if entry["headWidth"].get("from") != "expressions" or panels[pid]["kind"] != "expression" or not same:
+                raise ValueError(f"faces.json {pid}: headWidth is two ends, or from its sheet's expressions for an expression panel")
+            records[pid] = one(pid, float(np.median(same)))
     records = {pid: records[pid] for pid in plan["panels"]}
     return {"species": species, "headWidthPt": head_width_pt, "records": records,
-            "presets": {n: {"panels": presets[n]["panels"], "note": presets[n].get("note", "")} for n in PRESETS}}
+            "presets": {n: {"primary": presets[n].get("primary"), "beside": presets[n].get("beside", []),
+                            "note": presets[n].get("note", "")} for n in PRESETS}}
 
 
 def overlay(rgb, keep, record, path):
@@ -530,7 +653,7 @@ def main(argv):
         sheets.save_png(ref / "faces" / f"{pid}.png", (keep * 255).astype(np.uint8))
         overlay(rgb, keep, result["records"][pid], ref / "overlays" / f"faces-{pid}.png")
     sheets.write_json(ref / "faces.json", result)
-    print(f"faces: {len(result['records'])} panels for {sum(1 for p in result['presets'].values() if p['panels'])} presets")
+    print(f"faces: {len(result['records'])} panels for {sum(1 for p in result['presets'].values() if p['primary'])} presets")
     return 0
 
 
