@@ -1,0 +1,8 @@
+{
+  "name": "face_sleepy",
+  "lengthMs": 1000,
+  "views": { "body": [[0, "front"]], "head": [[0, "front"]] },
+  "states": { "eye.L": [[0, "closed"]], "eye.R": [[0, "closed"]], "mouth": [[0, "smile"]], "brow.L": [[0, "neutral"]], "brow.R": [[0, "neutral"]], "ear.L": [[0, "lowered"]], "ear.R": [[0, "lowered"]] },
+  "tracks": { "ear.L": { "rot": [[0, 7]] }, "ear.R": { "rot": [[0, -7]] } },
+  "events": [{ "at": 0, "type": "keyPose" }]
+}
