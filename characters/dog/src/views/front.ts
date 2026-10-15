@@ -285,12 +285,18 @@ const tuft = furSpan(smooth([[-31, -149.2], [-29.6, -152.8], [-26.6, -155.6], [-
 // at its tip). Below the eye and the hood the face is cream. Typed per side,
 // as the sheet draws them (the left about 3 pt higher, with the head's roll),
 // with about 4 pt of bleed past the head's edge; the eye covers what is typed
-// under it. Their edges are soft but defined: a sigma of 0.5 pt.
+// under it. Their edges are soft but defined: a sigma of 0.5 pt; along each
+// hood's top the tan breaks into a row of small soft points of fur where the
+// cream above runs down into it, as the sheet paints it, not a clean curve.
+const hoodLocks = [{ len: 0.65, w: 1, lean: 0.2 }, { len: 0.95, w: 1.3, lean: 0.1 }, { len: 0.55, w: 0.9, lean: -0.1 }, { len: 0.85, w: 1.2, lean: -0.2 },
+  { len: 0.5, w: 0.8, lean: -0.3 }];
 const patches = {
-  R: smooth([[-28, -117.8], [-22, -116.8], [-18.2, -113.2], [-15.8, -108.2], [-15.6, -102.4], [-18, -98], [-26, -93.4], [-33.4, -90.2], [-38.4, -88.4],
-    [-43, -86.6], [-49.6, -86], [-50, -106], [-48.4, -121.4], [-41.6, -122.6], [-39.6, -118], [-38.4, -112.6], [-35.8, -114.8], [-32.2, -117.2]], { corners: [15] }),
-  L: smooth([[26, -121.2], [20.2, -121], [16.2, -118.6], [13.6, -114], [12.6, -108.4], [13.2, -103.4], [18, -96.6], [28, -94.4], [34.4, -94.2], [39.6, -93.2],
-    [43.4, -91.4], [49, -90.4], [49.4, -110], [44.6, -125], [37.6, -131.4], [35.4, -126], [35, -121], [34.6, -117.4], [32.6, -119.4], [29.6, -120.8]], { corners: [17] }),
+  R: furEdge(smooth([[-43, -86.6], [-49.6, -86], [-50, -106], [-48.4, -121.4], [-41.6, -122.6], [-39.6, -118], [-38.4, -112.6], [-35.8, -114.8], [-32.2, -117.2],
+    [-28, -117.8], [-22, -116.8], [-18.2, -113.2], [-15.8, -108.2], [-15.6, -102.4], [-18, -98], [-26, -93.4], [-33.4, -90.2], [-38.4, -88.4]], { corners: [6] }),
+    [-34.6, -115.8], [-19.6, -115], hoodLocks, 0.28),
+  L: furEdge(smooth([[43.4, -91.4], [49, -90.4], [49.4, -110], [44.6, -125], [37.6, -131.4], [35.4, -126], [35, -121], [34.6, -117.4], [32.6, -119.4], [29.6, -120.8],
+    [26, -121.2], [20.2, -121], [16.2, -118.6], [13.6, -114], [12.6, -108.4], [13.2, -103.4], [18, -96.6], [28, -94.4], [34.4, -94.2], [39.6, -93.2]], { corners: [7] }),
+    [33.6, -118.6], [17.4, -119.6], lefthandOf(hoodLocks), 0.28),
 };
 /** Each hood's end toward the nose softens a little more than its edge, as the sheet's does. */
 const patchFade = { R: { from: [-16.8, -105.4], to: [-13.6, -104.4] }, L: { from: [14.2, -109.6], to: [11, -108.6] } } satisfies Record<string, Fade>;
@@ -328,9 +334,10 @@ const backPaint: Paint = {
   fill: C.fur,
   shade: furShade(hipGroup),
   // From under the collar's end down the shoulder, the lighter fur line, coming out from under the collar; round
-  // the haunch, the warm line the sheet draws there, thinner and lighter than the head's, lighter on the side
-  // toward the light. The two cross-fade where the shoulder meets the haunch, their tapers overlapping.
-  outline: { ...OUTLINE, colour: C.warmLine, width: 1.2, taper: 6, spans: [
+  // the haunch, the light grey-brown line the sheet draws there (#BB9370 to #BE997E), thinner and lighter than
+  // the head's, lighter on the side toward the light. The two cross-fade where the shoulder meets the haunch,
+  // their tapers overlapping.
+  outline: { ...OUTLINE, colour: C.haunchLine, width: 1.2, taper: 6, spans: [
     { from: [-29.2, -61.4], to: [-38.8, -42.6], width: THIN, colour: C.furLine }, { from: [-35.6, -47.6], to: [-47.4, -11] },
     { from: [47.4, -11], to: [35.6, -47.6], width: 1.35 }, { from: [38.8, -42.6], to: [29.2, -61.4], width: THIN, colour: C.furLine }] },
 };
@@ -719,11 +726,11 @@ export function front(): Drawn[] {
       // Over its top, where it lies on the haunch, a soft light line that tapers off into the haunch at each end, as
       // the sheet draws it; then the warm line down its outer side and along the sole, to where it goes behind the
       // front paw. The two cross-fade on its outer side.
-      outline: { ...OUTLINE, colour: C.warmLine, width: 1.3, taper: 4, spans: bySide(side, [{ from: [-33.4, -17.6], to: [-48.4, -13.6], width: THIN, colour: C.softLine },
+      outline: { ...OUTLINE, colour: C.pawLine, width: 1.3, taper: 4, spans: bySide(side, [{ from: [-33.4, -17.6], to: [-48.4, -13.6], width: THIN, colour: C.softLine },
         { from: [-47, -15.8], to: [-29.2, -4.6], width: 1.45 }]) },
       // Two toe lines rising from the sole about 6.5 pt up the paw, each bowing a little away from the middle toe.
       inner: [[[-41.6, -3.4], [-42.3, -5.8], [-42.2, -8.1], [-41.6, -10]], [[-35.6, -3], [-34.9, -5.4], [-34.9, -7.8], [-35.4, -9.7]]]
-        .map((pts) => ({ pts: flipX(pts as P[], side), width: INNER, colour: C.warmLine, opacity: 0.65 })),
+        .map((pts) => ({ pts: flipX(pts as P[], side), width: INNER, colour: C.pawLine, opacity: 0.65 })),
     }), 6));
   }
   // Its canvas a point roomier than the chest, so the light group's shade, which reaches 13.7 pt past it, stays
@@ -802,12 +809,12 @@ export function front(): Drawn[] {
       fill: C.fur,
       shade: furShade(bodyGroup, [], ["M-40 -60 L40 -60 L40 -34 L-40 -34Z"]),
       under: `<defs><linearGradient id="${fade}" gradientUnits="userSpaceOnUse" x1="0" y1="${top}" x2="0" y2="-14">` +
-        `<stop offset="0" stop-color="${C.softLine}" stop-opacity="0.3"/><stop offset="0.35" stop-color="${C.softLine}"/><stop offset="1" stop-color="${C.warmLine}"/></linearGradient>` +
+        `<stop offset="0" stop-color="${C.softLine}" stop-opacity="0.3"/><stop offset="0.35" stop-color="${C.softLine}"/><stop offset="1" stop-color="${C.pawLine}"/></linearGradient>` +
         `<linearGradient id="${inside}" gradientUnits="userSpaceOnUse" x1="0" y1="-31" x2="0" y2="-12">` +
-        `<stop offset="0" stop-color="${C.softLine}" stop-opacity="0.4"/><stop offset="0.45" stop-color="${C.softLine}"/><stop offset="1" stop-color="${C.warmLine}"/></linearGradient>` +
+        `<stop offset="0" stop-color="${C.softLine}" stop-opacity="0.4"/><stop offset="0.45" stop-color="${C.softLine}"/><stop offset="1" stop-color="${C.pawLine}"/></linearGradient>` +
         // The toe lines fade out toward their tops.
         `<linearGradient id="${toe}" gradientUnits="userSpaceOnUse" x1="0" y1="-1.4" x2="0" y2="-8">` +
-        `<stop offset="0.35" stop-color="${C.warmLine}"/><stop offset="1" stop-color="${C.warmLine}" stop-opacity="0.1"/></linearGradient></defs>`,
+        `<stop offset="0.35" stop-color="${C.pawLine}"/><stop offset="1" stop-color="${C.pawLine}" stop-opacity="0.1"/></linearGradient></defs>`,
       // Two toe lines rising from the sole's scallops about 6.5 pt up the paw (45% of it), each bowing a little away
       // from the middle toe, as the paw-stub and stubby-paws panels draw them.
       inner: [[[-20, -1.4], [-20.7, -3.6], [-20.8, -5.9], [-20.3, -8]], [[-11, -1.5], [-10.3, -3.7], [-10.2, -6], [-10.7, -8.1]]]

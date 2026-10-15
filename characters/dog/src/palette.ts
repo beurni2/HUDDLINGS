@@ -60,6 +60,12 @@ export const C = {
   /** The outline warmed toward the ears' deep brown: the sheet's line round the haunches, the paws and under the
    * chin, #9F6D4A against the sheet's #A06D48 to #A36E4F there. */
   warmLine: mix(outline, mix(darken(multiply(marking, marking), 0.12), marking, 0.33), 0.4),
+  /** The line round the paws and their soles: the outline 15% of the way to the soft shadow, a greyer brown,
+   * #9E7B5F against the sheet's #9A7B5E to #977C61. */
+  pawLine: mix(outline, need(printed, "shadow"), 0.15),
+  /** The line round the haunches: the outline 35% of the way to the soft shadow, #B39479 against the sheet's
+   * #BB9370 to #BE997E. */
+  haunchLine: mix(outline, need(printed, "shadow"), 0.35),
   /** The faint line where one part lies over another (a leg over the haunch, a hind paw's top): the warm line
    * halfway to the fur's shade, #CEA889 against the sheet's #CCAB8C to #D6AE8B. */
   softLine: mix(mix(outline, mix(darken(multiply(marking, marking), 0.12), marking, 0.33), 0.4), furShade, 0.5),
