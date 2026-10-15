@@ -52,8 +52,8 @@
   "threshold": 0.85,
   "groundShadowLeftOut": true,
   "pass": true,
-  "iouHeadAligned": 0.9641,
-  "headCentreOffsetPt": [0.31, -0.39]
+  "iouHeadAligned": 0.9645,
+  "headCentreOffsetPt": [0.3, -0.42]
  },
  "landmarks": {
   "thresholdPt": 2.8,
@@ -100,10 +100,10 @@
    },
    "eye.L": {
     "how": "finder",
-    "found": [-67.47, -101.17],
+    "found": [-66.47, -101.33],
     "model": [-67.3, -100.4],
-    "errPt": 0.79,
-    "errShareOfHead": 0.008,
+    "errPt": 1.25,
+    "errShareOfHead": 0.013,
     "pass": true
    },
    "ground": {
@@ -199,7 +199,7 @@
     "heldTo": "#FFF4E8",
     "heldBy": "palette.fur",
     "deltaE2000": 0.0,
-    "pixels": 12999,
+    "pixels": 13022,
     "pass": true
    },
    "furShade": {
@@ -215,15 +215,15 @@
     "heldTo": "#200C02",
     "heldBy": "palettePainted.eyeDark",
     "deltaE2000": 0.0,
-    "pixels": 312,
+    "pixels": 349,
     "pass": true
    },
    "lowerIris": {
-    "dominant": "#3A2314",
+    "dominant": "#3D2414",
     "heldTo": "#3A2314",
     "heldBy": "palette.dark",
-    "deltaE2000": 0.0,
-    "pixels": 67,
+    "deltaE2000": 0.97,
+    "pixels": 70,
     "pass": true
    },
    "nose": {
@@ -247,7 +247,7 @@
     "heldTo": "#F0BC92",
     "heldBy": "palettePainted.markingLight",
     "deltaE2000": 0.25,
-    "pixels": 1596,
+    "pixels": 1591,
     "pass": true
    },
    "bodyMarkings": {
@@ -356,7 +356,7 @@
    },
    "head.patch.L": {
     "part": "head.patch.L",
-    "shownPt2": 1101.3,
+    "shownPt2": 1096.1,
     "shows": true,
     "expected": true,
     "host": "head.base",
@@ -367,9 +367,9 @@
      "renderCentroidInSheetPatch": true,
      "sheetCentroidInRender": true,
      "advisory": {
-      "areaRatio": 1.331,
-      "centroidOffsetPt": [2.48, -2.32],
-      "centroidDistancePt": 3.39
+      "areaRatio": 1.324,
+      "centroidOffsetPt": [2.51, -2.33],
+      "centroidDistancePt": 3.42
      },
      "pass": true
     }
@@ -459,8 +459,8 @@
    "set": "3x",
    "pages": 1,
    "pageAreaPx": 4194304,
-   "allRegionsShare": 0.355,
-   "thisStillShare": 0.107
+   "allRegionsShare": 0.354,
+   "thisStillShare": 0.106
   }
  },
  "failed": [],

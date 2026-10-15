@@ -15,6 +15,7 @@ import { marking, part, soft, type Fade, type Paint } from "../../../draw/paint.
 import { blur, join, mask, pad, piece, region, uid, type Box, type Piece } from "../../../draw/svg.ts";
 import { model } from "../model.ts";
 import { C } from "../palette.ts";
+import { eye, type EyeSpec } from "../parts/eye.ts";
 import type { Drawn } from "./front.ts";
 
 const OUTER = model.outline.outerPt;
@@ -426,68 +427,18 @@ function headLinePiece(): Piece {
 }
 
 /**
- * The near eye in profile, as the side turnaround paints it: a tall oval iris (11.2 by 21 pt) leaning 6° back at its
- * top, near-black over its upper half and glowing smoothly down into a warm brown at its foot, with no step, inside
- * a slightly darker rim; behind it, toward the ear, a thin crescent of white, narrow at the top, where the lid's soft
- * shade falls on it, and widest at its lower back, where it cools into a soft pale blue-grey shade; the lid line sitting right on the iris's top and
- * running round its back, heaviest along the top and the back corner and tapering away down the back; a faint pale
- * halo round the iris's foot and front; and one catchlight high on its front, toward the nose, as the sheet draws it
- * (Q26's default: the side crop shows one).
+ * The near eye in profile, by the dog's one eye recipe (parts/eye.ts, DECISIONS 73), as the side crop draws it: a
+ * tall oval (the sheet's eye runs x −74.3 to −58 and y −110.6 to −89.3, its iris x −73.8 to −63) leaning 6° back at
+ * its top; the rim dark all round, heaviest over the top and down the back, where the lash line lies on it; the
+ * white a crisp crescent between the rim and the iris all down the back, widest (2.9 pt, the sheet's 2.7 to 3.1) a
+ * little below the back's level; and one catchlight where the sheet's sits (x −68.3, y −104.3; Q26's default, the
+ * side crop shows one).
  */
-function eye(): Piece {
-  // The iris as the sheet's dark oval measures (its extremes x -73.4 to -62, y -110.8 to -89.7).
-  const c: P = [-67.7, -100.2], rx = 5.6, ry = 10.5, lean = 6;
-  const iris = pathD(ellipse(c, rx, ry, lean));
-  const clip = uid("eye"), glow = uid("glow"), cool = uid("cool"), lidShade = uid("shade");
-  const shine = uid("blur"), edge = uid("blur"), white = uid("blur"), halo = uid("blur"), rimSoft = uid("blur");
-  const box: Box = [c[0] - 10, c[1] - 15, 24, 30];
-  /** A point on the iris's oval at an angle (degrees, 0 toward the back, 90 down), grown by `grow`. */
-  const on = (deg: number, grow = 0): P => {
-    const a = (deg * Math.PI) / 180, t = (lean * Math.PI) / 180;
-    const x = (rx + grow) * Math.cos(a), y = (ry + grow) * Math.sin(a);
-    return [c[0] + x * Math.cos(t) - y * Math.sin(t), c[1] + x * Math.sin(t) + y * Math.cos(t)];
-  };
-  // The white: from the iris's top round its back, just inside the lid line, down to its lower back, where it is widest.
-  const whiteShape = smooth([on(-100), [-63.6, -108.6], [-61, -106.4], [-59.6, -104.2], [-58.7, -101.6], [-58.3, -98.8], [-58.7, -96], [-59.8, -93.6],
-    [-61.4, -91.8], [-63.4, -91.2], on(55), on(0), on(-50)], { corners: [0, 10] });
-  // The lid: along the iris's top from its front and round its back to its lower back; a heavier stroke along the top
-  // and the back corner over it.
-  const lidArc = smooth([on(-150, 0.1), on(-118, 0.25), on(-92, 0.35), [-63.8, -109.4], [-60.8, -107.2], [-59, -104.8], [-57.9, -101.8], [-57.5, -98.8], [-57.6, -96],
-    [-58.3, -93.8]], { closed: false });
-  const topArc = smooth([on(-140, 0.2), on(-110, 0.35), on(-88, 0.4), [-63.8, -109.5], [-60.8, -107.3], [-59.2, -105]], { closed: false });
-  const lid = tapered(sample(lidArc.segs, 10, false), 1.3, "outer", "eye lid", { taper: 7, tip: 0.25 });
-  const lidTop = tapered(sample(topArc.segs, 10, false), 1.8, "outer", "eye lid", { taper: 4, tip: 0.6 });
-  // A faint pale halo just outside the rim round the iris's foot and front, between the eye and the fur, as the sheet paints it.
-  const ring = strokeOf(Array.from({ length: 25 }, (_, k) => on(95 + (k * 120) / 24, 1.1)), 1.6, { taper: 5, tip: 0.2 });
-  // And just outside the lid, round the eye's top and back, where the patch's tan stops short of it, as the sheet paints it.
-  const outer = strokeOf(sample(smooth([on(-150, 1.4), on(-110, 1.7), on(-88, 1.8), [-63.4, -111.2], [-59.8, -108.8], [-57.6, -105.4], [-56.3, -101.2], [-56, -96.6],
-    [-56.8, -93.2]], { closed: false }).segs, 8, false), 1.5, { taper: 5, tip: 0.2 });
-  // The iris's own darker rim, round its front, foot and back, inside its edge.
-  const rim = tapered(Array.from({ length: 31 }, (_, k) => on(-160 + (k * 250) / 30, -0.35)), 0.8, "inner", "eye rim", { taper: 5, tip: 0.3 });
-  // The catchlight where the sheet's sits, high on the iris's front (x -68.3, y -104.3).
-  const big: P = [-68.3, -104.3];
-  const n = (p: P) => `${fmt(p[0])}" cy="${fmt(p[1])}`;
-  const [tx, ty] = on(-90), [bx, by] = on(90);
-  const svg = `<defs><clipPath id="${clip}"><path d="${iris}"/></clipPath>` +
-    // Down the iris's own axis: near-black over its upper half, glowing smoothly into the printed lower iris's warm dark
-    // brown and, at its foot, the warm light low in the iris.
-    `<linearGradient id="${glow}" gradientUnits="userSpaceOnUse" x1="${fmt(tx)}" y1="${fmt(ty)}" x2="${fmt(bx)}" y2="${fmt(by)}">` +
-    `<stop offset="0.42" stop-color="${C.eyeDark}"/><stop offset="0.7" stop-color="${C.dark}"/><stop offset="0.86" stop-color="${C.dark}"/>` +
-    `<stop offset="1" stop-color="${C.irisWarm}"/></linearGradient>` +
-    // The lid's soft shade over the white's top, the printed soft shadow, as the sheet paints it there (#E7DAD1).
-    `<linearGradient id="${lidShade}" gradientUnits="userSpaceOnUse" x1="0" y1="-109" x2="0" y2="-100">` +
-    `<stop offset="0" stop-color="${C.shadow}" stop-opacity="0.95"/><stop offset="1" stop-color="${C.shadow}" stop-opacity="0"/></linearGradient>` +
-    `<linearGradient id="${cool}" gradientUnits="userSpaceOnUse" x1="0" y1="-97" x2="0" y2="-90.4">` +
-    `<stop offset="0" stop-color="${C.collarHighlight}" stop-opacity="0"/><stop offset="1" stop-color="${C.collarHighlight}" stop-opacity="0.32"/></linearGradient>` +
-    `${blur(shine, box, 0.1)}${blur(edge, box, 0.2)}${blur(white, box, 0.3)}${blur(halo, box, 0.55)}${blur(rimSoft, box, 0.45)}</defs>` +
-    `<path d="${ring.d}" fill="${C.fur}" opacity="0.8" filter="url(#${halo})"/><path d="${outer.d}" fill="${C.fur}" opacity="0.5" filter="url(#${halo})"/>` +
-    `<g filter="url(#${white})">${[C.eyeWhite, `url(#${cool})`, `url(#${lidShade})`].map((fill) => `<path d="${pathD(whiteShape.segs)}" fill="${fill}"/>`).join("")}</g>` +
-    `<g filter="url(#${edge})"><path d="${iris}" fill="url(#${glow})"/></g>` +
-    `<g clip-path="url(#${clip})"><path d="${rim.d}" fill="${C.eyeDark}" opacity="0.7" filter="url(#${rimSoft})"/></g>` +
-    `<g filter="url(#${edge})"><path d="${lid.d}" fill="${C.eyeDark}"/><path d="${lidTop.d}" fill="${C.eyeDark}"/></g>` +
-    `<ellipse cx="${n(big)}" rx="1.55" ry="1.5" fill="${C.light}" filter="url(#${shine})"/>`;
-  return piece(svg, box, { shapes: [], lines: [lid.line, lidTop.line, rim.line] });
-}
+const EYE: EyeSpec = {
+  centre: [-66.15, -99.95], rx: 7.7, ry: 10.65, turn: 6, noseward: -1,
+  rim: { top: 1.3, side: 0.9, foot: 0.6 }, lid: { from: -45, to: 150, width: 1.8, flick: 0.3 },
+  white: { at: -8, width: 2.9, span: 64 }, shine: { at: [2.4, 4.1], r: 1.55 },
+};
 
 /** The brow: a short, thick, rounded dab of tan above the hood, domed, its back end lower, soft at its edges (the front's recipe). */
 function brow(): Piece {
@@ -706,7 +657,7 @@ export function side(): Drawn[] {
       `<stop offset="0" stop-color="${C.marking}" stop-opacity="0"/><stop offset="1" stop-color="${C.marking}" stop-opacity="0.5"/></linearGradient></defs>` +
       `<rect ${region(box)} fill="url(#${deepen})"/>`)));
   add("blush.L", blush());
-  add("eye.L", eye(), "open");
+  add("eye.L", eye(EYE), "open");
   add("brow.L", brow());
   add("nose", nose());
   add("mouth", mouth(), "smile");

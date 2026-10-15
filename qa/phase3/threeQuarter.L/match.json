@@ -52,8 +52,8 @@
   "threshold": 0.9,
   "groundShadowLeftOut": true,
   "pass": true,
-  "iouHeadAligned": 0.9682,
-  "headCentreOffsetPt": [-0.44, 0.14]
+  "iouHeadAligned": 0.9681,
+  "headCentreOffsetPt": [-0.5, 0.11]
  },
  "landmarks": {
   "thresholdPt": 2.8,
@@ -124,18 +124,18 @@
    },
    "eye.L": {
     "how": "finder",
-    "found": [-37.92, -96.12],
+    "found": [-37.73, -96.45],
     "model": [-38.5, -95.6],
-    "errPt": 0.78,
-    "errShareOfHead": 0.008,
+    "errPt": 1.15,
+    "errShareOfHead": 0.012,
     "pass": true
    },
    "eye.R": {
     "how": "finder",
-    "found": [-78.08, -105.63],
+    "found": [-77.99, -105.36],
     "model": [-77.8, -105.0],
-    "errPt": 0.69,
-    "errShareOfHead": 0.007,
+    "errPt": 0.41,
+    "errShareOfHead": 0.004,
     "pass": true
    },
    "ground": {
@@ -239,7 +239,7 @@
     "heldTo": "#FFF4E8",
     "heldBy": "palette.fur",
     "deltaE2000": 0.0,
-    "pixels": 16771,
+    "pixels": 16914,
     "pass": true
    },
    "furShade": {
@@ -247,7 +247,7 @@
     "heldTo": "#FDE3C8",
     "heldBy": "palettePainted.furShade",
     "deltaE2000": 0.38,
-    "pixels": 2387,
+    "pixels": 2388,
     "pass": true
    },
    "eyes": {
@@ -255,15 +255,15 @@
     "heldTo": "#200C02",
     "heldBy": "palettePainted.eyeDark",
     "deltaE2000": 0.0,
-    "pixels": 792,
+    "pixels": 731,
     "pass": true
    },
    "lowerIris": {
-    "dominant": "#3A2213",
+    "dominant": "#3D2413",
     "heldTo": "#3A2314",
     "heldBy": "palette.dark",
-    "deltaE2000": 0.56,
-    "pixels": 194,
+    "deltaE2000": 1.15,
+    "pixels": 168,
     "pass": true
    },
    "nose": {
@@ -303,7 +303,7 @@
     "heldTo": "#F0BC92",
     "heldBy": "palettePainted.markingLight",
     "deltaE2000": 0.3,
-    "pixels": 1117,
+    "pixels": 1152,
     "pass": true
    },
    "bodyMarkings": {
@@ -414,7 +414,7 @@
    },
    "head.patch.L": {
     "part": "head.patch.L",
-    "shownPt2": 567.1,
+    "shownPt2": 583.7,
     "shows": true,
     "expected": true,
     "host": "head.base",
@@ -425,16 +425,16 @@
      "renderCentroidInSheetPatch": true,
      "sheetCentroidInRender": true,
      "advisory": {
-      "areaRatio": 0.871,
-      "centroidOffsetPt": [-0.15, 2.16],
-      "centroidDistancePt": 2.16
+      "areaRatio": 0.899,
+      "centroidOffsetPt": [-0.27, 2.35],
+      "centroidDistancePt": 2.36
      },
      "pass": true
     }
    },
    "head.patch.R": {
     "part": "head.patch.R",
-    "shownPt2": 207.3,
+    "shownPt2": 208.3,
     "shows": true,
     "expected": true,
     "host": "head.base",
@@ -445,9 +445,9 @@
      "renderCentroidInSheetPatch": true,
      "sheetCentroidInRender": true,
      "advisory": {
-      "areaRatio": 0.838,
-      "centroidOffsetPt": [1.88, -4.95],
-      "centroidDistancePt": 5.3
+      "areaRatio": 0.845,
+      "centroidOffsetPt": [1.91, -4.91],
+      "centroidDistancePt": 5.27
      },
      "pass": true
     }
@@ -532,8 +532,8 @@
    "set": "3x",
    "pages": 1,
    "pageAreaPx": 4194304,
-   "allRegionsShare": 0.355,
-   "thisStillShare": 0.122
+   "allRegionsShare": 0.354,
+   "thisStillShare": 0.121
   }
  },
  "failed": [],
