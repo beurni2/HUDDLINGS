@@ -44,6 +44,8 @@ export const C = {
   furShadeBy: ratio(fur, furShade),
   /** Every other fill's shade, 10% darker (spec L507: the fill 8 to 12% darker). */
   shadeBy: darken(light, 0.1),
+  /** The ears' shade as a multiply: the tan deepens toward the ear's bottom and outer edge to about #CA8B5C, as the sheet's #C5834F. */
+  earShadeBy: mix(light, marking, 0.45),
   /** The lighter line on fur spans. */
   furLine: mix(outline, fur, 0.14),
   /** The faint line round the cheeks' fluff, which the sheet barely outlines. */

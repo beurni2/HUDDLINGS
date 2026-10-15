@@ -361,7 +361,7 @@ export function front(): Drawn[] {
       fill: C.marking,
       under: earEdge(k),
       // The tan's own warm shade, deepest toward the bottom and the outer edge, as the sheet paints its ears.
-      shade: { multiply: C.furShadeBy, rim: { inset: 2.4, toLight: 4 }, shapes: [k > 0 ? shadeD : mirrorD(shadeD)], blur: 3.2 },
+      shade: { multiply: C.earShadeBy, rim: { inset: 2.4, toLight: 4 }, shapes: [k > 0 ? shadeD : mirrorD(shadeD)], blur: 3.2 },
       // The upper ear is lighter where it leaves the head.
       // Lighter on its inner side and where it leaves the head.
       highlight: { d: k > 0 ? "M-58 -126 C-53 -132 -46 -137 -40 -134 L-38 -90 L-47.6 -90 C-48.4 -100 -49 -112 -51 -118 C-54 -120 -57 -122 -58 -126Z" : "M58 -126 C53 -132 46 -139 40 -137 L38 -90 L47.6 -90 C48.4 -100 49 -112 51 -118 C54 -120 57 -122 58 -126Z", colour: C.patch, opacity: 0.8, blur: 2.4 },
