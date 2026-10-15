@@ -243,11 +243,11 @@
     "pass": true
    },
    "furShade": {
-    "dominant": "#FDE4CA",
+    "dominant": "#FDE3C9",
     "heldTo": "#FDE3C8",
     "heldBy": "palettePainted.furShade",
-    "deltaE2000": 0.44,
-    "pixels": 2384,
+    "deltaE2000": 0.38,
+    "pixels": 2387,
     "pass": true
    },
    "eyes": {
@@ -532,7 +532,7 @@
    "set": "3x",
    "pages": 1,
    "pageAreaPx": 4194304,
-   "allRegionsShare": 0.249,
+   "allRegionsShare": 0.355,
    "thisStillShare": 0.122
   }
  },

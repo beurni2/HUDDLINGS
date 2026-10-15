@@ -172,8 +172,9 @@ test("every part of the three-quarter view that turns runs under the part coveri
 
 test("the far front leg is 6 to 10% darker than the near one and stays warm (L369)", () => {
   const rgb = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
-  const mean = (h: string) => rgb(h).reduce((a, b) => a + b) / 3;
-  const darker = 1 - mean(C.farFur) / mean(C.fur);
+  // Darker as the eye sees it: by luminance, as the side view's test measures it, so the two views hold one rule.
+  const luma = (h: string) => { const [r, g, b] = rgb(h); return 0.2126 * r! + 0.7152 * g! + 0.0722 * b!; };
+  const darker = 1 - luma(C.farFur) / luma(C.fur);
   assert.ok(darker >= 0.06 && darker <= 0.1, `the far leg is ${(darker * 100).toFixed(1)}% darker`);
   // Warm, not grey: its red channel stays the highest and its blue falls furthest, as the fur's own shade does.
   const [r, g, b] = rgb(C.farFur), [fr, fg, fb] = rgb(C.fur);
