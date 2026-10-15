@@ -437,7 +437,7 @@ function eye(): Piece {
   // The iris as the sheet's dark oval measures (its extremes x -73.4 to -62, y -110.8 to -89.7).
   const c: P = [-67.7, -100.2], rx = 5.6, ry = 10.5, lean = 6;
   const iris = pathD(ellipse(c, rx, ry, lean));
-  const clip = uid("eye"), glow = uid("glow"), cool = uid("cool"), lidShade = uid("shade"), shine = uid("blur"), edge = uid("blur"), white = uid("blur"), core = uid("blur"), halo = uid("blur"), rimSoft = uid("blur");
+  const clip = uid("eye"), glow = uid("glow"), cool = uid("cool"), lidShade = uid("shade"), shine = uid("blur"), edge = uid("blur"), white = uid("blur"), halo = uid("blur"), rimSoft = uid("blur");
   const box: Box = [c[0] - 10, c[1] - 15, 24, 30];
   /** A point on the iris's oval at an angle (degrees, 0 toward the back, 90 down), grown by `grow`. */
   const on = (deg: number, grow = 0): P => {
@@ -446,8 +446,8 @@ function eye(): Piece {
     return [c[0] + x * Math.cos(t) - y * Math.sin(t), c[1] + x * Math.sin(t) + y * Math.cos(t)];
   };
   // The white: from the iris's top round its back, just inside the lid line, down to its lower back, where it is widest.
-  const whiteShape = smooth([on(-100), [-63.6, -108.6], [-61, -106.4], [-59.6, -104.2], [-58.7, -101.6], [-58.3, -98.8], [-58.5, -96], [-59.4, -93.4],
-    [-60.8, -91.4], [-62.8, -90.4], on(55), on(0), on(-50)], { corners: [0, 10] });
+  const whiteShape = smooth([on(-100), [-63.6, -108.6], [-61, -106.4], [-59.6, -104.2], [-58.7, -101.6], [-58.3, -98.8], [-58.7, -96], [-59.8, -93.6],
+    [-61.4, -91.8], [-63.4, -91.2], on(55), on(0), on(-50)], { corners: [0, 10] });
   // The lid: along the iris's top from its front and round its back to its lower back; a heavier stroke along the top
   // and the back corner over it.
   const lidArc = smooth([on(-150, 0.1), on(-118, 0.25), on(-92, 0.35), [-63.8, -109.4], [-60.8, -107.2], [-59, -104.8], [-57.9, -101.8], [-57.5, -98.8], [-57.6, -96],
@@ -462,7 +462,8 @@ function eye(): Piece {
     [-56.8, -93.2]], { closed: false }).segs, 8, false), 1.5, { taper: 5, tip: 0.2 });
   // The iris's own darker rim, round its front, foot and back, inside its edge.
   const rim = tapered(Array.from({ length: 31 }, (_, k) => on(-160 + (k * 250) / 30, -0.35)), 0.8, "inner", "eye rim", { taper: 5, tip: 0.3 });
-  const big = on(-128, -2.7);
+  // The catchlight where the sheet's sits, high on the iris's front (x -68.3, y -104.3).
+  const big: P = [-68.3, -104.3];
   const n = (p: P) => `${fmt(p[0])}" cy="${fmt(p[1])}`;
   const [tx, ty] = on(-90), [bx, by] = on(90);
   const svg = `<defs><clipPath id="${clip}"><path d="${iris}"/></clipPath>` +
@@ -476,14 +477,13 @@ function eye(): Piece {
     `<stop offset="0" stop-color="${C.shadow}" stop-opacity="0.95"/><stop offset="1" stop-color="${C.shadow}" stop-opacity="0"/></linearGradient>` +
     `<linearGradient id="${cool}" gradientUnits="userSpaceOnUse" x1="0" y1="-97" x2="0" y2="-90.4">` +
     `<stop offset="0" stop-color="${C.collarHighlight}" stop-opacity="0"/><stop offset="1" stop-color="${C.collarHighlight}" stop-opacity="0.32"/></linearGradient>` +
-    `${blur(shine, box, 0.1)}${blur(edge, box, 0.2)}${blur(white, box, 0.3)}${blur(core, box, 0.3)}${blur(halo, box, 0.55)}${blur(rimSoft, box, 0.45)}</defs>` +
+    `${blur(shine, box, 0.1)}${blur(edge, box, 0.2)}${blur(white, box, 0.3)}${blur(halo, box, 0.55)}${blur(rimSoft, box, 0.45)}</defs>` +
     `<path d="${ring.d}" fill="${C.fur}" opacity="0.8" filter="url(#${halo})"/><path d="${outer.d}" fill="${C.fur}" opacity="0.5" filter="url(#${halo})"/>` +
     `<g filter="url(#${white})"><path d="${pathD(whiteShape.segs)}" fill="${C.eyeWhite}"/><path d="${pathD(whiteShape.segs)}" fill="url(#${cool})"/><path d="${pathD(whiteShape.segs)}" fill="url(#${lidShade})"/></g>` +
     `<g filter="url(#${edge})"><path d="${iris}" fill="url(#${glow})"/></g>` +
     `<g clip-path="url(#${clip})"><path d="${rim.d}" fill="${C.eyeDark}" opacity="0.7" filter="url(#${rimSoft})"/></g>` +
     `<g filter="url(#${edge})"><path d="${lid.d}" fill="${C.eyeDark}"/><path d="${lidTop.d}" fill="${C.eyeDark}"/></g>` +
-    `<ellipse cx="${n(big)}" rx="1.6" ry="1.55" fill="${C.light}" filter="url(#${shine})"/>` +
-    `<ellipse cx="${n(big)}" rx="0.6" ry="0.55" fill="${C.dark}" opacity="0.1" filter="url(#${core})"/>`;
+    `<ellipse cx="${n(big)}" rx="1.55" ry="1.5" fill="${C.light}" filter="url(#${shine})"/>`;
   return piece(svg, box, { shapes: [], lines: [lid.line, lidTop.line, rim.line] });
 }
 
