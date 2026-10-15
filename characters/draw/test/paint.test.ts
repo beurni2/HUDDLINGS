@@ -4,7 +4,8 @@ import assert from "node:assert/strict";
 import { Resvg } from "@resvg/resvg-js";
 import { PNG } from "pngjs";
 import { pathD, smooth, type Node } from "../geom.ts";
-import { LIGHT, darken, grain, marking, mix, multiply, part, ratio } from "../paint.ts";
+import { reach } from "../lint.ts";
+import { LIGHT, darken, grain, marking, mix, multiply, part, ratio, type Paint } from "../paint.ts";
 import type { Piece } from "../svg.ts";
 
 const FUR = "#FFF4E8", FUR_SHADE = "#FDE3C8", TAN = "#D9A379";
@@ -64,6 +65,20 @@ test("the shade falls away from the light and the highlight toward it; a mirrore
   assert.ok(sum(left.at(-11, -11)) > sum(left.at(11, 11)), "lit at the top left, shaded at the bottom right");
   const right = render(paint([-LIGHT[0], LIGHT[1]]));
   assert.ok(sum(right.at(11, -11)) > sum(right.at(-11, 11)), "a light from the top right shades the bottom left");
+});
+
+test("a part's filters and masks reach as far as lint.ts's reach() of each, an automatic highlight's default move included", () => {
+  /** How far past the part's box (its bounds and 1 pt) its widest filter or mask region reaches. */
+  const past = (paint: Paint) => -21 - Math.min(...[...part("p", disc, paint).svg.matchAll(/<(?:filter|mask)\b[^>]*\sx="([^"]+)"/g)].map((m) => Number(m[1])));
+  const near = (got: number, want: number) => assert.ok(Math.abs(got - want) < 1e-3, `${got}, not ${want}`);
+  // The highlight from the light by default: eroded 3 pt and moved 5 pt away from the light, then blurred.
+  near(past({ fill: FUR, highlight: { colour: "#FFFFFF", opacity: 0.8, blur: 2 } }), reach(2, 3 + 5));
+  near(past({ fill: FUR, highlight: { colour: "#FFFFFF", opacity: 0.8, blur: 2, auto: { inset: 2, toLight: 1 } } }), reach(2, 2 + 1));
+  near(past({ fill: FUR, highlight: { colour: "#FFFFFF", opacity: 0.8, blur: 2, d: "M0 0h4v4z" } }), reach(2, 0));
+  // The shade: its blur, and its rim's erode and move toward the light; the widest of the part's reaches counts.
+  const shade = { multiply: ratio(FUR, FUR_SHADE), rim: { inset: 2.5, toLight: 4 }, blur: 2.4 };
+  near(past({ fill: FUR, shade }), reach(2.4, 2.5 + 4));
+  near(past({ fill: FUR, shade, highlight: { colour: "#FFFFFF", opacity: 0.8, blur: 3 } }), reach(3, 3 + 5));
 });
 
 test("a faded marking shows fully at its fade's start and not at all past its end, its gradient kept out of the paint", () => {

@@ -7,6 +7,7 @@
 // patch darkens exactly like the fur around it.
 import { bbox, fracAt, pathD, v, type P, type Shape } from "./geom.ts";
 import { innerLine, ribbons, type Outline } from "./line.ts";
+import { reach } from "./lint.ts";
 import { blur, filter, mask, pad, piece, region, uid, type Box, type LineMeta, type Piece } from "./svg.ts";
 
 /** The light comes from the top left, a little more from above. A mirrored facing passes its own. */
@@ -31,7 +32,7 @@ export interface Highlight {
   colour: string;
   opacity: number;
   blur: number;
-  /** Placed from the light: the shape eroded by `inset`, minus itself moved `toLight` pt away from the light. */
+  /** Placed from the light: the shape eroded by `inset`, minus itself moved `toLight` pt away from the light (AUTO when neither this nor `d` is given). */
   auto?: { inset: number; toLight: number };
   /** Or a shape placed by hand, as path data, for one highlight across a light group. */
   d?: string;
@@ -52,10 +53,18 @@ export interface Paint {
 
 const xy = (p: P) => `${(Math.round(p[0] * 1000) / 1000).toString()} ${(Math.round(p[1] * 1000) / 1000).toString()}`;
 
-/** How far past the part's bounds its filters and masks reach. */
+/** The automatic highlight's placing, when a paint gives neither its own nor a hand-placed shape. */
+const AUTO = { inset: 3, toLight: 5 };
+
+/** How far the shade's mask reaches past the part, by lint.ts's rule: its blur, and its rim's erode and move toward the light. */
+const shadeReach = (s: Shade) => reach(s.blur, (s.rim?.inset ?? 0) + (s.rim?.toLight ?? 0));
+/** How far the highlight reaches: a hand-placed one its blur; one from the light its mask's blur, erode and move away from the light. */
+const highlightReach = (h: Highlight) => (h.d ? reach(h.blur, 0) : reach(h.blur, (h.auto ?? AUTO).inset + (h.auto ?? AUTO).toLight));
+
+/** How far past the part's bounds its filters and masks reach: the widest of them, each by lint.ts's one rule. */
 function reachOf(paint: Paint): number {
-  const s = paint.shade, h = paint.highlight;
-  return Math.max(2, s ? 3 * s.blur + (s.rim?.toLight ?? 0) + (s.rim?.inset ?? 0) : 0, h ? 3 * h.blur + (h.auto?.toLight ?? 0) : 0);
+  const { shade, highlight, outline } = paint;
+  return Math.max(reach(0, 0), shade ? shadeReach(shade) : 0, highlight ? highlightReach(highlight) : 0, outline?.blur ? reach(outline.blur, 0) : 0);
 }
 
 /** The shade's mask: the rim and the overhang shapes, minus the keep zones, through one blur. */
@@ -81,7 +90,7 @@ function highlight(shape: Shape, h: Highlight, light: P, area: Box): string {
   let defs = blur(soft, area, h.blur);
   if (h.d) return `<defs>${defs}</defs><path d="${h.d}" fill="${h.colour}" opacity="${h.opacity}" filter="url(#${soft})"/>`;
   // The shape inset, minus itself moved away from the light: a lit crescent on the side toward the light, whichever way the part faces.
-  const auto = h.auto ?? { inset: 3, toLight: 5 };
+  const auto = h.auto ?? AUTO;
   const id = uid("lit"), erode = uid("erode");
   const d = pathD(shape.segs);
   defs += filter(erode, area, `<feMorphology operator="erode" radius="${auto.inset}"/>`) +
