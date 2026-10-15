@@ -109,8 +109,8 @@ const tail = furSpan(furEdge(furEdge(furEdge(furEdge(smooth([[10, -22], [17.4, -
 // the shoulder so its back end goes up square under the ear's foot (hidden
 // from x -18), as the sheet draws it.
 const collar = smooth([[-62.2, -56], [-61.2, -59.2], [-55.9, -60.5], [-48.8, -61.7], [-41.7, -62.6], [-34.7, -63.6], [-27.6, -64.7], [-22, -65.5], [-17, -66.2],
-  [-14.6, -65.6], [-14.8, -63.6], [-17.6, -62.8], [-20.6, -60.8], [-24, -58.7], [-27.6, -57.3], [-34.7, -54.8], [-41.7, -52.7], [-48.8, -51.3], [-55.9, -51.1],
-  [-60.2, -52.2]]);
+  [-14.6, -65.6], [-14.8, -63.6], [-17.6, -62.8], [-20.6, -60.8], [-24, -58.7], [-27.6, -57.3], [-34.7, -54.8], [-41.7, -52.7], [-48.8, -51.3], [-55.9, -51.6],
+  [-60.2, -52.6]]);
 
 // The tag, a little turned: a round, coin-like heart (12.4 pt wide, 14.4 pt
 // tall; the front's is 17.9 wide), the dip between its lobes shallow, its foot
@@ -158,7 +158,7 @@ const foreLocks: { tip: P; root: P; notches: [P, P] }[] = [];
 const noteLock = (tip: P, root: P, notches: [P, P]) => foreLocks.push({ tip, root, notches });
 const head = furEdge(furEdge(smooth([[-60.8, -59.6], [-70, -63.8], [-80.6, -67.4], [-91.8, -76.2], [-92.8, -80.2], [-95.2, -85.6], [-96.6, -92.2],
   [-96, -97.2], [-92.4, -100.3], [-85, -104.4], [-84, -112.6], [-81, -124.4], [-77.8, -132.6], [-74, -140.2], [-69, -146.4], [-62.6, -151.4],
-  [-20, -155.8], [-4, -149], [10, -131], [17, -110], [14, -78], [-28, -64.6], [-44, -61.8]]), [-80.9, -127], [-65.8, -149.6],
+  [-20, -155.8], [-4, -149], [10, -131], [17, -110], [14, -78], [-28, -63.8], [-50, -58.8]]), [-80.9, -127], [-65.8, -149.6],
 // The forehead's fur breaks into two locks below the topknot, their tips combed forward and hooking back in under
 // themselves, as the sheet draws them.
 [{ len: 2.3, w: 1, lean: -0.45 }, { len: 3, w: 1.2, lean: -0.5 }], 0.38, noteLock),
@@ -540,16 +540,16 @@ function blush(): Piece {
 /**
  * The tag (the front's recipe), as the side crop paints it: flat matte gold, a deeper orange-gold rim inside its line
  * down its left side and round its foot, where the turned coin's edge shows, one soft light high on its left, and the
- * smaller heart embossed, soft: a lighter face with a soft darker edge low on its right. It hangs from a small gold
- * ring just under the band, held by a strap in the band's own darker blue at its front turn (the tag's pivot, the
- * ring's top on the collar, rig.json), so at rest the strap is the band's front turn itself.
+ * smaller heart embossed as a soft line with a lighter face. It hangs from a small gold ring just under the band; the
+ * tag's pivot, the ring's top on the collar (rig.json), lies on a short strap in the band's own darker blue at its
+ * front turn, so at rest the strap is the band's front turn itself.
  */
 function tagPiece(): Piece {
   const strapLine: DrawnLine = { kind: "inner", width: 0.7, where: "tag ring", drawn: [0.7, 0.7] };
   const f = uid("blur"), box: Box = [-64, -61, 8, 11];
   const strap = piece(`<defs>${blur(f, box, 0.5)}</defs>` +
-    `<path d="M-61.6 -58.6 C-61.8 -56.6 -61.6 -54.4 -61 -52.8 L-58.8 -52.8 C-58.4 -54.6 -58.4 -56.8 -58.6 -58.8 C-59.6 -59.6 -60.8 -59.4 -61.6 -58.6Z" ` +
-    `fill="${C.collarLine}" opacity="0.7" filter="url(#${f})"/>` +
+    `<path d="M-60.8 -58.8 C-61 -57.6 -60.8 -56.6 -60.4 -55.8 L-58.6 -55.8 C-58.3 -56.8 -58.3 -57.8 -58.5 -58.9 C-59.2 -59.5 -60.2 -59.4 -60.8 -58.8Z" ` +
+    `fill="${C.collarLine}" opacity="0.6" filter="url(#${f})"/>` +
     `<ellipse cx="-60.4" cy="-52.1" rx="1" ry="0.85" fill="${C.tag}" stroke="${C.tagLine}" stroke-width="${strapLine.width}"/>`, box, { shapes: [], lines: [strapLine] });
   const g = uid("blur"), emboss = pathD(innerHeart.segs);
   const rim = sample(innerHeart.segs, 10);
