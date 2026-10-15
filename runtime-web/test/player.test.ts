@@ -1,10 +1,10 @@
 // Tests for the player, from characters/format/README.md (Playing, blending and the clock; Springs).
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import type { Clip, Rig } from "../src/format.ts";
+import type { AtlasSet, Clip, Rig } from "../src/format.ts";
 import { validate } from "../src/format.ts";
-import { compile } from "../src/rig.ts";
-import { Player, STEP_HZ } from "../src/player.ts";
+import { compile, drawList } from "../src/rig.ts";
+import { Player, STEP_HZ, type Frame } from "../src/player.ts";
 
 const close = (a: number, b: number, eps = 1e-9, what = "") => assert.ok(Math.abs(a - b) <= eps, `${what} ${a} vs ${b}`);
 
@@ -460,7 +460,7 @@ test("two keys at the same time are a jump, and a first key's step easing is not
   for (let i = 1; i <= 120; i++) close(p.advanceTo(i / 120).pose.angle[c.index.get("tag")!]!, q.advanceTo(i / 120).pose.angle[c.index.get("tag")!]!, 1e-12, `frame ${i}`);
 });
 
-test("a part's alpha keys, eases and blends as a channel does, from and to its rest value 1", () => {
+test("a part's alpha keys, eases and blends as a channel does, from and to its rest value, 1 when the rig gives none", () => {
   const fades: Clip[] = [
     { name: "blush", lengthMs: 1000, alpha: { eye: [[0, 0.2], [400, 1, "linear"]], tail: [[0, 0.5]] } },
     { name: "plain", lengthMs: 1000, tracks: { body: { rot: [[0, 5]] } } },
@@ -481,6 +481,41 @@ test("a part's alpha keys, eases and blends as a channel does, from and to its r
   // And from 1 to a clip's value.
   p.play("dim", 1, 200);
   close(p.advanceTo(1.1).state.alpha!.tail!, 0.5, 1e-12, "halfway from 1 to 0");
+});
+
+test("a part's rest alpha is its alpha where no clip keys it, a clip's keys override it, and a blend runs from and to it", () => {
+  // The blush is drawn at full strength and rests at its sheet's level (README, Rig: parts); here the tail rests at
+  // 0.4 and the eye, hidden at rest, at 0. The body has no rest alpha: 1.
+  const resting: Rig = { ...rig, parts: rig.parts.map((p) => (p.name === "tail" ? { ...p, alpha: 0.4 } : p.name === "eye" ? { ...p, alpha: 0 } : p)) };
+  const fades: Clip[] = [
+    { name: "plain", lengthMs: 1000, tracks: { body: { rot: [[0, 5]] } } },
+    { name: "glow", lengthMs: 1000, alpha: { tail: [[0, 1]], eye: [[0, 0.8]] } },
+  ];
+  assert.deepEqual(validate(resting, fades), []);
+  const rc = compile(resting);
+  const region = { page: 0, x: 0, y: 0, w: 4, h: 4, anchorX: 2, anchorY: 2 };
+  const atlas: AtlasSet = { name: "2x", scale: 2, pages: [{ file: "p.png", scale: 2, width: 16, height: 16 }],
+    regions: { body: region, tail: region, "eye/open": region, "eye/closed": region } };
+  const drawn = (f: Frame) => Object.fromEntries(drawList(rc, f.pose, atlas, f.state).map((i) => [i.part, i.alpha]));
+  const p = new Player(rc, fades);
+  p.play("plain", 0);
+  const still = p.advanceTo(0);
+  assert.deepEqual(still.state.alpha, {}, "no clip keys a part");
+  assert.deepEqual(drawn(still), { tail: 0.4, body: 1, eye: 0 }, "each part draws at its rest alpha");
+  // A clip that keys a part sets its alpha; blending in, each part runs from its rest alpha (the weight is 0.5 halfway).
+  p.play("glow", 0.5, 200);
+  const mid = p.advanceTo(0.6);
+  close(mid.state.alpha!.tail!, 0.7, 1e-12, "the tail halfway from its rest 0.4 to 1");
+  close(mid.state.alpha!.eye!, 0.4, 1e-12, "the eye halfway from its rest 0 to 0.8");
+  assert.deepEqual(drawn(p.advanceTo(0.7)), { tail: 1, body: 1, eye: 0.8 }, "the keyed values once the blend is over");
+  // And back: a clip that keys no alpha blends each part to its rest alpha, then leaves it there.
+  p.play("plain", 1, 200);
+  const back = p.advanceTo(1.1);
+  close(back.state.alpha!.tail!, 0.7, 1e-12, "the tail halfway back to 0.4");
+  close(back.state.alpha!.eye!, 0.4, 1e-12, "the eye halfway back to 0");
+  const after = p.advanceTo(1.2);
+  assert.deepEqual(after.state.alpha, {});
+  assert.deepEqual(drawn(after), { tail: 0.4, body: 1, eye: 0 });
 });
 
 test("alpha moves nothing: a clip's alpha keys, jumps included, leave its poses and springs as they are", () => {

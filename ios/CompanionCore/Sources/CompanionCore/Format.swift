@@ -75,6 +75,8 @@ public struct Part: Codable, Equatable, Sendable {
     public var warp: Warp?
     /// The state drawn when no clip sets one (for parts whose regions are all "view:state").
     public var defaultState: String?
+    /// Its rest alpha, 0 to 1, 1 by default: its alpha where no clip keys it (README, Rig: parts).
+    public var alpha: Double?
 }
 
 /// How a part moves in the fake turn.
@@ -182,7 +184,7 @@ public struct Clip: Codable, Equatable, Sendable {
     public var interruptAt: [Double]?
     /// Keys per bone, then per channel name ("rot", "squash").
     public var tracks: [String: [String: [Key]]]?
-    /// Each part's opacity over time, 0 to 1; 1, its rest value, where no clip keys it (README, Clips: alpha).
+    /// Each part's opacity over time, 0 to 1; where no clip keys it, its rest alpha, 1 unless the rig gives one (README, Clips: alpha).
     public var alpha: [String: [Key]]?
     public var states: [String: [DiscreteKey]]?
     public var views: ViewTracks?

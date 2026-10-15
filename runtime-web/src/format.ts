@@ -55,6 +55,8 @@ export interface Part {
   warp?: Warp;
   /** The state drawn when no clip sets one (for parts whose regions are all "view:state"). */
   defaultState?: string;
+  /** Its rest alpha, 0 to 1, 1 by default: its alpha where no clip keys it (the blush, drawn at full strength, rests at its sheet's level). */
+  alpha?: number;
 }
 
 export type TurnRole = "face" | "marking" | "ear";
@@ -115,7 +117,7 @@ export interface Clip {
   blendInMs?: number;
   interruptAt?: number[];
   tracks?: Record<string, Partial<Record<Channel, Key[]>>>;
-  /** Each part's opacity over time, 0 to 1; 1, its rest value, where no clip keys it (README, Clips: alpha). */
+  /** Each part's opacity over time, 0 to 1; where no clip keys it, its rest alpha, 1 unless the rig gives one (README, Clips: alpha). */
   alpha?: Record<string, Key[]>;
   states?: Record<string, DiscreteKey[]>;
   views?: Partial<Record<"body" | "head", DiscreteKey[]>>;
@@ -248,6 +250,7 @@ export function validate(rig: Rig, clips: Clip[], atlas?: AtlasSet): string[] {
     if (parts.has(part.name)) problems.push(`part ${part.name}: listed twice`);
     parts.set(part.name, part);
     if (!bones.has(part.bone)) problems.push(`part ${part.name}: unknown bone ${part.bone}`);
+    if (part.alpha !== undefined && !(finite(part.alpha) && part.alpha >= 0 && part.alpha <= 1)) problems.push(`part ${part.name}: its rest alpha ${JSON.stringify(part.alpha)} is not a number from 0 to 1`);
     // Per view: whether any of its keys names a region. A null needs nothing in the atlas.
     const drawsIn = new Map<string, boolean>();
     for (const [view, region] of Object.entries(part.regions)) {

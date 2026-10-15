@@ -267,6 +267,15 @@ test("validation refuses keys out of time order on a bone's channel, and takes t
   assert.deepEqual(validate(rig, [keyed([[0, 0], [200, 2], [200, 4]])]), []);
 });
 
+test("validation keeps a part's rest alpha inside 0 to 1", () => {
+  const withRest = (alphas: Record<string, unknown>): Rig => ({ ...rig, parts: rig.parts.map((p) => (p.name in alphas ? { ...p, alpha: alphas[p.name] as number } : p)) });
+  assert.deepEqual(validate(withRest({ "eye.L": 0.34, "eye.R": 0, body: 1 }), []), []);
+  assert.deepEqual(validate(withRest({ "eye.L": 1.2, "eye.R": -0.1, body: "0.5", "head.base": null }), []), [
+    "part body: its rest alpha \"0.5\" is not a number from 0 to 1", "part head.base: its rest alpha null is not a number from 0 to 1",
+    "part eye.L: its rest alpha 1.2 is not a number from 0 to 1", "part eye.R: its rest alpha -0.1 is not a number from 0 to 1",
+  ]);
+});
+
 test("validation refuses an empty discrete track", () => {
   const clip: Clip = { name: "c", lengthMs: 500, states: { "eye.L": [] }, views: { body: [], head: [[0, "front"]] }, order: [] };
   assert.deepEqual(validate(rig, [clip]), [

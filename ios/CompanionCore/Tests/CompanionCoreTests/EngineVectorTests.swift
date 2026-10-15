@@ -152,6 +152,38 @@ final class EngineVectorTests: XCTestCase {
         XCTAssertEqual(index, file.frames.count, "player alpha: frames run")
         print("player alpha: \(index) frames, \(compare.count) numbers, largest difference \(compare.largest)")
     }
+
+    /// Parts' rest alphas: drawn where no clip keys them, blended from and to (README, Rig: parts), on the test rig the file holds.
+    func testPlayerRestAlphaRun() throws {
+        struct Item: Decodable { let part: String; let alpha: Double }
+        struct Frame: Decodable { let t: Double; let alpha: [String: Double]; let items: [Item] }
+        struct File: Decodable { let rig: Rig; let atlas: AtlasSet; let clips: [Clip]; let script: [ScriptStep]; let frames: [Frame] }
+        let file = try loadVector("characters/format/vectors/player-rest-alpha.json", as: File.self)
+        XCTAssertTrue(file.rig.parts.contains { $0.alpha != nil && $0.alpha != 1 }, "the rig gives rest alphas")
+        let c = compile(file.rig)
+        let player = Player(rig: c, clips: file.clips)
+        let compare = Comparison()
+        var index = 0
+        for step in file.script {
+            if let clip = step.play {
+                try player.play(clip, at: try XCTUnwrap(step.t), blendMs: step.blendMs)
+                continue
+            }
+            let t = try XCTUnwrap(step.frame)
+            let frame = try player.advance(to: t)
+            guard index < file.frames.count else { XCTFail("player rest alpha: the script has more frames than the vectors"); break }
+            let x = file.frames[index]
+            index += 1
+            let at = "player rest alpha frame \(index - 1) at \(t) s"
+            XCTAssertEqual(Set(frame.state.alpha.keys), Set(x.alpha.keys), "\(at): keyed parts")
+            for (part, value) in x.alpha { compare.close(frame.state.alpha[part] ?? .nan, value, "\(at) \(part) alpha") }
+            let items = drawList(c, frame.pose, file.atlas, frame.state)
+            XCTAssertEqual(items.map(\.part), x.items.map(\.part), "\(at): parts in order")
+            for (item, expected) in zip(items, x.items) { compare.close(item.alpha, expected.alpha, "\(at) \(item.part) drawn alpha") }
+        }
+        XCTAssertEqual(index, file.frames.count, "player rest alpha: frames run")
+        print("player rest alpha: \(index) frames, \(compare.count) numbers, largest difference \(compare.largest)")
+    }
 }
 
 /// A draw-list vector's case: a pose's input, the frame state, and the items the web runtime drew.
