@@ -8,7 +8,7 @@
 // and haunch, chest, near legs), so their joins carry no rim; the far front
 // leg is painted on its own, darker.
 import { furEdge, furSpan } from "../../../draw/fur.ts";
-import { bbox, ellipse, fracAt, pathD, sample, smooth, v, type P, type Shape } from "../../../draw/geom.ts";
+import { bbox, ellipse, fracAt, pathD, sample, smooth, spanPoints, v, type P, type Shape } from "../../../draw/geom.ts";
 import { ribbons, strokeOf, type DrawnLine, type Outline, type Stroke } from "../../../draw/line.ts";
 import { LIMITS } from "../../../draw/lint.ts";
 import { marking, part, soft, type Fade, type Paint } from "../../../draw/paint.ts";
@@ -499,6 +499,20 @@ function earPaint(): Paint {
   };
 }
 
+/**
+ * Where the chin's fur lies on the collar, as the sheet paints it (the front's recipe): the collar's dark rim right
+ * under the fur's edge and a soft shade of the band's own blue under that, drawn centred on the head's own edge from the
+ * jaw's meeting with the collar's front back to under the ear, so only its lower half shows below the fur.
+ */
+function collarContact(): string {
+  const f = uid("blur"), g = uid("blur");
+  const chin = spanPoints(head, fracAt(head, [-36, -62.4]), fracAt(head, [-60.4, -58.6]));
+  const rim = strokeOf(chin, 1.8, { taper: 2.5, tip: 0.6 }).d;
+  const shade = strokeOf(chin, 4.4, { taper: 4, tip: 1 }).d;
+  return `<defs>${blur(f, [-64, -68, 32, 14], 0.3)}${blur(g, [-64, -68, 32, 14], 0.9)}</defs>` +
+    `<path d="${shade}" fill="${C.collarLine}" opacity="0.4" filter="url(#${g})"/><path d="${rim}" fill="${C.collarRim}" opacity="0.85" filter="url(#${f})"/>`;
+}
+
 export function side(): Drawn[] {
   const out: Drawn[] = [];
   const add = (name: string, p: Piece, state?: string) => out.push({ part: name, piece: p, ...(state ? { state } : {}) });
@@ -521,7 +535,7 @@ export function side(): Drawn[] {
     // Its lower half in shade, lit along its middle, a dark blue rim round its foot, as the front's.
     shade: { multiply: C.shadeBy, shapes: ["M-64 -53 C-50 -48 -32 -50 -16 -58 L-16 -46 L-64 -46Z"], blur: 0.9 },
     highlight: { d: "M-58 -56.6 C-46 -57 -32 -59 -21 -62 L-21 -60 C-32 -57 -46 -55 -58 -54.6Z", colour: C.collarHighlight, opacity: 0.3, blur: 0.9 },
-    under: `<rect x="-61" y="-59.6" width="4" height="10" rx="1.2" fill="${C.collarLine}" opacity="0.3"/>`,
+    under: `<rect x="-61" y="-59.6" width="4" height="10" rx="1.2" fill="${C.collarLine}" opacity="0.3"/>` + collarContact(),
     outline: { colour: C.collarRim, width: THIN, taper: 3, blur: 0.2, spans: [{ from: [-19, -61.2], to: [-61.6, -56] }] },
   }));
   add("tag", tagPiece());
