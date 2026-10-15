@@ -25,9 +25,10 @@ run unchanged.
 
 Gating: the silhouette's IoU, the alignment, the landmarks, the palette per
 region (each against its own value, docs/QUESTIONS.md Q24), the blush as a
-level (Q25) and the markings. Advisory, never pass or fail: edge distances,
-IoU per part where the sheet gives the part, and the atlas share. The numbers
-are guard rails: the comparison images are looked at every time."""
+level (Q25) where the sheet's blush boxes are, and the markings. Advisory,
+never pass or fail: edge distances, IoU per part where the sheet gives the
+part, and the atlas share. The numbers are guard rails: the comparison images
+are looked at every time."""
 import os
 import sys
 import traceback
@@ -48,7 +49,7 @@ from pathlib import Path  # noqa: E402
 
 import numpy as np  # noqa: E402
 from PIL import Image, ImageDraw  # noqa: E402
-from scipy import ndimage  # noqa: E402
+from scipy import ndimage, optimize  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "refprep"))
 import markings  # noqa: E402
@@ -102,6 +103,7 @@ DARK_L_MAX = 40  # L*: the eyes' and the nose's pixels held to their dark values
 BLUSH_LIGHT_L_MIN = 70
 BLUSH_LIGHT_CHROMA_MAX = 30
 BLUSH_LEVEL_MIN = 0.05  # a level at or below this is no blush: the core colour is the peak itself, not carried to full strength
+BLUSH_PLACE_SHARE = 0.03  # of the head's width (L523's 3%): how far each of the sheet's blush boxes is grown to hold its cheek
 # The part each source landmark must lie on: the spec's part names, then the art prototype's.
 SOURCE_PARTS = {
     "paw.front.L": ("front.L", "paw.front.L"), "paw.front.R": ("front.R", "paw.front.R"),
@@ -325,6 +327,7 @@ def thresholds(frame):
             "landmarkShareOfHead": LANDMARK_SHARE, "landmarkPt": round(LANDMARK_SHARE * frame.head_width, 2), "deltaE2000Max": DELTA_E_MAX,
             "idTolerance": ID_TOLERANCE, "darkLMax": DARK_L_MAX, "blushRestingSpread": frame.model["blush"]["restingSpread"], "blushMinPx": BLUSH_MIN_PX,
             "blushLightLMin": BLUSH_LIGHT_L_MIN, "blushLightChromaMax": BLUSH_LIGHT_CHROMA_MAX, "blushLevelMin": BLUSH_LEVEL_MIN,
+            "blushPlaceShareOfHead": BLUSH_PLACE_SHARE,
             "shownPt2": SHOWN_PT2, "bakedMinPx": BAKED_MIN_PX, "matchRadiusShareOfHead": MATCH_RADIUS_SHARE,
             "markingPlaceShareOfHead": MARKING_PLACE_SHARE, "edgeP95Pt": EDGE_P95_PT, "partIoU": PART_IOU}
 
@@ -626,38 +629,89 @@ def check_palette(frame, render, still):
     return {"thresholdDeltaE2000": DELTA_E_MAX, "rows": rows, "pass": all(r["pass"] for r in rows.values())}
 
 
-def check_blush(frame, render, still):
+def blush_boxes(frame, grid):
+    """Phase 2's blush boxes for the crop (refmap/palette.json) on the render's grid, as the edges of the pixels they
+    cover, [x0, y0, x1, y1] in grid pixel indices (a pixel's centre is its index). A mirrored facing is measured
+    mirrored onto its .L crop, so its .L crop's boxes are its own boxes mirrored."""
+    plan = json.loads((frame.folder / "refmap" / "palette.json").read_text())
+    x0, y0 = frame.rec["boxSheetPx"][:2]
+    boxes = [b["box"] for b in plan["blush"] if b["panel"] == frame.rec["crop"]]
+    return [[x - x0 + grid.left - 0.5, y - y0 + grid.top - 0.5, x - x0 + grid.left + w - 0.5, y - y0 + grid.top + h - 0.5] for x, y, w, h in boxes]
+
+
+def pair_cheeks(centres, boxes, grow):
+    """Each cheek's box, one to one: a cheek may take only a box that holds its centroid once grown by `grow` px,
+    and the most cheeks are paired, the nearest to their boxes' centres among equals. None for a cheek left over."""
+    holds = np.array([[b[0] - grow <= x <= b[2] + grow and b[1] - grow <= y <= b[3] + grow for b in boxes] for x, y in centres], bool)
+    if not holds.any():
+        return [None] * len(centres)
+    distance = np.array([[np.hypot(x - (b[0] + b[2]) / 2, y - (b[1] + b[3]) / 2) for b in boxes] for x, y in centres])
+    # A pair that is not held costs more than every held pair together, so fewer of them always wins.
+    cost = np.where(holds, distance, 1 + distance[holds].sum() * (len(centres) + len(boxes)))
+    paired = [None] * len(centres)
+    for i, j in zip(*optimize.linear_sum_assignment(cost)):
+        if holds[i, j]:
+            paired[i] = int(j)
+    return paired
+
+
+def check_blush(frame, grid, render, still):
     """The blush as a level (Q25): each cheek fitted as palette.py fits the sheet's, in a box around the blush part,
     within the sheet's resting spread; and the blush part's own colour, the cheek carried along the fitted blend
-    from the fur to full strength, within ΔE2000 3 of the printed pink. As many cheeks blush as the sheet's crop
-    shows (phase 2's blush boxes for it, refmap/palette.json)."""
+    from the fur to full strength, within ΔE2000 3 of the printed pink. And where the sheet blushes: phase 2's blush
+    boxes for the crop (refmap/palette.json) and the cheeks pair one to one, each cheek's centroid inside its box
+    grown by 3% of the head's width; a box with no cheek and a cheek with no box both fail."""
     fur_hex, pink_hex = frame.model["palette"]["fur"], frame.model["palette"]["blush"]
     lo, hi = frame.model["blush"]["restingSpread"]
     fur, pink = sheets.hex_to_rgb(fur_hex).astype(float), sheets.hex_to_rgb(pink_hex).astype(float)
-    cheeks = []
+
+    def own(pt):
+        """A model point in the facing's own coordinates."""
+        return round2([-pt[0], pt[1]] if frame.mirrored else pt)
+
+    cheeks, centres = [], []
     names, mask = masks_for(render, still, BLUSH_PARTS)
     for blob in measure.components(mask, BLUSH_MIN_PX):
         ys, xs = np.nonzero(blob)
         box = render.rgb[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
-        centre = round2(measure.centroid(blob))
+        centre = measure.centroid(blob)
+        centres.append(centre)
+        cheek = {"centrePx": round2(centre), "centrePt": own(grid.to_pt(centre))}
+        cheeks.append(cheek)
         # palette.blush fits the box's light pixels (BLUSH_LIGHT_L_MIN, BLUSH_LIGHT_CHROMA_MAX); a box with none has no level.
         lab = sheets.to_lab(box.reshape(-1, 3))
         if not ((lab[:, 0] > BLUSH_LIGHT_L_MIN) & (np.hypot(lab[:, 1], lab[:, 2]) < BLUSH_LIGHT_CHROMA_MAX)).any():
-            cheeks.append({"centrePx": centre, "problem": "no light pixels in its box, so no level can be fitted", "pass": False})
+            cheek.update(problem="no light pixels in its box, so no level can be fitted", levelPass=False)
             continue
         level, peak = palette.blush(box, fur_hex, pink_hex)
         core = fur + (peak - fur) / level if level > BLUSH_LEVEL_MIN else peak
         de = palette.delta(np.clip(core, 0, 255), pink_hex)
-        cheeks.append({"centrePx": centre, "level": round(level, 3), "peak": sheets.rgb_to_hex(peak),
-                       "coreColour": sheets.rgb_to_hex(np.clip(core, 0, 255)), "coreDeltaE2000": round(de, 2),
-                       "pass": lo <= level <= hi and de <= DELTA_E_MAX})
-    plan = json.loads((frame.folder / "refmap" / "palette.json").read_text())
-    boxes = [b for b in plan["blush"] if b["panel"] == frame.rec["crop"]]
+        cheek.update(level=round(level, 3), peak=sheets.rgb_to_hex(peak), coreColour=sheets.rgb_to_hex(np.clip(core, 0, 255)),
+                     coreDeltaE2000=round(de, 2), levelPass=lo <= level <= hi and de <= DELTA_E_MAX)
+    boxes = blush_boxes(frame, grid)
+    grow = BLUSH_PLACE_SHARE * frame.head_width / frame.k
+    paired = pair_cheeks(centres, boxes, grow)
+    for cheek, j in zip(cheeks, paired):
+        cheek["sheetBox"] = j
+        if j is None:
+            cheek["placeProblem"] = "no blush box of the sheet's holds it"
+        cheek["pass"] = cheek["levelPass"] and j is not None
+    rows = []
+    for j, b in enumerate(boxes):
+        x0, y0 = grid.to_pt(b[:2])
+        x1, y1 = grid.to_pt(b[2:])
+        corners = [-x1, y0, -x0, y1] if frame.mirrored else [x0, y0, x1, y1]
+        cheek = paired.index(j) if j in paired else None
+        row = {"boxPt": round2(corners), "cheek": cheek, "pass": cheek is not None}
+        if cheek is None:
+            row["problem"] = "no cheek blushes here"
+        rows.append(row)
     result = {"parts": names, "restingSpread": [lo, hi], "heldTo": pink_hex, "thresholdDeltaE2000": DELTA_E_MAX,
-              "cheeks": cheeks, "sheetShowsBlush": bool(boxes), "sheetCheeks": len(boxes)}
+              "placeThresholdPt": round(BLUSH_PLACE_SHARE * frame.head_width, 2), "cheeks": cheeks, "sheetBoxes": rows,
+              "sheetShowsBlush": bool(boxes), "sheetCheeks": len(boxes)}
     if len(cheeks) < len(boxes):
         result["problem"] = f"{len(cheeks)} cheek{'' if len(cheeks) == 1 else 's'} blush; the sheet shows {len(boxes)}"
-    result["pass"] = all(c["pass"] for c in cheeks) and len(cheeks) >= len(boxes)
+    result["pass"] = all(c["pass"] for c in cheeks) and all(r["pass"] for r in rows)
     return result
 
 
@@ -768,7 +822,7 @@ def match(species, still_dir, landmarks_path=None):
     result["silhouette"] = silhouette
     result["landmarks"] = lm
     result["palette"] = check_palette(frame, render, seen)
-    result["blush"] = check_blush(frame, render, seen)
+    result["blush"] = check_blush(frame, grid, render, seen)
     result["markings"] = check_markings(frame, grid, render, seen)
     result["advisory"] = {"edgeDistance": edge_distances(render.sil, sheet, frame.k),
                           "partIoU": part_ious(frame, grid, render, seen),
@@ -802,8 +856,9 @@ def label(draw, xy, text, fill):
 
 
 def compare_image(result, parts, path):
-    """crop | render | outlines (sheet blue, render red) with landmarks (model blue, found red, source green) | onion
-    skin, at ZOOM times the crop's pixels, in the facing's own orientation, with the verdict above."""
+    """crop | render | outlines (sheet blue, render red) with landmarks (model blue, found red, source green) and the
+    sheet's blush boxes grown by their tolerance (magenta, each cheek's centroid a cross) | onion skin, at ZOOM times
+    the crop's pixels, in the facing's own orientation, with the verdict above."""
     frame, grid, render, sheet = parts["frame"], parts["grid"], parts["render"], parts["sheet"]
     crop = grid.pad(frame.crop, 0)
     outside = ~grid.pad(np.ones(frame.sil.shape, bool), False)
@@ -842,6 +897,16 @@ def compare_image(result, parts, path):
         if not row["pass"] and "model" in row:
             X, Y = at(row["model"])
             label(draw, (X + 6, Y - 12), name, (170, 0, 40))
+    blush = result["blush"]
+    grow = blush["placeThresholdPt"]
+    for row in blush["sheetBoxes"]:
+        left, top, right, bottom = row["boxPt"]
+        (X0, Y0), (X1, Y1) = at([left - grow, top - grow]), at([right + grow, bottom + grow])
+        draw.rectangle([min(X0, X1), Y0, max(X0, X1), Y1], outline=(200, 0, 160) if row["pass"] else (170, 0, 40), width=2)
+    for cheek in blush["cheeks"]:
+        X, Y = at(cheek["centrePt"])
+        draw.line([X - 4, Y - 4, X + 4, Y + 4], fill=(200, 0, 160), width=2)
+        draw.line([X - 4, Y + 4, X + 4, Y - 4], fill=(200, 0, 160), width=2)
     for i, title in enumerate(("sheet", "render", "outlines: sheet blue, render red", "onion skin")):
         label(draw, (i * (width + gap) + 4, 4), title, (40, 40, 40))
     lines = [verdict(result)]
@@ -851,8 +916,10 @@ def compare_image(result, parts, path):
                  f"within {lm['thresholdPt']} pt" + (f"; {lm['error']}" if "error" in lm else ""))
     pal = result["palette"]["rows"]
     lines.append("palette: " + ", ".join(f"{k} {v.get('deltaE2000', 'missing')}" + ("" if v["pass"] else " FAIL") for k, v in pal.items()))
-    blush = result["blush"]
-    lines.append("blush: " + (", ".join(f"{c['level']:.0%} core dE {c['coreDeltaE2000']}" if "level" in c else c["problem"] for c in blush["cheeks"]) or "none")
+    cheeks = [(f"{c['level']:.0%} core dE {c['coreDeltaE2000']}" if "level" in c else c["problem"])
+              + (f" ({c['placeProblem']})" if "placeProblem" in c else "") for c in blush["cheeks"]]
+    held = sum(r["pass"] for r in blush["sheetBoxes"])
+    lines.append("blush: " + (", ".join(cheeks) or "none") + f"; {held} of the sheet's {len(blush['sheetBoxes'])} blush boxes hold a cheek"
                  + (f" ({blush['problem']})" if "problem" in blush else "")
                  + f"; markings shown {result['markings']['shown']} expected {result['markings']['expected']}")
     strip = Image.new("RGB", (image.width, 16 * len(lines) + 6), "white")

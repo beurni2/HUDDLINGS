@@ -269,6 +269,19 @@ class Fixture:
         return {view: points}
 
 
+def sheet_boxes(view):
+    """Phase 2's blush boxes for a view's crop (refmap/palette.json), in model points: the edges of the sheet pixels
+    each covers, [left, top, right, bottom], from the crop's ground anchor."""
+    rec = MODEL["crops"][view]
+    plan = json.loads((sheets.ROOT / "characters/dog/refmap/palette.json").read_text())
+    x0, y0 = rec["boxSheetPx"][:2]
+    gx, gy = rec["anchorsCropPx"]["ground"]
+    k = rec["ptPerCropPx"]
+    edges = ([x - x0 - 0.5 - gx, y - y0 - 0.5 - gy, x + w - x0 - 0.5 - gx, y + h - y0 - 0.5 - gy] for x, y, w, h in
+             (b["box"] for b in plan["blush"] if b["panel"] == rec["crop"]))
+    return [match.round2(np.multiply(e, k)) for e in edges]
+
+
 def rescale(alpha, rgb, part, root, scale):
     """Everything scaled by scale about the root, nearest pixel."""
     h, w = alpha.shape
@@ -478,6 +491,14 @@ class PlantedTest(unittest.TestCase):
                 self.assertFailed(result, [])
                 self.assertEqual(result["silhouette"]["iou"], 1.0)
                 self.assertEqual(result["alignment"]["bestFitShiftPx"], [0.0, 0.0])
+                # Each cheek in its own one of the sheet's blush boxes for the crop, and each box holding one.
+                blush = result["blush"]
+                self.assertEqual(sorted(c["sheetBox"] for c in blush["cheeks"]), list(range(len(sheet_boxes(view)))))
+                self.assertEqual([r["boxPt"] for r in blush["sheetBoxes"]], sheet_boxes(view))
+                for cheek in blush["cheeks"]:
+                    left, top, right, bottom = blush["sheetBoxes"][cheek["sheetBox"]]["boxPt"]
+                    x, y = cheek["centrePt"]
+                    self.assertTrue(left < x < right and top < y < bottom, cheek)
 
     def test_an_eye_moved_3_pt_fails_and_2_pt_passes(self):
         k = MODEL["crops"]["front"]["ptPerCropPx"]
@@ -552,6 +573,73 @@ class PlantedTest(unittest.TestCase):
         problems = [c["problem"] for c in result["blush"]["cheeks"] if "problem" in c]
         self.assertEqual(problems, ["no light pixels in its box, so no level can be fitted"])
         self.assertIn("blush", result["failed"])
+
+    def test_a_cheek_off_the_sheets_boxes_fails_and_so_does_the_box_it_left(self):
+        # The level check alone passed this: two cheeks of the right level, where the sheet shows two.
+        fixture = self.fixture()
+        fixture.move("blush.R", 20, 0, "head.base")
+        result = self.run_still(fixture, "cheek-moved")
+        blush = result["blush"]
+        self.assertEqual(len(blush["cheeks"]), 2)
+        self.assertTrue(all(c["levelPass"] for c in blush["cheeks"]))
+        moved = [c for c in blush["cheeks"] if c["sheetBox"] is None]
+        self.assertEqual([c["placeProblem"] for c in moved], ["no blush box of the sheet's holds it"])
+        self.assertFalse(moved[0]["pass"])
+        self.assertEqual([r["problem"] for r in blush["sheetBoxes"] if not r["pass"]], ["no cheek blushes here"])
+        self.assertEqual(blush["placeThresholdPt"], round(0.03 * MODEL["proportions"]["headWidth"], 2))
+        self.assertIn("blush", result["failed"])
+
+    def test_two_cheeks_in_one_box_pair_with_it_once(self):
+        # The dog's left cheek gone and its right one split in two: two cheeks where the sheet shows two, both in one box.
+        fixture = self.fixture()
+        fixture.relabel("blush.L", "head.base", hexes(("palette", "fur")))
+        right = fixture.part == fixture.names.index("blush.R")
+        _, xs = np.nonzero(right)
+        middle = (xs.min() + xs.max()) // 2
+        gap = right & (np.abs(np.arange(right.shape[1]) - middle) <= 1)[None, :]
+        fixture.part[gap] = fixture.names.index("head.base")
+        fixture.rgb[gap] = hexes(("palette", "fur"))
+        result = self.run_still(fixture, "cheek-split")
+        blush = result["blush"]
+        self.assertEqual(len(blush["cheeks"]), 2)
+        self.assertNotIn("problem", blush, "as many cheeks as the sheet shows")
+        self.assertEqual(sorted(c["sheetBox"] is None for c in blush["cheeks"]), [False, True])
+        self.assertEqual([r["pass"] for r in blush["sheetBoxes"]].count(False), 1)
+        self.assertIn("blush", result["failed"])
+
+    def test_a_cheek_more_than_the_sheet_shows_fails(self):
+        fixture = self.fixture()
+        yy, xx = np.mgrid[:fixture.part.shape[0], :fixture.part.shape[1]]
+        top = fixture.to_px([0, MODEL["landmarks"]["front"]["head.top"][1] + 20])
+        spot = (xx - top[0]) ** 2 + (yy - top[1]) ** 2 <= 9
+        fur, pink = hexes(("palette", "fur")).astype(float), hexes(("palette", "blush")).astype(float)
+        fixture.at("blush.L", spot & (fixture.part == fixture.names.index("head.base")), np.round(fur + REST * (pink - fur)))
+        result = self.run_still(fixture, "cheek-extra")
+        blush = result["blush"]
+        self.assertEqual(len(blush["cheeks"]), 3)
+        self.assertTrue(all(r["pass"] for r in blush["sheetBoxes"]))
+        stray = [c for c in blush["cheeks"] if c["sheetBox"] is None]
+        self.assertEqual(len(stray), 1)
+        self.assertLess(stray[0]["centrePt"][1], -120, "the spot on the forehead is the one no box holds")
+        self.assertIn("blush", result["failed"])
+
+    def test_a_mirrored_facing_is_held_to_its_crops_blush_box_mirrored(self):
+        fixture = self.fixture("threeQuarter.L")
+        fixture.right_side()
+        kept = self.run_still(fixture, "right-cheek", view="threeQuarter.R", mirror=True)["blush"]
+        self.assertTrue(kept["pass"])
+        # In the facing's own coordinates its box is the .L crop's mirrored, and its cheek is inside it.
+        [left_box] = sheet_boxes("threeQuarter.L")
+        self.assertEqual(kept["sheetBoxes"][0]["boxPt"], [-left_box[2], left_box[1], -left_box[0], left_box[3]])
+        x, _ = kept["cheeks"][0]["centrePt"]
+        self.assertTrue(kept["sheetBoxes"][0]["boxPt"][0] < x < kept["sheetBoxes"][0]["boxPt"][2])
+        # Moved 20 px toward the viewer's right in the facing's own picture (left before the mirror): out of its box.
+        fixture.move("blush.R", -20, 0, "head.base")
+        moved = self.run_still(fixture, "right-cheek-moved", view="threeQuarter.R", mirror=True)
+        blush = moved["blush"]
+        self.assertEqual(blush["cheeks"][0]["sheetBox"], None)
+        self.assertGreater(blush["cheeks"][0]["centrePt"][0], blush["sheetBoxes"][0]["boxPt"][2] + blush["placeThresholdPt"])
+        self.assertIn("blush", moved["failed"])
 
     def test_a_marking_away_from_the_sheets_place_fails(self):
         fixture = self.fixture()
@@ -689,9 +777,8 @@ class PlantedTest(unittest.TestCase):
         folder = Path(self.folder.name) / "limits"
         self.fixture().write(folder)
         (folder / "landmarks.json").write_text(json.dumps(self.fixtures["front"].source()))
-        result, _ = match.match("dog", folder, folder / "landmarks.json")
-        self.assertFailed(result, [])
-        recorded = result["thresholds"]
+        # The still passes as it is (test_each_view_passes); match.json records what thresholds() gives.
+        recorded = match.thresholds(match.Frame("dog", MODEL, "front"))
         self.assertEqual((recorded["darkLMax"], recorded["blushLightLMin"], recorded["blushLightChromaMax"], recorded["blushLevelMin"]),
                          (40, 70, 30, 0.05))
         self.assertEqual((match.DARK_L_MAX, match.BLUSH_LIGHT_L_MIN, match.BLUSH_LIGHT_CHROMA_MAX, match.BLUSH_LEVEL_MIN), (40, 70, 30, 0.05))
