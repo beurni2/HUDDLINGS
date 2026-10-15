@@ -1,8 +1,9 @@
 // Rule R3's guards on the dog's face library (spec section 3, R3; 5b, The face, L440-498): Mochi acts out feelings
 // but never suffers, so no face state is named or drawn sad, angry, pouting, teary or drooped. Held here on what the
 // front actually draws: every state's name is on the allowlist; every mouth keeps its corners at or above its middle;
-// every brow is an arc that bows upward with its ends level within the sheets' own tilt; no face clip turns an ear
-// further in than the lowered state, and only the sleepy face lowers it. Each guard is shown failing on a planted
+// every brow is an arc that bows upward, its inner end never below its outer and within the sheets' own tilt above it;
+// no face clip turns an ear further in than the lowered state or further out than the lifted one, only the sleepy face
+// lowers it and only the lifted faces turn it out. Each guard is shown failing on a planted
 // fault. Also: the face clips are what presets.ts writes, and the stars draw only beside the sparkle eyes.
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -15,7 +16,7 @@ import { scopeIds } from "../../draw/svg.ts";
 import { clipText, earRot, faceClips, stillOf } from "../src/faceClips.ts";
 import { BROW_STATES, brow } from "../src/parts/brow.ts";
 import { MOUTH_STATES, mouth } from "../src/parts/mouth.ts";
-import { EAR_ANGLES, EAR_STATES, EYE_STATES, PRESETS } from "../src/presets.ts";
+import { EAR_ANGLES, EAR_STATES, EYE_STATES, PRESETS, type EarState } from "../src/presets.ts";
 import { faceFrame, faceStates, front } from "../src/views/front.ts";
 
 const rig = JSON.parse(readFileSync(new URL("../src/rig.json", import.meta.url), "utf8")) as Rig;
@@ -55,9 +56,9 @@ function mouthProblem(outline: P[]): string | undefined {
 /**
  * The brows' tilt on the sheets, measured on all nine expression panels the Faces check holds (DECISIONS 131): each
  * brow's end zones (its outer and inner fifth across) in the panel's own level frame (qa/phase3/faces/brows.py). Every
- * sheet brow has its inner end 1.38 to 2.34 pt higher than its outer; the largest, 2.34 pt (Excited's and Shy's left
- * brows), is the most either end may stand above the other, either way: past it a brow slants, inner end up (worried)
- * or down (angry).
+ * sheet brow has its inner end 1.38 to 2.34 pt higher than its outer, and none has it lower. So the guard is one-sided:
+ * the inner end never sits below the outer (an angry slant, R3, and the plan's own rule) and stands no more than the
+ * sheets' largest 2.34 pt above it (past it, a worried slant).
  */
 const BROW_TILT_PT = 2.34;
 /**
@@ -66,8 +67,8 @@ const BROW_TILT_PT = 2.34;
  */
 const BROW_BOW_PT = 0.3;
 
-/** The brow guard: an arc bowing up, its ends level within the sheets' tilt. `sx` is +1 on the dog's left (the viewer's right). */
-function browProblem(arc: P[], sx: 1 | -1): string | undefined {
+/** A brow arc's shape in the face's level frame: how far its inner end stands above its outer, and how far its middle bows up. */
+function browShape(arc: P[], sx: 1 | -1): { rise: number; bow: number } {
   const pts = level(arc);
   const xs = pts.map(([x]) => x), lo = Math.min(...xs), hi = Math.max(...xs), span = hi - lo;
   const mean = (keep: (x: number) => boolean) => {
@@ -75,25 +76,50 @@ function browProblem(arc: P[], sx: 1 | -1): string | undefined {
     return ys.reduce((a, b) => a + b, 0) / ys.length;
   };
   const low = mean((x) => x <= lo + 0.2 * span), high = mean((x) => x >= hi - 0.2 * span), middle = mean((x) => Math.abs(x - (lo + hi) / 2) <= 0.15 * span);
-  // The inner end is the one nearer the face's middle: the low-x end on the dog's left, the high-x end on its right.
+  // The inner end is the one nearer the face's middle: the low-x end on the dog's left, the high-x end on its right (y down).
   const [inner, outer] = sx > 0 ? [low, high] : [high, low];
-  if (Math.abs(inner - outer) > BROW_TILT_PT) return `its ${inner < outer ? "inner" : "outer"} end stands ${Math.abs(inner - outer).toFixed(2)} pt above the other, past the sheets' ${BROW_TILT_PT} pt`;
-  const bow = (inner + outer) / 2 - middle;
+  return { rise: outer - inner, bow: (inner + outer) / 2 - middle };
+}
+
+/** The brow guard: an arc bowing up, its inner end at or above its outer and no more than the sheets' tilt above it. `sx` is +1 on the dog's left (the viewer's right). */
+function browProblem(arc: P[], sx: 1 | -1): string | undefined {
+  const { rise, bow } = browShape(arc, sx);
+  if (rise < -1e-9) return `its inner end sits ${(-rise).toFixed(2)} pt below its outer end, an angry slant`;
+  if (rise > BROW_TILT_PT) return `its inner end stands ${rise.toFixed(2)} pt above its outer end, past the sheets' ${BROW_TILT_PT} pt, a worried slant`;
   if (bow < BROW_BOW_PT) return `it bows ${bow.toFixed(2)} pt, not up by ${BROW_BOW_PT} pt or more`;
   return undefined;
 }
 
+/**
+ * The same arc sheared in the face's level frame so its inner end stands `rise` pt above its outer (a planted slant; the
+ * rise is linear in the shear, so two measures find it).
+ */
+function slanted(arc: P[], sx: 1 | -1, rise: number): P[] {
+  const a = (faceFrame.rollDeg * Math.PI) / 180, c = Math.cos(a), s = Math.sin(a);
+  const pts = level(arc), mid = pts.reduce((m, [x]) => m + x / pts.length, 0);
+  const shear = (k: number) => pts.map(([x, y]): P => [x, y + k * (x - mid)]).map(([x, y]): P => [x * c - y * s, x * s + y * c]);
+  const r0 = browShape(shear(0), sx).rise, r1 = browShape(shear(1), sx).rise;
+  return shear((rise - r0) / (r1 - r0));
+}
+
 /** How far a key turns an ear in toward the face, in degrees: clockwise is inward for the dog's left ear (on the viewer's right). */
 const inward = (ear: "ear.L" | "ear.R", rot: number) => (ear === "ear.L" ? rot : -rot);
-const LOWERED = -EAR_ANGLES.lowered, RELAXED = -EAR_ANGLES.relaxed;
+const LOWERED = -EAR_ANGLES.lowered, RELAXED = -EAR_ANGLES.relaxed, LIFTED = EAR_ANGLES.lifted;
 
-/** The ear guard on one face clip: no key turns an ear in past the lowered state, and only a lowered face reaches past relaxed. */
-function earProblem(clip: Clip, lowered: boolean): string | undefined {
+/**
+ * The ear guard on one face clip: no key turns an ear in past the lowered state, and only a lowered face reaches past
+ * relaxed; and none turns it out past the lifted state, and only a lifted face turns it out at all. The sheets' drooped
+ * ear (Both drooped, R3) hangs lower and splays out, so an outward turn past lifted is the droop's splay, and an inward
+ * one past lowered tucks the ear toward going behind the head.
+ */
+function earProblem(clip: Clip, ears: EarState): string | undefined {
   for (const ear of ["ear.L", "ear.R"] as const) {
     for (const [, rot] of clip.tracks?.[ear]?.rot ?? []) {
       const turn = inward(ear, rot as number);
       if (turn > LOWERED + 1e-9) return `${ear} turns ${turn}° in, past the lowered state's ${LOWERED}°`;
-      if (turn > RELAXED + 1e-9 && !lowered) return `${ear} turns ${turn}° in, past relaxed, in a face the table does not lower`;
+      if (turn > RELAXED + 1e-9 && ears !== "lowered") return `${ear} turns ${turn}° in, past relaxed, in a face the table does not lower`;
+      if (-turn > LIFTED + 1e-9) return `${ear} turns ${-turn}° out, past the lifted state's ${LIFTED}°`;
+      if (-turn > 1e-9 && ears !== "lifted") return `${ear} turns ${-turn}° out, in a face the table does not lift`;
     }
   }
   return undefined;
@@ -146,7 +172,7 @@ test("every mouth keeps its corners at or above its middle, as drawn in the fron
   assert.match(mouthProblem(frown) ?? "", /below its middle/);
 });
 
-test("every brow is an arc that bows up with its ends level within the sheets' tilt, as drawn in the front", () => {
+test("every brow is an arc that bows up, its inner end at or above its outer and within the sheets' tilt, as drawn in the front", () => {
   const drawn = new Map([...front(), ...faceStates()].filter((d) => d.part.startsWith("brow.")).map((d) => [`${d.part}:${d.state ?? "neutral"}`, scopeIds(d.piece.svg, "b")]));
   for (const state of BROW_STATES) {
     for (const [part, sx] of [["brow.L", 1], ["brow.R", -1]] as const) {
@@ -155,37 +181,50 @@ test("every brow is an arc that bows up with its ends level within the sheets' t
       assert.equal(browProblem(b.arc, sx), undefined, `${part} ${state}`);
     }
   }
-  // Planted: the neutral brow turned 25° inner end up (worried) or 45° inner end down (angry, past its own 2 pt tilt the
-  // other way), and one bowed down (knitted), fail.
-  const neutral = brow("neutral", 1, faceFrame.frame).arc;
-  const c = neutral.reduce((s, p) => [s[0] + p[0] / neutral.length, s[1] + p[1] / neutral.length] as P, [0, 0] as P);
-  const turn = (deg: number) => neutral.map(([x, y]): P => {
-    const a = (deg * Math.PI) / 180;
-    return [c[0] + (x - c[0]) * Math.cos(a) - (y - c[1]) * Math.sin(a), c[1] + (x - c[0]) * Math.sin(a) + (y - c[1]) * Math.cos(a)];
-  });
-  // Turned clockwise on screen, the brow on the viewer's right lifts its inner end; anticlockwise, its outer end.
-  assert.match(browProblem(turn(25), 1) ?? "", /inner end stands/, "a worried slant");
-  assert.match(browProblem(turn(-45), 1) ?? "", /outer end stands/, "an angry slant");
-  const knitted = neutral.map(([x, y]): P => [x, 2 * c[1] - y]);
-  assert.match(browProblem(knitted, 1) ?? "", /bows/, "a brow bowed down");
+  // Planted on both brows: the inner end 1 pt below the outer (an angry slant inside the sheets' 2.34 pt band, which a
+  // symmetric tolerance let through), turned 45° inner end down, and 2.6 pt inner end up (worried) fail; a level brow and
+  // one bowed down (knitted) are told apart.
+  for (const sx of [1, -1] as const) {
+    const neutral = brow("neutral", sx, faceFrame.frame).arc;
+    assert.match(browProblem(slanted(neutral, sx, -1), sx) ?? "", /below its outer end, an angry slant/, "inner end 1 pt down");
+    assert.match(browProblem(slanted(neutral, sx, -0.2), sx) ?? "", /below its outer end/, "inner end 0.2 pt down");
+    assert.match(browProblem(slanted(neutral, sx, 2.6), sx) ?? "", /a worried slant/, "inner end 2.6 pt up");
+    assert.equal(browProblem(slanted(neutral, sx, 0), sx), undefined, "a level brow is neither");
+    const c = neutral.reduce((s, p) => [s[0] + p[0] / neutral.length, s[1] + p[1] / neutral.length] as P, [0, 0] as P);
+    // Turned anticlockwise on screen, the brow on the viewer's right drops its inner end; the one on the left lifts it.
+    const turn = (deg: number) => neutral.map(([x, y]): P => {
+      const a = (deg * Math.PI) / 180;
+      return [c[0] + (x - c[0]) * Math.cos(a) - (y - c[1]) * Math.sin(a), c[1] + (x - c[0]) * Math.sin(a) + (y - c[1]) * Math.cos(a)];
+    });
+    assert.match(browProblem(turn(-45 * sx), sx) ?? "", /an angry slant/, "turned 45° inner end down");
+    // Bowed down with its ends at the neutral's own tilt, so only its bow is wrong.
+    const knitted = slanted(neutral.map(([x, y]): P => [x, 2 * c[1] - y]), sx, browShape(neutral, sx).rise);
+    assert.match(browProblem(knitted, sx) ?? "", /bows -/, "a brow bowed down");
+  }
 });
 
-test("no face clip turns an ear in past the lowered state, only the sleepy face lowers it, and the lowered ear stays in sight", () => {
-  // The risk designer's measure: ears turned 14 to 18° in disappear behind the head.
+test("no face clip turns an ear in past the lowered state or out past the lifted one, and only sleepy lowers and only the lifted faces lift", () => {
+  // The risk designer's measure: ears turned 14 to 18° in disappear behind the head; the bones' limits keep the spec's 14° either way.
   assert.ok(LOWERED > RELAXED && LOWERED < 14, `lowered is ${LOWERED}° in`);
-  assert.ok(EAR_ANGLES.lifted > 0, "lifted turns the ears out");
+  assert.ok(LIFTED > 0 && LIFTED <= 14, `lifted is ${LIFTED}° out`);
+  for (const ear of ["ear.L", "ear.R"]) assert.deepEqual(rig.bones.find((b) => b.name === ear)!.rot, [-14, 14], `${ear}'s limits`);
   for (const clip of faces) {
     const preset = PRESETS[clip.name.slice("face_".length)]!;
-    assert.equal(earProblem(clip, preset.ears === "lowered"), undefined, clip.name);
+    assert.equal(earProblem(clip, preset.ears), undefined, clip.name);
   }
   const lowered = Object.entries(PRESETS).filter(([, p]) => p.ears === "lowered").map(([name]) => name);
   assert.deepEqual(lowered, ["sleepy"], "the table lowers the ears only for sleepy");
-  // Planted: an ear drooped past the lowered state, and the lowered ear in a face that is not sleepy, fail.
-  const happy = faces.find((c) => c.name === "face_happy")!;
+  // Planted: an ear drooped in past the lowered state, the lowered ear in a face that is not sleepy, an ear splayed 20°
+  // out (Both drooped's splay) in a lifted face, and an ear turned out in a face that is not lifted, fail.
+  const happy = faces.find((c) => c.name === "face_happy")!, listening = faces.find((c) => c.name === "face_listening")!;
   const drooped: Clip = { ...happy, tracks: { ...happy.tracks, "ear.R": { rot: [[0, -(LOWERED + 5)]] } } };
-  assert.match(earProblem(drooped, true) ?? "", /past the lowered state/);
+  assert.match(earProblem(drooped, "lowered") ?? "", /past the lowered state/);
   const low: Clip = { ...happy, tracks: { ...happy.tracks, "ear.L": { rot: [[0, LOWERED]] } } };
-  assert.match(earProblem(low, false) ?? "", /does not lower/);
+  assert.match(earProblem(low, "neutral") ?? "", /does not lower/);
+  const splayed: Clip = { ...listening, tracks: { ...listening.tracks, "ear.L": { rot: [[0, -20]] } } };
+  assert.match(earProblem(splayed, "lifted") ?? "", /20° out, past the lifted state/);
+  const out: Clip = { ...happy, tracks: { ...happy.tracks, "ear.R": { rot: [[0, 5]] } } };
+  assert.match(earProblem(out, "neutral") ?? "", /does not lift/);
 });
 
 test("the face clips are what presets.ts writes: one per preset drawn now, sound, at the frame each primary panel draws", () => {
