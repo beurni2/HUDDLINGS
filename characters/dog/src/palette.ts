@@ -70,6 +70,9 @@ export const C = {
   /** A contact shadow under a paw: the ground shadow 8% darker. */
   contact: darken(need(printed, "shadow"), 0.08),
   collarLine: darken(collar, 0.25),
+  /** The collar's dark rim: its blue 30% darker and a quarter of the way to the outline's brown, #647789 against the
+   * sheet's #597C8F. */
+  collarRim: mix(darken(collar, 0.3), outline, 0.25),
   /** The tag's edge: the outline's brown warmed toward the gold, as the sheet draws it, not a darker olive gold. */
   tagLine: mix(outline, tag, 0.35),
   /** The tag's shade: its own gold at 40% multiplied in, toward orange as the sheet's gold darkens. */
