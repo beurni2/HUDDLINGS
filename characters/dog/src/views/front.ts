@@ -137,7 +137,7 @@ const innerHeart = smooth([[0.4, -46.1], [-1.8, -47.8], [-3.9, -47.5], [-4.8, -4
 // deep. The right ear is typed in the head's frame and rolled with the face.
 const earR: Node[] = [[-37.5, -141.4], [-29.4, -138.6], [-28.2, -132.4], [-40, -86], [-39.4, -73], [-41.4, -66.6], [-46.6, -64], [-52.6, -62.6],
   [-58.6, -63.2], [-63.6, -65.2], [-67.4, -68.6], [-71.2, -69.8], [-74.4, -72.6], [-76.6, -77.4], [-80.4, -82], [-81, -88.4], [-80.4, -94.4],
-  [-78.2, -100.2], [-73.6, -106.2], [-66.8, -111.6], [-60.8, -117.4], [-56, -125.6], [-50.2, -131.2], [-44.6, -135.6]];
+  [-78.2, -100.2], [-73.6, -106.2], [-66.8, -111.6], [-60.8, -117.4], [-56, -125.6], [-50.6, -130.8], [-45.4, -135.2]];
 /** The right ear's node where the left ear's typed upper edge ends (its outer side, at y -82). */
 const EAR_SPLIT = earR.findIndex(([x, y]) => x === -80.4 && y === -82);
 /** The notches between the clumps: a crisp dip each, as the sheet draws them (concave, so no corner rule applies). */
@@ -153,7 +153,7 @@ const lowerL = hangL([earR[0]!, ...earR.slice(1).reverse()]);
 // Above its middle the sheet draws the left ear's outer edge as one full convex arc, 3.5 to 4.7 pt outside the
 // mirror's (y -137 to -113): those nodes are typed where the sheet draws them, in model space, down to the outer
 // clump, where the sheet's edge turns in at (76.4, -78.6) and the hung edge takes over.
-const earL: Node[] = [lowerL[0]!, [41, -139.6], [50, -132.6], [57.6, -125], [64.6, -116], [71, -110], [75.6, -103.6], [78.6, -96], [79.6, -88], [78.8, -82],
+const earL: Node[] = [lowerL[0]!, [42, -139.6], [51.4, -132.6], [58.2, -125], [64.6, -116], [71, -110], [75.6, -103.6], [78.6, -96], [79.6, -88], [78.8, -82],
   [76.4, -78.6], ...lowerL.slice(earR.length - EAR_SPLIT + 2)];
 // Fitted closely (0.05 pt), so the fit keeps the lobes as round as the typed nodes make them.
 // The left ear's lower nodes are the right's in reverse after its 10 typed ones, so a notch at the right's node j is the left's 9 + EAR_SPLIT - j;
@@ -196,7 +196,7 @@ const leftSide = ([x, y]: P): P => [x > 0 ? x - 2.4 * Math.min(1, Math.max(0, (y
 // -110 to -100 and -45.8 at -93 on the right). Typed as its right half,
 // mirrored, the crown lifted and the side drawn in on the left, and the cheeks
 // rolled with the face. The crown's part under the topknot is hidden by it.
-const headHalf: Node[] = [[0, -151.8], [-26, -149.4], [-32.4, -146.8], [-37.6, -143.4], [-41.6, -139.8], [-45.8, -134.4], [-40.6, -134], [-34.6, -133.6],
+const headHalf: Node[] = [[0, -151.8], [-26, -149.4], [-32.4, -146.8], [-37.6, -143.4], [-42.2, -139.6], [-46.2, -134.2], [-40.6, -134], [-34.6, -133.6],
   [-37.4, -128.6], [-42.4, -120.6], [-45.6, -114.4], [-47, -105], [-46.6, -97], [-45.2, -90.6], [-45.6, -80.4], [-42.6, -71.6], [-37.4, -67.4],
   [-31, -63.8], [-21, -61.2], [-9, -58.6]];
 /** The crown's overhang and the notch, on the right: the lock's tip, its underside, the notch (a concave corner). */
@@ -364,7 +364,8 @@ function headLinePiece(): Piece {
 /**
  * An open eye at its landmark, as the turnaround, the hero and the expression sheet's open eyes paint it: a
  * slightly tall oval, its top leaning toward the nose (and rolled with the face), its edge a little soft. The
- * rim is heaviest along the upper lid and the outer side and thins toward the lower inner side, where the
+ * rim is heaviest along the upper lid and the outer side, warms from near-black there to the printed dark brown
+ * round the eye's foot, and thins toward the lower inner side, where the
  * iris sits closest to it; a wide crescent of white lies low on the outer side inside the rim (centred about
  * 15 degrees below level, 2.1 pt at its widest, its inner edge soft); the iris is the printed brown round a
  * darker pupil, in the lid's shadow above and warming toward its foot (DECISIONS 18); one large catchlight
@@ -380,7 +381,7 @@ function eye(landmark: P, noseward: number): Piece {
   /** A point in the eye's own frame, rolled with the face: x toward the nose, y down. */
   const S = (x: number, y: number): P => [cx + noseward * x * cosR - y * sinR, cy + noseward * x * sinR + y * cosR];
   const oval = (c: P, a: number, b: number, deg = turn) => pathD(ellipse(c, a, b, deg));
-  const clip = uid("eye"), irisClip = uid("eye"), iris = uid("iris"), lid = uid("lid"), outside = uid("crescent");
+  const clip = uid("eye"), irisClip = uid("eye"), iris = uid("iris"), lid = uid("lid"), outside = uid("crescent"), rimFade = uid("rim");
   const pupil = uid("blur"), shine = uid("blur"), edge = uid("blur"), white = uid("blur"), glow = uid("blur"), halo = uid("blur");
   const box: Box = [cx - 14, cy - 14, 28, 28];
   const ball = oval([cx, cy], rx, ry);
@@ -409,9 +410,12 @@ function eye(landmark: P, noseward: number): Piece {
     `<stop offset="0.5" stop-color="${C.dark}"/><stop offset="0.66" stop-color="${C.dark}"/><stop offset="0.92" stop-color="${C.irisWarm}"/></radialGradient>` +
     `<linearGradient id="${lid}" gradientUnits="userSpaceOnUse" x1="${fmt(t0x)}" y1="${fmt(t0y)}" x2="${fmt(t1x)}" y2="${fmt(t1y)}">` +
     `<stop offset="0.35" stop-color="${C.eyeDark}"/><stop offset="1" stop-color="${C.eyeDark}" stop-opacity="0"/></linearGradient>` +
+    // The rim warms from near-black along the lid to the printed dark brown round the eye's foot, as the sheet's does.
+    `<linearGradient id="${rimFade}" gradientUnits="userSpaceOnUse" x1="${fmt(t0x)}" y1="${fmt(t0y)}" x2="${fmt(2 * cx - t0x)}" y2="${fmt(2 * cy - t0y)}">` +
+    `<stop offset="0.6" stop-color="${C.eyeDark}"/><stop offset="0.8" stop-color="${C.dark}"/></linearGradient>` +
     `${blur(pupil, box, 0.7)}${blur(shine, box, 0.2)}${blur(edge, box, 0.22)}${blur(white, box, 0.3)}${blur(glow, box, 0.8)}${blur(halo, box, 0.55)}</defs>` +
     `<path d="${haloBand.d}" fill="${C.fur}" opacity="0.8" filter="url(#${halo})"/>` +
-    `<g filter="url(#${edge})"><path d="${ball}" fill="${C.eyeDark}"/><path d="${lidLine.d}" fill="${C.eyeDark}"/></g>` +
+    `<g filter="url(#${edge})"><path d="${ball}" fill="url(#${rimFade})"/><path d="${lidLine.d}" fill="${C.eyeDark}"/></g>` +
     `<g clip-path="url(#${clip})"><path d="${irisOval}" fill="url(#${iris})"/>` +
     `<ellipse cx="${n([px, py])}" rx="3.8" ry="4.2" fill="${C.eyeDark}" opacity="0.75" filter="url(#${pupil})"/>` +
     `<path d="${ball}" fill="url(#${lid})"/>` +
@@ -439,7 +443,7 @@ function brow(sx: number): Piece {
  * round side corners, narrowing to a soft point over the philtrum (the sheet's is 11.7 pt wide and about 7.4 pt
  * tall), with a soft warm sheen on its upper middle.
  */
-const noseShape = symmetric([[0, 4.5], [-2.8, 4.75], [-4.8, 5.35], [-5.8, 6.5], [-5.6, 8.3], [-4.6, 9.9], [-2.9, 11.1], [-1.3, 11.8]], [0, 12]);
+const noseShape = symmetric([[0, 4.5], [-2.8, 4.75], [-4.8, 5.35], [-5.8, 6.5], [-5.8, 8.5], [-5, 10.1], [-3.4, 11.3], [-1.4, 12]], [0, 12.2]);
 function nose(): Piece {
   const f = uid("blur"), box: Box = [-8, 2, 16, 13];
   return piece(inFace(`<defs>${blur(f, box, 0.9)}</defs>` +`<path d="${pathD(noseShape.segs)}" fill="${C.eyeDark}"/>` +
@@ -493,10 +497,14 @@ function mouth(): Piece {
 
 /** A blush in the face frame, under the eye's outer side: an ellipse turned with the face. */
 function blush(sx: number): Piece {
-  const [cx, cy] = face([sx * 30, 13]);
-  const [dx, dy] = [7 * cosR, 7 * sinR], deg = r3((ROLL * 180) / Math.PI);
-  const d = `M${r3(cx - dx)} ${r3(cy - dy)} a7 4.4 ${deg} 1 0 ${r3(2 * dx)} ${r3(2 * dy)} a7 4.4 ${deg} 1 0 ${r3(-2 * dx)} ${r3(-2 * dy)}Z`;
-  return soft(d, [cx - 7.5, cy - 5, 15, 10], C.blush, 2.4, Math.round(model.blush.restingLevel * 1.17 * 100) / 100);
+  const [cx, cy] = face([sx * 30, 13.4]);
+  // As compact as the sheet's (its pink covers about 40% of what a 7 by 4.4 pt blush does), so the cream just under
+  // the eye stays clear.
+  const rx = 5.8, ry = 3.6;
+  const [dx, dy] = [rx * cosR, rx * sinR], deg = r3((ROLL * 180) / Math.PI);
+  const d = `M${r3(cx - dx)} ${r3(cy - dy)} a${rx} ${ry} ${deg} 1 0 ${r3(2 * dx)} ${r3(2 * dy)} a${rx} ${ry} ${deg} 1 0 ${r3(-2 * dx)} ${r3(-2 * dy)}Z`;
+  // The blur takes the small blush's peak down by about a fifth: painted that much stronger, its core reads at the resting level.
+  return soft(d, [cx - rx - 0.5, cy - ry - 0.6, 2 * rx + 1, 2 * ry + 1.2], C.blush, 2.2, Math.round(model.blush.restingLevel * 1.28 * 100) / 100);
 }
 
 /**
