@@ -437,10 +437,12 @@ function headLinePiece(): Piece {
  * An open eye at its landmark, as the turnaround, the hero and the expression sheet's open eyes paint it: an
  * oval about as tall as it is wide (19.4 pt on the sheet), its top leaning toward the nose (and rolled with the
  * face), its edge a little soft. The rim is a lash line, heaviest along the upper lid and the upper outer side,
- * near-black there and warming to the printed dark brown round the eye's foot, thinnest along the lower inner
- * side; a thin sliver of white lies high on the outer side inside the rim (from about 60 degrees above level to
- * 25 below, 1.15 pt at its widest, its inner edge soft). The iris is the near-black of the pupils down to a
- * distinct lower band in the printed dark brown (DECISIONS 18), as the hero paints it, warming in its middle;
+ * near-black there and warming to the printed dark brown round the eye's foot, thinnest along the foot. Inside
+ * it the white of the eye shows as a clean warm-white crescent between the rim and the iris on the outer side,
+ * from high on that side down to the foot, widest just below level, its top greying a little in the upper lid's
+ * shade; its edges are crisp, so it reads as the eye's white, not a reflection. The iris is the near-black of
+ * the pupils down to a distinct lower band in the printed dark brown (DECISIONS 18), as the hero paints it,
+ * warming in its middle;
  * and one catchlight, high on the nose side where the sheet's sits, crisp, with a faint grey core. The sheets
  * draw no small catchlight (the turnaround, the hero, the glossy-eyes panel and the expression sheet's open
  * eyes each draw exactly one), so none is drawn: the spec's "one or two small ones" (L446, L509) is a question
@@ -455,22 +457,24 @@ function eye(landmark: P, noseward: number): Piece {
   /** A point in the eye's own frame, rolled with the face: x toward the nose, y down. */
   const S = (x: number, y: number): P => [cx + noseward * x * cosR - y * sinR, cy + noseward * x * sinR + y * cosR];
   const oval = (c: P, a: number, b: number, deg = turn) => pathD(ellipse(c, a, b, deg));
-  const clip = uid("eye"), irisClip = uid("eye"), outside = uid("crescent"), above = uid("band"), rimFade = uid("rim");
-  const warm = uid("blur"), shine = uid("blur"), edge = uid("blur"), white = uid("blur"), band = uid("blur"), halo = uid("blur"), core = uid("blur");
+  const clip = uid("eye"), irisClip = uid("eye"), above = uid("band"), rimFade = uid("rim");
+  const warm = uid("blur"), shine = uid("blur"), edge = uid("blur"), crisp = uid("blur"), band = uid("blur"), halo = uid("blur"), core = uid("blur");
   const box: Box = [cx - 14, cy - 14, 28, 28];
   const ball = oval([cx, cy], rx, ry);
-  // The iris inside the rim, set 0.35 pt toward the nose and 0.4 pt down, so the rim is 1.4 pt over the top and
-  // the outer side and 0.6 pt along the lower inner side.
-  const rim = 1, irisAt: [number, number] = [0.35, 0.4], irisOval = oval(S(...irisAt), rx - rim, ry - rim);
+  // The eye's opening inside the dark rim, which is 1 pt wide down both sides, 1.3 pt over the top and 0.8 pt
+  // along the foot; the white of the eye fills it.
+  const opening = oval(S(0, 0.25), rx - 1, ry - 1.05);
+  // The iris: an oval 16.4 by 18.4 pt set 2 pt toward the nose, its top leaning 12 degrees away from it, so it
+  // fills the opening on the nose's side, over the top and along the foot, and on the outer side leaves the white
+  // as a crescent between it and the rim, as every sheet paints it: 2.25 pt wide at its widest, just below the
+  // eye's level (12% of the eye's width, 16% of the iris's), thinning to nothing 65 degrees above level and at
+  // the eye's foot.
+  const irisOval = oval(S(2, -0.2), 8.2, 9.2, ROLL_DEG - 12 * noseward);
   /** A disc's clip: everything round it but the disc, so what it clips is the iris less the disc. */
   const less = (c: P, r: number) => `M${fmt(cx - 30)} ${fmt(cy - 30)}H${fmt(cx + 30)}V${fmt(cy + 30)}H${fmt(cx - 30)}Z` + pathD(ellipse(c, r, r));
-  // The white: the iris less a disc 13.85 pt in radius set 6.6 pt from the iris's centre toward the nose and 12
-  // degrees down, which leaves a sliver 1.15 pt wide about 12 degrees above level on the outer side that thins to
-  // nothing about 45 degrees either side.
-  const cut = less(S(irisAt[0] + 6.6 * Math.cos(0.21), irisAt[1] + 6.6 * Math.sin(0.21)), 13.85);
-  // The lower band: the iris less a disc 12.55 pt in radius set 8 pt above its centre, 3.8 pt deep at the foot and
-  // running out about 80 degrees either side of it, so its top follows the eye's round.
-  const lower = less(S(irisAt[0], irisAt[1] - 8), 12.55);
+  // The lower band: the iris less a disc 12.55 pt in radius whose foot lies 3.6 pt above the opening's foot, so the
+  // band is 3.6 pt deep at the foot and runs out about 80 degrees either side of it, its top following the eye's round.
+  const lower = less(S(1.4, -7.6), 12.55);
   const [t0x, t0y] = S(0, -ry);
   // The lash line: from below the outer corner, over the top, to the nose side's upper quarter, on the ball's rim.
   const around = (from: number, to: number, grow: number, n = 41): P[] => Array.from({ length: n }, (_, k) => {
@@ -480,21 +484,24 @@ function eye(landmark: P, noseward: number): Piece {
   const lidLine = tapered(around(-35, 120, 0.25), 1.8, "outer", "eye lid", { taper: 9, tip: 0.3 });
   // The halo: a soft pale band just outside the rim, from below the eye round its outer side.
   const haloBand = strokeOf(around(-125, 25, 1.1, 31), 1.7, { taper: 5, tip: 0.2 });
-  const big = S(3.6, -4.55), warmAt = S(irisAt[0], irisAt[1] + 7.25);
+  const big = S(3.6, -4.55), warmAt = S(1.6, 7.4);
   const n = (p: P) => `${fmt(p[0])}" cy="${fmt(p[1])}`;
-  const svg = `<defs><clipPath id="${clip}"><path d="${ball}"/></clipPath><clipPath id="${irisClip}"><path d="${irisOval}"/></clipPath>` +
-    `<clipPath id="${outside}"><path d="${cut}" clip-rule="evenodd"/></clipPath><clipPath id="${above}"><path d="${lower}" clip-rule="evenodd"/></clipPath>` +
+  const svg = `<defs><clipPath id="${clip}"><path d="${opening}"/></clipPath><clipPath id="${irisClip}"><path d="${irisOval}"/></clipPath>` +
+    `<clipPath id="${above}"><path d="${lower}" clip-rule="evenodd"/></clipPath>` +
     // The rim warms from near-black along the lid to the printed dark brown round the eye's foot, as the sheet's does.
     `<linearGradient id="${rimFade}" gradientUnits="userSpaceOnUse" x1="${fmt(t0x)}" y1="${fmt(t0y)}" x2="${fmt(2 * cx - t0x)}" y2="${fmt(2 * cy - t0y)}">` +
     `<stop offset="0.62" stop-color="${C.eyeDark}"/><stop offset="0.85" stop-color="${C.dark}"/></linearGradient>` +
-    `${blur(warm, box, 0.45)}${blur(shine, box, 0.15)}${blur(edge, box, 0.22)}${blur(white, box, 0.25)}${blur(band, box, 0.55)}${blur(halo, box, 0.55)}${blur(core, box, 0.3)}</defs>` +
+    `${blur(warm, box, 0.45)}${blur(shine, box, 0.15)}${blur(edge, box, 0.22)}${blur(crisp, box, 0.18)}${blur(band, box, 0.55)}${blur(halo, box, 0.55)}${blur(core, box, 0.3)}</defs>` +
     `<path d="${haloBand.d}" fill="${C.fur}" opacity="0.8" filter="url(#${halo})"/>` +
     `<g filter="url(#${edge})"><path d="${ball}" fill="url(#${rimFade})"/><path d="${lidLine.d}" fill="${C.eyeDark}"/></g>` +
-    `<g clip-path="url(#${clip})"><path d="${irisOval}" fill="${C.eyeDark}"/>` +
+    // The white of the eye in the opening, greying a little under the upper lid's shade toward the crescent's top
+    // as the sheet's does, then the iris over it, their edges crisp, as the sheet paints them.
+    `<g clip-path="url(#${clip})"><path d="${opening}" fill="${C.eyeWhite}"/>` +
+    `<ellipse cx="${n(S(-4.5, -6.5))}" rx="6" ry="4.5" fill="${C.dark}" opacity="0.22" filter="url(#${warm})"/>` +
+    `<g filter="url(#${crisp})"><path d="${irisOval}" fill="${C.eyeDark}"/></g>` +
     // The lower band, its top edge soft but defined, warming through its middle above the foot.
     `<g clip-path="url(#${irisClip})"><g filter="url(#${band})"><path d="${irisOval}" fill="${C.dark}" clip-path="url(#${above})"/></g>` +
-    `<ellipse cx="${n(warmAt)}" rx="3.7" ry="0.85" fill="${C.irisLight}" opacity="0.85" filter="url(#${warm})"/>` +
-    `<g filter="url(#${white})"><path d="${irisOval}" fill="${C.eyeWhite}" clip-path="url(#${outside})"/></g></g></g>` +
+    `<ellipse cx="${n(warmAt)}" rx="3.7" ry="0.85" fill="${C.irisLight}" opacity="0.85" filter="url(#${warm})"/></g></g>` +
     `<ellipse cx="${n(big)}" rx="1.75" ry="1.65" fill="${C.light}" filter="url(#${shine})"/>` +
     `<ellipse cx="${n(big)}" rx="0.7" ry="0.6" fill="${C.dark}" opacity="0.1" filter="url(#${core})"/>`;
   return piece(svg, box, { shapes: [], lines: [lidLine.line] });
