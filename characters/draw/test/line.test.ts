@@ -5,7 +5,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { Drawing } from "../../build/atlas.ts";
 import { smooth, type Node, type P } from "../geom.ts";
-import { innerLine, ribbons, strokeOf, type DrawnLine } from "../line.ts";
+import { innerLine, ribbons, strokeOf, taperedStroke, type DrawnLine } from "../line.ts";
 import { LIMITS, lintDrawing } from "../lint.ts";
 import type { Meta } from "../svg.ts";
 
@@ -49,4 +49,13 @@ test("the lint holds the width a line draws, not only the width it declares", ()
   assert.match(say([{ kind: "outer", width: 1.2, where: "part", drawn: [1.08, 1.32] }]), /outer line 1.2 pt in part is drawn 1.08 to 1.32 pt wide, outside 1.2 to 1.8 pt/);
   assert.match(say([{ kind: "outer", width: 1.7, where: "part", drawn: [1.53, 1.87] }]), /drawn 1.53 to 1.87 pt wide/);
   assert.match(say([innerLine([[0, 0], [0, 2]], 0.75, "#91694A", { taper: 5 }).line]), /inner line 0.75 pt in inner is drawn 0.\d+ to 0.\d+ pt wide, outside 0.6 to 0.9 pt/);
+});
+
+test("a line meta that does not report its drawn widths fails, whatever it declares", () => {
+  const say = (lines: object[]) => lintDrawing(drawing({ shapes: [], lines: lines as DrawnLine[] })).join("\n");
+  assert.match(say([{ kind: "outer", width: 1.5, where: "part" }]), /outer line 1.5 pt in part reports no drawn widths/);
+  assert.match(say([{ kind: "inner", width: 0.7, where: "toe" }]), /inner line 0.7 pt in toe reports no drawn widths/);
+  // What line.ts draws always reports them.
+  const { drawn } = taperedStroke([[0, 0], [0, 10]], 0.7, { band: LIMITS.inner });
+  assert.equal(say([{ kind: "inner", width: 0.7, where: "toe", drawn }]), "");
 });

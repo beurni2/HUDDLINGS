@@ -372,8 +372,10 @@ export function lintDrawing(d: Drawing, rules: LintRules = {}): string[] {
     if (convex.r < LIMITS.cornerPt)
       say(`shape ${shape.name} turns a ${convex.r.toFixed(2)} pt convex corner at (${convex.at.map((n) => n.toFixed(1)).join(", ")}) on an outlined edge (at least ${LIMITS.cornerPt} pt outside fur)`);
   }
-  for (const line of (d.meta?.lines ?? []) as DrawnLine[]) {
+  // A line meta comes from what line.ts draws (strokeOf, taperedStroke, ribbons, innerLine), with the widths it draws.
+  for (const line of (d.meta?.lines ?? []) as (Omit<DrawnLine, "drawn"> & Partial<DrawnLine>)[]) {
     const band = line.kind === "outer" ? LIMITS.outer : LIMITS.inner;
+    if (!line.drawn) say(`${line.kind} line ${line.width} pt in ${line.where} reports no drawn widths; its meta comes from what line.ts draws`);
     if (!inBand(line.width, band)) say(`${line.kind} line ${line.width} pt in ${line.where} is outside ${band[0]} to ${band[1]} pt`);
     // What the wobble and the taper actually draw, away from the tapered ends, holds to the same band.
     else if (line.drawn && !(inBand(line.drawn[0], band) && inBand(line.drawn[1], band)))

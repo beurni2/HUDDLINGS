@@ -3,14 +3,15 @@
 // on the edge, inside the shape's clip, so the silhouette stays exactly the
 // path; each span has its own width and colour (fur spans take a lighter line).
 // The wobble never takes a line out of its band (lint.ts LIMITS), and every
-// line reports the widths it actually draws, for the lint to hold.
+// line reports the widths it actually draws, for the lint to hold: a line meta
+// without them fails the lint.
 import { arc, area, fracAt, rng, spanPoints, v, polyD, type At, type P, type Shape } from "./geom.ts";
 import { LIMITS } from "./lint.ts";
 import type { LineMeta } from "./svg.ts";
 
 /** A line as the lint sees it, with the narrowest and widest width it draws away from its tapered ends, in points. */
 export interface DrawnLine extends LineMeta {
-  drawn?: [number, number];
+  drawn: [number, number];
 }
 
 export interface Span {
@@ -90,9 +91,12 @@ export function strokeOf(given: P[], width: number, opts: Stroke = {}): { d: str
   return { d: polyD([...left, ...right.reverse()]), drawn: narrowest <= widest ? [narrowest, widest] : [peak, peak] };
 }
 
-/** A line of varying width as a filled polygon: full width in the middle, tapering to `tip` at both ends. */
-export function taperedStroke(line: P[], width: number, opts: Stroke = {}): string {
-  return strokeOf(line, width, opts).d;
+/**
+ * A line of varying width as a filled polygon: full width in the middle, tapering to `tip` at both ends; with the
+ * narrowest and widest it draws away from those ends, which its line meta reports (strokeOf).
+ */
+export function taperedStroke(line: P[], width: number, opts: Stroke = {}): { d: string; drawn: [number, number] } {
+  return strokeOf(line, width, opts);
 }
 
 /** The spans of a mirrored shape (mirrorX): each runs the other way, from the mirror of its end to the mirror of its start. */
