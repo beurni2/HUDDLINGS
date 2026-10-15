@@ -10,11 +10,12 @@ import { LIMITS } from "../../../draw/lint.ts";
 import { marking, part, soft, type Paint } from "../../../draw/paint.ts";
 import { blur, join, pad, piece, uid, type Box, type Piece } from "../../../draw/svg.ts";
 import { model } from "../model.ts";
-import { C } from "../palette.ts";
+import { C, LINES } from "../palette.ts";
 import { eye, type EyeSpec } from "../parts/eye.ts";
 import { litEdge, litMarking, litPart, withDefaults, type LitSpan } from "../parts/lines.ts";
 import { curlShapes, topknot, type Curl } from "../parts/topknot.ts";
 import { earFur } from "../parts/ear.ts";
+import { toes } from "../parts/paw.ts";
 import type { Drawn } from "./front.ts";
 
 const INNER = model.outline.innerPt;
@@ -553,13 +554,13 @@ export function threeQuarter(): Drawn[] {
   add("hind.L", roomy(litPart("hind.L", hind, {
     fill: C.fur,
     shade: furShade(hipGroup, [], ["M-34 -24 L-4 -24 L-4 -9 L-34 -9Z"]),
-    inner: [[[-16.2, -2.3], [-16.4, -4.6], [-16.1, -7]], [[-22.7, -3.6], [-22.9, -5.8], [-22.6, -8]]]
-      .map((pts) => ({ pts: pts as P[], width: 0.75, colour: C.warmLine, opacity: 0.5 })),
+    // Two toe lines rising from the sole's scallops a third of the way up the turned paw's front (parts/paw.ts).
+    ...toes({ lines: [[[-16.2, -2.2], [-16.8, -4.4], [-16.9, -6.6], [-16.4, -8.4]], [[-22.7, -3.4], [-23.4, -5.4], [-23.5, -7.4], [-23, -9.2]]], fade: [-2.6, -9.4] }),
     // Its back end runs on into the haunch, where the sheet's line along the ground carries on unbroken.
     feather: { from: [-5.8, -8], to: [-10, -8] },
-    // Its line, from where its sole meets the haunch's line along the ground, round its toe end and up over its crown,
-    // where it fades into the thigh, as the sheet draws it.
-  }, [{ from: [-9.4, -1.9], to: [-15.4, -16.6], taper: [5, 7] }]), 6));
+    // Its line, a bun closed where it shows: from where its sole meets the haunch's line along the ground, round its toe
+    // end and over its whole crown, fading only where its back end runs on into the haunch, as the sheet draws it.
+  }, [{ from: [-9.4, -1.9], to: [-9.6, -15.4], taper: [5, 6] }]), 6));
   // The far front leg: the fur most of the way to its own warm shade (palette.ts, farFur), 6.2% darker than the
   // near leg; from where it comes out from under the chest it eases in from the fur over 11 pt, so the two join
   // with no edge. The sheet keeps it light: no rim of shade down its front, only a soft shade down its inner side
@@ -568,12 +569,15 @@ export function threeQuarter(): Drawn[] {
   const farTop = uid("fartop");
   add("front.R", litPart("front.R", legR, {
     fill: C.farFur,
-    under: `<defs><linearGradient id="${farTop}" gradientUnits="userSpaceOnUse" x1="0" y1="-33.4" x2="0" y2="-22">` +
-      `<stop offset="0" stop-color="${C.fur}"/><stop offset="1" stop-color="${C.fur}" stop-opacity="0"/></linearGradient></defs>` +
-      `<rect x="-86" y="-48" width="34" height="26" fill="url(#${farTop})"/>`,
     shade: { multiply: C.furShadeBy, shapes: ["M-67 -34 C-63 -30 -59 -26 -57 -20 L-54 -3 L-60 -3 C-61 -11 -62.4 -19 -66 -26 L-70 -33Z"], blur: 1.8 },
-    inner: [[[-72.6, -4.2], [-72.8, -5.9], [-72.6, -7.6]], [[-78.6, -5.6], [-78.9, -7.2], [-78.7, -8.8]]]
-      .map((pts) => ({ pts: pts as P[], width: 0.75, colour: C.warmLine, opacity: 0.45 })),
+    ...((): Pick<Paint, "under" | "inner"> => {
+      // Two toe lines rising from the sole's scallops a third of the way up its round front (parts/paw.ts), with the
+      // gradient that eases the far leg in from the fur.
+      const t = toes({ lines: [[[-72.6, -4.2], [-73.2, -6.2], [-73.2, -8.2], [-72.6, -9.8]], [[-78.6, -5.6], [-79.4, -7.4], [-79.4, -9.4], [-78.8, -11]]], fade: [-4.4, -11.4] });
+      return { under: `<defs><linearGradient id="${farTop}" gradientUnits="userSpaceOnUse" x1="0" y1="-33.4" x2="0" y2="-22">` +
+        `<stop offset="0" stop-color="${C.fur}"/><stop offset="1" stop-color="${C.fur}" stop-opacity="0"/></linearGradient></defs>` +
+        `<rect x="-86" y="-48" width="34" height="26" fill="url(#${farTop})"/>` + t.under, inner: t.inner };
+    })(),
   }, [{ from: [-59.2, -5.2], to: [-77.6, -45], taper: [5, 8] }]));
   add("body.front", roomy(litPart("body.front", chest, {
     fill: C.fur,
@@ -581,12 +585,16 @@ export function threeQuarter(): Drawn[] {
     shade: furShade(bodyGroup),
     under: between(),
     // A few soft fur strokes down the chest's far side under the collar's end, as the sheet draws them.
+    // Over the slot between the legs, where the chest's fur lies on the far leg, a few short tapered fur strokes part the
+    // legs, as the sheet draws them, instead of one long crease.
     inner: [[[-72, -47.4], [-72.8, -43], [-72.4, -38.6]], [[-67.6, -45.6], [-68.6, -41.6], [-69.2, -37.8]], [[-59.8, -27.6], [-59, -25.8], [-58.8, -24.2]]]
-      .map((pts) => ({ pts: sample(smooth(pts as P[], { closed: false }).segs, 6, false), width: 0.7, colour: C.crownLine, opacity: 0.4 })),
+      .map((pts) => ({ pts: sample(smooth(pts as P[], { closed: false }).segs, 6, false), width: 0.7, colour: C.crownLine, opacity: 0.4 }))
+      .concat([[[-70.2, -34.2], [-67.6, -31.6], [-65.4, -29.4]], [[-64.6, -29.6], [-61.8, -26.8], [-59.6, -24.6]], [[-58.8, -24.8], [-57, -22.4], [-55.8, -20.4]]]
+        .map((pts) => ({ pts: sample(smooth(pts as P[], { closed: false }).segs, 6, false), width: 0.8, colour: LINES.cream[3]!, opacity: 0.8 }))),
     // The chest's front edge, the silhouette from the collar down to the far leg (the sheet's #B89778); and its lower
     // edge's long diagonal from under the tag to the slot between the legs, coming in faint as fur and deepening
     // where it meets the slot.
-  }, [{ from: [-77.2, -37.6], to: [-73.4, -57.6], taper: 4 }, { from: [-55.2, -19.8], to: [-69.4, -33.4], taper: [3, 8] }]), 1));
+  }, [{ from: [-77.2, -37.6], to: [-73.4, -57.6], taper: 4 }]), 1));
   // The jaw's shadow on the chest, cast by the head (spec L396): a soft band under the jaw's edge, about 3 pt deep,
   // falling on the chest beside the collar's ends (the collar hides the middle of it).
   const jawShade: P[] = [[-14, -68], [-26, -63.2], [-43, -59.6], [-62, -61.6], [-74, -64.2], [-82, -69], [-80, -64.4], [-72, -59.2], [-62, -56.4],
@@ -624,9 +632,13 @@ export function threeQuarter(): Drawn[] {
   add("front.L", litPart("front.L", legL, {
     fill: C.fur,
     shade: furShade(bodyGroup, [], ["M-70 -70 L-20 -70 L-20 -36 L-70 -36Z", "M-34 -40 L-18 -40 L-18 -16 L-34 -16Z"]),
-    // Two toe lines rising from the sole's scallops toward the paw's front, where the sheet draws them on the turned paw.
-    inner: [[[-46.8, -2.2], [-47, -4.1], [-46.8, -6]], [[-54.4, -3.3], [-54.6, -5.1], [-54.4, -7]]]
-      .map((pts) => ({ pts: pts as P[], width: 0.75, colour: C.warmLine, opacity: 0.5 })),
+    // Two toe lines rising from the sole's scallops a third of the way up the turned paw's front (parts/paw.ts), and the
+    // soft crease where the bun of the paw meets the leg, from the wrist back over its top, as the sheet draws it.
+    ...((): Pick<Paint, "under" | "inner"> => {
+      const t = toes({ lines: [[[-46.8, -2.1], [-47.4, -4.2], [-47.4, -6.4], [-46.8, -8.2]], [[-54.4, -3.2], [-55.1, -5.2], [-55.1, -7.4], [-54.4, -9]]], fade: [-2.4, -9.4] });
+      const crease = { pts: sample(smooth([[-54.6, -15.2], [-51, -16.2], [-46, -16], [-41.4, -14.6]], { closed: false }).segs, 6, false), width: 0.8, colour: C.warmLine, opacity: 0.45 };
+      return { under: t.under, inner: [...t.inner!, crease] };
+    })(),
     feather: { from: [-40, -46], to: [-40, -38] },
   }, [{ from: [-25.2, -16], to: [-50.9, -27.6], taper: [9, 8] }]));
   return out;
