@@ -61,19 +61,20 @@ const legL = smooth([[-50, -47], [-38, -47.5], [-27, -45], [-23.4, -37], [-22.8,
 // slot beside the near leg (x -55.6), under the chest's lower edge.
 const legR = smooth([[-75.6, -50], [-61, -46], [-58.4, -36], [-56.6, -28], [-55.6, -21], [-55.4, -15.6], [-56.2, -10], [-57.8, -6.4], [-60.6, -4.4],
   [-64.6, -3.6], [-68.4, -3.3], [-72.6, -3.75], [-76.4, -3.9], [-79.6, -5], [-82.1, -7.2], [-83.2, -10.4], [-82.6, -13.8], [-80.8, -16.4], [-79, -18],
-  [-77.3, -19.6], [-76.8, -24], [-77.1, -30], [-77.4, -38], [-77.2, -45]], { corners: [11, 19] });
+  [-78, -19.8], [-77.8, -24], [-78, -30], [-78.1, -38], [-77.6, -45]], { corners: [11, 19] });
 
 // The chest: from under the collar down to the paws, its front edge the silhouette from the collar's end down to
 // the far leg, which comes out from under it; its lower edge runs level across the far leg's top, then down the
 // long diagonal the sheet draws from under the tag (x -69.5) to the slot between the legs (x -55.4 at y -20.8),
 // and on under the near paw. Its right side lies on the haunch's cream under the near leg and the collar, with
 // no line.
-let chest = smooth([[-74.5, -61], [-60, -64], [-40, -64.5], [-24, -64], [-21, -58], [-23, -50], [-26.5, -42], [-29, -32], [-33, -14], [-40, -4],
-  [-52, -3.5], [-54.2, -16.6], [-55.6, -20.6], [-58.4, -24], [-61.6, -27.2], [-65.6, -30.6], [-69.5, -33.5], [-73.6, -32.4], [-75.8, -30.2], [-76.1, -36],
-  [-76.6, -42], [-76.2, -48.5], [-74.8, -55]], { corners: [18] });
+let chest = smooth([[-72.6, -60.8], [-60, -64], [-40, -64.5], [-24, -64], [-21, -58], [-23, -50], [-26.5, -42], [-29, -32], [-33, -14], [-40, -4],
+  [-52, -3.5], [-54.2, -16.6], [-55.6, -20.6], [-58.4, -24], [-61.6, -27.2], [-65.6, -30.6], [-69.5, -33.5], [-73.6, -32.4], [-75.8, -30.2], [-77, -36],
+  [-77.9, -42.4], [-77.4, -48.6], [-74.6, -54.8]], { corners: [18] });
 // Under the collar's end the chest's front edge breaks into a few small locks of fur combed down, as the sheet draws it.
-const chestLocks: Lock[] = [{ len: 0.6, w: 0.9, lean: -0.3 }, { len: 0.9, w: 1.2, lean: -0.35 }, { len: 0.7, w: 1, lean: -0.3 }, { len: 0.8, w: 1.1, lean: -0.25 }];
-chest = furEdge(chest, [-77.1, -38.6], [-75.2, -53.6], chestLocks, 0.3);
+const chestLocks: Lock[] = [{ len: 0.8, w: 0.9, lean: -0.3 }, { len: 1.3, w: 1.3, lean: -0.35 }, { len: 0.7, w: 0.8, lean: -0.3 }, { len: 1.1, w: 1.2, lean: -0.3 },
+  { len: 0.8, w: 0.9, lean: -0.25 }];
+chest = furEdge(chest, [-77.6, -38.8], [-74.9, -54.2], chestLocks, 0.32);
 
 // The collar: the band round the neck from under the chin, where its rounded end shows, along the near side
 // to where it turns away round the neck just short of the near ear; deepest (7.5 pt) under the near side of the
@@ -632,7 +633,7 @@ export function threeQuarter(): Drawn[] {
       `<stop offset="0" stop-color="${C.crownLine}"/><stop offset="1" stop-color="${C.pawLine}"/></linearGradient></defs>` +
       `<rect x="-86" y="-48" width="34" height="26" fill="url(#${farTop})"/>`,
     shade: { multiply: C.furShadeBy, shapes: ["M-67 -34 C-63 -30 -59 -26 -57 -20 L-54 -3 L-60 -3 C-61 -11 -62.4 -19 -66 -26 L-70 -33Z"], blur: 1.8 },
-    outline: { ...OUTLINE, colour: `url(#${farLine})`, width: 1.35, taper: 5, spans: [{ from: [-59.2, -5.2], to: [-77.2, -45] }] },
+    outline: { ...OUTLINE, colour: `url(#${farLine})`, width: 1.35, taper: 5, spans: [{ from: [-59.2, -5.2], to: [-77.6, -45] }] },
     inner: [[[-72.6, -4.2], [-72.8, -5.9], [-72.6, -7.6]], [[-78.6, -5.6], [-78.9, -7.2], [-78.7, -8.8]]]
       .map((pts) => ({ pts: pts as P[], width: 0.75, colour: C.pawLine, opacity: 0.5 })),
   }));
@@ -647,7 +648,7 @@ export function threeQuarter(): Drawn[] {
     // The chest's front edge, the silhouette from the collar down to the far leg, a light warm line (the sheet's
     // #B89778); and its lower edge's long diagonal from under the tag to the slot between the legs, coming in
     // faint as fur and deepening where it meets the slot.
-    outline: { ...OUTLINE, colour: C.crownLine, width: THIN, taper: 4, spans: [{ from: [-76.2, -37.6], to: [-74.8, -55] },
+    outline: { ...OUTLINE, colour: C.crownLine, width: THIN, taper: 4, spans: [{ from: [-77.2, -37.6], to: [-73.4, -57.6] },
       { from: [-55.2, -19.8], to: [-69.4, -33.4], colour: C.softLine, width: 1.3 }] },
   }), 1));
   // The jaw's shadow on the chest, cast by the head (spec L396): a soft band under the jaw's edge, about 3 pt deep,
