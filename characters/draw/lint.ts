@@ -5,6 +5,7 @@
 // attributes; markup it cannot read fails rather than slipping past.
 import type { Drawing } from "../build/atlas.ts";
 import { arc, minRadius, onSpan, sample } from "./geom.ts";
+import type { DrawnLine } from "./line.ts";
 
 export const LIMITS = {
   /** Hand nodes in one shape: 8 to 20 is the aim. */
@@ -371,9 +372,12 @@ export function lintDrawing(d: Drawing, rules: LintRules = {}): string[] {
     if (convex.r < LIMITS.cornerPt)
       say(`shape ${shape.name} turns a ${convex.r.toFixed(2)} pt convex corner at (${convex.at.map((n) => n.toFixed(1)).join(", ")}) on an outlined edge (at least ${LIMITS.cornerPt} pt outside fur)`);
   }
-  for (const line of d.meta?.lines ?? []) {
+  for (const line of (d.meta?.lines ?? []) as DrawnLine[]) {
     const band = line.kind === "outer" ? LIMITS.outer : LIMITS.inner;
     if (!inBand(line.width, band)) say(`${line.kind} line ${line.width} pt in ${line.where} is outside ${band[0]} to ${band[1]} pt`);
+    // What the wobble and the taper actually draw, away from the tapered ends, holds to the same band.
+    else if (line.drawn && !(inBand(line.drawn[0], band) && inBand(line.drawn[1], band)))
+      say(`${line.kind} line ${line.width} pt in ${line.where} is drawn ${line.drawn.map((w) => w.toFixed(2)).join(" to ")} pt wide, outside ${band[0]} to ${band[1]} pt`);
   }
   return problems;
 }
