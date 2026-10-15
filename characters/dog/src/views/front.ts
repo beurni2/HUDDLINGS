@@ -22,7 +22,7 @@ const OUTER = model.outline.outerPt;
 const INNER = model.outline.innerPt;
 /** Lines on fur spans and small parts: lighter, and never under 1.2 pt (a thinner line is a question for the founder). */
 const THIN = 1.2;
-const OUTLINE: Outline = { colour: C.outline, width: OUTER, taper: 6, blur: 0.2 };
+const OUTLINE: Outline = { colour: C.outline, width: OUTER, taper: 6, blur: 0.12 };
 
 /** The same shape on the dog's other side. */
 const other = (nodes: Node[]) => smooth(mirrorX(nodes));
@@ -746,9 +746,9 @@ function between(): string {
   // A narrow V, its point at the top: 3.6 pt across at y -26 and 9.6 pt between the wrists.
   const v = smooth([[0, -33], [1.6, -29], [3.4, -20], [4.8, -10], [4.6, -2.6], [-4.6, -2.6], [-4.8, -10], [-3.4, -20], [-1.6, -29]]);
   return `<defs><linearGradient id="${g}" gradientUnits="userSpaceOnUse" x1="0" y1="-32" x2="0" y2="-2.6">` +
-    `<stop offset="0" stop-color="${C.marking}" stop-opacity="0"/><stop offset="0.25" stop-color="${C.marking}" stop-opacity="0.18"/>` +
-    `<stop offset="0.5" stop-color="${C.marking}" stop-opacity="0.5"/><stop offset="0.75" stop-color="${C.marking}" stop-opacity="0.75"/>` +
-    `<stop offset="0.9" stop-color="${C.earDeep}" stop-opacity="0.7"/><stop offset="1" stop-color="${C.earDeep}" stop-opacity="0"/></linearGradient>` +
+    `<stop offset="0" stop-color="${C.marking}" stop-opacity="0"/><stop offset="0.25" stop-color="${C.marking}" stop-opacity="0.14"/>` +
+    `<stop offset="0.5" stop-color="${C.marking}" stop-opacity="0.38"/><stop offset="0.78" stop-color="${C.marking}" stop-opacity="0.6"/>` +
+    `<stop offset="0.92" stop-color="${C.marking}" stop-opacity="0.55"/><stop offset="1" stop-color="${C.marking}" stop-opacity="0"/></linearGradient>` +
     `${blur(f, [-12, -36, 24, 36], 1)}</defs>` +
     `<path d="${pathD(v.segs)}" fill="url(#${g})" filter="url(#${f})"/>`;
 }
