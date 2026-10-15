@@ -3,8 +3,9 @@
 // by the WebGL runtime in three passes, with still.json to read them by:
 // - white.png and black.png: the frame on opaque white and black, so alpha is
 //   1 − (white − black)/255 and colour is black/alpha;
-// - ids.png: each part in its own flat ID colour wherever its alpha is 0.5 or
-//   more, still clipped by its mask, on black (ids.ts).
+// - ids.png: each part in its own flat ID colour wherever its alpha is at least
+//   half its region's own largest alpha, still clipped by its mask, on black
+//   (ids.ts), so soft parts (shadows, the blush) show too.
 // Model point (x, y) is at pixel rootPx + ppp·(x, y), pixel (i, j) covering
 // [i, i + 1) × [j, j + 1). The folder is replaced whole, and only once every
 // file is written; a canvas Chromium will not give at full size fails.

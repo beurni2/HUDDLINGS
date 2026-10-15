@@ -14,7 +14,7 @@ import { buildPackage, pngChunks, readSource, writePackage } from "../../charact
 import type { Clip } from "../src/format.ts";
 import { compile, drawList, evaluatePose, type DrawItem } from "../src/rig.ts";
 import { MASK_ALPHA } from "../src/renderer.ts";
-import { hex, ID_ALPHA, idColour, recolour } from "../lab/ids.ts";
+import { hex, idColour, inPart, largestAlpha, recolour } from "../lab/ids.ts";
 import { MARGIN, openStills, type StillInfo, type Stills } from "../lab/still.ts";
 
 const PPP = 3;
@@ -73,6 +73,17 @@ function alphaAt(p: Placed, i: number, j: number): number {
   const region = set.regions[p.item.region]!;
   const page = pages[region.page]!;
   return page.data[((region.y + j - p.top) * page.width + region.x + i - p.left) * 4 + 3]!;
+}
+
+/** Whether the part's texel under pixel (i, j) is in its part for the ID pass: at least half its region's largest alpha. */
+function inItsPart(p: Placed, i: number, j: number): boolean {
+  return inPart(alphaAt(p, i, j), largest(p.item.region));
+}
+const largestOf = new Map<string, number>();
+function largest(name: string): number {
+  const region = set.regions[name]!;
+  if (!largestOf.has(name)) largestOf.set(name, largestAlpha(pages[region.page]!.data, pages[region.page]!.width, region));
+  return largestOf.get(name)!;
 }
 
 /** The pixels a part's quads could touch, a pixel wider all round. */
@@ -159,7 +170,7 @@ test("alpha from the white and black passes is the package's own alpha", (t) => 
   assert.ok(worst <= 2 / 255, `alpha differs by up to ${(worst * 255).toFixed(2)}/255`);
 });
 
-test("the ID pass paints each part flat where its alpha is 0.5 or more, inside its mask", () => {
+test("the ID pass paints each part flat where its alpha is half its largest or more, inside its mask", () => {
   const { placed, inTail, byPart, maskOf } = reference();
   const [w, h] = info.sizePx;
   const colourOf = new Map(Object.entries(info.parts).map(([name, p]) => [p.id, name]));
@@ -169,12 +180,12 @@ test("the ID pass paints each part flat where its alpha is 0.5 or more, inside i
       const got = hex(pixel(ids, i, j).slice(0, 3));
       assert.ok(got === "#000000" || colourOf.has(got), `pixel ${i}, ${j} is ${got}, no part's colour`);
       if (inTail(i, j)) continue;
-      // The topmost part with alpha 0.5 or more there, whose mask (cut at 0.5 in this pass) covers it.
+      // The topmost part at half its largest alpha or more there, whose mask (cut the same way in this pass) covers it.
       let want = "#000000";
       for (const p of placed) {
         const mask = maskOf(p);
-        if (mask && alphaAt(mask, i, j) < ID_ALPHA) continue;
-        if (alphaAt(p, i, j) >= ID_ALPHA) want = info.parts[p.item.part]!.id;
+        if (mask && !inItsPart(mask, i, j)) continue;
+        if (inItsPart(p, i, j)) want = info.parts[p.item.part]!.id;
       }
       if (got !== want) wrong++;
     }
@@ -185,9 +196,9 @@ test("the ID pass paints each part flat where its alpha is 0.5 or more, inside i
   let outside = 0, shown = 0;
   for (let j = marking.top; j < marking.top + marking.h; j++) {
     for (let i = marking.left; i < marking.left + marking.w; i++) {
-      if (alphaAt(marking, i, j) < ID_ALPHA) continue;
+      if (!inItsPart(marking, i, j)) continue;
       const here = hex(pixel(ids, i, j).slice(0, 3));
-      if (alphaAt(head, i, j) < ID_ALPHA) {
+      if (!inItsPart(head, i, j)) {
         outside++;
         assert.notEqual(here, info.parts["head.marking"]!.id, `the stripe shows outside head.base at ${i}, ${j}`);
       } else if (here === info.parts["head.marking"]!.id) shown++;
@@ -215,7 +226,8 @@ test("model points land on rootPx + ppp·(x, y)", () => {
     const item = items.find((i) => i.part === part)!;
     const region = set.regions[item.region]!;
     const page = pages[region.page]!;
-    const [rx, ry] = centroid(region.w, region.h, (i, j) => page.data[((region.y + j) * page.width + region.x + i) * 4 + 3]! >= ID_ALPHA);
+    const most = largestAlpha(page.data, page.width, region);
+    const [rx, ry] = centroid(region.w, region.h, (i, j) => inPart(page.data[((region.y + j) * page.width + region.x + i) * 4 + 3]!, most));
     const exact = [info.rootPx[0] + PPP * head.tx + rx - region.anchorX, info.rootPx[1] + PPP * head.ty + ry - region.anchorY];
     assert.ok(Math.abs(cx - exact[0]!) < 1e-9 && Math.abs(cy - exact[1]!) < 1e-9, `${part} at ${cx}, ${cy}, its raster puts it at ${exact}`);
     // And on its model point, within resvg's own antialiasing bias (0.07 px down for the nose at 3x).
@@ -271,7 +283,7 @@ test("a canvas Chromium will not give at full size fails instead of drawing the 
   assert.ok(!existsSync(join(dir, "huge")));
 });
 
-test("the ID pages keep each region's texels from alpha 0.5 up, its ring included, and nothing else", () => {
+test("the ID pages keep each region's texels from half its largest alpha up, its ring included, and nothing else", () => {
   // A 10 × 4 page: a 3 × 2 region at (4, 1) with alphas 127, 128, 255 on each row, an opaque texel two to its left (the ring) and three to its right (not).
   const page = new Uint8Array(10 * 4 * 4);
   const alpha = (x: number, y: number, a: number) => page.set([9, 9, 9, a], (y * 10 + x) * 4);
@@ -280,11 +292,26 @@ test("the ID pages keep each region's texels from alpha 0.5 up, its ring include
   alpha(9, 1, 255);
   const out = recolour(page, 10, 4, [{ x: 4, y: 1, w: 3, h: 2, colour: [10, 20, 30] }]);
   const at = (x: number, y: number) => [...out.subarray((y * 10 + x) * 4, (y * 10 + x) * 4 + 4)];
-  assert.deepEqual(at(4, 1), [0, 0, 0, 0], "127 is below 0.5");
-  assert.deepEqual(at(5, 1), [10, 20, 30, 255], "128 is 0.5 or more");
+  assert.deepEqual(at(4, 1), [0, 0, 0, 0], "127 is below half of 255");
+  assert.deepEqual(at(5, 1), [10, 20, 30, 255], "128 is half of 255 or more");
   assert.deepEqual(at(6, 2), [10, 20, 30, 255]);
   assert.deepEqual(at(2, 1), [10, 20, 30, 255], "the ring");
   assert.deepEqual(at(9, 1), [0, 0, 0, 0], "outside the ring");
+  // A soft region (a shadow at 0.18, the blush at its level) is cut at half its own largest alpha, not at 0.5.
+  const soft = new Uint8Array(10 * 4 * 4);
+  [0, 22, 23, 46].forEach((a, k) => soft.set([9, 9, 9, a], (1 * 10 + 4 + k) * 4));
+  const shadow = recolour(soft, 10, 4, [{ x: 4, y: 1, w: 4, h: 1, colour: [10, 20, 30] }]);
+  const of = (x: number) => shadow[(1 * 10 + x) * 4 + 3];
+  assert.deepEqual([4, 5, 6, 7].map(of), [0, 0, 255, 255], "of 46: 0 and 22 are out, 23 and 46 in");
+  assert.deepEqual([inPart(0, 0), inPart(1, 1), inPart(64, 128), inPart(63, 128)], [false, true, true, false]);
+});
+
+test("the ground shadow, a soft part, shows in the ID pass", () => {
+  // The test character's shadow is 0.18 opaque: under the old 0.5 cut it never showed.
+  const shadow = info.parts.shadow!.id;
+  let n = 0;
+  for (let k = 0; k < ids.data.length; k += 4) if (hex([...ids.data.subarray(k, k + 3)]) === shadow) n++;
+  assert.ok(n > 1000, `the shadow shows on ${n} pixels`);
 });
 
 test("ID colours are fixed by a part's index, distinct and never black", () => {
