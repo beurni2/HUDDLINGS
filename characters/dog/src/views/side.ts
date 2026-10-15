@@ -18,6 +18,7 @@ import { C } from "../palette.ts";
 import { eye, type EyeSpec } from "../parts/eye.ts";
 import { litEdge, litMarking, litPart, type LitSpan } from "../parts/lines.ts";
 import { curlShapes, topknot, type Curl } from "../parts/topknot.ts";
+import { earFur } from "../parts/ear.ts";
 import type { Drawn } from "./front.ts";
 
 const INNER = model.outline.innerPt;
@@ -141,7 +142,7 @@ const earClumps: { tip: P; root: P; notches: [P, P] }[] = [];
 const ear = furEdge(furEdge(smooth([[8.6, -134.4], [13.4, -125], [16.4, -114.6], [19.4, -104.6], [21.6, -95.4], [21.4, -85.4], [18.6, -77.6], [12.6, -71],
   [4, -66.4], [-13, -62.8], [-21.2, -64.4], [-28.6, -69.6], [-34.6, -77], [-37.2, -85.6], [-36.8, -94.4], [-34, -103.6], [-30.8, -113.4],
   [-29.4, -124], [-30.8, -132], [-27.4, -138.6], [-20.6, -142.6], [-12.9, -144], [-4.4, -142.6], [2.6, -139.4]]), [21.4, -86.4], [-29.4, -70.4],
-[{ len: 1.2, w: 0.9, lean: 0.25 }, { len: 0.9, w: 1.2, lean: 0.05 }, { len: 1.3, w: 2.1, lean: -0.05 }, { len: 0.9, w: 1.1, lean: -0.2 }], 0.45,
+[{ len: 1.1, w: 1.2, lean: 0.2 }, { len: 1.4, w: 2.2, lean: 0 }, { len: 1, w: 1.3, lean: -0.2 }], 0.45,
 (tip, root, notches) => earClumps.push({ tip, root, notches })), [-30.4, -134], [-6.4, -143],
 [{ len: 0.6, w: 1, lean: -0.4 }, { len: 0.8, w: 1.1, lean: -0.35 }, { len: 0.5, w: 0.9, lean: -0.3 }, { len: 0.7, w: 1.1, lean: -0.25 }, { len: 0.5, w: 0.8, lean: -0.2 }], 0.3);
 
@@ -499,59 +500,25 @@ function tagPiece(): Piece {
 }
 
 /**
- * The ear's paint (the front's recipe, turned), matte, as the sheet paints it: the tan deepening down the ear to a
- * browner tan at its foot and along its back, under the fur's own warm shade; its top the tan itself, a little
- * lighter toward the front, feathered into the crown's fur; a few fine darker strands running down its length and
- * curving with its round, and a few lighter ones between them; the fold where it turns over the back of the head, a
- * soft darker crease (the sheet's #A76640 there), with no light streak; a short parting up from each notch of its
- * foot. Its line runs on its front from under the patch's tan down, in the ears' deep warm brown, as the side crop
- * draws it (#A15E33 there), and round its foot and up its back in the warm line, the browner brown the crop draws
- * there (#936242 to #9C603C); its top has none.
+ * The ear's paint, by the dog's one ear recipe (parts/ear.ts, DECISIONS 76), matte, as the side crop paints it: the
+ * tan a little lighter toward its top and the front shoulder where the light falls, deepening down the ear to a
+ * browner tan at its foot and along its back; long locks running down its length with its round, the one at the back
+ * the fold where it turns over the back of the head (the sheet's #A76640 there), into the dips of its foot's three
+ * soft clumps; its back, away from the light, in the fur's warm shade. Its top lies under the crown's fur, feathered
+ * into it, with no light band and no line.
  */
 function earPaint(): Paint {
-  const deep = uid("deep"), top = uid("top"), parting = uid("blur"), along = uid("blur"), crisp = uid("blur"), [ex0, ey0, ex1, ey1] = bbox(ear.segs);
-  const earBox = pad([ex0, ey0, ex1 - ex0, ey1 - ey0], 2);
-  const light: P[][] = [[[-10, -112], [-10.6, -98], [-9.4, -84]], [[-21.4, -110], [-23, -98], [-22.6, -86]]];
-  const softStrokes = (pts: P[][], width: number) => pts.map((l) => strokeOf(sample(smooth(l, { closed: false }).segs, 8, false), width, { taper: 6, tip: 0.2 }).d).join("");
-  const crease = strokeOf(sample(smooth([[-3, -134.6], [1.6, -130.6], [6.8, -124.4], [11.4, -118.4], [15, -112.4], [17.6, -106.6], [18.8, -102.6]], { closed: false }).segs, 8, false),
-    1.1, { taper: 6, tip: 0.2 }).d;
-  const under = `<defs><linearGradient id="${deep}" gradientUnits="userSpaceOnUse" x1="-14" y1="-120" x2="-4" y2="-64">` +
-    `<stop offset="0" stop-color="${C.earDeep}" stop-opacity="0"/><stop offset="0.45" stop-color="${C.earDeep}" stop-opacity="0.8"/>` +
-    `<stop offset="0.8" stop-color="${C.earDeeper}"/><stop offset="1" stop-color="${C.earLow}"/></linearGradient>` +
-    // Its top a little lighter toward the front, the head patch's paler tan, where it comes out from under the crown's fur.
-    `<linearGradient id="${top}" gradientUnits="userSpaceOnUse" x1="-6" y1="-146" x2="6" y2="-120">` +
-    `<stop offset="0.1" stop-color="${C.patch}" stop-opacity="0.35"/><stop offset="1" stop-color="${C.patch}" stop-opacity="0"/></linearGradient>` +
-    `${blur(parting, earBox, 0.8)}${blur(along, earBox, 1.1)}${blur(crisp, earBox, 0.4)}</defs>` +
-    `<rect x="${fmt(ex0)}" y="${fmt(ey0)}" width="${fmt(ex1 - ex0)}" height="${fmt(ey1 - ey0)}" fill="url(#${deep})"/>` +
-    `<rect x="${fmt(ex0)}" y="${fmt(ey0)}" width="${fmt(ex1 - ex0)}" height="${fmt(ey1 - ey0)}" fill="url(#${top})"/>` +
-    `<path d="${softStrokes(light, 2.2)}" fill="${C.patch}" opacity="0.22" filter="url(#${along})"/>` +
-    `<path d="${crease}" fill="${C.earLine}" opacity="0.6" filter="url(#${crisp})"/>`;
-  const strand = uid("strand"), hair = uid("strand");
-  const strands = `<defs><linearGradient id="${strand}" gradientUnits="userSpaceOnUse" x1="0" y1="-64" x2="0" y2="-72">` +
-    `<stop offset="0" stop-color="${C.earLine}" stop-opacity="0.6"/><stop offset="1" stop-color="${C.earLine}" stop-opacity="0"/></linearGradient>` +
-    // The strands down its length fade in from nothing at their tops and out again just above the foot.
-    `<linearGradient id="${hair}" gradientUnits="userSpaceOnUse" x1="0" y1="-106" x2="0" y2="-68">` +
-    `<stop offset="0" stop-color="${C.earLine}" stop-opacity="0"/><stop offset="0.55" stop-color="${C.earLine}" stop-opacity="0.26"/>` +
-    `<stop offset="1" stop-color="${C.earLine}" stop-opacity="0.08"/></linearGradient></defs>`;
-  // Few and uneven, low on the ear, as the sheet paints them: two close together under its middle, curving with its
-  // round, one short toward its back.
-  const hairs: P[][] = [[[-19.4, -86], [-19.4, -78], [-17.6, -71]], [[-14.6, -84], [-14.2, -77], [-12.8, -71.4]], [[3.4, -88], [4.4, -80], [3.8, -73]]];
   return {
-    fill: C.marking,
-    under: under + strands,
-    inner: [
-      // A short crease up from each notch between the foot's clumps, fading out upward, as the sheet draws them.
-      ...earClumps.slice(1).map(({ notches }) => {
-        const n = notches[0];
-        return { pts: [n, [n[0] + 0.3, n[1] - 2.6], [n[0] + 0.2, n[1] - 5]] as P[], width: 0.7, colour: `url(#${strand})` };
-      }),
-      ...hairs.map((pts) => ({ pts: sample(smooth(pts, { closed: false }).segs, 8, false), width: 0.65, colour: `url(#${hair})` })),
-    ],
-    // Its back, away from the light, and its foot.
-    shade: { multiply: C.furShadeBy, rim: { inset: 2.4, toLight: 4 }, shapes: ["M-6 -142 C4 -136 11 -126 15.6 -114 C18 -106 22 -96 22 -82 L30 -82 L30 -142Z"], keep: ["M-40 -72 C-20 -70 0 -70 16 -76 L16 -56 L-40 -56Z"], blur: 3.2 },
-    // A broad soft light down its front shoulder, from the top left.
-    highlight: { d: "M-31 -110 C-31 -124 -25 -136 -13 -139 C-19 -132 -24 -122 -26.6 -108 C-28.6 -104 -31 -105 -31 -110Z", colour: C.patch, opacity: 0.22, blur: 3 },
-    feather: { from: [-12, -145.6], to: [-12, -140.6] },
+    ...earFur({
+      ear, axis: [[-6, -143], [-8, -63]], deepen: [0.4, 1.1],
+      locks: [[[-24, -118], [-28, -104], [-29.6, -90], [-28, -78]], [[-14, -124], [-17.4, -108], [-19, -92], [-18.4, -76], [-16.4, -67]],
+        [[-4, -126], [-5.4, -110], [-5.8, -94], [-4.6, -80], [-2.4, -67]], [[6, -122], [8.6, -108], [10, -94], [10, -82], [8, -71]],
+        [[-3, -134.6], [3.4, -128.4], [9.8, -120], [15, -112.4], [17.8, -104], [18.4, -92]]],
+      dips: earClumps.slice(1).map(({ notches }) => notches[0]),
+      light: "M-31 -110 C-31 -124 -25 -136 -13 -139 C-19 -132 -24 -122 -26.6 -108 C-28.6 -104 -31 -105 -31 -110Z",
+      under: ["M-6 -142 C4 -136 11 -126 15.6 -114 C18 -106 22 -96 22 -82 L30 -82 L30 -142Z"],
+    }),
+    feather: { from: [-12, -145], to: [-12, -142.4] },
   };
 }
 

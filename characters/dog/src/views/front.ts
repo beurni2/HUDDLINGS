@@ -14,6 +14,7 @@ import { C } from "../palette.ts";
 import { eye as sharedEye } from "../parts/eye.ts";
 import { litEdge, litMarking, litPart, type LitSpan } from "../parts/lines.ts";
 import { curlShapes, topknot, type Curl } from "../parts/topknot.ts";
+import { earFur } from "../parts/ear.ts";
 
 export interface Drawn {
   part: string;
@@ -599,55 +600,38 @@ function tagPiece(): Piece {
 }
 
 /**
- * An ear's paint (front c's, on front a's ears), as the sheet paints it: the tan deepening down the ear to a
- * browner tan at its lower clumps (the sheet's #E09B6C mid-ear to #C17D50 and #BC7847 at the bottom) under the
- * fur's own warm shade; the shade on the rim away from the light, along the inner edge where the ear tucks
- * under the head, and where the cheek's fluff hangs over it; a small soft light on its upper outer side; a few
- * soft fur locks, darker partings and lighter strokes along them, curving with the ear's bulge from its upper
- * middle down into the notches between the clumps of its lower edge, the partings' lower thirds drawn as fine
- * curved strands that fade out upward; and its line in the warm brown the sheet draws round the ears (#A47049
- * to #9D6C4B), heavier along the bottom, from where it comes out from under the cheek round the bottom and up
- * the outside, thinning and lightening to the crown's own line toward the root, where it goes on under the
- * crown at full width, so the crown's line runs on into it with no pinch.
+ * An ear's paint, by the dog's one ear recipe (parts/ear.ts, DECISIONS 76), as the front crop paints it: the tan
+ * lighter toward the root and the lit upper outer side, deepening down the ear to a browner tan at its lower clumps
+ * (the sheet's #E09B6C mid-ear to #C17D50 and #BC7847 at the bottom); five long locks curving with the ear's bulge
+ * from its upper middle down into its lower edge, the outer two into the dips between its three clumps; and the
+ * shade on the rim away from the light, along the inner edge where the ear tucks under the head, where the cheek's
+ * fluff hangs over it and across the root under the crown's overhang. Typed on the dog's right ear in the head's
+ * frame and placed on either ear.
  */
 function earPaint(side: "L" | "R"): Paint {
-  const k = side === "R" ? 1 : -1;
-  const ear = ears[side];
-  const deep = uid("deep"), parting = uid("blur"), along = uid("blur"), [ex0, ey0, ex1, ey1] = bbox(ear.segs);
-  const earBox = pad([ex0, ey0, ex1 - ex0, ey1 - ey0], 2);
-  // The locks' partings: curving down from the ear's upper middle with its outer contour into the notches between
-  // the clumps, and a short one low toward the face; the lighter strokes run along the locks between them. Painted
-  // soft, as the sheet paints them, not drawn as lines; only the partings' last few points into the notches are
-  // drawn, as short fine strokes.
-  const dark: P[][] = [[[-61.6, -115], [-67.6, -107.6], [-72.4, -98.4], [-75.2, -88.6], [-76, -79.6]], [[-56.6, -103.4], [-61.8, -94], [-65.4, -83.6], [-67, -72]],
-    [[-50.8, -92], [-54, -82], [-55.6, -70.4]]];
-  const light: P[][] = [[[-58.4, -110.4], [-64.4, -100.6], [-69, -90.6], [-71.2, -80.4]], [[-53.2, -98.4], [-58.4, -88.4], [-61.4, -77]]];
-  const soft = (pts: P[][], width: number) => pts.map((l) => strokeOf(sample(smooth(l.map((p) => onEar(side, p)), { closed: false }).segs, 8, false), width, { taper: 6, tip: 0.2 }).d).join("");
-  const under = `<defs><linearGradient id="${deep}" gradientUnits="userSpaceOnUse" x1="${-k * 52}" y1="-100" x2="${-k * 58}" y2="-60">` +
-    `<stop offset="0" stop-color="${C.earDeep}" stop-opacity="0"/><stop offset="0.35" stop-color="${C.earDeep}"/>` +
-    `<stop offset="0.72" stop-color="${C.earDeeper}"/><stop offset="1" stop-color="${C.earFoot}"/></linearGradient>` +
-    `${blur(parting, earBox, 0.7)}${blur(along, earBox, 1)}</defs>` +
-    `<rect x="${fmt(ex0)}" y="${fmt(ey0)}" width="${fmt(ex1 - ex0)}" height="${fmt(ey1 - ey0)}" fill="url(#${deep})"/>` +
-    `<path d="${soft(light, 2.2)}" fill="${C.patch}" opacity="0.12" filter="url(#${along})"/>` +
-    `<path d="${soft(dark, 1.5)}" fill="${C.earLow}" opacity="0.3" filter="url(#${parting})"/>`;
+  const on = (p: P) => onEar(side, p);
+  const locks: P[][] = [
+    [[-66, -122], [-72.6, -112], [-77.4, -101], [-79, -92]],
+    [[-61.6, -116], [-68, -107], [-73.4, -97], [-76, -87.4], [-76.4, -79]],
+    [[-56.4, -109], [-62, -98.6], [-66.2, -88], [-67.8, -78], [-67, -70.2]],
+    [[-51.2, -101], [-55.4, -90], [-57.6, -78], [-57.4, -66.4]],
+    [[-46.8, -94], [-48.8, -83], [-48.6, -71]],
+  ];
   const shadeD = "M-90 -92 C-80 -80 -62 -72 -40 -70 L-40 -50 L-90 -50Z";
   const cheekD = "M-38 -98 C-43 -93 -48.6 -85 -49.8 -74 C-49 -66 -45 -62 -40 -60Z";
   // Along the inner edge, where the ear tucks under the head's side; and the crown's soft contact shadow across
   // the root's tan, right under the overhang's fur.
   const innerD = "M-44 -128 C-48.4 -118 -49.4 -104 -48.8 -94 L-43 -94 L-43 -128Z";
   const rootD = "M-54 -140 L-26 -140 L-27 -132.6 C-35 -132.2 -45 -131.8 -54 -130.6Z";
-  const strand = uid("strand");
-  const lines = `<defs>` +
-    // The strands fade out upward, from their notches into the ear.
-    `<linearGradient id="${strand}" gradientUnits="userSpaceOnUse" x1="0" y1="-66" x2="0" y2="-88">` +
-    `<stop offset="0" stop-color="${C.earLine}" stop-opacity="0.55"/><stop offset="1" stop-color="${C.earLine}" stop-opacity="0"/></linearGradient></defs>`;
-  return {
-    fill: C.marking,
-    under: under + lines,
-    shade: { multiply: C.furShadeBy, rim: { inset: 2.2, toLight: 3.6 }, shapes: [earD(side, shadeD), earD(side, cheekD), earD(side, innerD), earD(side, rootD)], blur: 3.2 },
-    highlight: { d: earD(side, "M-74 -101 C-74 -106 -70 -111 -66 -112 C-64 -109 -66 -102 -69.6 -99 C-72 -98 -74 -99 -74 -101Z"), colour: C.patch, opacity: 0.3, blur: 2.6 },
-    inner: dark.map((pts) => ({ pts: sample(smooth(pts.slice(-3).map((p) => onEar(side, p)), { closed: false }).segs, 8, false), width: 0.7, colour: `url(#${strand})` })),
-  };
+  return earFur({
+    ear: ears[side],
+    axis: [on([-58, -124]), on([-60, -62])],
+    deepen: [0.3, 1],
+    locks: locks.map((pts) => pts.map(on)),
+    dips: ([[-66.6, -69.4], [-76.2, -78.2]] as P[]).map(on),
+    light: earD(side, "M-74 -101 C-74 -106 -70 -111 -66 -112 C-64 -109 -66 -102 -69.6 -99 C-72 -98 -74 -99 -74 -101Z"),
+    under: [earD(side, shadeD), earD(side, cheekD), earD(side, innerD), earD(side, rootD)],
+  });
 }
 
 /**

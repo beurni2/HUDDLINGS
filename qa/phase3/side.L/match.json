@@ -41,29 +41,29 @@
  },
  "alignment": {
   "rootOnCropGroundPlusHalf": true,
-  "bestFitShiftPx": [0.15, 0.8],
-  "bestFitShiftPt": [0.12, 0.62],
-  "iouAtBestWholePixelShift": 0.9683,
+  "bestFitShiftPx": [0.14, 0.78],
+  "bestFitShiftPt": [0.11, 0.6],
+  "iouAtBestWholePixelShift": 0.9682,
   "thresholdPx": 2.0,
   "pass": true
  },
  "silhouette": {
-  "iou": 0.965,
+  "iou": 0.9653,
   "threshold": 0.85,
   "groundShadowLeftOut": true,
   "pass": true,
-  "iouHeadAligned": 0.9637,
-  "headCentreOffsetPt": [0.4, -0.77]
+  "iouHeadAligned": 0.9642,
+  "headCentreOffsetPt": [0.36, -0.74]
  },
  "landmarks": {
   "thresholdPt": 2.8,
   "rows": {
    "collar": {
     "how": "finder",
-    "found": [-42.03, -57.39],
+    "found": [-42.13, -57.37],
     "model": [-41.5, -57.0],
-    "errPt": 0.66,
-    "errShareOfHead": 0.007,
+    "errPt": 0.73,
+    "errShareOfHead": 0.008,
     "pass": true
    },
    "collar.line.sheetLeft": {
@@ -76,26 +76,26 @@
    },
    "collar.line.sheetRight": {
     "how": "finder",
-    "found": [-19.43, -62.18],
+    "found": [-20.99, -61.79],
     "model": [-20.2, -61.0],
-    "errPt": 1.41,
-    "errShareOfHead": 0.015,
+    "errPt": 1.12,
+    "errShareOfHead": 0.012,
     "pass": true
    },
    "ear.L.root": {
     "how": "finder",
-    "found": [-12.6, -143.01],
+    "found": [-12.77, -143.01],
     "model": [-12.9, -143.8],
-    "errPt": 0.84,
+    "errPt": 0.8,
     "errShareOfHead": 0.009,
     "pass": true
    },
    "ear.L.tip": {
     "how": "finder",
-    "found": [-11.04, -63.73],
+    "found": [-11.81, -63.73],
     "model": [-13.0, -63.0],
-    "errPt": 2.09,
-    "errShareOfHead": 0.022,
+    "errPt": 1.39,
+    "errShareOfHead": 0.015,
     "pass": true
    },
    "eye.L": {
@@ -199,7 +199,7 @@
     "heldTo": "#FFF4E8",
     "heldBy": "palette.fur",
     "deltaE2000": 0.0,
-    "pixels": 13070,
+    "pixels": 13050,
     "pass": true
    },
    "furShade": {
@@ -235,11 +235,11 @@
     "pass": true
    },
    "ears": {
-    "dominant": "#D99F73",
+    "dominant": "#DFA980",
     "heldTo": "#D9A379",
     "heldBy": "palette.marking",
-    "deltaE2000": 1.31,
-    "pixels": 5996,
+    "deltaE2000": 1.7,
+    "pixels": 6034,
     "pass": true
    },
    "headPatches": {
@@ -431,16 +431,16 @@
  },
  "advisory": {
   "edgeDistance": {
-   "meanRenderToSheetPt": 0.93,
+   "meanRenderToSheetPt": 0.92,
    "p95RenderToSheetPt": 2.33,
-   "meanSheetToRenderPt": 0.87,
+   "meanSheetToRenderPt": 0.86,
    "p95SheetToRenderPt": 2.2,
    "targetP95Pt": 2.0,
    "meetsTarget": false
   },
   "partIoU": {
    "collar": {
-    "iou": 0.826,
+    "iou": 0.833,
     "target": 0.85,
     "meetsTarget": false
    },
@@ -450,7 +450,7 @@
     "meetsTarget": false
    },
    "ear.L": {
-    "iou": 0.727,
+    "iou": 0.725,
     "target": 0.85,
     "meetsTarget": false
    }
