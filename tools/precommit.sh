@@ -10,9 +10,9 @@
 set -e
 top=$(git rev-parse --show-toplevel)
 tmp=$(mktemp -d)
-sheetmatch=""
+sheetmatch="" hooktests=""
 # An early exit stops the background tests too; a failing kill must not become the hook's own status.
-trap 'if [ -n "$sheetmatch" ]; then kill "$sheetmatch" 2> /dev/null || true; fi; rm -rf "$tmp"' EXIT
+trap 'for pid in $sheetmatch $hooktests; do kill "$pid" 2> /dev/null || true; done; rm -rf "$tmp"' EXIT
 git -C "$top" checkout-index -a --prefix="$tmp/"
 staged=$(git -C "$top" diff --cached --name-only)
 
@@ -27,6 +27,12 @@ if [ -d "$tmp/characters/sheetmatch" ]; then
   PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s "$tmp/sheetmatch-tests/characters/sheetmatch" -q > "$tmp/sheetmatch.log" 2>&1 &
   sheetmatch=$!
 fi
+# This hook's own tests, on the hook being committed, beside the rest too: they spend most of their time waiting on
+# the stand-ins they run it with, in repositories of their own.
+if [ -f "$tmp/tools/test_precommit.py" ]; then
+  PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s "$tmp/tools" -p test_precommit.py -q > "$tmp/hooktests.log" 2>&1 &
+  hooktests=$!
+fi
 
 python3 "$tmp/tools/copylint/copylint.py"
 python3 -m unittest discover -s "$tmp/tools/copylint" -q
@@ -37,10 +43,6 @@ fi
 # The Visual QA tools' own tests (the E1 check and parity).
 if [ -d "$tmp/tools/qa" ]; then
   python3 -m unittest discover -s "$tmp/tools/qa" -q
-fi
-# This hook's own tests, on the hook being committed.
-if [ -f "$tmp/tools/test_precommit.py" ]; then
-  PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s "$tmp/tools" -p test_precommit.py -q
 fi
 # The placement guide's tests.
 if [ -d "$tmp/tools/guide" ]; then
@@ -102,6 +104,15 @@ if [ -f "$tmp/package.json" ]; then
   fi
 fi
 
+if [ -n "$hooktests" ]; then
+  if ! wait "$hooktests"; then
+    hooktests=""
+    cat "$tmp/hooktests.log" >&2
+    echo "pre-commit: the hook's own tests fail" >&2
+    exit 1
+  fi
+  hooktests=""
+fi
 if [ -n "$sheetmatch" ]; then
   if ! wait "$sheetmatch"; then
     sheetmatch=""

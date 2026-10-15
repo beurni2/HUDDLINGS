@@ -168,6 +168,19 @@ class HookTest(unittest.TestCase):
         self.assertIn("the dog's front fails its sheet match", said)
         self.assertEqual((self.repo / "build/qa/front/compare.png").read_text(), "evidence\n")
 
+    def test_a_failing_suite_run_beside_the_rest_fails_the_commit_with_what_it_said(self):
+        fails = "import unittest\n\n\nclass Planted(unittest.TestCase):\n    def test_planted(self):\n        self.fail('planted in the {}')\n"
+        for name, path, said in (("hook's own", "tools/test_precommit.py", "the hook's own tests fail"),
+                                 ("sheet match's", "characters/sheetmatch/test_planted.py", "the sheet match's tests fail")):
+            with self.subTest(suite=name):
+                (self.repo / path).write_text(fails.format(name))
+                code, out, _ = self.hook(path, HUDDLINGS_FRONT_MATCH="0")
+                self.assertEqual(code, 1, out)
+                self.assertIn(f"planted in the {name}", out)
+                self.assertIn(said, out)
+                self.git("reset", "-q", "--hard")
+                (self.repo / path).unlink(missing_ok=True)
+
     def test_the_raster_cache_is_the_main_checkouts_in_a_worktree_too(self):
         cache = str(self.repo.resolve() / "build" / "cache")
         _, said, looks = self.hook("characters/dog/src/front.ts")
