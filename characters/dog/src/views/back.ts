@@ -361,26 +361,28 @@ function whorlStrokes(): string {
 /**
  * The head's line, where the sheet draws one, by the line rule (parts/lines.ts): the crown's line from under each of
  * the topknot's feet over its first lock, breaking where the second steps down (on the left at the notch, on the right
- * where the root's tan begins). None under the lowest lock, where the crown's fur hangs over the root's tan. Down each
+ * where the root's tan begins); on the left on over the second lock to its tip over the ear's root, a span of its own
+ * (105). None under the lowest lock, where the crown's fur hangs over the root's tan. Down each
  * side, where the head lies over the ear, on the tan, coming in from nothing below the crescent and deepest where the
  * sheet's is (#A96737 by y -100), as the front's head sides over the ears are; and round each clump of the head's lower
  * lobe toward the collar's end, on the cream, lighter.
  */
 const headSpans: LitSpan[] = withDefaults({ taper: 1.2 }, [
-  { from: [-16.8, -155.7], to: [-32.4, -150.4] }, { from: [37.6, -151.2], to: [16.8, -155.7] },
+  // The second lock's line starts a point past the notch: begun in it, its tip bridges the notch's corner.
+  { from: [-16.8, -155.7], to: [-32.4, -150.4] }, { from: [-33.3, -149.95], to: [-41.6, -144] }, { from: [37.6, -151.2], to: [16.8, -155.7] },
   { from: [-37.6, -120.6], to: lobes.L[0]!.notches[0], on: "tan", under: 0.5, taper: [4, 1.4] }, ...lockSpans(lobes.L),
   ...lockSpans(lobes.R), { from: lobes.R.at(-1)!.notches[1], to: [37.6, -120.6], on: "tan", under: 0.5, taper: [1.4, 4] },
 ]);
 /**
- * Over each ear's root, where the crown's lowest lock lies on the ear (89), the sheet paints the crown's line in a
- * light warm tan (#C2A07B, #CAA27F; L* 65 to 80, C* 20 to 35) that neither ladder holds: the cream's lit tone is as
- * light but greyer (#BF9A7E, C* 19), the tan's lit tone, the ears' outline, 10 to 25 L* darker. Phase 2's ear roots
- * sit on it. So this one stretch of the back's line keeps the sheet's colour, turning from the lit cream tone to the
- * root's tan along the lock, at the weight the back read off its crop (105).
+ * Over the right ear's root, where the crown's lowest lock lies on the ear (89), the sheet paints the crown's line in
+ * a light warm tan (#C2A07B, #CAA27F; L* 65 to 80, C* 20 to 35) that neither ladder holds: the cream's lit tone is as
+ * light but greyer (#BF9A7E, C* 19), the tan's lit tone, the ears' outline, 10 to 25 L* darker. Phase 2's right ear
+ * root sits on it, and drawn by the rule it lands 5.75 pt from there, past the landmark check's 2.8; the left lands
+ * 2.03 pt off by the rule, so it is drawn by the rule. So this one stretch of the back's line keeps the sheet's colour,
+ * turning from the lit cream tone to the root's tan along the lock, at the weight the back read off its crop (105).
  */
-const ROOT = { L: uid("root"), R: uid("root") };
+const ROOT = { R: uid("root") };
 const rootLine: Outline = { colour: C.rootTan, width: 1.45, taper: 1.2, blur: 0.15, spans: [
-  { from: [-32.4, -150.4], to: [-41.6, -144], colour: `url(#${ROOT.L})` },
   { from: [44, -143.6], to: [37, -151.4], colour: `url(#${ROOT.R})`, width: 1.6 },
 ] };
 const rootGradient = (id: string, from: P, to: P) =>
@@ -408,7 +410,7 @@ function headLinePiece(): Piece {
     .map((pts) => tapered(curve(pts as P[], 6), 0.8, "inner", "crown lock", { taper: 1.2, tip: 0.15 }));
   const wisps = [...wispsL, ...flipX(wispsL)].map((pts) => strokeOf(curve(pts, 6), 2.2, { taper: 2.6, tip: 0.3, seed: 4 }).d).join("");
   return piece(`<defs>${r.defs}${blur(f, pad(box, 2), 0.15)}${blur(s, pad(box, 2), 0.6)}${blur(w, pad(box, 2), 0.6)}` +
-    `${rootGradient(ROOT.L, [-32.4, -150.4], [-41.6, -144])}${rootGradient(ROOT.R, [35.4, -152.4], [40.6, -148.4])}</defs>` +
+    `${rootGradient(ROOT.R, [35.4, -152.4], [40.6, -148.4])}</defs>` +
     `<path d="${edge}" fill="${C.fur}" opacity="0.35" filter="url(#${s})"/>` +
     `<path d="${wisps}" fill="${C.fur}" opacity="0.92" filter="url(#${w})"/>` + r.body + `<g filter="url(#${f})">${root.svg}</g>` +
     `<g fill="${NOTCH_TONE}" opacity="0.8" filter="url(#${f})">${hooks.map((h) => `<path d="${h.d}"/>`).join("")}</g>`, box, {
