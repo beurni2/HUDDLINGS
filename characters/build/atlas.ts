@@ -39,7 +39,8 @@ export function rasterize(drawing: Drawing, scale: number): Raster {
     }
   }
   // resvg's raw pixels are premultiplied; its PNG is straight alpha, as the atlas needs.
-  const rendered = new Resvg(drawing.svg, { fitTo: { mode: "zoom", value: scale }, background: "rgba(0,0,0,0)" }).render();
+  // Parts draw no text, and scanning the system's fonts cost 25 ms a drawing, 50 times the drawing itself.
+  const rendered = new Resvg(drawing.svg, { fitTo: { mode: "zoom", value: scale }, background: "rgba(0,0,0,0)", font: { loadSystemFonts: false } }).render();
   const png = PNG.sync.read(rendered.asPng());
   const { width, height, data } = png;
   let minX = width, minY = height, maxX = -1, maxY = -1;
