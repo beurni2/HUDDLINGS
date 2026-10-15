@@ -4,7 +4,7 @@
 // paint is the front view's (front.ts): the same recipes for the ears, eyes, nose, mouth, collar, tag and paws,
 // each part's nodes typed again from this view's own crop. Light comes from the top left, as in every view.
 import { furEdge, furSpan, type Lock } from "../../../draw/fur.ts";
-import { bbox, ellipse, fracAt, pathD, sample, smooth, spanPoints, v, type Node, type P, type Shape } from "../../../draw/geom.ts";
+import { bbox, ellipse, fracAt, pathD, rotate, sample, smooth, spanPoints, v, type Node, type P, type Shape } from "../../../draw/geom.ts";
 import { innerLine, ribbons, strokeOf, type DrawnLine, type Outline, type Span, type Stroke } from "../../../draw/line.ts";
 import { LIMITS } from "../../../draw/lint.ts";
 import { marking, part, soft, type Paint } from "../../../draw/paint.ts";
@@ -88,21 +88,28 @@ const heartHalf: Node[] = [[0, -49.8], [-1.5, -50.7], [-3.4, -51], [-5.4, -50.4]
   [-6.8, -41.2], [-5.6, -39.6], [-4, -38.1], [-2.1, -36.9]];
 const mirrored = (half: Node[], bottom: Node, dx: number): Node[] =>
   [...half, bottom, ...[...half].reverse().slice(0, -1).map(([x, y]): Node => [-x, y])].map(([x, y]): Node => [x + dx, y]);
-const heart = smooth(mirrored(heartHalf, [0, -36.2], TAG_X), { corners: [0], typed: heartHalf.length + 1 });
-const innerHeart = smooth(mirrored([[0, -46.6], [-1.6, -48], [-3.5, -48.1], [-4.8, -46.9], [-5, -45], [-4.3, -43.1], [-2.7, -41.5]], [0, -40.3], TAG_X),
-  { corners: [0], typed: 8 });
+/** The heart hangs a little turned on its ring, its point 1.5 pt toward the far side, as the sheet draws it. */
+const TAG_TILT = 6, TAG_HANG: P = [TAG_X, -51];
+const heart = smooth(rotate(mirrored(heartHalf, [0, -36.2], TAG_X), TAG_TILT, TAG_HANG), { corners: [0], typed: heartHalf.length + 1 });
+const innerHeart = smooth(rotate(mirrored([[0, -46.6], [-1.6, -48], [-3.5, -48.1], [-4.8, -46.9], [-5, -45], [-4.3, -43.1], [-2.7, -41.5]], [0, -40.3], TAG_X),
+  TAG_TILT, TAG_HANG), { corners: [0], typed: 8 });
 
 // The ears. The far ear (the dog's right) hangs out past the far cheek from high on the head's far side, its
-// upper edge one long convex arc from the root down to its widest, its lower edge breaking into soft clumps
-// of fur; its inner edge runs on behind the face. The near ear hangs from just under the crown's overhang down
-// beside the near cheek over the shoulder, broad and rounded below with a clump at its lower outer corner. Each
-// reaches well under the head at its root and along its inner edge (spec L394), its hidden end rounded.
-const earR = smooth([[-80.8, -143.4], [-75.4, -141.6], [-76.6, -132], [-82.6, -124], [-86.4, -108], [-90, -94], [-94, -84], [-96.8, -80.2], [-100.6, -78.3],
-  [-106.4, -79.8], [-110.8, -82.4], [-114.6, -85.8], [-117.8, -90], [-120, -94.6], [-120.8, -99], [-120.6, -104.6], [-119.4, -111.6],
-  [-116.6, -117], [-111.8, -121.7], [-104.4, -126.2], [-96.8, -131.4], [-93.8, -136], [-88.4, -140.4]]);
-const earL = smooth([[-5, -140.6], [7.6, -130.4], [12, -125.6], [14.6, -120.2], [17.6, -114.6], [25.8, -105.2], [28.7, -100.4], [30.2, -94.6], [30.8, -86],
-  [30.6, -77.6], [28.6, -71.2], [25.6, -68.6], [22.6, -65.4], [19, -62.6], [12, -59.8], [3, -58.4], [-9.2, -61.2], [-13.4, -65.6], [-18.6, -71],
-  [-20.4, -80], [-20.2, -95], [-22, -115], [-22.6, -131]], { corners: [11] });
+// upper edge one long convex arc from the root down to its widest, with a small lock where it steps out below the
+// root; its lower edge hangs in three layered locks of fur, the outer one's tip
+// lowest at the left (x -117.6), each tucked under the next at a notch (concave corners), as the sheet draws them;
+// its inner edge runs on behind the face. The near ear hangs from just under the crown's overhang down beside the
+// near cheek over the shoulder, broad and rounded below, its lower edge four rounded locks of uneven size with a
+// notch between each, and a small step high on its outer side. Each reaches well under the head at its root and
+// along its inner edge (spec L394), its hidden end rounded.
+const EAR_R_NOTCHES = [9, 11, 21];
+const earR = smooth([[-80.8, -143.4], [-75.4, -141.6], [-76.6, -132], [-86.4, -108], [-94, -84], [-96.2, -80.4], [-99.8, -78.5], [-104.4, -79.2], [-107.4, -80.4],
+  [-109.2, -82.6], [-112.8, -84.9], [-115.4, -88.4], [-117.2, -89.3], [-119.4, -91.4], [-120.6, -94.8], [-121, -99], [-120.6, -105.6], [-119.2, -111.8],
+  [-115.6, -117.6], [-106, -124.8], [-96.6, -131.2], [-93.8, -133.4], [-88.4, -140.2]], { corners: EAR_R_NOTCHES });
+const EAR_L_NOTCHES = [7, 11, 14, 17];
+const earL = smooth([[-5, -140.6], [7.6, -130.4], [12, -125.6], [15, -118.4], [18.8, -111.4], [25.8, -105.2], [28.7, -100.4], [29, -95.4], [30.9, -88.6],
+  [30.8, -80.6], [29.6, -75.2], [25.6, -71], [21.6, -66.2], [16.8, -62.8], [9.8, -61.2], [5.4, -59.2], [1.6, -58.6], [-4.4, -60.4], [-9.4, -61.8],
+  [-18.6, -71], [-20.4, -80], [-20.2, -95], [-22, -115], [-22.6, -131]], { corners: EAR_L_NOTCHES });
 const ears = { R: earR, L: earL };
 
 // The head: the crown under the topknot; on the near side the crown's fur overhangs the near ear's root, and the
@@ -110,9 +117,9 @@ const ears = { R: earR, L: earL };
 // to the chin, dipping lowest under the near cheek, and rises from the chin up the far side of the jaw to the far
 // cheek's puff, which bulges out over the far ear; above it the face's far side runs up over the far ear to its
 // root and the crown.
-const headNodes: Node[] = [[-68.6, -149.6], [-46, -152.6], [-11.2, -149.6], [-2.4, -144.2], [3.6, -136.6], [1.6, -134.8], [-18.2, -132.2], [-19.8, -129.4], [-14.6, -115],
-  [-12.4, -104], [-14.2, -91], [-17.4, -78], [-15.8, -67.2], [-26, -61.4], [-42.8, -57.9], [-61.7, -59.8], [-73.5, -62.4], [-84.2, -68.6], [-90.8, -76.2],
-  [-96.6, -84.2], [-97.6, -93.4], [-91.2, -100.6], [-86.4, -128], [-79.6, -143.8]];
+const headNodes: Node[] = [[-68.6, -149.6], [-46, -152.6], [-11.2, -149.6], [-2.4, -144.2], [3.6, -136.8], [1.4, -135.6], [-18.2, -132.2], [-19.8, -129.4], [-13.6, -115.4],
+  [-11.4, -105], [-14.2, -91], [-17.4, -78], [-15.8, -67.2], [-26, -61.4], [-48, -58.4], [-61.7, -59.8], [-73.5, -62.4], [-84.2, -68.6], [-90.8, -76.2],
+  [-96.6, -84.2], [-97.6, -93.4], [-91.2, -100.6], [-88.8, -121.6], [-79.6, -143.8]];
 /**
  * The overhang's tip over the near ear's root; where the face's near side leaves the overhang's underside, a concave
  * corner; and where the far cheek's puff comes out from under the side's line.
@@ -121,15 +128,19 @@ const OVERHANG = 5, TEMPLE = 7, PUFF = 21;
 let head = smooth(headNodes, { corners: [OVERHANG, TEMPLE, PUFF] });
 // The far cheek's puff breaks into a few soft clumps of fur along its lower and outer edge, and the jaw's fur
 // hangs over the collar in a row of small uneven tufts, as the sheet draws them.
-const cheekLocks: Lock[] = [{ len: 0.6, w: 1.4, lean: 0.2 }, { len: 0.9, w: 1, lean: 0.3 }];
-const chinLocks: Lock[] = [{ len: 0.5, w: 0.8, lean: 0.3 }, { len: 0.8, w: 1.1, lean: 0.25 }, { len: 0.6, w: 0.9, lean: 0.2 }, { len: 0.85, w: 1.2, lean: 0.15 },
-  { len: 0.6, w: 0.9, lean: 0.1 }, { len: 0.8, w: 1.1, lean: 0 }, { len: 0.55, w: 0.8, lean: -0.1 }];
+const cheekLocks: Lock[] = [{ len: 0.8, w: 0.9, lean: 0.25 }, { len: 1.5, w: 1.4, lean: 0.35 }, { len: 0.7, w: 0.8, lean: 0.3 }, { len: 1.2, w: 1.2, lean: 0.4 }];
+// Under the chin the fur hangs over the collar in a few soft tufts of uneven size, not a row of even scallops.
+const chinLocks: Lock[] = [{ len: 0.9, w: 1.3, lean: 0.35 }, { len: 0.5, w: 0.7, lean: 0.25 }, { len: 1.3, w: 1.6, lean: 0.3 }, { len: 0.6, w: 0.8, lean: 0.1 },
+  { len: 1.1, w: 1.4, lean: -0.05 }, { len: 0.7, w: 0.9, lean: -0.15 }];
 /** Each cheek clump's tip, root and notches (path order), for its line. */
 const clumps: { tip: P; root: P; notches: [P, P] }[] = [];
-head = furEdge(head, [-24, -61.8], [-70, -61.6], chinLocks, 0.24);
-head = furEdge(head, [-90.8, -76.2], [-97.4, -94], cheekLocks, 0.5, (tip, root, notches) => clumps.push({ tip, root, notches }));
+head = furEdge(head, [-24, -61.8], [-70, -61.6], chinLocks, 0.34);
+head = furEdge(head, [-90.8, -76.2], [-97.4, -94], cheekLocks, 0.4, (tip, root, notches) => clumps.push({ tip, root, notches }));
 // The crown's fur where it overhangs the near ear's root is a lock of fur, its tip a fur span.
-head = furSpan(head, [3.2, -137.2], [0.4, -134.9]);
+head = furSpan(head, [3.2, -137.4], [0.4, -135.5]);
+// Under the overhang the crown's cream fur hangs down over the near ear's root in a few soft locks, as the sheet
+// draws them, so the root has no flat top edge.
+head = furEdge(head, [-3.8, -135], [-16.4, -132.5], [{ len: 2.2, w: 1.3, lean: 0.4 }, { len: 1, w: 0.9, lean: 0.35 }, { len: 1.6, w: 1.1, lean: 0.4 }], 0.24);
 
 // The topknot: an upright sprig of three fur lobes, typed node by node (the sheet's tuft, seen turned), each side
 // lobe a petal of fur: the left one low and broad, pointing out to its tip at the left (x -67.2) and drawn back
@@ -142,17 +153,19 @@ const tuft = furSpan(smooth([[-55.6, -149.2], [-60.2, -150], [-64.4, -151.6], [-
   [-27.4, -156.1], [-22, -156.9], [-15.2, -155.6], [-10.6, -153.6], [-9.9, -151.7], [-12.2, -149.8], [-15, -148.5], [-18.6, -147.6], [-40, -145.6]],
   { corners: [3, 7, 14, 19] }), [-55.6, -149.2], [-18.6, -147.6]);
 
-// The head patches, in the paler tan (DECISIONS 18). The near one (the dog's left) is a broad hood over the
-// top and the outer side of the near eye, its top edge about 9 pt above the eye with the brow in the cream above
+// The head patches, in the paler tan (DECISIONS 18). The near one (the dog's left) is a broad hood arching over
+// the top and the outer side of the near eye, its top edge about 9 pt above the eye with the brow in the cream above
 // it, its nose end down to about the eye's middle; it runs down the face's side behind the eye to the cheek and
-// rises behind the brow into the near ear's root. The far one is a smaller hood over the far eye's outer top,
-// rising along the face's far side into the far ear's root. Each is typed with bleed past the head's edge; the
-// eyes cover what lies under them.
-const patchL = smooth([[-46.4, -104.8], [-43.6, -110.4], [-38, -113.6], [-31, -114.6], [-25, -113.8], [-21, -115.8], [-20.6, -121], [-22, -129.4], [-17, -132.8],
-  [-10, -128], [-8, -116], [-8, -100], [-11, -86], [-15, -79.6], [-21, -79.6], [-25.4, -82.4], [-27.6, -87], [-28.6, -95], [-33, -103.6], [-40, -105.6],
-  [-44.6, -102.6]]);
-const patchR = smooth([[-95, -137], [-86.6, -137], [-83.4, -133.4], [-82.4, -126], [-79.4, -119.4], [-72.4, -116.4], [-69.4, -112.6], [-72, -111.2],
-  [-76, -112.6], [-81, -111.6], [-84.6, -107.6], [-86.2, -102], [-87.2, -97.6], [-95, -97]]);
+// rises along the face's side into the near ear's root, a wedge of the crown's cream coming down between the hood
+// and that band to a point (x -20.2, y -106.2), as the sheet paints it. The far one is a small hood over the far eye's top, from the
+// face's far side over to the eye's nose side, running up the face's far side in a narrow band toward the far ear's
+// root; below the hood, beside the eye, the face is cream, as the sheet paints it. Each is typed with bleed
+// past the head's edge; the eyes cover what lies under them.
+const patchL = smooth([[-46.4, -104.8], [-43.6, -110.4], [-38, -113.8], [-31, -115], [-26, -113.4], [-22.4, -108.6], [-20.2, -106.2], [-18, -112], [-17.4, -123],
+  [-18.6, -130.4], [-16, -133.4], [-10, -128], [-8, -116], [-8, -100], [-11, -86], [-15, -79.6], [-21, -79.6], [-25.4, -82.4], [-27.6, -87], [-28.6, -95],
+  [-33, -103.6], [-40, -105.6], [-44.6, -102.6]], { corners: [6] });
+const patchR = smooth([[-95, -140], [-89.6, -140.4], [-86.6, -136.4], [-84.8, -130.4], [-83.2, -126.6], [-78.8, -125.4], [-74.2, -123.2], [-71, -119.6],
+  [-70.4, -114], [-73, -110.8], [-78, -110], [-84, -111.4], [-88.6, -114.6], [-95, -118]]);
 
 // The body's markings, each clipped to its part (L395). The near half of the saddle, a clear patch on the upper
 // back behind the near ear, as the sheet paints it: its top the back's line from x -9 down to x 10, its lower edge
@@ -253,13 +266,13 @@ const SEAM_R = uid("seam"), SEAM_L = uid("seam");
 // far side of the jaw to the chin, a soft light line (the sheet's #BC997D). The far cheek's clumps carry their
 // own lines.
 const headLine: Outline = { ...OUTLINE, taper: 4, blur: 0.15, spans: [
-  { from: [-91, -102], to: [-86.6, -127], width: THIN, colour: `url(#${SEAM_R})` },
+  { from: [-91, -102], to: [-82.4, -139.6], width: THIN, colour: `url(#${SEAM_R})` },
   { from: [-16.4, -120], to: [-17, -73], width: THIN, colour: `url(#${SEAM_L})` },
   { from: [-74, -62.6], to: [-90.6, -76], width: THIN, colour: C.crownLine },
 ] };
 const crownLine: Outline = { ...headLine, taper: 1.4, spans: [
   { from: [-85.4, -138.6], to: [-66, -150.6], width: THIN, colour: C.crownLine },
-  { from: [-11.4, -149.6], to: [0.8, -134.8], width: THIN, colour: C.crownLine },
+  { from: [-11.4, -149.6], to: [0.8, -135.4], width: THIN, colour: C.crownLine },
 ] };
 /** The far cheek's clumps' line, following the scalloped edge on through the notches, in the lighter warm line the front's cheek puffs take. */
 function clumpLines(): Outline {
@@ -435,22 +448,25 @@ function blush(): Piece {
   return soft(d, [cx - rx - 0.5, cy - ry - 0.8, 2 * rx + 1, 2 * ry + 1.6], C.blush, 2.2, Math.round(model.blush.restingLevel * 1.28 * 100) / 100);
 }
 
-/** The tag and its ring (front.ts's recipe): flat matte gold, a darker gold rim, one soft light high on its left lobe, the smaller heart engraved as one faint warm line. */
+/** The tag and its ring (front.ts's recipe): flat matte gold, one soft light high on its left lobe, the smaller heart raised in it. */
 function tagPiece(): Piece {
+  // The ring: a small rounded loop in the collar's light blue, leaning with the heart.
   const ringLine: DrawnLine = { kind: "inner", width: 0.6, where: "tag ring", drawn: [0.6, 0.6] };
-  const [rx, ry] = [TAG_X - 1.4, LM["tag.ring"]![1] - 0.2];
-  const ring = piece(`<rect x="${fmt(rx)}" y="${fmt(ry)}" width="2.8" height="7.6" rx="1.4" fill="${C.collar}" stroke="${C.collarRim}" stroke-width="${ringLine.width}"/>` +
-    `<rect x="${fmt(rx + 0.7)}" y="${fmt(ry + 0.6)}" width="0.8" height="6" rx="0.4" fill="${C.collarHighlight}"/>`, [rx - 1, ry - 1, 5, 9.6], { shapes: [], lines: [ringLine] });
+  const [rx, ry] = [TAG_X - 1.6, LM["tag.ring"]![1] - 0.2];
+  const ring = piece(`<rect x="${fmt(rx)}" y="${fmt(ry)}" width="3.2" height="6.6" rx="1.6" transform="rotate(${TAG_TILT + 4} ${fmt(TAG_X)} ${fmt(ry + 3.3)})" ` +
+    `fill="${C.collarHighlight}" stroke="${C.collarRim}" stroke-width="${ringLine.width}"/>`, [rx - 2, ry - 1, 7.2, 8.6], { shapes: [], lines: [ringLine] });
   const emboss = sample(innerHeart.segs, 10);
   emboss.push(emboss[0]!);
   const lit = uid("blur"), raised = sample(innerHeart.segs, 10).filter(([x, y]) => x < TAG_X && y < -44.2);
   return join(ring, part("tag", heart, {
     fill: C.tag,
-    shade: { multiply: C.tagShadeBy, rim: { inset: 1.3, toLight: 1.3 }, blur: 1 },
-    under: `<defs>${blur(lit, [TAG_X - 8, -51, 10, 10], 0.35)}</defs><path d="${strokeOf(raised, 0.9, { taper: 1.6, tip: 0.2 }).d}" fill="${C.tagShine}" opacity="0.7" filter="url(#${lit})"/>`,
-    highlight: { d: `M${fmt(TAG_X - 6.4)} -47.6 a2.6 1.8 -40 1 0 5.2 0 a2.6 1.8 -40 1 0 -5.2 0`, colour: C.tagShine, opacity: 0.45, blur: 1.4 },
-    inner: [{ pts: emboss, width: 0.7, colour: C.tagLine, opacity: 0.6 }],
-    outline: { colour: C.tagLine, width: 1.3, taper: 2, blur: 0.2 },
+    // A soft shade round its lower right; the smaller heart raised in it, lit along its upper left and only faintly
+    // edged, as the sheet paints it, not engraved.
+    shade: { multiply: C.tagShadeBy, rim: { inset: 1, toLight: 1.8 }, blur: 1.2 },
+    under: `<defs>${blur(lit, [TAG_X - 8, -51, 10, 10], 0.35)}</defs><path d="${strokeOf(raised, 1, { taper: 1.6, tip: 0.2 }).d}" fill="${C.tagShine}" opacity="0.8" filter="url(#${lit})"/>`,
+    highlight: { d: `M${fmt(TAG_X - 6.6)} -47.4 a2.6 1.8 -40 1 0 5.2 0 a2.6 1.8 -40 1 0 -5.2 0`, colour: C.tagShine, opacity: 0.5, blur: 1.4 },
+    inner: [{ pts: emboss, width: 0.7, colour: C.tagLine, opacity: 0.3 }],
+    outline: { colour: C.tagLine, width: 1.2, taper: 2, blur: 0.25 },
   }));
 }
 
@@ -465,19 +481,28 @@ function earPaint(side: "L" | "R"): Paint {
   const ear = ears[side];
   const deep = uid("deep"), parting = uid("blur"), along = uid("blur"), [ex0, ey0, ex1, ey1] = bbox(ear.segs);
   const earBox = pad([ex0, ey0, ex1 - ex0, ey1 - ey0], 2);
-  // The locks' partings and the lighter strokes between them, curving down the ear with its outer contour.
+  // The locks' partings, curving down the ear with its outer contour into the notches between the locks of its lower
+  // edge, and the lighter strokes between them, as the sheet paints them.
   const dark: P[][] = side === "R"
-    ? [[[-96, -127], [-104, -117], [-110, -106], [-113, -95], [-113.6, -86]], [[-92.4, -118], [-98.4, -108], [-102.4, -96], [-104.4, -84]]]
-    : [[[8, -122], [16, -110], [22, -98], [25, -86], [25.6, -72]], [[1, -116], [7, -104], [12, -92], [14.6, -78], [15.4, -64]]];
+    ? [[[-108, -120], [-112.4, -110], [-114.6, -100], [-115.2, -92], [-115.4, -88.4]], [[-100, -118], [-104.6, -106], [-107.6, -94], [-109, -86], [-109.2, -82.6]],
+      [[-94, -122], [-98, -108], [-100.6, -94], [-102, -84]]]
+    : [[[12, -118], [19, -104], [23.4, -90], [25, -78], [25.6, -71]], [[2, -112], [7, -98], [9.4, -84], [10, -70], [9.8, -61.2]],
+      [[-8, -100], [-6.6, -86], [-5, -72], [-4.4, -60.4]], [[20.6, -106], [25.6, -99.6], [29, -95.4]]];
   const light: P[][] = side === "R"
-    ? [[[-94, -123], [-101.4, -112], [-106.4, -100], [-108.8, -89]]]
-    : [[[4, -120], [11, -107], [17, -95], [20, -82]]];
+    ? [[[-104, -121], [-108.6, -110], [-111.6, -98], [-112.6, -88]], [[-96, -122], [-101, -110], [-104, -96], [-105.6, -84]]]
+    : [[[6, -116], [13, -102], [17, -88], [18.6, -74]], [[-3, -108], [1, -94], [3, -80], [3.4, -66]]];
   const softly = (pts: P[][], width: number) => pts.map((l) => strokeOf(sample(smooth(l, { closed: false }).segs, 8, false), width, { taper: 6, tip: 0.2 }).d).join("");
+  // Lighter and more golden at the root, in the head patches' paler tan, deepening down the ear (the sheet's
+  // #EAAE7F by the near ear's root).
+  const rootLight = uid("root");
   const under = `<defs><linearGradient id="${deep}" gradientUnits="userSpaceOnUse" x1="0" y1="${side === "R" ? -110 : -100}" x2="0" y2="${fmt(ey1)}">` +
     `<stop offset="0" stop-color="${C.earDeep}" stop-opacity="0"/><stop offset="0.35" stop-color="${C.earDeep}"/>` +
     `<stop offset="0.72" stop-color="${C.earDeeper}"/><stop offset="1" stop-color="${C.earFoot}"/></linearGradient>` +
+    `<linearGradient id="${rootLight}" gradientUnits="userSpaceOnUse" x1="0" y1="${side === "R" ? -143 : -136}" x2="0" y2="${side === "R" ? -125 : -117}">` +
+    `<stop offset="0" stop-color="${C.patch}" stop-opacity="0.35"/><stop offset="1" stop-color="${C.patch}" stop-opacity="0"/></linearGradient>` +
     `${blur(parting, earBox, 0.7)}${blur(along, earBox, 1)}</defs>` +
     `<rect x="${fmt(ex0)}" y="${fmt(ey0)}" width="${fmt(ex1 - ex0)}" height="${fmt(ey1 - ey0)}" fill="url(#${deep})"/>` +
+    `<rect x="${fmt(ex0)}" y="${fmt(ey0)}" width="${fmt(ex1 - ex0)}" height="${fmt(ey1 - ey0)}" fill="url(#${rootLight})"/>` +
     `<path d="${softly(light, 2.2)}" fill="${C.patch}" opacity="0.3" filter="url(#${along})"/>` +
     `<path d="${softly(dark, 1.5)}" fill="${C.earLow}" opacity="0.25" filter="url(#${parting})"/>`;
   const highlight = side === "R"
@@ -487,17 +512,21 @@ function earPaint(side: "L" | "R"): Paint {
   const toRoot = uid("earline");
   const lines = `<defs><linearGradient id="${toRoot}" gradientUnits="userSpaceOnUse" x1="0" y1="${side === "R" ? -140 : -134}" x2="0" y2="${side === "R" ? -118 : -112}">` +
     `<stop offset="0" stop-color="${C.crownLine}"/><stop offset="1" stop-color="${C.warmLine}"/></linearGradient></defs>`;
+  // Each lock carries its own line, breaking at the notches, as the sheet draws them.
   const spans: Span[] = side === "R"
-    ? [{ from: [-93, -86], to: [-120.2, -97.6], width: 1.6 }, { from: [-120.4, -104.6], to: [-85, -140.8], colour: `url(#${toRoot})` }]
-    : [{ from: [-1, -135.4], to: [30.8, -86], colour: `url(#${toRoot})` }, { from: [30.6, -90], to: [-15.2, -68], width: 1.6 }];
+    ? [{ from: [-93, -86], to: [-109.2, -82.6], width: 1.6 }, { from: [-109.2, -82.6], to: [-115.4, -88.4], width: 1.6 }, { from: [-115.4, -88.4], to: [-120.4, -104.6], width: 1.5 },
+      { from: [-120.4, -102], to: [-93.8, -133.4], colour: `url(#${toRoot})` }, { from: [-93.8, -133.4], to: [-85, -140.8], colour: `url(#${toRoot})` }]
+    : [{ from: [-1, -135.4], to: [29, -95.4], colour: `url(#${toRoot})` }, { from: [29, -95.4], to: [25.6, -71], width: 1.6 }, { from: [25.6, -71], to: [9.8, -61.2], width: 1.6 },
+      { from: [9.8, -61.2], to: [-4.4, -60.4], width: 1.6 }, { from: [-4.4, -60.4], to: [-15.2, -68], width: 1.6 }];
   return {
     fill: C.marking,
     under: under + lines,
     // The rim away from the light; the head's shadow where the ear goes under it is the head's own part (headShadow).
     shade: { multiply: C.furShadeBy, rim: { inset: 2.2, toLight: 3.6 }, blur: 3.2 },
     highlight: { d: highlight, colour: C.patch, opacity: 0.4, blur: 3 },
-    inner: dark.map((pts) => ({ pts: sample(smooth(pts.slice(-3), { closed: false }).segs, 8, false), width: 0.7, colour: C.earLine, opacity: 0.2 })),
-    outline: { ...OUTLINE, colour: C.warmLine, width: 1.3, taper: 7, blur: 0.25, spans },
+    // Each parting's last stretch into its notch drawn as a fine strand.
+    inner: dark.map((pts) => ({ pts: sample(smooth(pts.slice(-3), { closed: false }).segs, 8, false), width: 0.75, colour: C.earLine, opacity: 0.45 })),
+    outline: { ...OUTLINE, colour: C.warmLine, width: 1.3, taper: 2.6, blur: 0.25, spans },
   };
 }
 
@@ -513,7 +542,7 @@ function headShadow(side: "L" | "R"): Piece {
       [-11.4, -91], [-9.4, -104], [-11.4, -115], [-15.8, -126.6], [-15.2, -129.8], [1.6, -132.4]];
   const shape = smooth(band);
   const [x0, y0, x1, y1] = bbox(shape.segs);
-  return soft(pathD(shape.segs), [x0, y0, x1 - x0, y1 - y0], C.earDeep, 1.4, 0.75);
+  return soft(pathD(shape.segs), [x0, y0, x1 - x0, y1 - y0], C.earDeep, 1.4, 0.5);
 }
 
 /**
@@ -531,14 +560,17 @@ function between(): string {
     `<path d="${pathD(v.segs)}" fill="url(#${g})" filter="url(#${f})"/>`;
 }
 
-/** Where the jaw's fur lies on the collar (front.ts's recipe): the collar's dark rim right under the fur's edge, and a soft shade of its blue under that. */
+/**
+ * Where the jaw's fur lies on the collar, as the sheet paints it: the chin's tufts lie over the band softly, with only
+ * a little shade of its blue under them (front.ts's recipe without its dark rim, which here read as a lace edge).
+ */
 function collarContact(): string {
-  const f = uid("blur"), g = uid("blur");
+  const g = uid("blur"), f = uid("blur");
   const jaw = spanPoints(head, fracAt(head, [-24, -61.8]), fracAt(head, [-70, -61.6]));
-  const rim = strokeOf(jaw, 2.1, { taper: 2.5, tip: 0.6 }).d;
   const shade = strokeOf(jaw, 5, { taper: 4, tip: 1 }).d;
-  return `<defs>${blur(f, [-76, -66, 58, 14], 0.3)}${blur(g, [-76, -66, 58, 14], 0.9)}</defs>` +
-    `<path d="${shade}" fill="${C.collarLine}" opacity="0.45" filter="url(#${g})"/><path d="${rim}" fill="${C.collarRim}" opacity="0.9" filter="url(#${f})"/>`;
+  const rim = strokeOf(jaw, 2, { taper: 3, tip: 0.6 }).d;
+  return `<defs>${blur(g, [-76, -66, 58, 14], 1)}${blur(f, [-76, -66, 58, 14], 0.6)}</defs>` +
+    `<path d="${shade}" fill="${C.collarLine}" opacity="0.4" filter="url(#${g})"/><path d="${rim}" fill="${C.collarLine}" opacity="0.35" filter="url(#${f})"/>`;
 }
 
 export function threeQuarter(): Drawn[] {
@@ -631,8 +663,8 @@ export function threeQuarter(): Drawn[] {
     add(`shadow.head.${side}`, headShadow(side));
   }
   add("head.base", part("head.base", head, headPaint));
-  add("head.patch.L", marking("head.patch.L", { shape: head, paint: headPaint }, patchL, { fill: C.patch, blur: 0.8, clip: false, fade: { from: [-43, -106], to: [-47, -103.4] } }));
-  add("head.patch.R", marking("head.patch.R", { shape: head, paint: headPaint }, patchR, { fill: C.patch, blur: 0.8, clip: false, fade: { from: [-74, -114], to: [-69.8, -112.6] } }));
+  add("head.patch.L", marking("head.patch.L", { shape: head, paint: headPaint }, patchL, { fill: C.patch, blur: 0.55, clip: false, fade: { from: [-43, -106], to: [-47, -103.4] } }));
+  add("head.patch.R", marking("head.patch.R", { shape: head, paint: headPaint }, patchR, { fill: C.patch, blur: 0.6, clip: false, fade: { from: [-74, -114], to: [-69.8, -112.6] } }));
   add("blush.L", blush());
   add("eye.L", eye([-37.8, -95.2], { rx: 10.1, ry: 10, turn: -4, noseward: -1, white: 8, whiteWidth: 1.3, whiteOpacity: 0.7, shine: [3.6, 5.1, 1.75] }), "open");
   add("eye.R", eye([-78.3, -104.8], { rx: 6.4, ry: 9, turn: 15, noseward: 1, white: 2, whiteWidth: 1.1, whiteOpacity: 0.9, shine: [2.5, 4.1, 1.35] }), "open");
