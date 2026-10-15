@@ -131,7 +131,7 @@ test("the back view draws the markings phase 2 sighted on its crop, each an over
   }
 });
 
-test("the back view's outer lines are the line rule's, as every view's (DECISIONS 104, 105)", () => {
+test("the back view's outer lines are the line rule's, as every view's, and its fills carry no grain (DECISIONS 104 to 106)", () => {
   // Each lined part draws its line by parts/lines.ts: its ribbons are the ladders' tones.
   const tones = new Set([...LINES.cream, ...LINES.tan]);
   for (const name of ["body.back", "hind.L", "hind.R", "tail", "tuft", "ear.L", "ear.R", "head.line", "back.patch.L", "back.patch.R", "tail.base"]) {
@@ -142,6 +142,7 @@ test("the back view's outer lines are the line rule's, as every view's (DECISION
   const src = readFileSync(new URL("../src/views/back.ts", import.meta.url), "utf8");
   assert.equal(src.match(/\boutline: /g)?.length, 1, "a part other than the collar types its own outline");
   assert.equal(src.match(/\bribbons\(/g)?.length, 1, "the back types a line other than the root's stretch");
+  assert.ok(!/\bgrain\(/.test(src), "the back's fills carry a fur grain");
   for (const gone of ["haunchLine", "haunchShadeLine", "crownWarm", "earFootLine"]) assert.ok(!(gone in C), `palette.ts still holds ${gone}`);
 });
 

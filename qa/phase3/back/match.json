@@ -145,11 +145,11 @@
     "pass": true
    },
    "furShade": {
-    "dominant": "#FDE4CA",
+    "dominant": "#FEE9D3",
     "heldTo": "#FDE3C8",
     "heldBy": "palettePainted.furShade",
-    "deltaE2000": 0.44,
-    "pixels": 1148,
+    "deltaE2000": 2.33,
+    "pixels": 1446,
     "pass": true
    },
    "ears": {

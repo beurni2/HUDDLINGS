@@ -13,7 +13,7 @@ import { furEdge, furSpan, type Lock } from "../../../draw/fur.ts";
 import { bbox, ellipse, fracAt, mirrorX, pathD, sample, smooth, spanPoints, v, type Node, type P, type Shape } from "../../../draw/geom.ts";
 import { ribbons, strokeOf, type DrawnLine, type Outline, type Stroke } from "../../../draw/line.ts";
 import { LIMITS, reach } from "../../../draw/lint.ts";
-import { grain, part, soft, type Paint } from "../../../draw/paint.ts";
+import { part, soft, type Paint } from "../../../draw/paint.ts";
 import { blur, join, mask, pad, piece, uid, type Box, type Piece } from "../../../draw/svg.ts";
 import { litEdge, litMarking, litPart, withDefaults, type LitSpan } from "../parts/lines.ts";
 import { C, LINES } from "../palette.ts";
@@ -39,8 +39,6 @@ const curve = (pts: P[], per = 8) => sample(smooth(pts, { closed: false }).segs,
 const reversed = (locks: Lock[]): Lock[] => [...locks].reverse().map((l) => ({ ...l, lean: -(l.lean ?? 0) }));
 /** Typed for the viewer's left, mirrored to the right. */
 const flipX = (lines: P[][]): P[][] => lines.map((l) => l.map(([x, y]): P => [-x, y]));
-/** A painted fur grain under a part's shade (paint.ts grain): the sheet's fills vary by a few tenths of L* (DECISIONS 97). */
-const furGrain = (box: Box, seed: number, amount = 0.08) => grain(box, { light: C.light, dark: C.furShade, amount, scale: [0.9, 3.4], seed });
 /** Each lock of a fur edge as a span of its own, so the line breaks where the fur breaks it (74). */
 const lockSpans = (locks: { notches: [P, P] }[], extra: Omit<LitSpan, "from" | "to"> = {}): LitSpan[] =>
   locks.map(({ notches }) => ({ from: notches[0], to: notches[1], ...extra }));
@@ -256,7 +254,7 @@ function fold(from: P, to: P): NonNullable<Paint["inner"]>[number] {
 
 const backPaint: Paint = {
   fill: C.fur,
-  under: furGrain(boxOf(body), 3) + `<defs><linearGradient id="${FOLD}" gradientUnits="userSpaceOnUse" x1="0" y1="-12.4" x2="0" y2="-6">` +
+  under: `<defs><linearGradient id="${FOLD}" gradientUnits="userSpaceOnUse" x1="0" y1="-12.4" x2="0" y2="-6">` +
     `<stop offset="0" stop-color="${C.softLine}"/><stop offset="1" stop-color="${C.softLine}" stop-opacity="0"/></linearGradient></defs>`,
   // Broad and soft, as the sheet paints it: the shoulders under the collar, where the neck turns in under it; each
   // haunch's lower half, turning under toward the ground, deepest at its outer bottom; the right haunch's round, away
@@ -297,7 +295,6 @@ const tailShades = tailLocks.map(({ tip, notches }) => {
 
 const tailPaint: Paint = {
   fill: C.fur,
-  under: furGrain(boxOf(tail), 9),
   // Its right side and foot away from the light; under each clump where it tucks under the one above; and in the
   // hook's inner bend, where the curl rolls over the saddle.
   shade: { multiply: C.furShadeBy, rim: { inset: 2, toLight: 3.4 }, shapes: ["M-12 -4 C-2 0 14 -1 28 -7 L28 1 L-12 1Z", ...tailShades], blur: 2 },
@@ -344,7 +341,7 @@ const whorl: { pts: P[]; light: boolean }[] = [
 
 const headPaint: Paint = {
   fill: C.fur,
-  under: furGrain(boxOf(head), 5) + whorlStrokes(),
+  under: whorlStrokes(),
   // Low on the back of the head, where it warms toward the collar and turns under it; and the rim away from the
   // light. The crown stays light out to its line, as the sheet paints it.
   shade: furShade(headGroup, ["M-41 -92 C-32 -78 -14 -75 0 -75 C14 -75 32 -78 41 -92 L41 -60 L-41 -60Z"], ["M-50 -172 L50 -172 L50 -138 L-50 -138Z"], { inset: 3, toLight: 4.5 }, 3.6),
