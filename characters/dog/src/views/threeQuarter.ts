@@ -12,14 +12,17 @@ import { marking, part, soft, type Paint } from "../../../draw/paint.ts";
 import { blur, join, pad, piece, uid, type Box, type Piece } from "../../../draw/svg.ts";
 import { model } from "../model.ts";
 import { C, LINES } from "../palette.ts";
-import { eye, type EyeSpec } from "../parts/eye.ts";
+import type { BrowState } from "../parts/brow.ts";
+import { eye, lidBand, type EyeSpec, type LidBand } from "../parts/eye.ts";
+import type { Star } from "../parts/stars.ts";
+import { browState, foreshortened, halfLid, TURNED_MOUTHS, turnedMouth, turnedStars, type TurnedFrame, type TurnedMouthState } from "../parts/turned.ts";
 import { litEdge, litMarking, litPart, withDefaults, type LitSpan } from "../parts/lines.ts";
 import { curlShapes, topknot, type Curl } from "../parts/topknot.ts";
 import { earFur } from "../parts/ear.ts";
 import { toes } from "../parts/paw.ts";
 import { tagPaint } from "../parts/tag.ts";
 import { strands } from "../parts/marking.ts";
-import type { Drawn } from "./front.ts";
+import { EYE_STATES, type Drawn } from "./front.ts";
 import { facing, type Facing, type Side } from "./facing.ts";
 
 const INNER = model.outline.innerPt;
@@ -316,18 +319,29 @@ const headPaint = (F: Facing): Paint => ({
  * and under the chin, down the far side of the jaw, a deeper line (the sheet's #BC997D). The far cheek's clumps each
  * carry their own line, on the far ear's tan, broken at each notch.
  */
+/** The near side's curve, where the face lies over the near ear. */
+const NEAR_SIDE: LitSpan = { from: [-16.4, -120], to: [-14.4, -88.6], on: "tan", under: 0.45, taper: [4, 2] };
 const headSpans: LitSpan[] = [
   { from: [-91, -102], to: [-87.4, -127], on: "tan", under: 0.3, taper: [4, 6] },
-  { from: [-16.4, -120], to: [-14.4, -88.6], on: "tan", under: 0.45, taper: [4, 2] },
+  NEAR_SIDE,
   { from: [-74, -62.6], to: [-91, -74.8], under: 0.15, taper: 4 },
   { from: [-83.6, -141], to: [-61.8, -149.8], taper: [1.4, 0.4] },
   { from: [-15, -149.6], to: [0.8, -135.4], taper: 1.4 },
 ];
-/** head.line: the head's outline as its own unclipped region, drawn after the head's clip group, reaching 0.5 pt past the head. */
-function headLinePiece(F: Facing): Piece {
+/**
+ * head.line: the head's outline as its own unclipped region, drawn after the head's clip group, reaching 0.5 pt past the
+ * head. `temple`: the near ear raised (its perked state), where the head runs on behind the face's side into the nape
+ * the perked ear uncovers, so the near side's curve, which would lie inside it as a crease, is left out, as the front's
+ * temple states leave theirs (head.line's templeL, templeR and temples, keyed by the face clips beside a raised ear).
+ */
+function headLinePiece(F: Facing, temple = false): Piece {
   const [x0, y0, x1, y1] = bbox(head.segs);
   const box = pad([x0, y0, x1 - x0, y1 - y0], 2);
-  const r = litEdge(head, headSpans, "head.line", box, { reach: 0.5, light: F.light });
+  // Left out by shortening it to its first step along the outline, too short to draw, so every other span keeps its
+  // place in the list (the line rule wobbles each span's width by its place) and draws exactly as the rest line's.
+  const step = spanPoints(head, fracAt(head, NEAR_SIDE.from), fracAt(head, NEAR_SIDE.to)).slice(0, 2) as [P, P];
+  const spans = temple ? headSpans.map((s) => (s === NEAR_SIDE ? { ...s, from: step[0], to: step[1] } : s)) : headSpans;
+  const r = litEdge(head, spans, "head.line", box, { reach: 0.5, light: F.light });
   const c = litEdge(head, clumps.map(({ notches }): LitSpan => ({ from: notches[0], to: notches[1], taper: 1.4 })), "cheek clump", box, { reach: 0.5, blur: 0.2, light: F.light });
   // Where the crown's fur meets each ear's root with no line, the sheet's edge is soft: the crown's cream lies out
   // over the root's tan in a feathered edge.
@@ -362,6 +376,12 @@ const EYES: Record<"L" | "R", EyeSpec> = {
   },
 };
 
+/** Each brow's centre line from its inner end (by the nose) to its outer, and its width, where the sheet paints it. */
+const BROWS = {
+  L: { pts: [[-36.9, -124.4], [-35.2, -125.5], [-33.4, -125.9], [-31.2, -125], [-29.4, -122.8]] as P[], width: 2.2 },
+  R: { pts: [[-71.2, -131.4], [-72.8, -132], [-74.6, -131.6], [-76, -130.4]] as P[], width: 1.8 },
+};
+
 /** A brow, as the sheet paints it: a short, thick, rounded dab of tan, domed, its inner end no lower than its outer one; soft at its edges. */
 function brow(pts: P[], width: number): Piece {
   const f = uid("blur"), [x0, y0, x1, y1] = bbox([[pts[0]!, pts[0]!, pts.at(-1)!, pts.at(-1)!], ...pts.map((p): [P, P, P, P] => [p, p, p, p])]);
@@ -394,10 +414,11 @@ function nose(): Piece {
  * peaking left of the middle, with a soft lighter middle and no groove; a dark red-brown rim runs down the opening's
  * sides and round its foot.
  */
+/** The rest mouth's upper lip, from the far corner's curl to the near one's; the philtrum meets it at (−69.4, −85.8). */
+const REST_LIP: P[] = [[-77.6, -87.4], [-76.4, -86], [-74.8, -85.2], [-72.6, -85.3], [-70.6, -85.8], [-69.4, -85.8], [-67.2, -84.5], [-64.2, -83],
+  [-61.2, -82.3], [-58.6, -82.1], [-56.6, -82.5], [-55.3, -83.4], [-54.8, -84.4]];
 function mouth(): Piece {
-  const lipPts: P[] = [[-77.6, -87.4], [-76.4, -86], [-74.8, -85.2], [-72.6, -85.3], [-70.6, -85.8], [-69.4, -85.8], [-67.2, -84.5], [-64.2, -83],
-    [-61.2, -82.3], [-58.6, -82.1], [-56.6, -82.5], [-55.3, -83.4], [-54.8, -84.4]];
-  const lipShape = smooth(lipPts, { closed: false });
+  const lipShape = smooth(REST_LIP, { closed: false });
   const lip = tapered(sample(lipShape.segs, 12, false), 0.9, "inner", "upper lip", { taper: 2.2, tip: 0.3 });
   const opening = smooth([[-75.2, -85.2], [-72.8, -85.6], [-70.6, -86], [-69.6, -85.8], [-67.2, -84.4], [-64.2, -82.9], [-61.2, -82.2], [-58.2, -81.9],
     [-59, -79.2], [-60.6, -76.2], [-62.8, -73.4], [-65.6, -71.6], [-68.6, -71], [-71.4, -71.8], [-73.4, -74], [-74.6, -77.4],
@@ -658,8 +679,8 @@ export function threeQuarter(facingSide: Side = "L"): Drawn[] {
   add("blush.L", blush());
   add("eye.L", eye(EYES.L), "open");
   add("eye.R", eye(EYES.R), "open");
-  add("brow.L", brow([[-36.9, -124.4], [-35.2, -125.5], [-33.4, -125.9], [-31.2, -125], [-29.4, -122.8]], 2.2));
-  add("brow.R", brow([[-71.2, -131.4], [-72.8, -132], [-74.6, -131.6], [-76, -130.4]], 1.8));
+  add("brow.L", brow(BROWS.L.pts, BROWS.L.width));
+  add("brow.R", brow(BROWS.R.pts, BROWS.R.width));
   add("nose", nose());
   add("mouth", mouth(), "open");
   add("head.line", headLinePiece(F));
@@ -700,4 +721,195 @@ export const landmarks: Record<string, P> = {
   "tag.ring": [TAG_X, LM["tag.ring"]![1] + 0.4],
   // The seat: the haunch's underside on the midline, behind the hind paw, at y -1.6, taken 0.8 pt inside.
   seat: [0, -2.4],
+};
+
+// The face states (spec L440-498; DECISIONS 170 to 176, 179, 181 to 185): every state the front draws, seen from this
+// view, each from this view's own rest drawing where its rest feature sits, in the front's shape language
+// foreshortened: the eye states by the dog's one eye recipe on each eye's own spec (parts/eye.ts), the far eye's
+// narrower as its open eye is; the mouths the front's own shapes carried onto this muzzle (parts/turned.ts); the brows
+// this view's dabs moved as the front's are. The motion sheet's turned heads settle what they show: Soft landing the
+// happy crescents on a turned head, Curious lean the closed smile. threeQuarter.R is each drawn again in its facing
+// (views/facing.ts).
+
+/**
+ * This view's muzzle, the front's face frame carried onto it (parts/turned.ts): the front's lip centre lands where this
+ * view's rest philtrum meets its lip; across runs along the line through the rest mouth's corners (7.5°, the far curl
+ * at (−77.6, −87.4), the near one at (−54.8, −84.4)), the far half shortened to 0.64 and the near one drawn 1.14 times
+ * the front's, as the rest mouth's corners lie from its philtrum (8.2 and 14.6 pt, the front's 12.9); down leans 3°
+ * toward the near side, so the front's open foot lands on the rest mouth's (−68.6, −71).
+ */
+const muzzle = (light: P, k: [number, number] = [0.64, 1.14]): TurnedFrame => foreshortened({ origin: [-69.4, -85.8], acrossDeg: 7.5, downDeg: -3, k, light });
+/**
+ * The o and the yawn are shortened half as much (0.82 and 1.07): a small round opening on the muzzle's front faces the
+ * person more than the lip's corners, which wrap round the muzzle's sides; shortened as the lip is, the o's soft point
+ * read as a thin red seed.
+ */
+const ROUND: [number, number] = [0.82, 1.07];
+/** Where this view's rest philtrum leaves the nose's foot. */
+const NOSE_FOOT: P = [-67, -88.4];
+
+/** How much smaller the far eye is than the near one, across (its open eye's 6.6 pt half-width against 9.5). */
+const FAR = EYES.R.rx / EYES.L.rx;
+/**
+ * The crescents' and lids' lean (degrees, clockwise), between the muzzle's level (7.5°) and the eye line, which rises
+ * 9.7 pt over 40 toward the far eye (13.5°), as Soft landing lays its crescents along the turned face.
+ */
+const LID_TILT = 10;
+
+/**
+ * An eye state on this view's eye (`side` L the near eye, R the far one), from its open eye (EYES): the closed states are
+ * the front's lash bands (DECISIONS 130), placed from the open eye's centre as the front places its own (the crescent
+ * 2.35 pt lower and 1.9 pt further out, the closed lid 2 pt lower and 1.6 out, the wink at the open eye's height), out
+ * shortened on the far eye, and as wide as each eye: the near band the front's 17.6 pt, the far one shortened with its
+ * eye; the half-lid, the wide eye and the peek the open eye's own spec changed as the front changes its own.
+ */
+function eyeState(state: (typeof EYE_STATES)[number], side: "L" | "R"): Piece {
+  const spec = EYES[side], near = side === "L", k = near ? 1 : FAR, out = near ? 1 : -FAR;
+  const band = (o: number, down: number, b: Omit<LidBand, "centre" | "tilt" | "noseward">) =>
+    lidBand({ centre: [spec.centre[0] + out * o, spec.centre[1] + down], tilt: LID_TILT, noseward: spec.noseward, ...b });
+  switch (state) {
+    case "happy":
+      return band(1.9, 2.35, { width: 17.6 * k, rise: near ? 4.4 : 3.8, drop: near ? 1 : 0.8, thickness: near ? 3.3 : 3, ends: near ? [1.5, 0.8] : [1.3, 0.7],
+        flick: { length: near ? 1.4 : 1.1, hook: -10 } });
+    case "closed":
+      return band(1.6, 2, { width: 17 * k, rise: near ? -3 : -2.6, drop: 0, thickness: near ? 3 : 2.7, ends: near ? [1.3, 0.8] : [1.2, 0.7],
+        flick: { length: near ? 1.3 : 1, hook: -30 } });
+    case "wink":
+      return band(0.5, 0.6, { width: 17.6 * k, rise: near ? 4 : 3.5, drop: near ? -1.4 : -1.1, thickness: near ? 3.3 : 3, ends: near ? [1.5, 0.8] : [1.3, 0.7],
+        flick: { length: near ? 1.8 : 1.4, hook: -75 } });
+    // The upper lid closed over about two fifths of the eye, as the front's (its ends 3.2 pt above the middle of an eye
+    // 9.2 pt tall, its edge bowing 1.8 pt down: each eye's grown with its height), its catchlight just under the lash
+    // (Q28's default), the face's own fur showing above it, cream or the hood's tan as each eye sits (parts/turned.ts).
+    case "sleepy": {
+      const s = spec.ry / 9.2;
+      return halfLid(spec, { level: -3.2 * s, bow: 1.8 * s, tilt: LID_TILT, lash: near ? 1.9 : 1.6, overhang: near ? 1 : 0.7, shine: { at: near ? [2.7, -0.9] : [1.8, -0.8], r: near ? 1.4 : 1.1 } });
+    }
+    // Surprised round: 7% larger and a point higher, a little toward the nose, the white broader, the catchlight bigger.
+    case "wide":
+      return eye({ ...spec, centre: [spec.centre[0] + spec.noseward * 0.4, spec.centre[1] - 0.9], rx: spec.rx * 1.07, ry: spec.ry * 1.07,
+        white: { at: spec.white.at, width: spec.white.width * 1.35, span: spec.white.span + 8, fade: 0.5 },
+        shine: { at: [spec.shine.at[0] * 1.07, spec.shine.at[1] * 1.15], r: spec.shine.r * 1.15 }, glow: near ? { band: 6, warm: 2 } : { band: 5.4, warm: 2.4 } });
+    // Side glance: the iris toward the viewer's right, back toward the person, as the front's looks; the white a broad
+    // crescent on the side away from the look (the near eye's nose side, the far eye's outer side), the catchlight on the iris.
+    case "peek":
+      return eye({ ...spec, white: { at: near ? 186 : -6, width: near ? 4.6 : 3.4, span: 58, fade: 0.3 }, shine: { at: [near ? -2.4 : 2.2, near ? 5 : 4.2], r: spec.shine.r } });
+  }
+}
+
+// The one perked ear, as One ear perked draws it (DECISIONS 133, 176): a bean flipped up over the crown from its root,
+// standing above it and running out and a little down to a round free end past the head's side, its inside showing in a
+// darker wedge behind the fold at the root, painted by the ear recipe with its locks running out to the free end. Seen
+// from this view each ear flips out to its own side: the near ear up behind the crown's near corner and out over the
+// back of the head (to the viewer's right), the far ear up behind the topknot's far curl and out past the far cheek.
+// The ears draw behind the head in every state, so the crown and the topknot hide each root.
+
+/** The near ear flipped up: from its root under the crown's near corner, up behind the near curl, out to its free end over the back of the head. */
+const perkedNear = smooth([[-19, -147], [-19.4, -155], [-16.6, -162.4], [-11.6, -168.6], [-5, -172.6], [2.6, -173.6], [10.2, -171.6], [16.8, -167], [22, -160.6],
+  [25.8, -153.2], [27.6, -146], [26.8, -139.6], [23.8, -135.8], [19, -135.2], [14.4, -137.4], [10, -140.8], [5, -143.2], [0.6, -144.6], [-4, -145.2], [-10, -145.6],
+  [-15.4, -146]]);
+/** The far ear flipped up: from its root under the crown's far side, up behind the far curl, out past the far cheek. */
+const perkedFar = smooth([[-58, -150], [-61, -158], [-66.4, -164.6], [-73.8, -169], [-82.2, -170.8], [-90.4, -169.4], [-97.8, -165.4], [-104, -159.6], [-108.6, -152.6],
+  [-110.4, -145.6], [-108.8, -140], [-104.8, -137.4], [-99.8, -138.4], [-94.6, -141.4], [-88.6, -143.8], [-82, -145.4], [-75, -146.6], [-66, -148.4]]);
+
+/**
+ * With the near ear up, the back of the head and the nape it hung over show: the head's round runs on from under the
+ * crown's overhang (3.6, −136.8) down round the back of the skull, out to x 9.6 at y −104 (a head as wide as the front's
+ * 93 pt, turned, from the far cheek's puff at x −100), and in along the nape to the back's line at (−6.6, −53), where
+ * the back runs on down; its fur hangs over the collar's near end in a few soft locks. Cream, its far side in the fur's
+ * shade, and the root's tan under the crown, as the front's temple carries it (DECISIONS 133), paling down into the cream.
+ * Its inner side lies under the head.
+ */
+let nape = smooth([[-12, -146], [2, -142.6], [5.4, -136], [8, -127], [9.4, -116], [9.6, -104], [8.4, -92], [5.4, -81], [1, -72], [-3, -64.4], [-5.6, -57.6],
+  [-6.6, -53], [-10, -55.6], [-14, -57.6], [-19.6, -60.4], [-24, -66], [-23, -90], [-21, -120], [-18, -138]], { corners: [11] });
+nape = furEdge(nape, [-7.4, -53.8], [-19.6, -60.4], [{ len: 0.9, w: 1.4, lean: 0.3 }, { len: 0.6, w: 1, lean: 0.25 }, { len: 1, w: 1.5, lean: 0.35 }], 0.4);
+
+function perkedEar(side: "L" | "R", F: Facing): Piece {
+  const near = side === "L", shape = near ? perkedNear : perkedFar;
+  const paint = earFur(near ? {
+    ear: shape, axis: [[-6, -172], [25, -139]], deepen: [0.35, 1],
+    locks: [[[1, -170.4], [9.4, -167.6], [17, -161.6], [22.6, -153.6]], [[-1, -163.4], [7.6, -160.4], [15, -154.4], [21.2, -146.4]],
+      [[-2.4, -155.6], [5.6, -152.6], [12.6, -147.6], [18.2, -141.2]], [[3, -149], [8.8, -146.2], [13.4, -142]]],
+    dips: [[20.8, -135.6]],
+    light: F.lit("M-14 -166 C-8 -171.6 2 -173.4 11 -171 C5 -169.4 -2 -168 -9 -163.4Z", middle(shape)),
+    under: ["M-20 -150 C-12 -147.4 -4 -146.6 4 -143.6 L4 -138 L-20 -140Z"],
+    fold: { line: [[-9.6, -167.4], [-7, -161.6], [-4.4, -155.6], [-2, -149.4]], back: "M-9.6 -167.4 L-7 -161.6 L-4.4 -155.6 L-2 -149.4 L-16 -147 L-17 -160Z" },
+  } : {
+    ear: shape, axis: [[-74, -169], [-106, -139]], deepen: [0.3, 1.05],
+    locks: [[[-82, -169], [-91.6, -166.4], [-100, -160.4], [-106, -152.4]], [[-79, -162.6], [-88.4, -159.6], [-96.6, -153.6], [-103, -145.6]],
+      [[-77.4, -155.4], [-86.2, -152.4], [-94, -147.4], [-99.6, -141.4]], [[-82.6, -148.6], [-89.2, -146.4], [-94, -143]]],
+    dips: [[-102.4, -137.6]],
+    light: F.lit("M-64 -163 C-70 -168.6 -80 -170.8 -90 -169 C-84 -167.4 -76 -165.8 -68 -160.6Z", middle(shape)),
+    under: ["M-56 -150 C-64 -148.4 -72 -147.4 -80 -146 L-80 -140 L-56 -142Z"],
+    fold: { line: [[-66.6, -164.6], [-68, -158.6], [-69.6, -152.6]], back: "M-66.6 -164.6 L-68 -158.6 L-69.6 -152.6 L-58 -150 L-60 -160Z" },
+  });
+  // Its line from beside the root over its top and round the free end back under it, on the tan, breaking at the dip.
+  const spans: LitSpan[] = near
+    ? [{ from: [-19.2, -153], to: [20.8, -135.4], on: "tan", taper: [3, 2] }, { from: [20.8, -135.4], to: [1.2, -144.4], on: "tan", taper: [2, 5] }]
+    : [{ from: [-60.6, -156], to: [-103.2, -137.6], on: "tan", taper: [3, 2] }, { from: [-103.2, -137.6], to: [-80, -145.8], on: "tan", taper: [2, 5] }];
+  const flap = litPart(`ear.${side}`, shape, { ...paint, light: F.light }, spans);
+  if (!near) return flap;
+  const tan = uid("tan"), band = uid("band"), fade = uid("blur");
+  const back = litPart("ear.L nape", nape, {
+    fill: C.fur,
+    // The root's tan under the crown's overhang, deepest there and paling down the back of the head into the cream; and
+    // the near hood's band up the face's side (38), which ran on under the hanging ear, behind the face's side down to
+    // the cheek, paling back into the cream, so the face's line there lies on the tan, as it did on the ear.
+    under: `<defs><linearGradient id="${tan}" gradientUnits="userSpaceOnUse" x1="-4" y1="-143" x2="2" y2="-112">` +
+      `<stop offset="0" stop-color="${C.earDeep}" stop-opacity="0.75"/><stop offset="0.35" stop-color="${C.patch}" stop-opacity="0.8"/>` +
+      `<stop offset="1" stop-color="${C.patch}" stop-opacity="0"/></linearGradient>` +
+      `<linearGradient id="${band}" gradientUnits="userSpaceOnUse" x1="-9" y1="0" x2="3" y2="0">` +
+      `<stop offset="0" stop-color="${C.patch}"/><stop offset="1" stop-color="${C.patch}" stop-opacity="0"/></linearGradient>${blur(fade, [-30, -150, 46, 76], 2)}</defs>` +
+      `<path d="M-22 -146 L8 -146 C12 -132 10 -118 2 -110 C-6 -106 -16 -108 -22 -112Z" fill="url(#${tan})"/>` +
+      `<path d="M-24 -132 L-2 -132 C-2 -118 -4 -104 -7 -94 C-9 -88 -12 -84 -16 -82 L-24 -82Z" fill="url(#${band})" filter="url(#${fade})"/>`,
+    shade: furShade([nape]),
+    light: F.light,
+  }, [{ from: [5, -137], to: [-5, -59], taper: [6, 8] }]);
+  // Its canvas grown to hold its rim of shade's whole reach (front.ts's roomy rule).
+  return join(roomy(back, 2), flap);
+}
+
+/**
+ * Proud's stars beside the head on the dog's right (DECISIONS 138), here the far side: the larger out past the far ear's
+ * top and the smaller above it, clear of the ear in every state, as the front puts them from its head.
+ */
+const STARS: Star[] = [{ at: [-122, -150], size: [11.4, 14.4], turn: 0 }, { at: [-104.6, -164], size: [9.6, 10.4], turn: 0 }];
+
+/** The face states this view draws besides its rest, in a facing: threeQuarter.L's, or threeQuarter.R's drawn again in it. */
+export function threeQuarterFaces(facingSide: Side = "L"): Drawn[] {
+  const F = facing(facingSide);
+  const out: Drawn[] = [];
+  for (const side of ["L", "R"] as const) for (const state of EYE_STATES) out.push({ part: `eye.${side}`, state, piece: eyeState(state, side) });
+  for (const state of TURNED_MOUTHS) {
+    out.push({ part: "mouth", state, piece: turnedMouth(state, muzzle(F.light, state === "o" || state === "yawn" ? ROUND : undefined), NOSE_FOOT).piece });
+  }
+  for (const state of ["raised", "happy"] as const) {
+    for (const side of ["L", "R"] as const) out.push({ part: `brow.${side}`, state, piece: brow(browState(BROWS[side].pts, state), BROWS[side].width) });
+  }
+  for (const side of ["L", "R"] as const) out.push({ part: `ear.${side}`, state: "onePerked", piece: perkedEar(side, F) });
+  // The head's line beside the near ear raised: the state names the dog's side (the front's), so .R's near ear is its right.
+  out.push({ part: "head.line", state: facingSide === "L" ? "templeL" : "templeR", piece: headLinePiece(F, true) });
+  return F.finish(out);
+}
+
+/**
+ * The face states drawn and tested but held out of the package for now, in a facing: the sparkle's stars. The rig holds
+ * the stars to the front (faces.test.ts holds that no turned view draws them, and the turned views' order tests hold
+ * their draw orders), so the review build of the turned faces' evidence adds them (qa/phase3/faces/turned/render.ts;
+ * DECISIONS 183).
+ */
+export function threeQuarterHeld(facingSide: Side = "L"): Drawn[] {
+  const F = facing(facingSide);
+  return F.finish([{ part: "stars", state: "sparkle", piece: turnedStars(STARS, F.light) }]);
+}
+
+/** What the face states are drawn from, for the R3 guards (characters/dog/test/faces.turned.test.ts). */
+export const threeQuarterFace = {
+  muzzle: (light: P, state: TurnedMouthState | "open") => muzzle(light, state === "o" || state === "yawn" ? ROUND : undefined),
+  nose: NOSE_FOOT,
+  rest: { lip: REST_LIP, lipCentre: [-69.4, -85.8] as P },
+  brows: (state: BrowState) => ({ L: browState(BROWS.L.pts, state), R: browState(BROWS.R.pts, state) }),
+  eyes: EYES,
+  perked: { L: perkedNear, R: perkedFar },
+  /** The muzzle's level, the line through the rest mouth's corners (7.5°): the R3 guards' level frame here (DECISIONS 179). */
+  levelDeg: 7.5,
 };

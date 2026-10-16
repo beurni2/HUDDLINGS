@@ -11,18 +11,18 @@ import { back, landmarks as backLandmarks } from "./views/back.ts";
 import { landmarksFor } from "./views/facing.ts";
 import { faceStates, front, landmarks as frontLandmarks } from "./views/front.ts";
 import { side, landmarks as sideLandmarks } from "./views/side.ts";
-import { threeQuarter, landmarks as threeQuarterLandmarks } from "./views/threeQuarter.ts";
+import { threeQuarter, threeQuarterFaces, landmarks as threeQuarterLandmarks } from "./views/threeQuarter.ts";
 
 const rig = JSON.parse(readFileSync(new URL("./rig.json", import.meta.url), "utf8")) as Rig;
 
 /**
- * Each view's drawings: the front's rest and its face states, and the turned views in both facings, each .R its .L
- * view mirrored and lit again (views/facing.ts).
+ * Each view's drawings: the front's rest and its face states, and the turned views in both facings (the
+ * three-quarter's with its face states), each .R its .L view mirrored and lit again (views/facing.ts).
  */
 const VIEWS = {
   front: () => [...front(), ...faceStates()],
-  "threeQuarter.L": () => threeQuarter("L"),
-  "threeQuarter.R": () => threeQuarter("R"),
+  "threeQuarter.L": () => [...threeQuarter("L"), ...threeQuarterFaces("L")],
+  "threeQuarter.R": () => [...threeQuarter("R"), ...threeQuarterFaces("R")],
   "side.L": () => side("L"),
   "side.R": () => side("R"),
   back: () => back(),
