@@ -11,27 +11,27 @@
    "failing": [
     {
      "region": "ear.L|head.base",
-     "measure": "gapPt",
+     "measure": "weakPt",
      "value": 10.61,
-     "threshold": 1.5
+     "threshold": 2.121
     },
     {
      "region": "ear.L|head.base across",
-     "measure": "gapPt",
-     "value": 2.33,
-     "threshold": 1.5
+     "measure": "recall",
+     "value": 0.579,
+     "threshold": 0.781
     },
     {
      "region": "ear.R|head.base",
-     "measure": "gapPt",
-     "value": 7.46,
-     "threshold": 1.5
+     "measure": "weakPt",
+     "value": 8.59,
+     "threshold": 1.943
     },
     {
      "region": "ear.R|head.base across",
      "measure": "recall",
-     "value": 0.467,
-     "threshold": 0.78
+     "value": 0.545,
+     "threshold": 0.818
     }
    ],
    "caught": true
@@ -46,9 +46,9 @@
    "failing": [
     {
      "region": "collar|head.base",
-     "measure": "inkLog",
-     "value": -1.557,
-     "threshold": 1.014
+     "measure": "regionInkLog",
+     "value": -1.241,
+     "threshold": 0.632
     }
    ],
    "caught": true
@@ -66,20 +66,14 @@
     {
      "region": "body.front|front.L",
      "measure": "gapPt",
-     "value": 20.21,
-     "threshold": 1.5
-    },
-    {
-     "region": "body.front|front.L across",
-     "measure": "precision",
-     "value": 0.0,
-     "threshold": 0.9
+     "value": 19.25,
+     "threshold": 1.943
     },
     {
      "region": "body.front|front.R",
      "measure": "gapPt",
-     "value": 14.55,
-     "threshold": 1.5
+     "value": 15.87,
+     "threshold": 1.943
     }
    ],
    "caught": true
@@ -95,21 +89,15 @@
    "failing": [
     {
      "region": "front.L|ground",
-     "measure": "widthCvRatio",
-     "value": 0.436,
-     "threshold": 0.576
+     "measure": "toneDelta",
+     "value": -12.5,
+     "threshold": 5.386
     },
     {
      "region": "front.R|ground",
-     "measure": "widthCvRatio",
-     "value": 0.283,
-     "threshold": 0.491
-    },
-    {
-     "region": "front.R|ground across",
      "measure": "toneDelta",
-     "value": 8.5,
-     "threshold": 4.62
+     "value": -12.5,
+     "threshold": 4.952
     }
    ],
    "caught": true
@@ -125,15 +113,15 @@
    "failing": [
     {
      "region": "body.back|front.L",
-     "measure": "lightSeamPt",
-     "value": 9.33,
-     "threshold": 4.279
+     "measure": "toneDelta",
+     "value": -10.0,
+     "threshold": 3.0
     },
     {
      "region": "body.back|front.R",
-     "measure": "lightSeamPt",
-     "value": 18.92,
-     "threshold": 3.421
+     "measure": "inkLog",
+     "value": -1.202,
+     "threshold": 0.288
     }
    ],
    "caught": true
@@ -148,15 +136,15 @@
    "failing": [
     {
      "region": "ear.L|head.base",
-     "measure": "gapPt",
-     "value": 11.44,
-     "threshold": 1.5
+     "measure": "inkLog",
+     "value": -2.084,
+     "threshold": 0.554
     },
     {
      "region": "ear.L|head.base across",
      "measure": "recall",
-     "value": 0.7,
-     "threshold": 0.9
+     "value": 0.6,
+     "threshold": 0.8
     }
    ],
    "caught": true
@@ -173,15 +161,9 @@
    "failing": [
     {
      "region": "body.front|front.R",
-     "measure": "gapPt",
-     "value": 10.38,
-     "threshold": 1.5
-    },
-    {
-     "region": "body.front|front.R across",
-     "measure": "recall",
-     "value": 0.889,
-     "threshold": 0.9
+     "measure": "toneDelta",
+     "value": 16.0,
+     "threshold": 3.619
     }
    ],
    "caught": true
@@ -214,15 +196,15 @@
    "failing": [
     {
      "region": "ear.R|head.base",
-     "measure": "gapPt",
-     "value": 13.8,
-     "threshold": 1.5
+     "measure": "inkLog",
+     "value": -1.905,
+     "threshold": 0.554
     },
     {
      "region": "ear.R|head.base across",
      "measure": "recall",
-     "value": 0.5,
-     "threshold": 0.9
+     "value": 0.6,
+     "threshold": 0.8
     }
    ],
    "caught": true
@@ -239,15 +221,9 @@
    "failing": [
     {
      "region": "body.front|front.L",
-     "measure": "gapPt",
-     "value": 10.38,
-     "threshold": 1.5
-    },
-    {
-     "region": "body.front|front.L across",
-     "measure": "recall",
-     "value": 0.889,
-     "threshold": 0.9
+     "measure": "toneDelta",
+     "value": 15.9,
+     "threshold": 3.619
     }
    ],
    "caught": true
@@ -288,9 +264,9 @@
     },
     {
      "region": "front.L|front.R",
-     "measure": "inkLog",
-     "value": -0.704,
-     "threshold": 0.426
+     "measure": "toneDelta",
+     "value": 11.0,
+     "threshold": 3.858
     }
    ],
    "caught": true
@@ -308,20 +284,14 @@
     {
      "region": "body.front|front.L",
      "measure": "gapPt",
-     "value": 4.25,
-     "threshold": 1.5
-    },
-    {
-     "region": "body.front|front.L across",
-     "measure": "recall",
-     "value": 0.333,
-     "threshold": 0.75
+     "value": 7.73,
+     "threshold": 1.943
     },
     {
      "region": "front.L",
-     "measure": "extraPt",
-     "value": 7.19,
-     "threshold": 1.5
+     "measure": "gapPt",
+     "value": 2.33,
+     "threshold": 1.943
     }
    ],
    "caught": true
@@ -338,8 +308,8 @@
     {
      "region": "body.back|ground",
      "measure": "inkLog",
-     "value": -3.103,
-     "threshold": 0.323
+     "value": -2.113,
+     "threshold": 0.288
     },
     {
      "region": "hind.L|ground",
@@ -368,9 +338,9 @@
     },
     {
      "region": "front.L|front.R",
-     "measure": "inkLog",
-     "value": -0.565,
-     "threshold": 0.426
+     "measure": "toneDelta",
+     "value": 9.8,
+     "threshold": 3.858
     }
    ],
    "caught": true
@@ -388,20 +358,14 @@
     {
      "region": "body.front|front.R",
      "measure": "gapPt",
-     "value": 4.25,
-     "threshold": 1.5
-    },
-    {
-     "region": "body.front|front.R across",
-     "measure": "recall",
-     "value": 0.333,
-     "threshold": 0.75
+     "value": 7.73,
+     "threshold": 1.943
     },
     {
      "region": "front.R",
-     "measure": "extraPt",
-     "value": 7.19,
-     "threshold": 1.5
+     "measure": "gapPt",
+     "value": 3.11,
+     "threshold": 1.943
     }
    ],
    "caught": true
@@ -418,8 +382,8 @@
     {
      "region": "body.back|ground",
      "measure": "inkLog",
-     "value": -3.103,
-     "threshold": 0.323
+     "value": -2.101,
+     "threshold": 0.288
     },
     {
      "region": "hind.R|ground",
@@ -440,9 +404,9 @@
    "failing": [
     {
      "region": "body.back|outside",
-     "measure": "inkLog",
-     "value": -0.949,
-     "threshold": 0.461
+     "measure": "weakPt",
+     "value": 5.01,
+     "threshold": 1.962
     }
    ],
    "caught": true
@@ -459,9 +423,9 @@
    "failing": [
     {
      "region": "body.back|ground",
-     "measure": "furCrossings10Pt",
-     "value": 0.0,
-     "threshold": 0.986
+     "measure": "toneDelta",
+     "value": 9.0,
+     "threshold": 4.667
     },
     {
      "region": "hind.L|ground",

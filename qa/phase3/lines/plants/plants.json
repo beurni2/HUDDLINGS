@@ -11,8 +11,8 @@
    ],
    "newFailures": {
     "ear.R|head.base": {
-     "gapPt": [2.33, 1.5],
-     "inkLog": [-0.898, 0.704]
+     "gapPt": [2.33, 1.943],
+     "weakPt": [5.44, 1.943]
     }
    },
    "flippedElsewhere": [],
@@ -24,8 +24,11 @@
    "fault": "8 pt tapers at every span's joint, a span every 12 pt",
    "view": "front",
    "regions": [
+    "body.back|front.L",
+    "body.back|front.R",
     "body.back|hind.L",
     "body.back|outside",
+    "body.front|front.L",
     "body.front|front.R",
     "ear.L|head.base",
     "ear.L|outside",
@@ -34,73 +37,112 @@
     "front.L|ground",
     "front.L|hind.L",
     "front.R|ground",
-    "front.R|ground across",
     "front.R|hind.R",
     "head.base|outside",
     "hind.L|ground",
+    "hind.R|ground",
     "tuft|outside"
    ],
    "newFailures": {
+    "body.back|front.L": {
+     "weakPt": [4.66, 1.943],
+     "toneDelta": [5.5, 3.0],
+     "inkLog": [-0.878, 0.298]
+    },
+    "body.back|front.R": {
+     "recall": [0.875, 0.9],
+     "gapPt": [2.33, 1.943],
+     "weakPt": [3.24, 1.943],
+     "toneDelta": [7.6, 3.0],
+     "inkLog": [-0.805, 0.288]
+    },
     "body.back|hind.L": {
-     "inkLog": [-0.772, 0.561]
+     "weakPt": [2.52, 1.943],
+     "toneDelta": [3.9, 3.0],
+     "inkLog": [-0.47, 0.392]
     },
     "body.back|outside": {
-     "gapPt": [2.33, 1.5],
-     "toneDelta": [19.4, 13.2],
-     "inkLog": [-1.151, 0.613]
+     "gapPt": [2.33, 1.943],
+     "weakPt": [4.66, 1.943],
+     "toneDelta": [11.6, 4.92],
+     "inkLog": [-1.117, 0.414],
+     "regionInkLog": [-0.547, 0.405]
+    },
+    "body.front|front.L": {
+     "toneDelta": [7.7, 3.936],
+     "inkLog": [-0.692, 0.642]
     },
     "body.front|front.R": {
-     "inkLog": [-0.85, 0.792]
+     "recall": [0.829, 0.9],
+     "gapPt": [3.11, 1.943],
+     "toneDelta": [14.7, 3.398],
+     "inkLog": [-0.912, 0.557],
+     "regionInkLog": [-0.509, 0.405]
     },
     "ear.L|head.base": {
-     "gapPt": [3.11, 1.5],
-     "toneDelta": [17.5, 9.9],
-     "inkLog": [-1.313, 0.649],
-     "lightSeamPt": [5.75, 5.126]
+     "weakPt": [4.74, 2.121],
+     "toneDelta": [11.8, 7.71],
+     "inkLog": [-1.155, 0.501],
+     "regionInkLog": [-0.548, 0.405]
     },
     "ear.L|outside": {
-     "gapPt": [2.98, 2.068],
-     "inkLog": [-1.092, 1.013]
+     "regionInkLog": [-0.722, 0.69]
     },
     "ear.R|head.base": {
-     "gapPt": [4.66, 1.5],
-     "inkLog": [-0.939, 0.704]
+     "gapPt": [2.33, 1.943],
+     "weakPt": [4.66, 1.943],
+     "toneDelta": [12.7, 10.133],
+     "inkLog": [-1.056, 0.952]
     },
     "ear.R|outside": {
-     "recall": [0.847, 0.9],
-     "gapPt": [5.44, 1.5],
-     "toneDelta": [14.7, 13.09],
-     "inkLog": [-1.036, 0.971]
+     "recall": [0.759, 0.894],
+     "gapPt": [5.44, 1.943],
+     "weakPt": [2.52, 2.121],
+     "inkLog": [-1.42, 0.86],
+     "regionInkLog": [-0.744, 0.695]
     },
     "front.L|ground": {
-     "inkLog": [-0.756, 0.332]
+     "weakPt": [3.98, 1.943],
+     "toneDelta": [12.9, 5.386],
+     "inkLog": [-0.784, 0.373]
     },
     "front.L|hind.L": {
-     "inkLog": [-0.712, 0.552]
+     "weakPt": [2.98, 1.943],
+     "toneDelta": [17.3, 8.144],
+     "inkLog": [-0.727, 0.52]
     },
     "front.R|ground": {
-     "inkLog": [-0.647, 0.443]
-    },
-    "front.R|ground across": {
-     "toneDelta": [5.5, 4.62]
+     "weakPt": [3.24, 1.943],
+     "toneDelta": [12.8, 4.952],
+     "inkLog": [-0.759, 0.288],
+     "regionInkLog": [-0.469, 0.405]
     },
     "front.R|hind.R": {
-     "toneDelta": [18.6, 15.4],
-     "inkLog": [-0.956, 0.714]
+     "weakPt": [3.89, 1.943],
+     "toneDelta": [16.0, 4.07],
+     "inkLog": [-1.283, 0.551]
     },
     "head.base|outside": {
-     "toneDelta": [11.6, 10.67],
-     "inkLog": [-0.837, 0.526]
+     "weakPt": [4.96, 2.772],
+     "toneDelta": [12.1, 4.123],
+     "inkLog": [-0.943, 0.456]
     },
     "hind.L|ground": {
-     "gapPt": [1.55, 1.5],
-     "inkLog": [-0.898, 0.515]
+     "weakPt": [4.74, 1.943],
+     "toneDelta": [18.9, 5.205],
+     "inkLog": [-0.685, 0.44]
+    },
+    "hind.R|ground": {
+     "weakPt": [3.89, 1.943],
+     "toneDelta": [14.7, 5.114],
+     "inkLog": [-0.931, 0.412],
+     "regionInkLog": [-0.519, 0.405]
     },
     "tuft|outside": {
-     "recall": [0.895, 0.9],
-     "gapPt": [3.11, 1.5],
-     "toneDelta": [13.1, 8.58],
-     "inkLog": [-0.88, 0.678]
+     "recall": [0.882, 0.9],
+     "gapPt": [2.33, 1.943],
+     "toneDelta": [11.2, 8.04],
+     "regionInkLog": [-0.601, 0.405]
     }
    },
    "flippedElsewhere": [],
@@ -109,14 +151,19 @@
   {
    "plant": "6",
    "planted": "crop",
-   "fault": "three dark 3 pt claw ticks on a sole",
+   "fault": "three dark 3 pt claw ticks on a sole (standing into the paw)",
    "view": "front",
    "regions": [
-    "front.L|ground"
+    "front.L|ground",
+    "front.L"
    ],
    "newFailures": {
-    "front.L|ground across": {
-     "toneDelta": [-31.6, 4.84]
+    "front.L": {
+     "extraPt": [3.24, 1.943],
+     "regionInkLog": [0.857, 0.441]
+    },
+    "front.L|ground": {
+     "toneDelta": [-5.7, 5.386]
     }
    },
    "flippedElsewhere": [],
@@ -132,10 +179,8 @@
    ],
    "newFailures": {
     "front.L|ground": {
-     "inkLog": [0.423, 0.332]
-    },
-    "front.L|ground across": {
-     "toneDelta": [-36.6, 4.84]
+     "toneDelta": [-14.8, 5.386],
+     "inkLog": [0.458, 0.373]
     }
    },
    "flippedElsewhere": [],
@@ -151,9 +196,8 @@
    ],
    "newFailures": {
     "body.front": {
-     "precision": [0.0, 0.45],
-     "extraPt": [11.69, 2.068],
-     "inkLog": [2.111, 0.417]
+     "extraPt": [5.99, 1.943],
+     "regionInkLog": [2.286, 0.555]
     }
    },
    "flippedElsewhere": [],
@@ -169,12 +213,9 @@
    ],
    "newFailures": {
     "body.back|front.R": {
-     "precision": [0.893, 0.9],
-     "extraPt": [1.88, 1.5],
-     "lightSeamPt": [12.67, 3.421]
-    },
-    "body.back|front.R across": {
-     "precision": [0.833, 0.9]
+     "precision": [0.85, 0.9],
+     "toneDelta": [4.2, 3.0],
+     "lightSeamPt": [10.23, 6.995]
     }
    },
    "flippedElsewhere": [],
@@ -190,12 +231,10 @@
     "head.base|outside"
    ],
    "newFailures": {
-    "collar|head.base": {
-     "inkLog": [-0.846, 0.793]
-    },
     "head.base|outside": {
-     "gapPt": [3.98, 1.5],
-     "inkLog": [-2.133, 1.844]
+     "weakPt": [10.23, 4.864],
+     "toneDelta": [21.9, 12.624],
+     "inkLog": [-1.835, 0.631]
     }
    },
    "flippedElsewhere": [],
@@ -211,9 +250,9 @@
    ],
    "newFailures": {
     "body.back|tail": {
-     "toneDelta": [31.7, 7.48],
-     "inkLog": [-0.98, 0.639],
-     "lightSeamPt": [21.89, 6.259]
+     "toneDelta": [23.2, 4.22],
+     "inkLog": [-0.714, 0.288],
+     "lightSeamPt": [17.27, 6.995]
     }
    },
    "flippedElsewhere": [],
@@ -229,7 +268,7 @@
    ],
    "newFailures": {
     "tuft|outside": {
-     "toneDelta": [-10.0, 8.58]
+     "extraPt": [2.52, 2.068]
     }
    },
    "flippedElsewhere": [],
@@ -245,8 +284,10 @@
    ],
    "newFailures": {
     "ear.L|outside": {
-     "gapPt": [4.66, 1.5],
-     "inkLog": [-1.508, 0.616]
+     "gapPt": [4.66, 1.943],
+     "weakPt": [3.11, 1.943],
+     "toneDelta": [9.4, 5.95],
+     "inkLog": [-1.241, 0.775]
     }
    },
    "flippedElsewhere": [],
@@ -255,14 +296,20 @@
   {
    "plant": "sheet-b",
    "planted": "crop",
-   "fault": "the sheet's own: the tail's edge blurred (1.2 px)",
+   "fault": "the sheet's own: the tail's edge blurred (2 px)",
    "view": "side.L",
    "regions": [
     "tail|outside"
    ],
    "newFailures": {
     "tail|outside": {
-     "toneDelta": [17.3, 15.73]
+     "recall": [0.686, 0.88],
+     "gapPt": [10.23, 2.728],
+     "inkLog": [-0.918, 0.751],
+     "regionInkLog": [-0.755, 0.405]
+    },
+    "tail|outside across": {
+     "recall": [0.789, 0.855]
     }
    },
    "flippedElsewhere": [],
@@ -278,9 +325,7 @@
    ],
    "newFailures": {
     "ear.R|outside": {
-     "widthCvRatio": [0.518, 0.54],
-     "toneDelta": [17.2, 13.09],
-     "inkLog": [-1.174, 0.971],
+     "gapPt": [4.25, 1.943],
      "risePt": [1.567, 0.697]
     }
    },
@@ -293,13 +338,17 @@
    "fault": "one ear's outer edge replaced by its smoothed hull",
    "view": "front",
    "regions": [
-    "ear.R|outside"
+    "ear.R|outside",
+    "ear.R"
    ],
    "newFailures": {
+    "ear.R": {
+     "recall": [0.0, 0.55],
+     "gapPt": [2.98, 1.943],
+     "toneDelta": [7.1, 3.648]
+    },
     "ear.R|outside": {
-     "toneDelta": [14.7, 13.09],
-     "furRmsPt": [0.091, 0.146],
-     "furCrossings10Pt": [0.348, 0.515]
+     "furRmsPt": [0.091, 0.135]
     }
    },
    "flippedElsewhere": [],
@@ -315,6 +364,7 @@
    ],
    "newFailures": {
     "front.R|ground": {
+     "widthCv": [0.07, 0.084],
      "furCrossings10Pt": [0.0, 0.643]
     }
    },
@@ -331,10 +381,309 @@
    ],
    "newFailures": {
     "front.R|ground": {
-     "widthPt": [1.588, 1.544]
+     "inkLog": [0.584, 0.288],
+     "regionInkLog": [0.422, 0.405],
+     "widthPt": [1.588, 1.522]
     }
    },
    "flippedElsewhere": [],
+   "ok": true
+  }
+ ],
+ "paleOnEveryContactEdge": [
+  {
+   "plant": "11",
+   "planted": "crop",
+   "view": "threeQuarter.R",
+   "region": "body.back|front.R",
+   "share": 0.6,
+   "paintedPx": 47,
+   "short": true,
+   "failing": {
+    "body.back|front.R": {
+     "toneDelta": [7.6, 3.0]
+    }
+   },
+   "elsewhere": [
+    "body.back|hind.R"
+   ],
+   "ok": true
+  },
+  {
+   "plant": "11",
+   "planted": "crop",
+   "view": "threeQuarter.R",
+   "region": "body.back|hind.R",
+   "share": 0.6,
+   "paintedPx": 52,
+   "short": true,
+   "failing": {
+    "body.back|hind.R": {
+     "weakPt": [3.15, 1.889],
+     "toneDelta": [9.0, 6.163],
+     "inkLog": [-0.702, 0.459]
+    }
+   },
+   "elsewhere": [
+    "body.back|front.R"
+   ],
+   "ok": true
+  },
+  {
+   "plant": "11",
+   "planted": "crop",
+   "view": "threeQuarter.R",
+   "region": "body.back|tail",
+   "share": 0.6,
+   "paintedPx": 73,
+   "short": false,
+   "failing": {
+    "body.back|tail": {
+     "toneDelta": [21.2, 3.0],
+     "regionInkLog": [-0.516, 0.405],
+     "lightSeamPt": [15.14, 6.802]
+    }
+   },
+   "elsewhere": [],
+   "ok": true
+  },
+  {
+   "plant": "11",
+   "planted": "crop",
+   "view": "threeQuarter.R",
+   "region": "body.front|front.L",
+   "share": 0.6,
+   "paintedPx": 98,
+   "short": false,
+   "failing": {
+    "body.front|front.L": {
+     "toneDelta": [11.7, 3.619],
+     "inkLog": [-1.532, 0.47],
+     "regionInkLog": [-0.543, 0.405]
+    }
+   },
+   "elsewhere": [],
+   "ok": true
+  },
+  {
+   "plant": "11",
+   "planted": "crop",
+   "view": "threeQuarter.R",
+   "region": "body.front|front.R",
+   "share": 0.6,
+   "paintedPx": 39,
+   "short": false,
+   "failing": {
+    "body.front|front.R": {
+     "toneDelta": [7.7, 4.137],
+     "inkLog": [-0.809, 0.288],
+     "regionInkLog": [-0.457, 0.405]
+    }
+   },
+   "elsewhere": [],
+   "ok": true
+  },
+  {
+   "plant": "11",
+   "planted": "crop",
+   "view": "threeQuarter.R",
+   "region": "ear.L|head.base",
+   "share": 0.6,
+   "paintedPx": 238,
+   "short": false,
+   "failing": {
+    "ear.L|head.base": {
+     "weakPt": [3.02, 1.889],
+     "toneDelta": [22.6, 13.804],
+     "inkLog": [-1.924, 0.94],
+     "regionInkLog": [-1.138, 0.405],
+     "lightSeamPt": [19.04, 10.846]
+    }
+   },
+   "elsewhere": [],
+   "ok": true
+  },
+  {
+   "plant": "11",
+   "planted": "crop",
+   "view": "threeQuarter.R",
+   "region": "ear.R|head.base",
+   "share": 0.6,
+   "paintedPx": 302,
+   "short": false,
+   "failing": {
+    "ear.R|head.base": {
+     "weakPt": [5.35, 3.839],
+     "toneDelta": [25.3, 12.328],
+     "inkLog": [-2.177, 0.554],
+     "regionInkLog": [-1.348, 0.405],
+     "lightSeamPt": [23.14, 8.812]
+    }
+   },
+   "elsewhere": [],
+   "ok": true
+  },
+  {
+   "plant": "11",
+   "planted": "crop",
+   "view": "threeQuarter.R",
+   "region": "front.L|front.R",
+   "share": 0.6,
+   "paintedPx": 38,
+   "short": true,
+   "failing": {
+    "front.L|front.R": {
+     "toneDelta": [11.9, 3.366],
+     "inkLog": [-1.1, 0.288],
+     "regionInkLog": [-0.944, 0.405]
+    }
+   },
+   "elsewhere": [],
+   "ok": true
+  },
+  {
+   "plant": "11",
+   "planted": "crop",
+   "view": "threeQuarter.R",
+   "region": "head.base|tuft",
+   "share": 0.6,
+   "paintedPx": 75,
+   "short": true,
+   "failing": {
+    "head.base|tuft": {
+     "toneDelta": [10.1, 6.215],
+     "inkLog": [-0.798, 0.398],
+     "regionInkLog": [-0.495, 0.405]
+    }
+   },
+   "elsewhere": [],
+   "ok": true
+  },
+  {
+   "plant": "11",
+   "planted": "crop",
+   "view": "side.R",
+   "region": "body.back|body.front",
+   "share": 0.6,
+   "paintedPx": 50,
+   "short": false,
+   "failing": {
+    "body.back|body.front": {
+     "toneDelta": [5.7, 3.0],
+     "inkLog": [-1.024, 0.288],
+     "regionInkLog": [-0.592, 0.405]
+    }
+   },
+   "elsewhere": [],
+   "ok": true
+  },
+  {
+   "plant": "11",
+   "planted": "crop",
+   "view": "side.R",
+   "region": "body.back|ear.R",
+   "share": 0.6,
+   "paintedPx": 26,
+   "short": false,
+   "failing": {
+    "body.back|ear.R": {
+     "weakPt": [2.52, 1.943],
+     "toneDelta": [9.6, 3.185],
+     "inkLog": [-0.724, 0.288]
+    }
+   },
+   "elsewhere": [],
+   "ok": true
+  },
+  {
+   "plant": "11",
+   "planted": "crop",
+   "view": "side.R",
+   "region": "body.back|hind.R",
+   "share": 0.6,
+   "paintedPx": 34,
+   "short": false,
+   "failing": {
+    "body.back|hind.R": {
+     "toneDelta": [3.7, 3.192],
+     "inkLog": [-0.829, 0.362]
+    }
+   },
+   "elsewhere": [],
+   "ok": true
+  },
+  {
+   "plant": "11",
+   "planted": "crop",
+   "view": "side.R",
+   "region": "body.back|tail",
+   "share": 0.6,
+   "paintedPx": 84,
+   "short": false,
+   "failing": {
+    "body.back|tail": {
+     "toneDelta": [23.2, 4.22],
+     "inkLog": [-0.714, 0.288],
+     "lightSeamPt": [17.27, 6.995]
+    }
+   },
+   "elsewhere": [],
+   "ok": true
+  },
+  {
+   "plant": "11",
+   "planted": "crop",
+   "view": "side.R",
+   "region": "body.front|hind.R",
+   "share": 0.6,
+   "paintedPx": 43,
+   "short": true,
+   "failing": {
+    "body.front|hind.R": {
+     "toneDelta": [9.0, 5.095],
+     "inkLog": [-0.512, 0.474]
+    }
+   },
+   "elsewhere": [],
+   "ok": true
+  },
+  {
+   "plant": "11",
+   "planted": "crop",
+   "view": "side.R",
+   "region": "ear.R|head.base",
+   "share": 0.6,
+   "paintedPx": 362,
+   "short": false,
+   "failing": {
+    "ear.R|head.base": {
+     "gapPt": [3.11, 2.848],
+     "weakPt": [5.69, 1.943],
+     "toneDelta": [24.3, 7.762],
+     "inkLog": [-2.493, 0.745],
+     "regionInkLog": [-1.396, 0.418],
+     "lightSeamPt": [20.46, 12.139]
+    }
+   },
+   "elsewhere": [],
+   "ok": true
+  },
+  {
+   "plant": "11",
+   "planted": "crop",
+   "view": "side.R",
+   "region": "front.L|front.R",
+   "share": 0.6,
+   "paintedPx": 80,
+   "short": false,
+   "failing": {
+    "front.L|front.R": {
+     "toneDelta": [15.4, 3.858],
+     "inkLog": [-1.371, 0.344],
+     "regionInkLog": [-0.746, 0.405]
+    }
+   },
+   "elsewhere": [],
    "ok": true
   }
  ]
