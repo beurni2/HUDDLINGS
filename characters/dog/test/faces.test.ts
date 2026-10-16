@@ -290,6 +290,33 @@ test("the face clips are what presets.ts writes: one per preset drawn now, sound
   }
 });
 
+test("each preset's first panel is its primary in model.json, and its still winks the eye its primary winks", () => {
+  // The Faces check holds each preset to the one panel model.json's faceCrops names primary for it (DECISIONS 110);
+  // presets.ts lists that panel first, the still is drawn from it, and a wink closes the eye it closes (DECISIONS 141).
+  const model = JSON.parse(readFileSync(new URL("../model.json", import.meta.url), "utf8")) as {
+    faceCrops: Record<string, { primaryFor: string[]; presets: string[]; drawn: { wink?: string } }>;
+  };
+  const records = Object.entries(model.faceCrops);
+  for (const [name, p] of Object.entries(PRESETS)) {
+    if (p.next) continue;
+    const primary = records.filter(([, r]) => r.primaryFor.includes(name)).map(([id]) => id);
+    assert.deepEqual(primary, [p.crops[0]], `${name}'s first panel is its primary`);
+    assert.deepEqual(new Set(p.crops), new Set(records.filter(([, r]) => r.presets.includes(name)).map(([id]) => id)), `${name}'s panels are its records'`);
+    const wink = model.faceCrops[p.crops[0]!]!.drawn.wink;
+    const s = stillOf(p);
+    if (wink) {
+      const side = wink.slice(-1) as "L" | "R", other = side === "L" ? "R" : "L";
+      assert.equal(s.eyes[side], "wink", `${name} winks ${wink}, as its primary does`);
+      assert.equal(s.eyes[other], "open", `${name} keeps its other eye open`);
+    } else {
+      assert.ok(s.eyes.L !== "wink" && s.eyes.R !== "wink", `${name}'s primary draws no wink`);
+    }
+  }
+  // Planted: the wink on the dog's right eye, as it was, fails against Cheeky.
+  const s = stillOf({ ...PRESETS.mischievous!, wink: "R" });
+  assert.notEqual(s.eyes.L, "wink");
+});
+
 test("every face state draws a region, or a deliberate null, in every view that draws its part", () => {
   // The face clips key only the front, but phase 4 lays head turns over a face, so a state must never fall through to
   // nothing in a turned view: there it draws the view's rest drawing (the turned views' own states are next round's).

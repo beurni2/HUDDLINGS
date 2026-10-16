@@ -53,25 +53,25 @@ export interface Preset {
 export const PRESETS: Record<string, Preset> = {
   neutral: {
     eyes: ["open"], mouth: ["smile"], ears: "neutral", brows: "neutral", blush: null,
-    panels: "Happy (default), Idle", crops: ["expressions.expression.happy", "master.expression.happy"],
+    panels: "Happy (default), Idle", crops: ["master.expression.happy", "expressions.expression.happy"],
   },
   happy: {
     eyes: ["open"], eyesNote: "pupils larger", mouth: ["open"], ears: "neutral", brows: "neutral", blush: null,
-    panels: "Happy", crops: ["expressions.expression.happy", "master.expression.happy"],
+    panels: "Happy", crops: ["master.expression.happy", "expressions.expression.happy"],
   },
   excited: {
     // The dog's squeeze is its happy crescent (Q2).
     eyes: ["squeeze", "happy"], eyesHow: "or", eyesNote: "squeeze (kitty, bear) or happy", mouth: ["open"], ears: "lifted", brows: "happy", blush: null,
-    panels: "Excited", crops: ["expressions.expression.excited", "master.expression.excited"], still: { eyes: "happy" },
+    panels: "Excited", crops: ["master.expression.excited", "expressions.expression.excited"], still: { eyes: "happy" },
   },
   laughing: {
     eyes: ["happy"], mouth: ["laugh"], ears: "neutral", earsNote: "bouncing", brows: "happy", blush: null,
-    panels: "Laughing", crops: ["expressions.expression.laughing", "master.expression.laughing"],
+    panels: "Laughing", crops: ["master.expression.laughing", "expressions.expression.laughing"],
   },
   curious: {
     eyes: ["open"], eyesNote: "glancing up", mouth: ["o", "smile"], mouthHow: "or", ears: "onePerked", brows: "raised", blush: null,
     // The expression sheet's Curious draws a mouth whose ends hang below its middle (R3); the master sheet's Curious smiles.
-    panels: "Curious", crops: ["expressions.expression.curious", "master.expression.curious"], still: { mouth: "smile" }, perk: "L",
+    panels: "Curious", crops: ["master.expression.curious", "expressions.expression.curious"], still: { mouth: "smile" }, perk: "L",
   },
   surprised: {
     eyes: ["wide"], mouth: ["o"], ears: "lifted", brows: "raised", blush: null,
@@ -84,12 +84,12 @@ export const PRESETS: Record<string, Preset> = {
   proud: {
     sequence: "happy, then sparkle",
     eyes: ["happy", "sparkle"], eyesHow: "then", mouth: ["smile"], ears: "lifted", brows: "happy", blush: null,
-    panels: "Proud", crops: ["expressions.expression.proud"], still: { eyes: "sparkle" },
+    panels: "Proud", crops: ["master.expression.content", "expressions.expression.proud"], still: { eyes: "sparkle" },
   },
   mischievous: {
-    // The brow over the wink comes down with it, as the panel draws it.
-    eyes: ["wink"], mouth: ["cheeky"], ears: "onePerked", brows: { L: "neutral", R: "happy" }, blush: null,
-    panels: "Mischievous", crops: ["expressions.expression.mischievous", "master.expression.cheeky", "master.expression.winking"], wink: "R", perk: "L",
+    // The dog's left eye winks, as Cheeky, the primary, draws it (DECISIONS 111, 141); its brows stay level, as Cheeky's do.
+    eyes: ["wink"], mouth: ["cheeky"], ears: "onePerked", brows: "neutral", blush: null,
+    panels: "Mischievous", crops: ["master.expression.cheeky", "master.expression.winking", "expressions.expression.mischievous"], wink: "L", perk: "L",
   },
   content: {
     eyes: ["happy"], mouth: ["smile"], ears: "relaxed", brows: "happy", blush: null,
@@ -98,7 +98,7 @@ export const PRESETS: Record<string, Preset> = {
   sleepy: {
     sequence: "sleepy, then closed",
     eyes: ["sleepy", "closed"], eyesHow: "then", mouth: ["smile"], ears: "lowered", brows: "neutral", blush: null,
-    panels: "Sleepy", crops: ["expressions.expression.sleepy", "master.expression.sleepy"], still: { eyes: "closed" },
+    panels: "Sleepy", crops: ["master.expression.sleepy", "expressions.expression.sleepy"], still: { eyes: "closed" },
   },
   listening: {
     eyes: ["open"], eyesNote: "pupils larger", mouth: ["smile"], ears: "lifted", brows: "neutral", blush: null,
@@ -110,7 +110,7 @@ export const PRESETS: Record<string, Preset> = {
   },
   singing: {
     eyes: ["happy", "closed"], eyesHow: "or", mouth: ["o"], mouthNote: "opening on the beat", ears: "lifted", brows: "happy", blush: null,
-    panels: "Laughing, Happy", crops: ["expressions.expression.laughing", "expressions.expression.happy"], still: { eyes: "happy" },
+    panels: "Laughing, Happy", crops: ["master.expression.laughing", "master.expression.happy", "expressions.expression.happy", "expressions.expression.laughing"], still: { eyes: "happy" },
   },
   blissful: {
     sequence: "closed, then happy",
@@ -120,7 +120,7 @@ export const PRESETS: Record<string, Preset> = {
   ticklish: {
     // The dog's squeeze is its happy crescent (Q2).
     eyes: ["squeeze"], mouth: ["laugh"], ears: "neutral", earsNote: "bouncing", brows: "happy", blush: null,
-    panels: "Laughing, Excited", crops: ["expressions.expression.laughing", "expressions.expression.excited"],
+    panels: "Laughing, Excited", crops: ["master.expression.laughing", "master.expression.excited", "expressions.expression.excited", "expressions.expression.laughing"],
   },
   hungry: {
     sequence: "o, then the tongue peeking at a corner",
@@ -137,8 +137,8 @@ export const PRESETS: Record<string, Preset> = {
   },
   sly: {
     sequence: "wink, then side glances",
-    eyes: ["wink", "peek"], eyesHow: "then", eyesNote: "wink, then side glances", mouth: ["cheeky"], ears: "onePerked", brows: { L: "neutral", R: "happy" }, blush: null,
-    panels: "Mischievous", crops: ["expressions.expression.mischievous"], still: { eyes: "wink" }, wink: "R", perk: "L",
+    eyes: ["wink", "peek"], eyesHow: "then", eyesNote: "wink, then side glances", mouth: ["cheeky"], ears: "onePerked", brows: "neutral", blush: null,
+    panels: "Mischievous", crops: ["master.expression.cheeky", "master.expression.winking", "expressions.expression.mischievous"], still: { eyes: "wink" }, wink: "L", perk: "L",
   },
 };
 

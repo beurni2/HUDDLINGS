@@ -733,16 +733,20 @@ function eyeState(state: (typeof EYE_STATES)[number], side: "L" | "R"): Piece {
   const band = (out: number, down: number, b: Omit<LidBand, "centre" | "tilt" | "noseward">) =>
     lidBand({ centre: FRAME.at([sx * (EYE_HALF + out), down]), tilt: ROLL_DEG, noseward, ...b });
   switch (state) {
-    // A ∩ about as wide as the open eye (the panels' 19 to 21 pt with its soft edge), its middle 3.3 pt thick, the
-    // outer end a little lower and running out in a short lash flick.
+    // A ∩ about as wide as the open eye, an even band about 5 pt thick with round ends, its outer end a little lower and
+    // hooking down, as the master sheet's Laughing, Excited and Content paint it (20 to 20.6 pt across, 5 to 5.5 thick,
+    // 92 to 108 pt² of dark).
     case "happy":
-      return band(1.9, 2.35, { width: 17.6, rise: 4.4, drop: 1, thickness: 3.3, ends: [1.5, 0.8], flick: { length: 1.4, hook: -10 } });
-    // A ∪ a little narrower and thinner, its middle 3 pt below its ends, the outer end lifting in a lash flick.
+      return band(2.4, 1.45, { width: 17.4, rise: 4.6, drop: 0.8, thickness: 5, ends: [2.6, 3.2], fullness: 0.35, flick: { length: 0.9, hook: 25 } });
+    // A ∪ a little narrower, as thick, its middle 2.6 pt below its ends, the outer end lifting in a lash flick, as
+    // the master sheet's Sleepy paints it (18 to 18.8 pt across, 5 thick, 86 to 91 pt²).
     case "closed":
-      return band(1.6, 2, { width: 17, rise: -3, drop: 0, thickness: 3, ends: [1.3, 0.8], flick: { length: 1.3, hook: -30 } });
-    // The crescent at the open eye's height, its outer end lifting into a longer lash flick, as the winks draw it.
+      return band(1.6, 2, { width: 16.6, rise: -2.6, drop: 0, thickness: 4.8, ends: [2.4, 2.2], fullness: 0.35, flick: { length: 1.2, hook: -30 } });
+    // A flatter crescent at the open eye's height and 2.2 pt further out, its outer end lifted and running into a lash
+    // flick, as Cheeky and Winking draw the wink (19.3 pt across, 4.9 thick, 88 pt², its middle 25.7 pt out from the
+    // nose and 8 pt above it, the open eye's height).
     case "wink":
-      return band(0.5, 0.6, { width: 17.6, rise: 4, drop: -1.4, thickness: 3.3, ends: [1.5, 0.8], flick: { length: 1.8, hook: -75 } });
+      return band(2.7, -0.6, { width: 17.6, rise: 3.2, drop: -1.2, thickness: 4.8, ends: [2.4, 2.4], fullness: 0.35, flick: { length: 1.6, hook: -60 } });
     // The open eye with its upper lid closed down to just below its middle, its edge bowing a little, as Sleepy half-lid
     // draws it; the catchlight just under the lash.
     case "sleepy":

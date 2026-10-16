@@ -192,6 +192,11 @@ export interface LidBand {
   /** Thick at its middle, and at its inner and outer ends, in points. */
   thickness: number;
   ends: [number, number];
+  /**
+   * How soon it reaches its full thickness from its ends: the power on its swell (0.7 by default; lower is fuller, an
+   * even band with round ends, as the master sheet's crescents are).
+   */
+  fullness?: number;
   /** How far the outer end runs on as a fine flick, and how far it turns from the band's own direction (degrees, down positive). */
   flick: { length: number; hook: number };
 }
@@ -213,7 +218,7 @@ export function lidBand(b: LidBand): Piece {
   const widthAt = (k: number) => {
     if (k > n) return b.ends[1] + (0.15 - b.ends[1]) * ((k - n) / m);
     const s = k / n, base = b.ends[0] + (b.ends[1] - b.ends[0]) * s;
-    return base + (b.thickness - base) * Math.sin(Math.PI * s) ** 0.7;
+    return base + (b.thickness - base) * Math.sin(Math.PI * s) ** (b.fullness ?? 0.7);
   };
   const left: P[] = [], right: P[] = [];
   for (let k = 0; k <= total; k++) {
