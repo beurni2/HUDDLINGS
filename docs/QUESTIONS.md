@@ -21,6 +21,12 @@ Where the spec is silent or contradicts itself, I don't invent the answer. The q
 - **Decided: the default.** Check it in two parts, on every render: the blush part's own colour within ΔE2000 3 of `#F7B3A6`, and the rendered cheek's level, fitted the same way `characters/refprep/palette.py` fits the sheet's, within the sheet's own spread at rest (29 to 43%) and at the level each clip asks for otherwise. Not a dominant colour against a composite: on a soft blush that is ill-defined, and at ΔE 3 it fails the sheet's cheeks too. `model.json` holds the resting level and the sheet's spread (`blush`).
 - **Answered:** founder, Oct 14, 2026, in the session: "Q25 default".
 
+### Q27. Two choices in the Faces check: how to hold faces whose panels turn the head, and whether an open mouth passes as cheeky
+- **The spec says:** L525 holds each face preset to "its expression-sheet panel" by "the landmark check on eyes and mouth"; L480-498 name Curious, Shy, Sleepy and Mischievous as those panels; a face preset keeps the front's head (the lead's decision for the Faces check).
+- **Why it matters:** (a) Both Curious panels, the only Shy and both Sleepy panels turn the head: their eyes sit 3.0 to 5.1 pt across from where the front puts them. Held by place against the nose, a correct curious or shy face on the front's head failed by 5 to 6 pt and could pass only with its eyes slid against its nose. (b) The master sheet's Cheeky, the lead's choice for mischievous and sly, draws the tongue out over a closed smile; the expression sheet's Mischievous draws an open mouth with the tongue in it. Every shape gate lets an open mouth pass Cheeky's mouth; only the share of deep red inside the mouth tells them apart (Cheeky 0.14, the open mouths 0.35 to 0.40, Mischievous 0.27, the face library's cheeky still 0.32).
+- **Decided: the default.** (a) each keeps its own panel, recorded as turned, where the eyes are held by their shapes and their spacing and their place is held on the render's own head; the alternative is to hold curious and shy to the master sheet's Happy, level and front-on, as proud is held to Content (sleepy has no level panel with closed eyes). (b) an open mouth may pass mischievous and sly; the deep-red share is reported in every mouth row and judged by eye. A gate on it would fail the expression sheet's own Mischievous and the face library's cheeky mouth. (`characters/dog/DECISIONS.md` 110 and 118.)
+- **Answered:** founder, Oct 16, 2026, in the session: "Q27 defaults are fine, carry on".
+
 ## Needed before phase 1
 
 ### Q1. Which iPhone will measure the speed budgets?
@@ -41,12 +47,6 @@ Where the spec is silent or contradicts itself, I don't invent the answer. The q
 - **The spec says:** L446 "each eye (... two or three catchlights ...)"; L509 "one large catchlight high on the side toward the nose and one or two small ones, placed as the sheets draw them"; L504 "The sheet is the model".
 - **Why it matters:** the dog's turnaround, hero, glossy-eyes panel and expression sheet each draw one catchlight per open eye. A second small one makes the eyes glossier but less like the sheet.
 - **Default:** one catchlight, as the sheets draw it (`characters/dog/DECISIONS.md` 29). Adding the small ones is one line per eye.
-- **Owner:** founder
-
-### Q27. Two choices in the Faces check: how to hold faces whose panels turn the head, and whether an open mouth passes as cheeky
-- **The spec says:** L525 holds each face preset to "its expression-sheet panel" by "the landmark check on eyes and mouth"; L480-498 name Curious, Shy, Sleepy and Mischievous as those panels; a face preset keeps the front's head (the lead's decision for the Faces check).
-- **Why it matters:** (a) Both Curious panels, the only Shy and both Sleepy panels turn the head: their eyes sit 3.0 to 5.1 pt across from where the front puts them. Held by place against the nose, a correct curious or shy face on the front's head failed by 5 to 6 pt and could pass only with its eyes slid against its nose. (b) The master sheet's Cheeky, the lead's choice for mischievous and sly, draws the tongue out over a closed smile; the expression sheet's Mischievous draws an open mouth with the tongue in it. Every shape gate lets an open mouth pass Cheeky's mouth; only the share of deep red inside the mouth tells them apart (Cheeky 0.14, the open mouths 0.35 to 0.40, Mischievous 0.27, the face library's cheeky still 0.32).
-- **Default:** (a) each keeps its own panel, recorded as turned, where the eyes are held by their shapes and their spacing and their place is held on the render's own head; the alternative is to hold curious and shy to the master sheet's Happy, level and front-on, as proud is held to Content (sleepy has no level panel with closed eyes). (b) an open mouth may pass mischievous and sly; the deep-red share is reported in every mouth row and judged by eye. A gate on it would fail the expression sheet's own Mischievous and the face library's cheeky mouth. (`characters/dog/DECISIONS.md` 110 and 118.)
 - **Owner:** founder
 
 ## Needed by phase 4 (the rig and Visual QA)
