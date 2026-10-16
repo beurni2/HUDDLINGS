@@ -236,9 +236,11 @@ export function headFur(h: HeadFurSpec): HeadFur {
   const crown = crowns.map((x) => x.span);
   // Each root's unlined stretch: the head's edge from the crown's join to the upper end of that side's cheek line.
   const upper = (c: CheekPuff, raised: boolean, p: P) => {
-    const from = at(raised && c.raised ? c.raised : c.line.from), to = at(raised && c.raised ? c.raised : c.line.to);
-    // The end nearer the root is the one nearer its join.
-    return Math.hypot(from[0] - p[0], from[1] - p[1]) <= Math.hypot(to[0] - p[0], to[1] - p[1]) ? { end: 0 as const, at: from } : { end: 1 as const, at: to };
+    const from = at(c.line.from), to = at(c.line.to);
+    // The end nearer the root is the one nearer its join, as typed; under a raised ear that end lies at `raised` instead
+    // (whichever end of the line it is: a left cheek's line runs up from the jaw, so its upper end is its `to`).
+    const end = Math.hypot(from[0] - p[0], from[1] - p[1]) <= Math.hypot(to[0] - p[0], to[1] - p[1]) ? (0 as const) : (1 as const);
+    return { end, at: raised && c.raised ? at(c.raised) : end === 0 ? from : to };
   };
   const rootOf = (side: Side, raised: boolean) => {
     const x = crowns.find((k) => k.c.side === side && k.join), c = (h.cheeks ?? []).find((k) => k.side === side);
