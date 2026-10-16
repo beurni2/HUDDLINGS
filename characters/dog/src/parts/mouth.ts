@@ -7,7 +7,7 @@
 //   bowed arcs, broad and lowest about halfway out, that curl up at their tips, a W, never a single frown;
 // - open: the turnaround's open happy mouth (the rest; DECISIONS 50, 85);
 // - openWide: the open mouth as the master sheet's Excited draws it, wider and deeper (excited only; DECISIONS 143);
-// - laugh: Laughing's, wider and deeper, the tongue a bigger dome;
+// - laugh: the master sheet's Laughing, the widest and deepest, the tongue a big dome;
 // - o: Surprised's small o, an egg pointed at its top and widest low, the tongue filling its lower half;
 // - cheeky: Mischievous's and Cheeky's open mouth with the tongue out over the lower lip;
 // - yawn: a tall o with the tongue low, drawn for yawns (no panel), the o's egg grown taller;
@@ -164,11 +164,33 @@ const OPEN: Opened = {
 };
 
 /**
- * Laughing's mouth, as the Laughing panel and the expression sheet's Laughing mouth draw it: the open mouth wider and
- * deeper, its curls out at the corners the panel's (14 pt either side of the nose, the open mouth's 12.9), its U
- * running 3.9 pt deeper, the tongue a bigger dome.
+ * Laughing's mouth, as the master sheet's Laughing draws it (DECISIONS 144), the primary for laughing and ticklish: the
+ * open mouth at its widest and deepest, its curls out to 15.4 pt either side of the nose (the panel's 15.9 and 14.7),
+ * the opening's top corners 12.2 pt out and its U a full round one 35.6 pt below the eyes (the panel's 35.8), the
+ * tongue a big dome filling its lower half. Wider than Excited's open mouth, as the master sheet draws them.
  */
 const LAUGH: Opened = {
+  half: [[0, 14], [1.8, 14.9], [4.2, 15.8], [7, 16.5], [9.8, 16.9], [12, 16.85], [13.6, 16.3], [14.7, 15.4], [15.2, 14.5], [15.4, 13.7]],
+  opening: [[0, 14.2], [4.2, 16.05], [7, 16.8], [9.8, 17.15], [12.2, 17.3], [12.1, 21.5], [11.4, 25.6], [10.1, 29.2], [8.2, 32.1], [5.8, 34.2], [3, 35.3],
+    [0, 35.6], [-3, 35.3], [-5.8, 34.2], [-8.2, 32.1], [-10.1, 29.2], [-11.4, 25.6], [-12.1, 21.5], [-12.2, 17.3], [-9.8, 17.15], [-7, 16.8], [-4.2, 16.05]],
+  corners: [0, 4, 18],
+  philtrumTo: 14.2,
+  sideFrom: [12.2, 17.3],
+  lip: [17.6, 12],
+  sidesTo: 29,
+  footFrom: 27,
+  deep: "M-13.5 14 L13.5 14 L13.5 18.4 C8.4 17.9 3.8 17.1 0 16.9 C-3.8 17.1 -8.4 17.9 -13.5 18.4Z",
+  deepCorners: "M-13.5 17 L-10.8 17.4 C-10.9 18.8 -11 20.2 -11.5 22.2 L-13.5 22.2Z M13.5 17 L10.8 17.4 C10.9 18.8 11 20.2 11.5 22.2 L13.5 22.2Z",
+  tongue: "M-12 38 L-12 27.4 C-10.2 24.4 -6.4 22.6 0 22.4 C6.4 22.6 10.2 24.4 12 27.4 L12 38Z",
+  shine: [-0.4, 27.6, 5.4, 3],
+  box: [-18, 10, 36, 28],
+};
+
+/**
+ * The panting mouth's opening: the expression sheet's Laughing mouth (the laugh as first drawn), the open mouth wider
+ * and deeper, its curls 14.3 pt out, its U 3.9 pt deeper than the open mouth's, so a long tongue hangs well past it.
+ */
+const PANT_OPENING: Opened = {
   half: [[0, 14], [1.6, 14.9], [3.6, 15.8], [6, 16.5], [8.4, 16.95], [10.4, 17.05], [12, 16.6], [13.2, 15.8], [14, 14.8], [14.3, 13.7]],
   opening: [[0, 14.2], [3.6, 16], [6, 16.75], [8.4, 17.15], [10.4, 17.25], [9.9, 20.8], [8.7, 24.5], [6.9, 27.9], [4.7, 30.6], [2.4, 31.95], [0, 32.4],
     [-2.4, 31.95], [-4.7, 30.6], [-6.9, 27.9], [-8.7, 24.5], [-9.9, 20.8], [-10.4, 17.25], [-8.4, 17.15], [-6, 16.75], [-3.6, 16]],
@@ -215,9 +237,9 @@ const CHEEKY: Opened = {
   box: [-15, 10, 30, 27],
 };
 
-/** Pant: the laughing mouth's wide opening with the tongue further out, longer and narrower, hanging straight down to just above the chin. */
+/** Pant: a laughing mouth's wide opening with the tongue further out, longer and narrower, hanging straight down to just above the chin. */
 const PANT: Opened = {
-  ...LAUGH,
+  ...PANT_OPENING,
   out: [[0, 22.4], [3.2, 22.8], [5.4, 24.4], [6, 27], [5.8, 30.2], [5.1, 33.2], [3.8, 35.6], [2, 36.9], [0, 37.2]],
   box: [-17, 10, 34, 30],
 };
