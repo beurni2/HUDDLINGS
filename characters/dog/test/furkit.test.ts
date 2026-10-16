@@ -10,9 +10,11 @@ import { Resvg } from "@resvg/resvg-js";
 import { PNG } from "pngjs";
 import type { Lock } from "../../draw/fur.ts";
 import { arc, fracAt, mirrorX, smooth, spanPoints, v, type Node, type P, type Shape } from "../../draw/geom.ts";
+import { scopeIds, type Piece } from "../../draw/svg.ts";
 import { EAR, earEdge, earFur, type EarEdgeSpec } from "../src/parts/ear.ts";
 import { HEAD_FUR, headFur, type HeadFurSpec } from "../src/parts/headfur.ts";
 import { CONTACT_DEPTH, FREE_TAPER, litEdge, litRibbons, SOLE, UNDER_RUN, type LitSpan } from "../src/parts/lines.ts";
+import { brush, type Brush } from "../src/parts/marking.ts";
 import { BUN, bun, SOFT_TOES, toes, type BunSpec } from "../src/parts/paw.ts";
 import { C, LINES } from "../src/palette.ts";
 
@@ -271,4 +273,36 @@ test("the head's fur keeps its counts and the chin stays a rounded mass", () => 
   assert.throws(() => headFur({ ...HEAD, chin: { ...chin, scallops: chin.scallops.slice(0, 4).map((l, i) => (i === 3 ? { ...l, dip: undefined } : l)) } }), /4 locks, not 5 to 7/);
   assert.throws(() => headFur({ base: ring(5, [0, -100]), chin: { ...chin, corners: [on(50, 5)] } }), /jaw turns r [0-5]\.\d\d pt .* at least 6: the chin is a rounded mass/);
   assert.equal(HEAD_FUR.cornerPt, 6);
+});
+
+/** A piece rendered alone on transparent at `zoom` px/pt, and its alpha at a model point. */
+function alphaOf(p: Piece, zoom: number): (at: P) => number {
+  const [x, y, w, h] = p.box;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="${x} ${y} ${w} ${h}">${p.svg}</svg>`;
+  const png = PNG.sync.read(new Resvg(svg, { fitTo: { mode: "zoom", value: zoom }, background: "rgba(0,0,0,0)" }).render().asPng());
+  return ([px, py]) => {
+    const i = Math.floor((px - x) * zoom), j = Math.floor((py - y) * zoom);
+    return i < 0 || j < 0 || i >= png.width || j >= png.height ? 0 : png.data[(j * png.width + i) * 4 + 3]! / 255;
+  };
+}
+
+const PART = ring(20, [0, 0]), PATCH = ring(9, [8, 0]);
+const BRUSH: Brush = { flow: [1, 0.3], seed: 7, edge: 24, out: [1, 2.6], in: [1.5, 3], width: [0.7, 1.2], inside: { count: 4, length: [4, 7], colour: C.earDeep, opacity: 0.35, width: 0.8 }, colour: C.marking };
+
+test("a brushed marking is the same from its seed every build, darker strands inside, nothing light, and all of it inside its part", () => {
+  const a = brush("patch", PART, PATCH, 0.9, BRUSH), b = brush("patch", PART, PATCH, 0.9, BRUSH);
+  assert.equal(scopeIds(a.svg, "x"), scopeIds(b.svg, "x"), "the same seed lays different strands");
+  assert.notEqual(scopeIds(brush("patch", PART, PATCH, 0.9, { ...BRUSH, seed: 8 }).svg, "x"), scopeIds(a.svg, "x"));
+  assert.equal(a.meta.lines.length, 4);
+  for (const l of a.meta.lines) assert.equal(l.kind, "inner");
+  assert.throws(() => brush("patch", PART, PATCH, 0.9, { ...BRUSH, colour: C.fur }), /no light streaks/);
+  assert.throws(() => brush("patch", PART, PATCH, 0.9, { ...BRUSH, inside: { ...BRUSH.inside, colour: C.light } }), /no light streaks/);
+  // Every fill is the marking's or its darker strands' (the white is only the masks').
+  const fills = new Set([...a.svg.matchAll(/fill="(#[0-9A-Fa-f]{6})"/g)].map((m) => m[1]!).filter((c) => c !== "#FFFFFF"));
+  assert.deepEqual([...fills].sort(), [C.earDeep, C.marking].sort());
+  // Out past the patch's edge the strands show, and nothing comes within `keep` (2 pt) of the part's edge.
+  const alpha = alphaOf(a, 8);
+  const shown = Array.from({ length: 72 }, (_, k) => alpha(on(k * 5, 9.8, [8, 0]))).filter((x) => x > 0.2).length;
+  assert.ok(shown >= 12, `only ${shown} of 72 places 0.8 pt past the patch's edge carry a strand`);
+  for (let k = 0; k < 360; k += 3) for (const r of [18.4, 19, 20, 21]) assert.equal(alpha(on(k, r, [0, 0])), 0, `a strand shows ${r} pt from the part's middle at ${k}°`);
 });
