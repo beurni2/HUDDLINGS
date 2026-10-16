@@ -145,6 +145,26 @@ class Parity(unittest.TestCase):
         self.assertIn("full/f0002.png: no SpriteKit frame", report["problems"])
         self.assertIn("small/f0009.png: no web frame", report["problems"])
 
+    def test_stills_are_matched_by_name(self):
+        # The dog's parity: one still per clip in each run folder, as render.ts --stills and the SpriteKit test write
+        # them. Each is scored against its namesake; one missing on a side fails by name.
+        for side in ("web", "spritekit"):
+            for run, size in (("full", 200), ("small", 160)):
+                folder = self.root / side / run
+                folder.mkdir(parents=True)
+                for name in ("still_front", "face_shy"):
+                    character(size).save(folder / f"{name}.png")
+        code, report, printed = self.check()
+        self.assertEqual(0, code, printed)
+        self.assertEqual(2, report["runs"]["full"]["frames"])
+        character(200, leave_out=("eye",)).save(self.root / "spritekit/full/face_shy.png")
+        (self.root / "spritekit/small/still_front.png").unlink()
+        code, report, _ = self.check()
+        self.assertEqual(1, code)
+        self.assertIn("small/still_front.png: no SpriteKit frame", report["problems"])
+        self.assertTrue(any(p.startswith("full/face_shy.png: the runtimes disagree") for p in report["problems"]), report["problems"])
+        self.assertFalse(any(p.startswith("full/still_front.png") for p in report["problems"]))
+
     def test_a_run_without_frames_fails(self):
         self.both()
         for png in (self.root / "spritekit/small/frames").glob("*.png"):

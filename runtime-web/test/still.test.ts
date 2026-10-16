@@ -533,6 +533,34 @@ test("the command draws any built package, and several stills each into its own 
   assert.match(none.stderr, /no package at/);
 });
 
+test("render.ts --stills poses each still as still.ts does, on the frames' stage: the same pixels, moved by whole pixels", () => {
+  // The WebGL side of the dog's parity (ios.yml): every still and face clip of a package, into <out>/<clip>.png.
+  const out = join(dir, "parity-stills");
+  // Wide and tall enough for the test character at 3 px/pt with the root 24 px above the foot.
+  const size = 600;
+  const run = spawnSync(process.execPath, [join(repo, "runtime-web/lab/render.ts"), "--stills", "--package", join(dir, "package"), "--out", out,
+    "--size", String(size), "--ppp", String(PPP), "--set", "3x"], { encoding: "utf8" });
+  assert.equal(run.status, 0, run.stderr);
+  assert.deepEqual(readdirSync(out).sort(), ["report.json", "still_faded.png", "still_front.png", "still_side.R.png"]);
+  const frame = PNG.sync.read(readFileSync(join(out, "still_front.png")));
+  assert.deepEqual([frame.width, frame.height], [size, size]);
+  // The root sits at size / 2 across and 24 px above the foot; the still's at rootPx: both on whole pixels.
+  const [dx, dy] = [size / 2 - front.info.rootPx[0], size - 24 - front.info.rootPx[1]];
+  // Everything the frame holds of the still: all of it but the margin below the root, under the frame's foot.
+  let differ = 0, compared = 0;
+  for (let y = Math.max(0, -dy); y < Math.min(front.white.height, size - dy); y++) {
+    for (let x = Math.max(0, -dx); x < Math.min(front.white.width, size - dx); x++) {
+      const a = 4 * (y * front.white.width + x), b = 4 * ((y + dy) * size + x + dx);
+      compared++;
+      for (let c = 0; c < 3; c++) if (front.white.data[a + c] !== frame.data[b + c]) differ++;
+    }
+  }
+  assert.ok(compared > 0.9 * front.white.width * front.white.height, `${compared} pixels compared`);
+  assert.equal(differ, 0, "render.ts --stills draws still_front as still.ts's white pass does");
+  const none = spawnSync(process.execPath, [join(repo, "runtime-web/lab/render.ts"), "--stills", "--clip", "x", "--out", out], { encoding: "utf8" });
+  assert.equal(none.status, 2, "--stills and --clip are one or the other");
+});
+
 test("ID colours are fixed by a part's index, distinct and never black", () => {
   const seen = new Set<string>();
   for (let i = 0; i < 1024; i++) {

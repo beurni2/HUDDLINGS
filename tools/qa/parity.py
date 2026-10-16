@@ -4,10 +4,12 @@ the character, and no part drawn by one runtime and not the other.
 
 python3 tools/qa/parity.py <web folder> <spritekit folder> <report folder>
 
-Each folder holds one subfolder per run (full and small, both required) of
-f0000.png ... frames, directly or in a frames/ folder (as runtime-web/lab/render.ts
-writes them). Both runtimes must have rendered the same frames, and every frame
-must show the character.
+Each folder holds one subfolder per run (full and small, both required) of PNG
+frames, directly or in a frames/ folder (as runtime-web/lab/render.ts writes a
+clip's), matched by name: f0000.png ... for a clip's frames, or one still per
+clip, still_front.png ... face_shy.png, as render.ts --stills writes the dog's.
+Both runtimes must have rendered the same frames, and every frame must show the
+character.
 
 "On the character": the SSIM map is averaged over the pixels either frame draws,
 grown by the SSIM window's radius, so an empty background cannot dilute a
@@ -155,7 +157,7 @@ def frames(root, run):
 
 def frame_names(root, run):
     folder = frames(root, run)
-    return sorted(p.name for p in folder.glob("f*.png")) if folder.is_dir() else []
+    return sorted(p.name for p in folder.glob("*.png")) if folder.is_dir() else []
 
 
 def runs_in(root):

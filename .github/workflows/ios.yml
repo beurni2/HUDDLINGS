@@ -17,6 +17,51 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  dog-package:
+    # The dog's package for its parity (Gate A), built once here so both runtimes draw the same bytes. A dog build
+    # takes seconds; the macOS job only downloads it.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22.22"
+      - run: npm ci --no-audit --no-fund
+      - name: Build the dog
+        run: node characters/build/build.ts dog build/parity/package/dog
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dog-package
+          path: build/parity/package/dog
+          retention-days: 14
+
+  web-frames-dog:
+    # The WebGL side of the dog's parity: every view's rest still and every face clip, posed as a still (the clip at
+    # time 0 on a fresh player), full size (2 px/pt, the 2x set) and small (0.6 px/pt, the small set), on frames
+    # that hold the widest view. ParityRender.swift renders the same with SpriteKit.
+    needs: dog-package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22.22"
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: dog-package
+          path: build/parity/package/dog
+      - name: Render the dog's stills
+        run: |
+          node runtime-web/lab/render.ts --stills --package build/parity/package/dog --out build/parity/web-dog/full --size 512 --ppp 2 --set 2x
+          node runtime-web/lab/render.ts --stills --package build/parity/package/dog --out build/parity/web-dog/small --size 160 --ppp 0.6 --set small
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: web-frames-dog
+          path: build/parity/web-dog
+          retention-days: 14
+
   web-frames:
     # The WebGL side of parity: the test dance at 30 fps, full size and small.
     runs-on: ubuntu-latest
@@ -40,6 +85,10 @@ jobs:
           retention-days: 14
 
   ios:
+    # It waits for the dog's package (a minute or two of Linux), never for its renders; a failed package still lets
+    # every other check here run, and the dog's parity test then fails naming the missing package.
+    needs: dog-package
+    if: ${{ !cancelled() }}
     runs-on: macos-15
     timeout-minutes: 60
     steps:
@@ -53,6 +102,12 @@ jobs:
           node characters/build/build.ts test
           node characters/build/app-assets.ts
       - uses: ./.github/actions/macos-tools
+      - name: The dog's package, as the web renders it (outside build/characters, which the app bundles)
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        continue-on-error: true
+        with:
+          name: dog-package
+          path: build/parity/package/dog
       - name: Pick the simulator (a fixed device and runtime, as earlier runs used)
         id: sim
         run: |
@@ -67,7 +122,7 @@ jobs:
           ' "iPhone SE (3rd generation)" "com.apple.CoreSimulator.SimRuntime.iOS-26-2")
           xcrun simctl list devices available | grep "$udid"
           echo "udid=$udid" >> "$GITHUB_OUTPUT"
-      - name: Engine and SpriteKit tests on the simulator (writes the parity frames)
+      - name: Engine and SpriteKit tests on the simulator (writes the parity frames, the dance's and the dog's stills)
         working-directory: ios/CompanionCore
         run: xcodebuild test -quiet -scheme CompanionCore-Package -destination "id=${{ steps.sim.outputs.udid }}" -resultBundlePath ../../build/results/package.xcresult 2>&1
       - name: What the SpriteKit render and the probes measured
@@ -75,6 +130,7 @@ jobs:
         run: |
           cat build/parity/spritekit/notes.txt || true
           cat build/parity/spritekit/probes.txt || true
+          cat build/parity/spritekit-dog/notes.txt || true
       - name: Generate the project
         # Runs even when a test above failed, so one run reports everything.
         if: ${{ !cancelled() && steps.sim.outcome == 'success' }}
@@ -122,6 +178,12 @@ jobs:
           path: build/parity/spritekit
           retention-days: 14
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: spritekit-frames-dog
+          path: build/parity/spritekit-dog
+          retention-days: 14
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: failure()
         with:
           name: test-results
@@ -129,8 +191,10 @@ jobs:
           retention-days: 7
 
   parity:
-    # Section 5b: the same frames on the web and on the simulator, SSIM 0.95 or more.
-    needs: [web-frames, ios]
+    # Section 5b: the same frames on the web and on the simulator, SSIM 0.95 or more: the test character's dance, and
+    # the dog's stills (Gate A), soft alpha included (the blush at its rest alpha and at each face clip's keyed level,
+    # the soft shades and shadows).
+    needs: [web-frames, web-frames-dog, ios]
     # Also when the ios job failed after rendering (a probe, a UI test): parity
     # fails on its own if the SpriteKit frames are missing.
     if: ${{ !cancelled() && needs.web-frames.result == 'success' }}
@@ -154,9 +218,30 @@ jobs:
         env:
           PARITY_PRINT_EVIDENCE: "1"
         run: python3 tools/qa/parity.py build/parity/web build/parity/spritekit build/parity/report
+      # The dog's, whatever the dance's said, so one run reports both. A missing artifact leaves parity.py to fail
+      # on the missing frames by name.
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        with:
+          name: web-frames-dog
+          path: build/parity/web-dog
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        with:
+          name: spritekit-frames-dog
+          path: build/parity/spritekit-dog
+      - name: Compare the dog's stills
+        if: ${{ !cancelled() }}
+        env:
+          PARITY_PRINT_EVIDENCE: "1"
+        run: python3 tools/qa/parity.py build/parity/web-dog build/parity/spritekit-dog build/parity/report-dog
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
           name: parity-report
-          path: build/parity/report
+          path: |
+            build/parity/report
+            build/parity/report-dog
           retention-days: 14
