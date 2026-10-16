@@ -2,7 +2,7 @@
   "name": "face_listening",
   "lengthMs": 1000,
   "views": { "body": [[0, "front"]], "head": [[0, "front"]] },
-  "states": { "eye.L": [[0, "open"]], "eye.R": [[0, "open"]], "mouth": [[0, "smile"]], "brow.L": [[0, "neutral"]], "brow.R": [[0, "neutral"]], "ear.L": [[0, "lifted"]], "ear.R": [[0, "lifted"]] },
-  "tracks": { "ear.L": { "rot": [[0, -10]] }, "ear.R": { "rot": [[0, 10]] } },
+  "states": { "eye.L": [[0, "open"]], "eye.R": [[0, "open"]], "mouth": [[0, "smile"]], "brow.L": [[0, "neutral"]], "brow.R": [[0, "neutral"]], "ear.L": [[0, "lifted"]], "ear.R": [[0, "lifted"]], "temple.L": [[0, "up"]], "temple.R": [[0, "up"]], "head.line": [[0, "temples"]] },
+  "tracks": { "ear.L": { "rot": [[0, 0]] }, "ear.R": { "rot": [[0, 0]] } },
   "events": [{ "at": 0, "type": "keyPose" }]
 }

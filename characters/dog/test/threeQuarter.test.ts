@@ -228,7 +228,7 @@ test("the WebGL still of the three-quarter view reproduces the resvg composite o
   const r = rasters(SCALE);
   const layers: Layer[] = info.drawn.map((part) => {
     const clipTo = rig.parts.find((p) => p.name === part)!.clipTo;
-    return { rgba: r.get(part)!.data, part, ...(clipTo ? { clipTo } : {}) };
+    return { rgba: r.get(part)!.data, part, ...(clipTo ? { clipTo } : {}), alpha: rig.parts.find((p) => p.name === part)!.alpha };
   });
   const reference = composite(layers, W, HH);
   const dx = info.rootPx[0] + SCALE * BOX.x, dy = info.rootPx[1] + SCALE * BOX.y;

@@ -426,8 +426,9 @@ test("the ID pass shows the dog's blush by its footprint, never its level: keyed
     return n;
   };
   for (const cheek of ["blush.L", "blush.R"]) assert.ok(count(shots.still_front!.ids, cheek) > 200, `${cheek} shows at rest`);
-  // At 0.35 the frame is paler, and the ID pass is the rest still's, byte for byte.
-  assert.ok(!shots.still_blush35!.white.data.equals(shots.still_front!.white.data), "the blush's level shows in white.png");
+  // At 0.35 the blush shows in the frame (against none at 0: the rig's rest alpha may itself be 0.35), and the ID pass
+  // is the rest still's, byte for byte.
+  assert.ok(!shots.still_blush35!.white.data.equals(shots.still_blush0!.white.data), "the blush's level shows in white.png");
   assert.ok(shots.still_blush35!.ids.data.equals(shots.still_front!.ids.data), "the blush at 0.35 keeps its whole footprint");
   // At 0 no blush pixel is left; every other pixel is as before, and where a cheek was, its mask's group shows through.
   const blush = new Set(["blush.L", "blush.R"].map((p) => dogInfo.parts[p]!.id));

@@ -248,7 +248,7 @@
     "heldTo": "#FFF4E8",
     "heldBy": "palette.fur",
     "deltaE2000": 0.0,
-    "pixels": 14709,
+    "pixels": 14662,
     "pass": true
    },
    "furShade": {
@@ -353,37 +353,37 @@
   "placeThresholdPt": 2.8,
   "cheeks": [
    {
-    "centrePx": [162.6, 117.46],
-    "centrePt": [29.67, -88.25],
-    "level": 0.344,
-    "peak": "#FCDED1",
-    "coreColour": "#F7B3A6",
-    "coreDeltaE2000": 0.0,
+    "centrePx": [85.57, 122.83],
+    "centrePt": [-30.2, -84.08],
+    "level": 0.349,
+    "peak": "#FCDDD1",
+    "coreColour": "#F7B2A7",
+    "coreDeltaE2000": 0.82,
     "levelPass": true,
-    "sheetBox": 1,
+    "sheetBox": 0,
     "pass": true
    },
    {
-    "centrePx": [85.64, 122.74],
-    "centrePt": [-30.15, -84.15],
-    "level": 0.347,
+    "centrePx": [162.65, 117.28],
+    "centrePt": [29.7, -88.39],
+    "level": 0.35,
     "peak": "#FCDDD1",
-    "coreColour": "#F7B3A6",
-    "coreDeltaE2000": 0.0,
+    "coreColour": "#F7B2A7",
+    "coreDeltaE2000": 0.82,
     "levelPass": true,
-    "sheetBox": 0,
+    "sheetBox": 1,
     "pass": true
    }
   ],
   "sheetBoxes": [
    {
     "boxPt": [-38.03, -89.0, -17.82, -76.56],
-    "cheek": 1,
+    "cheek": 0,
     "pass": true
    },
    {
     "boxPt": [16.38, -92.1, 36.59, -79.67],
-    "cheek": 0,
+    "cheek": 1,
     "pass": true
    }
   ],
@@ -543,10 +543,10 @@
   },
   "atlas": {
    "set": "3x",
-   "pages": 1,
-   "pageAreaPx": 4194304,
-   "allRegionsShare": 0.709,
-   "thisStillShare": 0.152
+   "pages": 2,
+   "pageAreaPx": 5242880,
+   "allRegionsShare": 0.632,
+   "thisStillShare": 0.181
   }
  },
  "failed": [],

@@ -329,10 +329,10 @@
   },
   "atlas": {
    "set": "3x",
-   "pages": 1,
-   "pageAreaPx": 4194304,
-   "allRegionsShare": 0.709,
-   "thisStillShare": 0.1
+   "pages": 2,
+   "pageAreaPx": 5242880,
+   "allRegionsShare": 0.632,
+   "thisStillShare": 0.08
   }
  },
  "failed": [],

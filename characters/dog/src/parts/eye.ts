@@ -43,9 +43,16 @@ export interface EyeSpec {
    * The sleepy half-lid, as the expression sheet's Sleepy half-lid draws it: the upper lid closed down over the eye to a
    * level line `level` pt below the ball's centre (up negative), turned with the face by `tilt` degrees, its fur the
    * hood's pale tan deepening toward its edge, a lash line `lash` pt thick along that edge that runs `overhang` pt
-   * past the ball either side, and the catchlight moved just under it (`shine`, as `shine` above).
+   * past the ball either side, and the catchlight moved just under it (`shine`, as `shine` above); `bow`, how far the
+   * edge bows down in its middle below its ends (1.6 pt by default).
    */
-  cover?: { level: number; tilt: number; lash: number; overhang: number; shine: { at: [number, number]; r: number } };
+  cover?: { level: number; tilt: number; lash: number; overhang: number; shine: { at: [number, number]; r: number }; bow?: number };
+  /**
+   * A white four-pointed star in the lower iris, as the kitty's and the bear's Sparkle (Star Highlight) draw it: `at`
+   * toward the nose and up from the ball's centre, its half-height `r` (Q2's review-only alternative: the dog's sheets
+   * draw no star eye).
+   */
+  star?: { at: [number, number]; r: number };
 }
 
 const r3 = (n: number) => Math.round(n * 1000) / 1000;
@@ -132,10 +139,24 @@ export function eye(e: EyeSpec): Piece {
     `<g filter="url(#${soft})"><g clip-path="url(#${whiteClip})"><path d="${g.opening}" fill="${C.eyeWhite}"/><path d="${g.opening}" fill="url(#${whiteFade})"/></g></g></g>` +
     // One catchlight, high on the nose's side: white, its soft halo where it meets the iris.
     `<path d="${ell(big, e.shine.r * 1.3, e.shine.r * 1.25)}" fill="${C.eyeWhite}" opacity="0.35" filter="url(#${haloBlur})"/>` +
-    `<path d="${ell(big, e.shine.r, e.shine.r * 0.94)}" fill="${C.light}" filter="url(#${shineBlur})"/>`;
+    `<path d="${ell(big, e.shine.r, e.shine.r * 0.94)}" fill="${C.light}" filter="url(#${shineBlur})"/>` +
+    (e.star ? starShine(S(e.star.at[0], -e.star.at[1]), e.star.r, e.turn, shineBlur) : "");
   const lidLine: DrawnLine = { kind: "outer", width: e.lid.width, where: "eye lid", drawn: lid.drawn };
   if (!e.cover) return piece(svg, box, { shapes: [], lines: [lidLine] });
   return piece(svg + halfLid(e, e.cover, box), box, { shapes: [], lines: [lidLine] });
+}
+
+/** A white four-pointed star at `c`, `r` from its middle to its top and bottom points, a little narrower across, its sides drawn in. */
+function starShine(c: P, r: number, turn: number, soft: string): string {
+  const a = (turn * Math.PI) / 180, cos = Math.cos(a), sin = Math.sin(a);
+  const at = ([x, y]: P) => `${fmt(c[0] + x * cos - y * sin)} ${fmt(c[1] + x * sin + y * cos)}`;
+  const tips: P[] = [[0, -r], [r * 0.85, 0], [0, r], [-r * 0.85, 0]];
+  const k = 0.3;
+  const d = `M${at(tips[0]!)}` + tips.map((p, i) => {
+    const q = tips[(i + 1) % 4]!;
+    return `C${at([p[0] * k, p[1] * k])} ${at([q[0] * k, q[1] * k])} ${at(q)}`;
+  }).join("") + "Z";
+  return `<path d="${d}" fill="${C.light}" filter="url(#${soft})"/>`;
 }
 
 /** The half-lid over an open eye (EyeSpec.cover): drawn over it, inside the ball grown to cover its lash line. */
@@ -147,7 +168,7 @@ function halfLid(e: EyeSpec, c: NonNullable<EyeSpec["cover"]>, box: Box): string
   // The lid's edge bows down a little in its middle, as an eyelid's does.
   const edge = Array.from({ length: 25 }, (_, k): P => {
     const x = -half + (2 * half * k) / 24;
-    return L(x, c.level + 1.6 * (1 - (x / half) ** 2));
+    return L(x, c.level + (c.bow ?? 1.6) * (1 - (x / half) ** 2));
   });
   const ball = uid("ball"), shade = uid("lidshade"), soft = uid("blur"), lash = uid("blur"), shine = uid("blur");
   // Grown past the ball by the open eye's lash line and its flick, so none of its rim shows round the lid.
@@ -192,11 +213,29 @@ export interface LidBand {
   /** Thick at its middle, and at its inner and outer ends, in points. */
   thickness: number;
   ends: [number, number];
+  /**
+   * How soon it reaches its full thickness from its ends: the power on its swell (0.7 by default; lower is fuller, an
+   * even band with round ends, as the master sheet's crescents are).
+   */
+  fullness?: number;
   /** How far the outer end runs on as a fine flick, and how far it turns from the band's own direction (degrees, down positive). */
   flick: { length: number; hook: number };
 }
 
 export function lidBand(b: LidBand): Piece {
+  const { shape } = bandGeometry(b);
+  const [x0, y0, x1, y1] = shape.reduce((q, [x, y]) => [Math.min(q[0], x), Math.min(q[1], y), Math.max(q[2], x), Math.max(q[3], y)], [Infinity, Infinity, -Infinity, -Infinity]);
+  const box: Box = [x0 - 2, y0 - 2, x1 - x0 + 4, y1 - y0 + 4];
+  const g = uid("blur");
+  const d = `M${shape.map((p) => `${fmt(p[0])} ${fmt(p[1])}`).join("L")}Z`;
+  return piece(`<defs>${blur(g, box, 0.2)}</defs><path d="${d}" fill="${C.eyeRim}" filter="url(#${g})"/>`, box);
+}
+
+/** A band's centre line in model space, from its inner end to its outer end (its flick left out), for the R3 guard. */
+export const lidLine = (b: LidBand): P[] => bandGeometry(b).line;
+
+/** A band's outline and its centre line, placed in model space. */
+function bandGeometry(b: LidBand): { shape: P[]; line: P[] } {
   const t = (b.tilt * Math.PI) / 180, cos = Math.cos(t), sin = Math.sin(t);
   const out = -b.noseward;
   // The centre line level with the face, from the inner end (s = 0) to the outer (s = 1), x across toward the outer side, y down.
@@ -213,7 +252,7 @@ export function lidBand(b: LidBand): Piece {
   const widthAt = (k: number) => {
     if (k > n) return b.ends[1] + (0.15 - b.ends[1]) * ((k - n) / m);
     const s = k / n, base = b.ends[0] + (b.ends[1] - b.ends[0]) * s;
-    return base + (b.thickness - base) * Math.sin(Math.PI * s) ** 0.7;
+    return base + (b.thickness - base) * Math.sin(Math.PI * s) ** (b.fullness ?? 0.7);
   };
   const left: P[] = [], right: P[] = [];
   for (let k = 0; k <= total; k++) {
@@ -240,10 +279,54 @@ export function lidBand(b: LidBand): Piece {
     const lx = out * (x - mid[0]), ly = y - mid[1];
     return [b.centre[0] + lx * cos - ly * sin, b.centre[1] + lx * sin + ly * cos];
   };
-  const shape = outline.map(place);
-  const [x0, y0, x1, y1] = shape.reduce((q, [x, y]) => [Math.min(q[0], x), Math.min(q[1], y), Math.max(q[2], x), Math.max(q[3], y)], [Infinity, Infinity, -Infinity, -Infinity]);
+  return { shape: outline.map(place), line: pts.slice(0, n + 1).map(place) };
+}
+
+/**
+ * The squeezed eye as the kitty's and the bear's Excited draw it, `>` and `<` (Q2's review-only alternative: the dog's
+ * sheets draw none, and the dog's squeeze is its happy crescent): two short arms of the lash band's near-black,
+ * thickest where they meet in a soft point toward the nose and rounding off at their outer ends, their opening
+ * `spread` degrees, a touch soft at the edge as the open eye's is.
+ */
+export interface Chevron {
+  /** Where the point sits, in model space, and the face's roll (degrees). */
+  tip: P;
+  tilt: number;
+  /** +1 when the nose lies to the eye's right on screen, −1 when to its left. */
+  noseward: 1 | -1;
+  /** Each arm's length from the point, the angle between the arms, and the band's thickness at the point and at the arms' ends. */
+  length: number;
+  spread: number;
+  thickness: [number, number];
+}
+
+export function chevron(c: Chevron): Piece {
+  const t = (c.tilt * Math.PI) / 180;
+  const n = 24;
+  const arm = (sign: 1 | -1) => {
+    // From the point outward (away from the nose), turned up or down by half the spread, then rolled with the face.
+    const a = t + (c.noseward > 0 ? Math.PI : 0) - c.noseward * sign * ((c.spread / 2) * Math.PI) / 180;
+    const dir: P = [Math.cos(a), Math.sin(a)];
+    const pts = Array.from({ length: n + 1 }, (_, k): P => v.add(c.tip, v.mul(dir, (c.length * k) / n)));
+    const w = (k: number) => c.thickness[0] + (c.thickness[1] - c.thickness[0]) * (k / n) ** 1.4;
+    const nrm: P = [-dir[1], dir[0]];
+    const left = pts.map((p, k) => v.add(p, v.mul(nrm, w(k) / 2))), right = pts.map((p, k) => v.sub(p, v.mul(nrm, w(k) / 2)));
+    // A round cap at the outer end, a half circle of the end's width.
+    const end = pts[n]!, r = w(n) / 2;
+    const cap = Array.from({ length: 9 }, (_, k): P => {
+      const b = Math.PI / 2 - (Math.PI * (k + 1)) / 10;
+      return v.add(end, v.add(v.mul(dir, r * Math.cos(b)), v.mul(nrm, r * Math.sin(b))));
+    });
+    return [...left, ...cap, ...right.reverse()];
+  };
+  const shapes = [arm(1), arm(-1)];
+  // A round knuckle at the point, so the two arms meet in a soft point rather than a notch.
+  const knuckle = Array.from({ length: 16 }, (_, k): P => v.add(c.tip, [Math.cos((k * Math.PI) / 8) * c.thickness[0] / 2, Math.sin((k * Math.PI) / 8) * c.thickness[0] / 2]));
+  const all = [...shapes.flat(), ...knuckle];
+  const [x0, y0, x1, y1] = all.reduce((q, [x, y]) => [Math.min(q[0], x), Math.min(q[1], y), Math.max(q[2], x), Math.max(q[3], y)], [Infinity, Infinity, -Infinity, -Infinity]);
   const box: Box = [x0 - 2, y0 - 2, x1 - x0 + 4, y1 - y0 + 4];
   const g = uid("blur");
-  const d = `M${shape.map((p) => `${fmt(p[0])} ${fmt(p[1])}`).join("L")}Z`;
-  return piece(`<defs>${blur(g, box, 0.2)}</defs><path d="${d}" fill="${C.eyeRim}" filter="url(#${g})"/>`, box);
+  // Each its own path, so their overlaps fill whatever way each one winds.
+  const paths = [...shapes, knuckle].map((s) => `<path d="M${s.map((p) => `${fmt(p[0])} ${fmt(p[1])}`).join("L")}Z" fill="${C.eyeRim}"/>`).join("");
+  return piece(`<defs>${blur(g, box, 0.2)}</defs><g filter="url(#${g})">${paths}</g>`, box);
 }

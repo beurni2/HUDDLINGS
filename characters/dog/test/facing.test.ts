@@ -481,7 +481,7 @@ test("the WebGL stills of the right-facing views reproduce the resvg composite o
     const W = BOX.w * SCALE, HH = BOX.h * SCALE;
     const layers: Layer[] = info.drawn.map((part) => {
       const clipTo = rig.parts.find((p) => p.name === part)!.clipTo;
-      return { rgba: raster(R.get(part)!.svg, SCALE).data, part, ...(clipTo ? { clipTo } : {}) };
+      return { rgba: raster(R.get(part)!.svg, SCALE).data, part, ...(clipTo ? { clipTo } : {}), alpha: rig.parts.find((p) => p.name === part)!.alpha };
     });
     const reference = composite(layers, W, HH);
     const dx = info.rootPx[0] + SCALE * BOX.x, dy = info.rootPx[1] + SCALE * BOX.y;

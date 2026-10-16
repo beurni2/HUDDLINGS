@@ -26,13 +26,6 @@ ROOT = Path(__file__).resolve().parents[3]
 DOG = ROOT / "characters" / "dog"
 PRESETS = ["neutral", "happy", "excited", "laughing", "curious", "surprised", "shy", "proud", "mischievous",
            "content", "sleepy", "listening", "tender", "singing", "blissful", "ticklish", "sly"]
-# Each preset's primary panel: the first of presets.ts `crops`.
-PRIMARY = {"neutral": "expressions.expression.happy", "happy": "expressions.expression.happy", "excited": "expressions.expression.excited",
-           "laughing": "expressions.expression.laughing", "curious": "expressions.expression.curious", "surprised": "expressions.expression.surprised",
-           "shy": "expressions.expression.shy", "proud": "expressions.expression.proud", "mischievous": "expressions.expression.mischievous",
-           "content": "master.expression.content", "sleepy": "expressions.expression.sleepy", "listening": "expressions.ears.lifted-slightly",
-           "tender": "master.expression.content", "singing": "expressions.expression.laughing", "blissful": "master.expression.content",
-           "ticklish": "expressions.expression.laughing", "sly": "expressions.expression.mischievous"}
 CRESCENTS_PT = 49.9  # the render's happy crescents, apart
 HEIGHT = 196  # each tile's height on the sheet, px
 COLS = 3
@@ -48,6 +41,12 @@ def dark_blobs(rgb):
         if len(xs) >= 12:
             out.append((len(xs), xs.mean(), ys.mean()))
     return out
+
+
+def primary(model, preset):
+    """The panel the Faces check holds a preset to: the face crop record primary for it (model.json, DECISIONS 110),
+    the first of presets.ts `crops`."""
+    return next(pid for pid, rec in model["faceCrops"].items() if preset in rec["primaryFor"])
 
 
 def placing(model, crop, rgb):
@@ -100,7 +99,7 @@ def main(stills, out):
     model = json.loads((DOG / "model.json").read_text())
     tiles = []
     for p in PRESETS:
-        crop = PRIMARY[p]
+        crop = primary(model, p)
         sheet = crop.split(".")[0]
         panel = Image.open(DOG / "ref" / "panels" / sheet / f"{crop}.png").convert("RGB")
         k, nose_px, by_nose = placing(model, crop, np.asarray(panel).astype(float))

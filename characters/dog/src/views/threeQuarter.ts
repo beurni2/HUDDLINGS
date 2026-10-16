@@ -431,10 +431,15 @@ function mouth(): Piece {
 
 /** The near cheek's blush, a broad, faint, soft oval under the near eye spreading along the cheek, where the sheet's is (phase 2 found no blush box on the far cheek, so the blush check holds it to none there). */
 function blush(): Piece {
-  // Broad and faint, as the sheet's melts into the cheek: wider than the first pass's oval, softer at its edge.
-  const [cx, cy] = [-35.4, -78.4], rx = 10, ry = 5, deg = -8;
+  // Broad and faint, as the sheet's melts into the cheek: wider than the first pass's oval, softer at its edge. Drawn
+  // at the blush's reference level, as the front's is (DECISIONS 145, 160): the printed pink blurred, its alpha
+  // stretched past the blurred oval's peak (0.89 of its fill at 3x) so the reddest tenth of the cheek is the full pink
+  // and match.py's fit reads 1 at alpha 1; the part's rest alpha (rig.json) sets the resting level.
+  const [cx, cy] = [-35.4, -78.4], rx = 10, ry = 5, deg = -8, sd = 3, stretch = 1.224;
   const d = pathD(ellipse([cx, cy], rx, ry, deg));
-  return soft(d, [cx - rx - 0.5, cy - ry - 0.8, 2 * rx + 1, 2 * ry + 1.6], C.blush, 3, Math.round(model.blush.restingLevel * 1.1 * 100) / 100);
+  const f = uid("blush"), box = pad([cx - rx - 0.5, cy - ry - 0.8, 2 * rx + 1, 2 * ry + 1.6], 3 * sd);
+  const filter = blur(f, box, sd).replace("</filter>", `<feComponentTransfer><feFuncA type="linear" slope="${stretch}"/></feComponentTransfer></filter>`);
+  return piece(`<defs>${filter}</defs><path d="${d}" fill="${C.blush}" filter="url(#${f})"/>`, box);
 }
 
 /** The tag and its small round ring, by the dog's one tag recipe (parts/tag.ts). */
