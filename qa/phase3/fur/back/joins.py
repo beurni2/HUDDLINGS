@@ -29,7 +29,8 @@ ROWS = [
     ("7/8 left haunch and heel (audit #7, #8)", [-56, -32, 34, 36], 4.5),
     ("7/8 right haunch and heel (audit #7, #8)", [22, -32, 34, 36], 4.5),
     ("9  tail plume and its curl (audit #9)", [-16, -54, 50, 58], 3.4),
-    ("7/10 rump and feet on the ground, ground shadow (audit #7, #10)", [-76, -18, 152, 22], 2.6),
+    ("7/10 rump, the left heel to the tail's foot, ground shadow (audit #7, #10)", [-68, -22, 70, 26], 3.4),
+    ("7/10 rump, the tail's foot to the right heel, ground shadow (audit #7, #10)", [-2, -22, 70, 26], 3.4),
 ]
 
 
@@ -63,6 +64,7 @@ def main():
     ap.add_argument("--after", default=os.path.join(REPO, "build/stills/dog/back/white.png"))
     ap.add_argument("--out", default=os.path.join(HERE, "joins.png"))
     ap.add_argument("--title", default="back: the joins, sheet | before (fbbe6d3) | after")
+    ap.add_argument("--zoom", type=float, default=1, help="every row's zoom times this (for a closer look than a phone's)")
     a = ap.parse_args()
     crop, pt_per_px, ground = load_crop()
     crop_ppp = 1 / pt_per_px
@@ -74,6 +76,7 @@ def main():
     gap, label = 8, 22
     panels = []
     for name, box, zoom in ROWS:
+        zoom *= a.zoom
         row = [cut(crop, crop_origin, crop_ppp, box, zoom), cut(before, broot, bppp, box, zoom), cut(after, aroot, appp, box, zoom)]
         panels.append((name, row))
     width = max(sum(p.width for p in row) + gap * 4 for _, row in panels)
