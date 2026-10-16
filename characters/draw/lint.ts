@@ -4,8 +4,9 @@
 // either quote, character references decoded, style declarations as
 // attributes; markup it cannot read fails rather than slipping past.
 import type { Drawing } from "../build/atlas.ts";
-import { arc, minRadius, onSpan, sample } from "./geom.ts";
+import { arc, minRadius, onSpan, sample, type Seg } from "./geom.ts";
 import type { DrawnLine } from "./line.ts";
+import type { Piece, ShapeMeta } from "./svg.ts";
 
 export const LIMITS = {
   /** Hand nodes in one shape: 8 to 20 is the aim. */
@@ -14,9 +15,62 @@ export const LIMITS = {
   outer: [1.2, 1.8] as [number, number],
   /** Inner lines, in points. */
   inner: [0.6, 0.9] as [number, number],
-  /** No convex corner tighter than this on an outlined edge, outside fur (spec L510). */
+  /** No convex corner tighter than this on an outlined edge, outside fur and toe lobes (spec L510). */
   cornerPt: 4,
+  /**
+   * A toe lobe's least radius on an outlined edge (Q29's default: toe lobes as the stubby-paws panel draws them, about
+   * 3 pt, rather than 4; dog DECISIONS 216): rounder than a kink, tighter than the corner rule.
+   */
+  lobePt: 2.5,
 };
+
+/**
+ * The line gate (the fur plan's vector gate A, dog DECISIONS 219), for drawings whose lane has opted in (lineGate()):
+ * a visible outer or contact edge may run below its full width for at most `thinPt`, so a free end tapers over at
+ * most `taperPt` and two spans handing off within `handoffPt` of each other may not leave more than `thinPt` thin
+ * between them; a fur edge is one span; and a span may end in the middle of fur only within `endPt` of another
+ * line's end. A span that cites a DECISIONS entry is let through.
+ */
+export const GATE = { thinPt: 2, taperPt: 2, handoffPt: 4, endPt: 1 };
+
+/** How a lit span's end finishes (the dog's parts/lines.ts): tapering as every span did before the fur pass, or free, joined or running on under a part. */
+export type EndKind = "taper" | "free" | "join" | "under";
+
+/** What the line gate reads of a lit span, reported with each line drawn along one. */
+export interface SpanMeta {
+  /** The shape it runs on (shapeKey of its cubics), so the gate finds that shape's fur spans. */
+  shape: string;
+  /** Where it runs, as shares of the shape's length; `to` may be below `from` (it wraps past the start). */
+  from: number;
+  to: number;
+  /** Its length as drawn, in points. */
+  length: number;
+  ends: [EndKind, EndKind];
+  /** How long each end tapers, in points (0 where it joins or runs under a part). */
+  taper: [number, number];
+  /** A line where one part lies over another. */
+  contact?: boolean;
+  /** The DECISIONS entry that lets it break the gate's rules. */
+  cites?: number;
+  /** Set by lineGate(): the drawing's lane has opted in. */
+  gate?: boolean;
+}
+
+/** A shape's key, from its cubics (FNV-1a over their coordinates to the thousandth). */
+export function shapeKey(segs: Seg[]): string {
+  let h = 0x811c9dc5;
+  for (const n of segs.flat(2)) {
+    for (const c of `${Math.round(n * 1000) / 1000},`) h = Math.imul(h ^ c.charCodeAt(0), 0x01000193) >>> 0;
+  }
+  return h.toString(16).padStart(8, "0");
+}
+
+type Spanned = DrawnLine & { span?: SpanMeta };
+
+/** A piece whose lit spans the line gate holds (GATE): what a view lane sets on each drawing it has moved onto the fur pass's recipes. */
+export function lineGate(p: Piece): Piece {
+  return { ...p, meta: { ...p.meta, lines: p.meta.lines.map((l) => ((l as Spanned).span ? { ...l, span: { ...(l as Spanned).span!, gate: true } } : l)) } };
+}
 
 export interface LintRules {
   /** Every colour a drawing may paint (#RRGGBB): the species' palette.ts. */
@@ -509,15 +563,24 @@ export function lintDrawing(d: Drawing, rules: LintRules = {}): string[] {
   for (const shape of d.meta?.shapes ?? []) {
     if (shape.nodes > LIMITS.nodes) say(`shape ${shape.name} has ${shape.nodes} hand nodes (at most ${LIMITS.nodes})`);
     if (!shape.outlined.length || rules.corners?.[part]) continue;
-    // A fur span's own ends (where a lock rises from the base) count as fur, 1.5 pt either way.
+    // Fur spans are left out: a fur lock's tip may turn tighter than 4 pt where the sheet draws it so (Q29's default,
+    // dog DECISIONS 213), and a fur span's own ends (where a lock rises from the base) count as fur, 1.5 pt either way.
+    // Toe lobes (the dog's parts/paw.ts) are held to their own floor, LIMITS.lobePt, as the stubby-paws panel draws them (Q29).
     const pts = sample(shape.segs, 32);
     const total = arc([...pts, pts[0]!]).at(-1)!;
     const slack = 1.5 / total;
-    const keep = (f: number) =>
-      shape.outlined.some(([a, b]) => onSpan(f, a, b)) && !shape.fur.some(([a, b]) => onSpan(f, (a - slack + 1) % 1, (b + slack) % 1));
-    const { convex } = minRadius(shape.segs, keep);
+    const lobes = (shape as ShapeMeta & { lobes?: [number, number][] }).lobes ?? [];
+    const outlinedAt = (f: number) => shape.outlined.some(([a, b]) => onSpan(f, a, b));
+    const inFur = (f: number) => shape.fur.some(([a, b]) => onSpan(f, (a - slack + 1) % 1, (b + slack) % 1));
+    const inLobe = (f: number) => lobes.some(([a, b]) => onSpan(f, a, b));
+    const { convex } = minRadius(shape.segs, (f) => outlinedAt(f) && !inFur(f) && !inLobe(f));
     if (convex.r < LIMITS.cornerPt)
       say(`shape ${shape.name} turns a ${convex.r.toFixed(2)} pt convex corner at (${convex.at.map((n) => n.toFixed(1)).join(", ")}) on an outlined edge (at least ${LIMITS.cornerPt} pt outside fur)`);
+    if (lobes.length) {
+      const lobe = minRadius(shape.segs, (f) => outlinedAt(f) && !inFur(f) && inLobe(f)).convex;
+      if (lobe.r < LIMITS.lobePt)
+        say(`shape ${shape.name} turns a ${lobe.r.toFixed(2)} pt convex corner at (${lobe.at.map((n) => n.toFixed(1)).join(", ")}) on a toe lobe (at least ${LIMITS.lobePt} pt)`);
+    }
   }
   // A line meta comes from what line.ts draws (strokeOf, taperedStroke, ribbons, innerLine), with the widths it draws.
   for (const line of (d.meta?.lines ?? []) as (Omit<DrawnLine, "drawn"> & Partial<DrawnLine>)[]) {
@@ -528,8 +591,74 @@ export function lintDrawing(d: Drawing, rules: LintRules = {}): string[] {
     else if (line.drawn && !(inBand(line.drawn[0], band) && inBand(line.drawn[1], band)))
       say(`${line.kind} line ${line.width} pt in ${line.where} is drawn ${line.drawn.map(shown).join(" to ")} pt wide, outside ${band[0]} to ${band[1]} pt`);
   }
+  for (const problem of gateProblems(d.meta?.shapes ?? [], (d.meta?.lines ?? []) as Spanned[])) say(problem);
   // A definition drawn by several <use>s can break a rule the same way at each.
   return [...new Set(problems)];
+}
+
+/** The length two spans of a closed path overlap by, as a share of it (each from a to b, wrapping when b < a). */
+function overlap([a, b]: [number, number], [c, d]: [number, number]): number {
+  const pieces = (from: number, to: number): [number, number][] => (from <= to ? [[from, to]] : [[from, 1], [0, to]]);
+  let sum = 0;
+  for (const [p, q] of pieces(a, b)) for (const [r, s] of pieces(c, d)) sum += Math.max(0, Math.min(q, s) - Math.max(p, r));
+  return sum;
+}
+/** How far apart two places on a closed path are, as a share of it, the short way round. */
+const apart = (f: number, g: number) => Math.min(Math.abs(f - g), 1 - Math.abs(f - g));
+
+/** The line gate's problems with a drawing's opted-in lit spans (GATE); spans it cannot place on a shape are held to their tapers only. */
+function gateProblems(shapes: ShapeMeta[], lines: Spanned[]): string[] {
+  const problems: string[] = [];
+  const gated = lines.filter((l) => l.span?.gate);
+  const named = (l: Spanned) => `the lit span on ${l.where} from ${l.span!.from.toFixed(3)} to ${l.span!.to.toFixed(3)}`;
+  const which = ["start", "end"];
+  for (const key of new Set(gated.map((l) => l.span!.shape))) {
+    const group = gated.filter((l) => l.span!.shape === key);
+    for (const l of group) {
+      const s = l.span!;
+      if (s.cites) continue;
+      s.ends.forEach((e, i) => {
+        if ((e === "taper" || e === "free") && s.taper[i]! > GATE.taperPt + 1e-6)
+          problems.push(`${named(l)} tapers over ${s.taper[i]!.toFixed(2)} pt at its ${which[i]} (at most ${GATE.taperPt} pt, unless it cites a DECISIONS entry)`);
+      });
+    }
+    const shape = shapes.find((s) => shapeKey(s.segs) === key);
+    if (!shape) continue;
+    const pts = sample(shape.segs, 32);
+    const total = arc([...pts, pts[0]!]).at(-1)!;
+    // Two spans handing off along one edge: the thin run between them is the first's end taper, the gap and the next's start taper.
+    const sorted = [...group].sort((a, b) => a.span!.from - b.span!.from);
+    if (sorted.length > 1) {
+      sorted.forEach((a, k) => {
+        const b = sorted[(k + 1) % sorted.length]!;
+        const [A, B] = [a.span!, b.span!];
+        if (A.cites || B.cites || A.ends[1] === "join" || A.ends[1] === "under" || B.ends[0] === "join" || B.ends[0] === "under") return;
+        const gap = (((B.from - A.to) % 1) + 1) % 1;
+        const gapPt = (gap > 0.5 ? gap - 1 : gap) * total;
+        if (gapPt >= GATE.handoffPt) return;
+        const thin = Math.max(0, A.taper[1] + gapPt + B.taper[0]);
+        if (thin > GATE.thinPt + 1e-6) problems.push(`${named(a)} hands off to ${named(b)} with ${thin.toFixed(2)} pt below full width between them (at most ${GATE.thinPt} pt)`);
+      });
+    }
+    // A fur edge is one span.
+    for (const fur of shape.fur) {
+      const on = group.filter((l) => overlap([l.span!.from, l.span!.to], fur) * total > 1);
+      if (on.length > 1 && !on.some((l) => l.span!.cites))
+        problems.push(`the fur edge from ${fur[0].toFixed(3)} to ${fur[1].toFixed(3)} of ${on[0]!.where} is drawn as ${on.length} spans (one span per fur edge)`);
+    }
+    // A span ends in the middle of fur only beside another line's end; a joined or covered end is beside one by its kind.
+    for (const l of group) {
+      const s = l.span!;
+      if (s.cites) continue;
+      [s.from, s.to].forEach((f, i) => {
+        if (s.ends[i] === "join" || s.ends[i] === "under") return;
+        const mid = shape.fur.some(([a, b]) => onSpan(f, a, b) && apart(f, a) * total > GATE.endPt && apart(f, b) * total > GATE.endPt);
+        const near = group.some((m) => m !== l && [m.span!.from, m.span!.to].some((g) => apart(f, g) * total <= GATE.endPt));
+        if (mid && !near) problems.push(`${named(l)} ends in the middle of fur at its ${which[i]}, more than ${GATE.endPt} pt from another line or a part's edge`);
+      });
+    }
+  }
+  return problems;
 }
 
 /** Every problem with a set of drawings. */

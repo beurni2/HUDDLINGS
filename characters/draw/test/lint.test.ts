@@ -4,8 +4,8 @@ import assert from "node:assert/strict";
 import type { Drawing } from "../../build/atlas.ts";
 import { rasterizeAll } from "../../build/raster.ts";
 import { furSpan } from "../fur.ts";
-import { smooth, type Node } from "../geom.ts";
-import { lintDrawing, reach } from "../lint.ts";
+import { arc, ellipse, sample, smooth, type Node, type Shape } from "../geom.ts";
+import { GATE, LIMITS, lineGate, lintDrawing, reach, shapeKey, type SpanMeta } from "../lint.ts";
 import { marking, part } from "../paint.ts";
 import { blur, mask, type Piece } from "../svg.ts";
 
@@ -266,4 +266,61 @@ test("a convex corner tighter than 4 pt on an outlined edge fails, unless it is 
   // Off the outlined spans, a corner is not the lint's business.
   const hidden = part("part", sharp, { fill: "#FFF4E8", outline: { colour: "#91694A", width: 1.54, spans: [{ from: 0.3, to: 0.7 }] } });
   assert.deepEqual(lintOf(drawing(hidden)), []);
+});
+
+test("toe lobes may turn tighter than 4 pt, down to their own floor; nothing else may (Q29)", () => {
+  // A 3 pt round on an outlined edge: a corner under 4 pt, unless it is a declared toe lobe, as the stubby-paws panel draws them.
+  const lobe = (r: number, lobes: [number, number][]) => {
+    const p = part("part", { nodes: [], typed: 0, segs: ellipse([0, 0], r, r), closed: true, fur: [] }, { fill: "#FFF4E8", outline: { colour: "#91694A", width: 1.54 } });
+    return drawing({ ...p, meta: { ...p.meta, shapes: p.meta.shapes.map((s) => ({ ...s, lobes })) } });
+  };
+  assert.match(lintOf(lobe(3, [])).join("\n"), /turns a [23]\.\d\d pt convex corner .* outside fur/);
+  assert.deepEqual(lintOf(lobe(3, [[0, 1]])), []);
+  assert.match(lintOf(lobe(LIMITS.lobePt - 0.5, [[0, 1]])).join("\n"), /on a toe lobe \(at least 2.5 pt\)/);
+});
+
+// The line gate (the fur plan's vector gate A): a ring's lit spans, as the dog's parts/lines.ts reports them.
+const ring = smooth(round);
+const ringPts = sample(ring.segs, 32);
+const RING = arc([...ringPts, ringPts[0]!]).at(-1)!;
+/** A drawing of a shape with lit spans (from and to as shares), gated as a lane that has opted in, or not. */
+function spanned(shape: Shape, spans: Partial<SpanMeta>[], gate = true): Drawing {
+  const base = part("part", shape, { fill: "#FFF4E8" });
+  const lines = spans.map((s) => ({ kind: "outer" as const, width: 1.4, where: "part", drawn: [1.3, 1.5] as [number, number],
+    span: { shape: shapeKey(shape.segs), from: 0.1, to: 0.3, length: 25, ends: ["free", "free"], taper: [1.8, 1.8], ...s } as SpanMeta }));
+  const p: Piece = { ...base, meta: { ...base.meta, lines } };
+  return drawing(gate ? lineGate(p) : p);
+}
+const gateOf = (d: Drawing) => lintOf(d).filter((s) => /lit span|fur edge/.test(s)).join("\n");
+
+test("the line gate holds only drawings whose lane has opted in", () => {
+  const long: Partial<SpanMeta> = { ends: ["taper", "taper"], taper: [5, 5] };
+  assert.equal(gateOf(spanned(ring, [long], false)), "", "today's tapered spans pass where no lane has opted in");
+  assert.match(gateOf(spanned(ring, [long])), /tapers over 5.00 pt at its start/);
+  assert.equal(gateOf(spanned(ring, [{}])), "", "a span with free ends tapering 1.8 pt passes");
+  assert.equal(gateOf(spanned(ring, [{ ...long, cites: 74 }])), "", "a span that cites a DECISIONS entry is let through");
+});
+
+test("the line gate fails a handoff that leaves more than 2 pt thin, and passes a joined one", () => {
+  const gap = 1 / RING;
+  const pair = (endA: SpanMeta["ends"][1], startB: SpanMeta["ends"][0], taperA: number, taperB: number): Partial<SpanMeta>[] => [
+    { from: 0.1, to: 0.2, ends: ["free", endA], taper: [1.8, taperA] }, { from: 0.2 + gap, to: 0.3, ends: [startB, "free"], taper: [taperB, 1.8] }];
+  assert.match(gateOf(spanned(ring, pair("free", "free", 1.8, 1.8))), /hands off to .* with 4.60 pt below full width/);
+  assert.equal(gateOf(spanned(ring, pair("join", "join", 0, 0))), "");
+  assert.equal(gateOf(spanned(ring, pair("under", "free", 0, 1.8))), "", "an end running on under a part is not a handoff");
+  // Spans further apart than a handoff are separate edges, each lined where the sheet lines it.
+  assert.equal(gateOf(spanned(ring, [{ from: 0.1, to: 0.2 }, { from: 0.2 + (GATE.handoffPt + 1) / RING, to: 0.4 }])), "");
+});
+
+test("the line gate fails a fur edge drawn as more than one span, and a span ending in the middle of fur", () => {
+  // Fur over about a fifth of the way round, as shares of the ring's length (as the meta holds it).
+  const furred = furSpan(ring, ringPts[Math.round(ringPts.length * 0.1)]!, ringPts[Math.round(ringPts.length * 0.3)]!);
+  const [a, b] = part("part", furred, { fill: "#FFF4E8" }).meta.shapes[0]!.fur[0]!;
+  const mid = (a + b) / 2;
+  assert.equal(gateOf(spanned(furred, [{ from: a - 0.05, to: b + 0.05 }])), "", "one span over the fur edge passes");
+  assert.match(gateOf(spanned(furred, [{ from: a - 0.05, to: mid, ends: ["free", "join"], taper: [1.8, 0] }, { from: mid, to: b + 0.05, ends: ["join", "free"], taper: [0, 1.8] }])),
+    /is drawn as 2 spans/);
+  assert.match(gateOf(spanned(furred, [{ from: a - 0.05, to: mid }])), /ends in the middle of fur at its end/);
+  assert.equal(gateOf(spanned(furred, [{ from: a - 0.05, to: mid, ends: ["free", "under"], taper: [1.8, 0] }])), "", "an end that runs under a part is not in open fur");
+  assert.equal(gateOf(spanned(furred, [{ from: a - 0.05, to: b }])), "", "a span ending where the fur ends passes");
 });
