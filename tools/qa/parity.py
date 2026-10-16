@@ -38,13 +38,12 @@ Writes report.json, a sheet of the worst frames side by side (web | SpriteKit
 and exits 1 on any failure. With PARITY_PRINT_EVIDENCE=1 the strips are also
 printed as base64 JPEG, for logs where artifacts cannot be fetched."""
 import base64
+import fnmatch
 import io
 import json
 import os
 import sys
 from pathlib import Path
-
-import fnmatch
 
 import numpy as np
 from PIL import Image
