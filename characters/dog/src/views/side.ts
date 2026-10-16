@@ -16,9 +16,9 @@ import { blur, join, mask, pad, piece, region, uid, type Box, type Piece } from 
 import { model } from "../model.ts";
 import { C, LINES } from "../palette.ts";
 import type { BrowState } from "../parts/brow.ts";
-import { eye, lidBand, type EyeSpec, type LidBand } from "../parts/eye.ts";
+import { eye, type EyeSpec, type LidBand } from "../parts/eye.ts";
 import type { Star } from "../parts/stars.ts";
-import { browState, halfLid, paintOpen, paintOval, PROFILE_MOUTHS, turnedStars, type ProfileMouthState, type TurnedMouth } from "../parts/turned.ts";
+import { browState, drawLid, paintOpen, paintOval, PROFILE_MOUTHS, turnedStars, type LidState, type ProfileMouthState, type TurnedEyeLid, type TurnedMouth } from "../parts/turned.ts";
 import { litEdge, litMarking, litPart, type LitSpan } from "../parts/lines.ts";
 import { curlShapes, topknot, type Curl } from "../parts/topknot.ts";
 import { earFur } from "../parts/ear.ts";
@@ -682,9 +682,9 @@ export const landmarks: Record<string, P> = {
 // which head.line draws over it as the lower lip's edge. side.R is each drawn again in its facing (views/facing.ts).
 
 /** The profile's lash bands: placed from the open eye's centre as the front places its own, the band about as wide as the profile eye's opening. */
-function eyeState(state: (typeof EYE_STATES)[number]): Piece {
-  const band = (out: number, down: number, b: Omit<LidBand, "centre" | "tilt" | "noseward">) =>
-    lidBand({ centre: [EYE.centre[0] + out, EYE.centre[1] + down], tilt: 0, noseward: EYE.noseward, ...b });
+function lidOf(state: LidState): TurnedEyeLid {
+  const band = (out: number, down: number, b: Omit<LidBand, "centre" | "tilt" | "noseward">): TurnedEyeLid =>
+    ({ band: { centre: [EYE.centre[0] + out, EYE.centre[1] + down], tilt: 0, noseward: EYE.noseward, ...b } });
   switch (state) {
     // The crescent 2.6 pt below the open eye's centre and 1.3 pt back (the profile eye is taller than the front's: the
     // front's 2.35 grown with it), 14 pt across, the profile eye's 15.2 less its soft edge, its back end a little lower.
@@ -698,8 +698,18 @@ function eyeState(state: (typeof EYE_STATES)[number]): Piece {
     // the head turns between the two.
     case "sleepy": {
       const s = EYE.ry / 9.2;
-      return halfLid(EYE, { level: -3.2 * s, bow: 1.8 * s, tilt: 0, lash: 1.9, overhang: 0.8, shine: { at: [2.2, -1], r: 1.3 } });
+      return { spec: EYE, lid: { level: -3.2 * s, bow: 1.8 * s, tilt: 0, lash: 1.9, overhang: 0.5, shine: { at: [2.2, -0.5], r: 1.3 } } };
     }
+  }
+}
+
+function eyeState(state: (typeof EYE_STATES)[number]): Piece {
+  switch (state) {
+    case "happy":
+    case "closed":
+    case "wink":
+    case "sleepy":
+      return drawLid(lidOf(state));
     case "wide":
       return eye({ ...EYE, centre: [EYE.centre[0] - 0.3, EYE.centre[1] - 0.9], rx: EYE.rx * 1.07, ry: EYE.ry * 1.07,
         white: { ...EYE.white, width: EYE.white.width * 1.15, span: EYE.white.span + 6 }, shine: { at: [2.4, 4.6], r: 1.85 }, glow: { band: 6.4, warm: 2.2 } });
@@ -920,6 +930,8 @@ export const sideFace = {
   ovals: OVALS,
   brow: (state: BrowState) => browState(BROW, state),
   eye: EYE,
+  /** The lid each closing eye state draws (the R3 guard reads its lean). */
+  lids: lidOf,
   perked: { L: perked },
   /** The muzzle's level, as the profile is drawn upright (DECISIONS 179): the screen's. */
   levelDeg: 0,

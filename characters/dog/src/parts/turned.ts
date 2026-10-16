@@ -16,7 +16,7 @@ import { LIMITS } from "../../../draw/lint.ts";
 import { blur, pad, piece, uid, type Box, type Piece } from "../../../draw/svg.ts";
 import { C } from "../palette.ts";
 import type { BrowState } from "./brow.ts";
-import { eye, type EyeSpec } from "./eye.ts";
+import { eye, lidBand, type EyeSpec, type LidBand } from "./eye.ts";
 import { stars, type Star } from "./stars.ts";
 
 const r3 = (n: number) => Math.round(n * 1000) / 1000;
@@ -382,46 +382,97 @@ export function turnedMouth(state: TurnedMouthState, f: TurnedFrame, nose: P): T
   };
 }
 
+/** A turned half-lid (`halfLid`): where its edge lies, how it bows and leans, and its lash. */
+export interface TurnedLid {
+  /** How far above the ball's middle (negative) the edge meets the ball's sides, along the face's lean. */
+  level: number;
+  /** How far the edge bows down in its middle, below the line through its ends. */
+  bow: number;
+  /** The face's lean (degrees, clockwise on screen). */
+  tilt: number;
+  lash: number;
+  /** How far the lash runs on past the ball at its outer end, where the open eye's lash swells over the corner. */
+  overhang: number;
+  shine: { at: [number, number]; r: number };
+}
+
 /**
- * The sleepy half-lid on a turned eye (the expression sheet's Sleepy half-lid): the open eye closed down to a level line
- * `level` pt from its middle (up negative), its edge bowing down `bow` pt in its middle, as parts/eye.ts closes it
- * (EyeSpec.cover), with a lash line along that edge and the catchlight just under it (Q28's default). parts/eye.ts
- * paints the lid as the hood's pale tan over the whole upper eye: the front's eyes sit inside their hoods, but a turned
- * view's sit half in the cream (the three-quarter's near hood arches over its eye's outer top, the far one only over
- * its outer side), where that tan lid read as a cap stuck on the face. So here the open eye is drawn only below the
- * lid's edge, and above it the face's own fur shows, whatever colour it is round that eye, with a soft crease of the
- * lid's shade just above the lash.
+ * The half-lid's edge, from its inner end (the nose's side) to its outer end, in model space: a bow from where the
+ * level line meets the ball's side on the nose's side to where it meets it on the outer side, and on past the outer
+ * side by `overhang`. The lash is drawn along it, so it spans the ball and no more (the R3 guard reads it).
  */
-export function halfLid(e: EyeSpec, c: NonNullable<EyeSpec["cover"]> & { bow?: number }): Piece {
-  const base = eye(e);
-  const t = (c.tilt * Math.PI) / 180, cos = Math.cos(t), sin = Math.sin(t);
-  const L = (x: number, y: number): P => [e.centre[0] + x * cos - y * sin, e.centre[1] + x * sin + y * cos];
-  const reach = Math.max(e.rx, e.ry) + 1, half = reach + c.overhang;
-  // The lid's edge bows down a little in its middle, as an eyelid's does (parts/eye.ts's).
-  const edge = Array.from({ length: 25 }, (_, k): P => {
-    const x = -half + (2 * half * k) / 24;
-    return L(x, c.level + (c.bow ?? 1.6) * (1 - (x / half) ** 2));
+export function lidEdge(e: EyeSpec, c: TurnedLid): P[] {
+  const t = (c.tilt * Math.PI) / 180, a = (e.turn * Math.PI) / 180;
+  const L = (x: number, y: number): P => [e.centre[0] + x * Math.cos(t) - y * Math.sin(t), e.centre[1] + x * Math.sin(t) + y * Math.cos(t)];
+  /** Whether a point lies inside the ball, in the ball's own frame. */
+  const inside = ([px, py]: P) => {
+    const [dx, dy] = [px - e.centre[0], py - e.centre[1]];
+    const u = dx * Math.cos(a) + dy * Math.sin(a), w = -dx * Math.sin(a) + dy * Math.cos(a);
+    return (u / e.rx) ** 2 + (w / e.ry) ** 2 <= 1;
+  };
+  // Where the level line leaves the ball on each side, by halving.
+  const side = (dir: 1 | -1) => {
+    let lo = 0, hi = Math.max(e.rx, e.ry) + 1;
+    for (let k = 0; k < 40; k++) {
+      const mid = (lo + hi) / 2;
+      if (inside(L(dir * mid, c.level))) lo = mid;
+      else hi = mid;
+    }
+    return dir * lo;
+  };
+  const [x0, x1] = [side(-1), side(1)], xm = (x0 + x1) / 2, hh = (x1 - x0) / 2;
+  const y = (x: number) => c.level + c.bow * (1 - ((x - xm) / hh) ** 2);
+  // The outer side is away from the nose: +x when the nose lies to the eye's left.
+  const [from, to] = e.noseward < 0 ? [x0, x1 + c.overhang] : [x1, x0 - c.overhang];
+  return Array.from({ length: 25 }, (_, k) => {
+    const x = from + ((to - from) * k) / 24;
+    return L(x, y(x));
   });
-  const below = uid("below"), crease = uid("crease"), soft = uid("blur"), lash = uid("blur"), shine = uid("blur");
-  const under = `M${edge.map(xy).join("L")}L${xy(L(half, reach + 6))}L${xy(L(-half, reach + 6))}Z`;
-  // The crease: a soft band of the lid's shade 2.4 pt deep just above the lash, fading upward.
-  const lift = (p: P, by: number): P => [p[0] + by * sin, p[1] - by * cos];
-  const creaseD = `M${edge.slice(3, -3).map(xy).join("L")}L${[...edge.slice(3, -3)].reverse().map((p) => xy(lift(p, 2.4))).join("L")}Z`;
-  const mid = c.level + (c.bow ?? 1.6), [g0, g1] = [L(0, mid - 3.2), L(0, mid - 0.6)];
-  const band = strokeOf(edge.slice(2, -2), c.lash, { taper: 3.2, tip: 0.7 });
+}
+
+/**
+ * The sleepy half-lid on a turned eye, as the expression sheet's Sleepy half-lid draws it: the upper lid closed down
+ * over the ball to a bowed edge (`lidEdge`), a pale lid over the ball above it, the lash along the edge and the
+ * catchlight just under it (Q28's default). parts/eye.ts paints the lid as the hood's opaque tan: the front's eyes sit
+ * inside their hoods, but a turned view's sit half in the cream, where that tan read as a cap stuck on the face. Here
+ * the open eye is drawn only below the edge, and the lid over the ball above it is the lid's shade laid over the
+ * face's own fur, so it is the sheet's pale tan lid on the cream (the shade at 55% over the cream is the panel's
+ * #F2CDAA) and a deeper tan where the eye sits in the hood, with no edge of its own where it meets the fur round the
+ * ball. The lash spans the ball, running a little past it at the outer corner only: run on past both sides as a
+ * straight bar, it read as a flat, unimpressed lid.
+ */
+export function halfLid(e: EyeSpec, c: TurnedLid): Piece {
+  const base = eye(e);
+  const edge = lidEdge(e, c);
+  const t = (c.tilt * Math.PI) / 180, cos = Math.cos(t), sin = Math.sin(t);
+  const up = (p: P, by: number): P => [p[0] + by * sin, p[1] - by * cos];
+  const reach = Math.max(e.rx, e.ry) + 4;
+  // Below the edge (the open eye's part) and above it (the lid's), each closed far past the ball.
+  const below = `M${edge.map(xy).join("L")}L${xy(up(edge.at(-1)!, -reach * 2))}L${xy(up(edge[0]!, -reach * 2))}Z`;
+  const above = `M${edge.map(xy).join("L")}L${xy(up(edge.at(-1)!, reach * 2))}L${xy(up(edge[0]!, reach * 2))}Z`;
+  const ball = pathD(ellipse(e.centre, e.rx + 0.3, e.ry + 0.3, e.turn));
+  const under = uid("below"), lid = uid("lid"), shade = uid("shade"), soft = uid("blur"), lash = uid("blur"), shine = uid("blur");
+  // The lid's shade deepening a little toward the lash, as the panel's lid is a touch warmer over its edge.
+  const mid = edge[12]!, [g0, g1] = [up(mid, e.ry), mid];
+  const band = strokeOf(edge, c.lash, { taper: 2.4, tip: 0.6 });
   const a = (e.turn * Math.PI) / 180;
   const [u, w] = [c.shine.at[0], -c.shine.at[1]];
   const spot: P = [e.centre[0] + e.noseward * u * Math.cos(a) - w * Math.sin(a), e.centre[1] + e.noseward * u * Math.sin(a) + w * Math.cos(a)];
-  const svg = `<defs><clipPath id="${below}"><path d="${under}"/></clipPath>` +
-    `<linearGradient id="${crease}" gradientUnits="userSpaceOnUse" x1="${fmt(g0[0])}" y1="${fmt(g0[1])}" x2="${fmt(g1[0])}" y2="${fmt(g1[1])}">` +
-    `<stop offset="0" stop-color="${C.lidShade}" stop-opacity="0"/><stop offset="1" stop-color="${C.lidShade}" stop-opacity="0.55"/></linearGradient>` +
-    `${blur(soft, base.box, 0.6)}${blur(lash, base.box, 0.2)}${blur(shine, base.box, 0.22)}</defs>` +
-    `<g clip-path="url(#${below})">${base.svg}</g>` +
-    `<g filter="url(#${soft})"><path d="${creaseD}" fill="url(#${crease})"/></g>` +
+  const svg = `<defs><clipPath id="${under}"><path d="${below}"/></clipPath><clipPath id="${lid}"><path d="${above}"/></clipPath>` +
+    `<linearGradient id="${shade}" gradientUnits="userSpaceOnUse" x1="${fmt(g0[0])}" y1="${fmt(g0[1])}" x2="${fmt(g1[0])}" y2="${fmt(g1[1])}">` +
+    `<stop offset="0.2" stop-color="${C.lidShade}" stop-opacity="0.5"/><stop offset="1" stop-color="${C.lidShade}" stop-opacity="0.62"/></linearGradient>` +
+    `${blur(soft, base.box, 0.35)}${blur(lash, base.box, 0.2)}${blur(shine, base.box, 0.22)}</defs>` +
+    `<g clip-path="url(#${under})">${base.svg}</g>` +
+    `<g filter="url(#${soft})"><g clip-path="url(#${lid})"><path d="${ball}" fill="url(#${shade})"/></g></g>` +
     `<g filter="url(#${lash})"><path d="${band.d}" fill="${C.eyeRim}"/></g>` +
     `<path d="${pathD(ellipse(spot, c.shine.r, c.shine.r * 0.94, e.turn))}" fill="${C.light}" filter="url(#${shine})"/>`;
   return piece(svg, base.box, base.meta);
 }
+
+/** The eye states a turned view draws as a lid: a lash band (parts/eye.ts) or the half-lid over the open eye. */
+export type LidState = "happy" | "closed" | "wink" | "sleepy";
+export type TurnedEyeLid = { band: LidBand } | { spec: EyeSpec; lid: TurnedLid };
+export const drawLid = (l: TurnedEyeLid): Piece => ("band" in l ? lidBand(l.band) : halfLid(l.spec, l.lid));
 
 /**
  * The sparkle's stars in a turned view (parts/stars.ts, Proud's stars, Q2's default), typed in model space where the

@@ -13,9 +13,9 @@ import { blur, join, pad, piece, uid, type Box, type Piece } from "../../../draw
 import { model } from "../model.ts";
 import { C, LINES } from "../palette.ts";
 import type { BrowState } from "../parts/brow.ts";
-import { eye, lidBand, type EyeSpec, type LidBand } from "../parts/eye.ts";
+import { eye, type EyeSpec, type LidBand } from "../parts/eye.ts";
 import type { Star } from "../parts/stars.ts";
-import { browState, foreshortened, halfLid, TURNED_MOUTHS, turnedMouth, turnedStars, type TurnedFrame, type TurnedMouthState } from "../parts/turned.ts";
+import { browState, drawLid, foreshortened, TURNED_MOUTHS, turnedMouth, turnedStars, type LidState, type TurnedEyeLid, type TurnedFrame, type TurnedMouthState } from "../parts/turned.ts";
 import { litEdge, litMarking, litPart, withDefaults, type LitSpan } from "../parts/lines.ts";
 import { curlShapes, topknot, type Curl } from "../parts/topknot.ts";
 import { earFur } from "../parts/ear.ts";
@@ -753,10 +753,12 @@ const NOSE_FOOT: P = [-67, -88.4];
 /** How much smaller the far eye is than the near one, across (its open eye's 6.6 pt half-width against 9.5). */
 const FAR = EYES.R.rx / EYES.L.rx;
 /**
- * The crescents' and lids' lean (degrees, clockwise), between the muzzle's level (7.5°) and the eye line, which rises
- * 9.7 pt over 40 toward the far eye (13.5°), as Soft landing lays its crescents along the turned face.
+ * Each eye's crescents and lids lean (degrees, clockwise): 2.5° outward from the muzzle's level (7.5°), the near eye's
+ * toward the viewer's right and the far eye's toward the left, so both lie as the front's pair do, a touch lower at
+ * their outer ends, as Soft landing lays its crescents along the turned face. Laid along one lean, the far lid ran down
+ * toward the nose on screen, and beside the near one's outward droop the pair read as a skeptical squint.
  */
-const LID_TILT = 10;
+const LID_TILT = { L: 10, R: 5 };
 
 /**
  * An eye state on this view's eye (`side` L the near eye, R the far one), from its open eye (EYES): the closed states are
@@ -765,10 +767,10 @@ const LID_TILT = 10;
  * shortened on the far eye, and as wide as each eye: the near band the front's 17.6 pt, the far one shortened with its
  * eye; the half-lid, the wide eye and the peek the open eye's own spec changed as the front changes its own.
  */
-function eyeState(state: (typeof EYE_STATES)[number], side: "L" | "R"): Piece {
+function lidOf(state: LidState, side: "L" | "R"): TurnedEyeLid {
   const spec = EYES[side], near = side === "L", k = near ? 1 : FAR, out = near ? 1 : -FAR;
-  const band = (o: number, down: number, b: Omit<LidBand, "centre" | "tilt" | "noseward">) =>
-    lidBand({ centre: [spec.centre[0] + out * o, spec.centre[1] + down], tilt: LID_TILT, noseward: spec.noseward, ...b });
+  const band = (o: number, down: number, b: Omit<LidBand, "centre" | "tilt" | "noseward">): TurnedEyeLid =>
+    ({ band: { centre: [spec.centre[0] + out * o, spec.centre[1] + down], tilt: LID_TILT[side], noseward: spec.noseward, ...b } });
   switch (state) {
     case "happy":
       return band(1.9, 2.35, { width: 17.6 * k, rise: near ? 4.4 : 3.8, drop: near ? 1 : 0.8, thickness: near ? 3.3 : 3, ends: near ? [1.5, 0.8] : [1.3, 0.7],
@@ -779,13 +781,25 @@ function eyeState(state: (typeof EYE_STATES)[number], side: "L" | "R"): Piece {
     case "wink":
       return band(0.5, 0.6, { width: 17.6 * k, rise: near ? 4 : 3.5, drop: near ? -1.4 : -1.1, thickness: near ? 3.3 : 3, ends: near ? [1.5, 0.8] : [1.3, 0.7],
         flick: { length: near ? 1.8 : 1.4, hook: -75 } });
-    // The upper lid closed over about two fifths of the eye, as the front's (its ends 3.2 pt above the middle of an eye
-    // 9.2 pt tall, its edge bowing 1.8 pt down: each eye's grown with its height), its catchlight just under the lash
-    // (Q28's default), the face's own fur showing above it, cream or the hood's tan as each eye sits (parts/turned.ts).
+    // The upper lid closed over about two fifths of the eye, as the front's: its middle 1.4 pt above the middle of an
+    // eye 9.2 pt tall, its ends 3.2 pt above it where they meet the ball's sides, each eye's grown with its height; a
+    // pale lid over the ball above it, the lash running past the ball at its outer corner only, the catchlight just
+    // under the lash (Q28's default; parts/turned.ts).
     case "sleepy": {
       const s = spec.ry / 9.2;
-      return halfLid(spec, { level: -3.2 * s, bow: 1.8 * s, tilt: LID_TILT, lash: near ? 1.9 : 1.6, overhang: near ? 1 : 0.7, shine: { at: near ? [2.7, -0.9] : [1.8, -0.8], r: near ? 1.4 : 1.1 } });
+      return { spec, lid: { level: -3.2 * s, bow: 1.8 * s, tilt: LID_TILT[side], lash: near ? 1.9 : 1.6, overhang: near ? 0.5 : 0.4, shine: { at: near ? [2.7, -0.4] : [1.8, -0.4], r: near ? 1.4 : 1.1 } } };
     }
+  }
+}
+
+function eyeState(state: (typeof EYE_STATES)[number], side: "L" | "R"): Piece {
+  const spec = EYES[side], near = side === "L";
+  switch (state) {
+    case "happy":
+    case "closed":
+    case "wink":
+    case "sleepy":
+      return drawLid(lidOf(state, side));
     // Surprised round: 7% larger and a point higher, a little toward the nose, the white broader, the catchlight bigger.
     case "wide":
       return eye({ ...spec, centre: [spec.centre[0] + spec.noseward * 0.4, spec.centre[1] - 0.9], rx: spec.rx * 1.07, ry: spec.ry * 1.07,
@@ -911,6 +925,8 @@ export const threeQuarterFace = {
   rest: { lip: REST_LIP, lipCentre: [-69.4, -85.8] as P },
   brows: (state: BrowState) => ({ L: browState(BROWS.L.pts, state), R: browState(BROWS.R.pts, state) }),
   eyes: EYES,
+  /** The lid each closing eye state draws, on each eye (the R3 guard reads its lean). */
+  lids: lidOf,
   perked: { L: perkedNear, R: perkedFar },
   /** The muzzle's level, the line through the rest mouth's corners (7.5°): the R3 guards' level frame here (DECISIONS 179). */
   levelDeg: 7.5,

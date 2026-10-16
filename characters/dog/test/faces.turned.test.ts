@@ -12,7 +12,7 @@ import { regionFor } from "../../../runtime-web/src/rig.ts";
 import { sample, smooth, v, type P } from "../../draw/geom.ts";
 import { BROW_STATES } from "../src/parts/brow.ts";
 import { MOUTH_STATES } from "../src/parts/mouth.ts";
-import { PROFILE_MOUTHS, TURNED_MOUTHS, turnedMouth, type TurnedMouth } from "../src/parts/turned.ts";
+import { lidEdge, PROFILE_MOUTHS, TURNED_MOUTHS, turnedMouth, type TurnedEyeLid, type TurnedMouth } from "../src/parts/turned.ts";
 import { LIGHT } from "../../draw/paint.ts";
 import { stillOf } from "../src/faceClips.ts";
 import { EAR_STATES, EYE_STATES, PRESETS, type EarState } from "../src/presets.ts";
@@ -333,6 +333,59 @@ test("every turned brow bows up, its inner end at or above its outer and within 
   assert.match(browProblem(at(2.6), -1, deg) ?? "", /a worried slant/);
   const c = near.reduce((s, p) => [s[0] + p[0] / near.length, s[1] + p[1] / near.length] as P, [0, 0] as P);
   assert.match(browProblem(near.map(([x, y]): P => [x, 2 * c[1] - y]), -1, deg) ?? "", /bows -|angry|worried/);
+});
+
+/**
+ * How far a closing lid may lean from the face's level, either way: the sheets' bands lie within 4.5° of it (Happy
+ * crescent's outer end hangs 1 pt over 17.6, Winking's lifts 1.4), a turned one a few degrees more as its view leans
+ * it; the Angry and Sad (teary) lids lean far past this.
+ */
+const LID_LEAN_DEG = 10;
+/**
+ * A closing lid's lean in a level frame (`deg`, the face's level, clockwise on screen): the angle of the line from its
+ * inner end (the nose's side) to its outer end, positive with the outer end lower. A lash band's ends are its own
+ * (parts/eye.ts LidBand: `width` across from the inner end to the outer, the outer `drop` lower, turned by `tilt`); a
+ * half-lid's are its edge's (parts/turned.ts lidEdge).
+ */
+function lidLean(l: TurnedEyeLid, deg: number, mirrored = false): number {
+  let d: P;
+  if ("band" in l) {
+    const { width, drop, tilt, noseward } = l.band, t = (tilt * Math.PI) / 180, out = -noseward;
+    d = [out * width * Math.cos(t) - drop * Math.sin(t), out * width * Math.sin(t) + drop * Math.cos(t)];
+  } else {
+    const edge = lidEdge(l.spec, l.lid);
+    d = v.sub(edge.at(-1)!, edge[0]!);
+  }
+  // In the other facing the lid is mirrored, and its level with it.
+  const [x, y] = level([mirrored ? [-d[0], d[1]] : d], mirrored ? -deg : deg)[0]!;
+  return (Math.atan2(y, Math.abs(x)) * 180) / Math.PI;
+}
+function lidProblem(l: TurnedEyeLid, deg: number, mirrored = false): string | undefined {
+  const lean = lidLean(l, deg, mirrored);
+  if (lean < -LID_LEAN_DEG) return `its nose's end sits ${(-lean).toFixed(1)}° below its outer end, an angry slant`;
+  if (lean > LID_LEAN_DEG) return `its outer end droops ${lean.toFixed(1)}°, a sad slant`;
+  return undefined;
+}
+
+test("no turned lid slants angry or droops sad: every crescent, closed lid, wink and half-lid lies near the face's level, in both facings", () => {
+  const LIDS = ["happy", "closed", "wink", "sleepy"] as const;
+  const lids: { label: string; lid: TurnedEyeLid; deg: number }[] = [];
+  for (const state of LIDS) {
+    for (const side of ["L", "R"] as const) lids.push({ label: `threeQuarter eye.${side} ${state}`, lid: threeQuarterFace.lids(state, side), deg: threeQuarterFace.levelDeg });
+    lids.push({ label: `side eye.L ${state}`, lid: sideFace.lids(state), deg: sideFace.levelDeg });
+  }
+  for (const { label, lid, deg } of lids) {
+    assert.equal(lidProblem(lid, deg), undefined, `${label} (.L)`);
+    assert.equal(lidProblem(lid, deg, true), undefined, `${swapSides(label)} (.R)`);
+  }
+  // Planted: every three-quarter lid turned to -25° (on screen, anticlockwise): the near eye's runs down toward its
+  // nose (angry) and the far eye's droops outward (sad); both fail, banded and half-lidded.
+  const turned = (l: TurnedEyeLid): TurnedEyeLid => ("band" in l ? { band: { ...l.band, tilt: -25 } } : { spec: l.spec, lid: { ...l.lid, tilt: -25 } });
+  const deg = threeQuarterFace.levelDeg;
+  for (const state of LIDS) {
+    assert.match(lidProblem(turned(threeQuarterFace.lids(state, "L")), deg) ?? "", /an angry slant/, `near ${state} at -25°`);
+    assert.match(lidProblem(turned(threeQuarterFace.lids(state, "R")), deg) ?? "", /a sad slant/, `far ${state} at -25°`);
+  }
 });
 
 test("the one perked ear stands above the eyes in every turned view, never hanging as the sheets' drooped ears do", () => {
