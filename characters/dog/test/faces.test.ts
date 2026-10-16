@@ -434,8 +434,8 @@ test("the face clips are what presets.ts writes: one per preset, sound, at the f
   assert.deepEqual(validate(rig, [faceClip("shy", { ...PRESETS.shy!, blush: 1 })]), [], "a clip at 100%");
   assert.throws(() => blushAlpha(1.01), /past the 0 to 1/);
   assert.throws(() => blushAlpha(-0.1), /past the 0 to 1/);
-  // Shy and blissful at the table's levels, and huffy's puffed cheeks flushed (DECISIONS 152).
-  assert.deepEqual(Object.entries(PRESETS).filter(([, p]) => p.blush !== null).map(([n, p]) => [n, p.blush]), [["shy", 0.8], ["blissful", 0.7], ["huffy", 0.6]]);
+  // Shy and blissful at the table's levels, and no other: the table names none for the rest, huffy included (DECISIONS 161).
+  assert.deepEqual(Object.entries(PRESETS).filter(([, p]) => p.blush !== null).map(([n, p]) => [n, p.blush]), [["shy", 0.8], ["blissful", 0.7]]);
   // Huffy's peek back lets its cheeks go: one eye open again, the other still shut, the tiny smile.
   const peek = stillOf(PRESETS.huffy!, true);
   assert.deepEqual([peek.eyes.L, peek.eyes.R, peek.mouth, peek.cheeks], ["peekBack", "flat", "tinySmile", undefined]);

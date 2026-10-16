@@ -42,6 +42,9 @@ const STILLS: { still: string; clip: Clip; label: string; title: string }[] = [
   { still: "hungry-B-o", clip: variant("hungry_B_o", clip("hungry", hungry), { "eye.L": "eagerB", "eye.R": "eagerB", mouth: "o" }), label: "new drawing", title: "hungry B, its first beat: o" },
   { still: "huffy-A", clip: { ...clip("huffy", huffy), name: "review_huffy_A" }, label: "new drawing", title: "huffy A (ships): flat lids, pressed, cheeks puffed inside" },
   { still: "huffy-A-peek", clip: { ...clip("huffy", huffy, true), name: "review_huffy_A_peek" }, label: "new drawing", title: "huffy, its peek back: peekBack, tinySmile" },
+  // The flush the first drawing keyed: the table names no level for huffy, so the package keeps the resting level
+  // (DECISIONS 161) and this one is the founder's to choose.
+  { still: "huffy-A-flush", clip: { ...clip("huffy", { ...huffy, blush: 0.6 }), name: "review_huffy_A_flush" }, label: "new drawing", title: "huffy A flushed to 60%, for the founder" },
   { still: "huffy-B", clip: variant("huffy_B", clip("huffy", huffy), { "head.base": "puffed", "head.line": "puffed" }), label: "new drawing", title: "huffy B: the head itself puffed as well" },
   { still: "q2-squeeze-default", clip: { ...clip("ticklish", ticklish), name: "review_q2_squeeze_default" }, label: "Q2 default", title: "squeeze, Q2's default: the happy crescent" },
   { still: "q2-squeeze-alt", clip: variant("q2_squeeze_alt", clip("ticklish", ticklish), { "eye.L": "squeezeAlt", "eye.R": "squeezeAlt" }), label: "not on the dog sheet", title: "squeeze, the alternative: > <" },

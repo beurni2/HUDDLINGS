@@ -172,8 +172,9 @@ export const PRESETS: Record<string, Preset> = {
     sequence: "closed or half-closed, glancing away, peeking back with a tiny smile every 4–6 s",
     eyes: ["flat", "peekBack"], eyesHow: "then", eyesNote: "closed or half-closed, glancing away, peeking back with a tiny smile every 4–6 s",
     mouth: ["pressed", "tinySmile"], mouthHow: "then", mouthNote: "puffed cheeks, a small pressed mouth; the tiny smile as it peeks back",
-    // The puffed cheeks flush to 60%: unflushed, the puff reads as jowls at phone size (DECISIONS 152).
-    ears: "neutral", brows: "neutral", cheeks: "puffed", blush: 0.6,
+    // The table names no blush level for huffy, so it keeps the resting level, the safe default; the 60% flush the
+    // first drawing keyed is shown for the founder in the review render (DECISIONS 161).
+    ears: "neutral", brows: "neutral", cheeks: "puffed", blush: null,
     panels: "none: drawn new for Grumpy and approved by the founder; never the sheets' Angry or Pout, and never held more than 6 s without a peek back",
     crops: [], still: { eyes: "flat", mouth: "pressed" }, peek: { eye: "L", mouth: "tinySmile" },
     drawnNew: { from: ["expressions.eyes.closed", "expressions.eyes.side-glance", "expressions.mouth.small-smile", "master.expression.content"] },
