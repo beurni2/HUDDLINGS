@@ -1,12 +1,13 @@
 // Builds a character package (characters/format/README.md, Files) from
 // characters/<species>/src: checks the rig, clips and drawings, lints the
 // drawings, rasterizes them into atlas sets, and writes
-// build/characters/<species>/. Its development output (a build report and the
-// landmarks the species' drawings place) goes to build/dev/<species>/, outside
-// build/characters, which the app bundles whole (ios/project.yml).
+// build/characters/<species>/. Its development output (a build report, the
+// landmarks the species' drawings place and its face presets' data) goes to
+// build/dev/<species>/, outside build/characters, which the app bundles whole
+// (ios/project.yml).
 // Run: node characters/build/build.ts <species> [out folder] [--dev <folder>] [--cache <folder>]
 import { createHash } from "node:crypto";
-import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
@@ -47,6 +48,11 @@ export interface Source {
   lint?: LintRules;
   /** Points the sheet has no finder for (paws, the tag's ring, the seat), per view, in model space. */
   landmarks?: Record<string, Record<string, [number, number]>>;
+  /**
+   * The data src/presets.ts exports, for a species that has one (its face presets, each with the blush level it asks
+   * for): what the Faces check holds a face clip's still to, read from the build, never copied by hand.
+   */
+  presets?: Record<string, unknown>;
 }
 
 export async function readSource(species: string): Promise<Source> {
@@ -58,6 +64,10 @@ export async function readSource(species: string): Promise<Source> {
     lint?: LintRules;
     landmarks?(): Record<string, Record<string, [number, number]>>;
   };
+  // Only its data: JSON drops the functions a module may export beside it.
+  const presets = existsSync(join(src, "presets.ts"))
+    ? (JSON.parse(JSON.stringify(await import(pathToFileURL(join(src, "presets.ts")).href))) as Record<string, unknown>)
+    : undefined;
   return {
     rig: json(join(src, "rig.json")),
     clips: clipFiles.map((f) => json(join(src, "clips", f))),
@@ -65,6 +75,7 @@ export async function readSource(species: string): Promise<Source> {
     drawings: module.drawings(),
     ...(module.lint ? { lint: module.lint } : {}),
     ...(module.landmarks ? { landmarks: module.landmarks() } : {}),
+    ...(presets ? { presets } : {}),
   };
 }
 
@@ -74,6 +85,8 @@ export interface Package {
   atlas: { sets: AtlasSet[] };
   /** Development output, never part of the package: written to build/dev/<species>/ (devFolder). */
   dev: Map<string, Buffer>;
+  /** The source's own data the checks read (presets.json), written beside the development output, never in the package. */
+  data: Map<string, Buffer>;
   report: Report;
 }
 
@@ -150,15 +163,17 @@ export async function buildPackage(source: Source, opts: RasterOptions = {}): Pr
   const dev = new Map<string, Buffer>();
   if (source.lint || source.landmarks) dev.set("report.json", text(built));
   if (source.landmarks) dev.set("landmarks.json", text(source.landmarks));
-  return { files, atlas: { sets }, dev, report: built };
+  const data = new Map<string, Buffer>();
+  if (source.presets) data.set("presets.json", text(source.presets));
+  return { files, atlas: { sets }, dev, data, report: built };
 }
 
 /** Where a species' package goes: the folder the app bundles whole. */
 export const packageFolder = (species: string) => join(repo, "build", "characters", species);
-/** Where a species' development output goes (report.json, landmarks.json): never inside a package folder. */
+/** Where a species' development output goes (report.json, landmarks.json, presets.json): never inside a package folder. */
 export const devFolder = (species: string) => join(repo, "build", "dev", species);
 
-/** Writes the package into out and its development output, if it is given a folder, into dev; each folder is replaced whole. */
+/** Writes the package into out and its development output and data, if it is given a folder, into dev; each folder is replaced whole. */
 export function writePackage(pkg: Package, out: string, dev?: string): void {
   const write = (folder: string, files: Map<string, Buffer>) => {
     rmSync(folder, { recursive: true, force: true });
@@ -168,7 +183,7 @@ export function writePackage(pkg: Package, out: string, dev?: string): void {
     }
   };
   write(out, pkg.files);
-  if (dev) write(dev, pkg.dev);
+  if (dev) write(dev, new Map([...pkg.dev, ...pkg.data]));
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
@@ -184,7 +199,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     const pkg = await buildPackage(await readSource(species), { cache: resolve(args.cache ?? join(repo, "build", "cache")) });
     writePackage(pkg, out, dev);
     const pages = Object.entries(pkg.report.pageShare).map(([set, p]) => `${set}: ${p.pages.join(" + ")} (${Math.round(p.share * 100)}% filled)`).join(", ");
-    console.log(`built ${species} into ${out} (${pkg.files.size} files; pages ${pages})${pkg.dev.size ? `; report and landmarks in ${dev}` : ""}`);
+    console.log(`built ${species} into ${out} (${pkg.files.size} files; pages ${pages})${pkg.dev.size + pkg.data.size ? `; ${[...pkg.dev.keys(), ...pkg.data.keys()].join(", ")} in ${dev}` : ""}`);
     const nodes = Object.entries(pkg.report.nodes).map(([part, regions]) => `${part} ${Object.values(regions).join("/")}`);
     if (nodes.length) console.log(`hand nodes: ${nodes.join(", ")}`);
   } catch (error) {

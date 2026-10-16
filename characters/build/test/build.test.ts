@@ -6,7 +6,7 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, relative, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { PNG } from "pngjs";
 import { buildPackage, devFolder, packageFolder, pngChunks, readSource, SETS, writePackage } from "../build.ts";
 
@@ -77,6 +77,29 @@ test("development output goes to build/dev/<species>/, never into the folder the
     assert.ok(!existsSync(join(dir, "cli", "dev")));
     assert.ok(existsSync(join(dir, "cli", "package.json")));
     assert.ok(readdirSync(join(dir, "cache")).length > 0, "the raster cache is the one given");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("a species' face presets reach the Faces check as data, from its presets.ts, beside its landmarks", async () => {
+  // The Faces check holds each face clip's blush to the level its preset asks for (docs/QUESTIONS.md Q25); it reads
+  // them from build/dev/<species>/presets.json, so presets.ts stays their one source.
+  assert.equal(source.presets, undefined, "the test character has no presets.ts");
+  const dog = await readSource("dog");
+  const module = await import(pathToFileURL(join(repo, "characters/dog/src/presets.ts")).href);
+  assert.deepEqual(dog.presets, JSON.parse(JSON.stringify(module)));
+  const presets = dog.presets as { PRESETS: Record<string, { blush: number | null }> };
+  for (const [name, preset] of Object.entries(module.PRESETS as Record<string, { blush: number | null }>)) assert.equal(presets.PRESETS[name]!.blush, preset.blush, name);
+  const kit = await buildPackage({ ...source, landmarks: { front: { seat: [0, -20] } }, presets: dog.presets });
+  assert.deepEqual([...kit.data.keys()], ["presets.json"]);
+  assert.deepEqual(JSON.parse(kit.data.get("presets.json")!.toString("utf8")), dog.presets);
+  assert.ok(![...kit.files.keys()].some((f) => f.includes("presets")), "the presets never reach the package");
+  const dir = mkdtempSync(join(tmpdir(), "huddlings-build-"));
+  try {
+    writePackage(kit, join(dir, "package"), join(dir, "dev"));
+    assert.deepEqual(readdirSync(join(dir, "dev")).sort(), ["landmarks.json", "presets.json", "report.json"]);
+    assert.deepEqual(JSON.parse(readFileSync(join(dir, "dev", "presets.json"), "utf8")), dog.presets);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
