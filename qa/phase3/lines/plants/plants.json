@@ -1,0 +1,341 @@
+{
+ "note": "lineplants.py's evidence: each of the plan's faults (D) planted and checked",
+ "plants": [
+  {
+   "plant": "1",
+   "planted": "crop",
+   "fault": "4 pt of the cheek-over-ear line deleted",
+   "view": "front",
+   "regions": [
+    "ear.R|head.base"
+   ],
+   "newFailures": {
+    "ear.R|head.base": {
+     "gapPt": [2.33, 1.5],
+     "inkLog": [-0.898, 0.704]
+    }
+   },
+   "flippedElsewhere": [],
+   "ok": true
+  },
+  {
+   "plant": "2",
+   "planted": "crop",
+   "fault": "8 pt tapers at every span's joint, a span every 12 pt",
+   "view": "front",
+   "regions": [
+    "body.back|hind.L",
+    "body.back|outside",
+    "body.front|front.R",
+    "ear.L|head.base",
+    "ear.L|outside",
+    "ear.R|head.base",
+    "ear.R|outside",
+    "front.L|ground",
+    "front.L|hind.L",
+    "front.R|ground",
+    "front.R|ground across",
+    "front.R|hind.R",
+    "head.base|outside",
+    "hind.L|ground",
+    "tuft|outside"
+   ],
+   "newFailures": {
+    "body.back|hind.L": {
+     "inkLog": [-0.772, 0.561]
+    },
+    "body.back|outside": {
+     "gapPt": [2.33, 1.5],
+     "toneDelta": [19.4, 13.2],
+     "inkLog": [-1.151, 0.613]
+    },
+    "body.front|front.R": {
+     "inkLog": [-0.85, 0.792]
+    },
+    "ear.L|head.base": {
+     "gapPt": [3.11, 1.5],
+     "toneDelta": [17.5, 9.9],
+     "inkLog": [-1.313, 0.649],
+     "lightSeamPt": [5.75, 5.126]
+    },
+    "ear.L|outside": {
+     "gapPt": [2.98, 2.068],
+     "inkLog": [-1.092, 1.013]
+    },
+    "ear.R|head.base": {
+     "gapPt": [4.66, 1.5],
+     "inkLog": [-0.939, 0.704]
+    },
+    "ear.R|outside": {
+     "recall": [0.847, 0.9],
+     "gapPt": [5.44, 1.5],
+     "toneDelta": [14.7, 13.09],
+     "inkLog": [-1.036, 0.971]
+    },
+    "front.L|ground": {
+     "inkLog": [-0.756, 0.332]
+    },
+    "front.L|hind.L": {
+     "inkLog": [-0.712, 0.552]
+    },
+    "front.R|ground": {
+     "inkLog": [-0.647, 0.443]
+    },
+    "front.R|ground across": {
+     "toneDelta": [5.5, 4.62]
+    },
+    "front.R|hind.R": {
+     "toneDelta": [18.6, 15.4],
+     "inkLog": [-0.956, 0.714]
+    },
+    "head.base|outside": {
+     "toneDelta": [11.6, 10.67],
+     "inkLog": [-0.837, 0.526]
+    },
+    "hind.L|ground": {
+     "gapPt": [1.55, 1.5],
+     "inkLog": [-0.898, 0.515]
+    },
+    "tuft|outside": {
+     "recall": [0.895, 0.9],
+     "gapPt": [3.11, 1.5],
+     "toneDelta": [13.1, 8.58],
+     "inkLog": [-0.88, 0.678]
+    }
+   },
+   "flippedElsewhere": [],
+   "ok": true
+  },
+  {
+   "plant": "6",
+   "planted": "crop",
+   "fault": "three dark 3 pt claw ticks on a sole",
+   "view": "front",
+   "regions": [
+    "front.L|ground"
+   ],
+   "newFailures": {
+    "front.L|ground across": {
+     "toneDelta": [-31.6, 4.84]
+    }
+   },
+   "flippedElsewhere": [],
+   "ok": true
+  },
+  {
+   "plant": "7",
+   "planted": "crop",
+   "fault": "a uniform 1.75 pt tone-10 line along a paw's sole",
+   "view": "front",
+   "regions": [
+    "front.L|ground"
+   ],
+   "newFailures": {
+    "front.L|ground": {
+     "inkLog": [0.423, 0.332]
+    },
+    "front.L|ground across": {
+     "toneDelta": [-36.6, 4.84]
+    }
+   },
+   "flippedElsewhere": [],
+   "ok": true
+  },
+  {
+   "plant": "8",
+   "planted": "crop",
+   "fault": "a hard-edged tan stripe between the front legs",
+   "view": "front",
+   "regions": [
+    "body.front"
+   ],
+   "newFailures": {
+    "body.front": {
+     "precision": [0.0, 0.45],
+     "extraPt": [11.69, 2.068],
+     "inkLog": [2.111, 0.417]
+    }
+   },
+   "flippedElsewhere": [],
+   "ok": true
+  },
+  {
+   "plant": "9",
+   "planted": "crop",
+   "fault": "a 0.8 pt cream band along the haunch/leg boundary",
+   "view": "front",
+   "regions": [
+    "body.back|front.R"
+   ],
+   "newFailures": {
+    "body.back|front.R": {
+     "precision": [0.893, 0.9],
+     "extraPt": [1.88, 1.5],
+     "lightSeamPt": [12.67, 3.421]
+    },
+    "body.back|front.R across": {
+     "precision": [0.833, 0.9]
+    }
+   },
+   "flippedElsewhere": [],
+   "ok": true
+  },
+  {
+   "plant": "10",
+   "planted": "crop",
+   "fault": "the chin's line removed where it runs to the collar (in profile)",
+   "view": "side.L",
+   "regions": [
+    "collar|head.base",
+    "head.base|outside"
+   ],
+   "newFailures": {
+    "collar|head.base": {
+     "inkLog": [-0.846, 0.793]
+    },
+    "head.base|outside": {
+     "gapPt": [3.98, 1.5],
+     "inkLog": [-2.133, 1.844]
+    }
+   },
+   "flippedElsewhere": [],
+   "ok": true
+  },
+  {
+   "plant": "11",
+   "planted": "crop",
+   "fault": "side.R's haunch-over-tail line turned pale",
+   "view": "side.R",
+   "regions": [
+    "body.back|tail"
+   ],
+   "newFailures": {
+    "body.back|tail": {
+     "toneDelta": [31.7, 7.48],
+     "inkLog": [-0.98, 0.639],
+     "lightSeamPt": [21.89, 6.259]
+    }
+   },
+   "flippedElsewhere": [],
+   "ok": true
+  },
+  {
+   "plant": "12",
+   "planted": "crop",
+   "fault": "a detached 1 pt tick beside the crown line",
+   "view": "front",
+   "regions": [
+    "tuft|outside"
+   ],
+   "newFailures": {
+    "tuft|outside": {
+     "toneDelta": [-10.0, 8.58]
+    }
+   },
+   "flippedElsewhere": [],
+   "ok": true
+  },
+  {
+   "plant": "sheet-a",
+   "planted": "crop",
+   "fault": "the sheet's own: 6 pt of an ear's outline erased",
+   "view": "side.L",
+   "regions": [
+    "ear.L|outside"
+   ],
+   "newFailures": {
+    "ear.L|outside": {
+     "gapPt": [4.66, 1.5],
+     "inkLog": [-1.508, 0.616]
+    }
+   },
+   "flippedElsewhere": [],
+   "ok": true
+  },
+  {
+   "plant": "sheet-b",
+   "planted": "crop",
+   "fault": "the sheet's own: the tail's edge blurred (1.2 px)",
+   "view": "side.L",
+   "regions": [
+    "tail|outside"
+   ],
+   "newFailures": {
+    "tail|outside": {
+     "toneDelta": [17.3, 15.73]
+    }
+   },
+   "flippedElsewhere": [],
+   "ok": true
+  },
+  {
+   "plant": "3",
+   "planted": "render",
+   "fault": "an outer edge drawn soft at 0.6 pt, as head.line unclipped (on a crisp ear edge)",
+   "view": "front",
+   "regions": [
+    "ear.R|outside"
+   ],
+   "newFailures": {
+    "ear.R|outside": {
+     "widthCvRatio": [0.518, 0.54],
+     "toneDelta": [17.2, 13.09],
+     "inkLog": [-1.174, 0.971],
+     "risePt": [1.567, 0.697]
+    }
+   },
+   "flippedElsewhere": [],
+   "ok": true
+  },
+  {
+   "plant": "4",
+   "planted": "render",
+   "fault": "one ear's outer edge replaced by its smoothed hull",
+   "view": "front",
+   "regions": [
+    "ear.R|outside"
+   ],
+   "newFailures": {
+    "ear.R|outside": {
+     "toneDelta": [14.7, 13.09],
+     "furRmsPt": [0.091, 0.146],
+     "furCrossings10Pt": [0.348, 0.515]
+    }
+   },
+   "flippedElsewhere": [],
+   "ok": true
+  },
+  {
+   "plant": "5",
+   "planted": "render",
+   "fault": "one paw's sole flattened, with square 4 pt corners",
+   "view": "front",
+   "regions": [
+    "front.R|ground"
+   ],
+   "newFailures": {
+    "front.R|ground": {
+     "furCrossings10Pt": [0.0, 0.643]
+    }
+   },
+   "flippedElsewhere": [],
+   "ok": true
+  },
+  {
+   "plant": "7",
+   "planted": "render",
+   "fault": "a uniform 1.75 pt tone-10 line all round a paw",
+   "view": "front",
+   "regions": [
+    "front.R|ground"
+   ],
+   "newFailures": {
+    "front.R|ground": {
+     "widthPt": [1.588, 1.544]
+    }
+   },
+   "flippedElsewhere": [],
+   "ok": true
+  }
+ ]
+}
