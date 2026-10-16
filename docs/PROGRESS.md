@@ -26,7 +26,7 @@ Kept current every session (CLAUDE.md). One section per lane; each lane edits on
 - Done on the branch since: the face crop records on both sheets with the Faces check (each face held by its features' places and shapes on one primary panel, and on its own head; thresholds measured over 882 comparisons); a part's rest alpha in both runtimes; and the front face library: every eye, mouth, brow and ear state, the 19 presets, a face clip for each of the 17 sheet presets, and tests that no face is ever sad, angry or drooped (R3). Q27 decided by you (the defaults).
 - Faces today: 6 of 17 pass the full check (neutral, happy, surprised, curious, shy, listening); 11 fail on measured drawing gaps (crescent bands, Content's smile, the wink's side, excited's mouth width, sleepy's arcs). Evidence: `qa/phase3/faces/`.
 - In progress, round 2 (three lanes): every front face to green, the blush at its levels (shy 80%, blissful 70%), a lifted ear that reads, then hungry and huffy as new drawings (two versions each) and Q2's review-only eyes; the face states in the turned views; the blush level in the Faces check, the dog's parity on the Mac, and the faces check in the pre-commit hook.
-- Next: merge round 2, open the PR for this slice so the Mac job runs, then Gate A: the evidence pack and three fresh reviewers. Asked at Gate A: Q2, Q26, Q28 (the catchlight in a side glance).
+- Next: merge round 2, open the PR for this slice so the Mac job runs, then Gate A: the evidence pack and three fresh reviewers. Asked at Gate A: Q2 and Q26. Q28 decided by you: the catchlight's middle way.
 
 **Blockers**
 - For TestFlight at the end of phase 1: the Apple pieces in `PLAN.md`, What I need from you (Team ID, API key, your iPhone registered once, the app record and bundle ID).

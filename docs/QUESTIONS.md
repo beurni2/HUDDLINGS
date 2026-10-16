@@ -27,6 +27,12 @@ Where the spec is silent or contradicts itself, I don't invent the answer. The q
 - **Decided: the default.** (a) each keeps its own panel, recorded as turned, where the eyes are held by their shapes and their spacing and their place is held on the render's own head; the alternative is to hold curious and shy to the master sheet's Happy, level and front-on, as proud is held to Content (sleepy has no level panel with closed eyes). (b) an open mouth may pass mischievous and sly; the deep-red share is reported in every mouth row and judged by eye. A gate on it would fail the expression sheet's own Mischievous and the face library's cheeky mouth. (`characters/dog/DECISIONS.md` 110 and 118.)
 - **Answered:** founder, Oct 16, 2026, in the session: "Q27 defaults are fine, carry on".
 
+### Q28. When the eyes glance aside or half close, does the catchlight ride the iris, as the sheets draw it, or stay fixed to the head, as the spec says?
+- **The spec says:** L459 "A side glance is gaze, not a state: the pupils move and the catchlights stay"; L509 "The catchlights stay fixed to the head while the pupils move, which keeps the gloss believable"; L504 "The sheet is the model".
+- **Why it matters:** the expression sheet's Side glance draws the catchlight on the iris, moved aside with it, and its Sleepy half-lid draws it lower on the iris under the lid. Fixed to the head, the catchlight would sit on the white in a side glance, or under the lid. It also decides phase 4's gaze: a catchlight fixed to the head needs the catchlight as its own layer over a moving iris.
+- **Decided: a middle way** (recommended in the session, not the default): the catchlight moves with the iris at about half the iris's travel, as a real eye's reflection lags its pupil, so the eye reads as a glossy ball in motion; it never leaves the dark of the iris and goes under the lid as the lid closes. In stills it sits on the iris as the sheets draw it, nearer the open eye's place by about half the iris's shift. Phase 4 draws it as its own layer between the iris and the lid, and sets the fraction (from 0.5) by a wedge render for the founder. `characters/dog/DECISIONS.md` 130.
+- **Answered:** founder, Oct 16, 2026, in the session: "Q28 middle way".
+
 ## Needed before phase 1
 
 ### Q1. Which iPhone will measure the speed budgets?
@@ -47,12 +53,6 @@ Where the spec is silent or contradicts itself, I don't invent the answer. The q
 - **The spec says:** L446 "each eye (... two or three catchlights ...)"; L509 "one large catchlight high on the side toward the nose and one or two small ones, placed as the sheets draw them"; L504 "The sheet is the model".
 - **Why it matters:** the dog's turnaround, hero, glossy-eyes panel and expression sheet each draw one catchlight per open eye. A second small one makes the eyes glossier but less like the sheet.
 - **Default:** one catchlight, as the sheets draw it (`characters/dog/DECISIONS.md` 29). Adding the small ones is one line per eye.
-- **Owner:** founder
-
-### Q28. When the eyes glance aside or half close, does the catchlight ride the iris, as the sheets draw it, or stay fixed to the head, as the spec says?
-- **The spec says:** L459 "A side glance is gaze, not a state: the pupils move and the catchlights stay"; L509 "The catchlights stay fixed to the head while the pupils move, which keeps the gloss believable"; L504 "The sheet is the model".
-- **Why it matters:** the expression sheet's Side glance draws the catchlight on the iris, moved aside with it, and its Sleepy half-lid draws it lower on the iris under the lid. Fixed to the head, the catchlight would sit on the white in a side glance, or under the lid. It also decides phase 4's gaze: a catchlight fixed to the head needs the catchlight as its own layer over a moving iris.
-- **Default:** follow the sheets: the catchlight rides the iris in the peek and half-lid states (`characters/dog/DECISIONS.md` 130), reversible by drawing it as its own layer.
 - **Owner:** founder
 
 ## Needed by phase 4 (the rig and Visual QA)
