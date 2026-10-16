@@ -407,10 +407,12 @@ def head_width(rgb, keep, nose, roll_deg, hand):
     row = float(((a + b) / 2 - nose) @ down)
 
     def inside(p):
-        x, y = int(round(p[0])), int(round(p[1]))
+        # Rounded to a millionth first, so a point that lands on a half pixel rounds the same on every machine: the
+        # last bits of nose + down t + across s differ between CPUs.
+        x, y = int(round(round(p[0], 6))), int(round(round(p[1], 6)))
         return 0 <= y < fur.shape[0] and 0 <= x < fur.shape[1] and fur[y, x]
 
-    best = None
+    best, best_width = None, -1.0
     for t in np.arange(row - 3, row + 3.01, 0.5):
         ends = []
         for sign in (-1, 1):
@@ -421,8 +423,11 @@ def head_width(rgb, keep, nose, roll_deg, hand):
             while inside(nose + down * t + across * (s + sign * 0.5)) or inside(nose + down * t + across * (s + sign)):
                 s += sign * 0.5
             ends.append(nose + down * t + across * s)
-        if len(ends) == 2 and (best is None or np.linalg.norm(ends[1] - ends[0]) > np.linalg.norm(best[1] - best[0])):
-            best = ends
+        # Runs grow in half pixels, so rows often tie exactly: compare widths to a millionth, so the first of a tie wins
+        # on every machine rather than whichever the last bits favour.
+        width = round(float(np.linalg.norm(ends[1] - ends[0])), 6) if len(ends) == 2 else -1.0
+        if width > best_width:
+            best, best_width = ends, width
     return None if best is None else [[float(v) for v in best[0]], [float(v) for v in best[1]]]
 
 
