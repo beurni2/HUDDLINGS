@@ -2,8 +2,10 @@
 source each time, then with none, written to r3-plants.txt: an open mouth whose lip's ends hang below its centre (a
 frown under an open mouth), the neutral brow turned so its inner end sits below its outer (an angry slant), shy's
 left ear turned 12° in (a droop past the lowered state), listening's lifted left ear turned 12° out (the drooped ears'
-splay), and curious keying no head.line state beside its perked ear (the crease in the temple). Nothing in the working
-tree is touched.
+splay), curious keying no head.line state beside its perked ear (the crease in the temple), and on the new faces:
+huffy's pressed mouth with its ends bent below its centre (a frown pressed shut), its shut lids slanted with their inner
+ends down (the sheets' Angry), its left brow raised, its left ear turned 7 degrees in (a droop), and the puffed cheeks
+on another face. Nothing in the working tree is touched.
 
     python3 qa/phase3/faces/plants.py qa/phase3/faces/r3-plants.txt"""
 import os
@@ -31,6 +33,16 @@ PLANTS = [
      "characters/dog/src/clips/face_listening.json", '"ear.L": { "rot": [[0, 0]] }', '"ear.L": { "rot": [[0, -12]] }'),
     ("creased temple: face_curious keys no head.line state beside its perked ear",
      "characters/dog/src/clips/face_curious.json", ', "head.line": [[0, "templeL"]]', ""),
+    ("pressed frown: huffy's pressed mouth with its ends bent 0.9 pt below its centre",
+     "characters/dog/src/parts/mouth.ts", "[4.6, 14.5], [5.1, 14.3]];", "[4.6, 15], [5.1, 15.4]];"),
+    ("slanted lids: huffy's flat lids with their outer ends lifted 1.5 pt, the inner ends down toward the nose",
+     "characters/dog/src/views/front.ts", "rise: -1, drop: 0, thickness: 4.4", "rise: -1, drop: -1.5, thickness: 4.4"),
+    ("raised brow: huffy's left brow raised over its shut eye",
+     "characters/dog/src/presets.ts", 'ears: "neutral", brows: "neutral", cheeks: "puffed"', 'ears: "neutral", brows: { L: "raised", R: "neutral" }, cheeks: "puffed"'),
+    ("drooped ear: face_huffy's left ear turned 7 degrees in",
+     "characters/dog/src/clips/face_huffy.json", '"ear.L": { "rot": [[0, 0]] }', '"ear.L": { "rot": [[0, 7]] }'),
+    ("puffed cheeks elsewhere: face_happy keys the puffed cheeks",
+     "characters/dog/src/clips/face_happy.json", '"ear.R": [[0, "neutral"]] }', '"ear.R": [[0, "neutral"]], "cheeks": [[0, "puffed"]] }'),
 ]
 
 
