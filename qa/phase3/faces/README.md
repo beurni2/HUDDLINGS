@@ -87,8 +87,9 @@ alert more than inquisitive without its tilt and glance up. Tender's half-lid re
 `eyes.png` (phone size) sets the squeeze beside the kitty's and the bear's Excited, the star sparkle beside their
 Sparkle eyes, the open eye's two catchlights beside their Default eyes and the dog's own open eye panel, and the
 catchlights riding the iris (peek, huffy's peek back, hungry's eager eye) and tucked under the half-lid, in the front,
-the three-quarter and the profile (DECISIONS 200 to 206). At phone size the squeeze reads as the sister sheets' `> <`,
-the star as the bear's, and the tiny catchlight as a second glint below the first.
+the three-quarter and the profile (DECISIONS 200 to 206). At phone size the squeeze reads as the sister sheets' bold
+`> <`, the star in the eye as the bear's, the gold stars beside it as both sheets' (plump, the larger five-pointed),
+and the tiny catchlight as a second glint below the first.
 
 ## Files
 
