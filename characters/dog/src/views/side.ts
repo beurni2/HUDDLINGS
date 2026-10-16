@@ -760,7 +760,7 @@ export function side(facingSide: Side = "L"): Drawn[] {
   // crop leaves them (its length cited).
   add("front.L", lineGate(roomy(litPart("front.L", legNear, legNearPaint(F), [{ from: [-55.4, -29.4], to: APEX, under: byHeight(0, 0.5, -14, -6), ground: "sole", ends: ["free", "join"], taper: 2, cites: 216, bare: [0, 60] }]), 1)));
   const turn = uid("blur");
-  add("collar", part("collar", collar, {
+  add("collar", lineGate(part("collar", collar, {
     fill: C.collar,
     // Its lower half in shade, lit along its middle, its front end a darker round turn where the band wraps round the
     // throat, and a dark blue rim round its foot, as the sheet paints it.
@@ -773,12 +773,16 @@ export function side(facingSide: Side = "L"): Drawn[] {
       `<defs>${blur(turn, [-66, -63, 12, 15], 0.35)}</defs>` + collarContact(),
     outline: { colour: C.collarRim, width: THIN, taper: 3, blur: 0.2, spans: [{ from: [-17.8, -62.6], to: [-62, -57.4] }] },
     light: F.light,
-  }));
-  add("tag", tagPiece(F));
+  })));
+  add("tag", lineGate(tagPiece(F)));
   add("head.base", part("head.base", head, headPaintF));
   // The head patch, soft but defined, deepening a little toward the ear, as the sheet paints it.
-  add("head.patch.L", join(marking("head.patch.L", { shape: head, paint: headPaintF }, patch, { fill: C.patch, blur: 0.5, clip: false }),
-    deepen("head.patch.L", patch, 0.5, [-46, 0], [-28, 0], 0.5)));
+  // Its edge brushed into the fur, its top breaking into small feathered strands against the cream crown and its foot
+  // combed down the cheek, as the crop paints it (parts/marking.ts brush, DECISIONS 217; audit side #3).
+  add("head.patch.L", lineGate(join(marking("head.patch.L", { shape: head, paint: headPaintF }, patch, { fill: C.patch, blur: 0.5, clip: false }),
+    deepen("head.patch.L", patch, 0.5, [-46, 0], [-28, 0], 0.5),
+    brush("head.patch.L", head, patch, 0.5, { flow: (p: P): P => (p[1] < -112 ? [0.25, -1] : [0.45, 1]), seed: 2354, edge: 22, out: [0.6, 1.6], in: [1, 2.2],
+      width: [0.6, 1], inside: { count: 2, length: [3, 5], colour: C.marking, opacity: 0.3, width: 0.7 }, colour: C.patch }))));
   add("blush.L", blush());
   add("eye.L", eye(EYE), "open");
   add("brow.L", brow());
@@ -1126,9 +1130,11 @@ function perkedEar(F: Facing): Piece {
     under: ["M-18 -154 C-10 -152 -2 -151 6 -148 L6 -140 L-18 -142Z"],
     fold: { line: [[-7.6, -168.6], [-5, -162.6], [-2.6, -156.6], [-0.2, -150.6]], back: "M-7.6 -168.6 L-5 -162.6 L-2.6 -156.6 L-0.2 -150.6 L-14 -151 L-15 -162Z" },
   });
-  // Its root on the crown, under the topknot's back curl, which draws over it.
+  // Its root on the crown, under the topknot's back curl, which draws over it: its line starts in the crown's fur at the
+  // flap's root, runs over its top to its tip and back along its underside to the crown, where it goes under the curl,
+  // one line round the flap's free edge with its join at the tip (DECISIONS 210, 237).
   const flap = litPart("ear.L", perked, { ...paint, light: F.light },
-    [{ from: [-16.6, -156], to: [21.4, -137.8], on: "tan", taper: [3, 2] }, { from: [21.4, -137.8], to: [4.6, -147], on: "tan", taper: [2, 5] }]);
+    [{ from: [-16.4, -157.4], to: [21.4, -137.8], on: "tan", ends: ["free", "join"] }, { from: [21.4, -137.8], to: [-12.4, -151.6], on: "tan", ends: ["join", "under"] }]);
   // The root's tan: the patch's own tan, deepened as the patch is toward the ear (its marking tan at half), and the
   // ears' deep tan by the root, soft at its edge, so it runs on from the patch with no edge.
   const deep = uid("root"), f = uid("blur");
@@ -1138,10 +1144,10 @@ function perkedEar(F: Facing): Piece {
     `<stop offset="0" stop-color="${C.earDeep}" stop-opacity="0.6"/><stop offset="1" stop-color="${C.earDeep}" stop-opacity="0"/></linearGradient>${blur(f, box, 1.4)}</defs>` +
     `<g filter="url(#${f})"><path d="${d}" fill="${C.patch}"/><path d="${d}" fill="${C.marking}" opacity="0.45"/><path d="${d}" fill="url(#${deep})"/></g>`, box);
   // The head's line down the back of the head and along its lower edge over the collar, where the hanging ear covered
-  // it, by the line rule (parts/lines.ts), from where head.line's span over the crown ends, fading out over the collar.
+  // it, by the line rule (parts/lines.ts), joining head.line's span over the crown and ending in the fur over the collar.
   const [x0, y0, x1, y1] = bbox(head.segs);
   const lineBox = pad([x0, y0, x1 - x0, y1 - y0], 2);
-  const line = litEdge(head, [{ from: [6.6, -136.4], to: [-24, -64.6], under: (p: P) => (p[1] > -80 ? 0.35 : 0), taper: [6, 10] }], "back of the head", lineBox, { reach: 0.5, light: F.light });
+  const line = litEdge(head, [{ from: [6.6, -136.4], to: [-24, -64.6], under: (p: P) => (p[1] > -80 ? 0.35 : 0), ends: ["join", "free"] }], "back of the head", lineBox, { reach: 0.5, light: F.light });
   const back = piece(`<defs>${line.defs}</defs>${line.body}`, lineBox, { shapes: [], lines: line.lines });
   return join(tan, back, flap);
 }
@@ -1157,7 +1163,7 @@ export function sideFaces(facingSide: Side = "L"): Drawn[] {
   const out: Drawn[] = [];
   for (const state of EYE_STATES) out.push({ part: "eye.L", state, piece: eyeState(state, F.light) });
   for (const state of ["raised", "happy"] as const) out.push({ part: "brow.L", state, piece: brow(browState(BROW, state)) });
-  out.push({ part: "ear.L", state: "onePerked", piece: perkedEar(F) });
+  out.push({ part: "ear.L", state: "onePerked", piece: lineGate(perkedEar(F)) });
   return F.finish(out);
 }
 
