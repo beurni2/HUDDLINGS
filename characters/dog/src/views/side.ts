@@ -11,14 +11,15 @@ import { furEdge, furSpan } from "../../../draw/fur.ts";
 import { bbox, ellipse, fracAt, pathD, sample, smooth, spanPoints, v, type P, type Shape } from "../../../draw/geom.ts";
 import { ribbons, strokeOf, type DrawnLine, type Outline, type Stroke } from "../../../draw/line.ts";
 import { LIMITS, reach } from "../../../draw/lint.ts";
-import { marking, part, soft, type Fade, type Paint } from "../../../draw/paint.ts";
+import { LIGHT, marking, part, soft, type Fade, type Paint } from "../../../draw/paint.ts";
 import { blur, join, mask, pad, piece, region, uid, type Box, type Piece } from "../../../draw/svg.ts";
 import { model } from "../model.ts";
 import { C, LINES } from "../palette.ts";
 import type { BrowState } from "../parts/brow.ts";
-import { eye, type EyeSpec, type LidBand } from "../parts/eye.ts";
+import { chevron, eye, riding, type Chevron, type EyeSpec, type LidBand } from "../parts/eye.ts";
+import { turnedCheeks, type TurnedPuff } from "../parts/cheeks.ts";
 import type { Star } from "../parts/stars.ts";
-import { browState, drawLid, paintOpen, paintOval, PROFILE_MOUTHS, turnedStars, type LidState, type ProfileMouthState, type TurnedEyeLid, type TurnedMouth } from "../parts/turned.ts";
+import { browState, drawLid, lickTip, paintOpen, paintOval, PROFILE_MOUTHS, turnedStars, type LidState, type ProfileMouthState, type TurnedEyeLid, type TurnedMouth } from "../parts/turned.ts";
 import { litEdge, litMarking, litPart, type LitSpan } from "../parts/lines.ts";
 import { curlShapes, topknot, type Curl } from "../parts/topknot.ts";
 import { earFur } from "../parts/ear.ts";
@@ -27,9 +28,9 @@ import { tagPaint } from "../parts/tag.ts";
 import { deepen, strands } from "../parts/marking.ts";
 import { type Drawn } from "./front.ts";
 
-// The eye states this view draws. The front's list also holds hungry's and huffy's new eyes (eager, flat, peekBack),
-// which are not drawn turned yet: until they are, they fall back to this view's open eye (faces.turned.test.ts names them).
-const EYE_STATES = ["happy", "closed", "sleepy", "wink", "wide", "peek"] as const;
+// The eye states this view draws besides its open eye, on its one eye: every state the front draws (DECISIONS 170 to
+// 172, 200 to 207).
+const EYE_STATES = ["happy", "squeeze", "closed", "sleepy", "wink", "wide", "peek", "sparkle", "eager", "flat", "peekBack"] as const;
 import { facing, type Facing, type Side } from "./facing.ts";
 
 const INNER = model.outline.innerPt;
@@ -704,28 +705,82 @@ function lidOf(state: LidState): TurnedEyeLid {
     case "wink":
       return band(0.4, 0.6, { width: 14, rise: 3.8, drop: -1.2, thickness: 3.2, ends: [1.4, 0.8], flick: { length: 1.7, hook: -75 } });
     // The three-quarter's half-lid (parts/turned.ts), over the same two fifths of the eye, so the lid never changes as
-    // the head turns between the two.
+    // the head turns between the two; the catchlight on the iris just under the lash, its top tucked under it (Q28),
+    // the tiny one below it (Q26).
     case "sleepy": {
       const s = EYE.ry / 9.2;
-      return { spec: EYE, lid: { level: -3.2 * s, bow: 1.8 * s, tilt: 0, lash: 1.9, overhang: 0.5, shine: { at: [2.2, -0.5], r: 1.3 } } };
+      return { spec: EYE, lid: { level: -3.2 * s, bow: 1.8 * s, tilt: 0, lash: 1.9, overhang: 0.5, shine: { at: [2.2, 0.1], r: 1.3 } } };
+    }
+    // Huffy's flat lid (DECISIONS 153, 207), as the front's: shut and level, a hair lower in its middle than at its ends,
+    // as wide as the profile's closed lid.
+    case "flat":
+      return band(1.1, 1.3, { width: 13.4, rise: -1, drop: 0, thickness: 4.2, ends: [2.5, 1.7], fullness: 0.45, flick: { length: 1.1, hook: 10 } });
+  }
+}
+
+/** The profile's wide eye: 7% larger and a point higher, a hair toward the nose, the white broader, the catchlight bigger. */
+const WIDE: EyeSpec = { ...EYE, centre: [EYE.centre[0] - 0.3, EYE.centre[1] - 0.9], rx: EYE.rx * 1.07, ry: EYE.ry * 1.07,
+  white: { ...EYE.white, width: EYE.white.width * 1.15, span: EYE.white.span + 6 }, shine: { at: [2.4, 4.6], r: 1.85 }, glow: { band: 6.4, warm: 2.2 } };
+
+/** The profile eye's ball states (exported for the R3 gaze guard): the open eye changed as the front changes its own. */
+export function profileEyeSpec(state: "open" | "wide" | "peek" | "sparkle" | "eager" | "peekBack", light: P = LIGHT): EyeSpec {
+  switch (state) {
+    case "open":
+      return EYE;
+    case "wide":
+      return WIDE;
+    // Side glance back toward the person (the viewer's right), as the front's and the three-quarter's look: the white a
+    // broad crescent in front, on the nose's side; the catchlights ride the iris at half its travel (Q28).
+    case "peek": {
+      const e = { ...EYE, white: { at: 186, width: 4, span: 58, fade: 0.3 } };
+      return { ...e, shine: riding(e, EYE, EYE.shine) };
+    }
+    // The sparkle (Q2, DECISIONS 203): the star in the lower iris, and the two gold stars just past the eye's back top,
+    // on the head's patch.
+    case "sparkle":
+      return { ...EYE, sparkle: { star: { at: [1.4, -5], r: 3.3 }, level: 0, light, stars: [{ at: [-11.8, 10.2], r: 3.6 }, { at: [-13.8, 2.8], r: 2.5 }] } };
+    // Hungry's eager eye (DECISIONS 151, 207): the wide eye, its pupil larger, the iris baked toward the nose and a hair
+    // down, on the food in front of the nose, the white a crescent down its back; the catchlights ride the iris (Q28).
+    case "eager": {
+      const e = { ...WIDE, white: { at: 10, width: 2.6, span: 55, fade: 0.3 }, glow: { band: 3, warm: 1.2 } };
+      return { ...e, shine: riding(e, WIDE, { at: WIDE.shine.at, r: WIDE.shine.r * 1.1 }) };
+    }
+    // Huffy's peek back (DECISIONS 153, 159, 207): the eye open and bright, looking back at the person as the peek does,
+    // level, never up: the white in front a little below its level (168°), the catchlights riding the iris (Q28).
+    case "peekBack": {
+      const e = { ...EYE, white: { at: 168, width: 3, span: 56, fade: 0.3 } };
+      return { ...e, shine: riding(e, EYE, EYE.shine) };
     }
   }
 }
 
-function eyeState(state: (typeof EYE_STATES)[number]): Piece {
+/**
+ * The profile's squeeze (Q2, DECISIONS 202): the front's `>` `<` on the one eye, its point 7 pt in from the ball's middle
+ * toward the nose, its arms' run across shortened to the profile eye's width (0.8 of the front's), their rise kept.
+ */
+export function profileSqueeze(): Chevron {
+  const k = EYE.rx / 9.5;
+  const foreshorten = (len: number, deg: number): [number, number] => {
+    const a = (deg * Math.PI) / 180, [x, y] = [len * Math.cos(a) * k, len * Math.sin(a)];
+    return [Math.hypot(x, y), (Math.atan2(y, x) * 180) / Math.PI];
+  };
+  const [lu, au] = foreshorten(16.8, 14), [ll, al] = foreshorten(15.8, 26);
+  return { tip: [EYE.centre[0] + EYE.noseward * 8.8 * k, EYE.centre[1]], tilt: 0, noseward: EYE.noseward, length: [lu, ll], angle: [au, al],
+    thickness: 4.2, ends: 3.6, bow: 0.4, point: 1 };
+}
+
+function eyeState(state: (typeof EYE_STATES)[number], light: P): Piece {
   switch (state) {
     case "happy":
     case "closed":
     case "wink":
     case "sleepy":
+    case "flat":
       return drawLid(lidOf(state));
-    case "wide":
-      return eye({ ...EYE, centre: [EYE.centre[0] - 0.3, EYE.centre[1] - 0.9], rx: EYE.rx * 1.07, ry: EYE.ry * 1.07,
-        white: { ...EYE.white, width: EYE.white.width * 1.15, span: EYE.white.span + 6 }, shine: { at: [2.4, 4.6], r: 1.85 }, glow: { band: 6.4, warm: 2.2 } });
-    // Side glance back toward the person (the viewer's right), as the front's and the three-quarter's look: the white a
-    // broad crescent in front, on the nose's side, the catchlight on the iris.
-    case "peek":
-      return eye({ ...EYE, white: { at: 186, width: 4, span: 58, fade: 0.3 }, shine: { at: [-2, 4.4], r: EYE.shine.r } });
+    case "squeeze":
+      return chevron(profileSqueeze());
+    default:
+      return eye(profileEyeSpec(state, light));
   }
 }
 
@@ -845,8 +900,63 @@ function profileMouth(state: ProfileMouthState): TurnedMouth {
       const o = OVALS[state];
       return profileOval(o.centre, o.half, o.height, o.lean);
     }
+    case "pressed":
+      return profileClosed(PRESSED_SIDE, "pressed mouth");
+    case "tinySmile":
+      return profileClosed(TINY_SMILE_SIDE, "tiny smile");
+    case "o.tongue": {
+      // Hungry's lick (DECISIONS 154, 207): the rest smile, and the tongue's tip peeking out under its arc just inside the
+      // corner's curl, its top along the smile's line, which lies over it, a lobe about 3.5 pt across and 3.5 below it.
+      const rest = profileClosed(REST_SMILE, "smile");
+      const lip = smooth(REST_SMILE, { closed: false });
+      const line = sample(lip.segs, 16, false);
+      const under = (x: number) => {
+        for (let i = 1; i < line.length; i++) {
+          const [a, b] = [line[i - 1]!, line[i]!];
+          if ((x - a[0]) * (x - b[0]) <= 0) return a[1] + ((b[1] - a[1]) * (x - a[0])) / (b[0] - a[0] || 1);
+        }
+        return -80.2;
+      };
+      const tip = lickTip(LICK_SIDE, LICK_SHINE, ([x, y]) => y < under(x) + 0.15);
+      return { piece: { svg: tip.piece.svg + rest.piece.svg, box: unionBox(rest.piece.box, tip.piece.box), meta: { shapes: [], lines: [...rest.piece.meta.lines, ...tip.piece.meta.lines] } }, lip: rest.lip };
+    }
   }
 }
+
+/** Where the lick's soft shine sits on its lobe, up and toward the nose: as the profile's other tongues' shines, it belongs to its place. */
+const LICK_SHINE: P = [-0.6, -0.8];
+const unionBox = (a: Box, b: Box): Box => {
+  const x = Math.min(a[0], b[0]), y = Math.min(a[1], b[1]);
+  return [x, y, Math.max(a[0] + a[2], b[0] + b[2]) - x, Math.max(a[1] + a[3], b[1] + b[3]) - y];
+};
+
+/**
+ * Huffy's pressed mouth in profile (DECISIONS 153, 207): the smile drawn in from the lip's notch only a third of its run
+ * back, nearly level, its end tucked a hair above the notch (no frown, no pout); and the peek back's tiny smile, the
+ * rest smile at about three fifths of its run, its curl turning up.
+ */
+const PRESSED_SIDE: P[] = [[-92.8, -80.2], [-91.6, -80.02], [-90.3, -79.98], [-89.2, -80.1], [-88.5, -80.35]];
+const TINY_SMILE_SIDE: P[] = [[-92.8, -80.2], [-91.7, -79.75], [-90.3, -79.6], [-89.1, -79.85], [-88.3, -80.5], [-88, -81.3]];
+/** The lick's lobe in profile: under the smile's arc just inside its curl, at the corner's end of the mouth. */
+const LICK_SIDE: P[] = [[-89.6, -79.55], [-88, -79.62], [-86.6, -80.2], [-85.6, -79.3], [-85.5, -77.6], [-86.3, -76.4], [-87.7, -76.3], [-88.8, -77.2], [-89.4, -78.4]];
+
+/** A closed mouth in profile, as the rest smile is painted (mouth()): one inner line in the printed dark brown at 90%, from the notch back. */
+function profileClosed(pts: P[], where: string): TurnedMouth {
+  const line = sample(smooth(pts, { closed: false }).segs, 8, false);
+  const s = tapered(line, 0.9, "inner", where, { taper: 1, tip: 0.5 });
+  const f = uid("blur"), box: Box = [-98, -93, 16, 15];
+  return {
+    piece: piece(`<defs>${blur(f, box, 0.15)}</defs><g fill="${C.dark}" opacity="0.9" filter="url(#${f})"><path d="${s.d}"/></g>`, box, { shapes: [], lines: [s.line] }),
+    lip: { line, centre: NOTCH },
+  };
+}
+
+/**
+ * Huffy's puffed cheek in profile (DECISIONS 208): the near ball (parts/cheeks.ts PUFF) behind the mouth's corner and
+ * under the eye, where the front's sits beside the mouth, a little narrower across as the profile's muzzle is, its
+ * crease hugging the pressed mouth's end. Held out of the package: `cheeks` has no place in the profile's draw order.
+ */
+const PUFF_SIDE: TurnedPuff = { c: [-76.2, -80.6], rx: 7.4, ry: 8, turn: 0, mouthward: -1 };
 
 /**
  * The profile's openings alone: the o a small egg 5.8 pt across and 7.4 tall just behind the lip's front, leaning 8°
@@ -912,21 +1022,21 @@ const STARS: Star[] = [{ at: [-93, -146], size: [11.4, 14.4], turn: 0 }, { at: [
 export function sideFaces(facingSide: Side = "L"): Drawn[] {
   const F = facing(facingSide);
   const out: Drawn[] = [];
-  for (const state of EYE_STATES) out.push({ part: "eye.L", state, piece: eyeState(state) });
+  for (const state of EYE_STATES) out.push({ part: "eye.L", state, piece: eyeState(state, F.light) });
   for (const state of ["raised", "happy"] as const) out.push({ part: "brow.L", state, piece: brow(browState(BROW, state)) });
   out.push({ part: "ear.L", state: "onePerked", piece: perkedEar(F) });
   return F.finish(out);
 }
 
 /**
- * The face states drawn and tested but held out of the package for now, in a facing: the sparkle's stars, as
- * threeQuarterHeld's, and the profile's mouths, which faces.test.ts still holds to the rest smile in profile (its
- * planted fault reads the side's mouth keys as they were before this round). The review build of the turned faces'
- * evidence adds them (qa/phase3/faces/turned/render.ts; DECISIONS 183).
+ * The face states drawn and tested but held out of the package for now, in a facing: the sparkle's stars and huffy's
+ * puffed cheek, as threeQuarterHeld's, and the profile's mouths, which faces.test.ts still holds to the rest smile in
+ * profile (its planted fault reads the side's mouth keys as they were before this round). The review build of the
+ * turned faces' evidence adds them (qa/phase3/faces/turned/render.ts; DECISIONS 183, 208).
  */
 export function sideHeld(facingSide: Side = "L"): Drawn[] {
   const F = facing(facingSide);
-  const out: Drawn[] = [{ part: "stars", state: "sparkle", piece: turnedStars(STARS, F.light) }];
+  const out: Drawn[] = [{ part: "stars", state: "sparkle", piece: turnedStars(STARS, F.light) }, { part: "cheeks", state: "puffed", piece: turnedCheeks([PUFF_SIDE], F) }];
   for (const state of PROFILE_MOUTHS) out.push({ part: "mouth", state, piece: profileMouth(state).piece });
   return F.finish(out);
 }
@@ -939,6 +1049,10 @@ export const sideFace = {
   ovals: OVALS,
   brow: (state: BrowState) => browState(BROW, state),
   eye: EYE,
+  /** Each ball state's spec, the squeeze, and the puffed cheek (the R3 guards read where the iris looks, the squeeze's arms, the puff). */
+  spec: profileEyeSpec,
+  squeeze: profileSqueeze,
+  puff: PUFF_SIDE,
   /** The lid each closing eye state draws (the R3 guard reads its lean). */
   lids: lidOf,
   perked: { L: perked },

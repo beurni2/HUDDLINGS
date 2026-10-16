@@ -8,12 +8,12 @@ import { furEdge, furSpan, type Lock } from "../../../draw/fur.ts";
 import { bbox, ellipse, fracAt, pathD, rotate, sample, smooth, spanPoints, v, type Node, type P, type Shape } from "../../../draw/geom.ts";
 import { innerLine, strokeOf, type DrawnLine, type Stroke } from "../../../draw/line.ts";
 import { LIMITS } from "../../../draw/lint.ts";
-import { marking, part, soft, type Paint } from "../../../draw/paint.ts";
+import { LIGHT, marking, part, soft, type Paint } from "../../../draw/paint.ts";
 import { blur, join, pad, piece, uid, type Box, type Piece } from "../../../draw/svg.ts";
 import { model } from "../model.ts";
 import { C, LINES } from "../palette.ts";
 import type { BrowState } from "../parts/brow.ts";
-import { eye, type EyeSpec, type LidBand } from "../parts/eye.ts";
+import { chevron, eye, riding, type Chevron, type EyeSpec, type LidBand } from "../parts/eye.ts";
 import type { Star } from "../parts/stars.ts";
 import { browState, drawLid, foreshortened, TURNED_MOUTHS, turnedMouth, turnedStars, type LidState, type TurnedEyeLid, type TurnedFrame, type TurnedMouthState } from "../parts/turned.ts";
 import { litEdge, litMarking, litPart, withDefaults, type LitSpan } from "../parts/lines.ts";
@@ -22,11 +22,11 @@ import { earFur } from "../parts/ear.ts";
 import { toes } from "../parts/paw.ts";
 import { tagPaint } from "../parts/tag.ts";
 import { strands } from "../parts/marking.ts";
+import { PUFF as CHEEK_PUFF, turnedCheeks, type TurnedPuff } from "../parts/cheeks.ts";
 import { type Drawn } from "./front.ts";
 
-// The eye states this view draws. The front's list also holds hungry's and huffy's new eyes (eager, flat, peekBack),
-// which are not drawn turned yet: until they are, they fall back to this view's open eye (faces.turned.test.ts names them).
-const EYE_STATES = ["happy", "closed", "sleepy", "wink", "wide", "peek"] as const;
+// The eye states this view draws besides its open eye: every state the front draws (DECISIONS 170 to 172, 200 to 207).
+const EYE_STATES = ["happy", "squeeze", "closed", "sleepy", "wink", "wide", "peek", "sparkle", "eager", "flat", "peekBack"] as const;
 import { facing, type Facing, type Side } from "./facing.ts";
 
 const INNER = model.outline.innerPt;
@@ -792,32 +792,107 @@ function lidOf(state: LidState, side: "L" | "R"): TurnedEyeLid {
         flick: { length: near ? 1.8 : 1.4, hook: -75 } });
     // The upper lid closed over about two fifths of the eye, as the front's: its middle 1.4 pt above the middle of an
     // eye 9.2 pt tall, its ends 3.2 pt above it where they meet the ball's sides, each eye's grown with its height; a
-    // pale lid over the ball above it, the lash running past the ball at its outer corner only, the catchlight just
-    // under the lash (Q28's default; parts/turned.ts).
+    // pale lid over the ball above it, the lash running past the ball at its outer corner only, the catchlight on the
+    // iris just under the lash, its top tucked under it (Q28), the tiny one below it (Q26; parts/turned.ts).
     case "sleepy": {
       const s = spec.ry / 9.2;
-      return { spec, lid: { level: -3.2 * s, bow: 1.8 * s, tilt: LID_TILT[side], lash: near ? 1.9 : 1.6, overhang: near ? 0.5 : 0.4, shine: { at: near ? [2.7, -0.4] : [1.8, -0.4], r: near ? 1.4 : 1.1 } } };
+      return { spec, lid: { level: -3.2 * s, bow: 1.8 * s, tilt: LID_TILT[side], lash: near ? 1.9 : 1.6, overhang: near ? 0.5 : 0.4, shine: { at: near ? [2.7, 0] : [1.8, 0], r: near ? 1.4 : 1.1 } } };
+    }
+    // Huffy's flat lid (DECISIONS 153, 207), as the front's: shut, a hair lower in its middle than at its ends, 1.4 pt
+    // further out and 1.3 pt lower than the open eye's middle, the far one shortened and thinner with its eye; both
+    // level with the muzzle (7.5°), its ends level in the face's own frame as the front's are: leant outward as the
+    // crescents are (LID_TILT), the near lid's outer end dropped 0.7 pt and the shut pair read tired, not huffy.
+    case "flat": {
+      const b = band(1.4, 1.3, { width: 16.4 * k, rise: -1, drop: 0, thickness: near ? 4 : 3.4, ends: near ? [2.4, 1.7] : [2.1, 1.5], fullness: 0.45,
+        flick: { length: near ? 1.2 : 0.9, hook: 10 } });
+      return "band" in b ? { band: { ...b.band, tilt: threeQuarterLevel } } : b;
     }
   }
 }
 
-function eyeState(state: (typeof EYE_STATES)[number], side: "L" | "R"): Piece {
+/** The wide eye on each eye's open eye: 7% larger and a point higher, a little toward the nose, the white broader, the catchlight bigger. */
+const wideOf = (side: "L" | "R"): EyeSpec => {
   const spec = EYES[side], near = side === "L";
+  return { ...spec, centre: [spec.centre[0] + spec.noseward * 0.4, spec.centre[1] - 0.9], rx: spec.rx * 1.07, ry: spec.ry * 1.07,
+    white: { at: spec.white.at, width: spec.white.width * 1.35, span: spec.white.span + 8, fade: 0.5 },
+    shine: { at: [spec.shine.at[0] * 1.07, spec.shine.at[1] * 1.15], r: spec.shine.r * 1.15 }, glow: near ? { band: 6, warm: 2 } : { band: 5.4, warm: 2.4 } };
+};
+
+/**
+ * The ball states' specs on each eye (exported for the R3 gaze guard, faces.turned.test.ts): the open eye's, changed as
+ * the front changes its own (DECISIONS 172, 203 to 207).
+ */
+export function turnedEyeSpec(state: "open" | "wide" | "peek" | "sparkle" | "eager" | "peekBack", side: "L" | "R", light: P = LIGHT): EyeSpec {
+  const spec = EYES[side], near = side === "L", s = spec.ry / 9.2;
+  switch (state) {
+    case "open":
+      return spec;
+    case "wide":
+      return wideOf(side);
+    // Side glance: the iris toward the viewer's right, back toward the person, as the front's looks; the white a broad
+    // crescent on the side away from the look (the near eye's nose side, the far eye's outer side); the catchlights ride
+    // the iris at half its travel (Q28).
+    case "peek": {
+      const e = { ...spec, white: { at: near ? 186 : -6, width: near ? 4.6 : 3.4, span: 58, fade: 0.3 } };
+      return { ...e, shine: riding(e, spec, spec.shine) };
+    }
+    // The sparkle (Q2, DECISIONS 203), as the front's: the star in the lower iris, a little smaller in the far eye, and
+    // the two gold stars just past each eye's outer top, along the eye's lean.
+    case "sparkle":
+      return { ...spec, sparkle: { star: { at: [0.2, -4.5 * s], r: near ? 3.3 : 2.8 }, level: LID_TILT[side], light,
+        stars: near ? [{ at: [-13.6, 8.6], r: 3.8 }, { at: [-15.8, 1.2], r: 2.6 }] : [{ at: [-7.6, 10.8], r: 2.8 }, { at: [-9.2, 4.4], r: 1.9 }] } };
+    // Hungry's eager eye (DECISIONS 151, 207), as the front's: the wide eye with its pupil larger, the iris baked in toward
+    // the nose and a hair down, on the food just in front of the nose, the white a crescent down the outer side; the
+    // catchlights ride the iris at half its travel from the wide eye's (Q28), the large one 10% larger.
+    case "eager": {
+      const w = wideOf(side), e = { ...w, white: { at: 10, width: near ? 2 : 1.6, span: 55, fade: 0.3 }, glow: { band: 3, warm: 1.2 } };
+      return { ...e, shine: riding(e, w, { at: w.shine.at, r: w.shine.r * 1.1 }) };
+    }
+    // Huffy's peek back (DECISIONS 153, 159, 207): the eye open again and bright, looking back at the person (the viewer's
+    // right in a .L view, as the peek looks), level, never up: the white on the side away from the look a little below
+    // its level (the near eye's nose side at 168°, the far eye's outer side at 6°), the catchlights riding the iris (Q28).
+    case "peekBack": {
+      const e = { ...spec, white: { at: near ? 168 : 6, width: near ? 3.2 : 2.6, span: 56, fade: 0.3 } };
+      return { ...e, shine: riding(e, spec, spec.shine) };
+    }
+  }
+}
+
+/**
+ * The squeeze on each eye (Q2, DECISIONS 202), the front's `>` `<` placed from each eye's open eye as the front places
+ * its own, along the eye's lean: the near one the front's, the far one shortened across with its eye (its arms' run
+ * across times FAR, their rise kept, so they open a little wider on screen) and a little thinner.
+ */
+/** The muzzle's level (the line through the rest mouth's corners), the face's level for the R3 guards (DECISIONS 179). */
+const threeQuarterLevel = 7.5;
+const SQUEEZE_TILT = threeQuarterLevel / 2;
+export function turnedSqueeze(side: "L" | "R"): Chevron {
+  const spec = EYES[side], near = side === "L", k = near ? 1 : FAR;
+  const foreshorten = (len: number, deg: number): [number, number] => {
+    const a = (deg * Math.PI) / 180, [x, y] = [len * Math.cos(a) * k, len * Math.sin(a)];
+    return [Math.hypot(x, y), (Math.atan2(y, x) * 180) / Math.PI];
+  };
+  const [lu, au] = foreshorten(16.8, 14), [ll, al] = foreshorten(15.8, 26);
+  // The point 8.8 pt in from the ball's middle toward the nose, level with it, as the front's (8.2 from its landmark),
+  // both leaning half the muzzle's level: leant as the lids are (10° and 5°), the near `<` sheared, its lower arm
+  // dropping 36° and its upper rising 4°, and the pair no longer read as one squeeze.
+  const tilt = SQUEEZE_TILT, t = (tilt * Math.PI) / 180, back = 8.8 * k, out = -spec.noseward;
+  return { tip: [spec.centre[0] - out * back * Math.cos(t), spec.centre[1] - out * back * Math.sin(t)], tilt,
+    noseward: spec.noseward, length: [lu, ll], angle: [au, al], thickness: near ? 4.4 : 3.9, ends: near ? 3.8 : 3.3, bow: 0.4, point: near ? 1 : 0.9 };
+}
+
+function eyeState(state: (typeof EYE_STATES)[number], side: "L" | "R", light: P): Piece {
   switch (state) {
     case "happy":
     case "closed":
     case "wink":
     case "sleepy":
+    case "flat":
       return drawLid(lidOf(state, side));
-    // Surprised round: 7% larger and a point higher, a little toward the nose, the white broader, the catchlight bigger.
-    case "wide":
-      return eye({ ...spec, centre: [spec.centre[0] + spec.noseward * 0.4, spec.centre[1] - 0.9], rx: spec.rx * 1.07, ry: spec.ry * 1.07,
-        white: { at: spec.white.at, width: spec.white.width * 1.35, span: spec.white.span + 8, fade: 0.5 },
-        shine: { at: [spec.shine.at[0] * 1.07, spec.shine.at[1] * 1.15], r: spec.shine.r * 1.15 }, glow: near ? { band: 6, warm: 2 } : { band: 5.4, warm: 2.4 } });
-    // Side glance: the iris toward the viewer's right, back toward the person, as the front's looks; the white a broad
-    // crescent on the side away from the look (the near eye's nose side, the far eye's outer side), the catchlight on the iris.
-    case "peek":
-      return eye({ ...spec, white: { at: near ? 186 : -6, width: near ? 4.6 : 3.4, span: 58, fade: 0.3 }, shine: { at: [near ? -2.4 : 2.2, near ? 5 : 4.2], r: spec.shine.r } });
+    case "squeeze":
+      return chevron(turnedSqueeze(side));
+    default:
+      return eye(turnedEyeSpec(state, side, light));
   }
 }
 
@@ -908,7 +983,7 @@ const STARS: Star[] = [{ at: [-122, -150], size: [11.4, 14.4], turn: 0 }, { at: 
 export function threeQuarterFaces(facingSide: Side = "L"): Drawn[] {
   const F = facing(facingSide);
   const out: Drawn[] = [];
-  for (const side of ["L", "R"] as const) for (const state of EYE_STATES) out.push({ part: `eye.${side}`, state, piece: eyeState(state, side) });
+  for (const side of ["L", "R"] as const) for (const state of EYE_STATES) out.push({ part: `eye.${side}`, state, piece: eyeState(state, side, F.light) });
   for (const state of TURNED_MOUTHS) {
     out.push({ part: "mouth", state, piece: turnedMouth(state, muzzle(F.light, state === "o" || state === "yawn" ? ROUND : undefined), NOSE_FOOT).piece });
   }
@@ -922,15 +997,30 @@ export function threeQuarterFaces(facingSide: Side = "L"): Drawn[] {
 }
 
 /**
- * The face states drawn and tested but held out of the package for now, in a facing: the sparkle's stars. The rig holds
- * the stars to the front (faces.test.ts holds that no turned view draws them, and the turned views' order tests hold
- * their draw orders), so the review build of the turned faces' evidence adds them (qa/phase3/faces/turned/render.ts;
- * DECISIONS 183).
+ * The face states drawn and tested but held out of the package for now, in a facing: proud's stars round the head and
+ * huffy's puffed cheeks. The rig holds the stars to the front and has no cheeks in the turned views' draw orders (the
+ * draw orders are the lead's; faces.test.ts holds that no turned view draws the stars, and the turned views' order
+ * tests hold their draw orders), so the review build of the turned faces' evidence adds them
+ * (qa/phase3/faces/turned/render.ts; DECISIONS 183, 208).
  */
 export function threeQuarterHeld(facingSide: Side = "L"): Drawn[] {
   const F = facing(facingSide);
-  return F.finish([{ part: "stars", state: "sparkle", piece: turnedStars(STARS, F.light) }]);
+  return F.finish([{ part: "stars", state: "sparkle", piece: turnedStars(STARS, F.light) }, { part: "cheeks", state: "puffed", piece: turnedCheeks(puffs(F.light), F) }]);
 }
+
+/**
+ * Huffy's puffed cheeks seen from this view (DECISIONS 208): the front's balls (parts/cheeks.ts PUFF) carried onto the
+ * muzzle as its mouths are, the near one drawn 1.14 times as wide and the far one shortened to 0.64, along the muzzle's
+ * level, each crease hugging the pressed mouth's end. Held out of the package with the stars: `cheeks` has no place in
+ * a turned head's draw order (rig.json, the lead's).
+ */
+const puffs = (light: P): TurnedPuff[] => {
+  const f = muzzle(light);
+  // A little nearer the mouth and narrower than the front's (15.6 pt out, the near one its own width): carried as they
+  // are, the near ball sat on the blush and read as a white muzzle, and the far one bulged at the face's far edge.
+  return ([1, -1] as const).map((sx) => ({ c: f.at([sx * 15.6, CHEEK_PUFF.at[1]]), rx: CHEEK_PUFF.rx * (sx > 0 ? 0.95 : f.k[0]), ry: CHEEK_PUFF.ry * 0.92,
+    turn: f.levelDeg, mouthward: (sx > 0 ? -1 : 1) as 1 | -1 }));
+};
 
 /** What the face states are drawn from, for the R3 guards (characters/dog/test/faces.turned.test.ts). */
 export const threeQuarterFace = {
@@ -939,6 +1029,10 @@ export const threeQuarterFace = {
   rest: { lip: REST_LIP, lipCentre: [-69.4, -85.8] as P },
   brows: (state: BrowState) => ({ L: browState(BROWS.L.pts, state), R: browState(BROWS.R.pts, state) }),
   eyes: EYES,
+  /** Each ball state's spec, each squeeze, and the puffed cheeks (the R3 guards read where the iris looks, the squeeze's arms, the puff). */
+  spec: turnedEyeSpec,
+  squeeze: turnedSqueeze,
+  puffs,
   /** The lid each closing eye state draws, on each eye (the R3 guard reads its lean). */
   lids: lidOf,
   perked: { L: perkedNear, R: perkedFar },

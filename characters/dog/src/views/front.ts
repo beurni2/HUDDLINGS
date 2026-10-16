@@ -6,13 +6,13 @@
 import { furEdge, furSpan, type Lock } from "../../../draw/fur.ts";
 import { arc, bbox, ellipse, fracAt, mirrorX, pathD, polyD, rotate, sample, smooth, spanPoints, symmetric, v, type Node, type P, type Seg, type Shape } from "../../../draw/geom.ts";
 import { innerLine, mirrorSpans, strokeOf, type DrawnLine } from "../../../draw/line.ts";
-import { marking, part, soft, type Fade, type Paint } from "../../../draw/paint.ts";
+import { LIGHT, marking, part, soft, type Fade, type Paint } from "../../../draw/paint.ts";
 import { blur, filter, join, pad, piece, uid, type Box, type Piece } from "../../../draw/svg.ts";
 import { model } from "../model.ts";
 import { C, LINES } from "../palette.ts";
 import { brow } from "../parts/brow.ts";
 import { puffedCheeks } from "../parts/cheeks.ts";
-import { chevron, eye as sharedEye, lidBand, type EyeSpec, type LidBand } from "../parts/eye.ts";
+import { chevron, eye as sharedEye, lidBand, riding, type Chevron, type EyeSpec, type LidBand } from "../parts/eye.ts";
 import { rolledFrame } from "../parts/face.ts";
 import { MOUTH_STATES, mouth, oTongue } from "../parts/mouth.ts";
 import { stars, type Star } from "../parts/stars.ts";
@@ -761,11 +761,11 @@ const EYE_HALF = Math.hypot(EYE_L[0] - EYE_R[0], EYE_L[1] - EYE_R[1]) / 2;
 /** A model-space point moved across and down in the face's level frame. */
 const nudge = ([x, y]: P, [dx, dy]: P): P => [x + dx * cosR - dy * sinR, y + dx * sinR + dy * cosR];
 
-/** The eye states the front draws besides the open eye (sparkle and squeeze are the happy crescent's region: rig.json). */
-export const EYE_STATES = ["happy", "closed", "sleepy", "wink", "wide", "peek", "eager", "flat", "peekBack"] as const;
+/** The eye states the front draws besides the open eye. */
+export const EYE_STATES = ["happy", "squeeze", "closed", "sleepy", "wink", "wide", "peek", "sparkle", "eager", "flat", "peekBack"] as const;
 
 /** The eye states drawn on the open eye's ball (the rest are lash bands): their specs are what the R3 gaze guard holds. */
-export const BALL_STATES = ["sleepy", "wide", "peek", "eager", "peekBack"] as const;
+export const BALL_STATES = ["sleepy", "wide", "peek", "sparkle", "eager", "peekBack"] as const;
 
 /** The open eye's spec on one side, and each ball state's (exported for the R3 guard, which holds where the iris looks). */
 export function eyeStateSpec(state: "open" | (typeof BALL_STATES)[number], side: "L" | "R"): EyeSpec {
@@ -775,32 +775,69 @@ export function eyeStateSpec(state: "open" | (typeof BALL_STATES)[number], side:
     case "open":
       return spec;
     // The open eye with its upper lid closed down over about two fifths of it, its edge bowing down a little, as Sleepy
-    // half-lid draws it, the catchlight just under the lash: the lid's ends 3.2 pt above the ball's middle, its middle
-    // 1.4. Closed down past the middle, as it was, the flat lid across the iris read as unimpressed (DECISIONS 148).
+    // half-lid draws it: the lid's ends 3.2 pt above the ball's middle, its middle 1.4. Closed down past the middle, as
+    // it was, the flat lid across the iris read as unimpressed (DECISIONS 148). The catchlight on the iris just under
+    // the lid, as the panel draws it, its top tucked under the lash (it rides up toward the open eye's place and the lid
+    // covers it there, Q28), the tiny one below it (Q26).
     case "sleepy":
-      return { ...spec, cover: { level: -3.2, bow: 1.8, tilt: ROLL_DEG, lash: 1.9, overhang: 1, shine: { at: [2.8, -0.8], r: 1.4 } } };
+      return { ...spec, cover: { level: -3.2, bow: 1.8, tilt: ROLL_DEG, lash: 1.9, overhang: 1, shine: { at: [2.8, 0.1], r: 1.4 } } };
     // Surprised round: 7% larger and a point higher, the white broader and longer, the catchlight bigger; its larger
     // pupil baked in (phase 3 has no pupil scale).
     case "wide":
-      return { ...spec, centre: nudge(spec.centre, [-sx * 0.4, -0.9]), rx: 10.2, ry: 9.85, white: { at: -28, width: 2, span: 42, fade: 0.5 },
-        shine: { at: [2.5, 5.6], r: 2.05 }, glow: { band: 6, warm: 2 } };
+      return wide(spec, sx);
     // Side glance: the iris baked toward the viewer's right, as the panel looks, the white a broad crescent on the
-    // other side; the catchlight stays on the iris.
-    case "peek":
-      return { ...spec, white: { at: side === "R" ? -6 : 186, width: 4.6, span: 58, fade: 0.3 }, shine: { at: [side === "R" ? 2.6 : -2.4, 5], r: 1.8 } };
+    // other side; the catchlights ride the iris at half its travel (Q28).
+    case "peek": {
+      const e = { ...spec, white: { at: side === "R" ? -6 : 186, width: 4.6, span: 58, fade: 0.3 } };
+      return { ...e, shine: riding(e, spec, spec.shine) };
+    }
+    // The sparkle (Q2, DECISIONS 203): the open eye, its catchlights where the open eye has them, a soft white star in
+    // its lower iris as the bear's Sparkle draws it (its middle half the ball's radius below the ball's, its points
+    // about a third of the radius out, as plump as the bear's), and two small gold stars beside it.
+    case "sparkle":
+      return { ...spec, sparkle: { star: { at: [0.2, -4.5], r: 3.3 }, stars: SPARKLE_STARS, level: ROLL_DEG, light: LIGHT } };
     // Hungry's (new drawing): the wide eye with its pupil larger (the iris's dark reaching further down, its warm foot a
     // thin glow) and fixed on the food just in front of its nose, the iris baked in toward the nose and a hair down, so
-    // the two eyes meet on it, the white a crescent down the outer side, the catchlight riding the iris (Q28) and larger.
+    // the two eyes meet on it, the white a crescent down the outer side, the catchlights riding the iris at half its
+    // travel from the wide eye's (Q28), the large one 10% larger.
     case "eager":
       return eager(spec, sx, EAGER);
     // Huffy's peek back (new drawing): the eye open again, bright, no lid (a quarter-down lid read as a skeptical
     // side-eye, the huff kept up rather than melting), the iris baked toward the viewer's right and level, so with the
     // head glanced away to the dog's right (phase 4) it looks back at the viewer, never up at them: on the dog's left
     // eye, the one that peeks, the white lies on the nose's side 8° below the level, the open eye's white turned round
-    // to the other side (DECISIONS 159). The catchlight on the iris (Q28).
-    case "peekBack":
-      return { ...spec, white: { at: side === "R" ? -6 : 168, width: 3.2, span: 56, fade: 0.3 }, shine: { at: [side === "R" ? 3.4 : -1.6, 5.2], r: 1.9 } };
+    // to the other side (DECISIONS 159). The catchlights ride the iris at half its travel (Q28).
+    case "peekBack": {
+      const e = { ...spec, white: { at: side === "R" ? -6 : 168, width: 3.2, span: 56, fade: 0.3 } };
+      return { ...e, shine: riding(e, spec, spec.shine) };
+    }
   }
+}
+
+/** The wide eye on the open eye's spec: 7% larger and 0.9 pt higher, the white broader, the catchlight 15% bigger. */
+const wide = (spec: EyeSpec, sx: number): EyeSpec => ({
+  ...spec, centre: nudge(spec.centre, [-sx * 0.4, -0.9]), rx: 10.2, ry: 9.85, white: { at: -28, width: 2, span: 42, fade: 0.5 },
+  shine: { at: [2.5, 5.6], r: 2.05 }, glow: { band: 6, warm: 2 },
+});
+
+/**
+ * The sparkle's small gold stars beside each eye, toward the nose and up from the ball's middle in the face's level
+ * frame: two, as both sister sheets draw them beside their Sparkle eye, the larger a little above the eye's middle and
+ * the smaller below it, just past the eye's outer top, on the hood (DECISIONS 203).
+ */
+const SPARKLE_STARS = [{ at: [-13.6, 8.6] as [number, number], r: 3.8 }, { at: [-15.8, 1.2] as [number, number], r: 2.6 }];
+
+/**
+ * The squeeze (Q2, DECISIONS 202): the dog's own `>` `<`, as the kitty's and the bear's Excited draw theirs, at the
+ * open eye's size: its point 8.2 pt in from the open eye's middle toward the nose, 0.6 below it, its arms reaching
+ * out to the open eye's outer side (the upper 16.8 pt, turned 14° up, the lower 15.8, 26° down, as the sister sheets'
+ * arms rise 11 to 14° and fall 18 to 27°), 4.4 pt thick, a little under the crescent band's 5, in the lash bands'
+ * warm near-black, as dark as the sister sheets' (the outline's warm brown read faded beside them: 202).
+ */
+export function squeeze(side: "L" | "R"): Chevron {
+  const sx = side === "L" ? 1 : -1;
+  return { tip: FRAME.at([sx * (EYE_HALF - 8.2), 0.6]), tilt: ROLL_DEG, noseward: side === "L" ? -1 : 1, length: [16.8, 15.8], angle: [14, 26],
+    thickness: 4.4, ends: 3.8, bow: 0.4, point: 1 };
 }
 
 /**
@@ -832,6 +869,8 @@ function eyeState(state: (typeof EYE_STATES)[number], side: "L" | "R"): Piece {
     // happy crescent, the outer end lifting into a short lash; its inner end never below its outer (no angry slant).
     case "flat":
       return lidBand(flatLid(side));
+    case "squeeze":
+      return chevron(squeeze(side));
     default:
       return sharedEye(eyeStateSpec(state, side));
   }
@@ -845,15 +884,19 @@ export function flatLid(side: "L" | "R"): LidBand {
 }
 
 /** How the eager eye is baked: the white's place round the eye, its width and span, the pupil's warm foot, the catchlight. */
-interface Eager { white: { at: number; width: number; span: number }; glow: { band: number; warm: number }; shine: { at: [number, number]; r: number } }
+interface Eager { white: { at: number; width: number; span: number }; glow: { band: number; warm: number }; shine: number }
 /** The package's eager eye (variant A): fixed on the food just in front, below the eyes. */
-const EAGER: Eager = { white: { at: 10, width: 2, span: 55 }, glow: { band: 3, warm: 1.2 }, shine: { at: [4.8, 5.2], r: 2.25 } };
+const EAGER: Eager = { white: { at: 10, width: 2, span: 55 }, glow: { band: 3, warm: 1.2 }, shine: 2.25 };
 /** Review-only variant B: fixed on the food held out toward it, straight ahead, the wide eye's white round its outer foot. */
-const EAGER_B: Eager = { white: { at: -28, width: 1.5, span: 42 }, glow: { band: 3.4, warm: 1.4 }, shine: { at: [5.1, 7], r: 2.25 } };
-/** The eager eye on the wide eye's ball (7% larger and 0.9 pt higher than the open eye). */
-const eager = (spec: EyeSpec, sx: number, e: Eager): EyeSpec => ({
-  ...spec, centre: nudge(spec.centre, [-sx * 0.4, -0.9]), rx: 10.2, ry: 9.85, white: { ...e.white, fade: 0.3 }, shine: e.shine, glow: e.glow,
-});
+const EAGER_B: Eager = { white: { at: -28, width: 1.5, span: 42 }, glow: { band: 3.4, warm: 1.4 }, shine: 2.25 };
+/**
+ * The eager eye on the wide eye's ball (7% larger and 0.9 pt higher than the open eye), its large catchlight `shine`
+ * in radius, riding the iris at half its travel from where the wide eye has it (Q28).
+ */
+const eager = (spec: EyeSpec, sx: number, e: Eager): EyeSpec => {
+  const w = wide(spec, sx), eye = { ...w, white: { ...e.white, fade: 0.3 }, glow: e.glow };
+  return { ...eye, shine: riding(eye, w, { at: w.shine.at, r: e.shine }) };
+};
 
 /** Proud's stars beside the head on the dog's right, where the panel puts them from the nose, its raised chin levelled. */
 const STARS: Star[] = [{ at: [-74.9, -41.3], size: [11.4, 14.4], turn: 0 }, { at: [-60.3, -56.7], size: [9.6, 10.4], turn: 0 }];
@@ -997,12 +1040,11 @@ export function faceStates(): Drawn[] {
 }
 
 /**
- * The review-only drawings (qa/phase3/faces/new/new.ts), never in the package: the new faces' variant B and Q2's
- * alternative eyes, each under a state of its own so one scratch package draws both variants. Variant B of hungry
- * looks straight out at the food held toward it, its tongue peeking from the smile's corner; variant B of huffy puffs
- * the head itself, its outline swelling 4.4 pt at each cheek, with the head's line to match. Q2's alternatives are not
- * on the dog's sheets: the `> <` of the kitty's and the bear's Excited, drawn in the dog's lash band, and the
- * open eye with a white star in its lower iris, as their Sparkle (Star Highlight) draws it.
+ * The review-only drawings (qa/phase3/faces/new/new.ts), never in the package: the new faces' variant B and tender's
+ * softer lid, each under a state of its own so one scratch package draws both variants. Variant B of hungry looks
+ * straight out at the food held toward it, its tongue peeking from the smile's corner; variant B of huffy puffs the
+ * head itself, its outline swelling 4.4 pt at each cheek, with the head's line to match. Q2's eyes, the founder's
+ * choice, are in the package now (`squeeze`, `sparkle`).
  */
 export function reviewStates(): Drawn[] {
   const out: Drawn[] = [];
@@ -1010,10 +1052,9 @@ export function reviewStates(): Drawn[] {
     const sx = side === "L" ? 1 : -1, noseward: 1 | -1 = side === "L" ? -1 : 1;
     const spec = eyeSpec(side === "L" ? EYE_L : EYE_R, noseward);
     out.push({ part: `eye.${side}`, state: "eagerB", piece: sharedEye(eager(spec, sx, EAGER_B)) });
-    // The point toward the nose, about where the open eye's inner side is, its arms out to the open eye's outer side.
-    out.push({ part: `eye.${side}`, state: "squeezeAlt", piece: chevron({ tip: FRAME.at([sx * (EYE_HALF - 6.6), 0.6]), tilt: ROLL_DEG, noseward, length: 13.6, spread: 52, thickness: [4.4, 3.4] }) });
-    out.push({ part: `eye.${side}`, state: "sparkleAlt", piece: sharedEye({ ...spec, star: { at: [-0.4, -3.4], r: 3.9 } }) });
     out.push({ part: `eye.${side}`, state: "sleepySoft", piece: sharedEye(softHalfLid(side)) });
+    // The squeeze in the outline's warm brown, the other reading of "the warm line colour" (DECISIONS 202): not taken.
+    out.push({ part: `eye.${side}`, state: "squeezeWarm", piece: chevron({ ...squeeze(side), colour: C.warmLine }) });
   }
   out.push({ part: "mouth", state: "o.tongueB", piece: oTongue(FRAME).piece });
   const puffed = headOf(PUFF_B);

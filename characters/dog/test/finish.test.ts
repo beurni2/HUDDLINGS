@@ -115,9 +115,10 @@ test("the eye's white is a crescent as wide as asked on its outer side, and none
   assert.ok(inIris(edge(round.white.at + 180)), "there is white on the nose's side too");
 });
 
-test("the eye has one catchlight, no strokes, and its lash line is an outer line", () => {
+// One large catchlight and one tiny one (docs/QUESTIONS.md Q26, decided by the founder Oct 16, 2026; DECISIONS 200, 201).
+test("the eye has one large and one tiny catchlight, no strokes, and its lash line is an outer line", () => {
   const p = eye(round);
-  assert.equal(p.svg.split(`fill="${C.light}"`).length - 1, 1, "the eye does not have exactly one catchlight");
+  assert.equal(p.svg.split(`fill="${C.light}"`).length - 1, 2, "the eye does not have exactly its large and its tiny catchlight");
   assert.ok(!/stroke=/.test(p.svg), "the eye strokes a ring or a ray");
   const [lid] = p.meta.lines;
   assert.ok(lid && lid.kind === "outer" && lid.width >= LIMITS.outer[0] && lid.width <= LIMITS.outer[1], "the lash line is not an outer line");

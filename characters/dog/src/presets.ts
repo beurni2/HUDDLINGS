@@ -89,7 +89,7 @@ export const PRESETS: Record<string, Preset> = {
     panels: "Happy", crops: ["master.expression.happy", "expressions.expression.happy"],
   },
   excited: {
-    // The dog's squeeze is its happy crescent (Q2).
+    // Excited keeps the happy crescents its own panels draw; the squeeze is the kitty's and the bear's (Q2, DECISIONS 200).
     // The table's open mouth, drawn as the Excited panels draw it: wider and deeper than the rest's (DECISIONS 144).
     eyes: ["squeeze", "happy"], eyesHow: "or", eyesNote: "squeeze (kitty, bear) or happy", mouth: ["openWide"], mouthNote: "the table's open, as Excited draws it",
     ears: "lifted", brows: "happy", blush: null,
@@ -115,7 +115,9 @@ export const PRESETS: Record<string, Preset> = {
   proud: {
     sequence: "happy, then sparkle",
     eyes: ["happy", "sparkle"], eyesHow: "then", mouth: ["smile"], ears: "lifted", brows: "happy", blush: null,
-    panels: "Proud", crops: ["master.expression.content", "expressions.expression.proud"], still: { eyes: "sparkle" },
+    // The still is the dog's Proud panel: the crescents with the stars round the head (DECISIONS 205); the sparkle
+    // eye (Q2) is its second beat, whose timing is phase 4's.
+    panels: "Proud", crops: ["master.expression.content", "expressions.expression.proud"], still: { eyes: "happy" },
   },
   mischievous: {
     // The dog's left eye winks, as Cheeky, the primary, draws it (DECISIONS 111, 142); its brows stay level, as Cheeky's do.
@@ -149,7 +151,8 @@ export const PRESETS: Record<string, Preset> = {
     panels: "Content", crops: ["master.expression.content"], still: { eyes: "happy" },
   },
   ticklish: {
-    // The dog's squeeze is its happy crescent (Q2).
+    // The squeeze is the dog's own > <, as the kitty's and the bear's Excited draw theirs (Q2, DECISIONS 202): no dog
+    // panel draws it, so the Faces check holds the mouth to Laughing and the eyes are judged by eye (DECISIONS 206).
     eyes: ["squeeze"], mouth: ["laugh"], ears: "neutral", earsNote: "bouncing", brows: "happy", blush: null,
     panels: "Laughing, Excited", crops: ["master.expression.laughing", "master.expression.excited", "expressions.expression.excited", "expressions.expression.laughing"],
   },

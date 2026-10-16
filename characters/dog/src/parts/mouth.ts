@@ -407,10 +407,10 @@ function closedLip(half: P[], philtrumTo: number, where: string, f: FaceFrame): 
  * of the smile's width, dipping a hair at the philtrum's foot either side and its ends tucked 0.2 pt above where the
  * philtrum meets it, so it never turns down and never pushes out into a pout.
  */
-const PRESSED: P[] = [[0, 14.5], [1.2, 14.72], [2.5, 14.82], [3.7, 14.72], [4.6, 14.5], [5.1, 14.3]];
+export const PRESSED: P[] = [[0, 14.5], [1.2, 14.72], [2.5, 14.82], [3.7, 14.72], [4.6, 14.5], [5.1, 14.3]];
 
 /** The tiny smile of huffy's peek back (new drawing, no panel): the smile's W at about three fifths of its width, its tips curling up. */
-const TINY_SMILE: P[] = [[0, 14.6], [1.6, 15.3], [3.4, 15.9], [5.2, 16.05], [6.8, 15.7], [7.9, 15], [8.5, 14.2]];
+export const TINY_SMILE: P[] = [[0, 14.6], [1.6, 15.3], [3.4, 15.9], [5.2, 16.05], [6.8, 15.7], [7.9, 15], [8.5, 14.2]];
 
 /**
  * Hungry's o.tongue (new drawing, no panel), the beat after the o: the mouth closes into the small smile and the
