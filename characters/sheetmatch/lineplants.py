@@ -370,7 +370,8 @@ def soft_edge(still, host="ear.R", sigma_pt=0.6, reach_pt=2.0):
     """An outer edge drawn soft, as head.line was before the fix but twice as soft: the alpha and colour within
     reach_pt of a part's edge on the card blurred at sigma_pt."""
     foot = still.footprint(host)
-    edge = edge_of(foot, still.host == lm.OUTSIDE)
+    others = ~np.isin(still.host, [host, lm.OUTSIDE])
+    edge = edge_of(foot, still.host == lm.OUTSIDE) & (ndimage.distance_transform_edt(~others) > CLEAR_PT * still.ppp)
     near = ndimage.distance_transform_edt(~edge) <= reach_pt * still.ppp
     s = sigma_pt * still.ppp
     a = ndimage.gaussian_filter(still.alpha, s)
