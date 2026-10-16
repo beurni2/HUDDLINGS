@@ -1013,6 +1013,7 @@ export function reviewStates(): Drawn[] {
     // The point toward the nose, about where the open eye's inner side is, its arms out to the open eye's outer side.
     out.push({ part: `eye.${side}`, state: "squeezeAlt", piece: chevron({ tip: FRAME.at([sx * (EYE_HALF - 6.6), 0.6]), tilt: ROLL_DEG, noseward, length: 13.6, spread: 52, thickness: [4.4, 3.4] }) });
     out.push({ part: `eye.${side}`, state: "sparkleAlt", piece: sharedEye({ ...spec, star: { at: [-0.4, -3.4], r: 3.9 } }) });
+    out.push({ part: `eye.${side}`, state: "sleepySoft", piece: sharedEye(softHalfLid(side)) });
   }
   out.push({ part: "mouth", state: "o.tongueB", piece: oTongue(FRAME).piece });
   const puffed = headOf(PUFF_B);
@@ -1022,6 +1023,19 @@ export function reviewStates(): Drawn[] {
 }
 /** How far variant B's cheeks swell past the head's outline at their fullest, in points. */
 const PUFF_B = 4.4;
+
+/**
+ * A softer half-lid for tender, review-only (DECISIONS 162): the Sleepy half-lid's lid a little higher at its ends and
+ * arched up over the iris instead of bowed down across it, its lash thinner, the catchlight under the arch's middle,
+ * so the eye reads drowsy and soft rather than deadpan. Spec L457 gives tender the sleepy eye, so it is the founder's.
+ */
+function softHalfLid(side: "L" | "R"): EyeSpec {
+  const spec = eyeStateSpec("sleepy", side), cover = spec.cover!;
+  // The catchlight a point under the ball's middle, 2.2 pt under the arch's top; the open eye's own goes there too, so
+  // none shows twice under the arch.
+  const shine = { at: [cover.shine.at[0], -1] as [number, number], r: 1.5 };
+  return { ...spec, shine, cover: { ...cover, level: -2.6, bow: -1.4, lash: 1.3, overhang: 0.6, shine } };
+}
 
 /** The face frame and its roll, for the R3 guards (characters/dog/test/faces.test.ts), which hold what each recipe draws here. */
 export const faceFrame = { frame: FRAME, rollDeg: ROLL_DEG };

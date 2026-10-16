@@ -32,7 +32,7 @@ function variant(name: string, base: Clip, states: Record<string, string | null>
   return { ...base, name: `review_${name}`, states: s };
 }
 
-const hungry = PRESETS.hungry!, huffy = PRESETS.huffy!, ticklish = PRESETS.ticklish!, proud = PRESETS.proud!;
+const hungry = PRESETS.hungry!, huffy = PRESETS.huffy!, ticklish = PRESETS.ticklish!, proud = PRESETS.proud!, tender = PRESETS.tender!;
 const clip = (name: string, p: Preset, peek = false) => faceClip(name, p, peek);
 /** Each still: its clip, its label and what it shows. Variant A is the package's own clip. */
 const STILLS: { still: string; clip: Clip; label: string; title: string }[] = [
@@ -46,6 +46,11 @@ const STILLS: { still: string; clip: Clip; label: string; title: string }[] = [
   // (DECISIONS 161) and this one is the founder's to choose.
   { still: "huffy-A-flush", clip: { ...clip("huffy", { ...huffy, blush: 0.6 }), name: "review_huffy_A_flush" }, label: "new drawing", title: "huffy A flushed to 60%, for the founder" },
   { still: "huffy-B", clip: variant("huffy_B", clip("huffy", huffy), { "head.base": "puffed", "head.line": "puffed" }), label: "new drawing", title: "huffy B: the head itself puffed as well" },
+  // Tender's softer option for the founder (the last review: the half-lid reads deadpan at phone size); the package
+  // keeps the sleepy eye spec L457 gives it.
+  { still: "tender-A", clip: { ...clip("tender", tender), name: "review_tender_A" }, label: "on the dog sheet", title: "tender (ships): the sleepy half-lid" },
+  { still: "tender-soft", clip: variant("tender_soft", clip("tender", tender), { "eye.L": "sleepySoft", "eye.R": "sleepySoft" }), label: "for the founder", title: "tender: a softer lid, arched up" },
+  { still: "tender-crescent", clip: { ...clip("tender", { ...tender, eyes: ["happy"], blush: 0.5 }), name: "review_tender_crescent" }, label: "for the founder", title: "tender: crescents, blush 50%" },
   { still: "q2-squeeze-default", clip: { ...clip("ticklish", ticklish), name: "review_q2_squeeze_default" }, label: "Q2 default", title: "squeeze, Q2's default: the happy crescent" },
   { still: "q2-squeeze-alt", clip: variant("q2_squeeze_alt", clip("ticklish", ticklish), { "eye.L": "squeezeAlt", "eye.R": "squeezeAlt" }), label: "not on the dog sheet", title: "squeeze, the alternative: > <" },
   { still: "q2-sparkle-default", clip: { ...clip("proud", proud), name: "review_q2_sparkle_default" }, label: "Q2 default", title: "sparkle, Q2's default: crescents and stars" },
