@@ -324,3 +324,32 @@ test("validation refuses discrete keys out of time order, and takes two keys at 
   const clip: Clip = { name: "c", lengthMs: 500, states: { "eye.L": [[0, "open"], [300, "closed"], [200, "open"]] }, order: [[0, null], [100, "low"], [100, null]] };
   assert.deepEqual(validate(rig, [clip]), ["clip c: states of eye.L keys out of order at 200 ms"]);
 });
+
+test("validation names a states track for a part the rig lacks, and leaves its keys unread", () => {
+  // The web took it silently, and Swift decodes it and never reads it: a face clip keying a part the rig renamed would
+  // change nothing and pass.
+  const clip = { name: "c", lengthMs: 500, states: { "eye.L": [[0, "closed"]], "eye.M": [[0, "closed"]], tongue: [] } } as unknown as Clip;
+  assert.deepEqual(validate(rig, [clip]), ["clip c: states of unknown part eye.M", "clip c: states of unknown part tongue"]);
+});
+
+test("validation names a views track for a group other than the body and the head", () => {
+  // Both runtimes read only the body's and the head's views (Swift's decoder drops any other key), so a clip setting a
+  // tail's view, or a misspelt head, would draw the views it had before.
+  const clip = { name: "c", lengthMs: 500, views: { body: [[0, "front"]], heads: [[0, "front"]], tail: [[0, "nope"]] } } as unknown as Clip;
+  assert.deepEqual(validate(rig, [clip]), [
+    "clip c: views of unknown group heads; a clip sets the body's view and the head's",
+    "clip c: views of unknown group tail; a clip sets the body's view and the head's",
+  ]);
+});
+
+test("validation names events that are not a list, and an event that is not an object, rather than throwing", () => {
+  // An object or a number threw inside validate() on the web, walking it, and a string was walked letter by letter;
+  // Swift refuses each at decode. Null is left out, as for every clip field.
+  const cases: [unknown, string][] = [
+    [{ at: 0, type: "keyPose" }, 'clip c: events is not a list of events: {"at":0,"type":"keyPose"}'], [5, "clip c: events is not a list of events: 5"],
+    ["keyPose", 'clip c: events is not a list of events: "keyPose"'], [[null, { at: 0, type: "keyPose" }], "clip c: an event is not an object with its time and type: null"],
+  ];
+  for (const [events, expected] of cases) assert.deepEqual(validate(rig, [{ name: "c", lengthMs: 500, events } as unknown as Clip]), [expected], JSON.stringify(events));
+  assert.deepEqual(validate(rig, [{ name: "c", lengthMs: 500, events: null } as unknown as Clip]), []);
+  assert.deepEqual(validate(rig, [{ name: "c", lengthMs: 500, events: [{ at: 600, type: "sound" }] }]), ["clip c: event sound at 600 ms is outside the clip"]);
+});

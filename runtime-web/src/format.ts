@@ -372,17 +372,35 @@ export function validate(rig: Rig, clips: Clip[], atlas?: AtlasSet): string[] {
       if (!parts.has(partName)) problems.push(`clip ${clip.name}: alpha of unknown part ${partName}`);
       problems.push(...keyProblems(clip, `alpha of ${partName}`, keys, [0, 1], (v) => (v >= 0 && v <= 1 ? undefined : `alpha of ${partName} ${v} leaves 0 to 1`)));
     }
-    for (const event of clip.events ?? []) {
+    // Events are a list (null is left out, as for every clip field); one of another shape is named, not walked.
+    const events: unknown = clip.events;
+    if (events !== undefined && events !== null && !Array.isArray(events)) problems.push(`clip ${clip.name}: events is not a list of events: ${JSON.stringify(events)}`);
+    for (const event of Array.isArray(events) ? (events as ClipEvent[]) : []) {
+      if (!isMap(event)) {
+        problems.push(`clip ${clip.name}: an event is not an object with its time and type: ${JSON.stringify(event) ?? String(event)}`);
+        continue;
+      }
       if (event.at < 0 || event.at > clip.lengthMs) problems.push(`clip ${clip.name}: event ${event.type} at ${event.at} ms is outside the clip`);
       if (clip.loop && event.at === clip.lengthMs) problems.push(`clip ${clip.name}: on a loop, an event at ${clip.lengthMs} ms is the event at 0 ms; put it at 0`);
     }
+    // A states track for a part the rig lacks, or a views track for a group other than the body and the head, is one no
+    // runtime reads: named, as an unknown bone's track is, and its keys left unread.
+    const stateTracks = entries("states", "parts", clip.states).filter(([part]) => {
+      if (!parts.has(part)) problems.push(`clip ${clip.name}: states of unknown part ${part}`);
+      return parts.has(part);
+    });
+    const viewTracks = entries("views", "groups", clip.views).filter(([group]) => {
+      const known = group === "body" || group === "head";
+      if (!known) problems.push(`clip ${clip.name}: views of unknown group ${group}; a clip sets the body's view and the head's`);
+      return known;
+    });
     // A discrete track holds its first value before its first key, so it needs one, as a keyed track does. Each key is
     // [time, name] (an order key's name may be null, the view's own order), in time order, the order both samplers
     // read them in; a name is looked up only once its key reads.
     type Discrete = [what: string, keys: unknown, nullable: boolean, nameProblem: (name: string | null) => string | undefined];
     const discrete: Discrete[] = [
-      ...entries("states", "parts", clip.states).map(([part, keys]): Discrete => [`states of ${part}`, keys, false, () => undefined]),
-      ...entries("views", "groups", clip.views).map(([group, keys]): Discrete =>
+      ...stateTracks.map(([part, keys]): Discrete => [`states of ${part}`, keys, false, () => undefined]),
+      ...viewTracks.map(([group, keys]): Discrete =>
         [`${group} views`, keys, false, (view) => (rig.views.includes(view!) ? undefined : `${group} view ${view} is unknown`)]),
       ...(clip.order === undefined || clip.order === null ? [] : [["order", clip.order, true, (variant) =>
         (variant === null || rig.views.some((view) => rig.drawOrderVariants?.[`${view}:${variant}`]) ? undefined : `order variant ${variant} exists in no view`)] as Discrete]),
