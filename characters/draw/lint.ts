@@ -29,12 +29,15 @@ export const LIMITS = {
  * The line gate (the fur plan's vector gate A, dog DECISIONS 219), for drawings whose lane has opted in (lineGate()),
  * judged on each view as it is composited, in the rig's draw order with its clip groups (LintRules.rig): every visible
  * stretch of the edge of a shape a gated span runs on is lined at full width, but for at most `thinPt` at a time (a
- * free end's taper, a gap between two spans); a free end tapers over at most `taperPt`; a `join` end lies within
+ * free end's taper, a gap between two spans); a free end tapers over at most `taperPt` where its taper shows; a `join` end lies within
  * `joinPt` of another line drawn at full width; an `under` end runs on at least `underPt` at full width, and fades out,
  * under a part drawn above its line; a fur edge is one span; and a span may end in the middle of fur only within `endPt`
  * of another line's end or of where the edge goes under a part. A point lies under a part when it lies at least
- * `coverPt` inside it; a visible stretch is lined by another shape's line within `linedPt` of it. A span that cites a
- * DECISIONS entry is let through, and so is a stretch beside one.
+ * `coverPt` inside it; a visible stretch is lined by another shape's line within `linedPt` of it, or by a typed line
+ * its shape reports (ShapeMeta.outlined). A span that cites a current DECISIONS entry (LintRules.decisions: one that
+ * exists and that no later entry replaces) may taper longer, end in the middle of fur, or share a fur edge, and a bare
+ * stretch beside it is let through as far as its own taper there and what the span says the sheet leaves unlined
+ * (SpanMeta.bare); its joins and its ends under parts are held whatever it cites.
  */
 export const GATE = { thinPt: 2, taperPt: 2, joinPt: 0.5, underPt: 1, endPt: 1, coverPt: 0.3, linedPt: 0.75 };
 
@@ -59,8 +62,15 @@ export interface SpanMeta {
   taper: [number, number];
   /** A line where one part lies over another. */
   contact?: boolean;
-  /** The DECISIONS entry that lets it break the gate's rules. */
+  /** The DECISIONS entry that lets it break the gate's rules: a current one (LintRules.decisions), or the cite fails. */
   cites?: number;
+  /**
+   * How far past each end, in points, the sheet leaves the edge unlined, [before its start, after its end], which its
+   * cite lets through as a bare stretch beside it, and no further (nothing, when left out).
+   */
+  bare?: [number, number];
+  /** Where its part's feather fades it, as shares of its shape (the dog's parts/lines.ts): there it is not at full width, whatever its span says. */
+  faded?: [number, number][];
   /** Set by lineGate(): the drawing's lane has opted in. */
   gate?: boolean;
 }
@@ -91,6 +101,38 @@ export interface LintRules {
    * showing only inside it, a part resting below full alpha hiding nothing. A gated drawing with no rig to place it fails.
    */
   rig?: Pick<Rig, "drawOrder" | "parts">;
+  /** The species' DECISIONS entries, for the line gate's cites (decisionsOf()): a cite that names no current entry fails, and with none given every cite does. */
+  decisions?: Decisions;
+}
+
+/** A species' DECISIONS entries as the line gate reads them: every entry's number, and each entry later ones replace, in whole or in part, with the entries that replace it. */
+export interface Decisions {
+  entries: number[];
+  replaced: Record<number, number[]>;
+}
+
+/**
+ * A DECISIONS.md read for the line gate: each entry starts a line with its bold number (`**210. `), and an entry
+ * replaces another where it says "replaces" or "replacing" and names it with an apostrophe-s ("this replaces 74's
+ * ..."), to the clause's end. An entry replaced even in part cannot be cited to pass the gate: the rule a cite stands on
+ * must be the one in force, so a lane cites the entry that replaced it, or writes its own.
+ */
+export function decisionsOf(markdown: string): Decisions {
+  const entries: number[] = [];
+  const replaced: Record<number, number[]> = {};
+  let current: number | undefined;
+  for (const line of markdown.split("\n")) {
+    const head = /^\*\*(\d+)\.\s/.exec(line);
+    if (head) entries.push((current = Number(head[1])));
+    else if (/^#/.test(line)) current = undefined;
+    if (current === undefined) continue;
+    // Each "replaces ..." clause, to its sentence's or clause's end (a period before a space, a semicolon or a colon),
+    // leaving out an aside in brackets ("(210's cause)").
+    for (const clause of line.matchAll(/\breplac(?:es|ing)\b(.*?)(?:\.(?=\s|\*|$)|[;:]|$)/g)) {
+      for (const n of clause[1]!.matchAll(/(?<![\w.(])(\d+)['’]s\b/g)) if (Number(n[1]) !== current && !replaced[Number(n[1])]?.includes(current)) (replaced[Number(n[1])] ??= []).push(current);
+    }
+  }
+  return { entries, replaced };
 }
 
 /**
@@ -622,7 +664,11 @@ const apart = (f: number, g: number) => Math.min(Math.abs(f - g), 1 - Math.abs(f
 const ahead = (f: number, g: number) => (((g - f) % 1) + 1) % 1;
 /** How much of a closed path a span covers, as a share: the whole of it from a share to itself, or from 0 to 1, as spanPoints reads them. */
 const extent = (from: number, to: number) => (from === to || (from === 0 && to === 1) ? 1 : ahead(from, to));
+const listed = (ns: number[]) => (ns.length > 1 ? `${ns.slice(0, -1).join(", ")} and ${ns.at(-1)}` : `${ns[0]}`);
 const at1 = (p: P) => `(${p.map((n) => n.toFixed(1)).join(", ")})`;
+
+/** Whether a span's line is faded by its part's feather at share f of its shape. */
+const fadedAt = (s: SpanMeta, f: number) => (s.faded ?? []).some(([a, b]) => onSpan(((f % 1) + 1) % 1, a, b));
 
 /** A shape of a composited view, as the line gate reads it. */
 interface Placed {
@@ -654,6 +700,8 @@ interface Placing {
   layer: [number, number];
   /** Where it is drawn at full width, as shares of its shape, from and to (null when it never is). */
   full: [number, number] | null;
+  /** The same span on the same shape as one placed before it: a marking's copy of its part's line (litMarking), drawn again inside the marking's soft edge, held once, as its part's. */
+  copy?: boolean;
 }
 
 const after = (a: [number, number], b: [number, number]) => a[0] > b[0] || (a[0] === b[0] && a[1] > b[1]);
@@ -724,8 +772,14 @@ const STEP = 0.25;
  * each state a gated drawing draws, that state's drawings in place of the rest's), each part's shapes in the rig's draw
  * order, and every lit span of a gated drawing is held to the gate, with the whole outline of every shape one runs on.
  */
-export function gateProblems(drawings: Drawing[], rig?: LintRules["rig"]): string[] {
+export function gateProblems(drawings: Drawing[], rules: Pick<LintRules, "rig" | "decisions"> = {}): string[] {
+  const { rig, decisions } = rules;
   const problems: string[] = [];
+  // What is wrong with a cite, if anything: it must name a current entry.
+  const citeFault = (n: number) => !decisions ? `cites ${n}, and the lint was given no DECISIONS entries to check it against (LintRules.decisions)`
+    : !decisions.entries.includes(n) ? `cites ${n}, which is no DECISIONS entry`
+    : decisions.replaced[n] ? `cites ${n}, which ${listed(decisions.replaced[n]!)} ${decisions.replaced[n]!.length > 1 ? "replace" : "replaces"}: a cite stands on a current entry` : undefined;
+  const cited = (s: SpanMeta | undefined) => !!s?.cites && !citeFault(s.cites);
   const parse = (d: Drawing) => {
     const [part, rest = ""] = d.region.split("/");
     const [view, state] = rest.split(":");
@@ -780,34 +834,68 @@ export function gateProblems(drawings: Drawing[], rig?: LintRules["rig"]): strin
           const length = extent(span.from, span.to) * shape.total;
           if (length > span.taper[0] + span.taper[1] + 1e-9) full = [(span.from + span.taper[0] / shape.total) % 1, (span.to - span.taper[1] / shape.total + 1) % 1];
         }
-        lines.push({ line, span, region: d!.region, shape, layer: [z, mine >= 0 ? mine : ownShapes.length], full });
+        const copy = lines.some((o) => o.span.shape === span.shape && o.span.from === span.from && o.span.to === span.to && o.region !== d!.region);
+        lines.push({ line, span, region: d!.region, shape, layer: [z, mine >= 0 ? mine : ownShapes.length], full, ...(copy ? { copy } : {}) });
       }
     }
+    // A typed line (line.ts's ribbons, a part's typed outline) carries no span, but its shape reports where it runs
+    // (ShapeMeta.outlined): every such run that is no lit span's counts as lined along its whole length, its own
+    // taper unmeasured (the nose's and the lip's edges on head.line, the collar's outline).
+    // A shape reported twice (head.line reports the head's outline for its lines) is one outline: its runs are read by
+    // its key, and a lit span on either report is that outline's.
+    const typed = new Map<string, [number, number][]>();
+    for (const sh of shapes) {
+      const own = lines.filter((l) => l.span.shape === sh.key || l.span.shape === sh.mirrorKey);
+      const runs = (sh.meta.outlined ?? []).filter(([a, b]) => !own.some((l) => Math.abs(l.span.from - a) < 1e-6 && Math.abs(l.span.to - b) < 1e-6));
+      if (runs.length) typed.set(sh.key, [...(typed.get(sh.key) ?? []), ...runs]);
+    }
+    // Every line's full-width points, each with the shape it runs on: the lit spans' (by their index) and the typed lines'.
     const lined = new Lined();
+    const owner: (Placed | undefined)[] = lines.map((l) => l.shape);
     lines.forEach((l, k) => {
       if (!l.shape || !l.full) return;
       const length = extent(l.full[0], l.full[1]) * l.shape.total;
-      for (let s = 0; s <= length + 1e-9; s += STEP) lined.add(pointAt(l.shape, l.full[0] + s / l.shape.total), k);
+      for (let s = 0; s <= length + 1e-9; s += STEP) {
+        const f = l.full[0] + s / l.shape.total;
+        if (!fadedAt(l.span, f)) lined.add(pointAt(l.shape, f), k);
+      }
     });
+    for (const [key, runs] of typed) {
+      const sh = shapes.find((x) => x.key === key)!;
+      for (const [a, b] of runs) {
+        const id = owner.push(sh) - 1, length = extent(a, b) * sh.total;
+        for (let s = 0; s <= length + 1e-9; s += STEP) lined.add(pointAt(sh, a + s / sh.total), id);
+      }
+    }
     const named = (l: Placing) => `the lit span on ${l.line.where} from ${l.span.from.toFixed(3)} to ${l.span.to.toFixed(3)}`;
     const which = ["start", "end"];
     const subjects = new Map<Placed, string>();
 
     lines.forEach((l, k) => {
-      if (!l.span.gate || l.region.split("/")[1]?.split(":")[1] !== state) return;
+      if (!l.span.gate || l.copy || l.region.split("/")[1]?.split(":")[1] !== state) return;
       const s = l.span;
       if (!l.shape) {
         problems.push(`${l.region}: ${named(l)} runs on a shape (${s.shape}) that no drawing of ${view} reports, so the line gate cannot place it`);
         return;
       }
       if (!subjects.has(l.shape)) subjects.set(l.shape, l.region);
-      if (s.cites) return;
+      // A current cite lets through what the sheet may draw so: a long taper, a line ending in the middle of fur, a bare
+      // stretch as long as the span says. A join with no line to meet, or an end run on under no part, is never the
+      // sheet's: those are held whatever the span cites. Any other cite fails, and the span is held as if it cited nothing.
+      if (s.cites && citeFault(s.cites)) problems.push(`${l.region}: ${named(l)} ${citeFault(s.cites)}`);
+      const waived = cited(s);
       const shape = l.shape;
       s.ends.forEach((e, i) => {
         const f = i === 0 ? s.from : s.to;
         const p = pointAt(shape, f);
-        if ((e === "taper" || e === "free") && s.taper[i]! > GATE.taperPt + 1e-6)
-          problems.push(`${l.region}: ${named(l)} tapers over ${s.taper[i]!.toFixed(2)} pt at its ${which[i]} (at most ${GATE.taperPt} pt, unless it cites a DECISIONS entry)`);
+        // A taper is held where it shows: one that lies wholly under parts drawn over its line (an ear's inner edge behind the face) is not seen.
+        const hidden = () => {
+          const dir = i === 0 ? 1 : -1;
+          for (let d = 0; d <= s.taper[i]! + 1e-9; d += STEP) if (!covered(pointAt(shape, f + (dir * d) / shape.total), l.layer)) return false;
+          return true;
+        };
+        if ((e === "taper" || e === "free") && !waived && s.taper[i]! > GATE.taperPt + 1e-6 && !hidden())
+          problems.push(`${l.region}: ${named(l)} tapers over ${s.taper[i]!.toFixed(2)} pt at its ${which[i]} (at most ${GATE.taperPt} pt, unless it cites a current DECISIONS entry)`);
         if (e === "join") {
           // Its own other end, on a ring drawn whole, or another line at full width.
           const ring = s.ends[1 - i] === "join" && apart(s.from, s.to) * shape.total <= GATE.joinPt;
@@ -825,7 +913,7 @@ export function gateProblems(drawings: Drawing[], rig?: LintRules["rig"]): strin
             }
           }
         }
-        if (e === "taper" || e === "free") {
+        if ((e === "taper" || e === "free") && !waived) {
           const mid = shape.meta.fur.some(([a, b]) => onSpan(f, a, b) && apart(f, a) * shape.total > GATE.endPt && apart(f, b) * shape.total > GATE.endPt);
           const nearEnd = lines.some((m, j) => j !== k && m.shape && [m.span.from, m.span.to].some((g) => {
             const q = pointAt(m.shape!, g);
@@ -839,19 +927,20 @@ export function gateProblems(drawings: Drawing[], rig?: LintRules["rig"]): strin
     });
 
     for (const [shape, region] of subjects) {
-      const on = lines.map((l, k) => ({ l, k })).filter(({ l }) => l.shape === shape);
+      const on = lines.map((l, k) => ({ l, k })).filter(({ l }) => l.shape === shape && !l.copy);
       // A fur edge is one span.
       for (const fur of shape.meta.fur) {
         const over = on.filter(({ l }) => overlap([l.span.from, l.span.to], fur) * shape.total > 1);
-        if (over.length > 1 && !over.some(({ l }) => l.span.cites))
+        if (over.length > 1 && !over.some(({ l }) => cited(l.span)))
           problems.push(`${region}: the fur edge from ${fur[0].toFixed(3)} to ${fur[1].toFixed(3)} of ${shape.meta.name} is drawn as ${over.length} spans (one span per fur edge)`);
       }
       // Every visible stretch of its outline is lined at full width, by its own spans or another shape's line beside it.
       const n = Math.max(1, Math.round(shape.total / STEP)), step = shape.total / n;
       const bare = Array.from({ length: n }, (_, i) => {
         const f = ((i + 0.5) * step) / shape.total, q = pointAt(shape, f);
-        if (on.some(({ l }) => l.full && (extent(l.full[0], l.full[1]) === 1 || onSpan(f, l.full[0], l.full[1])))) return false;
-        if (lined.near(q, GATE.linedPt, (m) => lines[m]!.shape === shape)) return false;
+        if (on.some(({ l }) => l.full && (extent(l.full[0], l.full[1]) === 1 || onSpan(f, l.full[0], l.full[1])) && !fadedAt(l.span, f))) return false;
+        if ((typed.get(shape.key) ?? []).some(([a, b]) => extent(a, b) === 1 || onSpan(f, a, b))) return false;
+        if (lined.near(q, GATE.linedPt, (m) => owner[m]?.key === shape.key)) return false;
         return !covered(q, shape.layer);
       });
       // The bare runs, walked round from a sample that is not bare (the whole outline, when none is).
@@ -869,14 +958,18 @@ export function gateProblems(drawings: Drawing[], rig?: LintRules["rig"]): strin
         const length = count * step;
         if (length <= GATE.thinPt + 1e-6) continue;
         const f0 = (start * step) / shape.total, f1 = (((start + count) % n) * step) / shape.total;
-        // The spans on either side of the stretch: the one ending nearest before it and the one starting nearest after
-        // it, read a sample inside the stretch, so a span ending within a sample of it counts.
-        const g0 = f0 + step / shape.total, g1 = f1 - step / shape.total;
-        const before = on.map(({ l }) => l).sort((a, b) => ahead(a.span.to, g0) - ahead(b.span.to, g0))[0];
-        const next = on.map(({ l }) => l).sort((a, b) => ahead(g1, a.span.from) - ahead(g1, b.span.from))[0];
-        if (before?.span.cites || next?.span.cites) continue;
+        // The spans on either side of the stretch: the one whose end lies nearest back from the stretch's end (its taper
+        // or fade, when it has one, lies in the stretch) and the one whose start lies nearest on from the stretch's start.
+        const before = on.map(({ l }) => l).sort((a, b) => ahead(a.span.to, f1) - ahead(b.span.to, f1))[0];
+        const next = on.map(({ l }) => l).sort((a, b) => ahead(f0, a.span.from) - ahead(f0, b.span.from))[0];
+        // A citing span beside it lets through its own end's taper and as much as it says the sheet leaves unlined
+        // there, and no more.
+        const waived = (cited(before?.span) ? before!.span.taper[1] + (before!.span.bare?.[1] ?? 0) : 0) +
+          (cited(next?.span) ? next!.span.taper[0] + (next!.span.bare?.[0] ?? 0) : 0);
+        if (length <= waived + GATE.thinPt + 1e-6) continue;
         problems.push(`${region}: the edge of ${shape.meta.name} shows ${length.toFixed(2)} pt below full line width from ${at1(pointAt(shape, f0))} to ${at1(pointAt(shape, f1))}` +
-          `${before ? `, after ${named(before)}` : ""}${next && count < n ? `, before ${named(next)}` : ""} (at most ${GATE.thinPt} pt: one line at full width along each visible edge, unless a span beside it cites a DECISIONS entry)`);
+          `${before ? `, after ${named(before)}` : ""}${next && count < n ? `, before ${named(next)}` : ""} (at most ${GATE.thinPt} pt` +
+          `${waived > 0 ? ` past the ${waived.toFixed(2)} pt its cite lets through` : ""}: one line at full width along each visible edge, unless a span beside it cites a current DECISIONS entry and says how far the sheet leaves it unlined)`);
       }
     }
   }
@@ -885,5 +978,5 @@ export function gateProblems(drawings: Drawing[], rig?: LintRules["rig"]): strin
 
 /** Every problem with a set of drawings: each drawing's own, and the line gate's on each view a lane has opted into it. */
 export function lint(drawings: Drawing[], rules: LintRules = {}): string[] {
-  return [...drawings.flatMap((d) => lintDrawing(d, rules)), ...gateProblems(drawings, rules.rig)];
+  return [...drawings.flatMap((d) => lintDrawing(d, rules)), ...gateProblems(drawings, rules)];
 }

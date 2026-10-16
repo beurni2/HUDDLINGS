@@ -12,8 +12,8 @@ import { PNG } from "pngjs";
 import type { Drawing } from "../../build/atlas.ts";
 import type { Rig } from "../../../runtime-web/src/format.ts";
 import { furEdge, type Lock } from "../../draw/fur.ts";
-import { gateProblems, lineGate } from "../../draw/lint.ts";
-import { arc, fracAt, mirrorX, smooth, spanPoints, v, type Node, type P, type Shape } from "../../draw/geom.ts";
+import { decisionsOf, gateProblems, lineGate } from "../../draw/lint.ts";
+import { arc, fracAt, mirrorX, sample, smooth, spanPoints, v, type Node, type P, type Shape } from "../../draw/geom.ts";
 import { scopeIds, type Piece } from "../../draw/svg.ts";
 import { EAR, earEdge, earFur, type EarEdgeSpec } from "../src/parts/ear.ts";
 import { HEAD_FUR, headFur, type HeadFurSpec } from "../src/parts/headfur.ts";
@@ -33,7 +33,7 @@ const polygons = (svg: string) => [...svg.matchAll(/d="([^"]+)"/g)].map((m) => [
 
 test("left out, the fur pass's options draw exactly what the line drew before them", () => {
   const span: LitSpan = { from: "left", to: "right", taper: 4 };
-  const a = litRibbons(paw, [span], "a"), b = litRibbons(paw, [{ ...span, ends: undefined, contact: undefined, ground: undefined, cites: undefined }], "a");
+  const a = litRibbons(paw, [span], "a"), b = litRibbons(paw, [{ ...span, ends: undefined, contact: undefined, ground: undefined, cites: undefined, bare: undefined, most: undefined }], "a");
   assert.equal(a.svg, b.svg);
   assert.deepEqual(a.lines[0]!.span.ends, ["taper", "taper"]);
   assert.deepEqual(a.lines[0]!.span.taper, [4, 4]);
@@ -75,6 +75,16 @@ test("a contact line keeps the same darkness in both facings, never lighter than
   const contact = [tonesOf(litRibbons(paw, [{ ...right, contact: true }], "c").svg, LINES.cream), tonesOf(litRibbons(mirrored, [{ ...left, contact: true }], "c").svg, LINES.cream)];
   assert.deepEqual([...contact[0]!].sort(), [...contact[1]!].sort(), "the contact line's tones differ between the facings");
   assert.ok(contact.flat().every((t) => t >= Math.round(CONTACT_DEPTH * 10)), `a contact line is lighter than the ladder's middle (${contact.flat()})`);
+});
+
+test("a light line's ceiling keeps it light and thin where the sheet lines a fur edge lightly, whatever the light and the ground", () => {
+  const sole: LitSpan = { from: "right", to: "left" };
+  const full = litRibbons(paw, [sole], "s"), deep = tonesOf(full.svg, LINES.cream);
+  assert.ok(Math.max(...deep) >= 8, "under the sole the line runs on to the darkest");
+  const light = litRibbons(paw, [{ ...sole, most: 0.25 }], "s");
+  assert.ok(tonesOf(light.svg, LINES.cream).every((t) => t <= 3), `the light line's tones ${tonesOf(light.svg, LINES.cream)}`);
+  // As thin as the light rule draws a lit edge, with its wobble: 1.2 to 1.4 pt, where the sole's is 1.6.
+  assert.ok(light.lines[0]!.drawn[1] <= 1.41 && light.lines[0]!.drawn[1] < full.lines[0]!.drawn[1] - 0.15, `the light line is ${light.lines[0]!.drawn[1]} pt at its widest`);
 });
 
 test("under a paw's sole the ground's dark lies only under the middle 60%, lighter, thinner and varied round it", () => {
@@ -347,9 +357,23 @@ test("a right-facing view's gated spans are found through facing.ts's mirror and
     return { region: `tail/side.${R ? "R" : "L"}`, svg: "", anchor: [0, 0], meta: (R ? mirrorPiece(p) : p).meta };
   };
   for (const R of [false, true]) {
-    assert.match(gateProblems([view(two, R)], rig).join("\n"), /is drawn as 2 spans/, `the planted two-span fur edge is found in side.${R ? "R" : "L"}`);
-    assert.deepEqual(gateProblems([view(one, R)], rig), [], `one span all round passes in side.${R ? "R" : "L"}`);
+    assert.match(gateProblems([view(two, R)], { rig }).join("\n"), /is drawn as 2 spans/, `the planted two-span fur edge is found in side.${R ? "R" : "L"}`);
+    assert.deepEqual(gateProblems([view(one, R)], { rig }), [], `one span all round passes in side.${R ? "R" : "L"}`);
   }
+});
+
+test("a part's feather fades its own line, and the line gate holds the faded run as below full width", () => {
+  // The paw lined all round, then with its right side feathered away (transparent at x 16, opaque from x 10): the
+  // line there fades with the part, as the side's hind paw's back did against the haunch.
+  const one: LitSpan[] = [{ from: 0, to: 1, ends: ["join", "join"] }];
+  const view = (feather?: { from: P; to: P }): Drawing => {
+    const p = lineGate(litPart("tail", paw, { fill: C.fur, ...(feather ? { feather } : {}) }, one));
+    return { region: "tail/side.L", svg: "", anchor: [0, 0], meta: p.meta };
+  };
+  assert.deepEqual(gateProblems([view()], { rig }), []);
+  const faded = view({ from: [16, -8], to: [10, -8] });
+  assert.ok(((faded.meta!.lines[0] as LitLine).span.faded ?? []).length > 0, "the span says where the feather fades it");
+  assert.match(gateProblems([faded], { rig }).join("\n"), /the edge of tail shows \d+\.\d\d pt below full line width/);
 });
 
 test("today's views, gated whole, fail the line gate, and each right-facing view as its left-facing view does", () => {
@@ -359,9 +383,19 @@ test("today's views, gated whole, fail the line gate, and each right-facing view
   const gated = (view: string) => all.map((d) => (d.region.split("/")[1] === view && d.meta
     ? { ...d, meta: { ...d.meta, lines: d.meta.lines.map((l) => ((l as LitLine).span ? { ...l, span: { ...(l as LitLine).span, gate: true } } : l)) } } : d));
   const kinds = (view: string) => {
-    const p = gateProblems(gated(view), rig).filter((x) => !/patch/.test(x.split(":")[0]!));
+    const p = gateProblems(gated(view), { rig }).filter((x) => !/patch/.test(x.split(":")[0]!));
     return { edges: p.filter((x) => / shows .* below full line width/.test(x)).length, fur: p.filter((x) => /drawn as \d+ spans|middle of fur/.test(x)).length };
   };
   assert.ok(kinds("front").edges > 0, "today's front has broken lines the gate finds");
   for (const view of ["threeQuarter", "side"]) assert.deepEqual(kinds(`${view}.R`), kinds(`${view}.L`), `${view}.R is held as ${view}.L`);
+});
+
+test("the dog's DECISIONS, as the line gate reads them: the fur pass's entries stand, and the entries they replace cannot be cited", () => {
+  const d = decisionsOf(readFileSync(new URL("../DECISIONS.md", import.meta.url), "utf8"));
+  for (let n = 210; n <= 219; n++) assert.ok(d.entries.includes(n) && !d.replaced[n], `${n} is a current entry`);
+  // 68 (the profile ear's top feathered under the crown) and 89 (the crown's line into each ear's) still stand.
+  for (const n of [68, 89]) assert.ok(d.entries.includes(n) && !d.replaced[n], `${n} is a current entry`);
+  // What the fur pass replaced, in whole or in part, each by the entry that says so.
+  for (const [n, by] of [[74, 210], [79, 212], [72, 213], [85, 213], [7, 214], [33, 214], [76, 215], [81, 215], [64, 216], [82, 216], [45, 218]] as const)
+    assert.ok(d.replaced[n]?.includes(by), `${n} is replaced by ${by}`);
 });

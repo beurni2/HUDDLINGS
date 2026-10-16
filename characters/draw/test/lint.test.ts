@@ -5,7 +5,7 @@ import type { Drawing } from "../../build/atlas.ts";
 import { rasterizeAll } from "../../build/raster.ts";
 import { furSpan } from "../fur.ts";
 import { arc, ellipse, sample, smooth, type Node, type Shape } from "../geom.ts";
-import { LIMITS, lineGate, lint, lintDrawing, reach, shapeKey, type SpanMeta } from "../lint.ts";
+import { decisionsOf, LIMITS, lineGate, lint, lintDrawing, reach, shapeKey, type Decisions, type SpanMeta } from "../lint.ts";
 import { marking, part } from "../paint.ts";
 import { blur, mask, type Piece } from "../svg.ts";
 
@@ -296,7 +296,11 @@ function spanned(shape: Shape, spans: Partial<SpanMeta>[], gate = true, region =
 }
 /** A plain part over the ring's right half (or under it, as "below"), reaching past it at the top and the bottom. */
 const coverOf = (region: string) => drawing(part(region.split("/")[0]!, smooth(Array.from({ length: 12 }, (_, i): Node => [14 + 24 * Math.cos((i / 12) * 2 * Math.PI), 34 * Math.sin((i / 12) * 2 * Math.PI)])), { fill: "#FFF4E8" }), region, 100);
-const gateOf = (...ds: Drawing[]) => lint(ds, { palette: PALETTE, rig: RIG }).filter((s) => /line gate|lit span|fur edge|edge of/.test(s)).join("\n");
+/** A species' DECISIONS as the gate reads them: 210 replaces 74's rule, 214 stands. */
+const DECISIONS: Decisions = { entries: [74, 210, 214], replaced: { 74: [210] } };
+const gateOf = (...ds: Drawing[]) => gateWith(DECISIONS, ...ds);
+const gateWith = (decisions: Decisions | undefined, ...ds: Drawing[]) =>
+  lint(ds, { palette: PALETTE, rig: RIG, ...(decisions ? { decisions } : {}) }).filter((s) => /line gate|lit span|fur edge|edge of/.test(s)).join("\n");
 const share = (pt: number) => pt / RING;
 /** The whole ring lined by one span joined to itself, as drawn: no gate problem. */
 const whole: Partial<SpanMeta> = { from: 0, to: 1, ends: ["join", "join"], taper: [0, 0] };
@@ -306,7 +310,21 @@ test("the line gate holds only drawings whose lane has opted in, and only on a v
   assert.equal(gateOf(spanned(ring, [long], false)), "", "today's tapered spans pass where no lane has opted in");
   assert.equal(gateOf(spanned(ring, [whole])), "", "the ring lined all round at full width passes");
   assert.match(gateOf(spanned(ring, [long])), /tapers over 5.00 pt at its start/);
-  assert.equal(gateOf(spanned(ring, [{ ...long, cites: 74 }])), "", "a span that cites a DECISIONS entry is let through");
+  // A long taper wholly under a part drawn over the ring is not seen; one under a part drawn below it is.
+  const hiddenTaper: Partial<SpanMeta> = { from: 0.95, to: 0.05, ends: ["taper", "taper"], taper: [5, 5] };
+  assert.doesNotMatch(gateOf(spanned(ring, [hiddenTaper]), coverOf("over/front")), /tapers over/, "a taper hidden under a part");
+  assert.match(gateOf(spanned(ring, [hiddenTaper]), coverOf("below/front")), /tapers over 5.00 pt at its start/);
+  assert.equal(gateOf(spanned(ring, [{ ...long, cites: 210 }])), "", "a span that cites a current DECISIONS entry is let through");
+  // A cite stands only on a current entry: one that does not exist, one a later entry replaces, or any cite the lint cannot check, fails, and the span is held as if it cited nothing.
+  const fake = gateOf(spanned(ring, [{ ...long, cites: 99999 }]));
+  assert.match(fake, /cites 99999, which is no DECISIONS entry/);
+  assert.match(fake, /tapers over 5.00 pt at its start/, "a span whose cite fails is held to every rule");
+  assert.match(gateOf(spanned(ring, [{ ...long, cites: 74 }])), /cites 74, which 210 replaces/, "the entry 210 replaced cannot be cited");
+  assert.match(gateWith(undefined, spanned(ring, [{ ...long, cites: 210 }])), /cites 210, and the lint was given no DECISIONS entries/);
+  // A cite never makes a fake join or an uncovered under end true: the sheet draws neither.
+  const fakeJoin: Partial<SpanMeta> = { from: 0.1, to: 0.9, ends: ["join", "join"], taper: [0, 0], cites: 210, bare: [30, 0] };
+  assert.match(gateOf(spanned(ring, [fakeJoin])), /joins no line at its start/, "a cited span's join is held");
+  assert.match(gateOf(spanned(ring, [{ ...fakeJoin, ends: ["under", "join"], taper: [1.8, 0] }])), /runs on under no part at its start/, "and so is its under end");
   assert.match(lint([spanned(ring, [whole])], { palette: PALETTE }).join("\n"), /composites ring's view|the lint was given none/, "a gated drawing with no rig to place it fails");
   assert.match(gateOf(spanned(ring, [{ ...whole, shape: "00000000" }])), /runs on a shape \(00000000\) that no drawing of front reports/, "a span whose shape cannot be found fails");
 });
@@ -319,7 +337,13 @@ test("the line gate fails any visible stretch of edge below full width, however 
   for (const gap of [6, 12]) assert.match(gateOf(spanned(ring, pair(gap))), new RegExp(`shows ${gap + 3}\\.\\d\\d pt below full line width`), `a ${gap} pt gap is a hole in the line`);
   assert.equal(gateOf(spanned(ring, pair(12)), coverOf("over/front")), "", "a gap under a part drawn over the ring is not on a visible edge");
   assert.match(gateOf(spanned(ring, pair(12)), coverOf("below/front")), /shows 15\.\d\d pt below/, "a part drawn under the ring covers nothing of it");
-  assert.equal(gateOf(spanned(ring, pair(12, 210))), "", "a stretch beside a span that cites a DECISIONS entry is let through");
+  // A cite lets a bare stretch beside its span through only as far as the span says the sheet leaves it unlined.
+  const cited = (bare?: [number, number]) => pair(12).map((s, i) => (i === 0 ? { ...s, cites: 210, ...(bare ? { bare } : {}) } : s));
+  assert.match(gateOf(spanned(ring, cited())), /shows 15\.\d\d pt below full line width/, "a cite alone waives no bare edge beside it");
+  assert.equal(gateOf(spanned(ring, cited([13.5, 0]))), "", "a stretch beside a citing span, no longer than it says, is let through");
+  assert.match(gateOf(spanned(ring, cited([8, 0]))), /shows 15\.\d\d pt below full line width .* past the 9.80 pt its cite lets through/, "and no further than its own taper and that");
+  assert.match(gateOf(spanned(ring, cited([0, 13.5]))), /shows 15\.\d\d pt below/, "the stretch lies before the span's start, not after its end");
+  assert.match(gateOf(spanned(ring, pair(12).map((s, i) => (i === 0 ? { ...s, cites: 74, bare: [13.5, 0] as [number, number] } : s)))), /shows 15\.\d\d pt below/, "a replaced entry's cite waives nothing");
 });
 
 test("a join end must meet another line at full width, and an under end must run on under a part drawn over its line", () => {
@@ -348,6 +372,22 @@ test("the line gate fails a fur edge drawn as more than one span, and a span end
   assert.match(gateOf(spanned(furred, [{ from: mid, to: mid - 0.001, ends: ["free", "free"], taper: [1.8, 1.8] }])), /ends in the middle of fur at its start/);
 });
 
+test("a typed line (no span) lines its run of the edge and takes a join; a marking's copy of its part's line is held once", () => {
+  // Half the ring lit, the other half drawn by a typed line (line.ts's ribbons, as the nose's edge on head.line): its
+  // shape reports the run (ShapeMeta.outlined), so the edge is lined all round and the lit span's joins meet it.
+  const half: Partial<SpanMeta> = { from: 0, to: 0.5, ends: ["join", "join"], taper: [0, 0] };
+  const withTyped = (d: Drawing, runs: [number, number][]): Drawing => ({ ...d, meta: { ...d.meta!, shapes: d.meta!.shapes.map((m) => ({ ...m, outlined: [[0, 0.5], ...runs] })) } });
+  assert.match(gateOf(withTyped(spanned(ring, [half]), [])), /shows \d+\.\d\d pt below full line width/, "half the ring bare");
+  assert.match(gateOf(withTyped(spanned(ring, [half]), [])), /joins no line at its start/);
+  assert.equal(gateOf(withTyped(spanned(ring, [half]), [[0.5, 1]])), "", "the typed line lines the rest and meets both joins");
+  // A marking drawn over the ring carries the ring's line again inside its own soft edge (the dog's litMarking): the
+  // same span on the same shape, one line, not a second span on its fur edge.
+  const furred = furSpan(ring, ringPts[Math.round(ringPts.length * 0.1)]!, ringPts[Math.round(ringPts.length * 0.3)]!);
+  const ringed = spanned(furred, [whole]);
+  const marking: Drawing = { ...drawing(part("over", smooth(round.map(([x, y]): Node => [x * 0.5, y * 0.5])), { fill: "#FFF4E8" }), "over/front"), meta: { shapes: [], lines: ringed.meta!.lines } };
+  assert.equal(gateOf(ringed, marking), "", "a marking's copy of its part's line is not a second span");
+});
+
 test("in a mirrored facing the gate finds each span's shape through the mirror and holds it as in the facing it was typed in", () => {
   // A right-facing view's piece is its left-facing piece mirrored about x = 0, its spans as they were (the dog's views/facing.ts).
   const furred = furSpan(ring, ringPts[Math.round(ringPts.length * 0.1)]!, ringPts[Math.round(ringPts.length * 0.3)]!);
@@ -356,4 +396,21 @@ test("in a mirrored facing the gate finds each span's shape through the mirror a
   const mirror = (d: Drawing): Drawing => ({ ...d, meta: { ...d.meta!, shapes: d.meta!.shapes.map((s) => ({ ...s, segs: s.segs.map((seg) => seg.map(([x, y]) => [-x, y]) as typeof seg) })) } });
   assert.match(gateOf(mirror(spanned(furred, two))), /is drawn as 2 spans/);
   assert.equal(gateOf(mirror(spanned(furred, [whole]))), "");
+});
+
+test("the gate reads a DECISIONS.md: every entry, and each one a later entry replaces, in whole or in part", () => {
+  const md = [
+    "## Outline",
+    "**74. One outer line for every view.** Each span tapers to nothing at both ends.",
+    "**79. The line's tones** (replaces 74's tones and widths).",
+    "**85. Small locks.**",
+    "## The fur pass",
+    "**210. One line per visible edge; this replaces 74's \"every span tapers\".** At 0.8 pt, as 79 says.",
+    "**213. Fur locks; this replaces 72's and 85's small locks, which were shrunk after reviewers read the broken line (210's cause) as lace.**",
+    "**214. The head's fur; this replaces 7's \"no line between\", and 33's handoff.** It keeps 89's rule.",
+  ].join("\n");
+  const d = decisionsOf(md);
+  assert.deepEqual(d.entries, [74, 79, 85, 210, 213, 214]);
+  // Each entry that replaces one is named; an aside in brackets and a mention outside a "replaces" clause replace nothing.
+  assert.deepEqual(d.replaced, { 74: [79, 210], 72: [213], 85: [213], 7: [214], 33: [214] });
 });

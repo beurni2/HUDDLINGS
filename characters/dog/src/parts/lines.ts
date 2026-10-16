@@ -10,7 +10,7 @@
 // as it did until its lane opts in: `ends` gives one span per visible edge, tapering only where it ends in open fur;
 // `contact` keeps a line where one part lies over another as dark in both facings (Q31); `ground: "sole"` puts the
 // ground's dark only under the middle of a paw's sole; `crisp` keeps head.line's outer edge sharp.
-import { arc, area, fracAt, spanPoints, v, type At, type P, type Shape } from "../../../draw/geom.ts";
+import { arc, area, fracAt, sample, spanPoints, v, type At, type P, type Shape } from "../../../draw/geom.ts";
 import type { DrawnLine } from "../../../draw/line.ts";
 import { LIMITS, shapeKey, type EndKind, type SpanMeta } from "../../../draw/lint.ts";
 import { LIGHT, marking, part, type Fade, type Paint } from "../../../draw/paint.ts";
@@ -27,6 +27,8 @@ export interface LitSpan {
   on?: "cream" | "tan" | ((p: P) => "cream" | "tan");
   /** How deep the place lies whatever the light, 0 to 1, along the span or at each point: a floor under the light's own depth (1 is the sole's). */
   under?: number | ((p: P) => number);
+  /** How deep the line may lie at most, 0 to 1, along the span or at each point: a ceiling, lighter and thinner, where the sheet lines a fur edge lightly (the chin's and the cheeks' fur, DECISIONS 214). */
+  most?: number | ((p: P) => number);
   /** How long each end tapers, in points: both ends alike, or [its start, its end]. With `ends`, how long a free end tapers (1.8 pt when left out). */
   taper?: number | [number, number];
   /**
@@ -41,8 +43,10 @@ export interface LitSpan {
   contact?: boolean;
   /** Where the ground darkens the line (DECISIONS 216): along the whole edge that faces it (the default), or only under the middle 60% of a paw's sole, where it presses, the line lighter, thinner and more varied round it. */
   ground?: "sole";
-  /** The DECISIONS entry that lets this span break the line gate's rules (lint.ts), where the sheet draws it so. */
+  /** The DECISIONS entry that lets this span break the line gate's rules (lint.ts), where the sheet draws it so: a current entry, or the gate fails the cite. */
   cites?: number;
+  /** With `cites`: how far past each end, in points, the sheet leaves the edge unlined, [before its start, after its end], which the cite lets through and no further. */
+  bare?: [number, number];
 }
 
 export interface LitOptions {
@@ -168,6 +172,7 @@ export function litRibbons(shape: Shape, spans: LitSpan[], where: string, o: Lit
     const out = tan.map((t): P => (cw ? [t[1], -t[0]] : [-t[1], t[0]]));
     // Depth from the light and the ground, floored by the place, then eased along the line over about 1.5 pt each way.
     const under = (p: P) => (typeof span.under === "function" ? span.under(p) : span.under ?? 0);
+    const most = (p: P) => (typeof span.most === "function" ? span.most(p) : span.most ?? 1);
     let raw: number[];
     if (!span.contact && !span.ground) raw = pts.map((p, i) => Math.max(under(p), depth(p, out[i]!, light)));
     else {
@@ -186,7 +191,8 @@ export function litRibbons(shape: Shape, spans: LitSpan[], where: string, o: Lit
       let sum = 0, n = 0;
       for (let j = i; j >= 0 && at[i]! - at[j]! <= 1.5; j--) (sum += raw[j]!, n++);
       for (let j = i + 1; j < pts.length && at[j]! - at[i]! <= 1.5; j++) (sum += raw[j]!, n++);
-      return sum / n;
+      // The ceiling after the easing, so a line that comes and goes with its fur keeps its rhythm.
+      return span.most === undefined ? sum / n : Math.min(most(pts[i]!), sum / n);
     });
     let t0: number, t1: number;
     if (!span.ends) {
@@ -240,7 +246,7 @@ export function litRibbons(shape: Shape, spans: LitSpan[], where: string, o: Lit
     const drawn: [number, number] = [Math.min(...shown), Math.max(...shown)];
     const ends: [EndKind, EndKind] = span.ends ? [span.ends[0], span.ends[1]] : ["taper", "taper"];
     lines.push({ kind: "outer", width: r3((drawn[0] + drawn[1]) / 2), where, drawn,
-      span: { shape: key, from, to, length: r3(length), ends, taper: [r3(t0), r3(t1)], ...(span.contact ? { contact: true } : {}), ...(span.cites ? { cites: span.cites } : {}) } });
+      span: { shape: key, from, to, length: r3(length), ends, taper: [r3(t0), r3(t1)], ...(span.contact ? { contact: true } : {}), ...(span.cites ? { cites: span.cites } : {}), ...(span.cites && span.bare ? { bare: span.bare } : {}) } });
   });
   return { svg, lines, outlined };
 }
@@ -275,9 +281,38 @@ function feather(f: { from: P; to: P }, area: Box): { defs: string; id: string }
   };
 }
 
+/** How faint a feathered part may lie and its line still count as drawn at full width (the line gate, lint.ts). */
+const FADED = 0.9;
+
+/**
+ * Where a part's feather fades its own lines (paint.ts's feather: transparent at `from`, opaque at `to`): the runs of
+ * the shape's outline, as shares (as the line gate measures them), where the mask is below FADED, so the gate holds
+ * them as below full width, as they are drawn.
+ */
+function fadedRuns(shape: Shape, f: { from: P; to: P }): [number, number][] {
+  const pts = sample(shape.segs, 48), at = arc([...pts, pts[0]!]), total = at.at(-1)!;
+  const along = v.sub(f.to, f.from), l2 = v.dot(along, along);
+  const faded = pts.map((p) => Math.min(1, Math.max(0, v.dot(v.sub(p, f.from), along) / l2)) < FADED);
+  const runs: [number, number][] = [];
+  for (let i = 0; i < pts.length; i++) {
+    if (!faded[i] || (i > 0 && faded[i - 1])) continue;
+    let j = i;
+    while (j + 1 < pts.length && faded[j + 1]) j++;
+    runs.push([at[i]! / total, (j + 1 < pts.length ? at[j + 1]! : total) / total]);
+  }
+  // A run through the path's start is one run.
+  if (runs.length > 1 && faded[0] && faded[pts.length - 1]) runs[0] = [runs.pop()![0], runs[0]![1]];
+  return runs;
+}
+
 /** The lines drawn inside a shape's clip (and its feather), as defs and a body. */
 function clippedLines(name: string, shape: Shape, spans: LitSpan[], box: Box, paint: Paint, o: LitOptions) {
   const r = litRibbons(shape, spans, name, { ...o, light: o.light ?? paint.light });
+  // Under a feather the lines fade with the part: their spans say where, for the line gate.
+  if (paint.feather) {
+    const faded = fadedRuns(shape, paint.feather);
+    if (faded.length) for (const l of r.lines) l.span.faded = faded;
+  }
   const clip = uid("clip");
   const s = softened(r, box, o.blur ?? SOFT);
   let defs = `<clipPath id="${clip}"><path d="${shapePath(shape)}"/></clipPath>${s.defs}`;
