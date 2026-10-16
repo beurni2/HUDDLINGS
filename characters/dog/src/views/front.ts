@@ -22,6 +22,7 @@ import { curlShapes, topknot, type Curl } from "../parts/topknot.ts";
 import { earEdge, earFur } from "../parts/ear.ts";
 import { chinShadow, headFur, type HeadFur, type HeadFurSpec } from "../parts/headfur.ts";
 import { bun, lobed, toes } from "../parts/paw.ts";
+import { brush, type Brush } from "../parts/marking.ts";
 import { groundShadow } from "../parts/shadow.ts";
 import { tagPaint } from "../parts/tag.ts";
 
@@ -454,6 +455,21 @@ const saddleR = smooth([[-27, -64.2], [-31.6, -63.4], [-37.4, -55], [-43, -46], 
 const saddleL = smooth([[27, -64.2], [31.6, -63.4], [36.2, -55.6], [38.8, -47.4], [40.2, -41], [40.6, -36.2], [40.2, -32.4], [39.2, -29.6], [37.8, -31.8], [36.6, -36.8],
   [35, -44], [32.6, -51], [29.6, -57.6]]);
 
+/**
+ * The saddles' brushed edges (DECISIONS 217): strands of the tan combed down and out over the haunch, short where the
+ * fur runs along the edge and longer where it runs out across it, and on the right's broad haunch five darker strands
+ * of the fur's deep tan, the crop's texture there (L* 64 to 70 strokes in its 71 to 75 tan); the left's narrow streak
+ * carries none (strands that short read as specks), and is brushed only above its faded tail (saddleLTop), where
+ * strands past the fade read as specks too. Each from its own fixed seed.
+ */
+const saddleLTop = smooth([[27, -64.2], [31.6, -63.4], [36.2, -55.6], [38.8, -47.4], [39.8, -42], [37.6, -42], [35, -44], [32.6, -51], [29.6, -57.6]]);
+const SADDLE_BRUSH: Record<"R" | "L", Brush> = {
+  R: { flow: [-0.35, 1], seed: 7301, edge: 26, out: [0.8, 2.2], in: [1.2, 2.6], width: [0.7, 1.1], colour: C.marking,
+    inside: { count: 5, length: [4, 7], colour: C.earDeep, opacity: 0.28, width: 0.8 } },
+  L: { flow: [0.3, 1], seed: 7302, edge: 14, out: [0.6, 1.6], in: [1, 2], width: [0.6, 0.9], colour: C.marking,
+    inside: { count: 0, length: [3, 5], colour: C.earDeep, opacity: 0.25, width: 0.7 } },
+};
+
 // Paint.
 
 // The one highlight: a small soft patch on the crown's left, toward the light, so the crown keeps its warm cream,
@@ -688,8 +704,12 @@ export function front(): Drawn[] {
   // crop paints it (x -64 to 60), darkest where the paws press.
   add("shadow", groundShadow({ reach: [-68, 63], presses: [{ x: -15.4, half: 13 }, { x: 15.4, half: 13 }, { x: -38.4, half: 9 }, { x: 38.4, half: 9 }] }));
   add("body.back", lineGate(litPart("body.back", back, backPaint, backLines)));
-  add("back.patch.R", litMarking("back.patch.R", { shape: back, paint: backPaint, spans: backLines }, saddleR, { fill: C.marking, blur: 1.4 }));
-  add("back.patch.L", litMarking("back.patch.L", { shape: back, paint: backPaint, spans: backLines }, saddleL, { fill: C.marking, blur: 1.3, fade: { from: [38, -40], to: [39.4, -29.4] } }));
+  // Each saddle's edge brushed into the cream, and a few darker strands combed down its haunch, as the crop paints the
+  // haunch's fur (audit front #13, G8; parts/marking.ts, DECISIONS 217): never a blurred blot.
+  add("back.patch.R", lineGate(join(litMarking("back.patch.R", { shape: back, paint: backPaint, spans: backLines }, saddleR, { fill: C.marking, blur: 1.4 }),
+    brush("back.patch.R", back, saddleR, 1.4, SADDLE_BRUSH.R))));
+  add("back.patch.L", lineGate(join(litMarking("back.patch.L", { shape: back, paint: backPaint, spans: backLines }, saddleL, { fill: C.marking, blur: 1.3, fade: { from: [38, -40], to: [39.4, -29.4] } }),
+    brush("back.patch.L", back, saddleLTop, 1.3, SADDLE_BRUSH.L))));
   for (const side of ["R", "L"] as const) {
     const sx = side === "R" ? -1 : 1, cx = sx * 37.6, cy = -10.9;
     add(`hind.${side}`, lineGate(roomy(litPart(`hind.${side}`, hind[side], {
