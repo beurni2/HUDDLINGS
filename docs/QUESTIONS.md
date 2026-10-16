@@ -49,6 +49,12 @@ Where the spec is silent or contradicts itself, I don't invent the answer. The q
 - **Default:** one catchlight, as the sheets draw it (`characters/dog/DECISIONS.md` 29). Adding the small ones is one line per eye.
 - **Owner:** founder
 
+### Q28. When the eyes glance aside or half close, does the catchlight ride the iris, as the sheets draw it, or stay fixed to the head, as the spec says?
+- **The spec says:** L459 "A side glance is gaze, not a state: the pupils move and the catchlights stay"; L509 "The catchlights stay fixed to the head while the pupils move, which keeps the gloss believable"; L504 "The sheet is the model".
+- **Why it matters:** the expression sheet's Side glance draws the catchlight on the iris, moved aside with it, and its Sleepy half-lid draws it lower on the iris under the lid. Fixed to the head, the catchlight would sit on the white in a side glance, or under the lid. It also decides phase 4's gaze: a catchlight fixed to the head needs the catchlight as its own layer over a moving iris.
+- **Default:** follow the sheets: the catchlight rides the iris in the peek and half-lid states (`characters/dog/DECISIONS.md` 130), reversible by drawing it as its own layer.
+- **Owner:** founder
+
 ## Needed by phase 4 (the rig and Visual QA)
 
 ### Q3. As the spec words them, four Visual QA checks would fail good animation. May I narrow them?
