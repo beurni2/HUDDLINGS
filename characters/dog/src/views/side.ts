@@ -275,7 +275,7 @@ const EAR_EDGE = earEdge({
   // In profile the ear lies over the head: its line takes up the head's at its back, where the head's outline goes
   // under the ear, runs down round the hem and up its front to y -123, where it ends in open fur; its top, feathered
   // over the crown, is unlined (DECISIONS 68, its length cited).
-  line: { from: EAR_JOIN, to: [-31.4, -123], ends: ["join", "free"], cites: 68, bare: [0, 54.4] },
+  line: { from: EAR_JOIN, to: [-31.4, -123], ends: ["join", "free"], cites: 68, bare: [0, 54.3] },
 });
 const ear = EAR_EDGE.shape;
 
@@ -291,12 +291,12 @@ const ear = EAR_EDGE.shape;
 const CURLS: Curl[] = [
   { nodes: [[-63.2, -150.8], [-62.2, -154], [-59.6, -156.6], [-56, -158.2], [-52.4, -158.2], [-49.4, -156.8], [-46.6, -155.4], [-44.4, -152.6], [-44, -150],
     [-52, -147.4], [-58, -147.6], [-61.6, -149]],
-    line: { from: [-63, -150.6], to: [-46.6, -155.4], taper: 0.6, ends: ["free", "free"], cites: 236, bare: [0, 25.7] }, into: [[[-63, -151], [-60, -151.5], [-56.4, -151.7]]] },
+    line: { from: [-63, -150.6], to: [-46.6, -155.4], taper: 0.6, ends: ["free", "free"], cites: 236, bare: [0, 24.7] }, into: [[[-63, -151], [-60, -151.5], [-56.4, -151.7]]] },
   { nodes: [[-27.6, -152.8], [-26.8, -156.4], [-24, -158.4], [-21, -158.7], [-16, -158.4], [-11.4, -157], [-8.4, -154.6], [-7.2, -152.2], [-8.2, -149.6], [-14, -148.4], [-22, -148]],
-    line: { from: [-24.8, -157.6], to: [-7.2, -152.2], taper: 0.5, ends: ["under", "free"], cites: 236, bare: [0, 20.8] }, into: [[[-7.4, -152], [-10.6, -151.5], [-14.4, -151.2]]], tip: [[-7.4, -153.2], [-7.6, -151]] },
+    line: { from: [-24.8, -157.6], to: [-7.2, -152.2], taper: 0.5, ends: ["under", "free"], cites: 236, bare: [0, 20.1] }, into: [[[-7.4, -152], [-10.6, -151.5], [-14.4, -151.2]]], tip: [[-7.4, -153.2], [-7.6, -151]] },
   { nodes: [[-43.6, -155.4], [-46.4, -158.4], [-45.6, -162.2], [-42.4, -164.4], [-37.6, -164.7], [-32.4, -164.3], [-28, -162.6], [-25, -160], [-23.6, -157.4],
     [-24.6, -152], [-32, -148], [-40, -148], [-43.6, -151]],
-    line: { from: [-43.6, -155.4], to: [-23.6, -157.4], taper: [0.5, 1], ends: ["free", "free"], cites: 236, bare: [0, 31] }, into: [[[-43.8, -155.6], [-40.4, -155], [-36.6, -154.8]]], tip: [[-43.4, -154.6], [-44.6, -156.4]] },
+    line: { from: [-43.6, -155.4], to: [-23.6, -157.4], taper: [0.5, 1], ends: ["free", "free"], cites: 236, bare: [0, 30] }, into: [[[-43.8, -155.6], [-40.4, -155], [-36.6, -154.8]]], tip: [[-43.4, -154.6], [-44.6, -156.4]] },
 ];
 const tuftShapes = curlShapes(CURLS);
 
@@ -378,7 +378,7 @@ const byHeight = (a: number, b: number, y0: number, y1: number) => (p: P) => a +
 const backLines = (F: Facing): LitSpan[] => [{ from: [-16.6, -63.4], to: RUMP_TOP, on: "tan", ends: ["under", "join"] },
   { from: RUMP_TOP, to: RUMP_FOOT, on: F.shows("rump.patch.L") ? "tan" : "cream", contact: true, under: byHeight(0.5, 0.75, -30, -10), ends: ["join", "join"] },
   { from: RUMP_FOOT, to: [-17, -1.7], ground: "sole", ends: ["join", "under"] },
-  { from: THIGH_FOOT, to: [-23.2, -28.6], contact: true, most: thighMost, ends: ["under", "free"], taper: 6, cites: 216, bare: [0, 32] }];
+  { from: THIGH_FOOT, to: [-23.2, -28.6], contact: true, most: thighMost, ends: ["under", "free"], taper: 6, cites: 216, bare: [0, 28.3] }];
 
 function chestPaint(F: Facing): Paint {
   return {
@@ -522,7 +522,7 @@ const headSpans: LitSpan[] = [
   { from: [-92, -100.5], to: [-60.4, -152.2], under: (p: P) => 0.65 * Math.min(1, Math.max(0, (p[1] + 124) / 20)), ends: ["join", "under"] },
   { from: [-50.2, -152.7], to: [-41, -153.6], ends: ["under", "under"] },
   { from: [-14, -154], to: [12.6, -126], ends: ["under", "under"] },
-  { ...HEAD_FUR.chin!, under: chinDepth, cites: 236, bare: [49.8, 0] },
+  { ...HEAD_FUR.chin!, under: chinDepth, cites: 236, bare: [37.5, 0] },
 ];
 /**
  * Round the nose's front, where the nose is the head's edge, a line in the nose's own near-black, so the stencil's
@@ -753,12 +753,12 @@ export function side(facingSide: Side = "L"): Drawn[] {
   // its sole (the ground's dark under its middle), round its toe end, up its front past where the near paw's heel
   // leans on it and up into the thigh's line, as the crop draws one line from the ground into the thigh; its crown and
   // back lie on the haunch unlined, as the crop leaves them (its length cited).
-  add("hind.L", lineGate(roomy(litPart("hind.L", hindNear, hindPaint(F), [{ from: HIND_BACK, to: [-20.8, -16.7], under: byHeight(0.1, 0.45, -12, -4), most: (p: P) => (p[1] > -3 ? 0.55 : 1), ground: "sole", ends: ["join", "free"], taper: 2, cites: 238, bare: [0, 22] }]), 6)));
+  add("hind.L", lineGate(roomy(litPart("hind.L", hindNear, hindPaint(F), [{ from: HIND_BACK, to: [-20.8, -16.7], under: byHeight(0.1, 0.45, -12, -4), most: (p: P) => (p[1] > -3 ? 0.55 : 1), ground: "sole", ends: ["join", "free"], taper: 2, cites: 238, bare: [0, 21.3] }]), 6)));
   // The near leg's line (DECISIONS 216, 238): from the wrist, where it takes up the chest's edge, down the leg and round
   // its bun's toe end, along its sole (the ground's dark under its middle) and round its heel up to where the heel leans
   // on the hind paw's toe, ending on the hind paw's line; its back above and its top lie on the chest unlined, as the
   // crop leaves them (its length cited).
-  add("front.L", lineGate(roomy(litPart("front.L", legNear, legNearPaint(F), [{ from: [-55.4, -29.4], to: APEX, under: byHeight(0, 0.5, -14, -6), ground: "sole", ends: ["free", "join"], taper: 2, cites: 216, bare: [0, 60] }]), 1)));
+  add("front.L", lineGate(roomy(litPart("front.L", legNear, legNearPaint(F), [{ from: [-55.4, -29.4], to: APEX, under: byHeight(0, 0.5, -14, -6), ground: "sole", ends: ["free", "join"], taper: 2, cites: 216, bare: [0, 53.1] }]), 1)));
   const turn = uid("blur");
   add("collar", lineGate(part("collar", collar, {
     fill: C.collar,
@@ -1147,7 +1147,7 @@ function perkedEar(F: Facing): Piece {
   // it, by the line rule (parts/lines.ts), joining head.line's span over the crown and ending in the fur over the collar.
   const [x0, y0, x1, y1] = bbox(head.segs);
   const lineBox = pad([x0, y0, x1 - x0, y1 - y0], 2);
-  const line = litEdge(head, [{ from: [6.6, -136.4], to: [-24, -64.6], under: (p: P) => (p[1] > -80 ? 0.35 : 0), ends: ["join", "free"] }], "back of the head", lineBox, { reach: 0.5, light: F.light });
+  const line = litEdge(head, [{ from: [6.6, -136.4], to: [-26.6, -64.2], under: (p: P) => (p[1] > -80 ? 0.35 : 0), ends: ["join", "free"] }], "back of the head", lineBox, { reach: 0.5, light: F.light });
   const back = piece(`<defs>${line.defs}</defs>${line.body}`, lineBox, { shapes: [], lines: line.lines });
   return join(tan, back, flap);
 }
