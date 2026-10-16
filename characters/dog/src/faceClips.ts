@@ -12,11 +12,15 @@ import { BLUSH_REFERENCE, EAR_ANGLES, PRESETS, type EarState, type EyeState, typ
 /** An ear's rotation for an ear state: outward is clockwise for the dog's right ear (on the viewer's left), anticlockwise for its left. */
 export const earRot = (side: "L" | "R", state: EarState) => (side === "R" ? 1 : -1) * EAR_ANGLES[state] + 0;
 
-/** The states and angles a preset's still shows, part by part. */
-export function stillOf(p: Preset) {
+/**
+ * The states and angles a preset's still shows, part by part; with `peek`, huffy's peek back instead (presets.ts
+ * `peek`): one eye open to look back, the other still shut, the tiny smile, the cheeks let go.
+ */
+export function stillOf(p: Preset, peek = false) {
+  if (peek && !p.peek) throw new Error("this preset has no peek back");
   const eyes = p.still?.eyes ?? p.eyes[0]!;
-  const mouth = p.still?.mouth ?? p.mouth[0]!;
-  const eye = (side: "L" | "R"): EyeState => (p.wink ? (side === p.wink ? eyes : "open") : eyes);
+  const mouth = peek ? p.peek!.mouth : p.still?.mouth ?? p.mouth[0]!;
+  const eye = (side: "L" | "R"): EyeState => (peek ? (side === p.peek!.eye ? "peekBack" : eyes) : p.wink ? (side === p.wink ? eyes : "open") : eyes);
   const ear = (side: "L" | "R"): EarState => (p.ears === "onePerked" ? (side === p.perk ? "onePerked" : "neutral") : p.ears);
   const brow = (side: "L" | "R") => (typeof p.brows === "string" ? p.brows : p.brows[side]);
   const ears = { L: ear("L"), R: ear("R") };
@@ -31,25 +35,27 @@ export function stillOf(p: Preset) {
     headLine,
     // The sparkle's stars draw only beside the sparkle eyes.
     stars: eyes === "sparkle",
+    cheeks: peek ? undefined : p.cheeks,
   };
 }
 
 /** The ear states drawn off the temple, whose head's line runs along the temple's edge instead. */
 export const RAISED: ReadonlySet<EarState> = new Set(["onePerked", "lifted"]);
 
-export function faceClip(name: string, p: Preset): Clip {
-  const s = stillOf(p);
+export function faceClip(name: string, p: Preset, peek = false): Clip {
+  const s = stillOf(p, peek);
   const states: Record<string, [number, string][]> = {
     "eye.L": [[0, s.eyes.L]], "eye.R": [[0, s.eyes.R]], mouth: [[0, s.mouth]],
     "brow.L": [[0, s.brows.L]], "brow.R": [[0, s.brows.R]], "ear.L": [[0, s.ears.L]], "ear.R": [[0, s.ears.R]],
     ...(s.headLine ? { "head.line": [[0, s.headLine]] as [number, string][] } : {}),
     ...(s.stars ? { stars: [[0, "sparkle"]] as [number, string][] } : {}),
+    ...(s.cheeks ? { cheeks: [[0, s.cheeks]] as [number, string][] } : {}),
   };
   // The blush's level where the table names one, as the cheeks' alpha over their drawing at the reference level
   // (DECISIONS 144); elsewhere the parts' rest alpha keeps the resting level.
   const alpha = p.blush === null ? undefined : blushAlpha(p.blush);
   return {
-    name: `face_${name}`,
+    name: peek ? `face_${name}_peek` : `face_${name}`,
     lengthMs: 1000,
     views: { body: [[0, "front"]], head: [[0, "front"]] },
     states,
@@ -62,9 +68,9 @@ export function faceClip(name: string, p: Preset): Clip {
 /** A blush level (0 to 1) as the blush parts' alpha: the level over the reference level each view's blush is drawn at. */
 export const blushAlpha = (level: number) => Math.round((level / BLUSH_REFERENCE) * 1000) / 1000;
 
-/** Every face clip: one per preset drawn now (hungry and huffy are next round's). */
+/** Every face clip: one per preset. Huffy's peek back is not one: look.ts --faces would take face_huffy_peek for a preset of that name. */
 export function faceClips(): Clip[] {
-  return Object.entries(PRESETS).filter(([, p]) => !p.next).map(([name, p]) => faceClip(name, p));
+  return Object.entries(PRESETS).map(([name, p]) => faceClip(name, p));
 }
 
 /** A value on one line, spaced as the hand-written clips are. */

@@ -1,14 +1,20 @@
 // The dog's face presets (spec L480-498), as data: for each of the table's 19 presets, its eyes, mouth, brows, ears
 // and blush level, the sequence the table names, its panels, and the frame its still shows (the state of each
 // sequence its primary panel draws; a sequence's later beats are phase 4's timing). faceClips.ts writes a face clip
-// for each preset drawn now; hungry and huffy are next round's new drawings, for the founder to approve (L496-497).
+// for each. Hungry and huffy are new drawings no panel shows, for the founder to approve at Gate A (L496-497, R3);
+// their stills show the beat that carries each face, and the review-only render (qa/phase3/faces/new) shows the rest.
 // Brows are not in the table: raised for curious and surprised (L472), happy for the crescent-eyed faces, as their
 // panels draw them lower, and neutral otherwise. Rule R3: nothing here is sad, angry, pouting, teary or drooped
 // (characters/dog/test/faces.test.ts).
 import type { BrowState } from "./parts/brow.ts";
+import type { CheekState } from "./parts/cheeks.ts";
 import type { MouthState } from "./parts/mouth.ts";
 
-export const EYE_STATES = ["open", "happy", "squeeze", "closed", "sleepy", "wide", "wink", "sparkle", "peek"] as const;
+/**
+ * The eye states: the table's (L450-457), peek (Side glance), and the new faces' new drawings: eager (hungry's wide
+ * eye, its pupil larger and fixed on the food), flat (huffy's shut lids) and peekBack (huffy's eye opening to look back).
+ */
+export const EYE_STATES = ["open", "happy", "squeeze", "closed", "sleepy", "wide", "wink", "sparkle", "peek", "eager", "flat", "peekBack"] as const;
 export type EyeState = (typeof EYE_STATES)[number];
 export const EAR_STATES = ["neutral", "lifted", "onePerked", "relaxed", "lowered"] as const;
 export type EarState = (typeof EAR_STATES)[number];
@@ -55,8 +61,20 @@ export interface Preset {
   /** Which eye winks, as the primary panel draws it, and which ear perks, as One ear perked draws it. */
   wink?: "L" | "R";
   perk?: "L" | "R";
-  /** Next round's new drawing, not drawn now. */
-  next?: string;
+  /** The cheeks' state where the face puffs them (huffy). */
+  cheeks?: CheekState;
+  /**
+   * A new drawing no panel shows (hungry, huffy: L496-497), for the founder to approve at Gate A: the sheet panels it
+   * borrows from, nearest first, set beside it for review. It has no primary panel, so the Faces check judges it by
+   * eye and holds its head.
+   */
+  drawnNew?: { from: string[] };
+  /**
+   * Huffy's peek back, the beat every 4 to 6 s (L497): the eye that opens again to look back (peekBack), the other
+   * staying shut, the mouth it smiles, and the cheeks let go. Rendered for review (qa/phase3/faces/new); its timing is
+   * phase 4's.
+   */
+  peek?: { eye: "L" | "R"; mouth: MouthState };
 }
 
 export const PRESETS: Record<string, Preset> = {
@@ -134,17 +152,29 @@ export const PRESETS: Record<string, Preset> = {
     panels: "Laughing, Excited", crops: ["master.expression.laughing", "master.expression.excited", "expressions.expression.excited", "expressions.expression.laughing"],
   },
   hungry: {
+    // New drawing (R3, L496): the wide eye with its pupil larger, baked fixed on the food just in front of its nose
+    // (eager), the raised brows and the lifted ears of the listening tell, the o of Surprised, then the mouth closing
+    // into the smile with the tongue's tip peeking out at its corner, a lick (o.tongue). Eager and sweet, never
+    // pleading: the eyes meet on the food, never look up at the viewer.
     sequence: "o, then the tongue peeking at a corner",
-    eyes: ["wide"], eyesNote: "pupils larger, fixed on the food or the jar", mouth: ["o"], mouthNote: "then the tongue peeking at a corner", ears: "lifted",
+    eyes: ["eager"], eyesNote: "wide, pupils larger, fixed on the food or the jar", mouth: ["o", "o.tongue"], mouthHow: "then", ears: "lifted",
     brows: "raised", blush: null, panels: "none: drawn new from the Surprised and Happy panels, approved by the founder", crops: [],
-    next: "a new drawing (o.tongue: the o with the tongue peeking at a corner), next round, for the founder's approval",
+    still: { mouth: "o.tongue" },
+    drawnNew: { from: ["expressions.expression.surprised", "expressions.expression.happy", "expressions.mouth.tiny-o", "master.expression.cheeky"] },
   },
   huffy: {
+    // New drawing (R3, L497): shut flat lids, the cheeks puffed inside the outline and the lips pressed in a short level
+    // line, brows and ears at rest; then the peek back, one eye opening to look back with a tiny smile, the cheeks let
+    // go. A playful huff that melts in a second: no knitted or slanted brows, no downturned or pushed-out mouth, no
+    // tears, no lowered ears, never the sheets' Angry or Pout. Glancing away is the head's turn (phase 4).
     sequence: "closed or half-closed, glancing away, peeking back with a tiny smile every 4–6 s",
-    eyes: ["closed", "sleepy"], eyesHow: "or", eyesNote: "closed or half-closed, glancing away, peeking back with a tiny smile every 4–6 s",
-    mouth: [], mouthNote: "puffed cheeks, a small pressed mouth", ears: "neutral", brows: "neutral", blush: null,
+    eyes: ["flat", "peekBack"], eyesHow: "then", eyesNote: "closed or half-closed, glancing away, peeking back with a tiny smile every 4–6 s",
+    mouth: ["pressed", "tinySmile"], mouthHow: "then", mouthNote: "puffed cheeks, a small pressed mouth; the tiny smile as it peeks back",
+    // The puffed cheeks flush to 60%: unflushed, the puff reads as jowls at phone size (DECISIONS 152).
+    ears: "neutral", brows: "neutral", cheeks: "puffed", blush: 0.6,
     panels: "none: drawn new for Grumpy and approved by the founder; never the sheets' Angry or Pout, and never held more than 6 s without a peek back",
-    crops: [], next: "new drawings (pressed, tinySmile and the puffed cheeks), next round, for the founder's approval",
+    crops: [], still: { eyes: "flat", mouth: "pressed" }, peek: { eye: "L", mouth: "tinySmile" },
+    drawnNew: { from: ["expressions.eyes.closed", "expressions.eyes.side-glance", "expressions.mouth.small-smile", "master.expression.content"] },
   },
   sly: {
     sequence: "wink, then side glances",

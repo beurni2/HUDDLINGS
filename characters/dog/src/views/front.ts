@@ -11,6 +11,7 @@ import { blur, filter, join, pad, piece, uid, type Box, type Piece } from "../..
 import { model } from "../model.ts";
 import { C, LINES } from "../palette.ts";
 import { brow } from "../parts/brow.ts";
+import { puffedCheeks } from "../parts/cheeks.ts";
 import { eye as sharedEye, lidBand, type EyeSpec, type LidBand } from "../parts/eye.ts";
 import { rolledFrame } from "../parts/face.ts";
 import { MOUTH_STATES, mouth } from "../parts/mouth.ts";
@@ -758,7 +759,7 @@ const EYE_HALF = Math.hypot(EYE_L[0] - EYE_R[0], EYE_L[1] - EYE_R[1]) / 2;
 const nudge = ([x, y]: P, [dx, dy]: P): P => [x + dx * cosR - dy * sinR, y + dx * sinR + dy * cosR];
 
 /** The eye states the front draws besides the open eye (sparkle and squeeze are the happy crescent's region: rig.json). */
-export const EYE_STATES = ["happy", "closed", "sleepy", "wink", "wide", "peek"] as const;
+export const EYE_STATES = ["happy", "closed", "sleepy", "wink", "wide", "peek", "eager", "flat", "peekBack"] as const;
 
 /**
  * An eye state, drawn from its panels. The closed states are the sheets' dark lash bands, placed by their middles where
@@ -800,8 +801,38 @@ function eyeState(state: (typeof EYE_STATES)[number], side: "L" | "R"): Piece {
     // other side; the catchlight stays on the iris.
     case "peek":
       return sharedEye({ ...spec, white: { at: side === "R" ? -6 : 186, width: 4.6, span: 58, fade: 0.3 }, shine: { at: [side === "R" ? 2.6 : -2.4, 5], r: 1.8 } });
+    // Hungry's (new drawing): the wide eye with its pupil larger (the iris's dark reaching further down, its warm foot a
+    // thin glow) and fixed on the food just in front of its nose, the iris baked in toward the nose and a hair down, so
+    // the two eyes meet on it, the white a crescent down the outer side, the catchlight riding the iris (Q28) and larger.
+    case "eager":
+      return sharedEye(eager(spec, sx, EAGER));
+    // Huffy's flat lid (new drawing): shut, nearly level, a hair lower in its middle than at its ends, thinner than the
+    // happy crescent, the outer end lifting into a short lash; its inner end never below its outer (no angry slant).
+    case "flat":
+      return lidBand(flatLid(side));
+    // Huffy's peek back (new drawing): the eye opening again, its lid still a quarter down, the iris baked toward the
+    // viewer's right, so with the head glanced away to the dog's right (phase 4) it looks back at the viewer, the
+    // catchlight just under the lid on the iris (Q28).
+    case "peekBack":
+      return sharedEye({ ...spec, white: { at: side === "R" ? -6 : 186, width: 3.2, span: 56, fade: 0.3 }, shine: { at: [side === "R" ? 3.4 : -1.6, 5.2], r: 1.9 } });
   }
 }
+
+/** Huffy's flat lid on one side (exported for the R3 guard, which holds its ends level). */
+export function flatLid(side: "L" | "R"): LidBand {
+  const sx = side === "L" ? 1 : -1;
+  return { centre: FRAME.at([sx * (EYE_HALF + 1.4), 1.3]), tilt: ROLL_DEG, noseward: side === "L" ? -1 : 1,
+    width: 16.4, rise: -1, drop: 0, thickness: 4.4, ends: [2.6, 1.8], fullness: 0.45, flick: { length: 1.2, hook: 10 } };
+}
+
+/** How the eager eye is baked: the white's place round the eye, its width and span, the pupil's warm foot, the catchlight. */
+interface Eager { white: { at: number; width: number; span: number }; glow: { band: number; warm: number }; shine: { at: [number, number]; r: number } }
+/** The package's eager eye (variant A): fixed on the food just in front, below the eyes. */
+const EAGER: Eager = { white: { at: 10, width: 2, span: 55 }, glow: { band: 3, warm: 1.2 }, shine: { at: [4.8, 5.2], r: 2.25 } };
+/** The eager eye on the wide eye's ball (7% larger and 0.9 pt higher than the open eye). */
+const eager = (spec: EyeSpec, sx: number, e: Eager): EyeSpec => ({
+  ...spec, centre: nudge(spec.centre, [-sx * 0.4, -0.9]), rx: 10.2, ry: 9.85, white: { ...e.white, fade: 0.3 }, shine: e.shine, glow: e.glow,
+});
 
 /** Proud's stars beside the head on the dog's right, where the panel puts them from the nose, its raised chin levelled. */
 const STARS: Star[] = [{ at: [-74.9, -41.3], size: [11.4, 14.4], turn: 0 }, { at: [-60.3, -56.7], size: [9.6, 10.4], turn: 0 }];
@@ -916,6 +947,8 @@ export function faceStates(): Drawn[] {
   }
   for (const side of ["L", "R"] as const) out.push({ part: `ear.${side}`, state: "onePerked", piece: perkedEar(side) }, { part: `ear.${side}`, state: "lifted", piece: liftedEar(side) });
   out.push({ part: "stars", state: "sparkle", piece: stars(STARS, FRAME) });
+  // Huffy's puffed cheeks, inside the head's outline (variant A).
+  out.push({ part: "cheeks", state: "puffed", piece: puffedCheeks(FRAME) });
   // The head's line with an ear raised off its temple on one side or both (DECISIONS 146).
   out.push({ part: "head.line", state: "templeL", piece: headLinePiece({ L: true, R: false }) },
     { part: "head.line", state: "templeR", piece: headLinePiece({ L: false, R: true }) },

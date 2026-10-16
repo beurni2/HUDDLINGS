@@ -11,15 +11,19 @@
 // - o: Surprised's small o, an egg pointed at its top and widest low, the tongue filling its lower half;
 // - cheeky: Mischievous's and Cheeky's open mouth with the tongue out over the lower lip;
 // - yawn: a tall o with the tongue low, drawn for yawns (no panel), the o's egg grown taller;
-// - pant: the open mouth with the tongue further out, drawn for panting (no panel).
+// - pant: the open mouth with the tongue further out, drawn for panting (no panel);
+// - o.tongue: hungry's beat after the o, new (no panel): the small smile with the tongue's tip peeking out at its corner;
+// - pressed: huffy's, new (no panel): a short flat line, the lips pressed together under the puffed cheeks, never a
+//   pout (no lower lip pushed out, its ends never below its middle);
+// - tinySmile: huffy's peek back, new (no panel): the small smile's W at half its width, its tips curling up.
 import { mirrorX, pathD, sample, smooth, type Node, type P, type Seg } from "../../../draw/geom.ts";
 import { innerLine, strokeOf, type DrawnLine, type Stroke } from "../../../draw/line.ts";
 import { LIMITS } from "../../../draw/lint.ts";
-import { blur, piece, uid, type Box, type Piece } from "../../../draw/svg.ts";
+import { blur, piece, uid, union, type Box, type Piece } from "../../../draw/svg.ts";
 import { C } from "../palette.ts";
 import type { FaceFrame } from "./face.ts";
 
-export const MOUTH_STATES = ["smile", "open", "openWide", "laugh", "o", "cheeky", "yawn", "pant"] as const;
+export const MOUTH_STATES = ["smile", "open", "openWide", "laugh", "o", "cheeky", "yawn", "pant", "o.tongue", "pressed", "tinySmile"] as const;
 export type MouthState = (typeof MOUTH_STATES)[number];
 
 export interface Mouth {
@@ -294,6 +298,28 @@ function oval(o: Oval, f: FaceFrame): Mouth {
 }
 
 /**
+ * The tongue's tip peeking out of the mouth (o.tongue): a small coral
+ * lobe, lighter where the light falls, with the tongue's warm rim round the part that shows outside the mouth (`inside`
+ * says which points lie within it), so it reads as the tip of the tongue the mouth already shows, poking out.
+ */
+function tongueTip(outline: P[], f: FaceFrame, box: Box, inside: (p: P) => boolean): { svg: string; line: DrawnLine } {
+  const lobe = smooth(outline);
+  const pts = sample(lobe.segs, 16, true);
+  // The rim runs round the outside part only, from where the lobe leaves the mouth to where it goes back in.
+  const k0 = pts.findIndex((p, i) => inside(p) && !inside(pts[(i + 1) % pts.length]!));
+  const ring = [...pts.slice(k0 + 1), ...pts.slice(0, k0 + 1)];
+  const out = ring.slice(0, ring.findIndex((p) => inside(p)));
+  const rim = tapered(out, 0.8, "inner", "tongue tip", { taper: 1.6, tip: 0.15 });
+  const soft = uid("blur"), lit = uid("blur");
+  const [cx, cy] = outline.reduce((s, p) => [s[0] + p[0] / outline.length, s[1] + p[1] / outline.length], [0, 0]);
+  const svg = `<defs>${blur(soft, box, 0.25)}${blur(lit, box, 0.9)}</defs>` +
+    `<g filter="url(#${soft})"><path d="${pathD(lobe.segs)}" fill="${C.tongue}"/></g>` +
+    `<ellipse cx="${r3(cx + f.light[0] * 1.1)}" cy="${r3(cy + f.light[1] * 1.1)}" rx="1.5" ry="1.2" fill="${C.tongueShine}" opacity="0.55" filter="url(#${lit})"/>` +
+    `<path d="${rim.d}" fill="${C.tongueRim}"/>`;
+  return { svg, line: rim.line };
+}
+
+/**
  * An egg's right half, pointed end up, from its top down to its foot: `top` and `height` down the face, `half` its
  * half-width at its widest, `widest` how far down that is (0 top, 1 foot). Above its widest its side is a superellipse
  * of exponent 1.7, which runs up to a soft point; below, one of 2.2, which rounds under a broad foot. Its last two
@@ -332,6 +358,50 @@ const YAWN: Oval = {
   philtrumTo: 13.6,
   box: [-9, 10, 18, 27],
 };
+
+/** A closed mouth's lip from its right half (philtrum's foot out to the tip), in the smile's colours: the pressed mouth and the tiny smile. */
+function closedLip(half: P[], philtrumTo: number, where: string, f: FaceFrame): Mouth {
+  const lipShape = lipOf(half);
+  const along = sample(lipShape.segs, 12, false);
+  const lip = tapered(along, 0.9, "inner", where, { taper: 1.4, tip: 0.3 });
+  const philtrum = innerLine([[0, 11.7], [0, philtrumTo]], 0.9, C.eyeDark, { taper: 0.9, tip: 0.75, wobble: 0 });
+  const lipFade = uid("lip"), span = r3(half[half.length - 1]![0] + 0.5);
+  const box: Box = [-span - 2, 10, 2 * span + 4, 10];
+  const svg = `<defs><linearGradient id="${lipFade}" gradientUnits="userSpaceOnUse" x1="${-span}" y1="0" x2="${span}" y2="0">` +
+    `<stop offset="0.05" stop-color="${C.dark}"/><stop offset="0.3" stop-color="${C.lipLine}"/><stop offset="0.7" stop-color="${C.lipLine}"/>` +
+    `<stop offset="0.95" stop-color="${C.dark}"/></linearGradient></defs>` +
+    `<path d="${lip.d}" fill="url(#${lipFade})"/>${philtrum.svg}`;
+  return {
+    piece: piece(f.place(svg), f.box(box), { shapes: [], lines: [lip.line, { ...philtrum.line, where: "philtrum" }] }),
+    lip: { line: along.map(f.at), centre: f.at(half[0]!) },
+  };
+}
+
+/**
+ * Huffy's pressed mouth (new drawing, no panel): the lips pressed together in a short, nearly level line about a third
+ * of the smile's width, dipping a hair at the philtrum's foot either side and its ends tucked 0.2 pt above where the
+ * philtrum meets it, so it never turns down and never pushes out into a pout.
+ */
+const PRESSED: P[] = [[0, 14.5], [1.2, 14.72], [2.5, 14.82], [3.7, 14.72], [4.6, 14.5], [5.1, 14.3]];
+
+/** The tiny smile of huffy's peek back (new drawing, no panel): the smile's W at about half its width, its tips curling up. */
+const TINY_SMILE: P[] = [[0, 14.6], [1.6, 15.3], [3.4, 15.9], [5.2, 16.05], [6.8, 15.7], [7.9, 15], [8.5, 14.2]];
+
+/**
+ * Hungry's o.tongue (new drawing, no panel), the beat after the o: the mouth closes into the small smile and the
+ * tongue's tip peeks out at its corner on the dog's left (the viewer's right), under the arc just inside its curl, as
+ * a dog licks its lips at a treat: a round coral lobe about 6 pt long and 5.5 wide, its rim warm, its foot 5 pt below
+ * the lip, never hanging toward the chin, so it reads as a lick, not a pant. The lip keeps its ends above its middle (R3).
+ */
+function lick(f: FaceFrame): Mouth {
+  const m = smile(f);
+  // The lip's line dips to 17.6 pt about 8 pt out; the lobe comes out from under it there and shows below it.
+  const box: Box = [-16, 10, 32, 14];
+  // Its top lies along the lip's line, which is drawn over it; inside the mouth is above that line.
+  const tip = tongueTip([[7.6, 17.55], [9.8, 17.4], [11.8, 16.9], [13.3, 17.7], [13.9, 19.7], [13.3, 21.8], [11.6, 22.9], [9.6, 22.4], [8.2, 20.4]], f, box,
+    ([x, y]) => y < 17.9 - 0.035 * (x - 8) ** 2);
+  return { ...m, piece: { svg: f.place(tip.svg) + m.piece.svg, box: union(m.piece.box, f.box(box)), meta: { ...m.piece.meta, lines: [...m.piece.meta.lines, tip.line] } } };
+}
 
 /**
  * The small smile, as the expression sheet's Small smile and the master sheet's Content and Winking draw it: the
@@ -377,5 +447,11 @@ export function mouth(state: MouthState, f: FaceFrame): Mouth {
       return oval(YAWN, f);
     case "pant":
       return opened(PANT, f);
+    case "o.tongue":
+      return lick(f);
+    case "pressed":
+      return closedLip(PRESSED, 14.5, "pressed mouth", f);
+    case "tinySmile":
+      return closedLip(TINY_SMILE, 14.6, "tiny smile", f);
   }
 }

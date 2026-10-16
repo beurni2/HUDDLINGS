@@ -203,6 +203,19 @@ export interface LidBand {
 }
 
 export function lidBand(b: LidBand): Piece {
+  const { shape } = bandGeometry(b);
+  const [x0, y0, x1, y1] = shape.reduce((q, [x, y]) => [Math.min(q[0], x), Math.min(q[1], y), Math.max(q[2], x), Math.max(q[3], y)], [Infinity, Infinity, -Infinity, -Infinity]);
+  const box: Box = [x0 - 2, y0 - 2, x1 - x0 + 4, y1 - y0 + 4];
+  const g = uid("blur");
+  const d = `M${shape.map((p) => `${fmt(p[0])} ${fmt(p[1])}`).join("L")}Z`;
+  return piece(`<defs>${blur(g, box, 0.2)}</defs><path d="${d}" fill="${C.eyeRim}" filter="url(#${g})"/>`, box);
+}
+
+/** A band's centre line in model space, from its inner end to its outer end (its flick left out), for the R3 guard. */
+export const lidLine = (b: LidBand): P[] => bandGeometry(b).line;
+
+/** A band's outline and its centre line, placed in model space. */
+function bandGeometry(b: LidBand): { shape: P[]; line: P[] } {
   const t = (b.tilt * Math.PI) / 180, cos = Math.cos(t), sin = Math.sin(t);
   const out = -b.noseward;
   // The centre line level with the face, from the inner end (s = 0) to the outer (s = 1), x across toward the outer side, y down.
@@ -246,10 +259,5 @@ export function lidBand(b: LidBand): Piece {
     const lx = out * (x - mid[0]), ly = y - mid[1];
     return [b.centre[0] + lx * cos - ly * sin, b.centre[1] + lx * sin + ly * cos];
   };
-  const shape = outline.map(place);
-  const [x0, y0, x1, y1] = shape.reduce((q, [x, y]) => [Math.min(q[0], x), Math.min(q[1], y), Math.max(q[2], x), Math.max(q[3], y)], [Infinity, Infinity, -Infinity, -Infinity]);
-  const box: Box = [x0 - 2, y0 - 2, x1 - x0 + 4, y1 - y0 + 4];
-  const g = uid("blur");
-  const d = `M${shape.map((p) => `${fmt(p[0])} ${fmt(p[1])}`).join("L")}Z`;
-  return piece(`<defs>${blur(g, box, 0.2)}</defs><path d="${d}" fill="${C.eyeRim}" filter="url(#${g})"/>`, box);
+  return { shape: outline.map(place), line: pts.slice(0, n + 1).map(place) };
 }

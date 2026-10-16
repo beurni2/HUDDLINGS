@@ -3,22 +3,25 @@
 // front actually draws: every state's name is on the allowlist; no mouth turns down (a lip's ends never below its
 // centre, an o symmetric and round at its foot); every brow is an arc that bows upward, its inner end never below its
 // outer and within the sheets' own tilt above it; no face clip turns an ear further in than the lowered state or further
-// out than the lifted one, only the sleepy face lowers it and only the lifted faces turn it out. Each guard is shown
-// failing on a planted fault. Also: the face clips are what presets.ts writes, and the stars draw only beside the
-// sparkle eyes.
+// out than the lifted one, only the sleepy face lowers it and only the lifted faces turn it out. The new faces (hungry,
+// huffy, L496-497) are held the same way, and huffy more: its pressed mouth's ends never below its centre, its brows
+// level and at rest, its shut lids level. Each guard is shown failing on a planted fault. Also: the face clips are what
+// presets.ts writes, and the stars and the puffed cheeks draw only in their own states.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import type { Clip, Rig } from "../../../runtime-web/src/format.ts";
 import { validate } from "../../../runtime-web/src/format.ts";
 import { regionFor } from "../../../runtime-web/src/rig.ts";
 import type { P } from "../../draw/geom.ts";
 import { scopeIds } from "../../draw/svg.ts";
-import { blushAlpha, clipText, earRot, faceClips, RAISED, stillOf } from "../src/faceClips.ts";
+import { blushAlpha, clipText, earRot, faceClip, faceClips, RAISED, stillOf } from "../src/faceClips.ts";
 import { BROW_STATES, brow } from "../src/parts/brow.ts";
+import { CHEEK_STATES } from "../src/parts/cheeks.ts";
+import { lidBand, lidLine } from "../src/parts/eye.ts";
 import { MOUTH_STATES, mouth, type Mouth } from "../src/parts/mouth.ts";
 import { BLUSH_REFERENCE, EAR_ANGLES, EAR_STATES, EYE_STATES, PRESETS, type EarState } from "../src/presets.ts";
-import { faceFrame, faceStates, front } from "../src/views/front.ts";
+import { faceFrame, faceStates, flatLid, front } from "../src/views/front.ts";
 
 const rig = JSON.parse(readFileSync(new URL("../src/rig.json", import.meta.url), "utf8")) as Rig;
 const clipsDir = new URL("../src/clips/", import.meta.url);
@@ -27,10 +30,14 @@ const faces = clips.filter((c) => c.name.startsWith("face_"));
 
 /** Names for sorrow and anger, which no face state, part or preset may carry (rule R3). */
 const SORROW = /sad|angry|anger|pout|tear|cry|droop|frown|sorrow|sulk|grief/i;
-/** The face states each face part may take: the spec's eye, mouth, brow and ear states (L450-472), the sparkle's stars, and the head's line beside a raised ear (DECISIONS 146). */
+/**
+ * The face states each face part may take: the spec's eye, mouth, brow and ear states (L450-472) and the new faces'
+ * (presets.ts, parts/mouth.ts), the sparkle's stars, huffy's puffed cheeks, and the head's line beside a raised ear
+ * (DECISIONS 146).
+ */
 const ALLOWED: Record<string, readonly string[]> = {
   "eye.L": EYE_STATES, "eye.R": EYE_STATES, mouth: MOUTH_STATES, "brow.L": BROW_STATES, "brow.R": BROW_STATES,
-  "ear.L": EAR_STATES, "ear.R": EAR_STATES, stars: ["sparkle"], "head.line": ["templeL", "templeR", "temples"],
+  "ear.L": EAR_STATES, "ear.R": EAR_STATES, stars: ["sparkle"], cheeks: CHEEK_STATES, "head.line": ["templeL", "templeR", "temples"],
 };
 
 /** A point list turned into the face's level frame (the front's face is rolled with the head, DECISIONS 27). */
@@ -210,6 +217,69 @@ test("no mouth turns down: every lip's ends at or above its centre, every o symm
   const wide = (o.reduce((p, q) => (q[0] < p[0] ? q : p))[1] + o.reduce((p, q) => (q[0] > p[0] ? q : p))[1]) / 2;
   assert.match(mouthProblem({ opening: unlevel(o.map(([x, y]): P => [x, Math.min(y, wide)])) }) ?? "", /a frown's corners/, "an o cut flat");
   assert.match(mouthProblem({ opening: unlevel(o.map(([x, y]): P => [x, y + 0.15 * (x - axis)])) }) ?? "", /lopsided/, "an o hung on one side");
+  // Huffy's pressed mouth (and the tiny smile, and hungry's lick) are lipped, so the loop above holds their ends at or
+  // above their centres. Planted: the pressed line's ends bent 0.5 pt below where the philtrum meets it, a frown
+  // pressed shut, fails; so does the pressed line turned over about its centre.
+  for (const state of ["pressed", "tinySmile", "o.tongue"] as const) assert.ok(mouth(state, faceFrame.frame).lip, `the ${state} mouth is lipped`);
+  const pressed = mouth("pressed", faceFrame.frame).lip!;
+  const pp = level(pressed.line), [pcx, pcy] = level([pressed.centre])[0]!;
+  const preach = Math.max(...pp.map(([x]) => Math.abs(x - pcx)));
+  const pend = Math.max(...pp.filter(([x]) => Math.abs(Math.abs(x - pcx) - preach) < 1e-9).map(([, y]) => y));
+  const pbent = pp.map(([x, y]): P => [x, y + (pcy + 0.5 - pend) * ((x - pcx) / preach) ** 4]);
+  assert.match(mouthProblem({ lip: { line: unlevel(pbent), centre: pressed.centre } }) ?? "", /hangs 0\.50 pt below its centre/, "pressed bent down");
+  assert.match(mouthProblem({ lip: { line: unlevel(pp.map(([x, y]) => [x, 2 * pcy - y])), centre: pressed.centre } }) ?? "", /below its centre/, "pressed turned over");
+});
+
+/**
+ * Huffy's shut lids: each band's inner end level with its outer, within 0.5 pt either way, so the shut eye never slants
+ * down toward the nose (the sheets' Angry, R3) or up toward it (worried). Measured on its centre line in the face's
+ * level frame, its flick left out.
+ */
+const LID_LEVEL_PT = 0.5;
+function lidProblem(line: P[]): string | undefined {
+  const pts = level(line), inner = pts[0]!, outer = pts[pts.length - 1]!;
+  const rise = outer[1] - inner[1];
+  if (rise < -LID_LEVEL_PT) return `its inner end sits ${(-rise).toFixed(2)} pt below its outer end, an angry slant`;
+  if (rise > LID_LEVEL_PT) return `its inner end stands ${rise.toFixed(2)} pt above its outer end, a worried slant`;
+  return undefined;
+}
+
+test("huffy's shut lids lie level, as drawn in the front, and a slanted lid fails", () => {
+  const drawn = new Map(faceStates().filter((d) => d.state === "flat").map((d) => [d.part, scopeIds(d.piece.svg, "f")]));
+  for (const side of ["L", "R"] as const) {
+    const b = flatLid(side);
+    assert.equal(scopeIds(lidBand(b).svg, "f"), drawn.get(`eye.${side}`), `the guarded eye.${side} flat is the one the front draws`);
+    assert.equal(lidProblem(lidLine(b)), undefined, `eye.${side} flat`);
+    // Planted: the lid's outer end lifted 1.5 pt (its inner end down toward the nose, an angry slant) and dropped 1.5 pt.
+    assert.match(lidProblem(lidLine({ ...b, drop: -1.5 })) ?? "", /angry slant/, `eye.${side} flat, outer end up`);
+    assert.match(lidProblem(lidLine({ ...b, drop: 1.5 })) ?? "", /worried slant/, `eye.${side} flat, outer end down`);
+  }
+});
+
+/**
+ * Huffy's brows stay level and at rest: in the huff and in the peek back, both brows take the neutral state, the
+ * turnaround's (whose arcs pass the brow guard below), and the two stand at one height across the face, within 0.3 pt.
+ * A raised or happy brow on one side, or the two at different heights, fails.
+ */
+function huffyBrowsProblem(states: Record<string, string>): string | undefined {
+  const L = states["brow.L"] ?? "neutral", R = states["brow.R"] ?? "neutral";
+  if (L !== "neutral" || R !== "neutral") return `its brows are ${L} and ${R}, not both at rest`;
+  const height = (arc: P[]) => level(arc).reduce((m, [, y]) => m + y / arc.length, 0);
+  const off = Math.abs(height(brow(L, 1, faceFrame.frame).arc) - height(brow(R, -1, faceFrame.frame).arc));
+  if (off > 0.3) return `its brows stand ${off.toFixed(2)} pt apart in height`;
+  return undefined;
+}
+
+test("huffy's brows stay level and at rest, in the huff and in its peek back", () => {
+  const huffy = PRESETS.huffy!;
+  for (const clip of [faceClips().find((c) => c.name === "face_huffy")!, faceClip("huffy", huffy, true)]) {
+    const states = Object.fromEntries(Object.entries(clip.states ?? {}).map(([part, keys]) => [part, String(keys[0]![1])]));
+    assert.equal(huffyBrowsProblem(states), undefined, clip.name);
+    for (const [part, sx] of [["brow.L", 1], ["brow.R", -1]] as const) assert.equal(browProblem(brow("neutral", sx, faceFrame.frame).arc, sx), undefined, `${clip.name} ${part}`);
+  }
+  // Planted: one brow raised, and one happy, fail.
+  assert.match(huffyBrowsProblem({ "brow.L": "raised", "brow.R": "neutral" }) ?? "", /not both at rest/);
+  assert.match(huffyBrowsProblem({ "brow.L": "neutral", "brow.R": "happy" }) ?? "", /not both at rest/);
 });
 
 test("every brow is an arc that bows up, its inner end at or above its outer and within the sheets' tilt, as drawn in the front", () => {
@@ -270,25 +340,29 @@ test("no face clip turns an ear in past the lowered state or out past the lifted
   assert.match(earProblem(out, "neutral") ?? "", /past the lifted state|does not lift/);
 });
 
-test("the face clips are what presets.ts writes: one per preset drawn now, sound, at the frame each primary panel draws", () => {
-  // The spec's table (L480-498): 19 presets, of which hungry and huffy are next round's new drawings.
+test("the face clips are what presets.ts writes: one per preset, sound, at the frame each primary panel draws", () => {
+  // The spec's table (L480-498): 19 presets; hungry and huffy are new drawings no panel shows (L496-497).
   assert.deepEqual(Object.keys(PRESETS).sort(), ["blissful", "content", "curious", "excited", "happy", "huffy", "hungry", "laughing", "listening", "mischievous",
     "neutral", "proud", "shy", "singing", "sleepy", "sly", "surprised", "tender", "ticklish"]);
   const written = faceClips();
-  assert.equal(written.length, 17);
+  assert.equal(written.length, 19);
   assert.deepEqual(faces.map((c) => c.name).sort(), written.map((c) => c.name).sort());
   for (const clip of written) assert.equal(readFileSync(new URL(`${clip.name}.json`, clipsDir), "utf8"), clipText(clip), `${clip.name}.json is stale: node characters/dog/src/faceClips.ts`);
   assert.deepEqual(validate(rig, written), []);
+  // Every package face clip is face_<preset>, as look.ts --faces and facematch.py read them: huffy's peek back is not a
+  // preset, so it is no package clip (it is rendered for review, qa/phase3/faces/new).
+  for (const clip of faces) assert.ok(Object.hasOwn(PRESETS, clip.name.slice("face_".length)), `${clip.name} names a preset`);
+  assert.deepEqual(validate(rig, [faceClip("huffy", PRESETS.huffy!, true)]), [], "huffy's peek back is sound");
   for (const [name, p] of Object.entries(PRESETS)) {
-    if (p.next) {
-      assert.ok(!faces.some((c) => c.name === `face_${name}`), `${name} is next round's`);
-      continue;
-    }
     const s = stillOf(p);
     // The still's states are the preset's own (the dog's squeeze and sparkle are its happy crescents, Q2).
     for (const eye of [s.eyes.L, s.eyes.R]) assert.ok(eye === "open" || p.eyes.includes(eye) || (eye === "sparkle" && p.eyes.includes("sparkle")), `${name}: eyes ${eye}`);
     assert.ok(p.mouth.includes(s.mouth), `${name}: mouth ${s.mouth}`);
-    assert.ok(p.crops.length > 0, `${name} has a primary panel`);
+    // A preset drawn new has no panel, and names the panels it borrows from; every other has its primary.
+    if (p.drawnNew) {
+      assert.deepEqual(p.crops, [], `${name} is a new drawing, with no panel`);
+      for (const crop of p.drawnNew.from) assert.ok(existsSync(new URL(`../ref/panels/${crop.split(".")[0]}/${crop}.png`, import.meta.url)), `${name} borrows from ${crop}`);
+    } else assert.ok(p.crops.length > 0, `${name} has a primary panel`);
     for (const ear of ["L", "R"] as const) assert.equal(earRot(ear, s.ears[ear]), (ear === "R" ? 1 : -1) * EAR_ANGLES[s.ears[ear]] + 0);
     // The blush at the preset's level: both cheeks' alpha the level over the reference level they are drawn at
     // (DECISIONS 144); a preset that names none keys none, so the rest alpha keeps the resting level.
@@ -301,7 +375,13 @@ test("the face clips are what presets.ts writes: one per preset drawn now, sound
       }
     }
   }
-  assert.deepEqual(Object.entries(PRESETS).filter(([, p]) => p.blush !== null && !p.next).map(([n, p]) => [n, p.blush]), [["shy", 0.8], ["blissful", 0.7]]);
+  // Shy and blissful at the table's levels, and huffy's puffed cheeks flushed (DECISIONS 152).
+  assert.deepEqual(Object.entries(PRESETS).filter(([, p]) => p.blush !== null).map(([n, p]) => [n, p.blush]), [["shy", 0.8], ["blissful", 0.7], ["huffy", 0.6]]);
+  // Only huffy puffs its cheeks, and its peek back lets them go: one eye open again, the other still shut, the tiny smile.
+  for (const clip of faces) assert.equal(clip.states?.cheeks?.[0]?.[1], clip.name === "face_huffy" ? "puffed" : undefined, `${clip.name}'s cheeks`);
+  const peek = stillOf(PRESETS.huffy!, true);
+  assert.deepEqual([peek.eyes.L, peek.eyes.R, peek.mouth, peek.cheeks], ["peekBack", "flat", "tinySmile", undefined]);
+  assert.throws(() => stillOf(PRESETS.happy!, true), /no peek back/);
 });
 
 test("the raised ears are drawings of their own, and the head's line runs along the temple each one uncovers", () => {
@@ -322,8 +402,8 @@ test("the raised ears are drawings of their own, and the head's line runs along 
     assert.equal(clip.states!["head.line"]?.[0]?.[1], want, `${clip.name}: the head's line beside ears ${ears.L} and ${ears.R}`);
     if (want) raised++;
   }
-  // The lifted faces (excited, surprised, proud, listening, singing) and the perked ones (curious, mischievous, sly).
-  assert.equal(raised, 8);
+  // The lifted faces (excited, surprised, proud, listening, singing, hungry) and the perked ones (curious, mischievous, sly).
+  assert.equal(raised, 9);
   // Planted: a perked face whose head's line keeps its side over the ear fails.
   const curious = faces.find((c) => c.name === "face_curious")!;
   const creased = { ...curious, states: Object.fromEntries(Object.entries(curious.states!).filter(([part]) => part !== "head.line")) };
@@ -338,7 +418,11 @@ test("each preset's first panel is its primary in model.json, and its still wink
   };
   const records = Object.entries(model.faceCrops);
   for (const [name, p] of Object.entries(PRESETS)) {
-    if (p.next) continue;
+    // A new drawing has no panel, so no record may name it (DECISIONS 107).
+    if (p.drawnNew) {
+      assert.deepEqual(records.filter(([, r]) => r.presets.includes(name)).map(([id]) => id), [], `no panel judges ${name}`);
+      continue;
+    }
     const primary = records.filter(([, r]) => r.primaryFor.includes(name)).map(([id]) => id);
     assert.deepEqual(primary, [p.crops[0]], `${name}'s first panel is its primary`);
     assert.deepEqual(new Set(p.crops), new Set(records.filter(([, r]) => r.presets.includes(name)).map(([id]) => id)), `${name}'s panels are its records'`);
@@ -376,7 +460,7 @@ test("every face state draws a region, or a deliberate null, in every view that 
   assert.equal(regionFor(mouthPart, "side.L", "laugh"), "mouth/side.L:smile");
 });
 
-test("the stars draw only beside the sparkle eyes, and every eye state draws its own drawing", () => {
+test("the stars draw only beside the sparkle eyes, the puffed cheeks only puffed, and every eye state draws its own drawing", () => {
   const stars = rig.parts.find((p) => p.name === "stars")!;
   assert.equal(regionFor(stars, "front", "sparkle"), "stars/front:sparkle");
   for (const state of [undefined, ...EYE_STATES.filter((s) => s !== "sparkle")]) assert.equal(regionFor(stars, "front", state), undefined, `stars in ${state}`);
@@ -391,4 +475,12 @@ test("the stars draw only beside the sparkle eyes, and every eye state draws its
   // The squeeze and the sparkle are the happy crescent (Q2).
   assert.equal(regionFor(eye, "front", "squeeze"), "eye.L/front:happy");
   assert.equal(regionFor(eye, "front", "sparkle"), "eye.L/front:happy");
+  // Huffy's puffed cheeks (variant A, inside the head's outline) draw in their state and nowhere else; the head's
+  // outline has no puffed state in the package (variant B is review-only).
+  const cheeks = rig.parts.find((p) => p.name === "cheeks")!;
+  assert.equal(cheeks.clipTo, "head.base");
+  assert.equal(regionFor(cheeks, "front", "puffed"), "cheeks/front:puffed");
+  assert.equal(regionFor(cheeks, "front", undefined), undefined);
+  for (const view of rig.views.filter((v) => v !== "front")) assert.equal(regionFor(cheeks, view, "puffed"), undefined, `cheeks in ${view}`);
+  for (const part of ["head.base", "head.line"]) assert.ok(!Object.keys(rig.parts.find((p) => p.name === part)!.regions).some((k) => k.endsWith(":puffed")), `${part} has no puffed state`);
 });

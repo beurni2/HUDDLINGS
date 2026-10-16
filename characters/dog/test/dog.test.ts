@@ -76,7 +76,7 @@ test("the rig and its clips are sound, and the front order is spec L397's", () =
   const order = rig.drawOrder.front!.flatMap((e) => (e === "@head" ? rig.drawOrder["head.front"]! : [e]));
   const stages = [
     ["shadow"], ["tail"], ["body.back", "back.patch.R", "back.patch.L"], ["hind.L", "hind.R"], ["body.front", "shadow.chin"], ["collar", "shadow.chin.collar"], ["tag"],
-    ["ear.L", "ear.R"], ["head.base"], ["head.patch.L", "head.patch.R"], ["blush.L", "blush.R", "eye.L", "eye.R", "brow.L", "brow.R", "nose", "mouth"],
+    ["ear.L", "ear.R"], ["head.base"], ["head.patch.L", "head.patch.R"], ["blush.L", "blush.R", "cheeks", "eye.L", "eye.R", "brow.L", "brow.R", "nose", "mouth"],
     // The sparkle's stars (a face state's part beside the head, drawn only in that state) come last in the head.
     ["head.line"], ["tuft"], ["stars"], ["front.L", "front.R"],
   ];
