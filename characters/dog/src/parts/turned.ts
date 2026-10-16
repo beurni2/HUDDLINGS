@@ -56,6 +56,8 @@ export interface TurnedFrame {
 
 /** The front's lip centre, where its philtrum meets the open mouth's lip (parts/mouth.ts, OPEN). */
 export const LIP_Y = 14.2;
+/** The front's nose's foot, where its philtrum starts (parts/face.ts). */
+const NOSE_FOOT_Y = 11.7;
 
 /**
  * A three-quarter muzzle: a front point's x shortened by `k[0]` left of the midline and `k[1]` right of it, laid
@@ -155,6 +157,12 @@ interface Oval {
   half: P[];
   tongue: string;
   shine: [number, number, number, number];
+  /**
+   * Where the front's short philtrum ends above the opening. Turned, it runs from the view's nose's foot toward the
+   * opening's top, the same share of the way as the front's: the turn lays the muzzle's midline on a slant (the rest
+   * philtrum's, from the nose's foot down to the lip), so a tick down the muzzle's upright would point at the
+   * opening's shoulder, and one to the front's height read as a flat dash.
+   */
   philtrumTo: number;
 }
 
@@ -336,7 +344,7 @@ export function turnedMouth(state: TurnedMouthState, f: TurnedFrame, nose: P): T
       piece: paintOval({
         opening, top: mapD(`M-8 ${fmt(top - 1)} L8 ${fmt(top - 1)} L8 ${fmt(top + 3.2)} C3 ${fmt(top + 2)} -3 ${fmt(top + 2)} -8 ${fmt(top + 3.2)}Z`, at),
         tongue: mapD(o.tongue, at), shine: { at: at([sx, sy]), r: [srx * k(sx), sry] }, sides, foot,
-        philtrum: [nose, at([0, o.philtrumTo])], box,
+        philtrum: [nose, v.add(nose, v.mul(v.sub(at([0, top]), nose), (o.philtrumTo - NOSE_FOOT_Y) / (top - NOSE_FOOT_Y)))], box,
       }),
       opening: ring,
     };

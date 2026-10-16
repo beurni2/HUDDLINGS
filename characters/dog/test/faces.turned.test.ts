@@ -167,18 +167,29 @@ const mirror = (pts: P[]): P[] => pts.map(([x, y]): P => [-x, y]);
  * The mouth guard in a turned view (faces.test.ts's), in the muzzle's own level frame (`lv`: how far along its across and
  * its down, parts/turned.ts; the profile's is the screen's). A lipped mouth keeps both ends of its lip line, its
  * farthest reach each way across, at or above where the philtrum meets it (the profile's lip begins at the notch, its
- * centre there, so its one corner holds to it). A mouth drawn as an opening alone (o, yawn) is symmetric in its own
+ * centre there, so its one corner holds to it); and each half of it hangs on or below the line from the centre to that
+ * half's end, so neither half arches up between them, a pout's (an m of a lip whose ends are level still passes the
+ * ends' test alone). A mouth drawn as an opening alone (o, yawn) is symmetric in its own
  * frame (a turned o with each half's shortening undone, a profile o about its own leaning axis) and round at its foot,
  * which hangs below its widest by at least a quarter of its width.
  */
 const O_FOOT = 0.25;
+const LIP_ARCH_PT = 0.05;
 type Level = (p: P) => P;
 function mouthProblem(m: Pick<TurnedMouth, "lip" | "opening">, lv: Level): string | undefined {
   if (m.lip) {
     const pts = m.lip.line.map(lv), [, cy] = lv(m.lip.centre);
     const left = pts.reduce((a, b) => (b[0] < a[0] ? b : a)), right = pts.reduce((a, b) => (b[0] > a[0] ? b : a));
+    const centre = lv(m.lip.centre);
     for (const [name, end] of [["left", left], ["right", right]] as const) {
       if (end[1] > cy + 1e-9) return `its lip's ${name} end hangs ${(end[1] - cy).toFixed(2)} pt below its centre`;
+    }
+    for (const [name, end] of [["left", left], ["right", right]] as const) {
+      const span = end[0] - centre[0];
+      if (Math.abs(span) < 1e-9) continue;
+      // How far above its chord each point of this half stands (y down), sampling noise aside (0.05 pt).
+      const above = Math.max(0, ...pts.filter(([x]) => (x - centre[0]) / span > 0).map(([x, y]) => centre[1] + ((end[1] - centre[1]) * (x - centre[0])) / span - y));
+      if (above > LIP_ARCH_PT) return `its lip's ${name} half arches ${above.toFixed(2)} pt above the line from its centre to its end, a pout`;
     }
     return undefined;
   }
@@ -267,6 +278,14 @@ test("no turned mouth turns down: every lip's ends at or above its centre, every
   const back = Math.max(...open.line.map(([x]) => x)), backY = open.line.find(([x]) => x === back)![1];
   const sagged = open.line.map(([x, y]): P => [x, y + (open.centre[1] + 1 - backY) * Math.max(0, (x - open.centre[0]) / (back - open.centre[0])) ** 4]);
   assert.match(mouthProblem({ lip: { line: sagged, centre: open.centre } }, screen) ?? "", /right end hangs 1\.00 pt below its centre/);
+  // Planted: the smile's halves arched up into an m, its ends where they were (each half bowing 2.7 pt above its
+  // centre, its curl ending level with it), carried onto the muzzle as the smile is: a pout, which the ends' test alone passes.
+  const mHalf: P[] = [[0, 14.4], [1.4, 13.2], [3.1, 12.2], [5.1, 11.65], [7.1, 11.75], [8.9, 12.3], [10.4, 13.2], [11.6, 13.9], [12.3, 14.3]];
+  const mF = q.muzzle(LIGHT, "smile");
+  const mLine = sample(smooth([...mHalf.slice(1).reverse().map(([x, y]): P => [-x, y]), ...mHalf].map(mF.at), { closed: false }).segs, 12, false);
+  const mLip = { lip: { line: mLine, centre: mF.at(mHalf[0]!) } };
+  assert.match(mouthProblem(mLip, mF.level) ?? "", /half arches .* a pout/);
+  assert.match(mouthProblem({ lip: { line: mirror(mLine), centre: mirror([mLip.lip.centre])[0]! } }, mirrored(mF.level)) ?? "", /half arches .* a pout/);
   // Planted: the turned o cut flat at its widest (a frown's corners at its foot), and hung 2 pt lower on one side, fail.
   const oF = q.muzzle(LIGHT, "o"), o = turnedMouth("o", oF, q.nose).opening!;
   const un: Level = (p) => {
