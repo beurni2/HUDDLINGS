@@ -253,10 +253,14 @@ class HookTest(unittest.TestCase):
     def test_a_failing_front_match_ends_the_hook_without_waiting_for_the_faces_check(self):
         # The front's match fails first; the hook exits at once, stopping the Faces check running beside it.
         start = time.monotonic()
-        code, said, _ = self.hook("characters/dog/src/front.ts", STUB_LOOK_EXIT="1", STUB_FACES_SECONDS="30")
+        code, said, looks = self.hook("characters/dog/src/front.ts", STUB_LOOK_EXIT="1", STUB_FACES_SECONDS="30")
         self.assertEqual(code, 1)
         self.assertIn("the dog's front fails its sheet match", said)
         self.assertLess(time.monotonic() - start, 20, "the hook waited for the Faces check")
+        # The Faces check had started and was still running when the front's match failed: a hook without it would
+        # pass the timing alone.
+        self.assertEqual((len(self.faces), len(looks)), (1, 1), said)
+        self.assertTrue(Path(f"{self.log}.beside").exists(), "the front's match failed with the Faces check not running")
 
     def test_the_raster_cache_is_the_main_checkouts_in_a_worktree_too(self):
         cache = str(self.repo.resolve() / "build" / "cache")
