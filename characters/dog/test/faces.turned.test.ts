@@ -35,7 +35,7 @@ const ALLOWED: Record<string, readonly string[]> = {
 };
 /**
  * The states each face part draws as a drawing of its own in a view; the others are the rest drawing (ears turned by
- * the clip) or its alias (Q2). The three-quarter's mouths are its own list (parts/turned.ts) with its rest; the
+ * the clip) or, for the profile's mouths, its rest smile. The three-quarter's mouths are its own list (parts/turned.ts) with its rest; the
  * profile's are drawn but held out of the package for now (sideHeld, DECISIONS 183), so it keys its smile alone.
  */
 const TURNED_EYES = ["happy", "squeeze", "closed", "sleepy", "wink", "wide", "peek", "sparkle", "eager", "flat", "peekBack"];

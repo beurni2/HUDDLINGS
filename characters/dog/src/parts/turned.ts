@@ -538,8 +538,8 @@ export type TurnedEyeLid = { band: LidBand } | { spec: EyeSpec; lid: TurnedLid }
 export const drawLid = (l: TurnedEyeLid): Piece => ("band" in l ? lidBand(l.band) : halfLid(l.spec, l.lid));
 
 /**
- * The sparkle's stars in a turned view (parts/stars.ts, Proud's stars, Q2's default), typed in model space where the
- * view puts them beside its head, their warm cores toward the light the view is drawn in.
+ * The stars round a turned head (parts/stars.ts, Proud's stars, proud's still: DECISIONS 181, 205), typed in model
+ * space where the view puts them beside its head, their warm cores toward the light the view is drawn in.
  */
 export function turnedStars(list: Star[], light: P): Piece {
   return stars(list, { place: (svg) => svg, at: (p) => p, box: (b) => b, light });

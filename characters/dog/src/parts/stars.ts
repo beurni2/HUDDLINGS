@@ -1,8 +1,9 @@
-// The sparkle's stars, one recipe for every view (docs/QUESTIONS.md Q2's default: the dog's sparkle is its happy
-// crescents with stars beside the head, as its Proud panel draws them): four-pointed gold stars, taller than wide,
-// their sides drawn in toward the middle, the points a little rounded, a lighter warm core and no line, as the panel
-// paints them. A part of their own on the head (`stars`), drawn only in the sparkle state; each view says where they
-// sit beside its head, in the face's frame.
+// The stars round the head, one recipe for every view, as the dog's Proud panel draws them beside its happy crescents
+// (proud's still, DECISIONS 138, 205): four-pointed gold stars, taller than wide, their sides drawn in toward the
+// middle, the points a little rounded, a lighter warm core and no line, as the panel paints them. A part of their own
+// on the head (`stars`), drawn only in its `sparkle` state, which only proud's clip keys; each view says where they sit
+// beside its head, in the face's frame. The sparkle eye's own small gold stars, beside each eye, are the eye's
+// (parts/eye.ts, Q2, DECISIONS 203).
 import { type P } from "../../../draw/geom.ts";
 import { blur, piece, uid, union, type Box, type Piece } from "../../../draw/svg.ts";
 import { C } from "../palette.ts";
