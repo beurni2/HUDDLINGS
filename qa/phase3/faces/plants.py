@@ -5,7 +5,10 @@ left ear turned 12° in (a droop past the lowered state), listening's lifted lef
 splay), curious keying no head.line state beside its perked ear (the crease in the temple), and on the new faces:
 huffy's pressed mouth with its ends bent below its centre (a frown pressed shut), its shut lids slanted with their inner
 ends down (the sheets' Angry), its left brow raised, its left ear turned 7 degrees in (a droop), and the puffed cheeks
-on another face. Nothing in the working tree is touched.
+on another face; and from the last review: mischievous winking the dog's right eye again (Cheeky closes its left),
+listening keying no temple beside its lifted ear, the temple drawn into the lifted ear's own drawing again (where it
+swings out of the head's side, R16), hungry's eager eye rolled up under its white (the pleading eyes), and huffy's peek
+back looking up as it was. Nothing in the working tree is touched.
 
     python3 qa/phase3/faces/plants.py qa/phase3/faces/r3-plants.txt"""
 import os
@@ -43,6 +46,18 @@ PLANTS = [
      "characters/dog/src/clips/face_huffy.json", '"ear.L": { "rot": [[0, 0]] }', '"ear.L": { "rot": [[0, 7]] }'),
     ("puffed cheeks elsewhere: face_happy keys the puffed cheeks",
      "characters/dog/src/clips/face_happy.json", '"ear.R": [[0, "neutral"]] }', '"ear.R": [[0, "neutral"]], "cheeks": [[0, "puffed"]] }'),
+    ("wink on the right: mischievous winks the dog's right eye, where Cheeky, its primary, closes the left",
+     "characters/dog/src/presets.ts", 'mischievous"], wink: "L"', 'mischievous"], wink: "R"'),
+    ("open temple: face_listening keys no temple beside its lifted left ear",
+     "characters/dog/src/clips/face_listening.json", '"temple.L": [[0, "up"]], ', ""),
+    ("temple on the ear: the lifted ear's drawing carries its temple again, so it swings with the ear's spring",
+     "characters/dog/src/views/front.ts",
+     'return litPart(`ear.${side}`, lifted[side], paint, [side === "R" ? { from: a, to: b, on: "tan", taper: [3, 3] } : { from: b, to: a, on: "tan", taper: [3, 3] }]);',
+     'return join(litPart(`ear.${side}`, lifted[side], paint, [side === "R" ? { from: a, to: b, on: "tan", taper: [3, 3] } : { from: b, to: a, on: "tan", taper: [3, 3] }]), templePiece(side));'),
+    ("pleading eyes: hungry's eager eye rolled up, its white under the iris (the last review's probe)",
+     "characters/dog/src/views/front.ts", "const EAGER: Eager = { white: { at: 10, width: 2, span: 55 },", "const EAGER: Eager = { white: { at: -90, width: 3, span: 70 },"),
+    ("looking up: huffy's peek back with its white at 186 degrees, as it was",
+     "characters/dog/src/views/front.ts", 'white: { at: side === "R" ? -6 : 168,', 'white: { at: side === "R" ? -6 : 186,'),
 ]
 
 
