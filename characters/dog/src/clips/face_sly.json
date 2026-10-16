@@ -1,0 +1,8 @@
+{
+  "name": "face_sly",
+  "lengthMs": 1000,
+  "views": { "body": [[0, "front"]], "head": [[0, "front"]] },
+  "states": { "eye.L": [[0, "open"]], "eye.R": [[0, "wink"]], "mouth": [[0, "cheeky"]], "brow.L": [[0, "neutral"]], "brow.R": [[0, "happy"]], "ear.L": [[0, "onePerked"]], "ear.R": [[0, "neutral"]] },
+  "tracks": { "ear.L": { "rot": [[0, 0]] }, "ear.R": { "rot": [[0, 0]] } },
+  "events": [{ "at": 0, "type": "keyPose" }]
+}

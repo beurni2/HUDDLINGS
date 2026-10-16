@@ -1,0 +1,8 @@
+{
+  "name": "face_laughing",
+  "lengthMs": 1000,
+  "views": { "body": [[0, "front"]], "head": [[0, "front"]] },
+  "states": { "eye.L": [[0, "happy"]], "eye.R": [[0, "happy"]], "mouth": [[0, "laugh"]], "brow.L": [[0, "happy"]], "brow.R": [[0, "happy"]], "ear.L": [[0, "neutral"]], "ear.R": [[0, "neutral"]] },
+  "tracks": { "ear.L": { "rot": [[0, 0]] }, "ear.R": { "rot": [[0, 0]] } },
+  "events": [{ "at": 0, "type": "keyPose" }]
+}

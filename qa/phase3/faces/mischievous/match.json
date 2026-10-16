@@ -1,0 +1,449 @@
+{
+ "species": "dog",
+ "preset": "mischievous",
+ "renderFaceRollDeg": -3.98,
+ "still": {
+  "still": "face_mischievous",
+  "clip": "face_mischievous",
+  "views": {
+   "body": "front",
+   "head": "front"
+  },
+  "ppp": 3,
+  "sizePx": [494, 610],
+  "rootPx": [268, 557]
+ },
+ "rest": {
+  "still": "still_front",
+  "clip": "still_front",
+  "views": {
+   "body": "front",
+   "head": "front"
+  },
+  "ppp": 3
+ },
+ "thresholds": {
+  "landmarkShareOfHead": 0.03,
+  "landmarkPt": 2.8,
+  "eyeAreaRatio": 1.9,
+  "eyeIoU": 0.58,
+  "mouthIoU": 0.35,
+  "mouthOpenRatio": 2.9,
+  "mouthOpenFloorShare": 0.25,
+  "padShareOfHead": 0.25,
+  "headBoxPt": [-70.0, -190.0, 70.0, -30.0],
+  "turnedShareOfHead": 0.03,
+  "reachShareOfHead": 0.08,
+  "touchShareOfHead": 0.05,
+  "topShareOfHead": 0.15,
+  "pinReachShareOfHead": 0.2,
+  "pinRounds": 4,
+  "pinSettledPx": 0.05,
+  "windowShareOfHead": 0.35,
+  "subsamples": 4,
+  "softL": [50, 70],
+  "endPx": 2.0,
+  "eyeMinPx": 20,
+  "noseCorePx": 5,
+  "openChroma": 30,
+  "openHue": 50,
+  "openL": 60
+ },
+ "primary": "master.expression.cheeky",
+ "records": {
+  "master.expression.cheeky": {
+   "crop": "master.expression.cheeky",
+   "gating": true,
+   "ptPerCropPx": 1.20449,
+   "measureZoom": 2,
+   "rollDeg": -6.57,
+   "turnDeg": -2.59,
+   "padPx": 39,
+   "turned": false,
+   "turnAcrossPt": 1.03,
+   "drawn": {
+    "eyes": "wink",
+    "mouth": "cheeky",
+    "wink": "eye.L"
+   },
+   "heldTo": [
+    "eye.R",
+    "eye.L",
+    "mouth.R",
+    "mouth.L"
+   ],
+   "alignment": {
+    "pinnedOn": "nose",
+    "shiftFromModelPt": [0.47, 0.48]
+   },
+   "rows": {
+    "head.top": {
+     "record": [67.78, 4.09],
+     "held": false,
+     "found": [76.75, -2.38],
+     "errPt": 13.32,
+     "offsetPt": [11.62, -6.5],
+     "pass": true,
+     "note": "reported, never held: the sheet draws the tuft differently in every panel"
+    },
+    "nose": {
+     "record": [70.76, 65.36],
+     "held": false,
+     "found": [70.76, 65.36],
+     "errPt": 0.0,
+     "offsetPt": [0.0, 0.0],
+     "pass": true,
+     "note": "the render is placed here"
+    },
+    "eye.R": {
+     "record": [49.74, 61.06],
+     "held": true,
+     "found": [50.5, 61.87],
+     "errPt": 1.34,
+     "offsetPt": [0.79, 1.08],
+     "pass": true
+    },
+    "eye.L": {
+     "record": [91.22, 56.28],
+     "held": true,
+     "found": [89.81, 56.77],
+     "errPt": 1.8,
+     "offsetPt": [-1.76, 0.39],
+     "pass": true
+    },
+    "mouth.R": {
+     "record": [60.36, 73.24],
+     "held": true,
+     "found": [61.72, 73.01],
+     "errPt": 1.67,
+     "offsetPt": [1.66, -0.09],
+     "pass": true
+    },
+    "mouth.L": {
+     "record": [83.14, 69.58],
+     "held": true,
+     "found": [81.6, 70.55],
+     "errPt": 2.2,
+     "offsetPt": [-1.98, 0.95],
+     "pass": true
+    }
+   },
+   "spacing": {},
+   "shapes": {
+    "eye.R": {
+     "areaPx": 163,
+     "recordAreaPx": 831,
+     "areaPt2": 59.1,
+     "areaRatio": 0.196,
+     "iou": 0.182,
+     "pass": false,
+     "held": true
+    },
+    "eye.L": {
+     "areaPx": 829,
+     "recordAreaPx": 243,
+     "areaPt2": 300.7,
+     "areaRatio": 3.412,
+     "iou": 0.288,
+     "pass": false,
+     "held": true
+    },
+    "mouth": {
+     "areaPx": 742,
+     "recordAreaPx": 991,
+     "areaPt2": 269.1,
+     "areaRatio": 0.749,
+     "iou": 0.735,
+     "pass": true,
+     "openPx": 704,
+     "recordOpenPx": 843,
+     "openRatio": 0.873,
+     "redShare": 0.322,
+     "recordRedShare": 0.141,
+     "held": true
+    }
+   },
+   "anchorsHeld": 4,
+   "spacingsHeld": 0,
+   "shapesHeld": 3,
+   "pass": false
+  },
+  "master.expression.winking": {
+   "crop": "master.expression.winking",
+   "gating": false,
+   "ptPerCropPx": 1.27366,
+   "measureZoom": 2,
+   "rollDeg": -0.48,
+   "turnDeg": 3.5,
+   "padPx": 37,
+   "turned": false,
+   "turnAcrossPt": 2.27,
+   "drawn": {
+    "eyes": "wink",
+    "mouth": "smile",
+    "wink": "eye.L"
+   },
+   "heldTo": [
+    "eye.R",
+    "eye.L"
+   ],
+   "alignment": {
+    "pinnedOn": "nose",
+    "shiftFromModelPt": [0.48, 0.48]
+   },
+   "rows": {
+    "head.top": {
+     "record": [65.25, 4.03],
+     "held": false,
+     "found": [70.5, 10.56],
+     "errPt": 10.67,
+     "offsetPt": [6.62, 8.38],
+     "pass": true,
+     "note": "reported, never held: the sheet draws the tuft differently in every panel"
+    },
+    "nose": {
+     "record": [67.06, 66.72],
+     "held": false,
+     "found": [67.06, 66.72],
+     "errPt": 0.0,
+     "offsetPt": [0.0, 0.0],
+     "pass": true,
+     "note": "the render is placed here"
+    },
+    "eye.R": {
+     "record": [48.56, 59.96],
+     "held": true,
+     "found": [48.31, 61.39],
+     "errPt": 1.84,
+     "offsetPt": [-0.34, 1.81],
+     "pass": true
+    },
+    "eye.L": {
+     "record": [88.31, 59.62],
+     "held": true,
+     "found": [85.83, 60.56],
+     "errPt": 3.38,
+     "offsetPt": [-3.17, 1.17],
+     "pass": false
+    },
+    "mouth.R": {
+     "record": [58.28, 74.05],
+     "held": false,
+     "found": [57.67, 72.91],
+     "errPt": 1.65,
+     "offsetPt": [-0.76, -1.46],
+     "pass": true
+    },
+    "mouth.L": {
+     "record": [78.08, 72.65],
+     "held": false,
+     "found": [76.32, 73.01],
+     "errPt": 2.29,
+     "offsetPt": [-2.25, 0.44],
+     "pass": true
+    }
+   },
+   "spacing": {},
+   "shapes": {
+    "eye.R": {
+     "areaPx": 147,
+     "recordAreaPx": 768,
+     "areaPt2": 59.6,
+     "areaRatio": 0.191,
+     "iou": 0.173,
+     "pass": false,
+     "held": true
+    },
+    "eye.L": {
+     "areaPx": 743,
+     "recordAreaPx": 270,
+     "areaPt2": 301.3,
+     "areaRatio": 2.752,
+     "iou": 0.338,
+     "pass": false,
+     "held": true
+    },
+    "mouth": {
+     "areaPx": 665,
+     "recordAreaPx": 113,
+     "areaPt2": 269.7,
+     "areaRatio": 5.885,
+     "iou": 0.096,
+     "pass": true,
+     "openPx": 627,
+     "recordOpenPx": 0,
+     "openRatio": 23.195,
+     "redShare": 0.321,
+     "recordRedShare": 0.0,
+     "held": false
+    }
+   },
+   "anchorsHeld": 2,
+   "spacingsHeld": 0,
+   "shapesHeld": 2,
+   "pass": false
+  },
+  "expressions.expression.mischievous": {
+   "crop": "expressions.expression.mischievous",
+   "gating": false,
+   "ptPerCropPx": 0.69432,
+   "measureZoom": 1,
+   "rollDeg": -11.79,
+   "turnDeg": -7.81,
+   "padPx": 34,
+   "turned": true,
+   "turnAcrossPt": -4.97,
+   "drawn": {
+    "eyes": "wink",
+    "mouth": "cheeky",
+    "wink": "eye.R"
+   },
+   "heldTo": [
+    "eye.R",
+    "eye.L",
+    "mouth.R",
+    "mouth.L"
+   ],
+   "alignment": {
+    "pinnedOn": "nose",
+    "shiftFromModelPt": [0.43, 0.47]
+   },
+   "rows": {
+    "head.top": {
+     "record": [137.56, 4.66],
+     "held": false,
+     "found": [150.33, -10.33],
+     "errPt": 13.68,
+     "offsetPt": [10.81, -8.38],
+     "pass": true,
+     "note": "reported, never held: the sheet draws the tuft differently in every panel"
+    },
+    "nose": {
+     "record": [150.47, 107.47],
+     "held": false,
+     "found": [150.47, 107.46],
+     "errPt": 0.0,
+     "offsetPt": [0.0, 0.0],
+     "pass": true,
+     "note": "the render is placed here"
+    },
+    "eye.R": {
+     "record": [107.4, 101.18],
+     "held": false,
+     "found": [114.77, 104.64],
+     "errPt": 5.66,
+     "offsetPt": [4.52, 3.4],
+     "pass": true,
+     "note": "reported: the panel turns the head, so the pair is held by its spacing and the eyes on the head"
+    },
+    "eye.L": {
+     "record": [172.15, 87.67],
+     "held": false,
+     "found": [181.95, 89.63],
+     "errPt": 6.94,
+     "offsetPt": [6.39, 2.73],
+     "pass": true,
+     "note": "reported: the panel turns the head, so the pair is held by its spacing and the eyes on the head"
+    },
+    "mouth.R": {
+     "record": [126.59, 117.61],
+     "held": false,
+     "found": [135.72, 122.02],
+     "errPt": 7.04,
+     "offsetPt": [5.58, 4.3],
+     "pass": true,
+     "note": "reported: the panel turns the head, so the pair is held by its spacing and the eyes on the head"
+    },
+    "mouth.L": {
+     "record": [166.57, 113.66],
+     "held": false,
+     "found": [169.67, 115.18],
+     "errPt": 2.4,
+     "offsetPt": [1.89, 1.47],
+     "pass": true,
+     "note": "reported: the panel turns the head, so the pair is held by its spacing and the eyes on the head"
+    }
+   },
+   "spacing": {
+    "eyes": {
+     "held": true,
+     "recordPt": [45.93, 0.0],
+     "foundPt": [47.79, -0.67],
+     "errPt": 1.98,
+     "pass": true
+    },
+    "mouth": {
+     "held": true,
+     "recordPt": [27.73, 2.99],
+     "foundPt": [24.04, 0.16],
+     "errPt": 4.65,
+     "pass": false
+    }
+   },
+   "shapes": {
+    "eye.R": {
+     "areaPx": 120,
+     "recordAreaPx": 191,
+     "areaPt2": 57.8,
+     "areaRatio": 0.628,
+     "iou": 0.628,
+     "pass": true,
+     "held": true
+    },
+    "eye.L": {
+     "areaPx": 623,
+     "recordAreaPx": 503,
+     "areaPt2": 300.3,
+     "areaRatio": 1.239,
+     "iou": 0.779,
+     "pass": true,
+     "held": true
+    },
+    "mouth": {
+     "areaPx": 562,
+     "recordAreaPx": 605,
+     "areaPt2": 270.9,
+     "areaRatio": 0.929,
+     "iou": 0.737,
+     "pass": true,
+     "openPx": 528,
+     "recordOpenPx": 527,
+     "openRatio": 1.001,
+     "redShare": 0.32,
+     "recordRedShare": 0.268,
+     "held": true
+    }
+   },
+   "anchorsHeld": 0,
+   "spacingsHeld": 2,
+   "shapesHeld": 3,
+   "pass": false
+  }
+ },
+ "headGate": {
+  "headShiftPt": [0.0, 0.0],
+  "headIoU": 1.0,
+  "thresholdPt": 2.8,
+  "rows": {
+   "nose": {
+    "model": [-0.2, -91.6],
+    "found": [-0.68, -92.05],
+    "errPt": 0.66,
+    "pass": true
+   },
+   "eyes.middle": {
+    "model": [-1.2, -99.6],
+    "found": [-0.98, -99.3],
+    "errPt": 0.37,
+    "pass": true,
+    "measuredBy": "each eye's parts' pixels in the ID pass"
+   }
+  },
+  "pass": true
+ },
+ "anchorsHeld": 4,
+ "spacingsHeld": 0,
+ "shapesHeld": 3,
+ "pass": false,
+ "summary": "FAIL: 4 anchors and 3 shapes held on master.expression.cheeky (failing: eye.R shape, eye.L shape); head held (nose 0.66 pt, eyes.middle 0.37 pt)"
+}

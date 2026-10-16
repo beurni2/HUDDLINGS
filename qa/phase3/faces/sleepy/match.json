@@ -1,0 +1,269 @@
+{
+ "species": "dog",
+ "preset": "sleepy",
+ "renderFaceRollDeg": -3.98,
+ "still": {
+  "still": "face_sleepy",
+  "clip": "face_sleepy",
+  "views": {
+   "body": "front",
+   "head": "front"
+  },
+  "ppp": 3,
+  "sizePx": [534, 570],
+  "rootPx": [269, 517]
+ },
+ "rest": {
+  "still": "still_front",
+  "clip": "still_front",
+  "views": {
+   "body": "front",
+   "head": "front"
+  },
+  "ppp": 3
+ },
+ "thresholds": {
+  "landmarkShareOfHead": 0.03,
+  "landmarkPt": 2.8,
+  "eyeAreaRatio": 1.9,
+  "eyeIoU": 0.58,
+  "mouthIoU": 0.35,
+  "mouthOpenRatio": 2.9,
+  "mouthOpenFloorShare": 0.25,
+  "padShareOfHead": 0.25,
+  "headBoxPt": [-70.0, -190.0, 70.0, -30.0],
+  "turnedShareOfHead": 0.03,
+  "reachShareOfHead": 0.08,
+  "touchShareOfHead": 0.05,
+  "topShareOfHead": 0.15,
+  "pinReachShareOfHead": 0.2,
+  "pinRounds": 4,
+  "pinSettledPx": 0.05,
+  "windowShareOfHead": 0.35,
+  "subsamples": 4,
+  "softL": [50, 70],
+  "endPx": 2.0,
+  "eyeMinPx": 20,
+  "noseCorePx": 5,
+  "openChroma": 30,
+  "openHue": 50,
+  "openL": 60
+ },
+ "primary": "master.expression.sleepy",
+ "records": {
+  "master.expression.sleepy": {
+   "crop": "master.expression.sleepy",
+   "gating": true,
+   "ptPerCropPx": 1.22682,
+   "measureZoom": 2,
+   "rollDeg": 8.78,
+   "turnDeg": 12.76,
+   "padPx": 38,
+   "turned": true,
+   "turnAcrossPt": 3.04,
+   "drawn": {
+    "eyes": "closed",
+    "mouth": "downturned"
+   },
+   "heldTo": [
+    "eye.R",
+    "eye.L"
+   ],
+   "alignment": {
+    "pinnedOn": "nose",
+    "shiftFromModelPt": [0.42, 0.45]
+   },
+   "rows": {
+    "head.top": {
+     "record": [74.25, 3.56],
+     "held": false,
+     "found": [75.33, 14.52],
+     "errPt": 13.51,
+     "offsetPt": [3.36, 13.09],
+     "pass": true,
+     "note": "reported, never held: the sheet draws the tuft differently in every panel"
+    },
+    "nose": {
+     "record": [64.05, 71.62],
+     "held": false,
+     "found": [64.05, 71.62],
+     "errPt": 0.0,
+     "offsetPt": [0.0, 0.0],
+     "pass": true,
+     "note": "the render is placed here"
+    },
+    "eye.R": {
+     "record": [46.12, 63.53],
+     "held": false,
+     "found": [44.72, 64.0],
+     "errPt": 1.81,
+     "offsetPt": [-1.61, 0.83],
+     "pass": true,
+     "note": "reported: the panel turns the head, so the pair is held by its spacing and the eyes on the head"
+    },
+    "eye.L": {
+     "record": [87.78, 69.96],
+     "held": false,
+     "found": [84.73, 70.19],
+     "errPt": 3.76,
+     "offsetPt": [-3.66, 0.85],
+     "pass": true,
+     "note": "reported: the panel turns the head, so the pair is held by its spacing and the eyes on the head"
+    }
+   },
+   "spacing": {
+    "eyes": {
+     "held": true,
+     "recordPt": [51.71, -0.01],
+     "foundPt": [49.67, 0.02],
+     "errPt": 2.04,
+     "pass": true
+    }
+   },
+   "shapes": {
+    "eye.R": {
+     "areaPx": 131,
+     "recordAreaPx": 228,
+     "areaPt2": 49.3,
+     "areaRatio": 0.575,
+     "iou": 0.575,
+     "pass": false,
+     "held": true
+    },
+    "eye.L": {
+     "areaPx": 139,
+     "recordAreaPx": 243,
+     "areaPt2": 52.3,
+     "areaRatio": 0.572,
+     "iou": 0.572,
+     "pass": false,
+     "held": true
+    }
+   },
+   "anchorsHeld": 0,
+   "spacingsHeld": 1,
+   "shapesHeld": 2,
+   "pass": false
+  },
+  "expressions.expression.sleepy": {
+   "crop": "expressions.expression.sleepy",
+   "gating": false,
+   "ptPerCropPx": 0.7023,
+   "measureZoom": 1,
+   "rollDeg": 9.54,
+   "turnDeg": 13.52,
+   "padPx": 33,
+   "turned": true,
+   "turnAcrossPt": 3.03,
+   "drawn": {
+    "eyes": "closed",
+    "mouth": "downturned"
+   },
+   "heldTo": [
+    "eye.R",
+    "eye.L"
+   ],
+   "alignment": {
+    "pinnedOn": "nose",
+    "shiftFromModelPt": [0.42, 0.44]
+   },
+   "rows": {
+    "head.top": {
+     "record": [131.5, 22.6],
+     "held": false,
+     "found": [126.68, 31.63],
+     "errPt": 7.19,
+     "offsetPt": [-2.28, 6.82],
+     "pass": true,
+     "note": "reported, never held: the sheet draws the tuft differently in every panel"
+    },
+    "nose": {
+     "record": [104.67, 130.72],
+     "held": false,
+     "found": [104.64, 130.73],
+     "errPt": 0.03,
+     "offsetPt": [-0.02, 0.01],
+     "pass": true,
+     "note": "the render is placed here"
+    },
+    "eye.R": {
+     "record": [75.23, 116.93],
+     "held": false,
+     "found": [71.01, 116.95],
+     "errPt": 2.97,
+     "offsetPt": [-2.92, 0.51],
+     "pass": true,
+     "note": "reported: the panel turns the head, so the pair is held by its spacing and the eyes on the head"
+    },
+    "eye.L": {
+     "record": [144.25, 128.54],
+     "held": false,
+     "found": [140.84, 128.69],
+     "errPt": 2.39,
+     "offsetPt": [-2.34, 0.5],
+     "pass": true,
+     "note": "reported: the panel turns the head, so the pair is held by its spacing and the eyes on the head"
+    }
+   },
+   "spacing": {
+    "eyes": {
+     "held": true,
+     "recordPt": [49.15, 0.01],
+     "foundPt": [49.74, 0.0],
+     "errPt": 0.58,
+     "pass": true
+    }
+   },
+   "shapes": {
+    "eye.R": {
+     "areaPx": 98,
+     "recordAreaPx": 137,
+     "areaPt2": 48.3,
+     "areaRatio": 0.715,
+     "iou": 0.715,
+     "pass": true,
+     "held": true
+    },
+    "eye.L": {
+     "areaPx": 106,
+     "recordAreaPx": 141,
+     "areaPt2": 52.3,
+     "areaRatio": 0.752,
+     "iou": 0.752,
+     "pass": true,
+     "held": true
+    }
+   },
+   "anchorsHeld": 0,
+   "spacingsHeld": 1,
+   "shapesHeld": 2,
+   "pass": true
+  }
+ },
+ "headGate": {
+  "headShiftPt": [0.0, 0.0],
+  "headIoU": 1.0,
+  "thresholdPt": 2.8,
+  "rows": {
+   "nose": {
+    "model": [-0.2, -91.6],
+    "found": [-0.68, -92.05],
+    "errPt": 0.66,
+    "pass": true
+   },
+   "eyes.middle": {
+    "model": [-1.2, -99.6],
+    "found": [-1.08, -97.6],
+    "errPt": 2.0,
+    "pass": true,
+    "measuredBy": "each eye's parts' pixels in the ID pass"
+   }
+  },
+  "pass": true
+ },
+ "anchorsHeld": 0,
+ "spacingsHeld": 1,
+ "shapesHeld": 2,
+ "pass": false,
+ "summary": "FAIL: the eyes' spacing and 2 shapes held on master.expression.sleepy (it turns the head: each place reported, the eyes held on the head) (failing: eye.R shape, eye.L shape); head held (nose 0.66 pt, eyes.middle 2.0 pt)"
+}

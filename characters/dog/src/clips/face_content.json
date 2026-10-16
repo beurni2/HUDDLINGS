@@ -1,0 +1,8 @@
+{
+  "name": "face_content",
+  "lengthMs": 1000,
+  "views": { "body": [[0, "front"]], "head": [[0, "front"]] },
+  "states": { "eye.L": [[0, "happy"]], "eye.R": [[0, "happy"]], "mouth": [[0, "smile"]], "brow.L": [[0, "happy"]], "brow.R": [[0, "happy"]], "ear.L": [[0, "relaxed"]], "ear.R": [[0, "relaxed"]] },
+  "tracks": { "ear.L": { "rot": [[0, 3]] }, "ear.R": { "rot": [[0, -3]] } },
+  "events": [{ "at": 0, "type": "keyPose" }]
+}

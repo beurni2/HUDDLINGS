@@ -1,0 +1,54 @@
+== no plant
+✔ every face state is on the allowlist, and no state, part or preset is named for sorrow
+✔ no mouth turns down: every lip's ends at or above its centre, every o symmetric and round at its foot, as drawn in the front
+✔ every brow is an arc that bows up, its inner end at or above its outer and within the sheets' tilt, as drawn in the front
+✔ no face clip turns an ear in past the lowered state or out past the lifted one, and only sleepy lowers and only the lifted faces lift
+✔ the face clips are what presets.ts writes: one per preset drawn now, sound, at the frame each primary panel draws
+✔ every face state draws a region, or a deliberate null, in every view that draws its part
+✔ the stars draw only beside the sparkle eyes, and every eye state draws its own drawing
+== open frown: the open mouth's lip curls bent down, its ends 6.6 pt below its centre
+✔ every face state is on the allowlist, and no state, part or preset is named for sorrow
+✖ no mouth turns down: every lip's ends at or above its centre, every o symmetric and round at its foot, as drawn in the front
+✔ every brow is an arc that bows up, its inner end at or above its outer and within the sheets' tilt, as drawn in the front
+✔ no face clip turns an ear in past the lowered state or out past the lifted one, and only sleepy lowers and only the lifted faces lift
+✔ the face clips are what presets.ts writes: one per preset drawn now, sound, at the frame each primary panel draws
+✔ every face state draws a region, or a deliberate null, in every view that draws its part
+✔ the stars draw only beside the sparkle eyes, and every eye state draws its own drawing
+✖ failing tests:
+✖ no mouth turns down: every lip's ends at or above its centre, every o symmetric and round at its foot, as drawn in the front
+  AssertionError [ERR_ASSERTION]: the open mouth
+  + "its lip's left end hangs 6.60 pt below its centre"
+== angry brow: the neutral brow sheared so its inner end sits 1.6 pt below its outer
+✔ every face state is on the allowlist, and no state, part or preset is named for sorrow
+✔ no mouth turns down: every lip's ends at or above its centre, every o symmetric and round at its foot, as drawn in the front
+✖ every brow is an arc that bows up, its inner end at or above its outer and within the sheets' tilt, as drawn in the front
+✔ no face clip turns an ear in past the lowered state or out past the lifted one, and only sleepy lowers and only the lifted faces lift
+✔ the face clips are what presets.ts writes: one per preset drawn now, sound, at the frame each primary panel draws
+✔ every face state draws a region, or a deliberate null, in every view that draws its part
+✔ the stars draw only beside the sparkle eyes, and every eye state draws its own drawing
+✖ failing tests:
+✖ every brow is an arc that bows up, its inner end at or above its outer and within the sheets' tilt, as drawn in the front
+  AssertionError [ERR_ASSERTION]: brow.L neutral
+  + 'its inner end sits 1.61 pt below its outer end, an angry slant'
+== drooped ear: face_shy's left ear turned 12 degrees in
+✔ every face state is on the allowlist, and no state, part or preset is named for sorrow
+✔ no mouth turns down: every lip's ends at or above its centre, every o symmetric and round at its foot, as drawn in the front
+✔ every brow is an arc that bows up, its inner end at or above its outer and within the sheets' tilt, as drawn in the front
+✖ no face clip turns an ear in past the lowered state or out past the lifted one, and only sleepy lowers and only the lifted faces lift
+✖ the face clips are what presets.ts writes: one per preset drawn now, sound, at the frame each primary panel draws
+✔ every face state draws a region, or a deliberate null, in every view that draws its part
+✔ the stars draw only beside the sparkle eyes, and every eye state draws its own drawing
+✖ failing tests:
+✖ no face clip turns an ear in past the lowered state or out past the lifted one, and only sleepy lowers and only the lifted faces lift
+  AssertionError [ERR_ASSERTION]: face_shy
+  + "ear.L turns 12° in, past the lowered state's 7°"
+✖ the face clips are what presets.ts writes: one per preset drawn now, sound, at the frame each primary panel draws
+  AssertionError [ERR_ASSERTION]: face_shy.json is stale: node characters/dog/src/faceClips.ts
+== plants taken out
+✔ every face state is on the allowlist, and no state, part or preset is named for sorrow
+✔ no mouth turns down: every lip's ends at or above its centre, every o symmetric and round at its foot, as drawn in the front
+✔ every brow is an arc that bows up, its inner end at or above its outer and within the sheets' tilt, as drawn in the front
+✔ no face clip turns an ear in past the lowered state or out past the lifted one, and only sleepy lowers and only the lifted faces lift
+✔ the face clips are what presets.ts writes: one per preset drawn now, sound, at the frame each primary panel draws
+✔ every face state draws a region, or a deliberate null, in every view that draws its part
+✔ the stars draw only beside the sparkle eyes, and every eye state draws its own drawing
