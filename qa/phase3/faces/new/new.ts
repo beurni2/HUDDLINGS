@@ -1,9 +1,9 @@
 // The new faces for the founder's review at Gate A (spec L496-497, R3; docs/phase3-plan.md section 5, New faces), and
-// Q2's alternative eyes, rendered as front stills from a scratch package that never ships: the dog's source built with
-// the review-only drawings added (views/front.ts reviewStates: hungry's and huffy's variant B, the dog-style `> <` and
-// star eyes), each under a state of its own, and a clip per face. The package's own variant A comes from its own
-// clips (face_hungry, face_huffy). Each still is labelled "new drawing" or "not on the dog sheet"; sheet.py lays them
-// beside the sheet panels they borrow from.
+// Q2's eyes as the founder chose them, rendered as front stills from a scratch package that never ships: the dog's
+// source built with the review-only drawings added (views/front.ts reviewStates: hungry's and huffy's variant B,
+// tender's softer lid, the squeeze in the outline's warm brown), each under a state of its own, and a clip per face.
+// The package's own variant A comes from its own clips (face_hungry, face_huffy), and Q2's squeeze and sparkle from
+// its own eye states (DECISIONS 202, 203). Each still is labelled; sheet.py lays them beside the panels they borrow from.
 //
 // node qa/phase3/faces/new/new.ts <out folder> [--cache <raster cache>]
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
@@ -51,10 +51,12 @@ const STILLS: { still: string; clip: Clip; label: string; title: string }[] = [
   { still: "tender-A", clip: { ...clip("tender", tender), name: "review_tender_A" }, label: "on the dog sheet", title: "tender (ships): the sleepy half-lid" },
   { still: "tender-soft", clip: variant("tender_soft", clip("tender", tender), { "eye.L": "sleepySoft", "eye.R": "sleepySoft" }), label: "for the founder", title: "tender: a softer lid, arched up" },
   { still: "tender-crescent", clip: { ...clip("tender", { ...tender, eyes: ["happy"], blush: 0.5 }), name: "review_tender_crescent" }, label: "for the founder", title: "tender: crescents, blush 50%" },
-  { still: "q2-squeeze-default", clip: { ...clip("ticklish", ticklish), name: "review_q2_squeeze_default" }, label: "Q2 default", title: "squeeze, Q2's default: the happy crescent" },
-  { still: "q2-squeeze-alt", clip: variant("q2_squeeze_alt", clip("ticklish", ticklish), { "eye.L": "squeezeAlt", "eye.R": "squeezeAlt" }), label: "not on the dog sheet", title: "squeeze, the alternative: > <" },
-  { still: "q2-sparkle-default", clip: { ...clip("proud", proud), name: "review_q2_sparkle_default" }, label: "Q2 default", title: "sparkle, Q2's default: crescents and stars" },
-  { still: "q2-sparkle-alt", clip: variant("q2_sparkle_alt", clip("proud", proud), { "eye.L": "sparkleAlt", "eye.R": "sparkleAlt" }), label: "not on the dog sheet", title: "sparkle, the alternative: a star in the eye, and the stars" },
+  // Q2 as the founder chose it (DECISIONS 200): ticklish's squeeze and proud's two beats ship; the squeeze in the
+  // outline's warm brown, the other reading of "the warm line colour", is shown not taken (202).
+  { still: "q2-squeeze", clip: { ...clip("ticklish", ticklish), name: "review_q2_squeeze" }, label: "not on the dog sheet", title: "ticklish (ships): the squeeze, > <" },
+  { still: "q2-squeeze-warm", clip: variant("q2_squeeze_warm", clip("ticklish", ticklish), { "eye.L": "squeezeWarm", "eye.R": "squeezeWarm" }), label: "not taken", title: "the squeeze in the outline's warm brown" },
+  { still: "q2-proud", clip: { ...clip("proud", proud), name: "review_q2_proud" }, label: "on the dog sheet", title: "proud (ships): its panel, crescents and stars" },
+  { still: "q2-sparkle", clip: variant("q2_sparkle", clip("proud", proud), { "eye.L": "sparkle", "eye.R": "sparkle" }), label: "not on the dog sheet", title: "proud's second beat: the sparkle eyes" },
 ];
 
 const source = await readSource("dog");

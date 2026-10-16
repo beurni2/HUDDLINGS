@@ -354,10 +354,7 @@
      "mouth.R",
      "mouth.L"
     ],
-    "ticklish": [
-     "eye.R",
-     "eye.L"
-    ]
+    "ticklish": []
    },
    "mask": "ref/faces/master.expression.excited.png"
   },
@@ -423,8 +420,6 @@
      "eye.L"
     ],
     "ticklish": [
-     "eye.R",
-     "eye.L",
      "mouth.R",
      "mouth.L"
     ]
@@ -895,10 +890,7 @@
      "mouth.R",
      "mouth.L"
     ],
-    "ticklish": [
-     "eye.R",
-     "eye.L"
-    ]
+    "ticklish": []
    },
    "mask": "ref/faces/expressions.expression.excited.png"
   },
@@ -960,8 +952,6 @@
      "eye.L"
     ],
     "ticklish": [
-     "eye.R",
-     "eye.L",
      "mouth.R",
      "mouth.L"
     ]

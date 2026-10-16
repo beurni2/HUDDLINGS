@@ -42,6 +42,60 @@ export const PUFF: Puff = {
   crease: [-40, 30],
 };
 
+/**
+ * A puffed cheek on a turned head (DECISIONS 208), in model space: the front's ball (PUFF) where the view's muzzle puts
+ * it, `rx` and `ry` its half-axes there (the across one shortened with the muzzle) and `turn` the muzzle's level
+ * (degrees, clockwise); `mouthward` +1 when the mouth lies to its right on screen, −1 when to its left, where its
+ * crease hugs the mouth's end.
+ */
+export interface TurnedPuff {
+  c: P;
+  rx: number;
+  ry: number;
+  turn: number;
+  mouthward: 1 | -1;
+}
+
+/**
+ * The puffed cheeks of a turned head, each ball painted as the front's are (light dome, warm shade, the crease), the
+ * dome's light at two thirds of the front's: at its full 0.7 a turned ball, seen over the blush's side of the cheek,
+ * read as a cotton ball stuck on.
+ */
+export function turnedCheeks(balls: TurnedPuff[], facing: { light: P; lit(d: string, about: number): string }, p: Puff = { ...PUFF, light: { ...PUFF.light, opacity: 0.45 } }): Piece {
+  const light = facing.light;
+  // The dome is a light typed toward the top left in the .L frame and placed again across its ball in .R (Facing.lit).
+  const typed: P = [-Math.abs(light[0]), light[1]];
+  const boxes = balls.map((b): Box => [b.c[0] - b.rx - 4, b.c[1] - b.ry - 4, 2 * b.rx + 8, 2 * b.ry + 8]);
+  const box = boxes.reduce((a, b) => [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0] + a[2], b[0] + b[2]) - Math.min(a[0], b[0]), Math.max(a[1] + a[3], b[1] + b[3]) - Math.min(a[1], b[1])]);
+  const shadeBlur = uid("blur"), lightBlur = uid("blur"), ring = uid("ring"), soft = uid("blur");
+  let defs = `${blur(shadeBlur, box, 1.5)}${blur(lightBlur, box, 1.8)}${blur(soft, box, 0.25)}`;
+  let body = "";
+  const lines = [];
+  for (const [k, b] of balls.entries()) {
+    const t = (b.turn * Math.PI) / 180, cos = Math.cos(t), sin = Math.sin(t);
+    /** A point in the ball's own frame (x along the muzzle's level, y down), in model space. */
+    const at = ([x, y]: P): P => [b.c[0] + x * cos - y * sin, b.c[1] + x * sin + y * cos];
+    const s = b.rx / p.rx, q = b.ry / p.ry;
+    const ball = pathD(ellipse(b.c, b.rx, b.ry, b.turn));
+    const lit: P = [b.c[0] + light[0] * p.shade.inset, b.c[1] + light[1] * p.shade.inset];
+    const id = `${ring}${k}`;
+    defs += `<clipPath id="${id}"><path d="${ball}"/></clipPath>`;
+    body += `<g filter="url(#${shadeBlur})" opacity="${p.shade.opacity}"><g clip-path="url(#${id})"><path d="M${r3(b.c[0] - 40)} ${r3(b.c[1] - 40)}H${r3(b.c[0] + 40)}V${r3(b.c[1] + 40)}H${r3(b.c[0] - 40)}Z${pathD(ellipse(lit, b.rx + 0.4, b.ry + 0.4, b.turn))}" ` +
+      `fill="${C.furShade}" fill-rule="evenodd"/></g></g>`;
+    const top: P = [b.c[0] + typed[0] * b.ry * 0.38, b.c[1] + typed[1] * b.ry * 0.38];
+    body += `<path d="${facing.lit(pathD(ellipse(top, p.light.rx * s, p.light.ry * q, 0)), b.c[0])}" fill="${C.light}" opacity="${p.light.opacity}" filter="url(#${lightBlur})"/>`;
+    const n = 10, [a0, a1] = p.crease;
+    const crease = Array.from({ length: n + 1 }, (_, i): P => {
+      const a = ((a0 + ((a1 - a0) * i) / n) * Math.PI) / 180;
+      return at([b.mouthward * b.rx * Math.cos(a), b.ry * Math.sin(a)]);
+    });
+    const l = innerLine(crease, 0.75, C.puffLine, { opacity: 0.7, taper: 2.2, tip: 0.1, wobble: 0 });
+    body += `<g filter="url(#${soft})">${l.svg}</g>`;
+    lines.push({ ...l.line, where: "cheek crease" });
+  }
+  return piece(`<defs>${defs}</defs>${body}`, box, { shapes: [], lines });
+}
+
 export function puffedCheeks(f: FaceFrame, p: Puff = PUFF): Piece {
   const box: Box = [-(p.at[0] + p.rx + 4), p.at[1] - p.ry - 4, 2 * (p.at[0] + p.rx + 4), 2 * p.ry + 8];
   const shadeBlur = uid("blur"), lightBlur = uid("blur"), ring = uid("ring"), soft = uid("blur");

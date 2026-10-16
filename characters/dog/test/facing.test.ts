@@ -471,7 +471,9 @@ test("each right-facing view's face states are its left-facing ones mirrored, na
   for (const kind of KINDS) {
     const L = facePieces(`${kind}.L`), R = facePieces(`${kind}.R`);
     assert.deepEqual([...R.keys()].sort(), [...L.keys()].map(swapKey).sort(), `${kind}: the facings draw the same states`);
-    assert.equal(R.size, kind === "side" ? 16 : 26, `${kind}.R draws ${R.size} face states`);
+    // Every face state, hungry's and huffy's and Q2's squeeze and sparkle among them (DECISIONS 202 to 208), with the held
+    // stars, puffed cheeks and profile mouths.
+    assert.equal(R.size, kind === "side" ? 25 : 40, `${kind}.R draws ${R.size} face states`);
     for (const [key, r] of R) {
       const l = L.get(swapKey(key))!;
       assert.ok(r.svg.startsWith(MIRROR), `${kind}.R ${key} is not its .L drawing mirrored`);
@@ -479,7 +481,11 @@ test("each right-facing view's face states are its left-facing ones mirrored, na
       assert.deepEqual(r.meta.shapes.map((s) => s.segs), l.meta.shapes.map((s) => s.segs.map((seg) => seg.map(([x, y]) => [-x, y]))), `${key}'s shapes`);
       // The stars' warm cores glow a little past their drawn-in sides and sit toward the light, so their coverage moves
       // with it: their bodies are held here, their cores by the next test.
-      const body = (svg: string) => (key === "stars:sparkle" ? svg.replace(/<ellipse [^>]*\/>/g, "") : svg);
+      // Huffy's puffed cheeks are all light and shade but their creases (parts/cheeks.ts turnedCheeks): their shade lies
+      // away from the light and their domes toward it (held by the next test), so their creases are held here.
+      const body = (svg: string) => (key === "stars:sparkle" ? svg.replace(/<ellipse [^>]*\/>/g, "")
+        : key === "cheeks:puffed" ? svg.replace(/<g filter="url\(#[^)]+\)" opacity="[^"]+"><g clip-path="url\(#[^)]+\)"><path [^>]*\/><\/g><\/g>/g, "")
+          .replace(/<path d="[^"]+" fill="#FFFFFF" opacity="[^"]+" filter="url\(#[^)]+\)"\/>/g, "") : svg);
       if (key.startsWith("head.line:")) {
         // The head's line follows the light on its inner side (the line rule's width), so, as the rest test above, its
         // coverage is not held to the mirror's; it is held to its own facing's rest line, which that test holds: the
@@ -564,8 +570,10 @@ test("each face state's light typed by hand toward the light is, in .R, its .L l
     return (x0 + x1) / 2;
   };
   const stated: Record<Kind, Record<string, number[]>> = {
-    threeQuarter: { "ear.L:onePerked": [across(threeQuarterFace.perked.L)], "ear.R:onePerked": [across(threeQuarterFace.perked.R)] },
-    side: { "ear.L:onePerked": [across(sideFace.perked.L)] },
+    // And huffy's puffed cheeks' light domes, each about its ball's middle (parts/cheeks.ts turnedCheeks, DECISIONS 208).
+    threeQuarter: { "ear.L:onePerked": [across(threeQuarterFace.perked.L)], "ear.R:onePerked": [across(threeQuarterFace.perked.R)],
+      "cheeks:puffed": threeQuarterFace.puffs(LIGHT).map((b) => b.c[0]) },
+    side: { "ear.L:onePerked": [across(sideFace.perked.L)], "cheeks:puffed": [sideFace.puff.c[0]] },
   };
   for (const kind of KINDS) {
     const R = facePieces(`${kind}.R`);

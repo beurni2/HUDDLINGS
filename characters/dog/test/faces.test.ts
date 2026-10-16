@@ -21,10 +21,12 @@ import { BOX, composite, resvgLayers } from "../../draw/test/composite.ts";
 import { blushAlpha, clipText, earRot, faceClip, faceClips, RAISED, stillOf } from "../src/faceClips.ts";
 import { BROW_STATES, brow } from "../src/parts/brow.ts";
 import { CHEEK_STATES } from "../src/parts/cheeks.ts";
-import { eye, eyeGeometry, lidBand, lidLine, type EyeSpec } from "../src/parts/eye.ts";
+import { chevronArms, coverEdge, eye, eyeGeometry, irisCentre, lidBand, lidLine, lightOnIris, plumpStar, tinyOf, type Chevron, type EyeSpec } from "../src/parts/eye.ts";
 import { MOUTH_STATES, mouth, oTongue, type Mouth } from "../src/parts/mouth.ts";
 import { BLUSH_REFERENCE, EAR_ANGLES, EAR_STATES, EYE_STATES, PRESETS, type EarState, type Preset } from "../src/presets.ts";
-import { eyeStateSpec, faceFrame, faceStates, flatLid, front } from "../src/views/front.ts";
+import { BALL_STATES, eyeStateSpec, faceFrame, faceStates, flatLid, front, squeeze } from "../src/views/front.ts";
+import { profileEyeSpec } from "../src/views/side.ts";
+import { turnedEyeSpec } from "../src/views/threeQuarter.ts";
 
 const rig = JSON.parse(readFileSync(new URL("../src/rig.json", import.meta.url), "utf8")) as Rig;
 const clipsDir = new URL("../src/clips/", import.meta.url);
@@ -280,6 +282,133 @@ function gazeProblem(e: EyeSpec, rest: EyeSpec): string | undefined {
   return up > GAZE_UP_PT ? `its dark stands ${up.toFixed(2)} pt higher in the eye than the rest eye's, looking up` : undefined;
 }
 
+/** How many white fills an eye's drawing paints: its catchlights, and the sparkle's star. */
+const whites = (svg: string) => svg.split('fill="#FFFFFF"').length - 1;
+/** An eye state's catchlights, large then tiny: the half-lid's own under its lid, else the eye's. */
+const lightsOf = (e: EyeSpec) => (e.cover ? [e.cover.shine, tinyOf(e.cover.shine)] : [e.shine, e.tiny ?? tinyOf(e.shine)]);
+/** A catchlight's problem on its eye: off the dark iris (on the white or the rim), or under a half-lid wholly hidden. */
+function lightProblem(e: EyeSpec, l: { at: [number, number]; r: number }): string | undefined {
+  const { shown, off } = lightOnIris(e, l, e.cover ? { edge: coverEdge(e, e.cover), tilt: e.cover.tilt } : undefined);
+  if (shown === 0) return "it shows nowhere below the lid";
+  return off > 0 ? `${off} of its ${shown} points that show lie off the dark iris` : undefined;
+}
+/** How far the large catchlight has moved with the iris, as a share of the iris's own travel from the eye with its iris centred, and along it. */
+function ride(e: EyeSpec, centred: EyeSpec): { share: number; along: number } {
+  const [a, b] = [irisCentre(e), irisCentre(centred)];
+  const travel: P = [a[0] - b[0], a[1] - b[1]], moved: P = [e.shine.at[0] - centred.shine.at[0], e.shine.at[1] - centred.shine.at[1]];
+  const t = Math.hypot(...travel), m = Math.hypot(...moved);
+  return { share: m / t, along: (moved[0] * travel[0] + moved[1] * travel[1]) / (m * t || 1) };
+}
+
+/**
+ * The catchlights (docs/QUESTIONS.md Q26, Q28, the founder's choices of Oct 16, 2026; DECISIONS 200, 201, 204): every eye
+ * that shows its iris paints one large catchlight and one tiny one, a quarter its size, just below it toward the outer
+ * side, both wholly on the dark iris inside the opening, never on the white; under the half-lid what shows below the lid
+ * lies on the iris and some of each shows; where the iris looks aside (peek, huffy's peek back, hungry's eager eye) the
+ * large one has moved about half the iris's travel, along it; the closed eyes (the lash bands, the squeeze) paint none.
+ * The founder's "about a quarter" (a fifth to a third) and "about half" are held as numbers of their own, not read from
+ * the recipe's constants, so a change to those fails here.
+ */
+const QUARTER = [0.2, 1 / 3] as const, HALF = 0.5;
+test("every eye that shows its iris has its large and its tiny catchlight on the dark iris, riding it at half its travel; a closed eye has none", () => {
+  const drawn = new Map(faceStates().map((d) => [`${d.part}:${d.state}`, d.piece.svg]));
+  for (const side of ["L", "R"] as const) {
+    for (const state of ["open", ...BALL_STATES] as const) {
+      const e = eyeStateSpec(state, side), [big, tiny] = lightsOf(e);
+      for (const [name, l] of [["large", big!], ["tiny", tiny!]] as const) assert.equal(lightProblem(e, l), undefined, `eye.${side} ${state}: its ${name} catchlight`);
+      const size = tiny!.r / big!.r;
+      assert.ok(size >= QUARTER[0] && size <= QUARTER[1] && tiny!.at[1] < big!.at[1] - big!.r && tiny!.at[0] < big!.at[0], `eye.${side} ${state}: the tiny catchlight is ${size.toFixed(2)} of the large one, not about a quarter below it toward the outer side`);
+      if (state !== "open") assert.equal(whites(drawn.get(`eye.${side}:${state}`)!), state === "sparkle" ? 3 : 2, `eye.${side} ${state}'s whites`);
+    }
+    assert.equal(whites(eye(eyeStateSpec("open", side)).svg), 2, `eye.${side} open's whites`);
+    // About half the iris's travel: half, or on only as far as it must where half would leave it touching the white.
+    for (const [state, centred] of [["peek", "open"], ["peekBack", "open"], ["eager", "wide"]] as const) {
+      const [e, c] = [eyeStateSpec(state, side), eyeStateSpec(centred, side)];
+      const { share, along } = ride(e, c);
+      assert.ok(share > HALF - 0.02 && share <= 1 && along > 0.999, `eye.${side} ${state}: its catchlight moves ${share.toFixed(2)} of the iris's travel (${along.toFixed(3)} along it)`);
+      if (share > HALF + 0.02) {
+        const [a, b] = [irisCentre(e), irisCentre(c)], f = share - 0.05;
+        const back = { at: [c.shine.at[0] + f * (a[0] - b[0]), c.shine.at[1] + f * (a[1] - b[1])] as [number, number], r: e.shine.r };
+        assert.ok(lightProblem(e, back) || lightProblem(e, tinyOf(back)), `eye.${side} ${state}: its catchlight rides ${share.toFixed(2)} of the iris's travel where less would do`);
+      }
+    }
+    for (const state of ["happy", "squeeze", "closed", "wink", "flat"]) assert.equal(whites(drawn.get(`eye.${side}:${state}`)!), 0, `eye.${side} ${state} paints a catchlight`);
+  }
+  // Planted: peek's catchlights left where the open eye has them (riding not at all) and the half-lid's at the open
+  // eye's place, under its lid (going under the lid wholly), each fails; so does the tiny one put on the white's side.
+  const peek = eyeStateSpec("peek", "L"), open = eyeStateSpec("open", "L"), sleepy = eyeStateSpec("sleepy", "L");
+  assert.match(lightProblem(peek, open.shine) ?? "", /off the dark iris/, "peek's catchlight left where the open eye has it");
+  assert.match(lightProblem(sleepy, open.shine) ?? "", /shows nowhere below the lid/, "the half-lid's catchlight at the open eye's place");
+  assert.match(lightProblem(open, { at: [-7.6, -3], r: 0.45 }) ?? "", /off the dark iris/, "a tiny catchlight on the white");
+  assert.ok(Math.abs(ride({ ...peek, shine: open.shine }, open).share) < 0.02, "riding not at all measures as not riding");
+});
+
+/**
+ * The squeeze guard (R3): the dog's > < reads as eyes squeezed shut with glee, as the kitty's and the bear's Excited
+ * draw them, never the sheets' Angry slant. In the face's level frame each arm runs out from the point toward the eye's
+ * outer side: the upper arm rises 4 to 20° (the sister sheets' 11 to 14°; steeper, it reads as a frowning brow), the
+ * lower falls 15 to 35° (their 18 to 27°), and the two open 25 to 50° apart, the opening's middle falling outward by
+ * 0 to 12°, never rising (a > tipped up at its open end leans angry).
+ */
+function squeezeProblem(c: Chevron, levelDeg: number): string | undefined {
+  const [upper, lower] = chevronArms(c);
+  const t = (-levelDeg * Math.PI) / 180, out = -c.noseward;
+  const angle = (arm: P[]) => {
+    const [x, y] = [arm.at(-1)![0] - arm[0]![0], arm.at(-1)![1] - arm[0]![1]];
+    const [lx, ly] = [x * Math.cos(t) - y * Math.sin(t), x * Math.sin(t) + y * Math.cos(t)];
+    if (out * lx <= 0) return NaN;
+    return (Math.atan2(ly, Math.abs(lx)) * 180) / Math.PI;
+  };
+  const [up, down] = [-angle(upper), angle(lower)];
+  if (!(up >= 4 && up <= 20)) return `its upper arm rises ${up.toFixed(1)}° outward, outside 4 to 20°`;
+  if (!(down >= 15 && down <= 35)) return `its lower arm falls ${down.toFixed(1)}° outward, outside 15 to 35°`;
+  const mid = (down - up) / 2;
+  if (!(mid >= 0 && mid <= 12)) return `its opening's middle falls ${mid.toFixed(1)}° outward, outside 0 to 12°`;
+  return undefined;
+}
+
+test("the squeeze never slants angry: its arms open outward as the sister sheets' Excited draw them, as drawn in the front", () => {
+  const drawn = new Map(faceStates().map((d) => [`${d.part}:${d.state}`, d.piece.svg]));
+  for (const side of ["L", "R"] as const) {
+    assert.equal(squeezeProblem(squeeze(side), faceFrame.rollDeg), undefined, `eye.${side} squeeze`);
+    assert.ok(drawn.get(`eye.${side}:squeeze`)!.includes(`fill="${"#150801"}"`) || /fill="#1[0-9A-F]{5}"/.test(drawn.get(`eye.${side}:squeeze`)!), `eye.${side} squeeze is not in the lash bands' near-black`);
+  }
+  // Planted: the upper arm steepened to 30° (a frowning V), the arms closed up to 10° and 12° (a flat dash), and the
+  // whole tipped up 15° at its open end; each fails.
+  const s = squeeze("L");
+  assert.match(squeezeProblem({ ...s, angle: [30, 40] }, faceFrame.rollDeg) ?? "", /upper arm rises/);
+  assert.match(squeezeProblem({ ...s, angle: [10, 12] }, faceFrame.rollDeg) ?? "", /lower arm falls/);
+  assert.match(squeezeProblem({ ...s, angle: [19, 16] }, faceFrame.rollDeg) ?? "", /middle falls -1\.\d°/);
+});
+
+/** A path's points, its numbers taken in pairs, and how many rounded corners (Q) it turns. */
+const pathPoints = (d: string): { pts: P[]; corners: number } => {
+  const n = (d.match(/-?\d+(\.\d+)?/g) ?? []).map(Number);
+  return { pts: Array.from({ length: n.length / 2 }, (_, k): P => [n[2 * k]!, n[2 * k + 1]!]), corners: (d.match(/Q/g) ?? []).length };
+};
+
+test("the sparkle's gold stars are plump, the larger five-pointed above the smaller four-pointed, as both sister sheets draw them, in every view", () => {
+  const sparkles: [string, EyeSpec][] = [
+    ...(["L", "R"] as const).map((side): [string, EyeSpec] => [`front eye.${side}`, eyeStateSpec("sparkle", side)]),
+    ...(["L", "R"] as const).map((side): [string, EyeSpec] => [`threeQuarter eye.${side}`, turnedEyeSpec("sparkle", side)]),
+    ["side", profileEyeSpec("sparkle")],
+  ];
+  for (const [name, e] of sparkles) {
+    const [big, small] = e.sparkle!.stars;
+    assert.ok(e.sparkle!.stars.length === 2 && big!.points === 5 && small!.points === 4, `${name}: its stars are not a five-pointed and a four-pointed one`);
+    assert.ok(big!.r > small!.r && big!.at[1] > small!.at[1], `${name}: the larger star does not stand above the smaller`);
+  }
+  // Each outline turns a rounded corner at every tip and valley, and stands as tall as asked, its tips rounded off by
+  // under a tenth, its height's middle where it is placed.
+  for (const points of [5, 4] as const) {
+    const { pts, corners } = pathPoints(plumpStar([0, 0], 4, points, 0.56));
+    const ys = pts.map((p) => p[1]), height = Math.max(...ys) - Math.min(...ys);
+    assert.equal(corners, 2 * points, `the ${points}-pointed star's corners`);
+    assert.ok(height > 8 * 0.9 && height <= 8, `the ${points}-pointed star is ${height.toFixed(2)} tall, asked 8`);
+    assert.ok(Math.abs((Math.max(...ys) + Math.min(...ys)) / 2) < 0.4, `the ${points}-pointed star is not centred on its height`);
+  }
+});
+
 test("the new faces' open eyes never look up: hungry's eager eye and huffy's peek back, as drawn in the front", () => {
   const drawn = new Map(faceStates().map((d) => [`${d.part}:${d.state}`, scopeIds(d.piece.svg, "g")]));
   for (const side of ["L", "R"] as const) {
@@ -408,8 +537,8 @@ test("the face clips are what presets.ts writes: one per preset, sound, at the f
   assert.deepEqual(validate(rig, [faceClip("huffy", PRESETS.huffy!, true)]), [], "huffy's peek back is sound");
   for (const [name, p] of Object.entries(PRESETS)) {
     const s = stillOf(p);
-    // The still's states are the preset's own (the dog's squeeze and sparkle are its happy crescents, Q2).
-    for (const eye of [s.eyes.L, s.eyes.R]) assert.ok(eye === "open" || p.eyes.includes(eye) || (eye === "sparkle" && p.eyes.includes("sparkle")), `${name}: eyes ${eye}`);
+    // The still's states are the preset's own (the squeeze and the sparkle are drawings of their own now, Q2: DECISIONS 202, 203).
+    for (const eye of [s.eyes.L, s.eyes.R]) assert.ok(eye === "open" || p.eyes.includes(eye), `${name}: eyes ${eye}`);
     assert.ok(p.mouth.includes(s.mouth), `${name}: mouth ${s.mouth}`);
     // A preset drawn new has no panel, and names the panels it borrows from; every other has its primary.
     if (p.drawnNew) {
@@ -608,11 +737,17 @@ test("every face state draws a region, or a deliberate null, in every view that 
   assert.equal(regionFor(mouthPart, "side.L", "laugh"), "mouth/side.L:smile");
 });
 
-test("the stars draw only beside the sparkle eyes, the puffed cheeks only puffed, and every eye state draws its own drawing", () => {
+test("the stars round the head draw only in a sparkling face, the puffed cheeks only puffed, and every eye state draws its own drawing", () => {
   const stars = rig.parts.find((p) => p.name === "stars")!;
   assert.equal(regionFor(stars, "front", "sparkle"), "stars/front:sparkle");
   for (const state of [undefined, ...EYE_STATES.filter((s) => s !== "sparkle")]) assert.equal(regionFor(stars, "front", state), undefined, `stars in ${state}`);
   for (const view of rig.views.filter((v) => v !== "front")) assert.equal(regionFor(stars, view, "sparkle"), undefined, `stars in ${view}`);
+  // Only proud's sequence sparkles, and its still keeps its panel: the crescents with the stars round the head (DECISIONS 205).
+  for (const clip of faces) assert.equal(clip.states?.stars?.[0]?.[1], clip.name === "face_proud" ? "sparkle" : undefined, `${clip.name}'s stars`);
+  const proud = stillOf(PRESETS.proud!);
+  assert.deepEqual([proud.eyes.L, proud.eyes.R, proud.stars], ["happy", "happy", true], "proud's still is the crescents with the stars round the head");
+  // Its sparkle beat shows the sparkle's own gold stars beside each eye and not the head's as well: one set at a time.
+  assert.equal(stillOf({ ...PRESETS.proud!, still: { eyes: "sparkle" } }).stars, false, "proud's sparkle beat keeps the stars round the head as well");
   const eye = rig.parts.find((p) => p.name === "eye.L")!;
   // No closed state falls back to the open eye: each has a region of its own, so nothing of the open eye draws under it.
   for (const state of EYE_STATES) {
@@ -620,9 +755,11 @@ test("the stars draw only beside the sparkle eyes, the puffed cheeks only puffed
     assert.ok(region, `eye.L ${state}`);
     if (state !== "open") assert.notEqual(region, "eye.L/front:open", `eye.L ${state} draws the open eye`);
   }
-  // The squeeze and the sparkle are the happy crescent (Q2).
-  assert.equal(regionFor(eye, "front", "squeeze"), "eye.L/front:happy");
-  assert.equal(regionFor(eye, "front", "sparkle"), "eye.L/front:happy");
+  // The squeeze and the sparkle are drawings of their own (Q2, the founder's choice: DECISIONS 200, 202, 203), and
+  // ticklish squeezes while excited keeps its panels' crescents.
+  assert.equal(regionFor(eye, "front", "squeeze"), "eye.L/front:squeeze");
+  assert.equal(regionFor(eye, "front", "sparkle"), "eye.L/front:sparkle");
+  assert.deepEqual([stillOf(PRESETS.ticklish!).eyes.L, stillOf(PRESETS.excited!).eyes.L], ["squeeze", "happy"]);
   // Huffy's puffed cheeks (variant A, inside the head's outline) draw in their state and nowhere else; the head's
   // outline has no puffed state in the package (variant B is review-only).
   const cheeks = rig.parts.find((p) => p.name === "cheeks")!;

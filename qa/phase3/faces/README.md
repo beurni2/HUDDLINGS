@@ -27,7 +27,7 @@ their heads held:
 | tender | master Content | mouth 0.5, 1.15 | mouth x0.64/0.58 |
 | singing | master Laughing | eyes 0.46, 0.19 | eyes x0.98/0.85, x0.97/0.90 |
 | blissful | master Content | eyes 0.97, 1.2; mouth 0.5, 1.15 | eyes x1.12/0.87, x1.05/0.89; mouth x0.64/0.58 |
-| ticklish | master Laughing | eyes 0.46, 0.2; mouth 1.64, 1.24 | eyes x0.98/0.85, x0.97/0.90; mouth x0.91/0.90 |
+| ticklish | master Laughing | mouth 1.64, 1.24 (its squeeze judged by eye, `eyes.png`) | mouth x0.91/0.90 |
 | sly | master Cheeky | eyes 0.74, 0.19; mouth 1.67, 2.2 | eyes x1.01/0.88, x1.07/0.85; mouth x0.75/0.74 |
 | hungry | none (new drawing) | nothing (judged by eye) | none |
 | huffy | none (new drawing) | nothing (judged by eye) | none |
@@ -45,9 +45,10 @@ huffy 0.349 and 0.35 (the resting level: the table names none for it, DECISIONS 
 
 ## The new faces, for Gate A
 
-`new/sheet.png` (phone size) sets each beside the panels it borrows from, labelled "new drawing", with Q2's
-alternative eyes beside the kitty's and the bear's panels, labelled "not on the dog sheet". Variant A of each ships;
-variant B, the huffy peek back, huffy flushed to 60%, tender's softer options and Q2's alternatives live only in a
+`new/sheet.png` (phone size) sets each beside the panels it borrows from, labelled "new drawing", with Q2's eyes as
+the founder chose them beside the kitty's and the bear's panels, labelled "not on the dog sheet", and the squeeze in
+the outline's warm brown, labelled "not taken" (DECISIONS 202). Variant A of each ships;
+variant B, the huffy peek back, huffy flushed to 60%, tender's softer options and the warm brown squeeze live only in a
 scratch package `new/new.ts` builds.
 
 - Hungry, meant to feel eager and sweet ("ooh, a treat"): the wide eye with its pupil larger, the irises meeting on
@@ -65,10 +66,10 @@ scratch package `new/new.ts` builds.
   phone size, as the sheet's own half-lid panel does. It ships so; the sheet shows a softer lid, arched up over the
   iris with a thinner lash, and the crescents with a 50% blush beside it, for the founder (DECISIONS 162).
 
-## Seventeen presets, fifteen faces
+## Seventeen presets, sixteen faces
 
-Two pairs draw the same still: laughing and ticklish, mischievous and sly. What tells each pair apart is timing:
-ticklish's bounce and sly's glance aside after the wink (phase 4). Content and blissful now differ by blissful's blush
+One pair draws the same still: mischievous and sly, told apart by sly's glance aside after the wink (phase 4).
+Ticklish now squeezes its eyes shut, `>` `<` (Q2, DECISIONS 202), where laughing keeps its crescents. Content and blissful now differ by blissful's blush
 at 70%.
 
 ## Read by eye
@@ -81,7 +82,20 @@ hood's band coming up it, as the panels paint it, and it stays put as the ear's 
 alert more than inquisitive without its tilt and glance up. Tender's half-lid reads drowsy more than warm (its options are in
 `new/sheet.png`). Nothing reads as sad, angry or drooped.
 
+## The founder's eye decisions (Q2, Q26, Q28)
+
+`eyes.png` (phone size) sets the squeeze beside the kitty's and the bear's Excited, the star sparkle beside their
+Sparkle eyes, the open eye's two catchlights beside their Default eyes and the dog's own open eye panel, and the
+catchlights riding the iris (peek, huffy's peek back, hungry's eager eye) and tucked under the half-lid, in the front,
+the three-quarter and the profile (DECISIONS 200 to 206). At phone size the squeeze reads as the sister sheets' bold
+`> <`, the star in the eye as the bear's, the gold stars beside it as both sheets' (plump, the larger five-pointed),
+and the tiny catchlight as a second glint below the first.
+
 ## Files
+
+- `eyes.png`: the eye decisions, from `node qa/phase3/faces/eyes.ts build/stills/dog/eyes` (after the build) and the
+  Faces check's stills, then
+  `python3 qa/phase3/faces/eyes.py build/stills/dog/eyes build/stills/dog/faces qa/phase3/faces/eyes.png`.
 
 - `new/sheet.png`: the new faces and Q2's eyes for review, from `node qa/phase3/faces/new/new.ts build/stills/dog/new`
   (a scratch package that never ships; DECISIONS 150), then
@@ -92,7 +106,8 @@ alert more than inquisitive without its tilt and glance up. Tender's half-lid re
 - `<preset>/beside.png` and `match.json`: the Faces check on each face clip's still, made by
   `node runtime-web/lab/look.ts dog --faces`.
 - `states.png`: the states no preset's still shows (peek, the yawn, the pant, the wink and the perked ear on the dog's
-  right, a lifted ear beside a perked one, raised brows over the wide eyes, the half-lid), and the lifted and the
+  right, a lifted ear beside a perked one, raised brows over the wide eyes, the half-lid, the sparkle as proud's
+  second beat, its own gold stars in place of the head's, huffy's peek back, hungry's o with its eager eyes), and the lifted and the
   perked ears turned to the ear springs' limits, 14° out and in, behind a head that stays whole (DECISIONS 158).
   `node qa/phase3/faces/states.ts build/stills/dog/states`, then
   `python3 qa/phase3/faces/sheet.py states build/stills/dog/states qa/phase3/faces/states.png`.
@@ -109,6 +124,7 @@ alert more than inquisitive without its tilt and glance up. Tender's half-lid re
   huffy's pressed mouth with its ends bent below its centre, its shut lids slanted inner end down, its left brow
   raised, its left ear turned 7° in, and the puffed cheeks keyed on happy; mischievous winking the right eye,
   listening keying no temple, the temple drawn into the lifted ear again, hungry's eye rolled up and the peek back
-  looking up as it was), then with none; each fails, and none fails with the plants taken out. `python3 qa/phase3/faces/plants.py qa/phase3/faces/r3-plants.txt`.
+  looking up as it was; the squeeze's arms steepened into a scowl, the peek's catchlights left where the open eye has
+  them, and the tiny catchlight grown to 0.6 of the large one), then with none; each fails, and none fails with the plants taken out. `python3 qa/phase3/faces/plants.py qa/phase3/faces/r3-plants.txt`.
 - `atlas.json`: the atlas page shares before and after the face states, with round 2's, with the new faces, and after
   the review's fixes (DECISIONS 139, 147, 157, 158).

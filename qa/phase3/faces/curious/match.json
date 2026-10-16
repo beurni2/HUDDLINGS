@@ -114,7 +114,7 @@
      "held": false,
      "found": [70.15, 73.11],
      "errPt": 5.1,
-     "offsetPt": [-4.21, 2.88],
+     "offsetPt": [-4.2, 2.88],
      "pass": true,
      "note": "reported: the panel turns the head, so the pair is held by its spacing and the eyes on the head"
     }
@@ -124,7 +124,7 @@
      "held": true,
      "recordPt": [47.05, 0.0],
      "foundPt": [47.97, -0.02],
-     "errPt": 0.91,
+     "errPt": 0.92,
      "pass": true
     }
    },

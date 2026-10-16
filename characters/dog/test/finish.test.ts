@@ -1,7 +1,7 @@
 // Tests for the finish pass's shared recipes (DECISIONS 73 to 76, 78 to 84): every drawn view takes its eyes, its outer
 // line, its topknot, its ear paint, its paws' toe lines and its tag from characters/dog/src/parts/; the line darkens and fills out from where the light
 // falls to where the part meets the ground, on warm ladders with no grey; the eye's white is a crescent as wide as
-// its view asks on its outer side and none on the other, under one catchlight; and the topknot and the ears keep
+// its view asks on its outer side and none on the other, under a large catchlight and a tiny one (Q26, DECISIONS 201); and the topknot and the ears keep
 // their counts (3 to 5 curls, 4 to 7 locks over 2 or 3 clumps).
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -115,9 +115,10 @@ test("the eye's white is a crescent as wide as asked on its outer side, and none
   assert.ok(inIris(edge(round.white.at + 180)), "there is white on the nose's side too");
 });
 
-test("the eye has one catchlight, no strokes, and its lash line is an outer line", () => {
+// One large catchlight and one tiny one (docs/QUESTIONS.md Q26, decided by the founder Oct 16, 2026; DECISIONS 200, 201).
+test("the eye has one large and one tiny catchlight, no strokes, and its lash line is an outer line", () => {
   const p = eye(round);
-  assert.equal(p.svg.split(`fill="${C.light}"`).length - 1, 1, "the eye does not have exactly one catchlight");
+  assert.equal(p.svg.split(`fill="${C.light}"`).length - 1, 2, "the eye does not have exactly its large and its tiny catchlight");
   assert.ok(!/stroke=/.test(p.svg), "the eye strokes a ring or a ray");
   const [lid] = p.meta.lines;
   assert.ok(lid && lid.kind === "outer" && lid.width >= LIMITS.outer[0] && lid.width <= LIMITS.outer[1], "the lash line is not an outer line");

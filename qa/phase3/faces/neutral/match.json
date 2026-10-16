@@ -111,7 +111,7 @@
     "eye.L": {
      "record": [90.06, 56.15],
      "held": true,
-     "found": [90.84, 56.76],
+     "found": [90.85, 56.76],
      "errPt": 1.2,
      "offsetPt": [0.81, 0.89],
      "pass": true

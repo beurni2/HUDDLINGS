@@ -8,7 +8,9 @@ ends down (the sheets' Angry), its left brow raised, its left ear turned 7 degre
 on another face; and from the last review: mischievous winking the dog's right eye again (Cheeky closes its left),
 listening keying no temple beside its lifted ear, the temple drawn into the lifted ear's own drawing again (where it
 swings out of the head's side, R16), hungry's eager eye rolled up under its white (the pleading eyes), and huffy's peek
-back looking up as it was. Nothing in the working tree is touched.
+back looking up as it was; and from the founder's eye decisions (DECISIONS 201 to 204): the squeeze's arms steepened
+into a scowl, the peek's catchlights left where the open eye has them as its iris moves, and the tiny catchlight grown
+to more than half the large one's size. Nothing in the working tree is touched.
 
     python3 qa/phase3/faces/plants.py qa/phase3/faces/r3-plants.txt"""
 import os
@@ -58,6 +60,12 @@ PLANTS = [
      "characters/dog/src/views/front.ts", "const EAGER: Eager = { white: { at: 10, width: 2, span: 55 },", "const EAGER: Eager = { white: { at: -90, width: 3, span: 70 },"),
     ("looking up: huffy's peek back with its white at 186 degrees, as it was",
      "characters/dog/src/views/front.ts", 'white: { at: side === "R" ? -6 : 168,', 'white: { at: side === "R" ? -6 : 186,'),
+    ("scowling squeeze: the squeeze's arms turned 30 degrees up and 40 down, past the sister sheets' Excited",
+     "characters/dog/src/views/front.ts", "length: [16.8, 15.8], angle: [14, 26],", "length: [16.8, 15.8], angle: [30, 40],"),
+    ("stuck catchlight: the peek's catchlights left where the open eye has them as its iris moves (Q28)",
+     "characters/dog/src/views/front.ts", "return { ...e, shine: riding(e, spec, spec.shine) };\n    }\n    // The sparkle", "return e;\n    }\n    // The sparkle"),
+    ("a second large light: the tiny catchlight at 0.6 of the large one's size (Q26 asks about a quarter)",
+     "characters/dog/src/parts/eye.ts", "export const TINY = { scale: 0.25,", "export const TINY = { scale: 0.6,"),
 ]
 
 

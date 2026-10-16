@@ -13,10 +13,11 @@
 import { ellipse, mirrorX, pathD, sample, smooth, v, type Node, type P, type Shape } from "../../../draw/geom.ts";
 import { innerLine, strokeOf, type DrawnLine, type Stroke } from "../../../draw/line.ts";
 import { LIMITS } from "../../../draw/lint.ts";
-import { blur, pad, piece, uid, type Box, type Piece } from "../../../draw/svg.ts";
+import { blur, pad, piece, uid, union, type Box, type Piece } from "../../../draw/svg.ts";
 import { C } from "../palette.ts";
 import type { BrowState } from "./brow.ts";
-import { eye, lidBand, type EyeSpec, type LidBand } from "./eye.ts";
+import { eye, lidBand, lights, tinyOf, type EyeSpec, type LidBand } from "./eye.ts";
+import { PRESSED, TINY_SMILE } from "./mouth.ts";
 import { stars, type Star } from "./stars.ts";
 
 const r3 = (n: number) => Math.round(n * 1000) / 1000;
@@ -304,13 +305,49 @@ export function paintSmile(lip: P[], ends: [P, P], philtrum: P[] | undefined, bo
 const lipNodes = (half: P[]): P[] => [...(mirrorX(half, false) as P[]).slice(0, -1), ...half];
 
 /**
+ * Hungry's lick on a turned muzzle (parts/mouth.ts's lick, DECISIONS 154): the tongue's tip, a round lobe about 6 pt
+ * long, peeking out under the turned smile's arc just inside its curl on the dog's left, its top along the lip (inside
+ * the mouth, under the lip's line), never hanging toward the chin. The front's lobe, fitted to this view's smile, whose
+ * curl is 12.3 pt out where the front's broader smile's is 14 (the turned views keep the base's smile, DECISIONS 173).
+ */
+const LICK: P[] = [[6.7, 16.9], [8.6, 16.4], [10.2, 15.7], [11.6, 16.6], [12.2, 18.6], [11.7, 20.7], [10.2, 21.8], [8.4, 21.3], [7.2, 19.5]];
+/** The turned smile's lip, how far down it lies at `x` across in the front's face frame (linear between its nodes). */
+const lickLip = (x: number) => {
+  const h = SMILE_HALF, ax = Math.abs(x);
+  for (let i = 1; i < h.length; i++) if (ax <= h[i]![0]) return h[i - 1]![1] + ((h[i]![1] - h[i - 1]![1]) * (ax - h[i - 1]![0])) / (h[i]![0] - h[i - 1]![0]);
+  return h[h.length - 1]![1];
+};
+
+/**
+ * A tongue's tip peeking out under a lip, in model space (parts/mouth.ts's tongueTip): the coral lobe, lighter toward
+ * the light, its warm rim round the part outside the mouth only (`inside` says which points lie within it).
+ */
+export function lickTip(outline: P[], light: P, inside: (p: P) => boolean): { piece: Piece } {
+  const lobe = smooth(outline);
+  const pts = sample(lobe.segs, 16, true);
+  const k0 = pts.findIndex((p, i) => inside(p) && !inside(pts[(i + 1) % pts.length]!));
+  if (k0 < 0) throw new Error("the tongue's tip lies all inside or all outside the mouth");
+  const ring = [...pts.slice(k0 + 1), ...pts.slice(0, k0 + 1)];
+  const out = ring.slice(0, ring.findIndex((p) => inside(p)));
+  const rim = tapered(out, 0.8, "inner", "tongue tip", { taper: 1.6, tip: 0.15 });
+  const box = boxOf(pts, 2);
+  const soft = uid("blur"), lit = uid("blur");
+  const [cx, cy] = outline.reduce((s, p) => [s[0] + p[0] / outline.length, s[1] + p[1] / outline.length], [0, 0]);
+  const svg = `<defs>${blur(soft, box, 0.25)}${blur(lit, box, 0.9)}</defs>` +
+    `<g filter="url(#${soft})"><path d="${pathD(lobe.segs)}" fill="${C.tongue}"/></g>` +
+    `<ellipse cx="${fmt(cx + light[0] * 1.1)}" cy="${fmt(cy + light[1] * 1.1)}" rx="1.5" ry="1.2" fill="${C.tongueShine}" opacity="0.55" filter="url(#${lit})"/>` +
+    `<path d="${rim.d}" fill="${C.tongueRim}"/>`;
+  return { piece: piece(svg, box, { shapes: [], lines: [rim.line] }) };
+}
+
+/**
  * The mouth states each turned view draws, named here rather than read off parts/mouth.ts's list, so a state the front
  * adds later is not drawn in a turned view by accident (it falls back to the view's rest mouth until it is drawn).
  * The three-quarter's rest is its open mouth, the profile's its smile.
  */
-export const TURNED_MOUTHS = ["smile", "laugh", "o", "cheeky", "yawn", "pant"] as const;
+export const TURNED_MOUTHS = ["smile", "laugh", "o", "cheeky", "yawn", "pant", "o.tongue", "pressed", "tinySmile"] as const;
 export type TurnedMouthState = (typeof TURNED_MOUTHS)[number];
-export const PROFILE_MOUTHS = ["open", "laugh", "o", "cheeky", "yawn", "pant"] as const;
+export const PROFILE_MOUTHS = ["open", "laugh", "o", "cheeky", "yawn", "pant", "o.tongue", "pressed", "tinySmile"] as const;
 export type ProfileMouthState = (typeof PROFILE_MOUTHS)[number];
 
 /**
@@ -320,12 +357,31 @@ export type ProfileMouthState = (typeof PROFILE_MOUTHS)[number];
  */
 export function turnedMouth(state: TurnedMouthState, f: TurnedFrame, nose: P): TurnedMouth {
   const at = f.at;
-  if (state === "smile") {
+  if (state === "smile" || state === "o.tongue") {
     const lip = smooth(lipNodes(SMILE_HALF).map(at), { closed: false });
     const line = sample(lip.segs, 12, false);
     const centre = at(SMILE_HALF[0]!);
     const box = boxOf([...line, nose], 3);
-    return { piece: paintSmile(line, [at([-13, 15]), at([13, 15])], [nose, v.add(v.mul(nose, 0.4), v.mul(at([0, 14.6]), 0.6)), at([0, 14.6])], box), lip: { line, centre } };
+    const smile = paintSmile(line, [at([-13, 15]), at([13, 15])], [nose, v.add(v.mul(nose, 0.4), v.mul(at([0, 14.6]), 0.6)), at([0, 14.6])], box);
+    if (state === "smile") return { piece: smile, lip: { line, centre } };
+    // Hungry's lick (DECISIONS 154, 207): the tongue's tip under the smile's arc just inside its curl on the dog's left,
+    // drawn under the lip, which lies over its top.
+    // Inside the mouth is above the lip's line, in the front's face frame (the muzzle's level frame, its shortening undone).
+    const tip = lickTip(LICK.map(at), f.light, (p) => {
+      const [s, t] = f.level(p);
+      return t + LIP_Y < lickLip(s / (s < 0 ? f.k[0] : f.k[1])) + 0.15;
+    });
+    return { piece: { svg: tip.piece.svg + smile.svg, box: union(smile.box, tip.piece.box), meta: { shapes: [], lines: [...smile.meta.lines, ...tip.piece.meta.lines] } }, lip: { line, centre } };
+  }
+  if (state === "pressed" || state === "tinySmile") {
+    // Huffy's pressed mouth and its peek back's tiny smile (DECISIONS 153, 207): the front's closed lips carried onto the
+    // muzzle, the philtrum down from the nose's foot to where it meets them.
+    const half = state === "pressed" ? PRESSED : TINY_SMILE;
+    const line = sample(smooth(lipNodes(half).map(at), { closed: false }).segs, 12, false);
+    const centre = at(half[0]!), span = half[half.length - 1]![0] + 0.5;
+    const box = boxOf([...line, nose], 3);
+    const philtrum: P[] = [nose, v.add(v.mul(nose, 0.4), v.mul(centre, 0.6)), centre];
+    return { piece: paintSmile(line, [at([-span, half[0]![1]]), at([span, half[0]![1]])], philtrum, box, state === "pressed" ? "pressed mouth" : "tiny smile"), lip: { line, centre } };
   }
   if (state === "o" || state === "yawn") {
     const o = state === "o" ? O : YAWN;
@@ -450,7 +506,8 @@ export function lidEdge(e: EyeSpec, c: TurnedLid): P[] {
  * straight bar, it read as a flat, unimpressed lid.
  */
 export function halfLid(e: EyeSpec, c: TurnedLid): Piece {
-  const base = eye(e);
+  // The open eye without its own catchlights: the lid draws its own, under it (Q26, Q28).
+  const base = eye(e, { lights: false });
   const edge = lidEdge(e, c);
   const t = (c.tilt * Math.PI) / 180, cos = Math.cos(t), sin = Math.sin(t);
   const up = (p: P, by: number): P => [p[0] + by * sin, p[1] - by * cos];
@@ -459,32 +516,30 @@ export function halfLid(e: EyeSpec, c: TurnedLid): Piece {
   const below = `M${edge.map(xy).join("L")}L${xy(up(edge.at(-1)!, -reach * 2))}L${xy(up(edge[0]!, -reach * 2))}Z`;
   const above = `M${edge.map(xy).join("L")}L${xy(up(edge.at(-1)!, reach * 2))}L${xy(up(edge[0]!, reach * 2))}Z`;
   const ball = pathD(ellipse(e.centre, e.rx + 0.3, e.ry + 0.3, e.turn));
-  const under = uid("below"), lid = uid("lid"), shade = uid("shade"), soft = uid("blur"), lash = uid("blur"), shine = uid("blur");
+  const under = uid("below"), lid = uid("lid"), shade = uid("shade"), soft = uid("blur"), lash = uid("blur");
   // The lid's shade deepening a little toward the lash, as the panel's lid is a touch warmer over its edge.
   const mid = edge[12]!, [g0, g1] = [up(mid, e.ry), mid];
   const band = strokeOf(edge, c.lash, { taper: 2.4, tip: 0.6 });
-  const a = (e.turn * Math.PI) / 180;
-  const [u, w] = [c.shine.at[0], -c.shine.at[1]];
-  const spot: P = [e.centre[0] + e.noseward * u * Math.cos(a) - w * Math.sin(a), e.centre[1] + e.noseward * u * Math.sin(a) + w * Math.cos(a)];
+  // The catchlights on the iris below the edge, the large one's top tucked under the lash (Q28) and the tiny one below
+  // it (Q26), clipped to below the edge with the eye, so the lid always lies over them.
   const svg = `<defs><clipPath id="${under}"><path d="${below}"/></clipPath><clipPath id="${lid}"><path d="${above}"/></clipPath>` +
     `<linearGradient id="${shade}" gradientUnits="userSpaceOnUse" x1="${fmt(g0[0])}" y1="${fmt(g0[1])}" x2="${fmt(g1[0])}" y2="${fmt(g1[1])}">` +
     `<stop offset="0.2" stop-color="${C.lidShade}" stop-opacity="0.5"/><stop offset="1" stop-color="${C.lidShade}" stop-opacity="0.62"/></linearGradient>` +
-    `${blur(soft, base.box, 0.35)}${blur(lash, base.box, 0.2)}${blur(shine, base.box, 0.22)}</defs>` +
-    `<g clip-path="url(#${under})">${base.svg}</g>` +
+    `${blur(soft, base.box, 0.35)}${blur(lash, base.box, 0.2)}</defs>` +
+    `<g clip-path="url(#${under})">${base.svg}${lights(e, c.shine, tinyOf(c.shine), base.box)}</g>` +
     `<g filter="url(#${soft})"><g clip-path="url(#${lid})"><path d="${ball}" fill="url(#${shade})"/></g></g>` +
-    `<g filter="url(#${lash})"><path d="${band.d}" fill="${C.eyeRim}"/></g>` +
-    `<path d="${pathD(ellipse(spot, c.shine.r, c.shine.r * 0.94, e.turn))}" fill="${C.light}" filter="url(#${shine})"/>`;
+    `<g filter="url(#${lash})"><path d="${band.d}" fill="${C.eyeRim}"/></g>`;
   return piece(svg, base.box, base.meta);
 }
 
 /** The eye states a turned view draws as a lid: a lash band (parts/eye.ts) or the half-lid over the open eye. */
-export type LidState = "happy" | "closed" | "wink" | "sleepy";
+export type LidState = "happy" | "closed" | "wink" | "sleepy" | "flat";
 export type TurnedEyeLid = { band: LidBand } | { spec: EyeSpec; lid: TurnedLid };
 export const drawLid = (l: TurnedEyeLid): Piece => ("band" in l ? lidBand(l.band) : halfLid(l.spec, l.lid));
 
 /**
- * The sparkle's stars in a turned view (parts/stars.ts, Proud's stars, Q2's default), typed in model space where the
- * view puts them beside its head, their warm cores toward the light the view is drawn in.
+ * The stars round a turned head (parts/stars.ts, Proud's stars, proud's still: DECISIONS 181, 205), typed in model
+ * space where the view puts them beside its head, their warm cores toward the light the view is drawn in.
  */
 export function turnedStars(list: Star[], light: P): Piece {
   return stars(list, { place: (svg) => svg, at: (p) => p, box: (b) => b, light });

@@ -1,6 +1,6 @@
 """The new faces' review sheet, phone size: hungry and huffy, each variant beside the sheet panels it borrows from, and
-Q2's alternative eyes beside the kitty's and the bear's panels that draw them, each labelled "new drawing" or "not on
-the dog sheet". The renders come from new.ts (a scratch package that never ships); the panels are the dog's crops
+Q2's eyes as the founder chose them beside the kitty's and the bear's panels that draw them, each labelled "new
+drawing", "not on the dog sheet" or "not taken". The renders come from new.ts (a scratch package that never ships); the panels are the dog's crops
 (characters/dog/ref/panels) and, for Q2, the kitty's and the bear's expression sheets cut at fixed boxes, for review
 only.
 
@@ -20,8 +20,8 @@ RENDER_H = 228
 PANEL_H = 120
 GAP = 8
 
-# For Q2: the kitty's and the bear's own panels, by their box on the 1280 x 960 sheet (x, y, w, h), as new.ts's
-# alternatives copy them.
+# For Q2: the kitty's and the bear's own panels, by their box on the 1280 x 960 sheet (x, y, w, h), which the dog's
+# squeeze and sparkle are drawn as (DECISIONS 202, 203).
 OTHER = {
     "kitty Excited": ("kitty", (285, 150, 220, 150)),
     "kitty Sparkle eye": ("kitty", (332, 826, 96, 52)),
@@ -42,10 +42,10 @@ GROUPS = [
      "panels": ["expressions.eyes.sleepy-half-lid", "master.expression.content"],
      "stills": ["tender-A", "tender-soft", "tender-crescent"],
      "captions": ["ships: the half-lid", "a softer lid: ask", "crescents, 50%: ask"]},
-    {"title": "Q2 eyes: the alternatives are not on the dog sheet (the kitty's and the bear's)",
+    {"title": "Q2 eyes, the founder's choice: drawn as the kitty's and the bear's (not on the dog sheet)",
      "panels": ["kitty Excited", "bear Excited", "kitty Sparkle eye", "bear Sparkle eye"],
-     "stills": ["q2-squeeze-default", "q2-squeeze-alt", "q2-sparkle-default", "q2-sparkle-alt"],
-     "captions": ["squeeze, default: crescent", "squeeze, alt: > <", "sparkle, default", "sparkle, alt: star eyes"]},
+     "stills": ["q2-squeeze", "q2-squeeze-warm", "q2-proud", "q2-sparkle"],
+     "captions": ["ships: the squeeze", "in warm brown", "ships: proud's still", "ships: sparkle beat"]},
 ]
 
 

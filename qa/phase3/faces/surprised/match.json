@@ -113,9 +113,9 @@
     "eye.L": {
      "record": [157.27, 95.67],
      "held": true,
-     "found": [159.38, 96.31],
+     "found": [159.39, 96.31],
      "errPt": 1.57,
-     "offsetPt": [1.47, 0.53],
+     "offsetPt": [1.48, 0.53],
      "pass": true
     },
     "mouth.R": {

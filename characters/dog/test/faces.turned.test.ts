@@ -13,6 +13,8 @@ import { sample, smooth, v, type P } from "../../draw/geom.ts";
 import { BROW_STATES } from "../src/parts/brow.ts";
 import { MOUTH_STATES } from "../src/parts/mouth.ts";
 import { lidEdge, PROFILE_MOUTHS, TURNED_MOUTHS, turnedMouth, type TurnedEyeLid, type TurnedMouth } from "../src/parts/turned.ts";
+import { CHEEK_STATES } from "../src/parts/cheeks.ts";
+import { chevronArms, irisCentre, lightOnIris, tinyOf, type Chevron, type EyeSpec } from "../src/parts/eye.ts";
 import { LIGHT } from "../../draw/paint.ts";
 import { stillOf } from "../src/faceClips.ts";
 import { EAR_STATES, EYE_STATES, PRESETS, type EarState } from "../src/presets.ts";
@@ -27,27 +29,23 @@ const SORROW = /sad|angry|anger|pout|tear|cry|droop|frown|sorrow|sulk|grief/i;
 /** The face states each face part may take (faces.test.ts's allowlist). */
 const ALLOWED: Record<string, readonly string[]> = {
   "eye.L": EYE_STATES, "eye.R": EYE_STATES, mouth: MOUTH_STATES, "brow.L": BROW_STATES, "brow.R": BROW_STATES,
-  "ear.L": EAR_STATES, "ear.R": EAR_STATES, stars: ["sparkle"],
+  "ear.L": EAR_STATES, "ear.R": EAR_STATES, stars: ["sparkle"], cheeks: CHEEK_STATES,
   // The head's line beside a raised ear (the front lane's states, named for the dog's side: left, right, both).
   "head.line": ["templeL", "templeR", "temples"],
 };
 /**
  * The states each face part draws as a drawing of its own in a view; the others are the rest drawing (ears turned by
- * the clip) or its alias (Q2). The three-quarter's mouths are its own list (parts/turned.ts) with its rest; the
+ * the clip) or, for the profile's mouths, its rest smile. The three-quarter's mouths are its own list (parts/turned.ts) with its rest; the
  * profile's are drawn but held out of the package for now (sideHeld, DECISIONS 183), so it keys its smile alone.
  */
+const TURNED_EYES = ["happy", "squeeze", "closed", "sleepy", "wink", "wide", "peek", "sparkle", "eager", "flat", "peekBack"];
 const OWN = (view: string): Record<string, readonly string[]> => ({
-  "eye.L": ["happy", "closed", "sleepy", "wink", "wide", "peek"], "eye.R": ["happy", "closed", "sleepy", "wink", "wide", "peek"],
+  "eye.L": TURNED_EYES, "eye.R": TURNED_EYES,
   mouth: view.startsWith("side") ? ["smile"] : ["open", ...TURNED_MOUTHS],
   "brow.L": ["raised", "happy"], "brow.R": ["raised", "happy"], "ear.L": ["onePerked"], "ear.R": ["onePerked"],
   // The three-quarter's near ear raised uncovers the nape, so its line beside it is its own; the far ear's is the rest.
   ...(view.startsWith("threeQuarter") ? { "head.line": [view.endsWith("L") ? "templeL" : "templeR"] } : {}),
 });
-/**
- * Hungry's and huffy's eyes, new drawings in front this round, are not drawn in the turned views yet: until they are,
- * they show the view's open eye. Named here so the gap stays visible, and the test fails once one is drawn.
- */
-const NOT_YET_TURNED: readonly string[] = ["eager", "flat", "peekBack"];
 const drawsIn = (part: Rig["parts"][number], view: string) => Object.keys(part.regions).some((k) => k.split(":")[0] === view);
 const deciding = (part: Rig["parts"][number], view: string, state: string) =>
   [`${view}:${state}`, view, `${view}:${part.defaultState ?? "open"}`].find((key) => Object.hasOwn(part.regions, key));
@@ -68,7 +66,8 @@ function regionProblem(r: Rig, view: string): string | undefined {
 
 test("every face state of every face part draws its own region, or a deliberate null, in every turned view that draws the part", () => {
   for (const view of TURNED) assert.equal(regionProblem(rig, view), undefined, view);
-  // The eyes the profile hides draw nothing there, in every state; the squeeze and the sparkle are the crescent (Q2).
+  // The eyes the profile hides draw nothing there, in every state; every other state is a drawing of its own, the
+  // squeeze and the sparkle (Q2, DECISIONS 202, 203) and hungry's and huffy's eyes (207) among them.
   for (const view of TURNED) {
     for (const eye of ["eye.L", "eye.R"]) {
       const part = rig.parts.find((p) => p.name === eye)!;
@@ -76,9 +75,7 @@ test("every face state of every face part draws its own region, or a deliberate 
       for (const state of EYE_STATES) {
         const region = regionFor(part, view, state);
         if (hidden) assert.equal(region, undefined, `${eye} draws in ${view}, which hides it`);
-        else if (state === "squeeze" || state === "sparkle") assert.equal(region, regionFor(part, view, "happy"), `${eye} ${state} in ${view}`);
-        else if (NOT_YET_TURNED.includes(state)) assert.equal(region, regionFor(part, view, "open"), `${eye} ${state} in ${view} is drawn now: take it off NOT_YET_TURNED`);
-        else if (state !== "open") assert.notEqual(region, regionFor(part, view, "open"), `${eye} ${state} in ${view} draws the open eye`);
+        else if (state !== "open") assert.equal(region, `${eye}/${view}:${state}`, `${eye} ${state} in ${view} draws ${region}`);
       }
     }
   }
@@ -393,7 +390,7 @@ function lidProblem(l: TurnedEyeLid, deg: number, mirrored = false): string | un
 }
 
 test("no turned lid slants angry or droops sad: every crescent, closed lid, wink and half-lid lies near the face's level, in both facings", () => {
-  const LIDS = ["happy", "closed", "wink", "sleepy"] as const;
+  const LIDS = ["happy", "closed", "wink", "sleepy", "flat"] as const;
   const lids: { label: string; lid: TurnedEyeLid; deg: number }[] = [];
   for (const state of LIDS) {
     for (const side of ["L", "R"] as const) lids.push({ label: `threeQuarter eye.${side} ${state}`, lid: threeQuarterFace.lids(state, side), deg: threeQuarterFace.levelDeg });
@@ -428,5 +425,141 @@ test("the one perked ear stands above the eyes in every turned view, never hangi
     // Planted: the same ear hung 40 pt lower, as a drooped one, fails.
     const hung = Math.max(...sample(shape.segs, 16, true).map(([, y]) => y + 40));
     assert.ok(!(hung < top - 10), `${label}: hung lower, it would pass`);
+  }
+});
+
+/**
+ * Huffy's shut lids lie level in the face's own frame in every turned view, as the front's do (faces.test.ts): their
+ * ends within 0.5 pt of each other across the face's level (DECISIONS 207), where the crescents lean 2.5° outward.
+ */
+type LidBandLike = Extract<TurnedEyeLid, { band: unknown }>["band"];
+function flatProblem(l: TurnedEyeLid, deg: number): string | undefined {
+  if (!("band" in l)) return "it is not a lash band";
+  const { width, drop, tilt, noseward } = l.band, t = (tilt * Math.PI) / 180, out = -noseward;
+  const d: P = [out * width * Math.cos(t) - drop * Math.sin(t), out * width * Math.sin(t) + drop * Math.cos(t)];
+  const [, y] = level([d], deg)[0]!;
+  return Math.abs(y) > 0.5 ? `its ends lie ${Math.abs(y).toFixed(2)} pt apart across the face's level` : undefined;
+}
+
+test("huffy's shut lids lie level in every turned view, and a slanted one fails", () => {
+  // The .R facing is the .L lid mirrored, and its level with it: the same measure.
+  for (const side of ["L", "R"] as const) assert.equal(flatProblem(threeQuarterFace.lids("flat", side), threeQuarterFace.levelDeg), undefined, `threeQuarter eye.${side}`);
+  assert.equal(flatProblem(sideFace.lids("flat"), sideFace.levelDeg), undefined, "side eye.L");
+  // Planted: the near flat lid turned 5° more, and its outer end dropped 1.2 pt; each fails.
+  const near = (threeQuarterFace.lids("flat", "L") as { band: LidBandLike }).band;
+  assert.match(flatProblem({ band: { ...near, tilt: near.tilt + 5 } }, threeQuarterFace.levelDeg) ?? "", /apart across the face's level/);
+  assert.match(flatProblem({ band: { ...near, drop: 1.2 } }, threeQuarterFace.levelDeg) ?? "", /apart across the face's level/);
+});
+
+/**
+ * The squeeze guard in the turned views (faces.test.ts's): each `>` `<` in its own frame (its lean undone, and its run
+ * across stretched back by its eye's width over the front's, 9.5 pt, so the far and the profile eye's foreshortening is
+ * undone) opens outward as the sister sheets' Excited draw it, its upper arm rising 4 to 20°, its lower falling 15 to
+ * 35°, the opening's middle falling outward by 0 to 12°; and its lean lies within 10° of the face's level.
+ */
+function squeezeProblem(c: Chevron, levelDeg: number, k: number): string | undefined {
+  if (Math.abs(c.tilt - levelDeg) > LID_LEAN_DEG) return `it leans ${(c.tilt - levelDeg).toFixed(1)}° from the face's level`;
+  const [upper, lower] = chevronArms(c);
+  const t = (-c.tilt * Math.PI) / 180, out = -c.noseward;
+  const angle = (arm: P[]) => {
+    const [x, y] = [arm.at(-1)![0] - arm[0]![0], arm.at(-1)![1] - arm[0]![1]];
+    const [lx, ly] = [(x * Math.cos(t) - y * Math.sin(t)) / k, x * Math.sin(t) + y * Math.cos(t)];
+    return out * lx <= 0 ? NaN : (Math.atan2(ly, Math.abs(lx)) * 180) / Math.PI;
+  };
+  const [up, down] = [-angle(upper), angle(lower)];
+  if (!(up >= 4 && up <= 20)) return `its upper arm rises ${up.toFixed(1)}° outward, outside 4 to 20°`;
+  if (!(down >= 15 && down <= 35)) return `its lower arm falls ${down.toFixed(1)}° outward, outside 15 to 35°`;
+  const mid = (down - up) / 2;
+  return mid >= 0 && mid <= 12 ? undefined : `its opening's middle falls ${mid.toFixed(1)}° outward, outside 0 to 12°`;
+}
+
+test("the squeeze never slants angry in a turned view: its arms open outward as the sister sheets' Excited draw them", () => {
+  const front = 9.5;
+  for (const side of ["L", "R"] as const) {
+    assert.equal(squeezeProblem(threeQuarterFace.squeeze(side), threeQuarterFace.levelDeg, threeQuarterFace.eyes[side].rx / front), undefined, `threeQuarter eye.${side}`);
+  }
+  assert.equal(squeezeProblem(sideFace.squeeze(), sideFace.levelDeg, sideFace.eye.rx / front), undefined, "side eye.L");
+  // Planted: the near squeeze's upper arm steepened to a frowning 30°, and the whole leant 15° off the face's level.
+  const near = threeQuarterFace.squeeze("L");
+  assert.match(squeezeProblem({ ...near, angle: [30, 40] }, threeQuarterFace.levelDeg, 1) ?? "", /upper arm rises/);
+  assert.match(squeezeProblem({ ...near, tilt: 22.5 }, threeQuarterFace.levelDeg, 1) ?? "", /leans 15\.0°/);
+});
+
+/**
+ * Where a turned eye looks (faces.test.ts's gaze guard): its iris's middle against the opening's, in the face's level
+ * frame, y down. The new faces' open eyes (hungry's eager eye, huffy's peek back) never look up past the rest eye's,
+ * within 0.25 pt (R3: looking up at the viewer would plead).
+ */
+const GAZE_UP_PT = 0.25;
+function irisDown(e: EyeSpec, levelDeg: number): number {
+  const [u, up] = irisCentre(e), a = (e.turn * Math.PI) / 180;
+  const d: P = [e.noseward * u * Math.cos(a) + up * Math.sin(a), e.noseward * u * Math.sin(a) - up * Math.cos(a)];
+  return level([d], levelDeg)[0]![1];
+}
+
+test("the new faces' open eyes never look up in a turned view: hungry's eager eye and huffy's peek back", () => {
+  const eyes: [string, (s: "open" | "eager" | "peekBack") => EyeSpec, number][] = [
+    ["threeQuarter eye.L", (s) => threeQuarterFace.spec(s, "L"), threeQuarterFace.levelDeg],
+    ["threeQuarter eye.R", (s) => threeQuarterFace.spec(s, "R"), threeQuarterFace.levelDeg],
+    ["side eye.L", (s) => sideFace.spec(s), sideFace.levelDeg],
+  ];
+  for (const [label, spec, deg] of eyes) {
+    const rest = irisDown(spec("open"), deg);
+    for (const state of ["eager", "peekBack"] as const) {
+      const up = rest - irisDown(spec(state), deg);
+      assert.ok(up <= GAZE_UP_PT, `${label} ${state}: its iris stands ${up.toFixed(2)} pt higher than the rest eye's, looking up`);
+    }
+  }
+  // Planted: the near eager eye's white rolled under its iris (the iris rolled up) fails.
+  const eager = threeQuarterFace.spec("eager", "L");
+  const rolled = irisDown(threeQuarterFace.spec("open", "L"), threeQuarterFace.levelDeg) - irisDown({ ...eager, white: { at: -90, width: 3, span: 70 } }, threeQuarterFace.levelDeg);
+  assert.ok(rolled > GAZE_UP_PT, `the near eager eye rolled up stands only ${rolled.toFixed(2)} pt higher`);
+});
+
+/**
+ * The catchlights in the turned views (Q26, Q28; DECISIONS 201, 204), as faces.test.ts holds the front's: every eye
+ * that shows its iris paints its large catchlight and a tiny one a quarter its size below it, both wholly on the dark
+ * iris; under the half-lid, what shows below the lid lies on the iris and some of each shows; where the iris looks
+ * aside the large one has moved about half the iris's travel. The founder's "about a quarter" and "about half" are held
+ * here as numbers of their own, not read from the recipe's constants, so a change to those fails here.
+ */
+const QUARTER = [0.2, 1 / 3] as const, HALF = 0.5;
+test("every turned eye that shows its iris has its large and its tiny catchlight on the dark iris, riding it at half its travel", () => {
+  const eyes: [string, (s: "open" | "wide" | "peek" | "sparkle" | "eager" | "peekBack") => EyeSpec, TurnedEyeLid][] = [
+    ["threeQuarter eye.L", (s) => threeQuarterFace.spec(s, "L"), threeQuarterFace.lids("sleepy", "L")],
+    ["threeQuarter eye.R", (s) => threeQuarterFace.spec(s, "R"), threeQuarterFace.lids("sleepy", "R")],
+    ["side eye.L", (s) => sideFace.spec(s), sideFace.lids("sleepy")],
+  ];
+  for (const [label, spec, half] of eyes) {
+    for (const state of ["open", "wide", "peek", "sparkle", "eager", "peekBack"] as const) {
+      const e = spec(state);
+      for (const [name, l] of [["large", e.shine], ["tiny", tinyOf(e.shine)]] as const) {
+        const { shown, off } = lightOnIris(e, l);
+        assert.ok(shown > 0 && off === 0, `${label} ${state}: ${off} of the ${name} catchlight's ${shown} points lie off the dark iris`);
+      }
+      const tiny = tinyOf(e.shine), size = tiny.r / e.shine.r;
+      assert.ok(size >= QUARTER[0] && size <= QUARTER[1] && tiny.at[1] < e.shine.at[1] - e.shine.r && tiny.at[0] < e.shine.at[0],
+        `${label} ${state}: the tiny catchlight is ${size.toFixed(2)} of the large one, not about a quarter below it toward the outer side`);
+    }
+    assert.ok(!("band" in half), `${label}: the half-lid is not a lid over the eye`);
+    const { spec: s, lid } = half as Extract<TurnedEyeLid, { lid: unknown }>;
+    for (const [name, l] of [["large", lid.shine], ["tiny", tinyOf(lid.shine)]] as const) {
+      const { shown, off } = lightOnIris(s, l, { edge: lidEdge(s, lid), tilt: lid.tilt });
+      assert.ok(shown > 0 && off === 0, `${label} sleepy: its ${name} catchlight shows ${shown} points below the lid, ${off} off the dark iris`);
+    }
+    // Planted: the half-lid's catchlight at the open eye's place goes wholly under the lid.
+    assert.equal(lightOnIris(s, s.shine, { edge: lidEdge(s, lid), tilt: lid.tilt }).shown, 0, `${label}: the open eye's catchlight under the half-lid`);
+    for (const [state, centred] of [["peek", "open"], ["peekBack", "open"], ["eager", "wide"]] as const) {
+      const [e, c] = [spec(state), spec(centred)];
+      const [a, b] = [irisCentre(e), irisCentre(c)];
+      const travel: P = [a[0] - b[0], a[1] - b[1]], moved: P = [e.shine.at[0] - c.shine.at[0], e.shine.at[1] - c.shine.at[1]];
+      const share = Math.hypot(...moved) / Math.hypot(...travel), along = v.dot(moved, travel) / (Math.hypot(...moved) * Math.hypot(...travel));
+      assert.ok(share > HALF - 0.02 && share <= 1 && along > 0.999, `${label} ${state}: its catchlight moves ${share.toFixed(2)} of the iris's travel (${along.toFixed(3)} along it)`);
+      // Past half only as far as it must: a step of 0.05 less would leave it, or its tiny one, touching the white.
+      if (share > HALF + 0.02) {
+        const back = { at: [c.shine.at[0] + (share - 0.05) * travel[0], c.shine.at[1] + (share - 0.05) * travel[1]] as [number, number], r: e.shine.r };
+        assert.ok(lightOnIris(e, back).off + lightOnIris(e, tinyOf(back)).off > 0, `${label} ${state}: its catchlight rides ${share.toFixed(2)} of the iris's travel where less would do`);
+      }
+    }
   }
 });

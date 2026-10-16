@@ -245,10 +245,12 @@ class RecordsTest(unittest.TestCase):
         both, eyes, mouth = ["eye.R", "eye.L", "mouth.R", "mouth.L"], ["eye.R", "eye.L"], ["mouth.R", "mouth.L"]
         for pid in (HAPPY, MASTER + "happy"):
             self.assertEqual(gates[pid], {"neutral": eyes, "happy": both, "singing": []})
+        # Ticklish's squeeze is the dog's own > < (docs/QUESTIONS.md Q2, Oct 16, 2026): no dog panel draws it, so its
+        # record holds only its laughing mouth and its eyes are judged by eye (DECISIONS.md 206).
         for pid in ("expressions.expression.laughing", MASTER + "laughing"):
-            self.assertEqual(gates[pid], {"laughing": both, "singing": eyes, "ticklish": both})
+            self.assertEqual(gates[pid], {"laughing": both, "singing": eyes, "ticklish": mouth})
         for pid in ("expressions.expression.excited", MASTER + "excited"):
-            self.assertEqual(gates[pid], {"excited": both, "ticklish": eyes})
+            self.assertEqual(gates[pid], {"excited": both, "ticklish": []})
         self.assertEqual(gates[MASTER + "curious"], {"curious": eyes})
         self.assertEqual(gates[MASTER + "sleepy"], {"sleepy": eyes})
         self.assertEqual(gates[MASTER + "content"], {"proud": both, "content": both, "tender": mouth, "blissful": both})
