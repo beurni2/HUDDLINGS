@@ -47,6 +47,24 @@ Where the spec is silent or contradicts itself, I don't invent the answer. The q
 - **Decided: one large catchlight and one tiny one** (recommended in the session), as the kitty's and the bear's "Default (Large & Glossy)" eyes draw them: the tiny one about a quarter of the large one's size, just below it and toward the eye's outer side. Not three: a third reads as noise at 164 pt. The tiny one moves with the large one (Q28) and shows only where the iris does (none on closed or crescent eyes). `characters/dog/DECISIONS.md` 200.
 - **Answered:** founder, Oct 16, 2026, in the session: "Q2 and Q26 as recommended".
 
+### Q29. May fur-lock tips and toe lobes be tighter than the 4 pt corner rule, where the sheet draws them so?
+- **The spec says:** L510 "rounded silhouettes with no corner tighter than a 4 pt radius, except the kitty's ear tips"; L504 "The sheet is the model ... drop nothing they do show".
+- **Why it matters:** the sheet's ear lock tips, chin scallops and tail locks turn at about 0.7 to 1.5 pt, and the stubby-paws panel's toe lobes at about 3 pt. Held to 4 pt they come out blunt and bumpy, which is part of what you saw. The lint already lets fur spans through; the toe lobes are not fur.
+- **Decided: the recommended default.** follow the sheet for fur-lock tips and toe lobes only, as the sheet draws them; every other corner of the silhouette (head, body, ear, paw outline) keeps 4 pt or more. At phone size a soft 1 pt lock tip still reads rounded.
+- **Answered:** founder, Oct 16, 2026, in the session: "Q29 to Q31 as recommended".
+
+### Q30. The spec's list of where tufts go leaves out fur the sheet draws. Do I add what the sheet draws?
+- **The spec says:** L508 "tufts only where the sheets draw them: the dog's head tuft, cheeks and chest; ... the tail tips"; L504 "Add no fur details ... the sheets do not show, and drop nothing they do show".
+- **Why it matters:** the dog's sheet also draws feathered ear edges with lock tips at the hem, small scallops on the chin over the collar, and small fur bumps at the elbows and haunches. L508's list leaves them out; L504 says to drop nothing the sheets show.
+- **Decided: the recommended default.** draw them exactly as the sheet draws them, and nothing more: L508's own rule is "only where the sheets draw them", and its list reads as examples. Each species follows its own sheets.
+- **Answered:** founder, Oct 16, 2026, in the session: "Q29 to Q31 as recommended".
+
+### Q31. In the right-facing views, does a line where one part lies over another stay as dark as the sheet's?
+- **The spec says:** L507 "Light comes from the top left on every part and view"; L506 the outline "on each part's outer edge only"; the line-by-light rule (`characters/dog/DECISIONS.md` 74) lightens a line on its lit side.
+- **Why it matters:** in the .R views the light rule turns some overlap lines pale (the haunch over the tail in side.R, the tail in threeQuarter.R), so the two parts merge and the overlap goes flat, where the mirrored sheet keeps them dark.
+- **Decided: the recommended default.** a line where one part lies over another is a contact line: it keeps the sheet's darkness in both facings, like a contact shadow. The light rule lightens only the silhouette's outer edge.
+- **Answered:** founder, Oct 16, 2026, in the session: "Q29 to Q31 as recommended".
+
 ## Needed before phase 1
 
 ### Q1. Which iPhone will measure the speed budgets?
@@ -57,25 +75,7 @@ Where the spec is silent or contradicts itself, I don't invent the answer. The q
 
 ## Needed by Gate A (the dog's look)
 
-Q2, Q26, Q27 and Q28 are decided (above). Three more came out of the fur edges audit (`docs/phase3-fur-plan.md`). At Gate A you also approve the look itself and the new hungry and huffy faces.
-
-### Q29. May fur-lock tips and toe lobes be tighter than the 4 pt corner rule, where the sheet draws them so?
-- **The spec says:** L510 "rounded silhouettes with no corner tighter than a 4 pt radius, except the kitty's ear tips"; L504 "The sheet is the model ... drop nothing they do show".
-- **Why it matters:** the sheet's ear lock tips, chin scallops and tail locks turn at about 0.7 to 1.5 pt, and the stubby-paws panel's toe lobes at about 3 pt. Held to 4 pt they come out blunt and bumpy, which is part of what you saw. The lint already lets fur spans through; the toe lobes are not fur.
-- **Default (recommended):** follow the sheet for fur-lock tips and toe lobes only, as the sheet draws them; every other corner of the silhouette (head, body, ear, paw outline) keeps 4 pt or more. At phone size a soft 1 pt lock tip still reads rounded.
-- **Owner:** founder
-
-### Q30. The spec's list of where tufts go leaves out fur the sheet draws. Do I add what the sheet draws?
-- **The spec says:** L508 "tufts only where the sheets draw them: the dog's head tuft, cheeks and chest; ... the tail tips"; L504 "Add no fur details ... the sheets do not show, and drop nothing they do show".
-- **Why it matters:** the dog's sheet also draws feathered ear edges with lock tips at the hem, small scallops on the chin over the collar, and small fur bumps at the elbows and haunches. L508's list leaves them out; L504 says to drop nothing the sheets show.
-- **Default (recommended):** draw them exactly as the sheet draws them, and nothing more: L508's own rule is "only where the sheets draw them", and its list reads as examples. Each species follows its own sheets.
-- **Owner:** founder
-
-### Q31. In the right-facing views, does a line where one part lies over another stay as dark as the sheet's?
-- **The spec says:** L507 "Light comes from the top left on every part and view"; L506 the outline "on each part's outer edge only"; the line-by-light rule (`characters/dog/DECISIONS.md` 74) lightens a line on its lit side.
-- **Why it matters:** in the .R views the light rule turns some overlap lines pale (the haunch over the tail in side.R, the tail in threeQuarter.R), so the two parts merge and the overlap goes flat, where the mirrored sheet keeps them dark.
-- **Default (recommended):** a line where one part lies over another is a contact line: it keeps the sheet's darkness in both facings, like a contact shadow. The light rule lightens only the silhouette's outer edge.
-- **Owner:** founder
+None open: Q2 and Q26 to Q31 are decided (above). At Gate A you approve the look itself and the new hungry and huffy faces.
 
 ## Needed by phase 4 (the rig and Visual QA)
 
