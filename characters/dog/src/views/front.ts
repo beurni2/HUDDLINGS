@@ -762,15 +762,53 @@ const nudge = ([x, y]: P, [dx, dy]: P): P => [x + dx * cosR - dy * sinR, y + dx 
 /** The eye states the front draws besides the open eye (sparkle and squeeze are the happy crescent's region: rig.json). */
 export const EYE_STATES = ["happy", "closed", "sleepy", "wink", "wide", "peek", "eager", "flat", "peekBack"] as const;
 
+/** The eye states drawn on the open eye's ball (the rest are lash bands): their specs are what the R3 gaze guard holds. */
+export const BALL_STATES = ["sleepy", "wide", "peek", "eager", "peekBack"] as const;
+
+/** The open eye's spec on one side, and each ball state's (exported for the R3 guard, which holds where the iris looks). */
+export function eyeStateSpec(state: "open" | (typeof BALL_STATES)[number], side: "L" | "R"): EyeSpec {
+  const sx = side === "L" ? 1 : -1, noseward: 1 | -1 = side === "L" ? -1 : 1;
+  const spec = eyeSpec(side === "L" ? EYE_L : EYE_R, noseward);
+  switch (state) {
+    case "open":
+      return spec;
+    // The open eye with its upper lid closed down over about two fifths of it, its edge bowing down a little, as Sleepy
+    // half-lid draws it, the catchlight just under the lash: the lid's ends 3.2 pt above the ball's middle, its middle
+    // 1.4. Closed down past the middle, as it was, the flat lid across the iris read as unimpressed (DECISIONS 148).
+    case "sleepy":
+      return { ...spec, cover: { level: -3.2, bow: 1.8, tilt: ROLL_DEG, lash: 1.9, overhang: 1, shine: { at: [2.8, -0.8], r: 1.4 } } };
+    // Surprised round: 7% larger and a point higher, the white broader and longer, the catchlight bigger; its larger
+    // pupil baked in (phase 3 has no pupil scale).
+    case "wide":
+      return { ...spec, centre: nudge(spec.centre, [-sx * 0.4, -0.9]), rx: 10.2, ry: 9.85, white: { at: -28, width: 2, span: 42, fade: 0.5 },
+        shine: { at: [2.5, 5.6], r: 2.05 }, glow: { band: 6, warm: 2 } };
+    // Side glance: the iris baked toward the viewer's right, as the panel looks, the white a broad crescent on the
+    // other side; the catchlight stays on the iris.
+    case "peek":
+      return { ...spec, white: { at: side === "R" ? -6 : 186, width: 4.6, span: 58, fade: 0.3 }, shine: { at: [side === "R" ? 2.6 : -2.4, 5], r: 1.8 } };
+    // Hungry's (new drawing): the wide eye with its pupil larger (the iris's dark reaching further down, its warm foot a
+    // thin glow) and fixed on the food just in front of its nose, the iris baked in toward the nose and a hair down, so
+    // the two eyes meet on it, the white a crescent down the outer side, the catchlight riding the iris (Q28) and larger.
+    case "eager":
+      return eager(spec, sx, EAGER);
+    // Huffy's peek back (new drawing): the eye open again, bright, no lid (a quarter-down lid read as a skeptical
+    // side-eye, the huff kept up rather than melting), the iris baked toward the viewer's right and level, so with the
+    // head glanced away to the dog's right (phase 4) it looks back at the viewer, never up at them: on the dog's left
+    // eye, the one that peeks, the white lies on the nose's side 8° below the level, the open eye's white turned round
+    // to the other side (DECISIONS 159). The catchlight on the iris (Q28).
+    case "peekBack":
+      return { ...spec, white: { at: side === "R" ? -6 : 168, width: 3.2, span: 56, fade: 0.3 }, shine: { at: [side === "R" ? 3.4 : -1.6, 5.2], r: 1.9 } };
+  }
+}
+
 /**
  * An eye state, drawn from its panels. The closed states are the sheets' dark lash bands, placed by their middles where
  * the level panels place them from the nose (DECISIONS 130): the happy crescents (Excited, Laughing) 2.3 pt below the
  * open eye's centre and 1.9 pt further out, the closed lids (Sleepy) 2 pt below and 1.6 out, the wink (Mischievous,
- * Winking, Cheeky) at the open eye's height.
+ * Winking, Cheeky) at the open eye's height. The others are the open eye's ball (eyeStateSpec).
  */
 function eyeState(state: (typeof EYE_STATES)[number], side: "L" | "R"): Piece {
   const sx = side === "L" ? 1 : -1, noseward: 1 | -1 = side === "L" ? -1 : 1;
-  const spec = eyeSpec(side === "L" ? EYE_L : EYE_R, noseward);
   const band = (out: number, down: number, b: Omit<LidBand, "centre" | "tilt" | "noseward">) =>
     lidBand({ centre: FRAME.at([sx * (EYE_HALF + out), down]), tilt: ROLL_DEG, noseward, ...b });
   switch (state) {
@@ -788,34 +826,12 @@ function eyeState(state: (typeof EYE_STATES)[number], side: "L" | "R"): Piece {
     // nose and 8 pt above it, the open eye's height).
     case "wink":
       return band(2.7, -0.6, { width: 17.6, rise: 3.2, drop: -1.2, thickness: 4.8, ends: [2.4, 2.4], fullness: 0.35, flick: { length: 1.6, hook: -60 } });
-    // The open eye with its upper lid closed down over about two fifths of it, its edge bowing down a little, as Sleepy
-    // half-lid draws it, the catchlight just under the lash: the lid's ends 3.2 pt above the ball's middle, its middle
-    // 1.4. Closed down past the middle, as it was, the flat lid across the iris read as unimpressed (DECISIONS 147).
-    case "sleepy":
-      return sharedEye({ ...spec, cover: { level: -3.2, bow: 1.8, tilt: ROLL_DEG, lash: 1.9, overhang: 1, shine: { at: [2.8, -0.8], r: 1.4 } } });
-    // Surprised round: 7% larger and a point higher, the white broader and longer, the catchlight bigger; its larger
-    // pupil baked in (phase 3 has no pupil scale).
-    case "wide":
-      return sharedEye({ ...spec, centre: nudge(spec.centre, [-sx * 0.4, -0.9]), rx: 10.2, ry: 9.85, white: { at: -28, width: 2, span: 42, fade: 0.5 },
-        shine: { at: [2.5, 5.6], r: 2.05 }, glow: { band: 6, warm: 2 } });
-    // Side glance: the iris baked toward the viewer's right, as the panel looks, the white a broad crescent on the
-    // other side; the catchlight stays on the iris.
-    case "peek":
-      return sharedEye({ ...spec, white: { at: side === "R" ? -6 : 186, width: 4.6, span: 58, fade: 0.3 }, shine: { at: [side === "R" ? 2.6 : -2.4, 5], r: 1.8 } });
-    // Hungry's (new drawing): the wide eye with its pupil larger (the iris's dark reaching further down, its warm foot a
-    // thin glow) and fixed on the food just in front of its nose, the iris baked in toward the nose and a hair down, so
-    // the two eyes meet on it, the white a crescent down the outer side, the catchlight riding the iris (Q28) and larger.
-    case "eager":
-      return sharedEye(eager(spec, sx, EAGER));
     // Huffy's flat lid (new drawing): shut, nearly level, a hair lower in its middle than at its ends, thinner than the
     // happy crescent, the outer end lifting into a short lash; its inner end never below its outer (no angry slant).
     case "flat":
       return lidBand(flatLid(side));
-    // Huffy's peek back (new drawing): the eye opening again, its lid still a quarter down, the iris baked toward the
-    // viewer's right, so with the head glanced away to the dog's right (phase 4) it looks back at the viewer, the
-    // catchlight just under the lid on the iris (Q28).
-    case "peekBack":
-      return sharedEye({ ...spec, white: { at: side === "R" ? -6 : 186, width: 3.2, span: 56, fade: 0.3 }, shine: { at: [side === "R" ? 3.4 : -1.6, 5.2], r: 1.9 } });
+    default:
+      return sharedEye(eyeStateSpec(state, side));
   }
 }
 

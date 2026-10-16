@@ -21,10 +21,10 @@ import { BOX, composite, resvgLayers } from "../../draw/test/composite.ts";
 import { blushAlpha, clipText, earRot, faceClip, faceClips, RAISED, stillOf } from "../src/faceClips.ts";
 import { BROW_STATES, brow } from "../src/parts/brow.ts";
 import { CHEEK_STATES } from "../src/parts/cheeks.ts";
-import { lidBand, lidLine } from "../src/parts/eye.ts";
+import { eye, eyeGeometry, lidBand, lidLine, type EyeSpec } from "../src/parts/eye.ts";
 import { MOUTH_STATES, mouth, oTongue, type Mouth } from "../src/parts/mouth.ts";
 import { BLUSH_REFERENCE, EAR_ANGLES, EAR_STATES, EYE_STATES, PRESETS, type EarState, type Preset } from "../src/presets.ts";
-import { faceFrame, faceStates, flatLid, front } from "../src/views/front.ts";
+import { eyeStateSpec, faceFrame, faceStates, flatLid, front } from "../src/views/front.ts";
 
 const rig = JSON.parse(readFileSync(new URL("../src/rig.json", import.meta.url), "utf8")) as Rig;
 const clipsDir = new URL("../src/clips/", import.meta.url);
@@ -249,6 +249,53 @@ function lidProblem(line: P[]): string | undefined {
   if (rise > LID_LEVEL_PT) return `its inner end stands ${rise.toFixed(2)} pt above its outer end, a worried slant`;
   return undefined;
 }
+
+/**
+ * Where an eye on the open eye's ball looks, in the face's level frame: the centroid of its dark (the iris inside the
+ * opening, parts/eye.ts's own geometry) against the opening's middle, in points, x toward the viewer's right, y down.
+ */
+function darkOffset(e: EyeSpec): P {
+  const g = eyeGeometry(e), t = (e.turn * Math.PI) / 180;
+  const at = (u: number, w: number) => level([[e.noseward * u * Math.cos(t) - w * Math.sin(t), e.noseward * u * Math.sin(t) + w * Math.cos(t)]])[0]!;
+  const inside = (o: { u: number; w: number; a: number; b: number }, u: number, w: number) => ((u - o.u) / o.a) ** 2 + ((w - o.w) / o.b) ** 2 <= 1;
+  let [ox, oy, m, dx, dy, n] = [0, 0, 0, 0, 0, 0];
+  for (let u = -14; u <= 14; u += 0.1) for (let w = -14; w <= 14; w += 0.1) {
+    if (!inside(g.open, u, w)) continue;
+    const [x, y] = at(u, w);
+    (ox += x, oy += y, m++);
+    if (inside(g.iris, u, w)) (dx += x, dy += y, n++);
+  }
+  return [dx / n - ox / m, dy / n - oy / m];
+}
+
+/**
+ * The new faces' open eyes never look up (R3): hungry's eager eye, fixed on the food, and huffy's peek back, looking
+ * back at the viewer, would plead looking up (DECISIONS 151, 159). Each eye's dark stands no higher in it than the rest
+ * eye's does, within 0.25 pt. The sheets' own Side glance (peek), which no new face uses, looks up 0.82 pt more on the
+ * dog's left eye, as its panel does; the rest eye's own white lies 8° below the level on its outer side.
+ */
+const GAZE_UP_PT = 0.25;
+function gazeProblem(e: EyeSpec, rest: EyeSpec): string | undefined {
+  const up = darkOffset(rest)[1] - darkOffset(e)[1];
+  return up > GAZE_UP_PT ? `its dark stands ${up.toFixed(2)} pt higher in the eye than the rest eye's, looking up` : undefined;
+}
+
+test("the new faces' open eyes never look up: hungry's eager eye and huffy's peek back, as drawn in the front", () => {
+  const drawn = new Map(faceStates().map((d) => [`${d.part}:${d.state}`, scopeIds(d.piece.svg, "g")]));
+  for (const side of ["L", "R"] as const) {
+    const rest = eyeStateSpec("open", side);
+    for (const state of ["eager", "peekBack"] as const) {
+      const e = eyeStateSpec(state, side);
+      assert.equal(scopeIds(eye(e).svg, "g"), drawn.get(`eye.${side}:${state}`), `the guarded eye.${side} ${state} is the one the front draws`);
+      assert.equal(gazeProblem(e, rest), undefined, `eye.${side} ${state}`);
+    }
+    // Planted: the eager eye's white rolled under its iris (the last review's probe: the iris up, the pleading eyes),
+    // and the peek back's white at 186°, as it was, its dark half a point up on the dog's left eye.
+    const eager = eyeStateSpec("eager", side), peekBack = eyeStateSpec("peekBack", side);
+    assert.match(gazeProblem({ ...eager, white: { at: -90, width: 3, span: 70 } }, rest) ?? "", /looking up/, `eye.${side} eager rolled up`);
+    if (side === "L") assert.match(gazeProblem({ ...peekBack, white: { ...peekBack.white, at: 186 } }, rest) ?? "", /looking up/, "eye.L peekBack as it was");
+  }
+});
 
 test("huffy's shut lids lie level, as drawn in the front, and a slanted lid fails", () => {
   const drawn = new Map(faceStates().filter((d) => d.state === "flat").map((d) => [d.part, scopeIds(d.piece.svg, "f")]));
