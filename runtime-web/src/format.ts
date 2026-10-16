@@ -158,6 +158,8 @@ function bodyOrders(rig: Rig): [string, string[]][] {
 
 const EASING_NAMES = new Set(["linear", "step", "easeIn", "easeOut", "easeInOut", "easeOutBack"]);
 const finite = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v);
+/** The events a clip may fire (README, Clips: events). */
+const EVENT_TYPES: ReadonlySet<string> = new Set<ClipEvent["type"]>(["keyPose", "sound", "haptic", "effect", "plant", "lift", "footstep"]);
 /** A JSON object: not a list, not null. */
 const isMap = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
 
@@ -378,6 +380,15 @@ export function validate(rig: Rig, clips: Clip[], atlas?: AtlasSet): string[] {
     for (const event of Array.isArray(events) ? (events as ClipEvent[]) : []) {
       if (!isMap(event)) {
         problems.push(`clip ${clip.name}: an event is not an object with its time and type: ${JSON.stringify(event) ?? String(event)}`);
+        continue;
+      }
+      // Swift decodes an event's time as a number and its type and name as strings, so the clip is refused there; and
+      // a type no runtime knows fires nothing anyone listens for (README, Clips: events).
+      const shown = JSON.stringify(event, (_, v: unknown) => (typeof v === "number" && !Number.isFinite(v) ? String(v) : v));
+      if (typeof event.type !== "string" || !EVENT_TYPES.has(event.type)) problems.push(`clip ${clip.name}: an event's type is not one of ${[...EVENT_TYPES].join(", ")}: ${shown}`);
+      if (event.name !== undefined && event.name !== null && typeof event.name !== "string") problems.push(`clip ${clip.name}: an event's name is not a string: ${shown}`);
+      if (!finite(event.at)) {
+        problems.push(`clip ${clip.name}: an event's time is not a finite number: ${shown}`);
         continue;
       }
       if (event.at < 0 || event.at > clip.lengthMs) problems.push(`clip ${clip.name}: event ${event.type} at ${event.at} ms is outside the clip`);

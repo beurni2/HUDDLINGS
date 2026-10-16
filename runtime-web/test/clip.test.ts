@@ -353,3 +353,24 @@ test("validation names events that are not a list, and an event that is not an o
   assert.deepEqual(validate(rig, [{ name: "c", lengthMs: 500, events: null } as unknown as Clip]), []);
   assert.deepEqual(validate(rig, [{ name: "c", lengthMs: 500, events: [{ at: 600, type: "sound" }] }]), ["clip c: event sound at 600 ms is outside the clip"]);
 });
+
+test("validation names an event whose time is not a finite number, whose type is none of the seven, or whose name is not a string", () => {
+  // Each passed validate() on the web; Swift's ClipEvent (at: Double, type: String, name: String?) refuses the first and
+  // the last at decode, and no runtime listens for an unknown type, so the runtimes would disagree on the clip.
+  const types = "keyPose, sound, haptic, effect, plant, lift, footstep";
+  const cases: [unknown, string[]][] = [
+    [{}, [`clip c: an event's type is not one of ${types}: {}`, "clip c: an event's time is not a finite number: {}"]],
+    [{ at: "x", type: "sound" }, ['clip c: an event\'s time is not a finite number: {"at":"x","type":"sound"}']],
+    [{ at: NaN, type: "sound" }, ['clip c: an event\'s time is not a finite number: {"at":"NaN","type":"sound"}']],
+    [{ at: null, type: "sound" }, ['clip c: an event\'s time is not a finite number: {"at":null,"type":"sound"}']],
+    [{ type: "haptic" }, ['clip c: an event\'s time is not a finite number: {"type":"haptic"}']],
+    [{ at: 10 }, [`clip c: an event's type is not one of ${types}: {"at":10}`]],
+    [{ at: 10, type: "Sound" }, [`clip c: an event's type is not one of ${types}: {"at":10,"type":"Sound"}`]],
+    [{ at: 10, type: 3 }, [`clip c: an event's type is not one of ${types}: {"at":10,"type":3}`]],
+    [{ at: 10, type: "sound", name: 7 }, ['clip c: an event\'s name is not a string: {"at":10,"type":"sound","name":7}']],
+  ];
+  for (const [event, expected] of cases) assert.deepEqual(validate(rig, [{ name: "c", lengthMs: 500, events: [event] } as unknown as Clip]), expected, JSON.stringify(event));
+  // Every type the format names, with a name or a null one, passes.
+  const fine = types.split(", ").map((type, i) => ({ at: i * 10, type, ...(i % 2 ? { name: "n" } : { name: null }) }));
+  assert.deepEqual(validate(rig, [{ name: "c", lengthMs: 500, events: fine } as unknown as Clip]), []);
+});
