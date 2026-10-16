@@ -5,7 +5,7 @@ import type { Drawing } from "../../build/atlas.ts";
 import { rasterizeAll } from "../../build/raster.ts";
 import { furSpan } from "../fur.ts";
 import { arc, ellipse, sample, smooth, type Node, type Shape } from "../geom.ts";
-import { GATE, LIMITS, lineGate, lintDrawing, reach, shapeKey, type SpanMeta } from "../lint.ts";
+import { LIMITS, lineGate, lint, lintDrawing, reach, shapeKey, type SpanMeta } from "../lint.ts";
 import { marking, part } from "../paint.ts";
 import { blur, mask, type Piece } from "../svg.ts";
 
@@ -279,48 +279,81 @@ test("toe lobes may turn tighter than 4 pt, down to their own floor; nothing els
   assert.match(lintOf(lobe(LIMITS.lobePt - 0.5, [[0, 1]])).join("\n"), /on a toe lobe \(at least 2.5 pt\)/);
 });
 
-// The line gate (the fur plan's vector gate A): a ring's lit spans, as the dog's parts/lines.ts reports them.
+// The line gate (the fur plan's vector gate A), on a view composited in its rig's draw order: a ring with lit spans, as
+// the dog's parts/lines.ts reports them, and a part that may lie over it ("over") or under it ("below").
 const ring = smooth(round);
-const ringPts = sample(ring.segs, 32);
+const ringPts = sample(ring.segs, 48);
 const RING = arc([...ringPts, ringPts[0]!]).at(-1)!;
-/** A drawing of a shape with lit spans (from and to as shares), gated as a lane that has opted in, or not. */
-function spanned(shape: Shape, spans: Partial<SpanMeta>[], gate = true): Drawing {
-  const base = part("part", shape, { fill: "#FFF4E8" });
-  const lines = spans.map((s) => ({ kind: "outer" as const, width: 1.4, where: "part", drawn: [1.3, 1.5] as [number, number],
+const rigPart = (name: string) => ({ name, bone: "root", group: "body" as const, regions: { front: `${name}/front` } });
+const RIG = { drawOrder: { front: ["below", "ring", "over"] }, parts: ["below", "ring", "over"].map(rigPart) };
+/** A drawing of a shape with lit spans (from and to as shares, as drawn), gated as a lane that has opted in, or not. */
+function spanned(shape: Shape, spans: Partial<SpanMeta>[], gate = true, region = "ring/front"): Drawing {
+  const base = part(region.split("/")[0]!, shape, { fill: "#FFF4E8" });
+  const lines = spans.map((s) => ({ kind: "outer" as const, width: 1.4, where: region.split("/")[0]!, drawn: [1.3, 1.5] as [number, number],
     span: { shape: shapeKey(shape.segs), from: 0.1, to: 0.3, length: 25, ends: ["free", "free"], taper: [1.8, 1.8], ...s } as SpanMeta }));
   const p: Piece = { ...base, meta: { ...base.meta, lines } };
-  return drawing(gate ? lineGate(p) : p);
+  return drawing(gate ? lineGate(p) : p, region);
 }
-const gateOf = (d: Drawing) => lintOf(d).filter((s) => /lit span|fur edge/.test(s)).join("\n");
+/** A plain part over the ring's right half (or under it, as "below"), reaching past it at the top and the bottom. */
+const coverOf = (region: string) => drawing(part(region.split("/")[0]!, smooth(Array.from({ length: 12 }, (_, i): Node => [14 + 24 * Math.cos((i / 12) * 2 * Math.PI), 34 * Math.sin((i / 12) * 2 * Math.PI)])), { fill: "#FFF4E8" }), region, 100);
+const gateOf = (...ds: Drawing[]) => lint(ds, { palette: PALETTE, rig: RIG }).filter((s) => /line gate|lit span|fur edge|edge of/.test(s)).join("\n");
+const share = (pt: number) => pt / RING;
+/** The whole ring lined by one span joined to itself, as drawn: no gate problem. */
+const whole: Partial<SpanMeta> = { from: 0, to: 1, ends: ["join", "join"], taper: [0, 0] };
 
-test("the line gate holds only drawings whose lane has opted in", () => {
-  const long: Partial<SpanMeta> = { ends: ["taper", "taper"], taper: [5, 5] };
+test("the line gate holds only drawings whose lane has opted in, and only on a view its rig can composite", () => {
+  const long: Partial<SpanMeta> = { from: 0, to: 1, ends: ["taper", "taper"], taper: [5, 5] };
   assert.equal(gateOf(spanned(ring, [long], false)), "", "today's tapered spans pass where no lane has opted in");
+  assert.equal(gateOf(spanned(ring, [whole])), "", "the ring lined all round at full width passes");
   assert.match(gateOf(spanned(ring, [long])), /tapers over 5.00 pt at its start/);
-  assert.equal(gateOf(spanned(ring, [{}])), "", "a span with free ends tapering 1.8 pt passes");
   assert.equal(gateOf(spanned(ring, [{ ...long, cites: 74 }])), "", "a span that cites a DECISIONS entry is let through");
+  assert.match(lint([spanned(ring, [whole])], { palette: PALETTE }).join("\n"), /composites ring's view|the lint was given none/, "a gated drawing with no rig to place it fails");
+  assert.match(gateOf(spanned(ring, [{ ...whole, shape: "00000000" }])), /runs on a shape \(00000000\) that no drawing of front reports/, "a span whose shape cannot be found fails");
 });
 
-test("the line gate fails a handoff that leaves more than 2 pt thin, and passes a joined one", () => {
-  const gap = 1 / RING;
-  const pair = (endA: SpanMeta["ends"][1], startB: SpanMeta["ends"][0], taperA: number, taperB: number): Partial<SpanMeta>[] => [
-    { from: 0.1, to: 0.2, ends: ["free", endA], taper: [1.8, taperA] }, { from: 0.2 + gap, to: 0.3, ends: [startB, "free"], taper: [taperB, 1.8] }];
-  assert.match(gateOf(spanned(ring, pair("free", "free", 1.8, 1.8))), /hands off to .* with 4.60 pt below full width/);
-  assert.equal(gateOf(spanned(ring, pair("join", "join", 0, 0))), "");
-  assert.equal(gateOf(spanned(ring, pair("under", "free", 0, 1.8))), "", "an end running on under a part is not a handoff");
-  // Spans further apart than a handoff are separate edges, each lined where the sheet lines it.
-  assert.equal(gateOf(spanned(ring, [{ from: 0.1, to: 0.2 }, { from: 0.2 + (GATE.handoffPt + 1) / RING, to: 0.4 }])), "");
+test("the line gate fails any visible stretch of edge below full width, however long, and passes one a part covers", () => {
+  // Two spans round the ring joined at its far side (0.5), their other ends free, a gap of `gap` pt between them at 0.
+  const pair = (gap: number, cites?: number): Partial<SpanMeta>[] => [
+    { from: share(gap / 2), to: 0.5, ends: ["free", "join"], taper: [1.8, 0], ...(cites ? { cites } : {}) }, { from: 0.5, to: 1 - share(gap / 2), ends: ["join", "free"], taper: [0, 1.8] }];
+  assert.match(gateOf(spanned(ring, pair(1))), /the edge of ring shows 4\.[5-7]\d pt below full line width/, "a handoff's tapers and gap");
+  for (const gap of [6, 12]) assert.match(gateOf(spanned(ring, pair(gap))), new RegExp(`shows ${gap + 3}\\.\\d\\d pt below full line width`), `a ${gap} pt gap is a hole in the line`);
+  assert.equal(gateOf(spanned(ring, pair(12)), coverOf("over/front")), "", "a gap under a part drawn over the ring is not on a visible edge");
+  assert.match(gateOf(spanned(ring, pair(12)), coverOf("below/front")), /shows 15\.\d\d pt below/, "a part drawn under the ring covers nothing of it");
+  assert.equal(gateOf(spanned(ring, pair(12, 210))), "", "a stretch beside a span that cites a DECISIONS entry is let through");
+});
+
+test("a join end must meet another line at full width, and an under end must run on under a part drawn over its line", () => {
+  // Two spans whose joined ends lie 6 pt apart, with nothing between: a fake join.
+  const apartBy = (gap: number): Partial<SpanMeta>[] => [{ from: 0, to: 0.5, ends: ["join", "join"], taper: [0, 0] }, { from: 0.5 + share(gap), to: 1, ends: ["join", "join"], taper: [0, 0] }];
+  assert.equal(gateOf(spanned(ring, apartBy(0))), "", "two spans joined on a shared point pass");
+  assert.match(gateOf(spanned(ring, apartBy(6))), /joins no line at its end/);
+  // One span over the ring's left half, its ends running on under a part (as lines.ts draws them: 1.5 pt at full width,
+  // then a 1.8 pt fade, past where they are typed at 0.25 and 0.75).
+  const run = share(1.5 + 1.8), half: Partial<SpanMeta> = { from: 0.25 - run, to: 0.75 + run, ends: ["under", "under"], taper: [1.8, 1.8] };
+  assert.equal(gateOf(spanned(ring, [half]), coverOf("over/front")), "", "ends under a part drawn over the ring, the rest of its edge covered");
+  const bare = gateOf(spanned(ring, [half]));
+  assert.match(bare, /runs on under no part at its start/, "a fake under end: no part covers it");
+  assert.match(bare, /runs on under no part at its end/);
+  assert.match(gateOf(spanned(ring, [half]), coverOf("below/front")), /runs on under no part/, "a part drawn under the line does not cover its end");
 });
 
 test("the line gate fails a fur edge drawn as more than one span, and a span ending in the middle of fur", () => {
   // Fur over about a fifth of the way round, as shares of the ring's length (as the meta holds it).
   const furred = furSpan(ring, ringPts[Math.round(ringPts.length * 0.1)]!, ringPts[Math.round(ringPts.length * 0.3)]!);
-  const [a, b] = part("part", furred, { fill: "#FFF4E8" }).meta.shapes[0]!.fur[0]!;
+  const [a, b] = part("ring", furred, { fill: "#FFF4E8" }).meta.shapes[0]!.fur[0]!;
   const mid = (a + b) / 2;
-  assert.equal(gateOf(spanned(furred, [{ from: a - 0.05, to: b + 0.05 }])), "", "one span over the fur edge passes");
-  assert.match(gateOf(spanned(furred, [{ from: a - 0.05, to: mid, ends: ["free", "join"], taper: [1.8, 0] }, { from: mid, to: b + 0.05, ends: ["join", "free"], taper: [0, 1.8] }])),
+  assert.equal(gateOf(spanned(furred, [whole])), "", "one span over the fur edge passes");
+  assert.match(gateOf(spanned(furred, [{ from: a - 0.05, to: mid, ends: ["join", "join"], taper: [0, 0] }, { from: mid, to: a - 0.05, ends: ["join", "join"], taper: [0, 0] }])),
     /is drawn as 2 spans/);
-  assert.match(gateOf(spanned(furred, [{ from: a - 0.05, to: mid }])), /ends in the middle of fur at its end/);
-  assert.equal(gateOf(spanned(furred, [{ from: a - 0.05, to: mid, ends: ["free", "under"], taper: [1.8, 0] }])), "", "an end that runs under a part is not in open fur");
-  assert.equal(gateOf(spanned(furred, [{ from: a - 0.05, to: b }])), "", "a span ending where the fur ends passes");
+  assert.match(gateOf(spanned(furred, [{ from: mid, to: mid - 0.001, ends: ["free", "free"], taper: [1.8, 1.8] }])), /ends in the middle of fur at its start/);
+});
+
+test("in a mirrored facing the gate finds each span's shape through the mirror and holds it as in the facing it was typed in", () => {
+  // A right-facing view's piece is its left-facing piece mirrored about x = 0, its spans as they were (the dog's views/facing.ts).
+  const furred = furSpan(ring, ringPts[Math.round(ringPts.length * 0.1)]!, ringPts[Math.round(ringPts.length * 0.3)]!);
+  const [a, b] = part("ring", furred, { fill: "#FFF4E8" }).meta.shapes[0]!.fur[0]!;
+  const two: Partial<SpanMeta>[] = [{ from: a - 0.05, to: (a + b) / 2, ends: ["join", "join"], taper: [0, 0] }, { from: (a + b) / 2, to: a - 0.05, ends: ["join", "join"], taper: [0, 0] }];
+  const mirror = (d: Drawing): Drawing => ({ ...d, meta: { ...d.meta!, shapes: d.meta!.shapes.map((s) => ({ ...s, segs: s.segs.map((seg) => seg.map(([x, y]) => [-x, y]) as typeof seg) })) } });
+  assert.match(gateOf(mirror(spanned(furred, two))), /is drawn as 2 spans/);
+  assert.equal(gateOf(mirror(spanned(furred, [whole]))), "");
 });

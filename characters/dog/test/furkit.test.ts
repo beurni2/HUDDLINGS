@@ -4,20 +4,26 @@
 // ends running on under their part, contact lines as dark in both facings, the ground's dark under the middle of the
 // sole only, and a crisp outer edge on head.line. The paws' bun and soft toe lines (paw.ts), the ears' edge
 // (ear.ts), the head's fur (headfur.ts), the markings' brushed edge (marking.ts) and the ground shadow (shadow.ts).
+import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { Resvg } from "@resvg/resvg-js";
 import { PNG } from "pngjs";
-import type { Lock } from "../../draw/fur.ts";
+import type { Drawing } from "../../build/atlas.ts";
+import type { Rig } from "../../../runtime-web/src/format.ts";
+import { furEdge, type Lock } from "../../draw/fur.ts";
+import { gateProblems, lineGate } from "../../draw/lint.ts";
 import { arc, fracAt, mirrorX, smooth, spanPoints, v, type Node, type P, type Shape } from "../../draw/geom.ts";
 import { scopeIds, type Piece } from "../../draw/svg.ts";
 import { EAR, earEdge, earFur, type EarEdgeSpec } from "../src/parts/ear.ts";
 import { HEAD_FUR, headFur, type HeadFurSpec } from "../src/parts/headfur.ts";
-import { CONTACT_DEPTH, FREE_TAPER, litEdge, litRibbons, SOLE, UNDER_RUN, type LitSpan } from "../src/parts/lines.ts";
+import { drawings } from "../src/drawings.ts";
+import { CONTACT_DEPTH, FREE_TAPER, litEdge, litPart, litRibbons, SOLE, UNDER_RUN, type LitLine, type LitSpan } from "../src/parts/lines.ts";
 import { brush, type Brush } from "../src/parts/marking.ts";
 import { BUN, bun, SOFT_TOES, toes, type BunSpec } from "../src/parts/paw.ts";
 import { groundShadow } from "../src/parts/shadow.ts";
 import { C, LINES } from "../src/palette.ts";
+import { mirrorPiece } from "../src/views/facing.ts";
 
 /** A plump part sitting on the ground, typed clockwise from its top: its lit upper left, its sole along the ground. */
 const paw = smooth([[0, -30, "top"], [14, -24], [17, -12, "right"], [14, -1.2], [0, 0, "sole"], [-14, -1.2], [-17, -12, "left"], [-14, -24]] as Node[]);
@@ -33,7 +39,7 @@ test("left out, the fur pass's options draw exactly what the line drew before th
   assert.deepEqual(a.lines[0]!.span.taper, [4, 4]);
 });
 
-test("a free end tapers over 1.8 pt, a joined end is full width to its point with a round cap, and a covered end runs on under its part", () => {
+test("a free end tapers over 1.8 pt, a joined end is full width to its point with a round cap, and a covered end runs on under its part and fades there", () => {
   const free = litRibbons(paw, [{ from: "left", to: "right", ends: ["free", "free"] }], "free").lines[0]!.span;
   assert.deepEqual(free.taper, [FREE_TAPER, FREE_TAPER]);
   assert.ok(FREE_TAPER >= 1.5 && FREE_TAPER <= 2, "a free end tapers over 1.5 to 2 pt");
@@ -47,14 +53,15 @@ test("a free end tapers over 1.8 pt, a joined end is full width to its point wit
   const capAtLeft = caps.find((pts) => v.len(v.sub(pts.reduce((s, p) => v.add(s, v.mul(p, 1 / 16)), [0, 0] as P), left)) < 1)!;
   const r = v.len(v.sub(capAtLeft[0]!, capAtLeft.reduce((s, p) => v.add(s, v.mul(p, 1 / 16)), [0, 0] as P)));
   assert.ok(r >= 0.59 && r <= 0.9, `the cap at the joined end is ${r.toFixed(2)} pt round, half a full-width line`);
-  // Covered at its start: it runs on 1.5 pt before where it is typed, at full width.
+  // Covered at its start: it runs on 1.5 pt before where it is typed at full width, then fades out over 1.8 pt, so an
+  // end that no part covers fades rather than stopping square (the line gate checks that one does).
   const total = arc([...spanPoints(paw, 0, 1), spanPoints(paw, 0, 1)[0]!]).at(-1)!;
   const under = litRibbons(paw, [{ from: "left", to: "right", ends: ["under", "free"] }], "under");
   const [f0] = under.outlined[0]!;
   const ran = ((fracAt(paw, "left") - f0 + 1) % 1) * total;
-  assert.ok(Math.abs(ran - UNDER_RUN) < 0.05, `the covered end runs on ${ran.toFixed(2)} pt past where it is typed`);
-  assert.ok(UNDER_RUN >= 1, "a covered end runs on at least 1 pt");
-  assert.deepEqual(under.lines[0]!.span.taper, [0, FREE_TAPER]);
+  assert.ok(Math.abs(ran - UNDER_RUN - FREE_TAPER) < 0.05, `the covered end runs on ${ran.toFixed(2)} pt past where it is typed`);
+  assert.ok(UNDER_RUN >= 1, "a covered end runs on at least 1 pt at full width");
+  assert.deepEqual(under.lines[0]!.span.taper, [FREE_TAPER, FREE_TAPER]);
 });
 
 test("a contact line keeps the same darkness in both facings, never lighter than the ladder's middle; an outer line lightens toward the light", () => {
@@ -325,4 +332,36 @@ test("the ground shadow is soft all round, reaches as far as it is asked and is 
   // Along the ground it is darkest under each paw.
   const ground = (x: number) => alpha([x, -0.3]);
   assert.ok(ground(-20) > ground(0) && ground(20) > ground(0), `under the paws ${ground(-20)}, ${ground(20)}, between them ${ground(0)}`);
+});
+
+// The line gate (DECISIONS 219) on the dog's own views, each composited in rig.json's draw order.
+const rig = JSON.parse(readFileSync(new URL("../src/rig.json", import.meta.url), "utf8")) as Rig;
+
+test("a right-facing view's gated spans are found through facing.ts's mirror and held as in the facing they were typed in", () => {
+  // A fur edge lined by two spans, in a piece mirrored as a .R view mirrors its .L piece: its spans keep the .L key.
+  const furred = furEdge(paw, [-16, -8], [-16, -18], [{ len: 2.4, width: 3.4, lean: 0.4, dip: 0.6 }, { len: 3, width: 4.4, lean: 0.5, dip: 0.6 }, { len: 2.2, width: 3.4, lean: 0.35 }], 0.2);
+  const two: LitSpan[] = [{ from: [0, -30], to: [-17, -12], ends: ["join", "join"] }, { from: [-17, -12], to: [0, -30], ends: ["join", "join"] }];
+  const one: LitSpan[] = [{ from: 0, to: 1, ends: ["join", "join"] }];
+  const view = (spans: LitSpan[], R: boolean): Drawing => {
+    const p = lineGate(litPart("tail", furred, { fill: C.fur }, spans));
+    return { region: `tail/side.${R ? "R" : "L"}`, svg: "", anchor: [0, 0], meta: (R ? mirrorPiece(p) : p).meta };
+  };
+  for (const R of [false, true]) {
+    assert.match(gateProblems([view(two, R)], rig).join("\n"), /is drawn as 2 spans/, `the planted two-span fur edge is found in side.${R ? "R" : "L"}`);
+    assert.deepEqual(gateProblems([view(one, R)], rig), [], `one span all round passes in side.${R ? "R" : "L"}`);
+  }
+});
+
+test("today's views, gated whole, fail the line gate, and each right-facing view as its left-facing view does", () => {
+  // No view has opted in, so the build passes; were every rest drawing gated, the gate would find today's broken lines,
+  // and every check, not only the tapers, would run in both facings (the markings each facing shows aside, DECISIONS 102).
+  const all = drawings();
+  const gated = (view: string) => all.map((d) => (d.region.split("/")[1] === view && d.meta
+    ? { ...d, meta: { ...d.meta, lines: d.meta.lines.map((l) => ((l as LitLine).span ? { ...l, span: { ...(l as LitLine).span, gate: true } } : l)) } } : d));
+  const kinds = (view: string) => {
+    const p = gateProblems(gated(view), rig).filter((x) => !/patch/.test(x.split(":")[0]!));
+    return { edges: p.filter((x) => / shows .* below full line width/.test(x)).length, fur: p.filter((x) => /drawn as \d+ spans|middle of fur/.test(x)).length };
+  };
+  assert.ok(kinds("front").edges > 0, "today's front has broken lines the gate finds");
+  for (const view of ["threeQuarter", "side"]) assert.deepEqual(kinds(`${view}.R`), kinds(`${view}.L`), `${view}.R is held as ${view}.L`);
 });

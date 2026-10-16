@@ -33,7 +33,8 @@ export interface LitSpan {
    * How each end finishes (DECISIONS 210), [its start, its end]: a `free` end, where the line ends in open fur, tapers
    * over `taper` (1.8 pt by default); a `join` end meets another line on a shared point at full width, with a round
    * cap so the two meet at any angle; an `under` end runs on 1.5 pt past where it is typed at full width, under the
-   * part that covers it. Left out, both ends taper as before (74).
+   * part that covers it, and then fades out over 1.8 pt there, so an end that no part covers fades rather than stopping
+   * in a square cut (the line gate, lint.ts, checks that a part does cover it). Left out, both ends taper as before (74).
    */
   ends?: [SpanEnd, SpanEnd];
   /** A line where one part lies over another (DECISIONS 211, Q31): its depth is its place's, never the light's, and at least 0.5, so it keeps the sheet's darkness in both facings. */
@@ -61,7 +62,7 @@ const WIDTH = { lit: 1.2, away: 1.45, deep: 1.6 };
 const SOFT = 0.3;
 /** A free end's taper, in points (DECISIONS 210: 1.5 to 2 pt, the spec's "slightly tapered where it ends"). */
 export const FREE_TAPER = 1.8;
-/** How far an `under` end runs on past where it is typed, at full width, under the part that covers it (at least 1 pt). */
+/** How far an `under` end runs on past where it is typed, at full width, under the part that covers it (at least 1 pt), before it fades out over FREE_TAPER. */
 export const UNDER_RUN = 1.5;
 /** A contact line's least depth (Q31): the ladder's middle, the sheet's dark brown over a haunch's or an ear's edge. */
 export const CONTACT_DEPTH = 0.5;
@@ -154,9 +155,9 @@ export function litRibbons(shape: Shape, spans: LitSpan[], where: string, o: Lit
   let svg = "";
   spans.forEach((span, k) => {
     let from = fracAt(shape, span.from), to = fracAt(shape, span.to);
-    // An end that runs on under the part over it is drawn on past where it is typed, at full width.
-    if (span.ends?.[0] === "under") from = (from - UNDER_RUN / pathLength() + 1) % 1;
-    if (span.ends?.[1] === "under") to = (to + UNDER_RUN / pathLength()) % 1;
+    // An end that runs on under the part over it is drawn on past where it is typed, at full width, then fades out under it.
+    if (span.ends?.[0] === "under") from = (from - (UNDER_RUN + FREE_TAPER) / pathLength() + 1) % 1;
+    if (span.ends?.[1] === "under") to = (to + (UNDER_RUN + FREE_TAPER) / pathLength()) % 1;
     outlined.push([from, to]);
     const pts = spanPoints(shape, from, to);
     if (pts.length < 3) return;
@@ -194,9 +195,9 @@ export function litRibbons(shape: Shape, spans: LitSpan[], where: string, o: Lit
       const fit = Math.min(1, (0.75 * length) / (a0 + a1));
       (t0 = a0 * fit), (t1 = a1 * fit);
     } else {
-      // Only a free end tapers; a join or an under end is at full width to its last point.
+      // A free end tapers where it ends; an under end fades out past its full-width run, under its part; a join end is at full width to its last point.
       const asked = typeof span.taper === "object" ? span.taper : [span.taper ?? FREE_TAPER, span.taper ?? FREE_TAPER];
-      const [a0, a1] = span.ends.map((e, i) => (e === "free" ? asked[i]! : 0)) as [number, number];
+      const [a0, a1] = span.ends.map((e, i) => (e === "free" ? asked[i]! : e === "under" ? FREE_TAPER : 0)) as [number, number];
       const fit = a0 + a1 > 0 ? Math.min(1, (0.75 * length) / (a0 + a1)) : 1;
       (t0 = a0 * fit), (t1 = a1 * fit);
     }
