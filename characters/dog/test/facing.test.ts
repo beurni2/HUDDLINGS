@@ -23,8 +23,8 @@ import { landmarks as placed } from "../src/drawings.ts";
 import { LINES } from "../src/palette.ts";
 import { mirrorPiece, reflectPath, swapSides } from "../src/views/facing.ts";
 import type { Drawn } from "../src/views/front.ts";
-import { side } from "../src/views/side.ts";
-import { threeQuarter } from "../src/views/threeQuarter.ts";
+import { side, sideFace, sideFaces, sideHeld } from "../src/views/side.ts";
+import { threeQuarter, threeQuarterFace, threeQuarterFaces, threeQuarterHeld } from "../src/views/threeQuarter.ts";
 
 const json = (path: string) => JSON.parse(readFileSync(new URL(path, import.meta.url), "utf8"));
 const rig = json("../src/rig.json") as Rig;
@@ -452,6 +452,160 @@ test("each right-facing view's placed landmarks are the left-facing view's mirro
       const top = order(`${kind}.R`).filter((part) => part !== "shadow" && at(alpha.get(part)!) >= 0.5).at(-1);
       assert.equal(top, owner[name], `${kind}.R ${name} at (${x}, ${y}) lies on ${top}`);
     }
+  }
+});
+
+// The turned views' face states in both facings (DECISIONS 170 to 185): each .R state is its .L state's geometry
+// mirrored, names swapped, and lit again from the top left, as the rest drawings above are; the states held out of the
+// package for now (DECISIONS 183) with them.
+const FACES = {
+  threeQuarter: (s: "L" | "R") => [...threeQuarterFaces(s), ...threeQuarterHeld(s)],
+  side: (s: "L" | "R") => [...sideFaces(s), ...sideHeld(s)],
+} as const;
+/** A face state's key in the other facing: its part's side swapped, and a state named for the dog's side (the head's line beside a raised ear) too. */
+const swapKey = (key: string) => swapSides(key).replace(/:temple(L|R)$/, (_m, s: string) => `:temple${s === "L" ? "R" : "L"}`);
+const faceDrawn = new Map(KINDS.flatMap((k) => (["L", "R"] as const).map((s) => [`${k}.${s}`, FACES[k](s)] as [string, Drawn[]])));
+const facePieces = (view: string) => new Map(faceDrawn.get(view)!.map((d) => [`${d.part}:${d.state}`, d.piece]));
+
+test("each right-facing view's face states are its left-facing ones mirrored, names swapped: every state's shape and coverage", () => {
+  for (const kind of KINDS) {
+    const L = facePieces(`${kind}.L`), R = facePieces(`${kind}.R`);
+    assert.deepEqual([...R.keys()].sort(), [...L.keys()].map(swapKey).sort(), `${kind}: the facings draw the same states`);
+    assert.equal(R.size, kind === "side" ? 16 : 26, `${kind}.R draws ${R.size} face states`);
+    for (const [key, r] of R) {
+      const l = L.get(swapKey(key))!;
+      assert.ok(r.svg.startsWith(MIRROR), `${kind}.R ${key} is not its .L drawing mirrored`);
+      assert.deepEqual(r.box, [-(l.box[0] + l.box[2]), l.box[1], l.box[2], l.box[3]], `${key}'s box`);
+      assert.deepEqual(r.meta.shapes.map((s) => s.segs), l.meta.shapes.map((s) => s.segs.map((seg) => seg.map(([x, y]) => [-x, y]))), `${key}'s shapes`);
+      // The stars' warm cores glow a little past their drawn-in sides and sit toward the light, so their coverage moves
+      // with it: their bodies are held here, their cores by the next test.
+      const body = (svg: string) => (key === "stars:sparkle" ? svg.replace(/<ellipse [^>]*\/>/g, "") : svg);
+      if (key.startsWith("head.line:")) {
+        // The head's line follows the light on its inner side (the line rule's width), so, as the rest test above, its
+        // coverage is not held to the mirror's; it is held to its own facing's rest line, which that test holds: the
+        // same line with only the near side's curve left out, on the near ear's side of the face.
+        for (const [view, p, near] of [[`${kind}.L`, l, -1], [`${kind}.R`, r, 1]] as const) {
+          const t = raster(p.svg, 2), rest = raster(pieces(view).get("head.line")!.svg, 2);
+          let extra = 0, gone = 0, gx = 0;
+          for (let k = 0; k < t.width * t.height; k++) {
+            const d = (t.data[k * 4 + 3]! - rest.data[k * 4 + 3]!) / 255;
+            extra = Math.max(extra, d);
+            if (d < 0) (gone -= d), (gx += -d * (BOX.x + ((k % t.width) + 0.5) / 2));
+          }
+          assert.ok(extra < 2 / 255, `${view} ${key} draws ${(extra * 255).toFixed(1)}/255 where its rest line draws nothing`);
+          assert.ok(gone > 0 && near * (gx / gone) > 10, `${view} ${key} leaves out ${gone.toFixed(1)} px about x = ${(gx / gone).toFixed(1)}, not the near side's curve`);
+        }
+        continue;
+      }
+      const a = raster(body(r.svg), 2), b = raster(body(l.svg), 2);
+      let off = 0, cover = 0;
+      for (let j = 0; j < a.height; j++) {
+        for (let i = 0; i < a.width; i++) {
+          const ar = a.data[(j * a.width + i) * 4 + 3]! / 255, al = b.data[flipped(a, i, j) * 4 + 3]! / 255;
+          off += Math.abs(ar - al);
+          cover += al;
+        }
+      }
+      assert.ok(off / cover < 0.01, `${kind}.R ${key}'s coverage differs from the mirror of .L's by ${(100 * off / cover).toFixed(2)}%`);
+    }
+  }
+});
+
+test("the perked ears are lit from the top left in both facings: each one's shade sits right of and below where its outline alone puts it, where a plain mirror moves it left", (t) => {
+  const units: Record<Kind, string[]> = { threeQuarter: ["ear.L:onePerked", "ear.R:onePerked"], side: ["ear.L:onePerked"] };
+  for (const kind of KINDS) {
+    const L = facePieces(`${kind}.L`), R = facePieces(`${kind}.R`);
+    for (const key of units[kind]) {
+      const svgs = { L: [L.get(key)!.svg], R: [R.get(swapKey(key))!.svg], plain: [mirrorPiece(L.get(key)!).svg] };
+      const shift = Object.fromEntries(Object.entries(svgs).map(([k, s]) => [k, shadeShift(s)])) as Record<keyof typeof svgs, [number, number]>;
+      const f = ([x, y]: [number, number]) => `(${x.toFixed(1)}, ${y.toFixed(1)})`;
+      t.diagnostic(`${kind} ${key}: .L ${f(shift.L)}, .R ${f(shift.R)}, a plain mirror ${f(shift.plain)}`);
+      for (const facing of ["L", "R"] as const) {
+        const [dx, dy] = shift[facing];
+        assert.ok(dx > 0.5 && dy > 0.5, `${kind}.${facing} ${key}: the shade shifts ${f(shift[facing])} pt, not right and down, away from the top-left light`);
+      }
+      assert.ok(shift.plain[0] < -0.5, `${kind} ${key}: a plain mirror shifts the shade ${f(shift.plain)} pt, which this test would not catch`);
+    }
+  }
+});
+
+test("the sparkle's stars are lit from the top left in both facings: .R's warm cores sit left of where a plain mirror of .L's puts them", (t) => {
+  // Where the light paint (bluer than the stars' gold: their pale cores) sits, weighted by how light it is. A plain
+  // mirror carries .L's cores, typed left of each star's middle toward the light, to the right of it; .R's are typed
+  // again toward the light, so they sit twice that offset left of the plain mirror's (a plain mirror would be 0).
+  const coreAt = (svg: string): [number, number] => {
+    const png = raster(svg, 4);
+    let lx = 0, ly = 0, lw = 0;
+    for (let j = 0; j < png.height; j++) {
+      for (let i = 0; i < png.width; i++) {
+        const k = (j * png.width + i) * 4, light = (png.data[k + 3]! / 255) * Math.max(0, png.data[k + 2]! - 120);
+        lx += (BOX.x + (i + 0.5) / 4) * light;
+        ly += (BOX.y + (j + 0.5) / 4) * light;
+        lw += light;
+      }
+    }
+    assert.ok(lw > 0, "the stars paint no light");
+    return [lx / lw, ly / lw];
+  };
+  for (const kind of KINDS) {
+    const l = facePieces(`${kind}.L`).get("stars:sparkle")!, r = facePieces(`${kind}.R`).get("stars:sparkle")!;
+    const [rx, ry] = coreAt(r.svg), [px, py] = coreAt(mirrorPiece(l).svg);
+    t.diagnostic(`${kind}: .R's cores sit (${(rx - px).toFixed(2)}, ${(ry - py).toFixed(2)}) pt from a plain mirror's`);
+    assert.ok(rx - px < -0.3, `${kind}.R: the stars' cores sit ${(rx - px).toFixed(2)} pt across from a plain mirror's, not toward the top-left light`);
+    assert.ok(Math.abs(ry - py) < 0.05, `${kind}.R: the stars' cores move ${(ry - py).toFixed(2)} pt up or down from a plain mirror's`);
+  }
+});
+
+test("each face state's light typed by hand toward the light is, in .R, its .L light reflected about its feature's middle; every other light lies where .L types it", () => {
+  // The perked ears' sheen on the flap's upper side (Facing.lit), about the flap's middle across; the other face states'
+  // hand-placed lights (the eyes' catchlights and halos on the nose's side, the mouths' shades) belong to their place.
+  const across = (shape: { segs: [number, number][][] }) => {
+    const [x0, , x1] = bbox(shape.segs as never);
+    return (x0 + x1) / 2;
+  };
+  const stated: Record<Kind, Record<string, number[]>> = {
+    threeQuarter: { "ear.L:onePerked": [across(threeQuarterFace.perked.L)], "ear.R:onePerked": [across(threeQuarterFace.perked.R)] },
+    side: { "ear.L:onePerked": [across(sideFace.perked.L)] },
+  };
+  for (const kind of KINDS) {
+    const R = facePieces(`${kind}.R`);
+    for (const [key, l] of facePieces(`${kind}.L`)) {
+      const r = R.get(swapKey(key))!, where = `${kind}.R ${swapKey(key)}`;
+      const [lights, again] = [handLights(l.svg), handLights(r.svg.slice(MIRROR.length))];
+      assert.equal(again.length, lights.length, `${where}: the facings paint different numbers of lights`);
+      const abouts = stated[kind][key] ?? [];
+      let moved = 0;
+      lights.forEach((dl, k) => {
+        const [sl, sr] = [subpaths(dl), subpaths(again[k]!)];
+        sl.forEach((pl, j) => {
+          const pr = sr[j]!;
+          if (pl.every((p, i) => Math.abs(p[0] - pr[i]![0]) < 1e-3 && Math.abs(p[1] - pr[i]![1]) < 1e-3)) return;
+          const about = abouts[moved++];
+          assert.ok(about !== undefined, `${where}: light ${k}.${j} is placed again across its part, where its view states no middle`);
+          for (const [i, p] of pl.entries()) assert.ok(Math.abs(pr[i]![0] - (2 * about - p[0])) < 2e-3 && Math.abs(pr[i]![1] - p[1]) < 2e-3, `${where}: light ${k}.${j} is not reflected about x = ${about.toFixed(2)}`);
+        });
+      });
+      assert.equal(moved, abouts.length, `${where}: ${moved} of its ${abouts.length} lights typed toward the light are placed again`);
+    }
+  }
+});
+
+test("no face state in the .R views (threeQuarter, side; held ones too) falls back to the default light", () => {
+  const own = [LIGHT[0], LIGHT[1]] as const;
+  const reads: string[] = [];
+  for (const i of [0, 1] as const) {
+    Object.defineProperty(LIGHT, i, { configurable: true, enumerable: true, get: () => (reads.push(new Error().stack!.split("\n").slice(2, 5).join(" <- ")), own[i]) });
+  }
+  try {
+    for (const kind of KINDS) {
+      reads.length = 0;
+      FACES[kind]("R");
+      const fallbacks = reads.filter((r) => !/^\s*at facing \(.*views\/facing\.ts:/.test(r));
+      assert.ok(reads.length > fallbacks.length, `${kind}.R's face states never read the facing's light`);
+      assert.deepEqual([...new Set(fallbacks)], [], `${kind}.R's face states fall back to the default light`);
+    }
+  } finally {
+    for (const i of [0, 1] as const) Object.defineProperty(LIGHT, i, { configurable: true, enumerable: true, writable: true, value: own[i] });
   }
 });
 
