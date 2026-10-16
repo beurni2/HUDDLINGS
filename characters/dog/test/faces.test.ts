@@ -21,7 +21,7 @@ import { BOX, composite, resvgLayers } from "../../draw/test/composite.ts";
 import { blushAlpha, clipText, earRot, faceClip, faceClips, RAISED, stillOf } from "../src/faceClips.ts";
 import { BROW_STATES, brow } from "../src/parts/brow.ts";
 import { CHEEK_STATES } from "../src/parts/cheeks.ts";
-import { chevronArms, coverEdge, eye, eyeGeometry, irisCentre, lidBand, lidLine, lightOnIris, RIDE, tinyOf, TINY, type Chevron, type EyeSpec } from "../src/parts/eye.ts";
+import { chevronArms, coverEdge, eye, eyeGeometry, irisCentre, lidBand, lidLine, lightOnIris, tinyOf, type Chevron, type EyeSpec } from "../src/parts/eye.ts";
 import { MOUTH_STATES, mouth, oTongue, type Mouth } from "../src/parts/mouth.ts";
 import { BLUSH_REFERENCE, EAR_ANGLES, EAR_STATES, EYE_STATES, PRESETS, type EarState, type Preset } from "../src/presets.ts";
 import { BALL_STATES, eyeStateSpec, faceFrame, faceStates, flatLid, front, squeeze } from "../src/views/front.ts";
@@ -304,14 +304,18 @@ function ride(e: EyeSpec, centred: EyeSpec): { share: number; along: number } {
  * side, both wholly on the dark iris inside the opening, never on the white; under the half-lid what shows below the lid
  * lies on the iris and some of each shows; where the iris looks aside (peek, huffy's peek back, hungry's eager eye) the
  * large one has moved about half the iris's travel, along it; the closed eyes (the lash bands, the squeeze) paint none.
+ * The founder's "about a quarter" (a fifth to a third) and "about half" are held as numbers of their own, not read from
+ * the recipe's constants, so a change to those fails here.
  */
+const QUARTER = [0.2, 1 / 3] as const, HALF = 0.5;
 test("every eye that shows its iris has its large and its tiny catchlight on the dark iris, riding it at half its travel; a closed eye has none", () => {
   const drawn = new Map(faceStates().map((d) => [`${d.part}:${d.state}`, d.piece.svg]));
   for (const side of ["L", "R"] as const) {
     for (const state of ["open", ...BALL_STATES] as const) {
       const e = eyeStateSpec(state, side), [big, tiny] = lightsOf(e);
       for (const [name, l] of [["large", big!], ["tiny", tiny!]] as const) assert.equal(lightProblem(e, l), undefined, `eye.${side} ${state}: its ${name} catchlight`);
-      assert.ok(Math.abs(tiny!.r / big!.r - TINY.scale) < 1e-9 && tiny!.at[1] < big!.at[1] - big!.r && tiny!.at[0] < big!.at[0], `eye.${side} ${state}: the tiny catchlight is not a quarter of the large one, below it toward the outer side`);
+      const size = tiny!.r / big!.r;
+      assert.ok(size >= QUARTER[0] && size <= QUARTER[1] && tiny!.at[1] < big!.at[1] - big!.r && tiny!.at[0] < big!.at[0], `eye.${side} ${state}: the tiny catchlight is ${size.toFixed(2)} of the large one, not about a quarter below it toward the outer side`);
       if (state !== "open") assert.equal(whites(drawn.get(`eye.${side}:${state}`)!), state === "sparkle" ? 3 : 2, `eye.${side} ${state}'s whites`);
     }
     assert.equal(whites(eye(eyeStateSpec("open", side)).svg), 2, `eye.${side} open's whites`);
@@ -319,8 +323,8 @@ test("every eye that shows its iris has its large and its tiny catchlight on the
     for (const [state, centred] of [["peek", "open"], ["peekBack", "open"], ["eager", "wide"]] as const) {
       const [e, c] = [eyeStateSpec(state, side), eyeStateSpec(centred, side)];
       const { share, along } = ride(e, c);
-      assert.ok(share > RIDE - 0.02 && share <= 1 && along > 0.999, `eye.${side} ${state}: its catchlight moves ${share.toFixed(2)} of the iris's travel (${along.toFixed(3)} along it)`);
-      if (share > RIDE + 0.02) {
+      assert.ok(share > HALF - 0.02 && share <= 1 && along > 0.999, `eye.${side} ${state}: its catchlight moves ${share.toFixed(2)} of the iris's travel (${along.toFixed(3)} along it)`);
+      if (share > HALF + 0.02) {
         const [a, b] = [irisCentre(e), irisCentre(c)], f = share - 0.05;
         const back = { at: [c.shine.at[0] + f * (a[0] - b[0]), c.shine.at[1] + f * (a[1] - b[1])] as [number, number], r: e.shine.r };
         assert.ok(lightProblem(e, back) || lightProblem(e, tinyOf(back)), `eye.${side} ${state}: its catchlight rides ${share.toFixed(2)} of the iris's travel where less would do`);

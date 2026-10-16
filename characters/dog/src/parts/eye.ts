@@ -321,7 +321,9 @@ export const RIDE = 0.5;
  * The large catchlight of an eye whose iris looks aside (Q28, DECISIONS 204): moved from `base`, where the eye with its
  * iris centred (`centred`) has it, by RIDE of the iris's travel from that eye's, its size kept; the tiny one follows it
  * (`tinyOf`). Where half the travel leaves either of them touching the white, it rides on a little further, in steps
- * of 0.05 of the travel, until both lie whole on the dark iris: the catchlight never leaves the iris (Q28).
+ * of 0.05 of the travel, until both lie whole on the dark iris: the catchlight never leaves the iris (Q28). An eye where
+ * no step does (an iris drawn too narrow or rolled away) gets the whole travel, and the catchlight and gaze guards
+ * (faces.test.ts, faces.turned.test.ts) name what is wrong with it, rather than the build failing before they run.
  */
 export function riding(e: EyeSpec, centred: EyeSpec, base: { at: [number, number]; r: number }, fraction = RIDE): { at: [number, number]; r: number } {
   const [a, b] = [irisCentre(e), irisCentre(centred)];
@@ -331,7 +333,7 @@ export function riding(e: EyeSpec, centred: EyeSpec, base: { at: [number, number
     const l = at(f);
     if (lightOnIris(e, l).off === 0 && lightOnIris(e, tinyOf(l)).off === 0) return l;
   }
-  throw new Error("no catchlight along the iris's travel lies whole on the iris");
+  return at(1);
 }
 
 /**

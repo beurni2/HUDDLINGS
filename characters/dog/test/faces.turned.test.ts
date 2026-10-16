@@ -14,7 +14,7 @@ import { BROW_STATES } from "../src/parts/brow.ts";
 import { MOUTH_STATES } from "../src/parts/mouth.ts";
 import { lidEdge, PROFILE_MOUTHS, TURNED_MOUTHS, turnedMouth, type TurnedEyeLid, type TurnedMouth } from "../src/parts/turned.ts";
 import { CHEEK_STATES } from "../src/parts/cheeks.ts";
-import { chevronArms, irisCentre, lightOnIris, RIDE, tinyOf, TINY, type Chevron, type EyeSpec } from "../src/parts/eye.ts";
+import { chevronArms, irisCentre, lightOnIris, tinyOf, type Chevron, type EyeSpec } from "../src/parts/eye.ts";
 import { LIGHT } from "../../draw/paint.ts";
 import { stillOf } from "../src/faceClips.ts";
 import { EAR_STATES, EYE_STATES, PRESETS, type EarState } from "../src/presets.ts";
@@ -520,8 +520,10 @@ test("the new faces' open eyes never look up in a turned view: hungry's eager ey
  * The catchlights in the turned views (Q26, Q28; DECISIONS 201, 204), as faces.test.ts holds the front's: every eye
  * that shows its iris paints its large catchlight and a tiny one a quarter its size below it, both wholly on the dark
  * iris; under the half-lid, what shows below the lid lies on the iris and some of each shows; where the iris looks
- * aside the large one has moved about half the iris's travel.
+ * aside the large one has moved about half the iris's travel. The founder's "about a quarter" and "about half" are held
+ * here as numbers of their own, not read from the recipe's constants, so a change to those fails here.
  */
+const QUARTER = [0.2, 1 / 3] as const, HALF = 0.5;
 test("every turned eye that shows its iris has its large and its tiny catchlight on the dark iris, riding it at half its travel", () => {
   const eyes: [string, (s: "open" | "wide" | "peek" | "sparkle" | "eager" | "peekBack") => EyeSpec, TurnedEyeLid][] = [
     ["threeQuarter eye.L", (s) => threeQuarterFace.spec(s, "L"), threeQuarterFace.lids("sleepy", "L")],
@@ -535,7 +537,9 @@ test("every turned eye that shows its iris has its large and its tiny catchlight
         const { shown, off } = lightOnIris(e, l);
         assert.ok(shown > 0 && off === 0, `${label} ${state}: ${off} of the ${name} catchlight's ${shown} points lie off the dark iris`);
       }
-      assert.ok(Math.abs(tinyOf(e.shine).r / e.shine.r - TINY.scale) < 1e-9);
+      const tiny = tinyOf(e.shine), size = tiny.r / e.shine.r;
+      assert.ok(size >= QUARTER[0] && size <= QUARTER[1] && tiny.at[1] < e.shine.at[1] - e.shine.r && tiny.at[0] < e.shine.at[0],
+        `${label} ${state}: the tiny catchlight is ${size.toFixed(2)} of the large one, not about a quarter below it toward the outer side`);
     }
     assert.ok(!("band" in half), `${label}: the half-lid is not a lid over the eye`);
     const { spec: s, lid } = half as Extract<TurnedEyeLid, { lid: unknown }>;
@@ -550,9 +554,9 @@ test("every turned eye that shows its iris has its large and its tiny catchlight
       const [a, b] = [irisCentre(e), irisCentre(c)];
       const travel: P = [a[0] - b[0], a[1] - b[1]], moved: P = [e.shine.at[0] - c.shine.at[0], e.shine.at[1] - c.shine.at[1]];
       const share = Math.hypot(...moved) / Math.hypot(...travel), along = v.dot(moved, travel) / (Math.hypot(...moved) * Math.hypot(...travel));
-      assert.ok(share > RIDE - 0.02 && share <= 1 && along > 0.999, `${label} ${state}: its catchlight moves ${share.toFixed(2)} of the iris's travel (${along.toFixed(3)} along it)`);
+      assert.ok(share > HALF - 0.02 && share <= 1 && along > 0.999, `${label} ${state}: its catchlight moves ${share.toFixed(2)} of the iris's travel (${along.toFixed(3)} along it)`);
       // Past half only as far as it must: a step of 0.05 less would leave it, or its tiny one, touching the white.
-      if (share > RIDE + 0.02) {
+      if (share > HALF + 0.02) {
         const back = { at: [c.shine.at[0] + (share - 0.05) * travel[0], c.shine.at[1] + (share - 0.05) * travel[1]] as [number, number], r: e.shine.r };
         assert.ok(lightOnIris(e, back).off + lightOnIris(e, tinyOf(back)).off > 0, `${label} ${state}: its catchlight rides ${share.toFixed(2)} of the iris's travel where less would do`);
       }
