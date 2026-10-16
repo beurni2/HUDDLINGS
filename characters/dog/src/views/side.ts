@@ -735,10 +735,10 @@ export function profileEyeSpec(state: "open" | "wide" | "peek" | "sparkle" | "ea
       const e = { ...EYE, white: { at: 186, width: 4, span: 58, fade: 0.3 } };
       return { ...e, shine: riding(e, EYE, EYE.shine) };
     }
-    // The sparkle (Q2, DECISIONS 203): the star in the lower iris, and the two gold stars just past the eye's back top,
-    // on the head's patch.
+    // The sparkle (Q2, DECISIONS 203): the star in the lower iris, and the two plump gold stars just past the eye's back
+    // top, on the head's patch, the larger five-pointed and the smaller four.
     case "sparkle":
-      return { ...EYE, sparkle: { star: { at: [1.4, -5], r: 3.3 }, level: 0, light, stars: [{ at: [-11.8, 10.2], r: 3.6 }, { at: [-13.8, 2.8], r: 2.5 }] } };
+      return { ...EYE, sparkle: { star: { at: [1.4, -5], r: 3.3 }, level: 0, light, stars: [{ at: [-11.8, 10.2], r: 3.6, points: 5 }, { at: [-13.8, 2.8], r: 2.5, points: 4 }] } };
     // Hungry's eager eye (DECISIONS 151, 207): the wide eye, its pupil larger, the iris baked toward the nose and a hair
     // down, on the food in front of the nose, the white a crescent down its back; the catchlights ride the iris (Q28).
     case "eager": {

@@ -56,16 +56,18 @@ export interface EyeSpec {
    * The sparkle (Q2, DECISIONS 203), as the kitty's and the bear's Sparkle (Star Highlight) draw it: a soft white
    * four-pointed star in the lower iris, the eye's largest light (`star`: `at` toward the nose and up from the ball's
    * centre, its half-height `r`), and small gold stars beside the eye (`stars`: each `at` toward the nose and up from
-   * the ball's centre in the face's level frame, turned `level` degrees as the face is, its half-height `r`).
+   * the ball's centre in the face's level frame, turned `level` degrees as the face is, its half-height `r`, and its
+   * `points`, five on the larger and four on the smaller, as both sheets draw them).
    */
-  sparkle?: { star: { at: [number, number]; r: number }; stars: { at: [number, number]; r: number }[]; level: number; light: P };
+  sparkle?: { star: { at: [number, number]; r: number }; stars: { at: [number, number]; r: number; points: 4 | 5 }[]; level: number; light: P };
 }
 
 /**
  * The tiny catchlight from the large one (Q26, DECISIONS 201): a quarter its radius, 1.45 radii below its middle and
- * 0.3 radii toward the eye's outer side. The kitty's and the bear's glossy eyes put it 1.4 to 1.5 radii below, about a
- * quarter the size; the founder's words put it toward the outer side, where those sheets lean it a little toward the
- * nose (0.35 to 0.65 radii), which at 164 pt is under a pixel either way.
+ * 0.3 radii toward the eye's outer side, as the founder's words put it. The kitty's Default eyes put it 1.4 to 1.5
+ * radii below, the bear's just under the large one's edge (about one radius); neither settles its side: the kitty
+ * leans it toward the nose in both eyes, the bear sets it below and to the viewer's right in both, a sheet pixel or two
+ * either way.
  */
 export const TINY = { scale: 0.25, below: 1.45, out: 0.3 };
 export const tinyOf = (shine: { at: [number, number]; r: number }) => ({
@@ -209,30 +211,51 @@ function starShine(e: EyeSpec, s: { at: [number, number]; r: number }, box: Box)
 }
 
 /**
- * The small gold stars beside a sparkle eye, as both sister sheets' Sparkle draws them beside its eye: four-pointed, in
- * the tag's gold with a lighter warm core toward the light, the points a little rounded, no line (Proud's stars'
- * recipe, parts/stars.ts, at their size). They lie on the head beside the eye, so the eye's clip to the head keeps them.
+ * A plump star's outline, as both sister sheets' Sparkle draws the gold stars beside its eye: `points` points (5 or 4),
+ * one straight up, its valleys `inner` of the way out to its tips, tips and valleys rounded; `r` is half its height,
+ * and `c` the middle of its height, so a five-pointed star, whose lower tips stand short of its radius, sits where asked.
  */
-function goldStars(e: EyeSpec, list: { at: [number, number]; r: number }[], light: P): { svg: string; box: Box } {
+export function plumpStar(c: P, r: number, points: 4 | 5, inner: number): string {
+  const n = points * 2, low = points === 5 ? Math.cos(Math.PI / 5) : 1;
+  const R = (2 * r) / (1 + low), dy = (R - R * low) / 2;
+  const pts = Array.from({ length: n }, (_, k): P => {
+    const a = -Math.PI / 2 + (Math.PI * k) / points, rr = k % 2 ? R * inner : R;
+    return [c[0] + rr * Math.cos(a), c[1] + dy + rr * Math.sin(a)];
+  });
+  // Each corner cut back along both its edges, a tip by a third of the edge and a valley by a fifth, and rounded
+  // through the corner, so the tips are round and the valleys soft, as the sheets paint them.
+  const cut = (k: number, toward: number) => {
+    const p = pts[k]!, q = pts[(k + toward + n) % n]!, f = k % 2 ? 0.2 : 0.33;
+    return [p[0] + (q[0] - p[0]) * f, p[1] + (q[1] - p[1]) * f] as P;
+  };
+  const xy = (p: P) => `${fmt(p[0])} ${fmt(p[1])}`;
+  return `M${xy(cut(0, 1))}` + Array.from({ length: n }, (_, i) => {
+    const k = (i + 1) % n;
+    return `L${xy(cut(k, -1))}Q${xy(pts[k]!)} ${xy(cut(k, 1))}`;
+  }).join("") + "Z";
+}
+
+/**
+ * The small gold stars beside a sparkle eye, as both sister sheets' Sparkle draws them beside its eye: plump, the
+ * larger five-pointed and the smaller four-pointed (`points`), in the tag's gold (the sheets' stars are #F4C539 at their
+ * middle, the tag #F4C542) with a lighter warm core toward the light and a soft rim of the tag's darker gold, as the
+ * sheets' stars have a faint olive rim, which parts them from the hood's tan beside them; no line. They lie on the head
+ * beside the eye, so the eye's clip to the head keeps them.
+ */
+function goldStars(e: EyeSpec, list: { at: [number, number]; r: number; points: 4 | 5 }[], light: P): { svg: string; box: Box } {
   const centres = list.map((s) => spotOf(e, s.at));
   const box = centres.map((c, k): Box => [c[0] - list[k]!.r - 1.5, c[1] - list[k]!.r - 1.5, 2 * list[k]!.r + 3, 2 * list[k]!.r + 3]).reduce(union);
   const soft = uid("blur"), glow = uid("blur");
-  // A soft edge of the tag's rim gold under each star, so it parts from the hood's tan beside it.
   const body = list.map((s, k) => {
     const c = centres[k]!, core: P = [c[0] + light[0] * s.r * 0.12, c[1] + light[1] * s.r * 0.12];
-    return `<path d="${starPath(c, s.r + 0.45, 0.86, 0.46)}" fill="${C.tagRim}" opacity="0.55" filter="url(#${soft})"/>` +
-      `<path d="${starPath(c, s.r, 0.86, 0.46)}" fill="${C.tag}" filter="url(#${soft})"/>` +
-      `<ellipse cx="${fmt(core[0])}" cy="${fmt(core[1])}" rx="${fmt(s.r * 0.24)}" ry="${fmt(s.r * 0.28)}" fill="${C.tagShine}" opacity="0.9" filter="url(#${glow})"/>`;
+    const inner = s.points === 5 ? 0.56 : 0.5;
+    return `<path d="${plumpStar(c, s.r + 0.4, s.points, inner)}" fill="${C.tagRim}" opacity="0.55" filter="url(#${soft})"/>` +
+      `<path d="${plumpStar(c, s.r, s.points, inner)}" fill="${C.tag}" filter="url(#${soft})"/>` +
+      `<ellipse cx="${fmt(core[0])}" cy="${fmt(core[1])}" rx="${fmt(s.r * 0.28)}" ry="${fmt(s.r * 0.3)}" fill="${C.tagShine}" opacity="0.8" filter="url(#${glow})"/>`;
   }).join("");
   return { svg: `<defs>${blur(soft, box, 0.18)}${blur(glow, box, 0.45)}</defs>${body}`, box };
 }
 
-/**
- * The half-lid over an open eye (EyeSpec.cover): drawn over it, inside the ball grown to cover its lash line. Its
- * catchlights lie on the iris just under the lid, the large one's top tucked under the lash (it rides up toward the
- * open eye's place and the lid covers what reaches past its edge, Q28) and the tiny one below it (Q26), each clipped
- * to below the lid's edge, so the lid always lies over them.
- */
 /** The half-lid's edge in model space, from the viewer's left to right: it bows down a little in its middle, as an eyelid's does. */
 export function coverEdge(e: EyeSpec, c: NonNullable<EyeSpec["cover"]>): P[] {
   const t = (c.tilt * Math.PI) / 180, cos = Math.cos(t), sin = Math.sin(t);
@@ -244,6 +267,12 @@ export function coverEdge(e: EyeSpec, c: NonNullable<EyeSpec["cover"]>): P[] {
   });
 }
 
+/**
+ * The half-lid over an open eye (EyeSpec.cover): drawn over it, inside the ball grown to cover its lash line. Its
+ * catchlights lie on the iris just under the lid, the large one's top tucked under the lash (it rides up toward the
+ * open eye's place and the lid covers what reaches past its edge, Q28) and the tiny one below it (Q26), each clipped
+ * to below the lid's edge, so the lid always lies over them.
+ */
 function halfLid(e: EyeSpec, c: NonNullable<EyeSpec["cover"]>, box: Box): string {
   const t = (c.tilt * Math.PI) / 180, cos = Math.cos(t), sin = Math.sin(t);
   /** A point level with the face: `x` across the eye (toward the viewer's right), `y` down, from the ball's centre. */

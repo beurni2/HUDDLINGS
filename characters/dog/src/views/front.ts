@@ -822,10 +822,12 @@ const wide = (spec: EyeSpec, sx: number): EyeSpec => ({
 
 /**
  * The sparkle's small gold stars beside each eye, toward the nose and up from the ball's middle in the face's level
- * frame: two, as both sister sheets draw them beside their Sparkle eye, the larger a little above the eye's middle and
- * the smaller below it, just past the eye's outer top, on the hood (DECISIONS 203).
+ * frame: two, as both sister sheets draw them beside their Sparkle eye, the larger five-pointed by the eye's outer top
+ * and the smaller four-pointed below it, level with the eye's middle, on the hood. The sheets stack theirs about the
+ * eye's middle on an empty panel; lowered so here, the smaller met the head's edge by the ear and the pair hung beside
+ * the eye like earrings (DECISIONS 203).
  */
-const SPARKLE_STARS = [{ at: [-13.6, 8.6] as [number, number], r: 3.8 }, { at: [-15.8, 1.2] as [number, number], r: 2.6 }];
+const SPARKLE_STARS = [{ at: [-13.6, 8.6] as [number, number], r: 3.8, points: 5 as const }, { at: [-15.8, 1.2] as [number, number], r: 2.6, points: 4 as const }];
 
 /**
  * The squeeze (Q2, DECISIONS 202): the dog's own `>` `<`, as the kitty's and the bear's Excited draw theirs, at the

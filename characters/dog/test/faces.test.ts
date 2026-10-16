@@ -21,10 +21,12 @@ import { BOX, composite, resvgLayers } from "../../draw/test/composite.ts";
 import { blushAlpha, clipText, earRot, faceClip, faceClips, RAISED, stillOf } from "../src/faceClips.ts";
 import { BROW_STATES, brow } from "../src/parts/brow.ts";
 import { CHEEK_STATES } from "../src/parts/cheeks.ts";
-import { chevronArms, coverEdge, eye, eyeGeometry, irisCentre, lidBand, lidLine, lightOnIris, tinyOf, type Chevron, type EyeSpec } from "../src/parts/eye.ts";
+import { chevronArms, coverEdge, eye, eyeGeometry, irisCentre, lidBand, lidLine, lightOnIris, plumpStar, tinyOf, type Chevron, type EyeSpec } from "../src/parts/eye.ts";
 import { MOUTH_STATES, mouth, oTongue, type Mouth } from "../src/parts/mouth.ts";
 import { BLUSH_REFERENCE, EAR_ANGLES, EAR_STATES, EYE_STATES, PRESETS, type EarState, type Preset } from "../src/presets.ts";
 import { BALL_STATES, eyeStateSpec, faceFrame, faceStates, flatLid, front, squeeze } from "../src/views/front.ts";
+import { profileEyeSpec } from "../src/views/side.ts";
+import { turnedEyeSpec } from "../src/views/threeQuarter.ts";
 
 const rig = JSON.parse(readFileSync(new URL("../src/rig.json", import.meta.url), "utf8")) as Rig;
 const clipsDir = new URL("../src/clips/", import.meta.url);
@@ -379,6 +381,34 @@ test("the squeeze never slants angry: its arms open outward as the sister sheets
   assert.match(squeezeProblem({ ...s, angle: [19, 16] }, faceFrame.rollDeg) ?? "", /middle falls -1\.\d°/);
 });
 
+/** A path's points, its numbers taken in pairs, and how many rounded corners (Q) it turns. */
+const pathPoints = (d: string): { pts: P[]; corners: number } => {
+  const n = (d.match(/-?\d+(\.\d+)?/g) ?? []).map(Number);
+  return { pts: Array.from({ length: n.length / 2 }, (_, k): P => [n[2 * k]!, n[2 * k + 1]!]), corners: (d.match(/Q/g) ?? []).length };
+};
+
+test("the sparkle's gold stars are plump, the larger five-pointed above the smaller four-pointed, as both sister sheets draw them, in every view", () => {
+  const sparkles: [string, EyeSpec][] = [
+    ...(["L", "R"] as const).map((side): [string, EyeSpec] => [`front eye.${side}`, eyeStateSpec("sparkle", side)]),
+    ...(["L", "R"] as const).map((side): [string, EyeSpec] => [`threeQuarter eye.${side}`, turnedEyeSpec("sparkle", side)]),
+    ["side", profileEyeSpec("sparkle")],
+  ];
+  for (const [name, e] of sparkles) {
+    const [big, small] = e.sparkle!.stars;
+    assert.ok(e.sparkle!.stars.length === 2 && big!.points === 5 && small!.points === 4, `${name}: its stars are not a five-pointed and a four-pointed one`);
+    assert.ok(big!.r > small!.r && big!.at[1] > small!.at[1], `${name}: the larger star does not stand above the smaller`);
+  }
+  // Each outline turns a rounded corner at every tip and valley, and stands as tall as asked, its tips rounded off by
+  // under a tenth, its height's middle where it is placed.
+  for (const points of [5, 4] as const) {
+    const { pts, corners } = pathPoints(plumpStar([0, 0], 4, points, 0.56));
+    const ys = pts.map((p) => p[1]), height = Math.max(...ys) - Math.min(...ys);
+    assert.equal(corners, 2 * points, `the ${points}-pointed star's corners`);
+    assert.ok(height > 8 * 0.9 && height <= 8, `the ${points}-pointed star is ${height.toFixed(2)} tall, asked 8`);
+    assert.ok(Math.abs((Math.max(...ys) + Math.min(...ys)) / 2) < 0.4, `the ${points}-pointed star is not centred on its height`);
+  }
+});
+
 test("the new faces' open eyes never look up: hungry's eager eye and huffy's peek back, as drawn in the front", () => {
   const drawn = new Map(faceStates().map((d) => [`${d.part}:${d.state}`, scopeIds(d.piece.svg, "g")]));
   for (const side of ["L", "R"] as const) {
@@ -507,8 +537,8 @@ test("the face clips are what presets.ts writes: one per preset, sound, at the f
   assert.deepEqual(validate(rig, [faceClip("huffy", PRESETS.huffy!, true)]), [], "huffy's peek back is sound");
   for (const [name, p] of Object.entries(PRESETS)) {
     const s = stillOf(p);
-    // The still's states are the preset's own (the dog's squeeze and sparkle are its happy crescents, Q2).
-    for (const eye of [s.eyes.L, s.eyes.R]) assert.ok(eye === "open" || p.eyes.includes(eye) || (eye === "sparkle" && p.eyes.includes("sparkle")), `${name}: eyes ${eye}`);
+    // The still's states are the preset's own (the squeeze and the sparkle are drawings of their own now, Q2: DECISIONS 202, 203).
+    for (const eye of [s.eyes.L, s.eyes.R]) assert.ok(eye === "open" || p.eyes.includes(eye), `${name}: eyes ${eye}`);
     assert.ok(p.mouth.includes(s.mouth), `${name}: mouth ${s.mouth}`);
     // A preset drawn new has no panel, and names the panels it borrows from; every other has its primary.
     if (p.drawnNew) {

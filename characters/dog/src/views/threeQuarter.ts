@@ -837,10 +837,11 @@ export function turnedEyeSpec(state: "open" | "wide" | "peek" | "sparkle" | "eag
       return { ...e, shine: riding(e, spec, spec.shine) };
     }
     // The sparkle (Q2, DECISIONS 203), as the front's: the star in the lower iris, a little smaller in the far eye, and
-    // the two gold stars just past each eye's outer top, along the eye's lean.
+    // the two plump gold stars just past each eye's outer top, the larger five-pointed and the smaller four, along the
+    // eye's lean.
     case "sparkle":
       return { ...spec, sparkle: { star: { at: [0.2, -4.5 * s], r: near ? 3.3 : 2.8 }, level: LID_TILT[side], light,
-        stars: near ? [{ at: [-13.6, 8.6], r: 3.8 }, { at: [-15.8, 1.2], r: 2.6 }] : [{ at: [-7.6, 10.8], r: 2.8 }, { at: [-9.2, 4.4], r: 1.9 }] } };
+        stars: near ? [{ at: [-13.6, 8.6], r: 3.8, points: 5 }, { at: [-15.8, 1.2], r: 2.6, points: 4 }] : [{ at: [-7.6, 10.8], r: 2.8, points: 5 }, { at: [-9.2, 4.4], r: 1.9, points: 4 }] } };
     // Hungry's eager eye (DECISIONS 151, 207), as the front's: the wide eye with its pupil larger, the iris baked in toward
     // the nose and a hair down, on the food just in front of the nose, the white a crescent down the outer side; the
     // catchlights ride the iris at half its travel from the wide eye's (Q28), the large one 10% larger.
