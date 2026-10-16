@@ -1,232 +1,69 @@
-g3-locks front: the line gate finds 57 problems today and 38 with the recipe (19 gone, 0 new)
-  gone: body.back: the lit span on body.back from 0.114 to 0.322 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: body.back: the lit span on body.back from 0.114 to 0.322 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: body.back: the lit span on body.back from 0.678 to 0.793 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: body.back: the lit span on body.back from 0.678 to 0.793 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: body.back: the lit span on body.back from 0.796 to 0.886 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: body.back: the lit span on body.back from 0.796 to 0.886 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: body.back: the lit span on body.back from 0.678 to 0.793 hands off to the lit span on body.back from 0.796 to 0.886 with 12.98 pt below full width between them (at most 2 pt)
-  gone: back.patch.R: the lit span on back.patch.R over back.patch.R from 0.114 to 0.322 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: back.patch.R: the lit span on back.patch.R over back.patch.R from 0.114 to 0.322 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: back.patch.R: the lit span on back.patch.R over back.patch.R from 0.678 to 0.793 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: back.patch.R: the lit span on back.patch.R over back.patch.R from 0.678 to 0.793 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: back.patch.R: the lit span on back.patch.R over back.patch.R from 0.796 to 0.886 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: back.patch.R: the lit span on back.patch.R over back.patch.R from 0.796 to 0.886 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: back.patch.L: the lit span on back.patch.L over back.patch.L from 0.114 to 0.322 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: back.patch.L: the lit span on back.patch.L over back.patch.L from 0.114 to 0.322 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: back.patch.L: the lit span on back.patch.L over back.patch.L from 0.678 to 0.793 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: back.patch.L: the lit span on back.patch.L over back.patch.L from 0.678 to 0.793 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: back.patch.L: the lit span on back.patch.L over back.patch.L from 0.796 to 0.886 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: back.patch.L: the lit span on back.patch.L over back.patch.L from 0.796 to 0.886 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-g3-locks side.L: the line gate finds 63 problems today and 41 with the recipe (22 gone, 0 new)
-  gone: tail: the lit span on tail from 0.104 to 0.170 tapers over 3.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: tail: the lit span on tail from 0.104 to 0.170 tapers over 3.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: tail: the lit span on tail from 0.160 to 0.411 tapers over 3.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: tail: the lit span on tail from 0.754 to 0.814 tapers over 3.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: tail: the lit span on tail from 0.807 to 0.902 tapers over 3.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: tail: the lit span on tail from 0.807 to 0.902 tapers over 3.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: tail: the lit span on tail from 0.104 to 0.170 hands off to the lit span on tail from 0.160 to 0.411 with 4.50 pt below full width between them (at most 2 pt)
-  gone: tail: the lit span on tail from 0.160 to 0.411 hands off to the lit span on tail from 0.411 to 0.466 with 2.80 pt below full width between them (at most 2 pt)
-  gone: tail: the lit span on tail from 0.411 to 0.466 hands off to the lit span on tail from 0.466 to 0.564 with 2.80 pt below full width between them (at most 2 pt)
-  gone: tail: the lit span on tail from 0.466 to 0.564 hands off to the lit span on tail from 0.564 to 0.608 with 2.80 pt below full width between them (at most 2 pt)
-  gone: tail: the lit span on tail from 0.564 to 0.608 hands off to the lit span on tail from 0.608 to 0.699 with 2.80 pt below full width between them (at most 2 pt)
-  gone: tail: the lit span on tail from 0.608 to 0.699 hands off to the lit span on tail from 0.699 to 0.754 with 2.80 pt below full width between them (at most 2 pt)
-  gone: tail: the lit span on tail from 0.699 to 0.754 hands off to the lit span on tail from 0.754 to 0.814 with 2.80 pt below full width between them (at most 2 pt)
-  gone: tail: the lit span on tail from 0.754 to 0.814 hands off to the lit span on tail from 0.807 to 0.902 with 4.93 pt below full width between them (at most 2 pt)
-  gone: tail: the fur edge from 0.411 to 0.754 of tail is drawn as 5 spans (one span per fur edge)
-  gone: tail: the fur edge from 0.210 to 0.746 of tail is drawn as 6 spans (one span per fur edge)
-  gone: tail.base: the lit span on tail.base over tail.base from 0.104 to 0.170 tapers over 3.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: tail.base: the lit span on tail.base over tail.base from 0.104 to 0.170 tapers over 3.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: tail.base: the lit span on tail.base over tail.base from 0.160 to 0.411 tapers over 3.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: tail.base: the lit span on tail.base over tail.base from 0.754 to 0.814 tapers over 3.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: tail.base: the lit span on tail.base over tail.base from 0.807 to 0.902 tapers over 3.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: tail.base: the lit span on tail.base over tail.base from 0.807 to 0.902 tapers over 3.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-g8-markings front: the line gate finds 57 problems today and 57 with the recipe (0 gone, 0 new)
-g8-markings side.L: the line gate finds 63 problems today and 63 with the recipe (0 gone, 0 new)
-g1-lines front: the line gate finds 57 problems today and 8 with the recipe (49 gone, 0 new)
-  gone: body.back: the lit span on body.back from 0.114 to 0.322 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: body.back: the lit span on body.back from 0.114 to 0.322 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: body.back: the lit span on body.back from 0.678 to 0.793 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: body.back: the lit span on body.back from 0.678 to 0.793 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: body.back: the lit span on body.back from 0.796 to 0.886 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: body.back: the lit span on body.back from 0.796 to 0.886 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: body.back: the lit span on body.back from 0.678 to 0.793 hands off to the lit span on body.back from 0.796 to 0.886 with 12.98 pt below full width between them (at most 2 pt)
-  gone: back.patch.R: the lit span on back.patch.R over back.patch.R from 0.114 to 0.322 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: back.patch.R: the lit span on back.patch.R over back.patch.R from 0.114 to 0.322 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: back.patch.R: the lit span on back.patch.R over back.patch.R from 0.678 to 0.793 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: back.patch.R: the lit span on back.patch.R over back.patch.R from 0.678 to 0.793 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: back.patch.R: the lit span on back.patch.R over back.patch.R from 0.796 to 0.886 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: back.patch.R: the lit span on back.patch.R over back.patch.R from 0.796 to 0.886 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: back.patch.L: the lit span on back.patch.L over back.patch.L from 0.114 to 0.322 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: back.patch.L: the lit span on back.patch.L over back.patch.L from 0.114 to 0.322 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: back.patch.L: the lit span on back.patch.L over back.patch.L from 0.678 to 0.793 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: back.patch.L: the lit span on back.patch.L over back.patch.L from 0.678 to 0.793 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: back.patch.L: the lit span on back.patch.L over back.patch.L from 0.796 to 0.886 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: back.patch.L: the lit span on back.patch.L over back.patch.L from 0.796 to 0.886 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: hind.R: the lit span on hind.R from 0.034 to 0.780 tapers over 3.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: hind.R: the lit span on hind.R from 0.034 to 0.780 tapers over 4.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: hind.L: the lit span on hind.L from 0.220 to 0.966 tapers over 3.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: hind.L: the lit span on hind.L from 0.220 to 0.966 tapers over 4.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: ear.R: the lit span on ear.R from 0.396 to 0.994 tapers over 7.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: ear.R: the lit span on ear.R from 0.396 to 0.994 tapers over 7.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: ear.L: the lit span on ear.L from 0.006 to 0.605 tapers over 7.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: ear.L: the lit span on ear.L from 0.006 to 0.605 tapers over 7.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: head.line: the lit span on head.line from 0.209 to 0.304 tapers over 4.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: head.line: the lit span on head.line from 0.209 to 0.304 tapers over 4.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: head.line: the lit span on head.line from 0.719 to 0.814 tapers over 4.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: head.line: the lit span on head.line from 0.719 to 0.814 tapers over 4.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: head.line: the lit span on head.line from 0.400 to 0.418 tapers over 2.60 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: head.line: the lit span on head.line from 0.596 to 0.618 tapers over 2.60 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: head.line: the lit span on cheek clump from 0.317 to 0.342 hands off to the lit span on cheek clump from 0.342 to 0.362 with 3.20 pt below full width between them (at most 2 pt)
-  gone: head.line: the lit span on cheek clump from 0.342 to 0.362 hands off to the lit span on cheek clump from 0.362 to 0.385 with 3.20 pt below full width between them (at most 2 pt)
-  gone: head.line: the lit span on cheek clump from 0.362 to 0.385 hands off to the lit span on cheek clump from 0.385 to 0.400 with 3.20 pt below full width between them (at most 2 pt)
-  gone: head.line: the lit span on cheek clump from 0.385 to 0.400 hands off to the lit span on head.line from 0.400 to 0.418 with 2.60 pt below full width between them (at most 2 pt)
-  gone: head.line: the lit span on head.line from 0.596 to 0.618 hands off to the lit span on cheek clump from 0.618 to 0.634 with 2.60 pt below full width between them (at most 2 pt)
-  gone: head.line: the lit span on cheek clump from 0.618 to 0.634 hands off to the lit span on cheek clump from 0.634 to 0.657 with 3.20 pt below full width between them (at most 2 pt)
-  gone: head.line: the lit span on cheek clump from 0.634 to 0.657 hands off to the lit span on cheek clump from 0.657 to 0.674 with 3.20 pt below full width between them (at most 2 pt)
-  gone: head.line: the lit span on cheek clump from 0.657 to 0.674 hands off to the lit span on cheek clump from 0.674 to 0.704 with 3.20 pt below full width between them (at most 2 pt)
-  gone: head.line: the fur edge from 0.317 to 0.400 of cheek clump is drawn as 4 spans (one span per fur edge)
-  gone: head.line: the fur edge from 0.618 to 0.704 of cheek clump is drawn as 4 spans (one span per fur edge)
-  gone: head.line: the lit span on head.line from 0.063 to 0.139 ends in the middle of fur at its end, more than 1 pt from another line or a part's edge
-  gone: head.line: the lit span on head.line from 0.878 to 0.949 ends in the middle of fur at its start, more than 1 pt from another line or a part's edge
-  gone: front.R: the lit span on front.R from 0.140 to 0.712 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: front.R: the lit span on front.R from 0.140 to 0.712 tapers over 16.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: front.L: the lit span on front.L from 0.288 to 0.860 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: front.L: the lit span on front.L from 0.288 to 0.860 tapers over 16.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-g1-lines side.L: the line gate finds 63 problems today and 0 with the recipe (63 gone, 0 new)
-  gone: tail: the lit span on tail from 0.104 to 0.170 tapers over 3.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: tail: the lit span on tail from 0.104 to 0.170 tapers over 3.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: tail: the lit span on tail from 0.160 to 0.411 tapers over 3.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: tail: the lit span on tail from 0.754 to 0.814 tapers over 3.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: tail: the lit span on tail from 0.807 to 0.902 tapers over 3.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: tail: the lit span on tail from 0.807 to 0.902 tapers over 3.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: tail: the lit span on tail from 0.104 to 0.170 hands off to the lit span on tail from 0.160 to 0.411 with 4.50 pt below full width between them (at most 2 pt)
-  gone: tail: the lit span on tail from 0.160 to 0.411 hands off to the lit span on tail from 0.411 to 0.466 with 2.80 pt below full width between them (at most 2 pt)
-  gone: tail: the lit span on tail from 0.411 to 0.466 hands off to the lit span on tail from 0.466 to 0.564 with 2.80 pt below full width between them (at most 2 pt)
-  gone: tail: the lit span on tail from 0.466 to 0.564 hands off to the lit span on tail from 0.564 to 0.608 with 2.80 pt below full width between them (at most 2 pt)
-  gone: tail: the lit span on tail from 0.564 to 0.608 hands off to the lit span on tail from 0.608 to 0.699 with 2.80 pt below full width between them (at most 2 pt)
-  gone: tail: the lit span on tail from 0.608 to 0.699 hands off to the lit span on tail from 0.699 to 0.754 with 2.80 pt below full width between them (at most 2 pt)
-  gone: tail: the lit span on tail from 0.699 to 0.754 hands off to the lit span on tail from 0.754 to 0.814 with 2.80 pt below full width between them (at most 2 pt)
-  gone: tail: the lit span on tail from 0.754 to 0.814 hands off to the lit span on tail from 0.807 to 0.902 with 4.93 pt below full width between them (at most 2 pt)
-  gone: tail: the fur edge from 0.411 to 0.754 of tail is drawn as 5 spans (one span per fur edge)
-  gone: tail: the fur edge from 0.210 to 0.746 of tail is drawn as 6 spans (one span per fur edge)
-  gone: tail.base: the lit span on tail.base over tail.base from 0.104 to 0.170 tapers over 3.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: tail.base: the lit span on tail.base over tail.base from 0.104 to 0.170 tapers over 3.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: tail.base: the lit span on tail.base over tail.base from 0.160 to 0.411 tapers over 3.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: tail.base: the lit span on tail.base over tail.base from 0.754 to 0.814 tapers over 3.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: tail.base: the lit span on tail.base over tail.base from 0.807 to 0.902 tapers over 3.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: tail.base: the lit span on tail.base over tail.base from 0.807 to 0.902 tapers over 3.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: front.R: the lit span on front.R from 0.226 to 0.585 tapers over 4.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: front.R: the lit span on front.R from 0.226 to 0.585 tapers over 4.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: body.back: the lit span on body.back from 0.099 to 0.281 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: body.back: the lit span on body.back from 0.099 to 0.281 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: body.back: the lit span on body.back from 0.258 to 0.468 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: body.back: the lit span on body.back from 0.258 to 0.468 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: body.back: the lit span on body.back from 0.450 to 0.562 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: body.back: the lit span on body.back from 0.450 to 0.562 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: body.back: the lit span on body.back from 0.099 to 0.281 hands off to the lit span on body.back from 0.258 to 0.468 with 7.50 pt below full width between them (at most 2 pt)
-  gone: body.back: the lit span on body.back from 0.258 to 0.468 hands off to the lit span on body.back from 0.450 to 0.562 with 8.43 pt below full width between them (at most 2 pt)
-  gone: back.patch.L: the lit span on back.patch.L over back.patch.L from 0.099 to 0.281 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: back.patch.L: the lit span on back.patch.L over back.patch.L from 0.099 to 0.281 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: back.patch.L: the lit span on back.patch.L over back.patch.L from 0.258 to 0.468 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: back.patch.L: the lit span on back.patch.L over back.patch.L from 0.258 to 0.468 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: back.patch.L: the lit span on back.patch.L over back.patch.L from 0.450 to 0.562 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: back.patch.L: the lit span on back.patch.L over back.patch.L from 0.450 to 0.562 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: rump.patch.L: the lit span on rump.patch.L over rump.patch.L from 0.099 to 0.281 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: rump.patch.L: the lit span on rump.patch.L over rump.patch.L from 0.099 to 0.281 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: rump.patch.L: the lit span on rump.patch.L over rump.patch.L from 0.258 to 0.468 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: rump.patch.L: the lit span on rump.patch.L over rump.patch.L from 0.258 to 0.468 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: rump.patch.L: the lit span on rump.patch.L over rump.patch.L from 0.450 to 0.562 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: rump.patch.L: the lit span on rump.patch.L over rump.patch.L from 0.450 to 0.562 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: hind.L: the lit span on hind.L from 0.650 to 0.398 tapers over 4.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: hind.L: the lit span on hind.L from 0.650 to 0.398 tapers over 8.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: front.L: the lit span on front.L from 0.202 to 0.666 tapers over 5.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: front.L: the lit span on front.L from 0.202 to 0.666 tapers over 5.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: head.line: the lit span on head.line from 0.360 to 0.372 tapers over 2.15 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: head.line: the lit span on head.line from 0.514 to 0.596 tapers over 3.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: head.line: the lit span on head.line from 0.514 to 0.596 tapers over 4.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: head.line: the lit span on head.line from 0.002 to 0.114 tapers over 4.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: head.line: the lit span on head.line from 0.184 to 0.271 hands off to the lit span on head.line from 0.271 to 0.311 with 2.60 pt below full width between them (at most 2 pt)
-  gone: head.line: the lit span on head.line from 0.271 to 0.311 hands off to the lit span on head.line from 0.311 to 0.360 with 2.80 pt below full width between them (at most 2 pt)
-  gone: head.line: the lit span on head.line from 0.311 to 0.360 hands off to the lit span on head.line from 0.360 to 0.372 with 2.26 pt below full width between them (at most 2 pt)
-  gone: head.line: the fur edge from 0.271 to 0.360 of head.line is drawn as 2 spans (one span per fur edge)
-  gone: ear.L: the lit span on ear.L from 0.980 to 0.528 tapers over 12.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: ear.L: the lit span on ear.L from 0.980 to 0.528 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: ear.L: the lit span on ear.L from 0.501 to 0.764 tapers over 4.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: ear.L: the lit span on ear.L from 0.501 to 0.764 tapers over 12.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: ear.L: the lit span on ear.L from 0.980 to 0.528 hands off to the lit span on ear.L from 0.501 to 0.764 with 3.82 pt below full width between them (at most 2 pt)
-  gone: ear.L: the fur edge from 0.222 to 0.520 of ear.L is drawn as 2 spans (one span per fur edge)
-  gone: ear.L: the lit span on ear.L from 0.501 to 0.764 ends in the middle of fur at its start, more than 1 pt from another line or a part's edge
-g4-headfur front: the line gate finds 57 problems today and 32 with the recipe (25 gone, 0 new)
-  gone: ear.R: the lit span on ear.R from 0.396 to 0.994 tapers over 7.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: ear.R: the lit span on ear.R from 0.396 to 0.994 tapers over 7.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: ear.L: the lit span on ear.L from 0.006 to 0.605 tapers over 7.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: ear.L: the lit span on ear.L from 0.006 to 0.605 tapers over 7.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: head.line: the lit span on head.line from 0.209 to 0.304 tapers over 4.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: head.line: the lit span on head.line from 0.209 to 0.304 tapers over 4.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: head.line: the lit span on head.line from 0.719 to 0.814 tapers over 4.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: head.line: the lit span on head.line from 0.719 to 0.814 tapers over 4.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: head.line: the lit span on head.line from 0.400 to 0.418 tapers over 2.60 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: head.line: the lit span on head.line from 0.596 to 0.618 tapers over 2.60 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: head.line: the lit span on cheek clump from 0.317 to 0.342 hands off to the lit span on cheek clump from 0.342 to 0.362 with 3.20 pt below full width between them (at most 2 pt)
-  gone: head.line: the lit span on cheek clump from 0.342 to 0.362 hands off to the lit span on cheek clump from 0.362 to 0.385 with 3.20 pt below full width between them (at most 2 pt)
-  gone: head.line: the lit span on cheek clump from 0.362 to 0.385 hands off to the lit span on cheek clump from 0.385 to 0.400 with 3.20 pt below full width between them (at most 2 pt)
-  gone: head.line: the lit span on cheek clump from 0.385 to 0.400 hands off to the lit span on head.line from 0.400 to 0.418 with 2.60 pt below full width between them (at most 2 pt)
-  gone: head.line: the lit span on head.line from 0.596 to 0.618 hands off to the lit span on cheek clump from 0.618 to 0.634 with 2.60 pt below full width between them (at most 2 pt)
-  gone: head.line: the lit span on cheek clump from 0.618 to 0.634 hands off to the lit span on cheek clump from 0.634 to 0.657 with 3.20 pt below full width between them (at most 2 pt)
-  gone: head.line: the lit span on cheek clump from 0.634 to 0.657 hands off to the lit span on cheek clump from 0.657 to 0.674 with 3.20 pt below full width between them (at most 2 pt)
-  gone: head.line: the lit span on cheek clump from 0.657 to 0.674 hands off to the lit span on cheek clump from 0.674 to 0.704 with 3.20 pt below full width between them (at most 2 pt)
-  gone: head.line: the fur edge from 0.317 to 0.400 of cheek clump is drawn as 4 spans (one span per fur edge)
-  gone: head.line: the fur edge from 0.618 to 0.704 of cheek clump is drawn as 4 spans (one span per fur edge)
-  gone: head.line: the fur edge from 0.415 to 0.600 of head.line is drawn as 2 spans (one span per fur edge)
-  gone: head.line: the lit span on head.line from 0.400 to 0.418 ends in the middle of fur at its end, more than 1 pt from another line or a part's edge
-  gone: head.line: the lit span on head.line from 0.596 to 0.618 ends in the middle of fur at its start, more than 1 pt from another line or a part's edge
-  gone: head.line: the lit span on head.line from 0.063 to 0.139 ends in the middle of fur at its end, more than 1 pt from another line or a part's edge
-  gone: head.line: the lit span on head.line from 0.878 to 0.949 ends in the middle of fur at its start, more than 1 pt from another line or a part's edge
-g5-ears front: the line gate finds 57 problems today and 53 with the recipe (8 gone, 4 new)
-  gone: ear.R: the lit span on ear.R from 0.396 to 0.994 tapers over 7.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: ear.R: the lit span on ear.R from 0.396 to 0.994 tapers over 7.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: ear.R: the lit span on ear.R from 0.089 to 0.373 tapers over 4.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: ear.R: the lit span on ear.R from 0.089 to 0.373 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: ear.L: the lit span on ear.L from 0.006 to 0.605 tapers over 7.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: ear.L: the lit span on ear.L from 0.006 to 0.605 tapers over 7.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: ear.L: the lit span on ear.L from 0.629 to 0.911 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: ear.L: the lit span on ear.L from 0.629 to 0.911 tapers over 4.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  new:  ear.R: the lit span on ear.R from 0.086 to 0.356 tapers over 4.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  new:  ear.R: the lit span on ear.R from 0.086 to 0.356 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  new:  ear.L: the lit span on ear.L from 0.645 to 0.915 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  new:  ear.L: the lit span on ear.L from 0.645 to 0.915 tapers over 4.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-g5-ears side.L: the line gate finds 63 problems today and 56 with the recipe (7 gone, 0 new)
-  gone: ear.L: the lit span on ear.L from 0.980 to 0.528 tapers over 12.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: ear.L: the lit span on ear.L from 0.980 to 0.528 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: ear.L: the lit span on ear.L from 0.501 to 0.764 tapers over 4.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: ear.L: the lit span on ear.L from 0.501 to 0.764 tapers over 12.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: ear.L: the lit span on ear.L from 0.980 to 0.528 hands off to the lit span on ear.L from 0.501 to 0.764 with 3.82 pt below full width between them (at most 2 pt)
-  gone: ear.L: the fur edge from 0.222 to 0.520 of ear.L is drawn as 2 spans (one span per fur edge)
-  gone: ear.L: the lit span on ear.L from 0.501 to 0.764 ends in the middle of fur at its start, more than 1 pt from another line or a part's edge
-g6-paws front: the line gate finds 57 problems today and 49 with the recipe (8 gone, 0 new)
-  gone: hind.R: the lit span on hind.R from 0.034 to 0.780 tapers over 3.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: hind.R: the lit span on hind.R from 0.034 to 0.780 tapers over 4.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: hind.L: the lit span on hind.L from 0.220 to 0.966 tapers over 3.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: hind.L: the lit span on hind.L from 0.220 to 0.966 tapers over 4.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: front.R: the lit span on front.R from 0.140 to 0.712 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: front.R: the lit span on front.R from 0.140 to 0.712 tapers over 16.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: front.L: the lit span on front.L from 0.288 to 0.860 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: front.L: the lit span on front.L from 0.288 to 0.860 tapers over 16.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-g6-paws side.L: the line gate finds 63 problems today and 53 with the recipe (11 gone, 1 new)
-  gone: body.back: the lit span on body.back from 0.450 to 0.562 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: body.back: the lit span on body.back from 0.450 to 0.562 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: body.back: the lit span on body.back from 0.258 to 0.468 hands off to the lit span on body.back from 0.450 to 0.562 with 8.43 pt below full width between them (at most 2 pt)
-  gone: back.patch.L: the lit span on back.patch.L over back.patch.L from 0.450 to 0.562 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: back.patch.L: the lit span on back.patch.L over back.patch.L from 0.450 to 0.562 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: rump.patch.L: the lit span on rump.patch.L over rump.patch.L from 0.450 to 0.562 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: rump.patch.L: the lit span on rump.patch.L over rump.patch.L from 0.450 to 0.562 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: hind.L: the lit span on hind.L from 0.650 to 0.398 tapers over 4.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: hind.L: the lit span on hind.L from 0.650 to 0.398 tapers over 8.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: front.L: the lit span on front.L from 0.202 to 0.666 tapers over 5.00 pt at its start (at most 2 pt, unless it cites a DECISIONS entry)
-  gone: front.L: the lit span on front.L from 0.202 to 0.666 tapers over 5.00 pt at its end (at most 2 pt, unless it cites a DECISIONS entry)
-  new:  body.back: the lit span on body.back from 0.258 to 0.468 hands off to the lit span on body.back from 0.450 to 0.620 with 4.23 pt below full width between them (at most 2 pt)
-g10-shadow front: the line gate finds 57 problems today and 57 with the recipe (0 gone, 0 new)
-g10-shadow side.L: the line gate finds 63 problems today and 63 with the recipe (0 gone, 0 new)
-g2-crisp front: the line gate finds 57 problems today and 57 with the recipe (0 gone, 0 new)
-g2-crisp side.L: the line gate finds 63 problems today and 63 with the recipe (0 gone, 0 new)
+# The line gate (DECISIONS 219) on each group's opt-in, on scratch copies of the front and side.L, against today's views.
+# A problem 'left as today's' is one today's view also has, its numbers aside (an outline the recipe moved shifts them);
+# 'new' ones are listed, each with whose it is. The line and head fur recipes (g1, g4) list every problem left, the
+# view lanes' work list. Made by: node qa/phase3/fur/recipes/demo.ts
+g3-locks front: the line gate finds 66 problems today and 55 with the recipe: 11 cleared, 55 left as today's, 0 new
+g3-locks side.L: the line gate finds 60 problems today and 42 with the recipe: 18 cleared, 42 left as today's, 0 new
+g8-markings front: the line gate finds 66 problems today and 66 with the recipe: 0 cleared, 66 left as today's, 0 new
+g8-markings side.L: the line gate finds 60 problems today and 60 with the recipe: 0 cleared, 60 left as today's, 0 new
+g1-lines front: the line gate finds 66 problems today and 14 with the recipe: 52 cleared, 14 left as today's, 0 new
+  left: head.line/front: the lit span on head.line from 0.400 to 0.418 tapers over 2.60 pt at its end (at most 2 pt, unless it cites a current DECISIONS entry) [the chin over the collar: G4's chin line (headFur), shown in g4-headfur; the front lane's]
+  left: head.line/front: the lit span on head.line from 0.400 to 0.418 ends in the middle of fur at its end, more than 1 pt from another line or a part's edge [the chin over the collar: G4's chin line (headFur), shown in g4-headfur; the front lane's]
+  left: head.line/front: the lit span on head.line from 0.596 to 0.618 tapers over 2.60 pt at its start (at most 2 pt, unless it cites a current DECISIONS entry) [the chin over the collar: G4's chin line (headFur), shown in g4-headfur; the front lane's]
+  left: head.line/front: the lit span on head.line from 0.596 to 0.618 ends in the middle of fur at its start, more than 1 pt from another line or a part's edge [the chin over the collar: G4's chin line (headFur), shown in g4-headfur; the front lane's]
+  left: tuft/front: the lit span on tuft from 0.000 to 0.613 tapers over 2.40 pt at its end (at most 2 pt, unless it cites a current DECISIONS entry) [the topknot's curls (topknot.ts): the front lane's]
+  left: body.back/front: the edge of body.back shows 5.25 pt below full line width from (-2.6, -1.6) to (2.6, -1.6), after the lit span on body.back from 0.088 to 0.333, before the lit span on body.back from 0.667 to 0.907 (at most 2 pt: one line at full width along each visible edge, unless a span beside it cites a current DECISIONS entry and says how far the sheet leaves it unlined) [the back's foot between the front paws: G7's shade and lines between the legs; the front lane's]
+  left: head.line/front: the fur edge from 0.415 to 0.600 of head.base is drawn as 2 spans (one span per fur edge) [the chin over the collar: G4's chin line (headFur), shown in g4-headfur; the front lane's]
+  left: head.line/front: the edge of head.base shows 5.75 pt below full line width from (-33.9, -64.4) to (-29.0, -62.0), after the lit span on head.line from 0.400 to 0.418, before the lit span on head.line from 0.596 to 0.618 (at most 2 pt: one line at full width along each visible edge, unless a span beside it cites a current DECISIONS entry and says how far the sheet leaves it unlined) [the chin over the collar: G4's chin line (headFur), shown in g4-headfur; the front lane's]
+  left: head.line/front: the edge of head.base shows 54.48 pt below full line width from (-26.7, -61.7) to (25.1, -62.8), after the lit span on head.line from 0.400 to 0.418, before the lit span on head.line from 0.596 to 0.618 (at most 2 pt: one line at full width along each visible edge, unless a span beside it cites a current DECISIONS entry and says how far the sheet leaves it unlined) [the chin over the collar: G4's chin line (headFur), shown in g4-headfur; the front lane's]
+  left: head.line/front: the edge of head.base shows 6.25 pt below full line width from (28.6, -63.7) to (33.7, -66.7), after the lit span on head.line from 0.400 to 0.418, before the lit span on head.line from 0.596 to 0.618 (at most 2 pt: one line at full width along each visible edge, unless a span beside it cites a current DECISIONS entry and says how far the sheet leaves it unlined) [the chin over the collar: G4's chin line (headFur), shown in g4-headfur; the front lane's]
+  left: tuft/front: the edge of tuft shows 17.47 pt below full line width from (-9.9, -148.6) to (-26.4, -147.8), after the lit span on tuft from 0.003 to 0.455, before the lit span on tuft from 0.003 to 0.455 (at most 2 pt: one line at full width along each visible edge, unless a span beside it cites a current DECISIONS entry and says how far the sheet leaves it unlined) [the topknot's curls (topknot.ts): the front lane's]
+  left: tuft/front: the edge of tuft shows 3.00 pt below full line width from (-28.7, -148.8) to (-30.5, -150.9), after the lit span on tuft from 0.003 to 0.455, before the lit span on tuft from 0.003 to 0.455 (at most 2 pt: one line at full width along each visible edge, unless a span beside it cites a current DECISIONS entry and says how far the sheet leaves it unlined) [the topknot's curls (topknot.ts): the front lane's]
+  left: tuft/front: the edge of tuft shows 20.47 pt below full line width from (20.7, -150.2) to (3.0, -152.5), after the lit span on tuft from 0.094 to 0.559, before the lit span on tuft from 0.094 to 0.559 (at most 2 pt: one line at full width along each visible edge, unless a span beside it cites a current DECISIONS entry and says how far the sheet leaves it unlined) [the topknot's curls (topknot.ts): the front lane's]
+  left: tuft/front: the edge of tuft shows 23.99 pt below full line width from (4.7, -155.0) to (-11.8, -153.1), after the lit span on tuft from 0.000 to 0.613, before the lit span on tuft from 0.000 to 0.613 (at most 2 pt: one line at full width along each visible edge, unless a span beside it cites a current DECISIONS entry and says how far the sheet leaves it unlined) [the topknot's curls (topknot.ts): the front lane's]
+g1-lines side.L: the line gate finds 60 problems today and 5 with the recipe: 55 cleared, 5 left as today's, 0 new
+  left: head.line/side.L: the edge of head.base shows 2.50 pt below full line width from (-46.8, -154.8) to (-44.3, -155.2), after the lit span on head.line from 0.181 to 0.387, before the lit span on head.line from 0.505 to 0.639 (at most 2 pt: one line at full width along each visible edge, unless a span beside it cites a current DECISIONS entry and says how far the sheet leaves it unlined) [the crown between the topknot's curls (topknot.ts): the side lane's]
+  left: head.line/side.L: the edge of head.base shows 38.75 pt below full line width from (-25.6, -64.4) to (-63.4, -60.5), after the lit span on head.line from 0.505 to 0.639, before the lit span on head.line from 0.002 to 0.114 (at most 2 pt: one line at full width along each visible edge, unless a span beside it cites a current DECISIONS entry and says how far the sheet leaves it unlined) [the head's foot over the collar behind the chin: G4's profile chin and G9's collar; the side lane's]
+  left: tuft/side.L: the edge of tuft shows 27.72 pt below full line width from (-47.5, -155.8) to (-63.0, -150.3), after the lit span on tuft from 0.994 to 0.438, before the lit span on tuft from 0.994 to 0.438 (at most 2 pt: one line at full width along each visible edge, unless a span beside it cites a current DECISIONS entry and says how far the sheet leaves it unlined) [the topknot's curls (topknot.ts): the side lane's]
+  left: tuft/side.L: the edge of tuft shows 20.01 pt below full line width from (-7.6, -150.4) to (-25.7, -151.4), after the lit span on tuft from 0.100 to 0.512, before the lit span on tuft from 0.100 to 0.512 (at most 2 pt: one line at full width along each visible edge, unless a span beside it cites a current DECISIONS entry and says how far the sheet leaves it unlined) [the topknot's curls (topknot.ts): the side lane's]
+  left: tuft/side.L: the edge of tuft shows 31.97 pt below full line width from (-23.5, -157.3) to (-43.8, -155.8), after the lit span on tuft from 0.000 to 0.513, before the lit span on tuft from 0.000 to 0.513 (at most 2 pt: one line at full width along each visible edge, unless a span beside it cites a current DECISIONS entry and says how far the sheet leaves it unlined) [the topknot's curls (topknot.ts): the side lane's]
+g4-headfur front: the line gate finds 66 problems today and 31 with the recipe: 35 cleared, 31 left as today's, 0 new
+  left: body.back/front: the lit span on body.back from 0.114 to 0.322 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a current DECISIONS entry) [the body's and legs' lines: G1's and G6's recipes (g1-lines, g6-paws)]
+  left: body.back/front: the lit span on body.back from 0.114 to 0.322 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a current DECISIONS entry) [the body's and legs' lines: G1's and G6's recipes (g1-lines, g6-paws)]
+  left: body.back/front: the lit span on body.back from 0.678 to 0.793 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a current DECISIONS entry) [the body's and legs' lines: G1's and G6's recipes (g1-lines, g6-paws)]
+  left: body.back/front: the lit span on body.back from 0.678 to 0.793 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a current DECISIONS entry) [the body's and legs' lines: G1's and G6's recipes (g1-lines, g6-paws)]
+  left: body.back/front: the lit span on body.back from 0.796 to 0.886 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a current DECISIONS entry) [the body's and legs' lines: G1's and G6's recipes (g1-lines, g6-paws)]
+  left: body.back/front: the lit span on body.back from 0.796 to 0.886 tapers over 6.00 pt at its end (at most 2 pt, unless it cites a current DECISIONS entry) [the body's and legs' lines: G1's and G6's recipes (g1-lines, g6-paws)]
+  left: hind.L/front: the lit span on hind.L from 0.220 to 0.966 tapers over 3.00 pt at its start (at most 2 pt, unless it cites a current DECISIONS entry) [the body's and legs' lines: G1's and G6's recipes (g1-lines, g6-paws)]
+  left: hind.L/front: the lit span on hind.L from 0.220 to 0.966 tapers over 4.00 pt at its end (at most 2 pt, unless it cites a current DECISIONS entry) [the body's and legs' lines: G1's and G6's recipes (g1-lines, g6-paws)]
+  left: hind.R/front: the lit span on hind.R from 0.034 to 0.780 tapers over 3.00 pt at its start (at most 2 pt, unless it cites a current DECISIONS entry) [the body's and legs' lines: G1's and G6's recipes (g1-lines, g6-paws)]
+  left: hind.R/front: the lit span on hind.R from 0.034 to 0.780 tapers over 4.00 pt at its end (at most 2 pt, unless it cites a current DECISIONS entry) [the body's and legs' lines: G1's and G6's recipes (g1-lines, g6-paws)]
+  left: tuft/front: the lit span on tuft from 0.000 to 0.613 tapers over 2.40 pt at its end (at most 2 pt, unless it cites a current DECISIONS entry) [the topknot's curls (topknot.ts): the front lane's]
+  left: front.L/front: the lit span on front.L from 0.288 to 0.860 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a current DECISIONS entry) [the body's and legs' lines: G1's and G6's recipes (g1-lines, g6-paws)]
+  left: front.L/front: the lit span on front.L from 0.288 to 0.860 tapers over 16.00 pt at its end (at most 2 pt, unless it cites a current DECISIONS entry) [the body's and legs' lines: G1's and G6's recipes (g1-lines, g6-paws)]
+  left: front.R/front: the lit span on front.R from 0.140 to 0.712 tapers over 6.00 pt at its start (at most 2 pt, unless it cites a current DECISIONS entry) [the body's and legs' lines: G1's and G6's recipes (g1-lines, g6-paws)]
+  left: front.R/front: the lit span on front.R from 0.140 to 0.712 tapers over 16.00 pt at its end (at most 2 pt, unless it cites a current DECISIONS entry) [the body's and legs' lines: G1's and G6's recipes (g1-lines, g6-paws)]
+  left: body.back/front: the edge of body.back shows 5.50 pt below full line width from (-29.0, -60.7) to (-31.8, -56.3), after the lit span on body.back from 0.796 to 0.886, before the lit span on body.back from 0.678 to 0.793 (at most 2 pt: one line at full width along each visible edge, unless a span beside it cites a current DECISIONS entry and says how far the sheet leaves it unlined) [the body's and legs' lines: G1's and G6's recipes (g1-lines, g6-paws)]
+  left: body.back/front: the edge of body.back shows 4.00 pt below full line width from (-49.5, -16.5) to (-48.5, -12.6), after the lit span on body.back from 0.796 to 0.886, before the lit span on body.back from 0.678 to 0.793 (at most 2 pt: one line at full width along each visible edge, unless a span beside it cites a current DECISIONS entry and says how far the sheet leaves it unlined) [the body's and legs' lines: G1's and G6's recipes (g1-lines, g6-paws)]
+  left: body.back/front: the edge of body.back shows 7.50 pt below full line width from (-2.6, -1.6) to (4.9, -1.6), after the lit span on body.back from 0.114 to 0.322, before the lit span on body.back from 0.678 to 0.793 (at most 2 pt: one line at full width along each visible edge, unless a span beside it cites a current DECISIONS entry and says how far the sheet leaves it unlined) [the body's and legs' lines: G1's and G6's recipes (g1-lines, g6-paws)]
+  left: body.back/front: the edge of body.back shows 4.00 pt below full line width from (48.5, -12.6) to (49.5, -16.5), after the lit span on body.back from 0.114 to 0.322, before the lit span on body.back from 0.796 to 0.886 (at most 2 pt: one line at full width along each visible edge, unless a span beside it cites a current DECISIONS entry and says how far the sheet leaves it unlined) [the body's and legs' lines: G1's and G6's recipes (g1-lines, g6-paws)]
+  left: body.back/front: the edge of body.back shows 13.00 pt below full line width from (44.6, -35.3) to (36.9, -45.6), after the lit span on body.back from 0.678 to 0.793, before the lit span on body.back from 0.796 to 0.886 (at most 2 pt: one line at full width along each visible edge, unless a span beside it cites a current DECISIONS entry and says how far the sheet leaves it unlined) [the body's and legs' lines: G1's and G6's recipes (g1-lines, g6-paws)]
+  left: body.back/front: the edge of body.back shows 5.00 pt below full line width from (31.9, -56.6) to (29.4, -60.3), after the lit span on body.back from 0.678 to 0.793, before the lit span on body.back from 0.114 to 0.322 (at most 2 pt: one line at full width along each visible edge, unless a span beside it cites a current DECISIONS entry and says how far the sheet leaves it unlined) [the body's and legs' lines: G1's and G6's recipes (g1-lines, g6-paws)]
+  left: hind.L/front: the edge of hind.L shows 2.50 pt below full line width from (29.2, -3.9) to (31.4, -2.8), after the lit span on hind.L from 0.220 to 0.966, before the lit span on hind.L from 0.220 to 0.966 (at most 2 pt: one line at full width along each visible edge, unless a span beside it cites a current DECISIONS entry and says how far the sheet leaves it unlined) [the body's and legs' lines: G1's and G6's recipes (g1-lines, g6-paws)]
+  left: hind.L/front: the edge of hind.L shows 4.76 pt below full line width from (34.5, -18.6) to (30.5, -16.0), after the lit span on hind.L from 0.220 to 0.966, before the lit span on hind.L from 0.220 to 0.966 (at most 2 pt: one line at full width along each visible edge, unless a span beside it cites a current DECISIONS entry and says how far the sheet leaves it unlined) [the body's and legs' lines: G1's and G6's recipes (g1-lines, g6-paws)]
+  left: hind.R/front: the edge of hind.R shows 3.76 pt below full line width from (-30.5, -16.0) to (-33.6, -18.1), after the lit span on hind.R from 0.034 to 0.780, before the lit span on hind.R from 0.034 to 0.780 (at most 2 pt: one line at full width along each visible edge, unless a span beside it cites a current DECISIONS entry and says how far the sheet leaves it unlined) [the body's and legs' lines: G1's and G6's recipes (g1-lines, g6-paws)]
+  left: hind.R/front: the edge of hind.R shows 3.51 pt below full line width from (-32.4, -2.6) to (-29.2, -3.9), after the lit span on hind.R from 0.034 to 0.780, before the lit span on hind.R from 0.034 to 0.780 (at most 2 pt: one line at full width along each visible edge, unless a span beside it cites a current DECISIONS entry and says how far the sheet leaves it unlined) [the body's and legs' lines: G1's and G6's recipes (g1-lines, g6-paws)]
+  left: tuft/front: the edge of tuft shows 17.47 pt below full line width from (-9.9, -148.6) to (-26.4, -147.8), after the lit span on tuft from 0.003 to 0.455, before the lit span on tuft from 0.003 to 0.455 (at most 2 pt: one line at full width along each visible edge, unless a span beside it cites a current DECISIONS entry and says how far the sheet leaves it unlined) [the topknot's curls (topknot.ts): the front lane's]
+  left: tuft/front: the edge of tuft shows 3.00 pt below full line width from (-28.7, -148.8) to (-30.5, -150.9), after the lit span on tuft from 0.003 to 0.455, before the lit span on tuft from 0.003 to 0.455 (at most 2 pt: one line at full width along each visible edge, unless a span beside it cites a current DECISIONS entry and says how far the sheet leaves it unlined) [the topknot's curls (topknot.ts): the front lane's]
+  left: tuft/front: the edge of tuft shows 20.47 pt below full line width from (20.7, -150.2) to (3.0, -152.5), after the lit span on tuft from 0.094 to 0.559, before the lit span on tuft from 0.094 to 0.559 (at most 2 pt: one line at full width along each visible edge, unless a span beside it cites a current DECISIONS entry and says how far the sheet leaves it unlined) [the topknot's curls (topknot.ts): the front lane's]
+  left: tuft/front: the edge of tuft shows 23.99 pt below full line width from (4.7, -155.0) to (-11.8, -153.1), after the lit span on tuft from 0.000 to 0.613, before the lit span on tuft from 0.000 to 0.613 (at most 2 pt: one line at full width along each visible edge, unless a span beside it cites a current DECISIONS entry and says how far the sheet leaves it unlined) [the topknot's curls (topknot.ts): the front lane's]
+  left: front.L/front: the edge of front.L shows 80.04 pt below full line width from (5.4, -1.2) to (34.7, -33.9), after the lit span on front.L from 0.288 to 0.860, before the lit span on front.L from 0.288 to 0.860 (at most 2 pt: one line at full width along each visible edge, unless a span beside it cites a current DECISIONS entry and says how far the sheet leaves it unlined) [the body's and legs' lines: G1's and G6's recipes (g1-lines, g6-paws)]
+  left: front.R/front: the edge of front.R shows 80.04 pt below full line width from (-32.6, -24.2) to (-1.3, -9.0), after the lit span on front.R from 0.140 to 0.712, before the lit span on front.R from 0.140 to 0.712 (at most 2 pt: one line at full width along each visible edge, unless a span beside it cites a current DECISIONS entry and says how far the sheet leaves it unlined) [the body's and legs' lines: G1's and G6's recipes (g1-lines, g6-paws)]
+g5-ears front: the line gate finds 66 problems today and 57 with the recipe: 9 cleared, 57 left as today's, 0 new
+g5-ears side.L: the line gate finds 60 problems today and 49 with the recipe: 11 cleared, 49 left as today's, 0 new
+g6-paws front: the line gate finds 66 problems today and 52 with the recipe: 14 cleared, 52 left as today's, 0 new
+g6-paws side.L: the line gate finds 60 problems today and 51 with the recipe: 9 cleared, 51 left as today's, 0 new
+g10-shadow front: the line gate finds 66 problems today and 66 with the recipe: 0 cleared, 66 left as today's, 0 new
+g10-shadow side.L: the line gate finds 60 problems today and 60 with the recipe: 0 cleared, 60 left as today's, 0 new
+g2-crisp front: the line gate finds 66 problems today and 66 with the recipe: 0 cleared, 66 left as today's, 0 new
+g2-crisp side.L: the line gate finds 60 problems today and 60 with the recipe: 0 cleared, 60 left as today's, 0 new
