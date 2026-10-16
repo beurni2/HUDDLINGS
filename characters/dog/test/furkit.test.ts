@@ -198,10 +198,11 @@ const droplet = smooth([[0, -40], [10, -30], [13, -15], [10, -4], [0, 0], [-10, 
 const HEM: Lock[] = [{ len: 1.4, width: 5, lean: 0.2, dip: 0.4 }, { len: 1.8, width: 6.5, lean: 0.2, dip: 0.3 }, { len: 1.2, width: 4.6, lean: 0.25, dip: 0.5 }, { len: 1.6, width: 5.4, lean: 0.3 }];
 const EDGE: EarEdgeSpec = {
   base: droplet,
-  steps: [{ from: [11.4, -27], to: [12.9, -19.6], lock: { len: 1.2, width: 7.4, lean: 0.6 } }],
+  steps: [{ from: [11.4, -27], to: [12.9, -19.6], lock: { len: 1.2, width: 7.4, lean: 0.45 } }],
   hem: { from: [10, -4], to: [-10, -4], locks: HEM, tipRound: 0.4 },
   axis: [[0, -40], [0, 0]],
-  line: { from: [-12, -24], to: [6, -36] },
+  // Seen from the front, the ear hangs behind the head: both ends run on under it.
+  line: { from: [-12, -24], to: [6, -36], ends: ["under", "under"] },
 };
 
 test("an ear's edge is a lock step or two down its outer edge and a hem of 3 or 4 rounded tips, its notches 1 to 2 pt deep", () => {
@@ -217,12 +218,17 @@ test("an ear's edge is a lock step or two down its outer edge and a hem of 3 or 
   assert.throws(() => earEdge({ ...EDGE, hem: { ...EDGE.hem, locks: [{ ...HEM[0]!, len: 0.6, dip: 0.2 }, ...HEM.slice(1)] } }), /notch after tip 0 is 0\.80 pt deep/);
   assert.throws(() => earEdge({ ...EDGE, hem: { ...EDGE.hem, locks: [{ ...HEM[0]!, width: 10 }, { ...HEM[1]!, width: 11.5, dip: undefined }] } }), /2 locks, not 3 to 4/);
   assert.deepEqual(EAR.hem.count, [3, 4]);
+  // A step is one broad low lock leaning along the edge (fur.ts's STEP): the first ears' steps, leaning 0.7 and more, read as barbs.
+  assert.throws(() => earEdge({ ...EDGE, steps: [{ ...EDGE.steps[0]!, lock: { len: 1.4, width: 6.6, lean: 0.7 } }] }), /leans 0.7, not 0.2 to 0.5/);
+  assert.throws(() => earEdge({ ...EDGE, steps: [{ ...EDGE.steps[0]!, lock: { len: 2.4, width: 6.6, lean: 0.4 } }] }), /stands 2.4 pt out/);
 });
 
-test("an ear's line is one span on the tan, running on under the head at both ends, light at the top and deepest at the hem", () => {
+test("an ear's line is one span on the tan, ending as its view states, light at the top and deepest at the hem", () => {
   const { span } = earEdge(EDGE);
   assert.equal(span.on, "tan");
   assert.deepEqual(span.ends, ["under", "under"]);
+  // In profile the ear lies over the head: its front end is free (or joins the head's line), as the view says.
+  assert.deepEqual(earEdge({ ...EDGE, line: { ...EDGE.line, ends: ["free", "under"] } }).span.ends, ["free", "under"]);
   const under = span.under as (p: P) => number;
   const depths = [-40, -30, -20, -10, 0].map((y) => under([0, y]));
   assert.equal(depths[0], 0, "the line is the light's own at the ear's top");
@@ -233,13 +239,17 @@ test("an ear's line is one span on the tan, running on under the head at both en
   assert.ok(drawn.lines.length === 1 && drawn.lines[0]!.span.ends.join() === "under,under");
 });
 
-test("an ear's paint over an edge takes the hem's 3 or 4 tips for its clumps and keeps its locks uneven", () => {
+test("an ear's paint over an edge takes the hem's 3 or 4 tips for its clumps and keeps its locks uneven and fanned", () => {
   const edge = earEdge(EDGE);
   const ear = { ear: edge.shape, axis: EDGE.axis, light: "", under: [], dips: [] };
-  const uneven: P[][] = [[[-8.5, -26], [-9.4, -14], [-8.5, -5]], [[-4.6, -20], [-5, -10], [-4.6, -2]], [[2.4, -30], [2.7, -16], [2.3, -1]], [[6.8, -22], [7.4, -12], [6.8, -4]]];
+  // Uneven in length and spacing, and fanning out toward the hem with the ear's droop (15° from the first to the last).
+  const uneven: P[][] = [[[-8.5, -26], [-10, -14], [-11, -5]], [[-4.6, -20], [-5.4, -10], [-5.8, -2]], [[2.4, -30], [2.7, -16], [3, -1]], [[6.8, -22], [8, -12], [9.4, -4]]];
   assert.doesNotThrow(() => earFur({ ...ear, locks: uneven, edge }));
   const comb: P[][] = [-7.5, -2.5, 2.5, 7.5].map((x): P[] => [[x, -22], [x, -12], [x, -2]]);
   assert.throws(() => earFur({ ...ear, locks: comb, edge }), /too even .* read as a comb/);
+  // Uneven but parallel, as the side's first locks (within 7 to 10° of each other): still a comb.
+  const parallel: P[][] = [[[-8.5, -26], [-9, -14], [-9, -5]], [[-4.6, -14], [-4.8, -8], [-4.8, -2]], [[2.4, -34], [2.4, -16], [2.6, -1]], [[6.8, -22], [7, -12], [7.4, -4]]];
+  assert.throws(() => earFur({ ...ear, locks: parallel, edge }), /parallel strokes read as a comb/);
   assert.throws(() => earFur({ ...ear, locks: uneven, edge: { ...edge, notches: edge.notches.slice(0, 1) } }), /hem is 3 or 4 lock tips, not 2/);
 });
 

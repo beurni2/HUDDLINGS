@@ -13,7 +13,7 @@
 // and darker at the hem, as the floppy-ears panel draws it; earFur() then takes the hem's notches for its creases and
 // ends its locks in the hem's tips. Every ear state with its own outline (the perked and lifted ears, the turned perked
 // ears) builds its edge the same way. A view that passes no edge paints its ears as before.
-import { furEdge, type FurRules, type Lock } from "../../../draw/fur.ts";
+import { furEdge, STEP, type FurRules, type Lock } from "../../../draw/fur.ts";
 import { sample, smooth, v, type P, type Shape } from "../../../draw/geom.ts";
 import { strokeOf } from "../../../draw/line.ts";
 import type { Paint } from "../../../draw/paint.ts";
@@ -48,8 +48,11 @@ export const EAR = {
   hem: { count: [3, 4], len: [0.6, 2], width: [4, 18], tipRound: 0.6, lean: [0, 0.6], ratio: 0.05, vary: 0.2, dip: [0, 1], fit: 0.15 } as FurRules,
   /** How deep a hem notch lies below the tips beside it: a tip's length and the notch's dip, in points. */
   notch: [1, 2] as [number, number],
-  /** A lock step down the outer edge: one lock leaning hard down along the edge, so the edge steps out below it. */
-  step: { count: [1, 1], len: [0.7, 2], width: [2.5, 9], tipRound: 0.35, lean: [0.3, 0.9], ratio: 0.1, vary: 0, dip: [0, 0], fit: 0.15 } as FurRules,
+  /**
+   * A lock step down the outer edge: one broad low lock leaning down along the edge, so the edge steps out below it, as
+   * the panel's top lobe overlaps the next (fur.ts's STEP); the first steps, leaning 0.7 and more, read as barbs.
+   */
+  step: STEP,
   /** How many steps down the outer edge. */
   steps: [1, 2] as [number, number],
 };
@@ -57,14 +60,18 @@ export const EAR = {
 export interface EarEdgeSpec {
   /** The ear's outline before its fur: the view's own droplet, or a state's (the perked, the lifted, a turned perked ear). */
   base: Shape;
-  /** 1 or 2 lock steps down the outer edge, each one lock on a short span of it, in path order (one about 40% of the way down). */
-  steps: { from: P; to: P; lock: Lock }[];
+  /** 1 or 2 lock steps down the outer edge, each one lock on a short span of it, in path order (one about 40% of the way down), its tip as round as `tipRound` (0.3 by default). */
+  steps: { from: P; to: P; lock: Lock; tipRound?: number }[];
   /** The hem: 3 or 4 rounded lock tips across the ear's lower edge, typed from the crop with their widths (in profile the rearmost leaning up the back edge). */
   hem: { from: P; to: P; locks: Lock[]; tipRound: number };
   /** From the ear's top to its hem: its line is thin and light at the top, heavier and darker at the hem. */
   axis: [P, P];
-  /** Where the line runs, in path order: from where it comes out from under the head round the hem and up the outer edge to the root under the crown. */
-  line: { from: P; to: P; ends?: [SpanEnd, SpanEnd] };
+  /**
+   * Where the line runs, in path order, and how each end finishes, which each view states: from the front an ear hangs
+   * behind the head and both ends run on under it; in profile it lies over the head, and its front end is free or
+   * joins the head's line.
+   */
+  line: { from: P; to: P; ends: [SpanEnd, SpanEnd]; cites?: number; bare?: [number, number] };
   /** How deep the line lies at the hem, whatever the light (0.7 by default, the ears' deep line where they hang over the body). */
   deep?: number;
 }
@@ -91,13 +98,16 @@ export function earEdge(e: EarEdgeSpec): EarEdge {
   });
   const tips: P[] = [], notches: P[] = [];
   // furEdge keeps the path outside its span exactly, so the steps and the hem go on without moving each other.
-  const stepped = e.steps.reduce((shape, st) => furEdge(shape, st.from, st.to, [st.lock], 0.3, undefined, EAR.step), e.base);
+  const stepped = e.steps.reduce((shape, st) => furEdge(shape, st.from, st.to, [st.lock], st.tipRound ?? 0.3, undefined, EAR.step), e.base);
   const shape = furEdge(stepped, e.hem.from, e.hem.to, e.hem.locks, e.hem.tipRound, (tip, _root, [, b]) => (tips.push(tip), notches.push(b)), EAR.hem);
   // The notch after the last tip is the hem's own end, on the base: only those between two tips are notches.
   notches.pop();
   const [a, b] = e.axis, deep = e.deep ?? 0.7, along = v.sub(b, a), length2 = v.dot(along, along);
   const t = (p: P) => Math.min(1, Math.max(0, v.dot(v.sub(p, a), along) / length2));
-  const span: LitSpan = { from: e.line.from, to: e.line.to, on: "tan", ends: e.line.ends ?? ["under", "under"], under: (p: P) => deep * t(p) ** 1.5 };
+  // A stretch of the ear's edge the sheet leaves unlined (the profile ear's top, feathered over the crown, DECISIONS 68)
+  // is the view's to cite, with its length.
+  const span: LitSpan = { from: e.line.from, to: e.line.to, on: "tan", ends: e.line.ends, under: (p: P) => deep * t(p) ** 1.5,
+    ...(e.line.cites ? { cites: e.line.cites, ...(e.line.bare ? { bare: e.line.bare } : {}) } : {}) };
   return { shape, span, tips, notches };
 }
 
@@ -109,7 +119,13 @@ const spread = (xs: number[]) => {
   return Math.sqrt(xs.reduce((s, x) => s + (x - mean) ** 2, 0) / xs.length) / mean;
 };
 /** The least spread the locks' lengths and their spacing across the ear may have, so they never read as a comb (the side's and back's first ears). */
-export const UNEVEN = 0.15;
+export const UNEVEN = 0.2;
+/**
+ * The least the locks' directions may fan, in degrees, from the most nearly upright to the most leaning: they follow
+ * the ear's droop and spread toward the hem, as the floppy-ears panel paints them (the front's ran 15°, the
+ * three-quarter's 10°); the side's first locks ran within 7 to 10° of each other, parallel strokes that read as a comb.
+ */
+export const FAN = 10;
 
 /** The ear's paint: fill, the painted fur under the shade, the shade and the light. Its line is the line rule's (parts/lines.ts). */
 export function earFur(e: EarFur): Paint {
@@ -130,6 +146,9 @@ export function earFur(e: EarFur): Paint {
     const gaps = starts.slice(1).map((x, i) => x - starts[i]!);
     if (spread(lengths) < UNEVEN || spread(gaps) < UNEVEN)
       throw new Error(`an ear's locks are too even (lengths ${spread(lengths).toFixed(2)}, spacing ${spread(gaps).toFixed(2)}, at least ${UNEVEN}): they read as a comb`);
+    const angles = locksAt.map((pts) => (Math.atan2(pts.at(-1)![1] - pts[0]![1], pts.at(-1)![0] - pts[0]![0]) * 180) / Math.PI);
+    if (Math.max(...angles) - Math.min(...angles) < FAN)
+      throw new Error(`an ear's locks run within ${(Math.max(...angles) - Math.min(...angles)).toFixed(1)}° of each other, under ${FAN}°: parallel strokes read as a comb; fan them with the ear's droop`);
   } else if (e.dips.length < 1 || e.dips.length > 2) throw new Error(`an ear's lower edge is 2 or 3 clumps, not ${e.dips.length + 1}`);
   const [x0, y0, x1, y1] = e.ear.segs.flat().reduce((b, [x, y]) => [Math.min(b[0], x), Math.min(b[1], y), Math.max(b[2], x), Math.max(b[3], y)], [Infinity, Infinity, -Infinity, -Infinity]);
   const box: Box = pad([x0, y0, x1 - x0, y1 - y0], 2);
