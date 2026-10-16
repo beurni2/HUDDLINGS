@@ -112,8 +112,8 @@
      "record": [91.6, 59.11],
      "held": false,
      "found": [89.27, 60.96],
-     "errPt": 3.55,
-     "offsetPt": [-2.8, 2.18],
+     "errPt": 3.54,
+     "offsetPt": [-2.79, 2.18],
      "pass": true
     },
     "mouth.R": {

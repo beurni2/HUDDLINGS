@@ -25,7 +25,7 @@ CROPS = {
     "movement.happy-bounce": (10, 2, 145, 85),
 }
 BESIDE = {
-    "threeQuarter": {"eyes happy (squeeze, Q2)": "movement.soft-landing", "mouth smile": "movement.curious-lean", "mouth laugh": "movement.happy-bounce",
+    "threeQuarter": {"eyes happy": "movement.soft-landing", "mouth smile": "movement.curious-lean", "mouth laugh": "movement.happy-bounce",
                      "content": "movement.soft-landing", "curious": "movement.curious-lean", "laughing": "movement.happy-bounce"},
     "side": {"rest": "movement.walk", "mouth open": "movement.jump", "happy": "movement.jump", "neutral": "movement.run"},
 }
@@ -34,7 +34,7 @@ BESIDE = {
 # What a cell shows that the package on this branch does not play (render.ts's `review`), and its footnote.
 MARKS = {"held": "*", "temple": "**"}
 NOTES = [
-    "* review build: a state held out of the package for now (the turned stars, the profile's mouths; DECISIONS 183)",
+    "* review build: a state held out of the package for now (the turned stars and puffed cheeks, the profile's mouths; DECISIONS 183, 208)",
     "** the three-quarter's line beside its near ear perked: keyed only by p3/faces2's face clips; here the package draws the rest line (176)",
 ]
 
@@ -84,7 +84,7 @@ def sheet(view, cells, out_dir, qa):
         if crop:
             tiles.append((f"sheet: {crop.split('.')[1]}{' (mirrored)' if facing == 'L' else ''}", motion(crop, facing == "L", (CELL_W, cell_h)), c["group"] + "-ref"))
     big, small = font(26), font(15)
-    sections = [("Every face state", [t for t in tiles if t[2].startswith("state")]), ("The 17 presets' stills", [t for t in tiles if t[2].startswith("preset")])]
+    sections = [("Every face state", [t for t in tiles if t[2].startswith("state")]), ("The 19 presets' stills, huffy's peek back and hungry's o", [t for t in tiles if t[2].startswith("preset")])]
     W = COLS * (CELL_W + PAD) + PAD
     H = 50 + sum(36 + -(-len(ts) // COLS) * (cell_h + LABEL_H + PAD) for _, ts in sections) + 30 + 20 * len(NOTES)
     page = Image.new("RGB", (W, H), "white")

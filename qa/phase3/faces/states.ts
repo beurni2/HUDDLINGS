@@ -1,6 +1,7 @@
 // The face states no preset's still shows, each rendered as a front still from a copy of the built package with a
 // clip of its own (the package's clips are the presets'): peek, the yawn, the pant, the wink and the perked ear on the
-// dog's other side, raised brows over the wide eyes with the o, and the half-lid; and the raised ears turned to the
+// dog's other side, raised brows over the wide eyes with the o, the half-lid, the sparkle with proud's stars, huffy's
+// peek back and hungry's o with its eager eyes; and the raised ears turned to the
 // ear springs' limits, 14° out and in, behind a head that stays whole (DECISIONS 158). sheet.py lays them out.
 //
 // node qa/phase3/faces/states.ts <out folder>     (after node characters/build/build.ts dog)
@@ -29,6 +30,10 @@ export const STATES: Record<string, ReturnType<typeof clip>> = {
   "lifted L, perked R": clip({ "ear.L": "lifted", "ear.R": "onePerked", "temple.L": "up", "temple.R": "up", "head.line": "temples", mouth: "smile" }),
   "raised, wide, o": clip({ "eye.L": "wide", "eye.R": "wide", mouth: "o", "brow.L": "raised", "brow.R": "raised" }),
   "sleepy half-lid": clip({ "eye.L": "sleepy", "eye.R": "sleepy", mouth: "smile" }),
+  // Q2's sparkle, proud's second beat (DECISIONS 203, 205), and huffy's peek back (its preset's peek): no still shows them.
+  "sparkle, stars": clip({ "eye.L": "sparkle", "eye.R": "sparkle", stars: "sparkle", mouth: "smile", "brow.L": "happy", "brow.R": "happy" }),
+  "huffy's peek back": clip({ "eye.L": "peekBack", "eye.R": "flat", mouth: "tinySmile" }),
+  "hungry's o": clip({ "eye.L": "eager", "eye.R": "eager", mouth: "o", "brow.L": "raised", "brow.R": "raised" }),
   "lifted, 14° out": clip(lifted, { "ear.L": -14, "ear.R": 14 }),
   "lifted, 14° in": clip(lifted, { "ear.L": 14, "ear.R": -14 }),
   "perked L, 14° out": clip(perkedL, { "ear.L": -14 }),

@@ -1,10 +1,10 @@
-// The face states in the turned views, rendered for the contact sheets (sheet.py): every state and the 17 presets'
+// The face states in the turned views, rendered for the contact sheets (sheet.py): every state and the 19 presets'
 // stills (presets.ts, faceClips.ts's stillOf) in threeQuarter.L, threeQuarter.R, side.L and side.R, each a still of a
 // review build of the dog with a clip of its own that sets the view and the states (a face preset's states apply in any
 // view at runtime, so the package itself gets no new clip). The review build is the package's own source plus the
-// turned views' stars and the profile's mouths, which the package holds out for now (DECISIONS 183), and these
+// turned views' stars and puffed cheeks and the profile's mouths, which the package holds out for now (DECISIONS 183, 208), and these
 // clips. Also the ID-pass check of
-// "nothing of the open eye under a closed one": every closed eye state (happy, squeeze, sparkle, closed, wink), in every
+// "nothing of the open eye under a closed one": every closed eye state (happy, squeeze, closed, wink, flat), in every
 // view that draws an eye, has the eye's ID footprint of its own band, never the open eye's, and under each view's
 // sleepy half-lid nothing dark of the open eye shows over the eye's top (ids.json).
 //
@@ -67,29 +67,35 @@ function cells(view: View): Cell[] {
   const state = (label: string, states: Record<string, string>, ears?: Cell["ears"]): Cell => ({ label, group: "state", states: { ...rest, ...states, ...(ears ? temple(ears) : {}) }, ...(ears ? { ears } : {}) });
   const list: Cell[] = [
     state("rest", {}),
-    state("eyes happy (squeeze, Q2)", both("happy")),
+    state("eyes happy", both("happy")),
+    state("eyes squeeze (Q2)", both("squeeze")),
     state("eyes closed", both("closed")),
     state("eyes sleepy half-lid", both("sleepy")),
     state(`wink (${near})`, { [near]: "wink" }),
     state("eyes wide", both("wide")),
     state("eyes peek", both("peek")),
-    state("sparkle (crescents, stars)", { ...both("sparkle"), stars: "sparkle" }),
-    ...["smile", "open", "laugh", "o", "cheeky", "yawn", "pant"].filter((m) => m !== rest.mouth).map((m) => state(`mouth ${m}`, { mouth: m })),
+    state("eyes sparkle (Q2)", both("sparkle")),
+    state("eyes eager (hungry)", both("eager")),
+    state("eyes flat (huffy)", both("flat")),
+    state("eyes peekBack (huffy)", both("peekBack")),
+    state("stars (proud)", { stars: "sparkle" }),
+    ...["smile", "open", "laugh", "o", "cheeky", "yawn", "pant", "o.tongue", "pressed", "tinySmile"].filter((m) => m !== rest.mouth).map((m) => state(`mouth ${m}`, { mouth: m })),
+    state("cheeks puffed (huffy)", { cheeks: "puffed", mouth: "pressed" }),
     state("brows raised", { "brow.L": "raised", "brow.R": "raised" }),
     state("brows happy", { "brow.L": "happy", "brow.R": "happy" }),
     ...EAR_STATES.filter((e) => e !== "neutral" && e !== "onePerked").map((e) => state(`ears ${e}`, { "ear.L": e, "ear.R": e }, { L: e, R: e })),
     state("ear.L perked", { "ear.L": "onePerked" }, { L: "onePerked", R: "neutral" }),
     state("ear.R perked", { "ear.R": "onePerked" }, { L: "neutral", R: "onePerked" }),
   ];
-  for (const [name, p] of Object.entries(PRESETS)) {
-    if (p.next) continue;
-    const s = stillOf(p);
-    list.push({
-      label: name, group: "preset",
-      states: { "eye.L": s.eyes.L, "eye.R": s.eyes.R, mouth: s.mouth, "brow.L": s.brows.L, "brow.R": s.brows.R, "ear.L": s.ears.L, "ear.R": s.ears.R, ...(s.stars ? { stars: "sparkle" } : {}), ...temple(s.ears) },
-      ears: s.ears,
-    });
-  }
+  const preset = (label: string, s: ReturnType<typeof stillOf>): Cell => ({
+    label, group: "preset",
+    states: { "eye.L": s.eyes.L, "eye.R": s.eyes.R, mouth: s.mouth, "brow.L": s.brows.L, "brow.R": s.brows.R, "ear.L": s.ears.L, "ear.R": s.ears.R,
+      ...(s.stars ? { stars: "sparkle" } : {}), ...(s.cheeks ? { cheeks: s.cheeks } : {}), ...temple(s.ears) },
+    ears: s.ears,
+  });
+  for (const [name, p] of Object.entries(PRESETS)) list.push(preset(name, stillOf(p)));
+  // Huffy's peek back (no package clip, DECISIONS 156), and hungry's first beat, the o.
+  list.push(preset("huffy, its peek back", stillOf(PRESETS.huffy!, true)), preset("hungry, its o", { ...stillOf(PRESETS.hungry!), mouth: "o" }));
   return list;
 }
 
@@ -104,7 +110,7 @@ function clip(name: string, view: View, c: Cell) {
 }
 
 /** The closed eye states the ID check covers, and the views it covers them in: every view that draws an eye. */
-const CLOSED = ["happy", "squeeze", "sparkle", "closed", "wink"];
+const CLOSED = ["happy", "squeeze", "closed", "wink", "flat"];
 const ID_VIEWS: View[] = ["front", ...VIEWS];
 
 const pkg = join(out, "package");
@@ -120,6 +126,10 @@ for (const [view, drawn] of [["threeQuarter.L", threeQuarterHeld("L")], ["threeQ
   }
   part("stars").regions[view] = null;
   source.rig.drawOrder[`head.${view}`]!.push("stars");
+  // Huffy's puffed cheeks, held out as the stars are (DECISIONS 208): after the blush, in the head base's clip group, as the front draws them.
+  part("cheeks").regions[view] = null;
+  const order = source.rig.drawOrder[`head.${view}`]!;
+  order.splice(order.findIndex((p) => p.startsWith("blush.")) + 1, 0, "cheeks");
 }
 const add = (c: ReturnType<typeof clip>) => source.clips.push(c as unknown as Clip);
 const plan: { view: View; cells: (Cell & { clip: string })[] }[] = VIEWS.map((view) => ({

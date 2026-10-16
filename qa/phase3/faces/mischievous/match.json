@@ -221,7 +221,7 @@
     "eye.R": {
      "record": [48.56, 59.96],
      "held": true,
-     "found": [48.23, 60.86],
+     "found": [48.22, 60.86],
      "errPt": 1.22,
      "offsetPt": [-0.44, 1.14],
      "pass": true
