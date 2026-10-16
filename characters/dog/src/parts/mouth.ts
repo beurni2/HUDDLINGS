@@ -15,7 +15,7 @@
 // - o.tongue: hungry's beat after the o, new (no panel): the small smile with the tongue's tip peeking out at its corner;
 // - pressed: huffy's, new (no panel): a short flat line, the lips pressed together under the puffed cheeks, never a
 //   pout (no lower lip pushed out, its ends never below its middle);
-// - tinySmile: huffy's peek back, new (no panel): the small smile's W at half its width, its tips curling up.
+// - tinySmile: huffy's peek back, new (no panel): the small smile's W at about three fifths of its width, its tips curling up.
 import { mirrorX, pathD, sample, smooth, type Node, type P, type Seg } from "../../../draw/geom.ts";
 import { innerLine, strokeOf, type DrawnLine, type Stroke } from "../../../draw/line.ts";
 import { LIMITS } from "../../../draw/lint.ts";
@@ -409,7 +409,7 @@ function closedLip(half: P[], philtrumTo: number, where: string, f: FaceFrame): 
  */
 const PRESSED: P[] = [[0, 14.5], [1.2, 14.72], [2.5, 14.82], [3.7, 14.72], [4.6, 14.5], [5.1, 14.3]];
 
-/** The tiny smile of huffy's peek back (new drawing, no panel): the smile's W at about half its width, its tips curling up. */
+/** The tiny smile of huffy's peek back (new drawing, no panel): the smile's W at about three fifths of its width, its tips curling up. */
 const TINY_SMILE: P[] = [[0, 14.6], [1.6, 15.3], [3.4, 15.9], [5.2, 16.05], [6.8, 15.7], [7.9, 15], [8.5, 14.2]];
 
 /**

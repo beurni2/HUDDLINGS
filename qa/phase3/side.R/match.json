@@ -446,9 +446,9 @@
   "atlas": {
    "set": "3x",
    "pages": 2,
-   "pageAreaPx": 4718592,
-   "allRegionsShare": 0.697,
-   "thisStillShare": 0.095
+   "pageAreaPx": 5242880,
+   "allRegionsShare": 0.635,
+   "thisStillShare": 0.085
   }
  },
  "failed": [],
