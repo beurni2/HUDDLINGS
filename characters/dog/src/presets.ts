@@ -61,7 +61,9 @@ export const PRESETS: Record<string, Preset> = {
   },
   excited: {
     // The dog's squeeze is its happy crescent (Q2).
-    eyes: ["squeeze", "happy"], eyesHow: "or", eyesNote: "squeeze (kitty, bear) or happy", mouth: ["open"], ears: "lifted", brows: "happy", blush: null,
+    // The table's open mouth, drawn as the Excited panels draw it: wider and deeper than the rest's (DECISIONS 143).
+    eyes: ["squeeze", "happy"], eyesHow: "or", eyesNote: "squeeze (kitty, bear) or happy", mouth: ["openWide"], mouthNote: "the table's open, as Excited draws it",
+    ears: "lifted", brows: "happy", blush: null,
     panels: "Excited", crops: ["master.expression.excited", "expressions.expression.excited"], still: { eyes: "happy" },
   },
   laughing: {

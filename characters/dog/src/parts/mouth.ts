@@ -3,9 +3,10 @@
 // placed by the view's frame. Rule R3, never a downturned mouth (characters/dog/test/faces.test.ts holds each one to
 // it): a lipped mouth keeps its lip's ends at or above where the philtrum meets it; the o and the yawn, which have no
 // corners, are symmetric and round at the foot.
-// - smile: the sheet's small smile (Small smile, Content, Winking): the philtrum down from the nose into two small
-//   bowed arcs that curl up at their tips, a W, never a single frown;
+// - smile: the sheets' small smile (Small smile, Content, Winking): the philtrum down from the nose into two
+//   bowed arcs, broad and lowest about halfway out, that curl up at their tips, a W, never a single frown;
 // - open: the turnaround's open happy mouth (the rest; DECISIONS 50, 85);
+// - openWide: the open mouth as the master sheet's Excited draws it, wider and deeper (excited only; DECISIONS 143);
 // - laugh: Laughing's, wider and deeper, the tongue a bigger dome;
 // - o: Surprised's small o, an egg pointed at its top and widest low, the tongue filling its lower half;
 // - cheeky: Mischievous's and Cheeky's open mouth with the tongue out over the lower lip;
@@ -18,7 +19,7 @@ import { blur, piece, uid, type Box, type Piece } from "../../../draw/svg.ts";
 import { C } from "../palette.ts";
 import type { FaceFrame } from "./face.ts";
 
-export const MOUTH_STATES = ["smile", "open", "laugh", "o", "cheeky", "yawn", "pant"] as const;
+export const MOUTH_STATES = ["smile", "open", "openWide", "laugh", "o", "cheeky", "yawn", "pant"] as const;
 export type MouthState = (typeof MOUTH_STATES)[number];
 
 export interface Mouth {
@@ -184,6 +185,29 @@ const LAUGH: Opened = {
   box: [-17, 10, 34, 26],
 };
 
+/**
+ * Excited's open mouth, as the master sheet's Excited draws it (DECISIONS 143): the open mouth grown about as wide as
+ * the laugh, its curls out to 15.3 pt either side of the nose (the panel's 15.2 and 15.6, the rest mouth's 12.9), the
+ * opening's top corners 11.6 pt out and its U a full round one about as deep as the laugh's, the tongue a broad dome
+ * filling its lower part. The rest mouth stays the turnaround's.
+ */
+const OPEN_WIDE: Opened = {
+  half: [[0, 14], [1.8, 14.95], [4, 15.85], [6.6, 16.55], [9.2, 16.95], [11.6, 17.05], [13.2, 16.6], [14.4, 15.7], [15.1, 14.6], [15.3, 13.6]],
+  opening: [[0, 14.2], [4, 16.05], [6.6, 16.8], [9.2, 17.15], [11.6, 17.25], [11.3, 20.6], [10.4, 24], [8.8, 27.2], [6.6, 29.8], [4.2, 31.3], [2, 31.95], [0, 32.15],
+    [-2, 31.95], [-4.2, 31.3], [-6.6, 29.8], [-8.8, 27.2], [-10.4, 24], [-11.3, 20.6], [-11.6, 17.25], [-9.2, 17.15], [-6.6, 16.8], [-4, 16.05]],
+  corners: [0, 4, 18],
+  philtrumTo: 14.2,
+  sideFrom: [11.6, 17.25],
+  lip: [17.6, 11.4],
+  sidesTo: 27.6,
+  footFrom: 24.6,
+  deep: "M-13 14 L13 14 L13 18.2 C8 17.9 3.6 17.1 0 16.9 C-3.6 17.1 -8 17.9 -13 18.2Z",
+  deepCorners: "M-13 17 L-10.2 17.4 C-10.3 18.6 -10.4 19.8 -10.9 21.6 L-13 21.6Z M13 17 L10.2 17.4 C10.3 18.6 10.4 19.8 10.9 21.6 L13 21.6Z",
+  tongue: "M-11.6 34 L-11.6 25.4 C-10 23 -6.2 21.6 0 21.5 C6.2 21.6 10 23 11.6 25.4 L11.6 34Z",
+  shine: [-0.4, 25.4, 5, 2.7],
+  box: [-18, 10, 36, 25],
+};
+
 /** Cheeky's: the open mouth with the tongue out over the lower lip and hanging past it, broad and round, as Mischievous and Cheeky draw it. */
 const CHEEKY: Opened = {
   ...OPEN,
@@ -288,19 +312,22 @@ const YAWN: Oval = {
 };
 
 /**
- * The small smile, as the expression sheet's Small smile, Content and Winking draw it: the philtrum down from the
- * nose into two small bowed arcs, a W, each curling up at its tip, its tips above its middle, never a frown; the line
- * a deep red-brown in its middle and the printed dark brown out along its ends, as the open mouth's lip is.
+ * The small smile, as the expression sheet's Small smile and the master sheet's Content and Winking draw it: the
+ * philtrum down from the nose into two broad bowed arcs, a W, each lowest about halfway out and curling up at its
+ * tip, its tips a little above its middle, never a frown; the line a deep red-brown in its middle and the printed dark
+ * brown out along its ends, as the open mouth's lip is. Measured on Content in its level frame (DECISIONS 142): the
+ * W runs 13.4 pt out either side of the nose (12.8 and 14), its arcs bottom out 17.6 pt below the eyes' midpoint
+ * about 8 pt out, and its tips curl back up to about the philtrum's foot.
  */
 function smile(f: FaceFrame): Mouth {
-  const half: P[] = [[0, 14.4], [1.4, 15.6], [3.1, 16.6], [5.1, 17.15], [7.1, 17.05], [8.9, 16.5], [10.4, 15.6], [11.6, 14.5], [12.3, 13.4]];
+  const half: P[] = [[0, 14.5], [1.4, 15.2], [2.9, 16.05], [4.5, 16.8], [6.2, 17.35], [8, 17.6], [9.8, 17.4], [11.3, 16.85], [12.5, 16], [13.4, 15.1], [14, 14.15]];
   const lipShape = lipOf(half);
   const along = sample(lipShape.segs, 12, false);
-  const lip = tapered(along, 0.9, "inner", "smile", { taper: 2.4, tip: 0.3 });
-  const philtrum = innerLine([[0, 11.7], [0, 14.6]], 0.9, C.eyeDark, { taper: 0.9, tip: 0.75, wobble: 0 });
+  const lip = tapered(along, 0.9, "inner", "smile", { taper: 1.8, tip: 0.3 });
+  const philtrum = innerLine([[0, 11.7], [0, 14.7]], 0.9, C.eyeDark, { taper: 0.9, tip: 0.75, wobble: 0 });
   const lipFade = uid("lip");
-  const box: Box = [-15, 10, 30, 10];
-  const svg = `<defs><linearGradient id="${lipFade}" gradientUnits="userSpaceOnUse" x1="-13" y1="0" x2="13" y2="0">` +
+  const box: Box = [-16, 10, 32, 10];
+  const svg = `<defs><linearGradient id="${lipFade}" gradientUnits="userSpaceOnUse" x1="-14.5" y1="0" x2="14.5" y2="0">` +
     `<stop offset="0.08" stop-color="${C.dark}"/><stop offset="0.3" stop-color="${C.lipLine}"/><stop offset="0.7" stop-color="${C.lipLine}"/>` +
     `<stop offset="0.92" stop-color="${C.dark}"/></linearGradient></defs>` +
     `<path d="${lip.d}" fill="url(#${lipFade})"/>${philtrum.svg}`;
@@ -316,6 +343,8 @@ export function mouth(state: MouthState, f: FaceFrame): Mouth {
       return smile(f);
     case "open":
       return opened(OPEN, f);
+    case "openWide":
+      return opened(OPEN_WIDE, f);
     case "laugh":
       return opened(LAUGH, f);
     case "o":
