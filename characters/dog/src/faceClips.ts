@@ -56,7 +56,7 @@ export function faceClip(name: string, p: Preset, peek = false): Clip {
     ...(s.cheeks ? { cheeks: [[0, s.cheeks]] as [number, string][] } : {}),
   };
   // The blush's level where the table names one, as the cheeks' alpha over their drawing at the reference level
-  // (DECISIONS 144); elsewhere the parts' rest alpha keeps the resting level.
+  // (DECISIONS 145, 160); elsewhere the parts' rest alpha keeps the resting level.
   const alpha = p.blush === null ? undefined : blushAlpha(p.blush);
   return {
     name: peek ? `face_${name}_peek` : `face_${name}`,
@@ -69,8 +69,14 @@ export function faceClip(name: string, p: Preset, peek = false): Clip {
   } as Clip;
 }
 
-/** A blush level (0 to 1) as the blush parts' alpha: the level over the reference level each view's blush is drawn at. */
-export const blushAlpha = (level: number) => Math.round((level / BLUSH_REFERENCE) * 1000) / 1000;
+/**
+ * A blush level (0 to 1) as the blush parts' alpha: the level over the reference level each view's blush is drawn at.
+ * A level past the reference cannot be drawn, so it is refused here rather than written into a clip the format refuses.
+ */
+export function blushAlpha(level: number): number {
+  if (!(level >= 0 && level <= BLUSH_REFERENCE)) throw new Error(`a blush level of ${level} is past the 0 to ${BLUSH_REFERENCE} the blush is drawn to`);
+  return Math.round((level / BLUSH_REFERENCE) * 1000) / 1000;
+}
 
 /** Every face clip: one per preset. Huffy's peek back is not one: look.ts --faces would take face_huffy_peek for a preset of that name. */
 export function faceClips(): Clip[] {

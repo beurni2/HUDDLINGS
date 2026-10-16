@@ -510,9 +510,10 @@ function nose(): Piece {
 
 /**
  * A blush in the face frame, under the eye's outer side: an ellipse turned with the face, drawn at the blush's
- * reference level (DECISIONS 144): the printed pink blurred, its alpha stretched so its core reaches the full
- * #F7B3A6, where the blur alone takes it down by about a fifth. The part's rest alpha (rig.json) sets it at the
- * resting level, and a face clip keys its alpha for the levels the presets ask (presets.ts BLUSH_REFERENCE).
+ * reference level (DECISIONS 145, 160): the printed pink blurred, its alpha stretched so its core is the full #F7B3A6
+ * across the reddest tenth of the cheek, where the blur alone takes its peak down by about a fifth. The part's rest
+ * alpha (rig.json) sets it at the resting level, and a face clip keys its alpha for the levels the presets ask
+ * (presets.ts BLUSH_REFERENCE).
  */
 function blush(sx: number): Piece {
   const [cx, cy] = face([sx * 30, 13.4]);
@@ -523,11 +524,12 @@ function blush(sx: number): Piece {
   const d = `M${r3(cx - dx)} ${r3(cy - dy)} a${rx} ${ry} ${deg} 1 0 ${r3(2 * dx)} ${r3(2 * dy)} a${rx} ${ry} ${deg} 1 0 ${r3(-2 * dx)} ${r3(-2 * dy)}Z`;
   const f = uid("blush"), box = pad([cx - rx - 0.5, cy - ry - 0.6, 2 * rx + 1, 2 * ry + 1.2], 3 * sd);
   // The blurred oval peaks at 0.81 of its fill at 3x (dog.test.ts holds the stretched core at full strength).
+  // Stretched by 1.475, match.py's fit reads 1 at alpha 1 (1.229, the first stretch, read 0.95 and left 95 to 100% out of reach).
   const stretch = `<feComponentTransfer><feFuncA type="linear" slope="${BLUSH_STRETCH.front}"/></feComponentTransfer>`;
   return piece(`<defs>${filter(f, box, `<feGaussianBlur stdDeviation="${sd}"/>${stretch}`)}</defs><path d="${d}" fill="${C.blush}" filter="url(#${f})"/>`, box);
 }
-/** How far each view's blush is stretched past its blurred peak (DECISIONS 144); the turned views' are typed in their own blush(). */
-const BLUSH_STRETCH = { front: 1.229 };
+/** How far each view's blush is stretched past its blurred peak (DECISIONS 160); the turned views' are typed in their own blush(). */
+const BLUSH_STRETCH = { front: 1.475 };
 
 /**
  * The tag and the ring it swings from, which the turnaround paints blue on the blue collar. The heart is painted by

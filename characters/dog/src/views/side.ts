@@ -500,10 +500,10 @@ function mouth(): Piece {
  * as the sheet's across the cheek (its pink reaches from x -68 to -53 and peaks at x -59, y -85.5 on the crop).
  */
 function blush(): Piece {
-  // Drawn at the blush's reference level, as the front's is (DECISIONS 144): the printed pink blurred, its alpha
-  // stretched past the blurred oval's peak (0.78 of its fill at 3x) so its core reaches the reference; the part's rest
-  // alpha (rig.json) sets the resting level.
-  const [cx, cy] = [-60, -84.6], rx = 7.4, ry = 3.9, sd = 2.8, stretch = 1.268;
+  // Drawn at the blush's reference level, as the front's is (DECISIONS 145, 160): the printed pink blurred, its alpha
+  // stretched past the blurred oval's peak (0.78 of its fill at 3x) so the reddest tenth of the cheek is the full pink
+  // and match.py's fit reads 1 at alpha 1; the part's rest alpha (rig.json) sets the resting level.
+  const [cx, cy] = [-60, -84.6], rx = 7.4, ry = 3.9, sd = 2.8, stretch = 1.522;
   const d = `M${r3(cx - rx)} ${cy} a${rx} ${ry} 0 1 0 ${2 * rx} 0 a${rx} ${ry} 0 1 0 ${-2 * rx} 0Z`;
   const f = uid("blush"), box = pad([cx - rx - 0.5, cy - ry - 0.6, 2 * rx + 1, 2 * ry + 1.2], 3 * sd);
   const filter = blur(f, box, sd).replace("</filter>", `<feComponentTransfer><feFuncA type="linear" slope="${stretch}"/></feComponentTransfer></filter>`);

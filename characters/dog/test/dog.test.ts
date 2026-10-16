@@ -119,7 +119,7 @@ test("each placed landmark lies on its own part, the topmost there with alpha 0.
 
 test("every view's blush is drawn at the reference level, its core the full printed pink, and rests at the resting level", () => {
   // Spec L474 and Q25: a level is the printed pink's opacity over the fur; the parts are drawn at the reference level
-  // (presets.ts BLUSH_REFERENCE, their core at full #F7B3A6), and their rest alpha sets the resting level (DECISIONS 144).
+  // (presets.ts BLUSH_REFERENCE, their core at full #F7B3A6), and their rest alpha sets the resting level (DECISIONS 145, 160).
   const drawn: [string, Piece][] = [
     ...front().filter((d) => d.part.startsWith("blush.")).map((d): [string, Piece] => [`front ${d.part}`, d.piece]),
     ...(["L", "R"] as const).flatMap((f) => [...threeQuarter(f), ...side(f)].filter((d) => d.part.startsWith("blush."))
