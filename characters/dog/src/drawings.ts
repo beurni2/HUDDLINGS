@@ -4,7 +4,7 @@
 import { readFileSync } from "node:fs";
 import type { Drawing } from "../../build/atlas.ts";
 import { toBone } from "../../draw/frame.ts";
-import type { LintRules } from "../../draw/lint.ts";
+import { decisionsOf, type LintRules } from "../../draw/lint.ts";
 import type { Rig } from "../../../runtime-web/src/format.ts";
 import { palette } from "./palette.ts";
 import { back, landmarks as backLandmarks } from "./views/back.ts";
@@ -46,6 +46,9 @@ export function landmarks(): Record<string, Record<string, [number, number]>> {
 
 export const lint: LintRules = {
   palette,
+  // The line gate composites each view in the rig's draw order, and holds every cite to a current DECISIONS entry.
+  rig,
+  decisions: decisionsOf(readFileSync(new URL("../DECISIONS.md", import.meta.url), "utf8")),
   corners: {
     collar: "the band's narrow rounded ends tuck under the cheek fur (spec L394), and from behind its near-square ends sit in the neck's fur, as the turnarounds draw them",
     tag: "the heart's point, as the sheet draws it",
