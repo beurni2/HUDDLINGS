@@ -425,7 +425,7 @@ function cheekLines(clumps: Clump[]): { spans: LitSpan[]; strokes: P[][] } {
   return { spans, strokes };
 }
 /**
- * Under a raised ear (the perked or the lifted, DECISIONS 146) the temple it uncovers carries the head's side, lined
+ * Under a raised ear (the perked or the lifted, DECISIONS 147) the temple it uncovers carries the head's side, lined
  * along its own edge, so the face's line over the ear would be a crease inside the tan: it starts lower instead, where
  * the temple's edge fades out, and runs on down the face's side to the cheek.
  */
@@ -936,7 +936,7 @@ function perkedEar(side: "L" | "R"): Piece {
   return litPart(`ear.${side}`, perked[side], paint, [side === "R" ? { from: a, to: b, on: "tan", taper: [3, 4] } : { from: b, to: a, on: "tan", taper: [4, 3] }]);
 }
 
-// The lifted ear, the listening tell, as Lifted slightly draws it (DECISIONS 145): the root raised behind the crown's
+// The lifted ear, the listening tell, as Lifted slightly draws it (DECISIONS 146): the root raised behind the crown's
 // top corner, so the flap stands out above the crown beside the topknot, and the flap tipped toward us, a broad round
 // paddle running out and down at about 45° to a full lobe level with the brows, about two thirds of the hanging
 // ear's length, its inside showing in a deeper band along its lower inner edge, where it tucks behind the head's side.
@@ -989,7 +989,7 @@ export function faceStates(): Drawn[] {
   out.push({ part: "stars", state: "sparkle", piece: stars(STARS, FRAME) });
   // Huffy's puffed cheeks, inside the head's outline (variant A).
   out.push({ part: "cheeks", state: "puffed", piece: puffedCheeks(FRAME) });
-  // The head's line with an ear raised off its temple on one side or both (DECISIONS 146).
+  // The head's line with an ear raised off its temple on one side or both (DECISIONS 147).
   out.push({ part: "head.line", state: "templeL", piece: headLinePiece({ L: true, R: false }) },
     { part: "head.line", state: "templeR", piece: headLinePiece({ L: false, R: true }) },
     { part: "head.line", state: "temples", piece: headLinePiece({ L: true, R: true }) });

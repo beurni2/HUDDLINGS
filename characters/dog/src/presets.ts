@@ -22,7 +22,7 @@ export type EarState = (typeof EAR_STATES)[number];
 /**
  * Each ear state's rest angle in degrees, outward positive (the ear's tip away from the face): relaxed and lowered
  * turned in toward the face, never so far that the ear goes behind the head (14 to 18° inward hides it). The lifted and
- * the one perked ear are drawings of their own, at 0° (DECISIONS 133, 145): Lifted slightly raises the root and tips
+ * the one perked ear are drawings of their own, at 0° (DECISIONS 133, 146): Lifted slightly raises the root and tips
  * the flap toward us, which no turn about the root gives.
  */
 export const EAR_ANGLES: Record<EarState, number> = { neutral: 0, lifted: 0, onePerked: 0, relaxed: -3, lowered: -7 };
@@ -90,7 +90,7 @@ export const PRESETS: Record<string, Preset> = {
   },
   excited: {
     // The dog's squeeze is its happy crescent (Q2).
-    // The table's open mouth, drawn as the Excited panels draw it: wider and deeper than the rest's (DECISIONS 143).
+    // The table's open mouth, drawn as the Excited panels draw it: wider and deeper than the rest's (DECISIONS 144).
     eyes: ["squeeze", "happy"], eyesHow: "or", eyesNote: "squeeze (kitty, bear) or happy", mouth: ["openWide"], mouthNote: "the table's open, as Excited draws it",
     ears: "lifted", brows: "happy", blush: null,
     panels: "Excited", crops: ["master.expression.excited", "expressions.expression.excited"], still: { eyes: "happy" },
@@ -118,7 +118,7 @@ export const PRESETS: Record<string, Preset> = {
     panels: "Proud", crops: ["master.expression.content", "expressions.expression.proud"], still: { eyes: "sparkle" },
   },
   mischievous: {
-    // The dog's left eye winks, as Cheeky, the primary, draws it (DECISIONS 111, 141); its brows stay level, as Cheeky's do.
+    // The dog's left eye winks, as Cheeky, the primary, draws it (DECISIONS 111, 142); its brows stay level, as Cheeky's do.
     eyes: ["wink"], mouth: ["cheeky"], ears: "onePerked", brows: "neutral", blush: null,
     panels: "Mischievous", crops: ["master.expression.cheeky", "master.expression.winking", "expressions.expression.mischievous"], wink: "L", perk: "L",
   },

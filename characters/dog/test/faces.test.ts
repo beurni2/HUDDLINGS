@@ -36,7 +36,7 @@ const SORROW = /sad|angry|anger|pout|tear|cry|droop|frown|sorrow|sulk|grief/i;
 /**
  * The face states each face part may take: the spec's eye, mouth, brow and ear states (L450-472) and the new faces'
  * (presets.ts, parts/mouth.ts), the sparkle's stars, huffy's puffed cheeks, and the head's line beside a raised ear
- * (DECISIONS 146).
+ * (DECISIONS 147).
  */
 const ALLOWED: Record<string, readonly string[]> = {
   "eye.L": EYE_STATES, "eye.R": EYE_STATES, mouth: MOUTH_STATES, "brow.L": BROW_STATES, "brow.R": BROW_STATES,
@@ -369,7 +369,7 @@ test("every brow is an arc that bows up, its inner end at or above its outer and
 test("no face clip turns an ear in past the lowered state or out past the lifted one, and only sleepy lowers and only the lifted faces lift", () => {
   // The risk designer's measure: ears turned 14 to 18° in disappear behind the head; the bones' limits keep the spec's 14° either way.
   assert.ok(LOWERED > RELAXED && LOWERED < 14, `lowered is ${LOWERED}° in`);
-  // The lifted ear is a drawing of its own at 0° (DECISIONS 145), so no face turns an ear out at all; the guard still
+  // The lifted ear is a drawing of its own at 0° (DECISIONS 146), so no face turns an ear out at all; the guard still
   // bounds any outward turn by the lifted state's angle.
   assert.ok(LIFTED >= 0 && LIFTED <= 14, `lifted is ${LIFTED}° out`);
   for (const ear of ["ear.L", "ear.R"]) assert.deepEqual(rig.bones.find((b) => b.name === ear)!.rot, [-14, 14], `${ear}'s limits`);
@@ -418,7 +418,7 @@ test("the face clips are what presets.ts writes: one per preset, sound, at the f
     } else assert.ok(p.crops.length > 0, `${name} has a primary panel`);
     for (const ear of ["L", "R"] as const) assert.equal(earRot(ear, s.ears[ear]), (ear === "R" ? 1 : -1) * EAR_ANGLES[s.ears[ear]] + 0);
     // The blush at the preset's level: both cheeks' alpha the level over the reference level they are drawn at
-    // (DECISIONS 144); a preset that names none keys none, so the rest alpha keeps the resting level.
+    // (DECISIONS 145, 160); a preset that names none keys none, so the rest alpha keeps the resting level.
     const clip = written.find((c) => c.name === `face_${name}`)!;
     if (p.blush === null) assert.equal(clip.alpha, undefined, `${name} keys no blush`);
     else {

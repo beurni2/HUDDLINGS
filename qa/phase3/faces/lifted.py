@@ -1,4 +1,4 @@
-"""The lifted ears beside their panels (DECISIONS 145): Neutral (default) and Lifted slightly, each laid on the render
+"""The lifted ears beside their panels (DECISIONS 146): Neutral (default) and Lifted slightly, each laid on the render
 by the head, since the ears hang from it: at Lifted slightly's own record's scale (its head 90 crop px wide, 1.04 pt a
 pixel; the two panels sit side by side on the expression sheet, drawn at one size) and pinned at the head's top, the
 tuft's highest point, on the render's (model.json's head.top); then for each the panel, the panel and the render half
