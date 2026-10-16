@@ -155,7 +155,7 @@ test("every face state is on the allowlist, and no state, part or preset is name
     for (const [key, region] of Object.entries(part.regions)) {
       assert.ok(!SORROW.test(key) && !SORROW.test(region ?? ""), `${part.name} ${key}`);
       const state = key.split(":")[1];
-      // The turned views keep their rest mouths (the side's smile); every state is the part's allowed one.
+      // The turned views keep their rest mouths (the side's smile, its fallback too); every state is the part's allowed one.
       if (state && ALLOWED[part.name]) assert.ok(ALLOWED[part.name]!.includes(state), `${part.name} has a region for ${state}, not an allowed state`);
     }
   }
@@ -288,6 +288,25 @@ test("the face clips are what presets.ts writes: one per preset drawn now, sound
     assert.ok(p.crops.length > 0, `${name} has a primary panel`);
     for (const ear of ["L", "R"] as const) assert.equal(earRot(ear, s.ears[ear]), (ear === "R" ? 1 : -1) * EAR_ANGLES[s.ears[ear]] + 0);
   }
+});
+
+test("every face state draws a region, or a deliberate null, in every view that draws its part", () => {
+  // The face clips key only the front, but phase 4 lays head turns over a face, so a state must never fall through to
+  // nothing in a turned view: there it draws the view's rest drawing (the turned views' own states are next round's).
+  // Of "view:state", "view" and "view:defaultState", the first key present decides (regionFor); none present is the fault.
+  const deciding = (part: Rig["parts"][number], view: string, state: string) =>
+    [`${view}:${state}`, view, `${view}:${part.defaultState ?? "open"}`].find((key) => Object.hasOwn(part.regions, key));
+  for (const [name, states] of Object.entries(ALLOWED)) {
+    const part = rig.parts.find((p) => p.name === name)!;
+    for (const view of rig.views.filter((v) => Object.keys(part.regions).some((k) => k.split(":")[0] === v))) {
+      for (const state of states) assert.ok(deciding(part, view, state), `${name} in ${view} draws nothing for ${state}`);
+    }
+  }
+  // Planted: the side's mouth with only its smile, as it was, draws nothing for the open mouth in a turned head.
+  const mouthPart = rig.parts.find((p) => p.name === "mouth")!;
+  const smileOnly = { ...mouthPart, regions: Object.fromEntries(Object.entries(mouthPart.regions).filter(([k]) => k !== "side.L")) };
+  assert.equal(deciding(smileOnly, "side.L", "open"), undefined);
+  assert.equal(regionFor(mouthPart, "side.L", "laugh"), "mouth/side.L:smile");
 });
 
 test("the stars draw only beside the sparkle eyes, and every eye state draws its own drawing", () => {
