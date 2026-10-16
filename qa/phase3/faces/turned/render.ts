@@ -5,8 +5,8 @@
 // turned views' stars and the profile's mouths, which the package holds out for now (DECISIONS 183), and these
 // clips. Also the ID-pass check of
 // "nothing of the open eye under a closed one": every closed eye state (happy, squeeze, sparkle, closed, wink), in every
-// view that draws an eye, has the eye's ID footprint of its own band, never the open eye's, and each turned view's
-// sleepy half-lid has the open eye's footprint below its lid only (ids.json).
+// view that draws an eye, has the eye's ID footprint of its own band, never the open eye's, and under each view's
+// sleepy half-lid nothing dark of the open eye shows over the eye's top (ids.json).
 //
 // node qa/phase3/faces/turned/render.ts <out folder> [--cache <raster cache>]
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
@@ -14,7 +14,8 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import { PNG } from "pngjs";
-import type { Clip } from "../../../../runtime-web/src/format.ts";
+import type { Clip, Rig } from "../../../../runtime-web/src/format.ts";
+import { regionFor } from "../../../../runtime-web/src/rig.ts";
 import { openStills } from "../../../../runtime-web/lab/still.ts";
 import { buildPackage, readSource, writePackage } from "../../../../characters/build/build.ts";
 import { toBone } from "../../../../characters/draw/frame.ts";
@@ -28,23 +29,31 @@ const { values: args, positionals } = parseArgs({ allowPositionals: true, option
 const out = resolve(positionals[0] ?? join(repo, "build/dev/turnedfaces"));
 const VIEWS = ["threeQuarter.L", "threeQuarter.R", "side.L", "side.R"] as const;
 type View = (typeof VIEWS)[number] | "front";
-const rig = JSON.parse(readFileSync(join(repo, "characters/dog/src/rig.json"), "utf8")) as { drawOrder: Record<string, string[]> };
+/** The package's own rig, before the review build adds the held states to its copy. */
+const rig = JSON.parse(readFileSync(join(repo, "characters/dog/src/rig.json"), "utf8")) as Rig;
 const restStill = (view: string) => JSON.parse(readFileSync(join(repo, `characters/dog/src/clips/still_${view}.json`), "utf8")) as { states?: Record<string, [number, string][]> };
 
-/** A cell: its label, the states it keys and the ears' turns, in one view. */
+/**
+ * A cell: its label, the states it keys and the ears' turns, in one view; and what it shows that the package on this
+ * branch does not play (`review`): a state held out of the package (DECISIONS 183), or the head's line beside a perked
+ * ear, which only p3/faces2's face clips key (176).
+ */
 interface Cell {
   label: string;
   group: "state" | "preset";
   states: Record<string, string>;
   ears?: { L: EarState; R: EarState };
+  review?: ("held" | "temple")[];
 }
 
 /**
- * The head's line beside a raised ear, as the front lane's face clips key it (head.line's templeL, templeR, temples):
- * here for the perked ear, the one raised ear a turned view draws as its own drawing.
+ * The head's line beside a raised ear, as p3/faces2's face clips key it (its faceClips.ts and DECISIONS 146): an ear
+ * raised off its temple, perked or lifted, leaves the line to the temple's edge on its side (templeL, templeR, temples).
+ * This branch's face clips key no head.line state, so the package here draws the rest line beside every ear.
  */
 const temple = (ears: { L: string; R: string }): Record<string, string> => {
-  const [l, r] = [ears.L === "onePerked", ears.R === "onePerked"];
+  const up = (e: string) => e === "onePerked" || e === "lifted";
+  const [l, r] = [up(ears.L), up(ears.R)];
   return l || r ? { "head.line": l && r ? "temples" : l ? "templeL" : "templeR" } : {};
 };
 
@@ -126,6 +135,18 @@ for (const view of ID_VIEWS) {
     idClips.push({ view, state, clip: name });
   }
 }
+// Each cell's states the package does not play: a region the review build adds, or the temple line beside a perked ear.
+for (const { view, cells: cs } of plan) {
+  for (const c of cs) {
+    const review = new Set<"held" | "temple">();
+    for (const [name, state] of Object.entries(c.states)) {
+      const own = regionFor(rig.parts.find((q) => q.name === name)!, view, state), built = regionFor(part(name), view, state);
+      if (own !== built) review.add("held");
+      else if (name === "head.line" && built !== `head.line/${view}`) review.add("temple");
+    }
+    if (review.size) c.review = [...review];
+  }
+}
 writePackage(await buildPackage(source, { cache: resolve(args.cache ?? join(repo, "build/cache")) }), pkg);
 
 const stills = await openStills(pkg);
@@ -174,19 +195,21 @@ for (const view of ID_VIEWS) {
       const pass = area > 0 && area <= 0.6 * openArea && dark === 0;
       results.push({ view, eye, state, area, openArea, share: Math.round((area / openArea) * 1000) / 1000, darkOutsideBand: dark, pass });
     }
-    // A turned view's half-lid shows the open eye below its lid only (parts/turned.ts's halfLid): its footprint's top
-    // stands at least a quarter of the open eye's height below the open eye's top, and it covers less than the open
-    // eye. (The front's paints its lid over the eye within the eye's own part, so its footprint is the open eye's.)
-    if (view === "front") continue;
+    // A half-lid closes the open eye over its top: the lid's pale fur and its lash lie over the ball's upper part, so
+    // nothing dark of the open eye (its rim, its iris) shows in the top fifth of the open eye's footprint, which the
+    // lid covers in every view (about two fifths at its middle, a third at its ends). The lid is drawn in the eye's own
+    // part, so the footprint itself is the ball's, as the front's always was.
     const sleepy = footprint(`ids_${slug(view)}_sleepy`, eye);
     const rows = (m: Uint8Array, w: number) => {
       const ys: number[] = [];
       for (let p = 0; p < m.length; p++) if (m[p]) ys.push(Math.floor(p / w));
       return [Math.min(...ys), Math.max(...ys)] as const;
     };
-    const [openTop, openFoot] = rows(open.mask, open.w), [lidTop] = rows(sleepy.mask, sleepy.w);
-    const area = sleepy.mask.reduce((a, b) => a + b, 0), drop = (lidTop - openTop) / (openFoot - openTop + 1);
-    results.push({ view, eye, state: "sleepy", area, openArea, share: Math.round((area / openArea) * 1000) / 1000, lidDrop: Math.round(drop * 1000) / 1000, pass: area < openArea && drop >= 0.25 });
+    const [openTop, openFoot] = rows(open.mask, open.w), topRows = openTop + 0.2 * (openFoot - openTop + 1);
+    let dark = 0;
+    for (let p = 0; p < open.mask.length; p++) if (open.mask[p] && Math.floor(p / open.w) < topRows && lum(sleepy.white.data, p * 4) < 66) dark++;
+    const area = sleepy.mask.reduce((a, b) => a + b, 0);
+    results.push({ view, eye, state: "sleepy", area, openArea, share: Math.round((area / openArea) * 1000) / 1000, darkUnderLid: dark, pass: area > 0 && dark === 0 });
   }
 }
 writeFileSync(join(out, "ids.json"), JSON.stringify(results, null, 1));

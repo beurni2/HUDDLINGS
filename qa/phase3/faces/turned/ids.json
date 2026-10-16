@@ -51,6 +51,16 @@
  },
  {
   "view": "front",
+  "eye": "eye.L",
+  "state": "sleepy",
+  "area": 3185,
+  "openArea": 2662,
+  "share": 1.196,
+  "darkUnderLid": 0,
+  "pass": true
+ },
+ {
+  "view": "front",
   "eye": "eye.R",
   "state": "happy",
   "area": 484,
@@ -97,6 +107,16 @@
   "openArea": 2661,
   "share": 0.181,
   "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "front",
+  "eye": "eye.R",
+  "state": "sleepy",
+  "area": 3183,
+  "openArea": 2661,
+  "share": 1.196,
+  "darkUnderLid": 0,
   "pass": true
  },
  {
@@ -153,19 +173,19 @@
   "view": "threeQuarter.L",
   "eye": "eye.L",
   "state": "sleepy",
-  "area": 1789,
+  "area": 2462,
   "openArea": 2769,
-  "share": 0.646,
-  "lidDrop": 0.3,
+  "share": 0.889,
+  "darkUnderLid": 0,
   "pass": true
  },
  {
   "view": "threeQuarter.L",
   "eye": "eye.R",
   "state": "happy",
-  "area": 320,
+  "area": 321,
   "openArea": 1747,
-  "share": 0.183,
+  "share": 0.184,
   "darkOutsideBand": 0,
   "pass": true
  },
@@ -173,9 +193,9 @@
   "view": "threeQuarter.L",
   "eye": "eye.R",
   "state": "squeeze",
-  "area": 320,
+  "area": 321,
   "openArea": 1747,
-  "share": 0.183,
+  "share": 0.184,
   "darkOutsideBand": 0,
   "pass": true
  },
@@ -183,9 +203,9 @@
   "view": "threeQuarter.L",
   "eye": "eye.R",
   "state": "sparkle",
-  "area": 320,
+  "area": 321,
   "openArea": 1747,
-  "share": 0.183,
+  "share": 0.184,
   "darkOutsideBand": 0,
   "pass": true
  },
@@ -193,9 +213,9 @@
   "view": "threeQuarter.L",
   "eye": "eye.R",
   "state": "closed",
-  "area": 263,
+  "area": 262,
   "openArea": 1747,
-  "share": 0.151,
+  "share": 0.15,
   "darkOutsideBand": 0,
   "pass": true
  },
@@ -203,9 +223,9 @@
   "view": "threeQuarter.L",
   "eye": "eye.R",
   "state": "wink",
-  "area": 316,
+  "area": 313,
   "openArea": 1747,
-  "share": 0.181,
+  "share": 0.179,
   "darkOutsideBand": 0,
   "pass": true
  },
@@ -213,10 +233,10 @@
   "view": "threeQuarter.L",
   "eye": "eye.R",
   "state": "sleepy",
-  "area": 1158,
+  "area": 1543,
   "openArea": 1747,
-  "share": 0.663,
-  "lidDrop": 0.283,
+  "share": 0.883,
+  "darkUnderLid": 0,
   "pass": true
  },
  {
@@ -253,7 +273,7 @@
   "view": "threeQuarter.R",
   "eye": "eye.L",
   "state": "closed",
-  "area": 263,
+  "area": 262,
   "openArea": 1748,
   "share": 0.15,
   "darkOutsideBand": 0,
@@ -263,9 +283,9 @@
   "view": "threeQuarter.R",
   "eye": "eye.L",
   "state": "wink",
-  "area": 316,
+  "area": 313,
   "openArea": 1748,
-  "share": 0.181,
+  "share": 0.179,
   "darkOutsideBand": 0,
   "pass": true
  },
@@ -273,10 +293,10 @@
   "view": "threeQuarter.R",
   "eye": "eye.L",
   "state": "sleepy",
-  "area": 1159,
+  "area": 1545,
   "openArea": 1748,
-  "share": 0.663,
-  "lidDrop": 0.283,
+  "share": 0.884,
+  "darkUnderLid": 0,
   "pass": true
  },
  {
@@ -333,10 +353,10 @@
   "view": "threeQuarter.R",
   "eye": "eye.R",
   "state": "sleepy",
-  "area": 1790,
+  "area": 2465,
   "openArea": 2770,
-  "share": 0.646,
-  "lidDrop": 0.3,
+  "share": 0.89,
+  "darkUnderLid": 0,
   "pass": true
  },
  {
@@ -393,10 +413,10 @@
   "view": "side.L",
   "eye": "eye.L",
   "state": "sleepy",
-  "area": 1645,
+  "area": 2176,
   "openArea": 2510,
-  "share": 0.655,
-  "lidDrop": 0.369,
+  "share": 0.867,
+  "darkUnderLid": 0,
   "pass": true
  },
  {
@@ -453,10 +473,10 @@
   "view": "side.R",
   "eye": "eye.R",
   "state": "sleepy",
-  "area": 1644,
+  "area": 2176,
   "openArea": 2509,
-  "share": 0.655,
-  "lidDrop": 0.369,
+  "share": 0.867,
+  "darkUnderLid": 0,
   "pass": true
  }
 ]

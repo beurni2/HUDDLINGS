@@ -22,12 +22,21 @@ CROPS = {
     "movement.walk": (90, 0, 175, 90),
     "movement.run": (100, 0, 200, 80),
     "movement.jump": (80, 0, 166, 90),
+    "movement.happy-bounce": (10, 2, 145, 85),
 }
 BESIDE = {
-    "threeQuarter": {"eyes happy (squeeze, Q2)": "movement.soft-landing", "mouth smile": "movement.curious-lean", "content": "movement.soft-landing",
-                     "curious": "movement.curious-lean"},
+    "threeQuarter": {"eyes happy (squeeze, Q2)": "movement.soft-landing", "mouth smile": "movement.curious-lean", "mouth laugh": "movement.happy-bounce",
+                     "content": "movement.soft-landing", "curious": "movement.curious-lean", "laughing": "movement.happy-bounce"},
     "side": {"rest": "movement.walk", "mouth open": "movement.jump", "happy": "movement.jump", "neutral": "movement.run"},
 }
+
+
+# What a cell shows that the package on this branch does not play (render.ts's `review`), and its footnote.
+MARKS = {"held": "*", "temple": "**"}
+NOTES = [
+    "* review build: a state held out of the package for now (the turned stars, the profile's mouths; DECISIONS 183)",
+    "** the three-quarter's line beside its near ear perked: keyed only by p3/faces2's face clips; here the package draws the rest line (176)",
+]
 
 
 def font(size):
@@ -69,18 +78,18 @@ def sheet(view, cells, out_dir, qa):
     cell_h = round(CELL_W * (y1 - y0) / (x1 - x0))
     tiles = []
     for c in cells:
-        tiles.append((c["label"], head(os.path.join(out_dir, "stills", c["clip"]), view).resize((CELL_W, cell_h), Image.LANCZOS), c["group"]))
+        marks = "".join(MARKS[r] for r in c.get("review", []))
+        tiles.append((c["label"] + (f" {marks}" if marks else ""), head(os.path.join(out_dir, "stills", c["clip"]), view).resize((CELL_W, cell_h), Image.LANCZOS), c["group"]))
         crop = BESIDE[kind].get(c["label"])
         if crop:
-            tiles.append((f"motion sheet: {crop.split('.')[1]}{' (mirrored)' if facing == 'L' else ''}", motion(crop, facing == "L", (CELL_W, cell_h)), c["group"] + "-ref"))
+            tiles.append((f"sheet: {crop.split('.')[1]}{' (mirrored)' if facing == 'L' else ''}", motion(crop, facing == "L", (CELL_W, cell_h)), c["group"] + "-ref"))
     big, small = font(26), font(15)
     sections = [("Every face state", [t for t in tiles if t[2].startswith("state")]), ("The 17 presets' stills", [t for t in tiles if t[2].startswith("preset")])]
     W = COLS * (CELL_W + PAD) + PAD
-    H = 50 + sum(36 + -(-len(ts) // COLS) * (cell_h + LABEL_H + PAD) for _, ts in sections) + 30
+    H = 50 + sum(36 + -(-len(ts) // COLS) * (cell_h + LABEL_H + PAD) for _, ts in sections) + 30 + 20 * len(NOTES)
     page = Image.new("RGB", (W, H), "white")
     d = ImageDraw.Draw(page)
-    held = "stars and profile mouths" if kind == "side" else "stars"
-    d.text((PAD, 10), f"{view}: face states at 3x, WebGL (review build: {held} held from the package)", fill=(40, 30, 20), font=font(22))
+    d.text((PAD, 10), f"{view}: face states at 3x, WebGL (review build, cells marked * and ** below)", fill=(40, 30, 20), font=font(22))
     y = 50
     for title, ts in sections:
         d.text((PAD, y + 6), title, fill=(90, 60, 40), font=font(20))
@@ -93,6 +102,8 @@ def sheet(view, cells, out_dir, qa):
             d.rectangle((x, yy, x + CELL_W - 1, yy + cell_h - 1), outline=(150, 170, 210) if ref else (225, 215, 205))
             d.text((x + 4, yy + cell_h + 3), label, fill=(60, 90, 150) if ref else (40, 30, 20), font=small)
         y += -(-len(ts) // COLS) * (cell_h + LABEL_H + PAD)
+    for k, note in enumerate(NOTES):
+        d.text((PAD, H - 24 - 20 * (len(NOTES) - k)), note, fill=(110, 90, 70), font=small)
     d.text((PAD, H - 24), "python3 qa/phase3/faces/turned/sheet.py, from node qa/phase3/faces/turned/render.ts", fill=(140, 130, 120), font=small)
     page.save(os.path.join(qa, f"{view}.png"), optimize=True)
 
