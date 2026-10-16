@@ -21,7 +21,7 @@ import type { Clip } from "../src/format.ts";
 import { compile, drawList, evaluatePose, type DrawItem } from "../src/rig.ts";
 import { MASK_ALPHA } from "../src/renderer.ts";
 import { hex, idColour, inPart, largestAlpha, MASK_ONLY, recolour } from "../lab/ids.ts";
-import { faceClips, failures, lookFaces, matchVerdict } from "../lab/look.ts";
+import { faceClips, failures, linesLine, lookFaces, matchVerdict } from "../lab/look.ts";
 import { MARGIN, openStills, type StillInfo, type Stills } from "../lab/still.ts";
 
 const PPP = 3;
@@ -478,6 +478,24 @@ test("the look loop reads a crash of the sheet match as a crash, never as the la
   assert.deepEqual(failed, { verdict: "fail", text: "FAIL blush.cheeks.L" });
   assert.deepEqual(await matchVerdict(process.execPath, matcher(0, { pass: true }), out), { verdict: "pass", text: "pass" });
   assert.deepEqual(failures({ a: { pass: false }, b: [{ name: "x", pass: false }], c: { gating: false, pass: false } }), ["a", "b.x"]);
+});
+
+test("the look loop's line check prints its own summary, marked advisory, and a crash as a crash, never a stale lines.json", async () => {
+  const out = join(dir, "look-lines");
+  mkdirSync(out, { recursive: true });
+  const json = join(out, "lines.json");
+  const stale = JSON.stringify({ summary: "lines pass (60 regions)", pass: true });
+  // A stand-in for linematch.py: writes what it is given into lines.json, if anything, and exits with a code.
+  const checker = (code: number, written?: unknown) =>
+    ["-e", `${written === undefined ? "" : `require("fs").writeFileSync(${JSON.stringify(json)}, ${JSON.stringify(JSON.stringify(written))});`} console.error("said"); process.exit(${code});`];
+  const failing = "lines FAIL 2 of 60 regions: ear.R|head.base, collar|head.base; worst ear.R|head.base gapPt 7.46 (threshold 1.5)";
+  assert.match(await linesLine(process.execPath, checker(1, { summary: failing, pass: false }), out), new RegExp(`^${failing.replace(/[|()]/g, "\\$&")} \\(advisory\\) · \\d+\\.\\d s$`));
+  assert.match(await linesLine(process.execPath, checker(0, { summary: "lines pass (60 regions)", pass: true }), out), /^lines pass \(60 regions\) \(advisory\)/);
+  writeFileSync(json, stale);
+  assert.match(await linesLine(process.execPath, checker(2), out), /^lines ERROR the line check crashed \(exit 2\): said \(advisory\)/);
+  assert.ok(!existsSync(json), "the old lines.json is deleted before the check runs");
+  writeFileSync(json, stale);
+  assert.match(await linesLine(process.execPath, checker(1), out), /^lines ERROR the line check crashed \(exit 1\)/, "a 1 with no lines.json of its own is no verdict");
 });
 
 test("the look loop's faces mode checks every face clip against the rest front, and passes a package with none", async () => {

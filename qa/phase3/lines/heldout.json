@@ -1,0 +1,1312 @@
+{
+ "note": "lineheld.py: the sheet's own still against held-out perturbed copies, judged by the committed calibration",
+ "calibration": "characters/sheetmatch/lines/dog.json",
+ "draws": 24,
+ "seed": 2,
+ "runs": 258,
+ "failing": 0,
+ "views": {
+  "front": [
+   {
+    "perturbation": "move -0.48,-0.4 px x1.0126 -0.82 deg",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.62,-0.89 px x0.991 0.31 deg + jpeg 89",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.34,-0.15 px x1.0053 0.93 deg + jpeg 81",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.63,-0.31 px x1.0004 0.78 deg + jpeg 93",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.06,0.39 px x0.9843 -0.79 deg + blur 0.45 px",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.7,0.29 px x0.9963 0.03 deg",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.12,0.78 px x1.0045 0.66 deg",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.32,0.05 px x0.9886 -0.8 deg + blur 0.37 px + jpeg 94",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.8,0.67 px x0.9954 0.95 deg",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.19,-0.61 px x0.9869 -0.64 deg + jpeg 72",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.67,-0.8 px x0.998 -0.02 deg",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.87,0.5 px x1.003 0.23 deg",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.55,0.38 px x1.0022 -0.92 deg + blur 0.47 px",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.97,-0.41 px x0.9804 0.65 deg + blur 0.08 px",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.11,-0.36 px x0.982 -0.22 deg + down-up 2x",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.99,-0.7 px x0.9884 -0.12 deg + down-up 2x",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.43,0.82 px x1.0185 -0.88 deg + blur 0.3 px",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.87,-0.63 px x0.9983 0.34 deg",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.59,-0.89 px x1.0191 0.23 deg + blur 0.16 px",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.23,-0.11 px x1.0122 0.65 deg",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.19,0.95 px x1.0042 0.94 deg + blur 0.45 px",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.43,-0.61 px x1.0019 -0.42 deg + blur 0.05 px",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.34,-0.59 px x0.9903 -0.07 deg + jpeg 70",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.94,0.89 px x0.9898 0.28 deg + down-up 2x",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 1,0 px x1 0 deg + jpeg 70",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -1,0 px x1 0 deg + jpeg 70",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,1 px x1 0 deg + jpeg 70",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,-1 px x1 0 deg + jpeg 70",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1.02 0 deg + jpeg 70",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x0.98 0 deg + jpeg 70",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1 1 deg + jpeg 70",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1 -1 deg + jpeg 70",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "down-up 2x + jpeg 70",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "blur 0.5 px + jpeg 70",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1.015 0 deg",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x0.985 0 deg",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1 0.75 deg",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1 -0.25 deg",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "jpeg 75",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "jpeg 85",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "blur 0.4 px",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.33,0.67 px x1 0 deg",
+    "regions": 69,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.67,0 px x1 0 deg",
+    "regions": 69,
+    "failed": {}
+   }
+  ],
+  "threeQuarter.L": [
+   {
+    "perturbation": "move -0.48,-0.4 px x1.0126 -0.82 deg",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.62,-0.89 px x0.991 0.31 deg + jpeg 89",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.34,-0.15 px x1.0053 0.93 deg + jpeg 81",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.63,-0.31 px x1.0004 0.78 deg + jpeg 93",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.06,0.39 px x0.9843 -0.79 deg + blur 0.45 px",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.7,0.29 px x0.9963 0.03 deg",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.12,0.78 px x1.0045 0.66 deg",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.32,0.05 px x0.9886 -0.8 deg + blur 0.37 px + jpeg 94",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.8,0.67 px x0.9954 0.95 deg",
+    "regions": 67,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.19,-0.61 px x0.9869 -0.64 deg + jpeg 72",
+    "regions": 67,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.67,-0.8 px x0.998 -0.02 deg",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.87,0.5 px x1.003 0.23 deg",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.55,0.38 px x1.0022 -0.92 deg + blur 0.47 px",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.97,-0.41 px x0.9804 0.65 deg + blur 0.08 px",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.11,-0.36 px x0.982 -0.22 deg + down-up 2x",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.99,-0.7 px x0.9884 -0.12 deg + down-up 2x",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.43,0.82 px x1.0185 -0.88 deg + blur 0.3 px",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.87,-0.63 px x0.9983 0.34 deg",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.59,-0.89 px x1.0191 0.23 deg + blur 0.16 px",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.23,-0.11 px x1.0122 0.65 deg",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.19,0.95 px x1.0042 0.94 deg + blur 0.45 px",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.43,-0.61 px x1.0019 -0.42 deg + blur 0.05 px",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.34,-0.59 px x0.9903 -0.07 deg + jpeg 70",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.94,0.89 px x0.9898 0.28 deg + down-up 2x",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 1,0 px x1 0 deg + jpeg 70",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -1,0 px x1 0 deg + jpeg 70",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,1 px x1 0 deg + jpeg 70",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,-1 px x1 0 deg + jpeg 70",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1.02 0 deg + jpeg 70",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x0.98 0 deg + jpeg 70",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1 1 deg + jpeg 70",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1 -1 deg + jpeg 70",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "down-up 2x + jpeg 70",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "blur 0.5 px + jpeg 70",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1.015 0 deg",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x0.985 0 deg",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1 0.75 deg",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1 -0.25 deg",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "jpeg 75",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "jpeg 85",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "blur 0.4 px",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.33,0.67 px x1 0 deg",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.67,0 px x1 0 deg",
+    "regions": 65,
+    "failed": {}
+   }
+  ],
+  "side.L": [
+   {
+    "perturbation": "move -0.48,-0.4 px x1.0126 -0.82 deg",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.62,-0.89 px x0.991 0.31 deg + jpeg 89",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.34,-0.15 px x1.0053 0.93 deg + jpeg 81",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.63,-0.31 px x1.0004 0.78 deg + jpeg 93",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.06,0.39 px x0.9843 -0.79 deg + blur 0.45 px",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.7,0.29 px x0.9963 0.03 deg",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.12,0.78 px x1.0045 0.66 deg",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.32,0.05 px x0.9886 -0.8 deg + blur 0.37 px + jpeg 94",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.8,0.67 px x0.9954 0.95 deg",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.19,-0.61 px x0.9869 -0.64 deg + jpeg 72",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.67,-0.8 px x0.998 -0.02 deg",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.87,0.5 px x1.003 0.23 deg",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.55,0.38 px x1.0022 -0.92 deg + blur 0.47 px",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.97,-0.41 px x0.9804 0.65 deg + blur 0.08 px",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.11,-0.36 px x0.982 -0.22 deg + down-up 2x",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.99,-0.7 px x0.9884 -0.12 deg + down-up 2x",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.43,0.82 px x1.0185 -0.88 deg + blur 0.3 px",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.87,-0.63 px x0.9983 0.34 deg",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.59,-0.89 px x1.0191 0.23 deg + blur 0.16 px",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.23,-0.11 px x1.0122 0.65 deg",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.19,0.95 px x1.0042 0.94 deg + blur 0.45 px",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.43,-0.61 px x1.0019 -0.42 deg + blur 0.05 px",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.34,-0.59 px x0.9903 -0.07 deg + jpeg 70",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.94,0.89 px x0.9898 0.28 deg + down-up 2x",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 1,0 px x1 0 deg + jpeg 70",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -1,0 px x1 0 deg + jpeg 70",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,1 px x1 0 deg + jpeg 70",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,-1 px x1 0 deg + jpeg 70",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1.02 0 deg + jpeg 70",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x0.98 0 deg + jpeg 70",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1 1 deg + jpeg 70",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1 -1 deg + jpeg 70",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "down-up 2x + jpeg 70",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "blur 0.5 px + jpeg 70",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1.015 0 deg",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x0.985 0 deg",
+    "regions": 62,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1 0.75 deg",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1 -0.25 deg",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "jpeg 75",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "jpeg 85",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "blur 0.4 px",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.33,0.67 px x1 0 deg",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.67,0 px x1 0 deg",
+    "regions": 64,
+    "failed": {}
+   }
+  ],
+  "back": [
+   {
+    "perturbation": "move -0.48,-0.4 px x1.0126 -0.82 deg",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.62,-0.89 px x0.991 0.31 deg + jpeg 89",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.34,-0.15 px x1.0053 0.93 deg + jpeg 81",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.63,-0.31 px x1.0004 0.78 deg + jpeg 93",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.06,0.39 px x0.9843 -0.79 deg + blur 0.45 px",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.7,0.29 px x0.9963 0.03 deg",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.12,0.78 px x1.0045 0.66 deg",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.32,0.05 px x0.9886 -0.8 deg + blur 0.37 px + jpeg 94",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.8,0.67 px x0.9954 0.95 deg",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.19,-0.61 px x0.9869 -0.64 deg + jpeg 72",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.67,-0.8 px x0.998 -0.02 deg",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.87,0.5 px x1.003 0.23 deg",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.55,0.38 px x1.0022 -0.92 deg + blur 0.47 px",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.97,-0.41 px x0.9804 0.65 deg + blur 0.08 px",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.11,-0.36 px x0.982 -0.22 deg + down-up 2x",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.99,-0.7 px x0.9884 -0.12 deg + down-up 2x",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.43,0.82 px x1.0185 -0.88 deg + blur 0.3 px",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.87,-0.63 px x0.9983 0.34 deg",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.59,-0.89 px x1.0191 0.23 deg + blur 0.16 px",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.23,-0.11 px x1.0122 0.65 deg",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.19,0.95 px x1.0042 0.94 deg + blur 0.45 px",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.43,-0.61 px x1.0019 -0.42 deg + blur 0.05 px",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.34,-0.59 px x0.9903 -0.07 deg + jpeg 70",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.94,0.89 px x0.9898 0.28 deg + down-up 2x",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 1,0 px x1 0 deg + jpeg 70",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -1,0 px x1 0 deg + jpeg 70",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,1 px x1 0 deg + jpeg 70",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,-1 px x1 0 deg + jpeg 70",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1.02 0 deg + jpeg 70",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x0.98 0 deg + jpeg 70",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1 1 deg + jpeg 70",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1 -1 deg + jpeg 70",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "down-up 2x + jpeg 70",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "blur 0.5 px + jpeg 70",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1.015 0 deg",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x0.985 0 deg",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1 0.75 deg",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1 -0.25 deg",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "jpeg 75",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "jpeg 85",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "blur 0.4 px",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.33,0.67 px x1 0 deg",
+    "regions": 47,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.67,0 px x1 0 deg",
+    "regions": 47,
+    "failed": {}
+   }
+  ],
+  "threeQuarter.R": [
+   {
+    "perturbation": "move -0.48,-0.4 px x1.0126 -0.82 deg",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.62,-0.89 px x0.991 0.31 deg + jpeg 89",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.34,-0.15 px x1.0053 0.93 deg + jpeg 81",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.63,-0.31 px x1.0004 0.78 deg + jpeg 93",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.06,0.39 px x0.9843 -0.79 deg + blur 0.45 px",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.7,0.29 px x0.9963 0.03 deg",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.12,0.78 px x1.0045 0.66 deg",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.32,0.05 px x0.9886 -0.8 deg + blur 0.37 px + jpeg 94",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.8,0.67 px x0.9954 0.95 deg",
+    "regions": 67,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.19,-0.61 px x0.9869 -0.64 deg + jpeg 72",
+    "regions": 67,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.67,-0.8 px x0.998 -0.02 deg",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.87,0.5 px x1.003 0.23 deg",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.55,0.38 px x1.0022 -0.92 deg + blur 0.47 px",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.97,-0.41 px x0.9804 0.65 deg + blur 0.08 px",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.11,-0.36 px x0.982 -0.22 deg + down-up 2x",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.99,-0.7 px x0.9884 -0.12 deg + down-up 2x",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.43,0.82 px x1.0185 -0.88 deg + blur 0.3 px",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.87,-0.63 px x0.9983 0.34 deg",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.59,-0.89 px x1.0191 0.23 deg + blur 0.16 px",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.23,-0.11 px x1.0122 0.65 deg",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.19,0.95 px x1.0042 0.94 deg + blur 0.45 px",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.43,-0.61 px x1.0019 -0.42 deg + blur 0.05 px",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.34,-0.59 px x0.9903 -0.07 deg + jpeg 70",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.94,0.89 px x0.9898 0.28 deg + down-up 2x",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 1,0 px x1 0 deg + jpeg 70",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -1,0 px x1 0 deg + jpeg 70",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,1 px x1 0 deg + jpeg 70",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,-1 px x1 0 deg + jpeg 70",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1.02 0 deg + jpeg 70",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x0.98 0 deg + jpeg 70",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1 1 deg + jpeg 70",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1 -1 deg + jpeg 70",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "down-up 2x + jpeg 70",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "blur 0.5 px + jpeg 70",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1.015 0 deg",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x0.985 0 deg",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1 0.75 deg",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1 -0.25 deg",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "jpeg 75",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "jpeg 85",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "blur 0.4 px",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.33,0.67 px x1 0 deg",
+    "regions": 65,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.67,0 px x1 0 deg",
+    "regions": 65,
+    "failed": {}
+   }
+  ],
+  "side.R": [
+   {
+    "perturbation": "move -0.48,-0.4 px x1.0126 -0.82 deg",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.62,-0.89 px x0.991 0.31 deg + jpeg 89",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.34,-0.15 px x1.0053 0.93 deg + jpeg 81",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.63,-0.31 px x1.0004 0.78 deg + jpeg 93",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.06,0.39 px x0.9843 -0.79 deg + blur 0.45 px",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.7,0.29 px x0.9963 0.03 deg",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.12,0.78 px x1.0045 0.66 deg",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.32,0.05 px x0.9886 -0.8 deg + blur 0.37 px + jpeg 94",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.8,0.67 px x0.9954 0.95 deg",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.19,-0.61 px x0.9869 -0.64 deg + jpeg 72",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.67,-0.8 px x0.998 -0.02 deg",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.87,0.5 px x1.003 0.23 deg",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.55,0.38 px x1.0022 -0.92 deg + blur 0.47 px",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.97,-0.41 px x0.9804 0.65 deg + blur 0.08 px",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.11,-0.36 px x0.982 -0.22 deg + down-up 2x",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.99,-0.7 px x0.9884 -0.12 deg + down-up 2x",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.43,0.82 px x1.0185 -0.88 deg + blur 0.3 px",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.87,-0.63 px x0.9983 0.34 deg",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.59,-0.89 px x1.0191 0.23 deg + blur 0.16 px",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.23,-0.11 px x1.0122 0.65 deg",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -0.19,0.95 px x1.0042 0.94 deg + blur 0.45 px",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.43,-0.61 px x1.0019 -0.42 deg + blur 0.05 px",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.34,-0.59 px x0.9903 -0.07 deg + jpeg 70",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.94,0.89 px x0.9898 0.28 deg + down-up 2x",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 1,0 px x1 0 deg + jpeg 70",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move -1,0 px x1 0 deg + jpeg 70",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,1 px x1 0 deg + jpeg 70",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,-1 px x1 0 deg + jpeg 70",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1.02 0 deg + jpeg 70",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x0.98 0 deg + jpeg 70",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1 1 deg + jpeg 70",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1 -1 deg + jpeg 70",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "down-up 2x + jpeg 70",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "blur 0.5 px + jpeg 70",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1.015 0 deg",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x0.985 0 deg",
+    "regions": 62,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1 0.75 deg",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0,0 px x1 -0.25 deg",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "jpeg 75",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "jpeg 85",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "blur 0.4 px",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.33,0.67 px x1 0 deg",
+    "regions": 64,
+    "failed": {}
+   },
+   {
+    "perturbation": "move 0.67,0 px x1 0 deg",
+    "regions": 64,
+    "failed": {}
+   }
+  ]
+ }
+}

@@ -215,7 +215,7 @@
     "heldTo": "#200C02",
     "heldBy": "palettePainted.eyeDark",
     "deltaE2000": 0.0,
-    "pixels": 319,
+    "pixels": 318,
     "pass": true
    },
    "lowerIris": {
@@ -459,8 +459,8 @@
    "set": "3x",
    "pages": 2,
    "pageAreaPx": 6291456,
-   "allRegionsShare": 0.619,
-   "thisStillShare": 0.084
+   "allRegionsShare": 0.64,
+   "thisStillShare": 0.087
   }
  },
  "failed": [],
