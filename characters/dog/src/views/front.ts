@@ -797,7 +797,7 @@ function perkedEar(side: "L" | "R"): Piece {
     under: `<defs><linearGradient id="${tan}" gradientUnits="userSpaceOnUse" x1="0" y1="${fmt(y0 - 2)}" x2="0" y2="${fmt(y1)}">` +
       `<stop offset="0" stop-color="${C.earDeep}"/><stop offset="0.35" stop-color="${C.marking}"/><stop offset="1" stop-color="${C.patch}"/></linearGradient></defs>` +
       `<rect x="-60" y="${fmt(y0 - 6)}" width="120" height="${fmt(y1 - y0 + 12)}" fill="url(#${tan})"/>`,
-  }, [side === "R" ? { from: templeEdge.R[0], to: templeEdge.R[1], on: "tan", taper: [0.8, 6] } : { from: templeEdge.L[0], to: templeEdge.L[1], on: "tan", taper: [0.8, 6] }]);
+  }, [{ from: templeEdge[side][0], to: templeEdge[side][1], on: "tan", taper: [0.8, 6] }]);
   const paint = earFur({
     ear: perked[side],
     axis: [on([-19.5, -172.6]), on([-55.1, -139.4])],
