@@ -257,6 +257,8 @@ interface Oval {
   shine: [number, number, number, number];
   /** How far down the philtrum runs from the nose's foot. */
   philtrumTo: number;
+  /** The tongue's tip peeking out over the rim (o.tongue): its outline, round from inside the opening out to its tip and back. */
+  tip?: P[];
   box: Box;
 }
 
@@ -291,14 +293,25 @@ function oval(o: Oval, f: FaceFrame): Mouth {
     `<ellipse cx="${sx}" cy="${sy}" rx="${srx}" ry="${sry}" fill="${C.tongueShine}" opacity="0.5" filter="url(#${lit})"/>` +
     `<g filter="url(#${edgeBlur})">${sides.map((s) => `<path d="${s.d}" fill="${C.mouthRim}"/>`).join("")}<path d="${foot.d}" fill="${C.tongueRim}"/></g></g>` +
     philtrum.svg;
+  const tip = o.tip ? tongueTip(o.tip, f, o.box, (p) => insideOf(edge, p)) : undefined;
   return {
-    piece: piece(f.place(svg), f.box(o.box), { shapes: [], lines: [...rimLines, { ...philtrum.line, where: "philtrum" }] }),
+    piece: piece(f.place(svg + (tip?.svg ?? "")), f.box(o.box), { shapes: [], lines: [...rimLines, { ...philtrum.line, where: "philtrum" }, ...(tip ? [tip.line] : [])] }),
     opening: edge.map(f.at),
   };
 }
 
+/** Whether a point lies inside a closed polygon (even-odd). */
+function insideOf(poly: P[], [x, y]: P): boolean {
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [xi, yi] = poly[i]!, [xj, yj] = poly[j]!;
+    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+
 /**
- * The tongue's tip peeking out of the mouth (o.tongue): a small coral
+ * The tongue's tip peeking out of the mouth (o.tongue, and the smile's in the review-only variant): a small coral
  * lobe, lighter where the light falls, with the tongue's warm rim round the part that shows outside the mouth (`inside`
  * says which points lie within it), so it reads as the tip of the tongue the mouth already shows, poking out.
  */
@@ -358,6 +371,18 @@ const YAWN: Oval = {
   philtrumTo: 13.6,
   box: [-9, 10, 18, 27],
 };
+
+/**
+ * Review-only (qa/phase3/faces/new), hungry's variant B: the tongue at a corner read as the o's own, its tip poking out
+ * over the o's foot a little to the dog's left, round and short; the package's o.tongue is the lick at the smile's corner.
+ */
+const O_TONGUE: Oval = {
+  ...O,
+  tip: [[-0.6, 23], [1.6, 22.3], [3.6, 23], [4.3, 24.9], [4.1, 26.9], [3, 28.1], [1.5, 28.4], [0.1, 27.6], [-0.6, 25.9]],
+  box: [-7, 10, 14, 21],
+};
+/** The o with the tongue's tip out over its foot (hungry's variant B, review-only). */
+export const oTongue = (f: FaceFrame): Mouth => oval(O_TONGUE, f);
 
 /** A closed mouth's lip from its right half (philtrum's foot out to the tip), in the smile's colours: the pressed mouth and the tiny smile. */
 function closedLip(half: P[], philtrumTo: number, where: string, f: FaceFrame): Mouth {

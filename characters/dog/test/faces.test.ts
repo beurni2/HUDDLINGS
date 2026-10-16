@@ -19,7 +19,7 @@ import { blushAlpha, clipText, earRot, faceClip, faceClips, RAISED, stillOf } fr
 import { BROW_STATES, brow } from "../src/parts/brow.ts";
 import { CHEEK_STATES } from "../src/parts/cheeks.ts";
 import { lidBand, lidLine } from "../src/parts/eye.ts";
-import { MOUTH_STATES, mouth, type Mouth } from "../src/parts/mouth.ts";
+import { MOUTH_STATES, mouth, oTongue, type Mouth } from "../src/parts/mouth.ts";
 import { BLUSH_REFERENCE, EAR_ANGLES, EAR_STATES, EYE_STATES, PRESETS, type EarState } from "../src/presets.ts";
 import { faceFrame, faceStates, flatLid, front } from "../src/views/front.ts";
 
@@ -228,6 +228,8 @@ test("no mouth turns down: every lip's ends at or above its centre, every o symm
   const pbent = pp.map(([x, y]): P => [x, y + (pcy + 0.5 - pend) * ((x - pcx) / preach) ** 4]);
   assert.match(mouthProblem({ lip: { line: unlevel(pbent), centre: pressed.centre } }) ?? "", /hangs 0\.50 pt below its centre/, "pressed bent down");
   assert.match(mouthProblem({ lip: { line: unlevel(pp.map(([x, y]) => [x, 2 * pcy - y])), centre: pressed.centre } }) ?? "", /below its centre/, "pressed turned over");
+  // The review-only variant B of hungry's o.tongue (qa/phase3/faces/new) never turns down either.
+  assert.equal(mouthProblem(oTongue(faceFrame.frame)), undefined, "hungry B's o with its tongue");
 });
 
 /**

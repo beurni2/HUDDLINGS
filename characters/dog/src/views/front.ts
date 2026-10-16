@@ -12,9 +12,9 @@ import { model } from "../model.ts";
 import { C, LINES } from "../palette.ts";
 import { brow } from "../parts/brow.ts";
 import { puffedCheeks } from "../parts/cheeks.ts";
-import { eye as sharedEye, lidBand, type EyeSpec, type LidBand } from "../parts/eye.ts";
+import { chevron, eye as sharedEye, lidBand, type EyeSpec, type LidBand } from "../parts/eye.ts";
 import { rolledFrame } from "../parts/face.ts";
-import { MOUTH_STATES, mouth } from "../parts/mouth.ts";
+import { MOUTH_STATES, mouth, oTongue } from "../parts/mouth.ts";
 import { stars, type Star } from "../parts/stars.ts";
 import { litEdge, litMarking, litPart, type LitSpan } from "../parts/lines.ts";
 import { curlShapes, topknot, type Curl } from "../parts/topknot.ts";
@@ -829,6 +829,8 @@ export function flatLid(side: "L" | "R"): LidBand {
 interface Eager { white: { at: number; width: number; span: number }; glow: { band: number; warm: number }; shine: { at: [number, number]; r: number } }
 /** The package's eager eye (variant A): fixed on the food just in front, below the eyes. */
 const EAGER: Eager = { white: { at: 10, width: 2, span: 55 }, glow: { band: 3, warm: 1.2 }, shine: { at: [4.8, 5.2], r: 2.25 } };
+/** Review-only variant B: fixed on the food held out toward it, straight ahead, the wide eye's white round its outer foot. */
+const EAGER_B: Eager = { white: { at: -28, width: 1.5, span: 42 }, glow: { band: 3.4, warm: 1.4 }, shine: { at: [5.1, 7], r: 2.25 } };
 /** The eager eye on the wide eye's ball (7% larger and 0.9 pt higher than the open eye). */
 const eager = (spec: EyeSpec, sx: number, e: Eager): EyeSpec => ({
   ...spec, centre: nudge(spec.centre, [-sx * 0.4, -0.9]), rx: 10.2, ry: 9.85, white: { ...e.white, fade: 0.3 }, shine: e.shine, glow: e.glow,
@@ -955,6 +957,33 @@ export function faceStates(): Drawn[] {
     { part: "head.line", state: "temples", piece: headLinePiece({ L: true, R: true }) });
   return out;
 }
+
+/**
+ * The review-only drawings (qa/phase3/faces/new/new.ts), never in the package: the new faces' variant B and Q2's
+ * alternative eyes, each under a state of its own so one scratch package draws both variants. Variant B of hungry
+ * looks straight out at the food held toward it, its tongue peeking from the smile's corner; variant B of huffy puffs
+ * the head itself, its outline swelling 4.4 pt at each cheek, with the head's line to match. Q2's alternatives are not
+ * on the dog's sheets: the `> <` of the kitty's and the bear's Excited, drawn in the dog's lash band, and the
+ * open eye with a white star in its lower iris, as their Sparkle (Star Highlight) draws it.
+ */
+export function reviewStates(): Drawn[] {
+  const out: Drawn[] = [];
+  for (const side of ["L", "R"] as const) {
+    const sx = side === "L" ? 1 : -1, noseward: 1 | -1 = side === "L" ? -1 : 1;
+    const spec = eyeSpec(side === "L" ? EYE_L : EYE_R, noseward);
+    out.push({ part: `eye.${side}`, state: "eagerB", piece: sharedEye(eager(spec, sx, EAGER_B)) });
+    // The point toward the nose, about where the open eye's inner side is, its arms out to the open eye's outer side.
+    out.push({ part: `eye.${side}`, state: "squeezeAlt", piece: chevron({ tip: FRAME.at([sx * (EYE_HALF - 6.6), 0.6]), tilt: ROLL_DEG, noseward, length: 13.6, spread: 52, thickness: [4.4, 3.4] }) });
+    out.push({ part: `eye.${side}`, state: "sparkleAlt", piece: sharedEye({ ...spec, star: { at: [-0.4, -3.4], r: 3.9 } }) });
+  }
+  out.push({ part: "mouth", state: "o.tongueB", piece: oTongue(FRAME).piece });
+  const puffed = headOf(PUFF_B);
+  out.push({ part: "head.base", state: "puffed", piece: part("head.base", puffed.head, headPaintOf(puffed.head)) });
+  out.push({ part: "head.line", state: "puffed", piece: headLinePiece({ L: false, R: false }, puffed) });
+  return out;
+}
+/** How far variant B's cheeks swell past the head's outline at their fullest, in points. */
+const PUFF_B = 4.4;
 
 /** The face frame and its roll, for the R3 guards (characters/dog/test/faces.test.ts), which hold what each recipe draws here. */
 export const faceFrame = { frame: FRAME, rollDeg: ROLL_DEG };
