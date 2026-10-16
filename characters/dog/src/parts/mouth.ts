@@ -1,16 +1,17 @@
 // The dog's mouths, one recipe per state for every view, each typed once in the face's own frame (parts/face.ts:
 // the origin midway between the eyes, y down, the nose's foot at y 11.7) from the expression sheet's panels, and
-// placed by the view's frame. Every state keeps its corners at or above the mouth's middle (rule R3: never a
-// downturned mouth; characters/dog/test/faces.test.ts holds each one to it).
+// placed by the view's frame. Rule R3, never a downturned mouth (characters/dog/test/faces.test.ts holds each one to
+// it): a lipped mouth keeps its lip's ends at or above where the philtrum meets it; the o and the yawn, which have no
+// corners, are symmetric and round at the foot.
 // - smile: the sheet's small smile (Small smile, Content, Winking): the philtrum down from the nose into two small
 //   bowed arcs that curl up at their tips, a W, never a single frown;
 // - open: the turnaround's open happy mouth (the rest; DECISIONS 50, 85);
 // - laugh: Laughing's, wider and deeper, the tongue a bigger dome;
-// - o: Surprised's small o, an upright egg with the tongue low in it;
+// - o: Surprised's small o, an egg pointed at its top and widest low, the tongue filling its lower half;
 // - cheeky: Mischievous's and Cheeky's open mouth with the tongue out over the lower lip;
-// - yawn: a tall o with the tongue low, drawn for yawns (no panel);
+// - yawn: a tall o with the tongue low, drawn for yawns (no panel), the o's egg grown taller;
 // - pant: the open mouth with the tongue further out, drawn for panting (no panel).
-import { mirrorX, pathD, sample, smooth, type Node, type P } from "../../../draw/geom.ts";
+import { mirrorX, pathD, sample, smooth, type Node, type P, type Seg } from "../../../draw/geom.ts";
 import { innerLine, strokeOf, type DrawnLine, type Stroke } from "../../../draw/line.ts";
 import { LIMITS } from "../../../draw/lint.ts";
 import { blur, piece, uid, type Box, type Piece } from "../../../draw/svg.ts";
@@ -22,8 +23,12 @@ export type MouthState = (typeof MOUTH_STATES)[number];
 
 export interface Mouth {
   piece: Piece;
-  /** What it draws, for the R3 guard: the lip line and the opening's edge, evenly sampled, in model space. */
-  outline: P[];
+  /**
+   * What it draws, for the R3 guard, in model space: a lipped mouth's upper lip, its line evenly sampled from end to
+   * end and its centre, where the philtrum meets it; a mouth drawn as an opening alone (o, yawn), its edge.
+   */
+  lip?: { line: P[]; centre: P };
+  opening?: P[];
 }
 
 /**
@@ -132,10 +137,9 @@ function opened(o: Opened, f: FaceFrame): Mouth {
     `<ellipse cx="${sx}" cy="${sy}" rx="${srx}" ry="${sry}" fill="${C.tongueShine}" opacity="0.5" filter="url(#${lit})"/>` +
     `<g filter="url(#${edge})">${sides.map((s) => `<path d="${s.d}" fill="${C.mouthRim}"/>`).join("")}<path d="${foot.d}" fill="${C.tongueRim}"/></g></g>` +
     out + `<path d="${lip.d}" fill="url(#${lipFade})"/>${philtrum.svg}`;
-  const drawn = [...sample(lipShape.segs, 12, false), ...sample(opening.segs, 12, true), ...(lobe ? sample(lobe.segs, 12, true) : [])];
   return {
     piece: piece(f.place(svg), f.box(o.box), { shapes: [], lines: [lip.line, ...rimLines, ...outLines, { ...philtrum.line, where: "philtrum" }] }),
-    outline: drawn.map(f.at),
+    lip: { line: sample(lipShape.segs, 12, false).map(f.at), centre: f.at(o.half[0]!) },
   };
 }
 
@@ -207,12 +211,17 @@ interface Oval {
 }
 
 /**
- * The o, as Surprised and the expression sheet's Tiny o draw it: an upright egg a little pointed at its top, the
- * mouth's deep red darkest under its top, the tongue's coral dome filling its lower part, a dark red-brown rim down its
- * sides and a warm one round its foot; the philtrum a short tick under the nose, the o standing clear below it.
+ * The o, as Surprised and the expression sheet's Tiny o draw it: an egg with its soft point up, widest low in it and
+ * round under a broad foot; the mouth's deep red darkest under its top, the tongue's coral dome filling its lower
+ * half, a dark red-brown rim down its sides and a warm one round its foot; the philtrum a short tick under the nose,
+ * the o standing clear below it.
  */
 function oval(o: Oval, f: FaceFrame): Mouth {
-  const shape = smooth([...o.half, ...mirrorX(o.half.slice(1, -1), false)], { corners: [0] });
+  // The right half fitted from its point to its foot (level there, so the two halves meet smoothly) and mirrored, so
+  // the two sides are exact mirrors; a fit of the whole loop splits each side differently.
+  const right = smooth(o.half, { closed: false }).segs;
+  const flip = ([x, y]: P): P => [-x, y];
+  const shape = { segs: [...right, ...right.map(([a, b, c, d]): Seg => [flip(d), flip(c), flip(b), flip(a)]).reverse()] };
   const m = pathD(shape.segs);
   const top = o.half[0]![1], footY = o.half[o.half.length - 1]![1];
   const doubled: [number, number] = [LIMITS.inner[0] * 2, LIMITS.inner[1] * 2];
@@ -234,24 +243,46 @@ function oval(o: Oval, f: FaceFrame): Mouth {
     philtrum.svg;
   return {
     piece: piece(f.place(svg), f.box(o.box), { shapes: [], lines: [...rimLines, { ...philtrum.line, where: "philtrum" }] }),
-    outline: edge.map(f.at),
+    opening: edge.map(f.at),
   };
 }
 
-/** Surprised's small o (its sides 4.2 pt either side of the nose's middle, 14.3 pt below it). */
+/**
+ * An egg's right half, pointed end up, from its top down to its foot: `top` and `height` down the face, `half` its
+ * half-width at its widest, `widest` how far down that is (0 top, 1 foot). Above its widest its side is a superellipse
+ * of exponent 1.7, which runs up to a soft point; below, one of 2.2, which rounds under a broad foot. Its last two
+ * nodes lie level, so the mirrored halves meet smoothly there.
+ */
+function egg(top: number, height: number, half: number, widest: number): P[] {
+  const yc = top + widest * height, above = yc - top, below = top + height - yc;
+  const side = (s: number, n: number) => half * Math.max(0, 1 - s ** n) ** (1 / n);
+  const r = (n: number) => Math.round(n * 100) / 100;
+  return [
+    ...[1, 0.97, 0.88, 0.7, 0.5, 0.3, 0.12, 0].map((s): P => [r(side(s, 1.7)), r(yc - s * above)]),
+    ...[0.4, 0.7, 0.9].map((s): P => [r(side(s, 2.2)), r(yc + s * below)]),
+    [r(side(0.98, 2.2)), r(top + height - 0.02)], [0, top + height],
+  ];
+}
+
+/**
+ * Surprised's o, measured in its level frame (DECISIONS 134): an egg drawn 10.5 pt tall and 9.4 wide, widest 0.63 of
+ * the way down (the panel's 0.62 to 0.67), its widest 14.3 pt below the nose's middle, where the panel's corners are;
+ * its top a soft point, its sides full, its foot broad and round, as the panel draws them.
+ */
 const O: Oval = {
-  half: [[0, 17.2], [1.75, 17.75], [3.25, 19.05], [4.1, 20.7], [4.2, 22], [3.9, 24], [3.1, 26], [1.75, 27.55], [0, 28.1]],
-  tongue: "M-5 29 L-5 25 C-3.6 23.7 -1.8 23.3 0 23.3 C1.8 23.3 3.6 23.7 5 25 L5 29Z",
-  shine: [-0.4, 25.2, 1.8, 1.1],
+  half: egg(14.9, 10.5, 4.75, 0.64),
+  // A round dome, its top 2 pt above where it meets the sides, as the panel's tongue rises.
+  tongue: "M-5.5 26.5 L-5.5 22.6 C-4.2 21.2 -2.2 20.6 0 20.6 C2.2 20.6 4.2 21.2 5.5 22.6 L5.5 26.5Z",
+  shine: [-0.4, 22.6, 2, 1.1],
   philtrumTo: 13,
   box: [-7, 10, 14, 21],
 };
 
-/** The yawn: a tall o, twice the o's height, with the tongue low in its foot. */
+/** The yawn: the o's egg grown to 18.3 pt tall and 12 wide, with the tongue low in its foot. */
 const YAWN: Oval = {
-  half: [[0, 15.8], [2.7, 16.6], [4.8, 18.8], [5.8, 21.6], [6, 24.3], [5.6, 27.6], [4.3, 30.8], [2.3, 33], [0, 33.8]],
-  tongue: "M-7 35 L-7 31 C-5 29.5 -2.6 28.9 0 28.9 C2.6 28.9 5 29.5 7 31 L7 35Z",
-  shine: [-0.6, 31.2, 2.4, 1.2],
+  half: egg(15.6, 18.3, 6, 0.64),
+  tongue: "M-7.5 35 L-7.5 30.8 C-5.4 29.2 -2.8 28.6 0 28.6 C2.8 28.6 5.4 29.2 7.5 30.8 L7.5 35Z",
+  shine: [-0.6, 31, 2.6, 1.2],
   philtrumTo: 13.6,
   box: [-9, 10, 18, 27],
 };
@@ -275,7 +306,7 @@ function smile(f: FaceFrame): Mouth {
     `<path d="${lip.d}" fill="url(#${lipFade})"/>${philtrum.svg}`;
   return {
     piece: piece(f.place(svg), f.box(box), { shapes: [], lines: [lip.line, { ...philtrum.line, where: "philtrum" }] }),
-    outline: along.map(f.at),
+    lip: { line: along.map(f.at), centre: f.at(half[0]!) },
   };
 }
 

@@ -1,10 +1,11 @@
 // Rule R3's guards on the dog's face library (spec section 3, R3; 5b, The face, L440-498): Mochi acts out feelings
 // but never suffers, so no face state is named or drawn sad, angry, pouting, teary or drooped. Held here on what the
-// front actually draws: every state's name is on the allowlist; every mouth keeps its corners at or above its middle;
-// every brow is an arc that bows upward, its inner end never below its outer and within the sheets' own tilt above it;
-// no face clip turns an ear further in than the lowered state or further out than the lifted one, only the sleepy face
-// lowers it and only the lifted faces turn it out. Each guard is shown failing on a planted
-// fault. Also: the face clips are what presets.ts writes, and the stars draw only beside the sparkle eyes.
+// front actually draws: every state's name is on the allowlist; no mouth turns down (a lip's ends never below its
+// centre, an o symmetric and round at its foot); every brow is an arc that bows upward, its inner end never below its
+// outer and within the sheets' own tilt above it; no face clip turns an ear further in than the lowered state or further
+// out than the lifted one, only the sleepy face lowers it and only the lifted faces turn it out. Each guard is shown
+// failing on a planted fault. Also: the face clips are what presets.ts writes, and the stars draw only beside the
+// sparkle eyes.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync } from "node:fs";
@@ -15,7 +16,7 @@ import type { P } from "../../draw/geom.ts";
 import { scopeIds } from "../../draw/svg.ts";
 import { clipText, earRot, faceClips, stillOf } from "../src/faceClips.ts";
 import { BROW_STATES, brow } from "../src/parts/brow.ts";
-import { MOUTH_STATES, mouth } from "../src/parts/mouth.ts";
+import { MOUTH_STATES, mouth, type Mouth } from "../src/parts/mouth.ts";
 import { EAR_ANGLES, EAR_STATES, EYE_STATES, PRESETS, type EarState } from "../src/presets.ts";
 import { faceFrame, faceStates, front } from "../src/views/front.ts";
 
@@ -38,18 +39,40 @@ const level = (pts: P[]): P[] => {
   return pts.map(([x, y]): P => [x * c - y * s, x * s + y * c]);
 };
 
+/** The face's midline across, in the level frame. */
+const midline = () => level([faceFrame.frame.at([0, 0])])[0]![0];
+
 /**
- * The mouth guard: its corners (its farthest reach each way across: a lip's curled tips, an o's sides) never below its
- * middle (halfway between the top and the foot of what it draws). A frown's ends hang below its middle.
+ * The mouth guard (R3: never a downturned mouth). A lipped mouth keeps both ends of its lip line (its farthest reach each
+ * way across, the curls' tips) at or above the lip's centre, where the philtrum meets it: a frown's ends hang below it,
+ * closed or open, however deep the opening under it. A mouth drawn as an opening alone (the o, the yawn) has no corners
+ * to hold: it is symmetric about the face's midline, and round at its foot, which hangs below its widest by at least a
+ * quarter of its width (the sheets' o: 0.32 on Surprised, 0.5 on Tiny o; a frown's ∩ of an opening has its widest at
+ * its foot, 0).
  */
-function mouthProblem(outline: P[]): string | undefined {
-  const pts = level(outline);
-  const ys = pts.map(([, y]) => y);
-  const middle = (Math.min(...ys) + Math.max(...ys)) / 2;
-  const left = pts.reduce((a, b) => (b[0] < a[0] ? b : a)), right = pts.reduce((a, b) => (b[0] > a[0] ? b : a));
-  for (const [name, corner] of [["left", left], ["right", right]] as const) {
-    if (corner[1] > middle + 0.05) return `its ${name} corner sits ${(corner[1] - middle).toFixed(2)} pt below its middle`;
+const O_FOOT = 0.25;
+function mouthProblem(m: Pick<Mouth, "lip" | "opening">): string | undefined {
+  if (m.lip) {
+    const pts = level(m.lip.line), [, cy] = level([m.lip.centre])[0]!;
+    const left = pts.reduce((a, b) => (b[0] < a[0] ? b : a)), right = pts.reduce((a, b) => (b[0] > a[0] ? b : a));
+    for (const [name, end] of [["left", left], ["right", right]] as const) {
+      if (end[1] > cy + 1e-9) return `its lip's ${name} end hangs ${(end[1] - cy).toFixed(2)} pt below its centre`;
+    }
+    return undefined;
   }
+  const pts = level(m.opening!), axis = midline();
+  // Symmetric: every point's mirror across the midline lies on the edge (the polyline through its samples).
+  const toEdge = ([x, y]: P) => Math.min(...pts.map(([ax, ay], i) => {
+    const [bx, by] = pts[(i + 1) % pts.length]!, [dx, dy] = [bx - ax, by - ay];
+    const t = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy || 1)));
+    return Math.hypot(x - ax - t * dx, y - ay - t * dy);
+  }));
+  const off = Math.max(...pts.map(([x, y]) => toEdge([2 * axis - x, y])));
+  if (off > 0.25) return `it is lopsided: a point's mirror lies ${off.toFixed(2)} pt off its edge`;
+  const xs = pts.map(([x]) => x), ys = pts.map(([, y]) => y);
+  const width = Math.max(...xs) - Math.min(...xs), foot = Math.max(...ys);
+  const widest = (pts.reduce((a, b) => (b[0] < a[0] ? b : a))[1] + pts.reduce((a, b) => (b[0] > a[0] ? b : a))[1]) / 2;
+  if (foot - widest < O_FOOT * width) return `its foot hangs only ${((foot - widest) / width).toFixed(2)} of its width below its widest, a frown's corners`;
   return undefined;
 }
 
@@ -157,19 +180,36 @@ test("every face state is on the allowlist, and no state, part or preset is name
   assert.ok(SORROW.test("drooped") && SORROW.test("teary") && SORROW.test("pout") && !EAR_STATES.includes("drooped" as never));
 });
 
-test("every mouth keeps its corners at or above its middle, as drawn in the front", () => {
+test("no mouth turns down: every lip's ends at or above its centre, every o symmetric and round at its foot, as drawn in the front", () => {
   const drawn = new Map([...front(), ...faceStates()].filter((d) => d.part === "mouth").map((d) => [d.state, scopeIds(d.piece.svg, "m")]));
   for (const state of MOUTH_STATES) {
     const m = mouth(state, faceFrame.frame);
     assert.equal(scopeIds(m.piece.svg, "m"), drawn.get(state), `the guarded ${state} mouth is the one the front draws`);
-    assert.equal(mouthProblem(m.outline), undefined, `the ${state} mouth`);
+    assert.ok(!!m.lip !== !!m.opening, `the ${state} mouth is lipped or an opening alone`);
+    assert.equal(mouthProblem(m), undefined, `the ${state} mouth`);
   }
-  // Planted: the smile turned upside down, a frown, fails.
-  const smile = level(mouth("smile", faceFrame.frame).outline);
-  const middle = (Math.min(...smile.map(([, y]) => y)) + Math.max(...smile.map(([, y]) => y))) / 2;
   const a = (faceFrame.rollDeg * Math.PI) / 180;
-  const frown = smile.map(([x, y]): P => [x, 2 * middle - y]).map(([x, y]): P => [x * Math.cos(a) - y * Math.sin(a), x * Math.sin(a) + y * Math.cos(a)]);
-  assert.match(mouthProblem(frown) ?? "", /below its middle/);
+  const unlevel = (pts: P[]) => pts.map(([x, y]): P => [x * Math.cos(a) - y * Math.sin(a), x * Math.sin(a) + y * Math.cos(a)]);
+  // Planted: the smile's lip turned upside down about its centre, a closed frown, fails.
+  const smile = mouth("smile", faceFrame.frame).lip!;
+  const [, sy] = level([smile.centre])[0]!;
+  assert.match(mouthProblem({ lip: { line: unlevel(level(smile.line).map(([x, y]) => [x, 2 * sy - y])), centre: smile.centre } }) ?? "", /hangs .* below its centre/);
+  // Planted: the open and the laughing mouths' lips with their ends bent down 1 pt below the centre, an open frown, fail.
+  // (The first guard measured from halfway down the whole opening, 7.1 pt below the open lip's centre, so a review's
+  // probe with the open lip's ends 6.6 pt below its centre passed it.)
+  for (const state of ["open", "laugh"] as const) {
+    const lip = mouth(state, faceFrame.frame).lip!;
+    const pts = level(lip.line), [cx, cy] = level([lip.centre])[0]!;
+    const reach = Math.max(...pts.map(([x]) => Math.abs(x - cx)));
+    const end = Math.max(...pts.filter(([x]) => Math.abs(Math.abs(x - cx) - reach) < 1e-9).map(([, y]) => y));
+    const bent = pts.map(([x, y]): P => [x, y + (cy + 1 - end) * ((x - cx) / reach) ** 4]);
+    assert.match(mouthProblem({ lip: { line: unlevel(bent), centre: lip.centre } }) ?? "", /hangs 1\.00 pt below its centre/, `${state} bent down`);
+  }
+  // Planted: the o cut flat at its widest, a ∩ with its corners at its foot, and the o hung lower on one side, fail.
+  const o = level(mouth("o", faceFrame.frame).opening!), axis = midline();
+  const wide = (o.reduce((p, q) => (q[0] < p[0] ? q : p))[1] + o.reduce((p, q) => (q[0] > p[0] ? q : p))[1]) / 2;
+  assert.match(mouthProblem({ opening: unlevel(o.map(([x, y]): P => [x, Math.min(y, wide)])) }) ?? "", /a frown's corners/, "an o cut flat");
+  assert.match(mouthProblem({ opening: unlevel(o.map(([x, y]): P => [x, y + 0.15 * (x - axis)])) }) ?? "", /lopsided/, "an o hung on one side");
 });
 
 test("every brow is an arc that bows up, its inner end at or above its outer and within the sheets' tilt, as drawn in the front", () => {
