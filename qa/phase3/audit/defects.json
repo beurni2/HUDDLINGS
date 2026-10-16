@@ -1,0 +1,779 @@
+{
+ "note": "Read-only audit of the six rest views against the sheet, Oct 16, 2026 (founder feedback on fur edges, chin, legs and paws). Zoomed images were scratch files; the overviews are in this folder.",
+ "defects": [
+  {
+   "view": "front",
+   "part": "ear.R / ear.L roots under the crown (head.base, head.line)",
+   "where": "#1. Viewer-left ear root at crop px (52-67, 43), 3x still about (147,112); viewer-right at crop (148-163, 37), still (371,98). Right side: d01_ear_roots_R.png",
+   "sheet": "The ear's top tucks under the crown. Cream crown fur lies over the ear root with a soft, feathered diagonal edge. The crown's outline runs on unbroken into the ear's outer line, so there is no visible top edge on the ear.",
+   "ours": "Each ear ends at the top in a straight cut: horizontal on the viewer-left, diagonal on the viewer-right. It has a sharp corner on the face side and a pale airbrushed band along the cut. The tan flap pokes up past the head line, and the crown outline stops bluntly where it meets the cut. At phone size this reads as a pasted-on flap with a flat top.",
+   "severity": "high",
+   "image": "scratch:audit/front/d01_ear_roots_L.png"
+  },
+  {
+   "view": "front",
+   "part": "head.base cheeks over ear.R / ear.L",
+   "where": "#2. Viewer-left cheek edge at crop (49-52, 106-127), then a step to (54-67, 128-135); still about (128,283). Viewer-right at crop (168-173, 97-121) and (153-168, 121-131); still (427,278). Right side: d02_cheek_over_ear_R.png",
+   "sheet": "Each cheek is a round, convex cream puff over the ear. Its edge has small white tufts and only a short light-brown line low down, and its top joins the face patch with a rounded curve. Below the right cheek, the ear's lower lobe shows a scalloped edge.",
+   "ours": "The cheek is a hard-cut wedge. Its edge is nearly vertical, with a sharp notch or spike at the top where it meets the ear's inner line. The edge is a chipped, broken grey-brown line with gaps (torn-paper look) that turns at an angle into a stepped diagonal toward the collar. There is no round puff and no tufts.",
+   "severity": "high",
+   "image": "scratch:audit/front/d02_cheek_over_ear_L.png"
+  },
+  {
+   "view": "front",
+   "part": "head.base chin and lower muzzle over the collar (shadow.chin.collar)",
+   "where": "#3. Lower corners at crop (63,133) and (157,131), still (156,322) and (375,318). Lower edge along crop x 68-150, y 133-139, centre still about (266,332)",
+   "sheet": "The muzzle and cheek fur is a rounded, fluffy mass. Its lower corners curve round with tufted sides. Its lower edge over the collar is a soft arc with small outlined scallops and fur points dipping onto the collar. A soft chin shadow lies on the collar's top.",
+   "ours": "The muzzle is a square-cornered block. The lower corners are angular steps with chipped grey-brown line bits. The lower edge is a nearly straight, blurred gradient with no line and no scallops. The collar's top edge under it is wobbly instead of being covered by fur.",
+   "severity": "high",
+   "image": "scratch:audit/front/d03_chin_over_collar.png"
+  },
+  {
+   "view": "front",
+   "part": "tuft (topknot) and head.line crown outline",
+   "where": "#4. Topknot at crop (85-150, 3-30), still about (266,36). Crown sides at crop (55-80, 25-40) and (140-165, 22-38), still (168,82) and (364,77)",
+   "sheet": "4-5 small flicked locks with a crisp, thin, dark-brown line. Each lock base has a short inner overlap stroke or curl into the head. The crown's sides descend with a few clean V-shaped fur notches.",
+   "ours": "3 smooth rounded lobes. The line is soft-edged and blurred, thicker and lighter, and fades out at the lock bases. Where the locks meet, the bases end in sharp dark sliver spikes. Both crown sides carry tiny stepped chips and bumps instead of clean notches, so the crown reads as smudged and smooth, not tufted.",
+   "severity": "medium",
+   "image": "scratch:audit/front/d04_crown.png"
+  },
+  {
+   "view": "front",
+   "part": "ear.R / ear.L outer edge and bottom lock tips",
+   "where": "#5. Viewer-left ear outer edge at crop (5-15, 85-115), still (30,245); bottom at crop (15-55, 130-145), still (91,341). Viewer-right outer edge at crop (205-212, 85-115), still (497,245); bottom at (165-205, 128-142), still (441,332). Right side: d05_ear_edge_R.png",
+   "sheet": "The outer edge is wavy, with small notches that split it into lobes. The bottom ends in 3 rounded lock tips with notches between them (scalloped). The outline varies: thin and light at the top, darker and heavier at the bottom.",
+   "ours": "A smooth balloon curve with no notches on the outer edge. The bottom has 1-2 shallow bumps instead of 3 lock tips. The outline is a uniform mid-brown line all the way round. The inner strand lines are fine, but the silhouette reads as a smooth droplet.",
+   "severity": "high",
+   "image": "scratch:audit/front/d05_ear_edge_L.png"
+  },
+  {
+   "view": "front",
+   "part": "head.patch.R / head.patch.L (eye-patch markings) edges",
+   "where": "#6. Top edges at crop (58-86, 60-64) and (130-152, 56-62), still about (177,152) and (340,145)",
+   "sheet": "Each tan patch is a soft rounded arc over its eye with a feathered top. On the viewer-left, a cream strip of fur at the temple separates the patch from the ear.",
+   "ours": "Each patch is a squared band. Its top is a bumpy, near-horizontal edge running from the ear root inward to above the eye, with a squarish inner corner. On the viewer-left, the patch runs straight into the ear root with no cream strip.",
+   "severity": "medium",
+   "image": "scratch:audit/front/d06_eye_patches.png"
+  },
+  {
+   "view": "front",
+   "part": "collar band edges and ends",
+   "where": "#7. Band from crop (76,139) to (147,138), still (180,336)-(338,334); the ends at both of those points",
+   "sheet": "A curved smile-shaped band, deeper in the middle. The top edge is soft under the chin shadow, with no heavy line. The darker blue line sits mainly on the bottom edge. Both ends tuck under the lower cheek fur.",
+   "ours": "A flatter band with a uniform slate-blue outline all round, including a wavy, wobbly top edge. Both ends are blunt, rounded-square and fully outlined, and stand out against the chest with cream between them and the cheeks.",
+   "severity": "low",
+   "image": "scratch:audit/front/d07_collar.png"
+  },
+  {
+   "view": "front",
+   "part": "body.front chest sides under the collar (against back.patch.R / back.patch.L)",
+   "where": "#8. Crop (67-72, 141-151) and (150-154, 139-149), still about (172,353) and (364,348). Right side: d08_chest_sides_R.png",
+   "sheet": "Under the collar, the body's side is a thin, smooth brown line with one small fur step, and soft tan fur texture inside it.",
+   "ours": "3-4 small sharp teeth (a saw-tooth tuft) in a thick dark line right under each collar end, then a smeared, blurred tan edge further down. It reads as a chipped edge rather than fur.",
+   "severity": "medium",
+   "image": "scratch:audit/front/d08_chest_sides_L.png"
+  },
+  {
+   "view": "front",
+   "part": "body.front chest fur strokes",
+   "where": "#9. Crop (81-88, 154-161) and (133-140, 154-161), still about (205,381) and (329,381)",
+   "sheet": "No dark strokes beside the tag; the chest there is plain soft cream. The chest's fur detail is a soft V of tufts below the tag (see #10).",
+   "ours": "Two pairs of short dark-brown dashes on each side of the tag. These are fur strokes the sheet does not draw, and they show as specks at phone size.",
+   "severity": "low",
+   "image": "scratch:audit/front/d09_chest_dashes.png"
+  },
+  {
+   "view": "front",
+   "part": "between front.R and front.L (body.front belly gap, leg inner edges)",
+   "where": "#10. Crop x 98-123, y 172-214, still about (266,446)",
+   "sheet": "Below the tag, the chest fur ends in a fluffy V of downward tufts. Thin brown lines run down both legs' inner edges from there to the paws. Between them is a narrow tan gap that closes at the ground with a short dark line.",
+   "ours": "There is no chest V and no tufts. A tan wedge between the legs starts as a blurred blob under the tag and widens into a hard-sided strip that runs to the ground with a peach glow. The legs' inner edges have no line at all from the chest down to the paw tops; their lines start only at the paws.",
+   "severity": "high",
+   "image": "scratch:audit/front/d10_between_legs.png"
+  },
+  {
+   "view": "front",
+   "part": "front.R / front.L legs and front paws",
+   "where": "#11. Paws at crop (70-100, 195-216) and (118-148, 195-216), still about (207,500) and (317,500); leg sides at crop x 70 and 150, y 175-200",
+   "sheet": "Short, plump columns that flare into round bun paws, wider than the legs. Each paw has a rounded bottom scalloped by the toes and 2-3 soft toe lines reaching about a third of the paw's height. The line is thin (about 1 pt), warm, and varies in weight, with gaps in places.",
+   "ours": "Long, straight tubes the same width as the paws. The paws have flat bottoms with squared lower corners and only two short straight toe ticks at the bottom edge. The outline is heavy and uniform: about 5 px at 3x (1.7 pt), with an L of about 105 core along the paw bottom, against the sheet's 1 px of about 0.8-1 pt.",
+   "severity": "high",
+   "image": "scratch:audit/front/d11_front_paws.png"
+  },
+  {
+   "view": "front",
+   "part": "front.R / front.L outer edges against the haunches (back.patch.R, body.back)",
+   "where": "#12. Viewer-left seam at crop x 63-68, y 156-192, still about (166,427). Viewer-right line start at crop (156,165), still (373,397); line runs to crop y 212. Right side: d12_leg_edge_R.png",
+   "sheet": "A faint, thin, broken brown line marks each front leg's outer edge against the haunch. A small fur bump marks the elbow, where the chest fur steps out.",
+   "ours": "Viewer-left: a pale cream seam (a light airbrushed band) runs down between the tan haunch and the leg, and the leg's line starts abruptly partway down. Viewer-right: a heavy dark line starts in mid-air at elbow height and runs to the paw, with no line above it (only a soft gradient up to the collar). Neither side has an elbow bump.",
+   "severity": "high",
+   "image": "scratch:audit/front/d12_leg_edge_L.png"
+  },
+  {
+   "view": "front",
+   "part": "body.back haunch silhouette (flank-to-haunch join)",
+   "where": "#13. Crop (59,163) and (163,159), still about (147,392) and (389,383)",
+   "sheet": "Each haunch is a separate rounded lobe that bulges out of the flank from a small concave notch, a visible fur bump. The viewer-left haunch is tan with fur texture and a cream streak; the viewer-right one has a narrow tan streak at its top.",
+   "ours": "One smooth convex teardrop curve runs from the collar to the hind paw, with no notch, so the haunch does not read as its own shape. The viewer-left haunch is a flat tan fill with a soft gradient. The viewer-right haunch has a blurred tan airbrush patch at its top instead of a streak.",
+   "severity": "medium",
+   "image": "scratch:audit/front/d13_haunch_notch.png"
+  },
+  {
+   "view": "front",
+   "part": "hind.R / hind.L hind paws",
+   "where": "#14. Crop (45-70, 195-216) and (152-178, 195-216), still about (142,492) and (392,492). Right side: d14_hind_paws_R.png",
+   "sheet": "Round bun paws. Each has a closed rounded top arc where it meets the haunch, 2-3 long, soft toe lines and a rounded, gently scalloped bottom, drawn with a thin line.",
+   "ours": "Flat-bottomed mitten paws with a squared bottom corner and two short toe ticks. The top line is an open hook: it starts or stops in mid-air inside the paw instead of closing against the haunch and the leg. The outline is heavy and uniform.",
+   "severity": "medium",
+   "image": "scratch:audit/front/d14_hind_paws_L.png"
+  },
+  {
+   "view": "front",
+   "part": "shadow (ground contact shadow)",
+   "where": "#15. Crop x 25-193, y 205-222, still about (79,514) to (452,514)",
+   "sheet": "A wide, soft grey oval contact shadow, darkest under the paws and reaching well past both haunches.",
+   "ours": "A narrow, faint, warm haze close under the paws, barely visible beyond the hind paws. The dog looks less planted than on the sheet.",
+   "severity": "low",
+   "image": "scratch:audit/front/d15_ground_shadow.png"
+  },
+  {
+   "view": "threeQuarter.L and threeQuarter.R (both, mirrored)",
+   "part": "far ear root / far side of head (crown end, head.base over ear.R in .L)",
+   "where": "L pair px x 100-160, y 70-200 (overview #1); R at x' = 531 - x",
+   "sheet": "The crown's brown line runs on over the far ear's root and becomes the ear's top outline. The ear's top tucks under feathered cream wisps. The face's far edge is a convex curve with a thin warm line and a soft tan shade band beside it.",
+   "ours": "The crown line stops in a blunt stub at the ear. The ear's top edge ends in a square corner, and the head fill cuts into the ear as a hard, unlined cream wedge, stepped twice. Below it the face meets the ear on a straight vertical seam, cream or pale tan on tan, with no line.",
+   "severity": "high",
+   "image": "scratch:audit/threeQuarter/d01_farear_root_seam.png"
+  },
+  {
+   "view": "threeQuarter.L and threeQuarter.R (both, mirrored)",
+   "part": "far cheek fur over the far ear",
+   "where": "L pair px x 55-110, y 200-300 (overview #2)",
+   "sheet": "A rounded, two-lobed fluffy cheek puff with a clean thin warm outline on its outer edge. It sits over the ear with a soft contact shade on the ear around it, and its lower edge flows into the jaw line.",
+   "ours": "The cheek's outer edge is a ragged, torn-looking grey fringe of short dashes. It meets the ear with a hard concave notch at the top and leaves no contact shade on the ear. Below, the jaw line continues as a dashed, jagged grey stroke.",
+   "severity": "high",
+   "image": "scratch:audit/threeQuarter/d02_farcheek_over_farear.png"
+  },
+  {
+   "view": "threeQuarter.L and threeQuarter.R (both, mirrored)",
+   "part": "near cheek over the near ear (head.base / ear.L in .L)",
+   "where": "L pair px x 320-340, y 235-330 (overview #3)",
+   "sheet": "The near ear's inner edge is one continuous warm-brown S-line from the root to the ear's bottom. The cream cheek puff below the eye is rounded and sits in front of it.",
+   "ours": "The ear's inner line stops at about eye level. Below that the cheek ends in a vertical, jagged, unlined cream cut against the tan ear, and its lower corner by the collar is square. The ID-pass boundary check flags this edge as unlined.",
+   "severity": "high",
+   "image": "scratch:audit/threeQuarter/d03_nearcheek_over_nearear.png"
+  },
+  {
+   "view": "threeQuarter.L and threeQuarter.R (both, mirrored)",
+   "part": "near ear root under the crown",
+   "where": "L pair px x 300-360, y 95-135 (overview #4); stray tick at about (318, 50)",
+   "sheet": "The ear's top disappears under the crown's cream with a feathered, spiky edge of cream strands over the tan, and the crown's lock line continues down into the ear's outer outline.",
+   "ours": "The ear has a flat top with a soft concave bite. Its edge is blurred and unlined, and its far corner is hard, so the root reads as a cut-off shape. The crown line ends at the ear's corner, and a short loose tick hangs off the crown line just above.",
+   "severity": "medium",
+   "image": "scratch:audit/threeQuarter/d04_nearear_root.png"
+  },
+  {
+   "view": "threeQuarter.L and threeQuarter.R (both, mirrored)",
+   "part": "both ears: outer edges, lock tips, bottoms",
+   "where": "far ear L x 0-130, y 70-300; near ear L x 350-490, y 90-345 (overview #5, two circles)",
+   "sheet": "Droopy, rounded ears with wavy, feathered outer edges: a lock step partway down the outer side, 3-4 scalloped lock tips along each bottom with the line dipping between them, and a lighter, varied warm line.",
+   "ours": "The far ear is a sail: its top is one straight diagonal from the crown to the outer tip. The near ear is a smooth convex balloon. Both have even, heavy outlines with no lock step and smooth bottom arcs: the near ear's bottom shows only faint notches and the far ear's tip is a single smooth point. Fur strokes inside the ears are fine.",
+   "severity": "high",
+   "image": "scratch:audit/threeQuarter/d05_ear_edges.png"
+  },
+  {
+   "view": "threeQuarter.L and threeQuarter.R (both, mirrored)",
+   "part": "crown / topknot edge",
+   "where": "L pair px x 130-360, y 20-110 (overview #6)",
+   "sheet": "A crisp brown line around each lock. A tiny wisp notch sits on the far shoulder, a thin strand line runs inside the centre lock, and the line carries on down to both ear roots.",
+   "ours": "The lock shapes and the line are close along the top. On the far shoulder the line turns soft and greyish with a blurred halo, inside the centre lock there is a blurred shade blob instead of the strand line, and the line stops short at both ear roots (see D1 and D4). At phone size this is mainly visible at the two ends.",
+   "severity": "low",
+   "image": "scratch:audit/threeQuarter/d06_crown_edge.png"
+  },
+  {
+   "view": "threeQuarter.L and threeQuarter.R (both, mirrored)",
+   "part": "chin and lower cheeks over the collar (muzzle fur)",
+   "where": "L pair px x 110-345, y 280-345 (overview #7)",
+   "sheet": "The muzzle is a rounded, fluffy mass. Its lower edge over the collar is a warm brown line of small scallops and tufts, the near lower cheek bulges with a tuft, and the far jaw line runs unbroken into the collar.",
+   "ours": "A square-cornered block. Its lower edge is an airbrushed tan band with no line, so the cream fades into the collar with a fine jagged rim. The near lower corner is square against the collar end, and the far jaw line tapers out before the collar, leaving a cream notch. There are no scallops or tufts.",
+   "severity": "high",
+   "image": "scratch:audit/threeQuarter/d07_chin_over_collar.png"
+  },
+  {
+   "view": "threeQuarter.L and threeQuarter.R (both, mirrored)",
+   "part": "collar edges and near end, neck join",
+   "where": "L pair px x 140-365, y 300-370 (overview #8 at the near end)",
+   "sheet": "The band is outlined top and bottom in dark navy. It runs on to the back's outline under the ear, with the cheek's lower edge lined above it, and the clasp is a small loop drawn with two dark lines.",
+   "ours": "The top edge has no outline: the chin fill sits directly on the blue with a fuzzy, jagged rim. The near end is cut square and stops short of the back line, which starts as a detached tapered stroke. Between them the cheek's lower corner is unlined against cream. The clasp is a pale pill.",
+   "severity": "medium",
+   "image": "scratch:audit/threeQuarter/d08_collar_ends_neck.png"
+  },
+  {
+   "view": "threeQuarter.L and threeQuarter.R (both, mirrored)",
+   "part": "chest / back join below the collar's near end (body.front vs body.back)",
+   "where": "L pair px x 285-320, y 330-420 (overview #9)",
+   "sheet": "Soft warm shading with fine fur texture under the collar end, with no edge.",
+   "ours": "A peach shade band runs down from the collar's near end with a hard, straight, unlined edge where body.front's shade stops against body.back's cream. The ID-pass check flags it as an unlined part boundary.",
+   "severity": "medium",
+   "image": "scratch:audit/threeQuarter/d09_shoulder_shade_band.png"
+  },
+  {
+   "view": "threeQuarter.L and threeQuarter.R (both, mirrored)",
+   "part": "far front leg and the chest's lower edge between the front legs",
+   "where": "L pair px x 140-240, y 380-470 (overview #10)",
+   "sheet": "The far leg is cream (mean RGB 248,234,216). The chest's lower edge is a fluffy V of short, branching warm fur strokes meeting the near leg's line, with a soft pinkish shade between the legs.",
+   "ours": "The far leg is painted peach-tan (249,223,198; dE2000 about 4.7 in both views). The chest crosses it on a hard, straight, unlined diagonal, leaving a tan wedge and stripe between the legs. Three separate thin lines form a Y instead of the tufted V.",
+   "severity": "high",
+   "image": "scratch:audit/threeQuarter/d10_between_frontlegs.png"
+  },
+  {
+   "view": "threeQuarter.L and threeQuarter.R (both, mirrored)",
+   "part": "front leg columns: far leg outer edge",
+   "where": "L pair px x 120-140, y 340-470 (overview #11)",
+   "sheet": "The far leg's outer edge is a gently convex line with small fur notches near the chest, stepping out into the bun paw. The chest fur hangs over the leg tops, so the legs read as short plump columns.",
+   "ours": "Wavy fur bumps on the upper third only, then a straight vertical line to the paw. Together with the peach fill (D10) the far leg reads as a separate tube from the chest's diagonal down. Measured chest-to-ground height matches the sheet in this view (the chest V is about 1 pt lower in ours), so the tube impression comes from the colour and the straight edge, not from leg length.",
+   "severity": "low",
+   "image": "scratch:audit/threeQuarter/d11_leg_columns.png"
+  },
+  {
+   "view": "threeQuarter.L and threeQuarter.R (both, mirrored)",
+   "part": "front paws (near and far)",
+   "where": "L pair px x 120-310, y 455-518 (overview #12)",
+   "sheet": "Round bun paws with a softly two-lobed bottom that dips between the toes. Toe lines are short, soft and light (pale grey or pink), and the warm line is about 1.4-1.5 pt at the bottom (measured on the upscaled crop) and thins and lightens up the sides. There is no line across the top of the near paw.",
+   "ours": "Flat paws with a straight bottom line and tight lower corners; the far paw's line ends square at its inner corner. The outline is a constant dark line of about 1.75 pt (measured) all the way round and up both sides. Toe marks are short, dark vertical ticks, and a heavy cuff arc crosses the near paw's top, so the paw reads as a shoe.",
+   "severity": "high",
+   "image": "scratch:audit/threeQuarter/d12_front_paws.png"
+  },
+  {
+   "view": "threeQuarter.L and threeQuarter.R (both, mirrored)",
+   "part": "hind paw, thigh front and the gap between the near front paw and the hind paw",
+   "where": "L pair px x 280-400, y 420-515 (overview #13)",
+   "sheet": "The hind paw is a round bun with two soft light toe lines and a light top line fading into the thigh. Soft fur crease lines mark the thigh front, and a warm pink-tan contact shadow fills the gap between the paws at the ground.",
+   "ours": "A heavy, flat-bottomed paw whose top arc is a dark stroke ending in mid-fur. A pale highlight strip (a light seam) runs up the thigh front beside a long, straight, thin line. A dark spur where the paw lines meet at the ground, and there is no warm shadow in the gap.",
+   "severity": "medium",
+   "image": "scratch:audit/threeQuarter/d13_hindpaw_thigh.png"
+  },
+  {
+   "view": "threeQuarter.L and threeQuarter.R (both, mirrored)",
+   "part": "tail plume edge and tan root",
+   "where": "L pair px x 400-531, y 320-500 (overview #14)",
+   "sheet": "A light, broken, wavy outline with 5-6 lock bumps down the outer edge and bumps along the inner edge. The tan root breaks into feathered, spiky tufts combed down and back, with a wavy lined bottom.",
+   "ours": "A uniform heavier line with 2-3 shallow notches on the outer edge and a smooth inner arc. The tan root is an airbrushed blob with three thin white hairline streaks, and its bottom edge is a dark, serrated, saw-tooth stroke.",
+   "severity": "medium",
+   "image": "scratch:audit/threeQuarter/d14_tail_plume.png"
+  },
+  {
+   "view": "threeQuarter.L and threeQuarter.R (both, mirrored)",
+   "part": "ground contact shadow",
+   "where": "L pair px y 490-520, both ends of the dog (overview #15)",
+   "sheet": "A broad, soft grey-beige ellipse that shows clearly beyond the dog on both sides, from past the far front paw to past the tail.",
+   "ours": "A narrow, faint band directly under the paws that barely shows past them, so the dog sits lighter on the ground.",
+   "severity": "low",
+   "image": "scratch:audit/threeQuarter/d15_ground_shadow.png"
+  },
+  {
+   "view": "side.L, side.R",
+   "part": "crown (head top locks)",
+   "where": "top of head, the 4-5 curly locks from forehead to back of crown (circle 1)",
+   "sheet": "One crisp, continuous, warm light-brown line runs round every lock. At each join between locks the line hooks into the fur in a small V.",
+   "ours": "The strokes are soft and blurred, and the line is broken into separate segments with cream gaps between the locks. Each lock join is a short tapered wedge stroke with no hook, and there is a small notch where two segments meet near the front lock.",
+   "severity": "high",
+   "image": "scratch:audit/side/d01_crown.png"
+  },
+  {
+   "view": "side.L, side.R",
+   "part": "back of head into ear top",
+   "where": "where the crown's back line meets the near ear's top (circle 2)",
+   "sheet": "The crown line runs on down the back of the head into the ear's back edge with small hooked tufts. The ear top is a blunt, flattish shape tucked under the crown fur, with a ragged feathered top edge and no line across it.",
+   "ours": "The crown line ends in a blurred taper that floats about 2-3 pt short of the ear. The ear top is a smooth, narrow, glossy dome with its own highlight. It sits on top of the head with no fur overlapping it, so it reads as pasted on.",
+   "severity": "high",
+   "image": "scratch:audit/side/d02_crown_ear_join.png"
+  },
+  {
+   "view": "side.L, side.R",
+   "part": "head patch at the ear root (side-view analogue of the cheek-over-ear wedge)",
+   "where": "tan area between the brow and the ear's front edge (circle 3)",
+   "sheet": "The patch's top edge against the cream crown breaks into small feathered fur tufts. It darkens toward the ear, and the ear's front edge is a wavy line with a small lock S-curve.",
+   "ours": "A smooth, rounded, pale peach lobe rises beside the ear top. Its edge is blurred and has no line or tufts. The ear's front edge is one smooth curve.",
+   "severity": "medium",
+   "image": "scratch:audit/side/d03_earroot_patch.png"
+  },
+  {
+   "view": "side.L, side.R",
+   "part": "near ear, outer edge and fur",
+   "where": "the ear's back and front edges, mid-height (circle 4)",
+   "sheet": "The edge is wavy and asymmetric. A back lock bulges out with a notch at about mid-height, with a lighter inner lock line along the back edge. The line is thin and varies in weight, and there are only a few soft, irregular fur strokes.",
+   "ours": "The ear is a symmetric smooth egg (balloon) with an even, heavy line all round. Five or six evenly spaced parallel fur strokes look like a comb, and one separate inner stroke runs near the back top.",
+   "severity": "high",
+   "image": "scratch:audit/side/d04_ear_outline.png"
+  },
+  {
+   "view": "side.L, side.R",
+   "part": "near ear, hem and lock tips",
+   "where": "bottom of the ear over the collar and the back (circle 5)",
+   "sheet": "The hem is round and U-shaped, made of about four distinct rounded lock tips with clear notches. The rearmost lock curls up the back edge.",
+   "ours": "The hem is wide and nearly flat, with three shallow notches. Its lowest point comes to a small V-shaped point, and the back corner has a hard kink.",
+   "severity": "high",
+   "image": "scratch:audit/side/d05_ear_hem.png"
+  },
+  {
+   "view": "side.L, side.R",
+   "part": "chin, jaw and lower cheek over the collar",
+   "where": "under the mouth down to the collar's front end and along the collar top (circle 6)",
+   "sheet": "A crisp, dark warm-brown chin line runs all the way to the collar's front and ends in a small tufted wiggle. The muzzle fur's lower edge hangs over the collar's top in white wispy strands with a small scalloped fringe and a little soft peach shade above it.",
+   "ours": "The chin line is lighter (rgb 180,137,107 against the sheet's 144,101,76) and fades out about 2 pt before reaching the collar. The jaw's lower edge is simply the collar's clean top edge, with a blurred, unlined peach shade band above it and no strands or scallops. In side.R a broad blurred tan shade runs diagonally across the whole lower cheek.",
+   "severity": "high",
+   "image": "scratch:audit/side/d06_chin_collar.png"
+  },
+  {
+   "view": "side.L, side.R",
+   "part": "tag and collar front end",
+   "where": "collar's front end and the hanging tag (circle 7)",
+   "sheet": "The tag is a rounded gold heart or coin with an embossed heart and a thin darker rim, hung from a small ring. The collar's front end has a darker blue loop band where the ring attaches.",
+   "ours": "The tag is an apple or peach shape with a stem nub on top, an apple-shaped inner ring and a heavy dark-gold outline. The collar's front is a plain rounded tube end with no loop band.",
+   "severity": "medium",
+   "image": "scratch:audit/side/d07_tag_collar.png"
+  },
+  {
+   "view": "side.L, side.R",
+   "part": "forehead profile and nose join",
+   "where": "head outline from the front crown lock down the forehead to the nose (circle 8)",
+   "sheet": "One smooth S-curve runs from the first crown lock down through the stop and the bridge into a rounded, drop-shaped nose.",
+   "ours": "At the top, a stray spike stroke from the front crown lock crosses the forehead line. Partway down the forehead the line has a step kink where two segments meet. Where the bridge line meets the nose top there is a jagged black crumb, and the nose is a tilted ellipse.",
+   "severity": "low",
+   "image": "scratch:audit/side/d08_forehead_nose.png"
+  },
+  {
+   "view": "side.L, side.R",
+   "part": "front paws (near and far): outline and toe lines",
+   "where": "both front paws on the ground (circle 9)",
+   "sheet": "Round bun paws closed all the way round by an even medium-brown line about 1.5 pt wide. Two or three faint, thin, curved toe lines follow the bun's front.",
+   "ours": "A heavy dark sole stroke thickens under each paw and tapers to nothing at the heel, so the back of the paw is open. The toe marks are dark, pointed ticks standing straight up from the sole, which read as claws.",
+   "severity": "high",
+   "image": "scratch:audit/side/d09_front_paws.png"
+  },
+  {
+   "view": "side.L, side.R",
+   "part": "near front leg top",
+   "where": "across the near front leg just above the paw (circle 10)",
+   "sheet": "There is no line here: the leg melts into the paw.",
+   "ours": "A curved hook stroke about 13 pt long runs from the paw's top front across the leg and ends in a taper mid-leg.",
+   "severity": "medium",
+   "image": "scratch:audit/side/d10_leg_top_hook.png"
+  },
+  {
+   "view": "side.L, side.R",
+   "part": "near front leg back edge, paw heel and the belly between the paws",
+   "where": "between the near front paw and the hind paw at the ground (circle 11)",
+   "sheet": "A dark V-shaped crease with warm peach shade closes the front paw's heel against the hind paw. The thigh's front line runs down into that crease, and the ground line is continuous under both paws.",
+   "ours": "An open, unlined light column runs between the paws: the near paw's back has no line, a soft vertical peach band stands in for the leg's back, and the ground shadow shows through the gap. The thigh's front line stops short, before it reaches the hind paw.",
+   "severity": "high",
+   "image": "scratch:audit/side/d11_leg_back_crease.png"
+  },
+  {
+   "view": "side.L, side.R",
+   "part": "hind paw and haunch sole",
+   "where": "ground edge under the hind paw's heel and the haunch: canvas x 514-578 in side.L and x 322-386 in side.R, 6 px/pt (circle 12)",
+   "sheet": "A continuous dark sole line runs along the whole ground edge under the hind paw and haunch, measured at about 1.5-1.7 pt wide and L* about 107.",
+   "ours": "About 10.7 pt of the ground edge has no line at all: the profile scans find no dip. The paw's line and the haunch's line each stop on either side of the gap.",
+   "severity": "high",
+   "image": "scratch:audit/side/d12_hind_sole_gap.png"
+  },
+  {
+   "view": "side.L, side.R",
+   "part": "hind paw top and toes",
+   "where": "top of the hind paw where it meets the thigh (circle 13)",
+   "sheet": "The paw's top is a soft line that merges into the thigh. There are two faint, thin, curved toe lines.",
+   "ours": "The paw's top arc overshoots past the paw as a hook into the haunch and ends in a taper. The toe marks are three dark claw-like ticks standing up from the sole.",
+   "severity": "medium",
+   "image": "scratch:audit/side/d13_hind_paw_top.png"
+  },
+  {
+   "view": "side.L, side.R",
+   "part": "body side and haunch front",
+   "where": "from under the collar down to the hind paw's top (circle 14)",
+   "sheet": "The near side reads as one soft cream mass. The haunch's front is a single curved line rising from the hind paw and fading out upward, with no vertical banding.",
+   "ours": "A straight vertical light-and-dark seam runs from under the collar down to the hind paw and splits the body into two flat columns. A second vertical peach shade band runs down the back of the near front leg.",
+   "severity": "medium",
+   "image": "scratch:audit/side/d14_body_seam.png"
+  },
+  {
+   "view": "side.L, side.R",
+   "part": "tail plume edge",
+   "where": "outer edge and tip of the tail plume (circle 15)",
+   "sheet": "An irregular, flame-like edge of pointed locks with wispy strands flicking outward. The line is thin, light and broken, and the tip curls over as one continuous hooked lock.",
+   "ours": "A uniform mid-brown line with regular, evenly sized round bumps, like a cog or a cloud. At the tip, a detached inner curl stroke leaves a gap in the outline.",
+   "severity": "high",
+   "image": "scratch:audit/side/d15_tail_plume.png"
+  },
+  {
+   "view": "side.L, side.R",
+   "part": "tail root marking and the tail foot",
+   "where": "tan root of the tail beside the rump and where the tail's bottom meets the haunch (circle 16)",
+   "sheet": "The tan is painted as streaky brown brush strands radiating from the rump, darkest at the root. The tail's underside rolls into the haunch in a rounded lock.",
+   "ours": "A blurred tan blob with two or three thin white streaks across it that look like scratches. Where the tail's bottom line meets the haunch outline, it forms a sharp acute corner.",
+   "severity": "low",
+   "image": "scratch:audit/side/d16_tail_root.png"
+  },
+  {
+   "view": "side.R",
+   "part": "haunch back outline over the tail",
+   "where": "rump outline between the haunch and the tail plume, side.R canvas x about 190, y 680-935 (circle 17)",
+   "sheet": "A medium-dark warm-brown line (mirrored crop) separates the haunch from the tail cleanly.",
+   "ours": "The line turns pale grey-beige, apparently from the line-by-light rule on the lit back side, so it reads as a faint seam instead of the haunch's outline. side.L draws the same edge dark brown.",
+   "severity": "medium",
+   "image": "scratch:audit/side/d17_R_haunch_line.png"
+  },
+  {
+   "view": "side.L, side.R",
+   "part": "saddle (back patch) edge",
+   "where": "patch on the upper back behind the ear (circle 18)",
+   "sheet": "The patch has streaky, feathered brush edges with darker strands following the back's curve.",
+   "ours": "A flat, even blob with a blurred, regularly scalloped lower edge. Its top-left edge is harder than any other edge of the patch.",
+   "severity": "low",
+   "image": "scratch:audit/side/d18_saddle_edge.png"
+  },
+  {
+   "view": "side.L, side.R",
+   "part": "ground shadow",
+   "where": "ground under and in front of the paws (circle 19)",
+   "sheet": "A clearly visible lilac-grey ellipse reaches well in front of the front paws and back under the tail.",
+   "ours": "A faint, narrow, warm-grey smudge that is barely visible at phone size.",
+   "severity": "low",
+   "image": "scratch:audit/side/d19_ground_shadow.png"
+  },
+  {
+   "view": "back",
+   "part": "crown fur over each ear top (head.base / head.line meeting ear.L, ear.R) [overview #1]",
+   "where": "crown corners where the head meets the ear tops, crop px about (40-55, 25-40) left and (145-160, 25-40) right",
+   "sheet": "The crown's outline runs on as one crisp warm-brown line. It curls into a small lock hook and flows straight into the ear's outer outline. The white crown fur overlaps the ear top in soft, feathered strands, and the tan fades under them.",
+   "ours": "The white crown fur stops over the ear in a hard, flat, nearly horizontal cut with no line (a white wedge on a flat-topped tan block). Right of it is a straight blurred vertical boundary. The crown line breaks up just before the ear: a 1-px gap plus a detached tick on the left, and a zigzag of thin strokes plus a stray tick on the right. The pale taupe crown line jumps abruptly to the darker sienna ear line.",
+   "severity": "high",
+   "image": "scratch:audit/back/z_corner_L.png ; scratch:audit/back/z_corner_R.png ; scratch:audit/back/z_crown_L.png ; scratch:audit/back/z_crown_R.png"
+  },
+  {
+   "view": "back",
+   "part": "outer edge of the tail plume (tail, tail.base) [overview #9]",
+   "where": "tail, crop px x 90-145, y 150-215",
+   "sheet": "A curled plume. The right edge has 4-5 distinct rounded lock lobes, each lined. The top-left ends in a hooked curl tip over the patch, and its edge against the patch is soft and mostly unlined. The bottom lobe dips just below the haunch line. Lines are light, warm and varied.",
+   "ours": "A smooth bean or lozenge whose right edge has only faint bumps, with no hooked curl. The outline is a chain of separate strokes with gaps (top-left, top-right, lower right, bottom), plus stray inner crease strokes (one near the top, one diagonal in the lower right). The whole top edge is lined against the patch, and the line is darker than the sheet's (darkest L 56 vs 63). The bottom sits on the flat ground line, and its outline doubles with that line into a thick dark bar.",
+   "severity": "high",
+   "image": "scratch:audit/back/z_tail.png ; scratch:audit/back/z_tailtop.png ; scratch:audit/back/z_tailbottom.png"
+  },
+  {
+   "view": "back",
+   "part": "lower head edge above the collar (head.base bottom corners, head.line) [overview #4]",
+   "where": "between each ear's foot and each collar end, crop px about (50-68, 115-135) left and (132-150, 115-135) right",
+   "sheet": "The bottom of the head is two rounded, fluffy lobes. A soft lined lower edge curves down into each collar end, so the head, collar and body read as one continuous silhouette.",
+   "ours": "head.base is a rectangle (the ID pass shows straight vertical sides and a flat bottom with square corners). The exposed lower corner beside each collar end has a blurred, unlined edge. A short brown tick stops in mid-air short of the collar, and a grey smudge sits where the head-side line ends. The head's lower edge never meets the collar.",
+   "severity": "high",
+   "image": "scratch:audit/back/z_nape_L.png ; scratch:audit/back/z_nape_R.png ; scratch:audit/back/z_nape_collar.png ; scratch:audit/back/ids_crop4.png"
+  },
+  {
+   "view": "back",
+   "part": "left shoulder outline (body.back edge under back.patch.L); right shoulder line breaks [overview #6]",
+   "where": "body side from each collar end down to the haunch, crop px x 42-58, y 138-172 left; x 142-160, y 138-172 right",
+   "sheet": "Both shoulders have a crisp, continuous warm-brown outline (darkest L about 55 on the left) with a small lock notch about halfway down and a tuck where the haunch starts. On the left, the line runs over the tan marking sliver at the edge.",
+   "ours": "On the left, the outer edge has no outline at all. The back.patch.L sliver is painted over the body edge as a blurred tan smear (darkest L about 66). Above it, from the notch to the collar, is only a soft blurred stroke. On the right, the line is present but breaks into dashes at the notch and at the haunch join.",
+   "severity": "high",
+   "image": "scratch:audit/back/z_shoulder_L_ids.png ; scratch:audit/back/z_shoulder_L.png ; scratch:audit/back/z_shoulder_R.png"
+  },
+  {
+   "view": "back",
+   "part": "haunches and the bottom of the body (body.back, hind.L, hind.R lower outline) [overview #7]",
+   "where": "bottom edge, crop px x 40-160, y 195-215",
+   "sheet": "Two plump, round haunch masses that curve inward well before the ground: at y 212 the silhouette spans only x 61-139, so the bottom corners have a large radius of about 10 pt. The bottom edge is a gently wavy line with small fur bumps, and the tail's lobe dips in the middle. The line is medium warm brown and varies in weight.",
+   "ours": "One flat, straight, dark line runs across the whole width. At y 212 the silhouette spans x 47-149, so the corners stand about 11 pt (left) and 8 pt (right) further out with a radius of about 3-4 pt. The sides are nearly vertical down to the ground, with no fur bumps. The bottom line is heavier and darker than the side lines (e.g. L about 40 vs about 50 at x 150), so the rump reads as a box.",
+   "severity": "high",
+   "image": "scratch:audit/back/z_bottom.png ; scratch:audit/back/z_side_L.png ; scratch:audit/back/z_side_R.png"
+  },
+  {
+   "view": "back",
+   "part": "ears: outer edge, lock tips, fur paint (ear.L, ear.R) [overview #3]",
+   "where": "ear outer and lower edges, crop px x 0-50, y 30-140 left; x 150-203, y 30-140 right",
+   "sheet": "The outer edges are wavy, with small notches along their length (feathered). The lower edge splits into 3 deep, rounded, separately lined lock lobes. The paint is a few soft curved strokes that follow the locks.",
+   "ours": "Smooth balloon outer edges with no notches. The lower edge has only two shallow notches and the lobes are barely separated. The paint is evenly spaced, parallel, straight vertical stripes from root to tip, which at phone size read as a ribbed gourd.",
+   "severity": "medium",
+   "image": "scratch:audit/back/z_ear_L.png ; scratch:audit/back/z_ear_R.png ; scratch:audit/back/z_eartip_L.png ; scratch:audit/back/z_eartip_R.png"
+  },
+  {
+   "view": "back",
+   "part": "crown line and topknot (head.line, tuft) [overview #2]",
+   "where": "crown edge, crop px x 40-160, y 0-35; topknot bases at about (84,14) and (116,14)",
+   "sheet": "One continuous line around the two topknot lobes. Each lobe's stroke curls inward into the crown line at its base. On each side of the topknot the crown edge has a rounded lock scallop with a curled tip.",
+   "ours": "The crown line stops about 1 px (crop) short of each topknot lobe, leaving visible breaks, and each lobe stroke ends in a cut tip or small hook. A blurred, lighter band is painted under the lobes. Between the topknot and the ears the crown edge is a nearly flat thin line with tiny notch ticks instead of lock scallops. The line is uniformly thin and pale taupe.",
+   "severity": "medium",
+   "image": "scratch:audit/back/z_topknot.png ; scratch:audit/back/z_crown.png"
+  },
+  {
+   "view": "back",
+   "part": "hind paw corners (hind.L, hind.R under body.back) [overview #8]",
+   "where": "bottom outer corners, crop px (40-50, 195-212) left and (150-160, 195-212) right",
+   "sheet": "A small round bun paw bulges at each bottom corner. A small notch where the haunch line meets it continues as one soft line round the bun, with at most a faint toe line inside.",
+   "ours": "The outline breaks at the notch: the haunch line ends and a separate lower stroke starts. A pale diagonal seam stroke (the body's lower outline crossing over the hind paw) cuts inward across each paw. Below it the paw is a flat-bottomed lump with a tight corner and a heavy dark base line.",
+   "severity": "medium",
+   "image": "scratch:audit/back/z_paw_L.png ; scratch:audit/back/z_paw_R.png"
+  },
+  {
+   "view": "back",
+   "part": "collar ends and outline (collar) [overview #5]",
+   "where": "collar, crop px x 55-145, y 120-145, ends at about (60,133) and (140,133)",
+   "sheet": "A band curved round the neck. Its ends are rounded, taper and dip slightly. The blue line is thinner on top and heavier underneath, and the head's lower edge and the shoulder lines run into the ends.",
+   "ours": "A stiff bar with squared, vertical ends and small rounded corners. The slate-blue outline has the same heavy width all round, about 1.3 crop px. Neither the head edge nor the left shoulder line connects to the ends.",
+   "severity": "medium",
+   "image": "scratch:audit/back/z_collar_L.png ; scratch:audit/back/z_collar_R.png"
+  },
+  {
+   "view": "back",
+   "part": "ground contact shadow (shadow) [overview #10]",
+   "where": "under the body, crop px x 20-185, y 198-218",
+   "sheet": "A distinct soft grey ellipse that clearly shows beyond both haunches and rises behind their bottoms.",
+   "ours": "A faint, heavily blurred haze about the same width that barely shows beyond the haunches. Under the tail and middle it starts with a hard top edge at the flat ground line.",
+   "severity": "low",
+   "image": "scratch:audit/back/z_shadow.png ; scratch:audit/back/z_tailbottom.png"
+  },
+  {
+   "view": "back",
+   "part": "head sides against the ears (head.base edge, shadow.ear.L/R) [overview #11]",
+   "where": "head sides, crop px x 45-60, y 35-115 left; x 140-155, y 35-115 right",
+   "sheet": "The white head edge in front of each ear is a gentle curve with feathered white tufts reaching over the tan. It is lined only in its lower two-thirds.",
+   "ours": "A straight vertical edge from crown to collar with a soft blurred tan band beside it and a few small jagged white flecks that look like paint chips rather than tufts. The line starts only at about y 70.",
+   "severity": "low",
+   "image": "scratch:audit/back/z_headside_L.png ; scratch:audit/back/z_headside_R.png ; scratch:audit/back/z_headback.png"
+  }
+ ],
+ "groups": [
+  {
+   "name": "G1 Line spans: one continuous line per visible edge, short taper only at free ends",
+   "cause": "parts/lines.ts tapers every span at both ends (default min(5, len/3), lines.ts:89-97; DECISIONS 74 'each span tapers to nothing at both ends'), and the views pass long tapers (front.ts:706 taper [6,16] on the leg/paw span, :382-383 taper 4). The views also give each lock or segment its own span (front.ts:401, threeQuarter.ts:331 and :571-573, side.ts:593, back.ts:43-44, :325, :489). So every handoff leaves 5-17 pt below full width, and spans that start under a part fade out over visible edge. Overlap (part-over-part) edges have no depth floor, so in .R facings the line-by-light rule paints them pale. Verified in source: lines.ts:89-97, front.ts:375-395 and :700-706.",
+   "recipeChange": "In LitSpan:\n- One span per visible edge. A fur edge is one span that follows furEdge's notches.\n- Taper only free ends, over 1.5-2 pt.\n- An end that meets another line joins it at full width on a shared point.\n- An end that runs under another part carries on at least 1 pt under it at full width.\n- A new `contact: true` flag (part over part) floors depth at about 0.5, so overlap lines stay dark in both facings.\n- Paw top arcs and heels close on the neighbouring line, with no overshoot hooks.\n\nLint (draw/lint.ts) fails any visible-edge gap over 2 pt and any taper over 2 pt, unless the span cites a DECISIONS entry. New DECISIONS replace 74's taper clause, 7's 'no line between' cheek and ear, 33/72's handoff of the chin edge to the collar rim, and 64's unlined near-leg back, each citing its crop.",
+   "files": [
+    "characters/dog/src/parts/lines.ts",
+    "characters/draw/lint.ts",
+    "characters/draw/test/lint.test.ts",
+    "characters/dog/test/finish.test.ts",
+    "characters/dog/src/views/front.ts (headSpans, crownSpans, cheekLines, leg spans :706)",
+    "characters/dog/src/views/threeQuarter.ts",
+    "characters/dog/src/views/side.ts",
+    "characters/dog/src/views/back.ts"
+   ],
+   "defects": [
+    "front #2 broken torn-paper cheek line (also G4)",
+    "front #10 legs' inner edges unlined from chest to paw (also G6, G7)",
+    "front #12 outer leg line starts in mid-air, none above the elbow (also G6)",
+    "front #14 hind paw top line is an open hook (also G6)",
+    "3/4 D1 crown line ends in a blunt stub at the far ear (also G4)",
+    "3/4 D2 dashed, jagged far jaw line (also G4)",
+    "3/4 D3 near ear's inner line stops at eye level (also G4)",
+    "3/4 D4 loose tick off the crown line; line ends at the ear corner",
+    "3/4 D8 back line starts as a detached tapered stroke at the collar end",
+    "3/4 D13 hind paw top arc ends in mid-fur; dark spur at the ground (also G6)",
+    "side #2 crown line floats 2-3 pt short of the ear (also G4)",
+    "side #6 chin line fades out about 2 pt before the collar (also G4)",
+    "side #12 10.7 pt of hind sole and haunch underside unlined (also G6)",
+    "side #15 detached tip curl leaves a gap in the tail outline (also G3)",
+    "side #17 side.R haunch line over the tail turns pale grey-beige",
+    "NEW threeQuarter.R: the haunch-over-tail line and the tail outline are paler than in .L (same cause as side #17), see /tmp/claude-0/-home-user/37d7f6cb-6b62-5851-a1de-59845110fc8d/scratchpad/audit/synth/LvsmirrorR_threeQuarter.png",
+    "back #1 crown line gaps and detached ticks before each ear (also G4)",
+    "back #4 head-side tick stops in mid-air short of the collar (also G4)",
+    "back #6 no left shoulder line; right line breaks into dashes (also G6, G7)",
+    "back #8 outline breaks at the paw notch; a pale seam stroke crosses each paw (also G6)",
+    "back #9 tail outline is a chain of strokes with gaps (also G3)"
+   ],
+   "risk": "- **Motion:** ends kept at full width under a part can show once legs, head or ears rotate in Phase 4 clips, and spec L506 forbids a line on a hidden edge. Render the rig's extreme poses before sign-off.\n- **Seams:** long spans cross several tone runs (litRibbons draws one polygon per run); check for seams between runs.\n- **Lint band:** lint.ts:524-528 refuses anything outside 1.2-1.8 pt mid-span.\n- **Decisions:** 7, 33/72, 64 and 74 need entries that replace them openly.\n- **Face states:** these spans also draw the face states, and they must change with the rest drawing or the state swap pops:\n  - head.line's temple states under the perked and lifted ears (front, on p3/faces2);\n  - huffy's puffed head B (p3/faces2);\n  - the profile mouths, which use head.line as the lower lip (p3/turnedfaces);\n  - the turned perked ear's 'back of the head' span, taper [6,10] (p3/turnedfaces).\n- **Gates:** sheet-match gates are unaffected, since the lines lie inside the silhouette.\n- **Facing tests:** facing tests (mirror geometry) are unaffected; line tones in .R change by design."
+  },
+  {
+   "name": "G2 Crisp outer line: no blur on the silhouette side",
+   "cause": "litEdge draws head.line unclipped, reaching 0.5 pt past the path, and blurs the whole group at \u03c3 0.3 (lines.ts:39, :122-126, :190-194; DECISIONS 79). That makes the silhouette itself soft. The views also paint blurred cream bands over the ear roots (front.ts:421-432 \u03c3 0.9, threeQuarter.ts:332-338, back.ts:402-406, side.ts:551-552) and a lighter blurred band under the topknot lobes. litPart (the topknot curls) blurs inside its clip, which is why the topknot's outer edge stays crisp.",
+   "recipeChange": "- Clip litEdge's blurred group to the head path grown by `reach`, so any blur falls only inward. Alternatively, drop SOFT for outer lines and keep blur only for shades and contact shadows (spec L507).\n- Remove the feathered cream bands at the ear roots and under the topknot; G4's crown locks replace them.\n- Rejoin the side forehead's segments into one span (G1).",
+   "files": [
+    "characters/dog/src/parts/lines.ts",
+    "characters/dog/src/parts/topknot.ts",
+    "characters/dog/src/views/front.ts",
+    "characters/dog/src/views/threeQuarter.ts",
+    "characters/dog/src/views/side.ts",
+    "characters/dog/src/views/back.ts"
+   ],
+   "defects": [
+    "front #4 crown and topknot line blurred, thicker and lighter, fading at lock bases (also G3)",
+    "3/4 D6 soft greyish halo on the far shoulder; blurred shade blob in the centre lock",
+    "side #1 crown strokes soft and broken into segments with cream gaps (also G1)",
+    "side #8 stray spike stroke, step kink on the forehead, crumb at the nose top",
+    "back #2 crown line breaks at each topknot lobe; blurred band under the lobes (also G1, G3)"
+   ],
+   "risk": "- **Fringe:** head.line's reach exists to cover head.base's antialiased stencil edge. A tight clip can expose a light fringe in the 3x atlas and in the WebGL/SpriteKit runtimes (premultiplied alpha), so check the runtime renders and parity, not only still.ts.\n- **Faces check:** the Faces check crops include the crown and brows, so re-run every face clip.\n- **Turned states:** turned head.line states (p3/turnedfaces) call litEdge too."
+  },
+  {
+   "name": "G3 Fur locks: taller, narrower, uneven, leaning, only where the sheet draws tufts (cheeks, chin, chest, crown, tail)",
+   "cause": "draw/fur.ts:56-70 gives each lock its share of the span, so locks stand 0.5-2.3 pt high on 4-9 pt widths, with blunt tips (tipRound 0.24-0.6). They were shrunk after reviewers read the broken line (G1) as lace or zigzag (fur.ts:6-8; DECISIONS 72, 85). The tail's locks are 1.1-2.3 pt on a 45 pt span and evenly sized, which reads as a cog or cloud. The front chest also carries dark dash strokes the sheet does not draw.",
+   "recipeChange": "Type the locks per crop, never procedurally:\n- length 2-4 pt, width 3-5 pt, tipRound 0.25 or less;\n- lean 0.3-0.6 along the fur flow;\n- neighbours differing by at least 20% in size;\n- notches dipping 0.5-1 pt inside the base.\n\nBy region:\n- **Tail:** pointed, flame-like locks with wisps, and the tip as one hooked lock (back: a hooked curl over the patch).\n- **Chest under each collar end:** one small fur step, not saw-teeth.\n- **Front chest:** delete the dash strokes.\n- **Below the front tag:** a fluffy V of downward tufts.\n\nLand G1 first, since the broken line, not the lock size, caused the 'lace' reading. Add validation to fur.ts for minimum length/width ratio and size variation.",
+   "files": [
+    "characters/draw/fur.ts",
+    "characters/draw/test/fur.test.ts",
+    "characters/dog/src/views/front.ts (cheekLocks, chinLocks, crownLocks, chest strokes, chest V)",
+    "characters/dog/src/views/threeQuarter.ts (:87-89 chest, :220-230 tail)",
+    "characters/dog/src/views/side.ts (:115-119 tail)",
+    "characters/dog/src/views/back.ts (:83 crown, :195-199 tail)"
+   ],
+   "defects": [
+    "front #8 saw-tooth teeth under each collar end, then a smeared edge (also G7)",
+    "front #9 dark dashes beside the tag the sheet does not draw",
+    "3/4 D14 tail: 2-3 shallow notches, smooth inner arc, serrated root bottom (also G8)",
+    "NEW 3/4 chest side under the collar, the far leg's top outer edge: a chipped saw-tooth like front #8 (D11 rated it as 'wavy bumps', low); see /tmp/claude-0/-home-user/37d7f6cb-6b62-5851-a1de-59845110fc8d/scratchpad/audit/synth/tq_legs.png",
+    "side #16 acute corner where the tail's underside meets the haunch (tan root: G8)",
+    "back #9 tail is a smooth bean with no hooked curl, stray inner creases, bottom doubled with the ground line"
+   ],
+   "risk": "- **Known failure modes:** fur.ts:6-8 records them: procedural scallops read as a zigzag, even lobes as notches, round lobes as cloud scallops. A reviewer round must judge at phone scale.\n- **Silhouette:** tips add 2-4 pt; IoU and edgeP95 should hold, but re-run all six views.\n- **Lint:** the 4 pt exemption covers only declared fur spans (lint.ts:511-518).\n- **Spec:** L508 lists the head tuft, cheeks, chest and tail tips; chin scallops and the crown's side locks need a DECISIONS entry citing the crop (see the founder questions).\n- **Faces check:** cheeks and chin lie inside the face crops."
+  },
+  {
+   "name": "G4 Head fur over the ear roots, cheeks and jaw: one head-fur builder for every view",
+   "cause": "Each view types its own head.base, and all four make the same moves:\n- **Cheeks:** the cheek puff leaves the face's side at a concave corner, and the clumps start lower (front.ts:233-271).\n- **Crown over the roots:** the crown's locks there are 0.55-1.1 pt (front.ts:279-280, back.ts:83), and the crown line stops before the root (front.ts:392), so the ear top reads as a straight cut. This misses the existing DECISIONS 89 ('the crown's line runs on into each ear's') and 68 (profile ear top feathered under the crown).\n- **Chin, front:** no head.line span (front.ts:377-386 hands the edge to chinOnCollar's dark rim). Chin locks are 0.6-0.95 pt. A \u03c3 2.4 band sits under the jaw while keep-zones hold the puffs unshaded to their rims (front.ts:365-369), so the lower face reads as a flat block. The jaw corner is tight (front.ts:225-227).\n- **Chin, 3/4:** the same pattern (threeQuarter.ts:152-155, :305-306, :319-325, :535-542).\n- **Back:** head.base is a rectangle with square bottom corners.",
+   "recipeChange": "Add a shared builder (new parts/headfur.ts) that each view calls with its own crop nodes:\n- **Crown over the root:** 2-3 crown locks hang over each ear root. The crown's span runs unbroken into the ear's outer line (G1) and hides the ear's top.\n- **Cheek over the ear:** a convex puff in 2-4 clumps (G3), with one span from the face-side line, round every clump, to the jaw. It uses the tan ladder where it lies on the ear, and is lined lightly or partly where the crop shows only a short low line.\n- **Chin:** a rounded mass with corners of r 6 pt or more. Its lower edge is one lit span with 5-7 small outlined scallops dipping onto the collar. Remove chinOnCollar's dark rim stroke but keep the shadow.chin.collar part. Shade the lower cheeks round, letting the shade enter the keep-zones.\n- **Back:** the head's bottom becomes two rounded lobes whose lined edges run into the collar ends.\n- **Profile:** the chin line reaches the collar and ends in a small tufted wiggle, with wispy strands over the collar top.",
+   "files": [
+    "characters/dog/src/parts/headfur.ts (new, lane 1)",
+    "characters/dog/src/views/front.ts (head, PUFF, cheekLocks, chinLocks, headSpans, crownSpans, chinOnCollar, ear-root bands)",
+    "characters/dog/src/views/threeQuarter.ts",
+    "characters/dog/src/views/side.ts",
+    "characters/dog/src/views/back.ts",
+    "characters/dog/test/dog.test.ts (shadow.chin.collar clip pin)"
+   ],
+   "defects": [
+    "front #1 each ear ends at the top in a straight cut; the crown outline stops at it (also G1, G2, G5)",
+    "front #3 chin and lower muzzle a square block with a blurred, unlined lower edge and no scallops",
+    "3/4 D1 far ear root: hard, stepped cream wedge; straight unlined seam",
+    "3/4 D2 far cheek: torn grey fringe, hard notch, no contact shade on the ear (also G3)",
+    "3/4 D3 near cheek: vertical, jagged, unlined cut against the ear; square lower corner",
+    "3/4 D4 near ear root: flat, blurred, unlined top (also G2)",
+    "3/4 D7 chin a square block; airbrushed band, no line, no scallops; cream notch at the far jaw",
+    "side #3 smooth pale peach lobe beside the ear top with no tufts (also G8)",
+    "back #1 white crown fur stops over each ear in a flat, unlined cut",
+    "back #4 head.base a rectangle; blurred, unlined lower corners that never meet the collar",
+    "back #11 straight vertical head sides with a blurred tan band and chip-like flecks (also G7)"
+   ],
+   "risk": "head.base and head.line also draw the face states:\n- huffy's puffed head B (p3/faces2's `head(puff)` builder and parts/cheeks.ts);\n- the temple states under the perked and lifted ears;\n- the turned perked ear and the profile mouths.\n\nAll must come from the same builder, or a state swap pops. Other risks:\n- **Pinned test:** dog.test.ts:68-80 pins shadow.chin.collar's clip group.\n- **Landmarks:** head width (93 pt between the ears' inner edges, DECISIONS 7) and the cheek and eye landmarks must stay within 2.8 pt.\n- **Faces check:** facematch crops the lower face, so re-run all 17 face clips.\n- **Collar:** the collar ends tuck under the new cheek mass; keep the collar corner exemption (drawings.ts:49) accurate."
+  },
+  {
+   "name": "G5 Ear edges: feathered outer edge, 3-4 lock tips at the hem, varied line, uneven paint",
+   "cause": "- **Shape:** every view types the ear as a smoothed droplet with 1-3 shallow notches (front.ts:151-174, threeQuarter.ts:123-130, side.ts:156-160, back.ts:119-128).\n- **Line:** one even line runs all the way round (front.ts:550-561).\n- **Paint:** ear.ts paints locks only inside the ear and never builds the edge (ear.ts:39-50, :70-78). Its guards cap the hem at 2-3 clumps (ear.ts:40-41; finish.test.ts:126-139; DECISIONS 76, 81).\n- **Spacing:** in side and back the paint is evenly spaced parallel strokes (a comb or ribbed gourd), while front and 3/4 were judged fine. So spacing is not controlled.",
+   "recipeChange": "earFur builds the edge itself:\n- **Outer edge:** furEdge with 1-2 lock steps (one about 40% down).\n- **Hem:** 3-4 rounded lock tips with notches 1-2 pt deep. In profile the rearmost lock curls up the back edge.\n- **3/4 far ear:** a rounded top tucked under the crown (G4) instead of the straight-diagonal 'sail'.\n- **Line:** one continuous span (G1), thin and light at the top, heavier and darker at the hem.\n- **Paint:** locks irregular in spacing and length, ending in the hem tips.\n\nIt returns shape, paint and spans, so every view gets it from one change. Calibrate against master.feature.floppy-ears.png. New DECISIONS entry replaces the 2-3 clump guard.",
+   "files": [
+    "characters/dog/src/parts/ear.ts",
+    "characters/dog/test/finish.test.ts (:126-139)",
+    "ear nodes in characters/dog/src/views/front.ts, threeQuarter.ts, side.ts, back.ts"
+   ],
+   "defects": [
+    "front #5 smooth balloon outer edge; 1-2 shallow bumps instead of 3 lock tips; uniform line",
+    "3/4 D5 far ear a sail with a straight top; near ear a smooth balloon; even heavy outlines; smooth hems",
+    "side #4 symmetric smooth egg with a heavy even line; comb-like parallel fur strokes",
+    "side #5 hem wide and nearly flat with shallow notches, a V point and a kinked back corner",
+    "back #3 smooth balloon edges, two shallow notches, ribbed vertical stripes"
+   ],
+   "risk": "- **Guards:** finish.test.ts:126-139 and ear.ts:40-41 must be revised through a DECISIONS entry citing the floppy-ears panel, not loosened silently.\n- **Ear states:** the front perked and lifted ears and the turned perked ears (p3/faces2, p3/turnedfaces) must use the same builder, or the outline changes on a state swap.\n- **Lint:** hem tips must be declared fur or the 4 pt rule refuses them, and spec L508 does not list ear tufts (founder question).\n- **Node budget:** 24 hand nodes per shape.\n- **Silhouette:** ears are the largest share of the outline; re-run IoU and edgeP95.\n- **Motion:** ears overshoot and settle as rigid parts, so tips are safe there."
+  },
+  {
+   "name": "G6 Paws and legs: bun paws, scalloped soles, soft toe lines, a light varied line, short plump columns with fur bumps (the founder's paws and leg edges)",
+   "cause": "- **Toe lines:** paw.ts types only the toe lines, with a gradient from 0.8 opacity at 20% to 0.08 at the top (paw.ts:23-30). Only 2-3 pt show, as dark ticks hanging off the sole, which read as claws.\n- **Paw shapes:** every view types flat soles (within 1.4 pt of flat), toe dips of 0.1-0.7 pt (none in side) and outer corners of about r 4 pt, on straight columns (front.ts:94-120, threeQuarter.ts:57-76, side.ts:82-101, back.ts:174-179).\n- **Sole line:** the ground term makes the whole sole the darkest tone at 1.6 pt with only a \u00b16% wobble (lines.ts:37, :49, :53, :96). finish.test.ts:70-80 pins at least 1.55 pt and tones 8 and up (DECISIONS 74, 79).\n- **Leg lines:** the front's single span (inner side, paw, outer side) has taper [6,16] (front.ts:706), so leg lines start in mid-air and the outer line runs up near the collar, which makes the tube look.\n- **Missing and stray marks:** no view draws an elbow or haunch bump; paw top arcs overshoot as hooks or cuffs; DECISIONS 64 leaves the near leg's back and heel unlined.\n- **Existing decisions not met:** DECISIONS 47 (bun paws wider than the leg) and 82 (outline closed all round) already ask for this, so this is an implementation gap.",
+   "recipeChange": "**Paw builder in paw.ts, used by every view.**\n- **Shape:** a bun 10-20% wider than the leg, with a rounded bottom of 2-3 toe lobes. The sole scallops up 0.5-0.8 pt at each toe line.\n- **Corners:** r 4 pt or more, unless the founder allows the sheet's tighter toe lobes.\n- **Toe lines:** 2-3, rising 40-50% of the paw's height, following the dome, in the warm line at about 50% opacity, fading gently, never darker than the outline.\n- **Outline:** closed round every visible edge. The top arc stops at the leg's line, and hind paws close against the haunch.\n\n**Line (lines.ts).** The ground term applies only to the middle ~60% of the sole, where the paw presses: 1.3-1.5 pt there, thinning to about 1.2 pt and lightening up the sides, with \u00b115% wobble.\n\n**Legs.**\n- **Columns:** slightly bulging. Their lines start below the chest fur at a small elbow bump (front, 3/4), with a haunch notch where the haunch leaves the flank (front #13), and inner edges lined down to the paws.\n- **Side:** a heel crease V against the hind paw and a continuous ground line under the hind paw and haunch.\n- **Back:** haunch bottoms rounded (corner r about 10 pt; at crop y 212 the silhouette spans x 61-139) with small fur bumps, the bottom line no darker than the sides.\n\n**Test.** Revise finish.test.ts's ground-line test with a new DECISIONS entry citing the founder's note ('a lighter, warmer, varied line').",
+   "files": [
+    "characters/dog/src/parts/paw.ts",
+    "characters/dog/src/parts/lines.ts (ground term, wobble)",
+    "characters/dog/test/finish.test.ts (:70-80)",
+    "characters/dog/src/views/front.ts (legs :94-120, leg spans :700-706, landmarks :840-847)",
+    "characters/dog/src/views/threeQuarter.ts (:57-76, :258-274, :683)",
+    "characters/dog/src/views/side.ts (:82-101, :260-265, :618)",
+    "characters/dog/src/views/back.ts (:174-179)"
+   ],
+   "defects": [
+    "front #11 long straight tubes; flat-bottomed paws with square corners; two short toe ticks; heavy uniform line about 1.7 pt",
+    "front #13 one smooth teardrop from collar to hind paw: no haunch notch (also G8)",
+    "front #14 flat mitten hind paws; heavy line",
+    "NEW front: the outer leg line runs up to just under the collar with parallel sides, the main source of the 'tube' look (not leg length; landmarks pass); see /tmp/claude-0/-home-user/37d7f6cb-6b62-5851-a1de-59845110fc8d/scratchpad/audit/synth/front_legs.png",
+    "3/4 D10 three separate thin lines form a Y instead of the tufted chest V (also G3, G7)",
+    "3/4 D11 far leg's outer edge: bumps on the upper third, then a straight line",
+    "3/4 D12 flat paws, constant dark 1.75 pt line, dark toe ticks, heavy cuff arc over the near paw",
+    "side #9 heavy sole stroke tapering open at the heel; claw-like toe ticks",
+    "side #10 a 13 pt hook stroke across the near front leg",
+    "side #11 open, unlined light column between the paws; thigh line stops short (also G7)",
+    "side #13 hind paw's top arc overshoots into the haunch; three claw ticks",
+    "back #7 one flat dark bottom line; corners about 11/8 pt too far out with r 3-4 pt; boxy rump",
+    "back #8 flat-bottomed paw lump with a tight corner and a heavy base line (also G1)"
+   ],
+   "risk": "- **Tests and lint:**\n  - finish.test.ts:70-80 (DECISIONS 74, 79) must be revised openly.\n  - The 4 pt lint applies to paws, which are not fur: toe bumps of 0.8 pt or less over 5 pt pass; the stubby-paws panel's deeper toe lobes (about r 3 pt) would not (founder question).\n- **Landmarks and anchor:**\n  - paw.front.L/R, paw.hind.L/R and seat (front.ts:840-847; tolerance 2.8 pt).\n  - The ground anchor match.py uses (root on the crop's ground) needs the lowest sole point at y 0.\n  - Silhouette IoU at the ground.\n- **Motion:**\n  - Paws must stay planted in Phase 5, and scalloped soles change the contact points.\n  - Leg pivots in rig.json stay unchanged.\n  - Full-width line ends under the body (G1) must not show when the legs rotate.\n- **ID pass:** leg and paw boundaries."
+  },
+  {
+   "name": "G7 Shade bands and seams at part joins",
+   "cause": "Soft fills end on unlined part edges inside the silhouette:\n- **Front between the legs:** between() paints tan at 0.35-0.9 opacity, cut straight by the legs' unlined inner edges (front.ts:569-578; DECISIONS 25).\n- **Front saddle:** its inner edge stops 0-2 pt short of the leg line and is blurred \u03c3 1.4 (front.ts:334-335, :608), leaving a cream seam.\n- **3/4 shoulder:** body.front's shade stops hard against body.back.\n- **3/4 far leg:** painted peach-tan (dE about 4.7).\n- **Turned thighs:** a faint separate line beside a highlight strip (threeQuarter.ts:258-274, side.ts:260-265).\n- **Side near-side group:** a vertical light/dark seam, plus a peach band behind the near front leg (DECISIONS 64).\n- **Back:** back.patch.L is painted over the body's edge.",
+   "recipeChange": "Rule: a shade or marking never ends on a part boundary inside the silhouette unless that boundary is lined. To meet it:\n- Paint a light group's shade once, clipped to the group's union, so it crosses joins continuously.\n- The dark between the front legs becomes the two legs' inner lines plus a light warm shade (opacity 0.35 or less, no hard sides).\n- The saddle reaches under the leg's line.\n- The far leg is cream with a soft shade.\n- The thigh front is one curved line rising from the hind paw and fading upward, with no highlight strip.\n- Side: the near-side seam goes.\n- Back: the patch sits inside the lined edge.\n\nEnforce it with the seam measure (h) in checkDesign.",
+   "files": [
+    "characters/dog/src/views/front.ts (between, saddle feather, chest shade, shadow.chin)",
+    "characters/dog/src/views/threeQuarter.ts (far leg fill, shoulder shade, thigh)",
+    "characters/dog/src/views/side.ts (belly, THIGH, near-side group)",
+    "characters/dog/src/views/back.ts (back.patch.L)",
+    "characters/draw/paint.ts (only if group shading needs kit support; lane 1)"
+   ],
+   "defects": [
+    "front #10 tan wedge, hard-sided stripe and peach glow between the legs; no chest V (also G3, G6)",
+    "front #12 light airbrushed seam between the haunch and the leg on the viewer-left (also G6)",
+    "3/4 D9 peach shade band with a hard, straight, unlined edge under the collar's near end",
+    "3/4 D10 far leg painted peach-tan; the chest crosses it on a hard unlined diagonal",
+    "3/4 D13 pale highlight strip up the thigh front beside a long straight line",
+    "side #14 vertical light/dark seam splitting the body into two columns; peach band behind the near leg",
+    "back #6 back.patch.L's tan smear over the left shoulder edge (line part in G1)"
+   ],
+   "risk": "- **Decisions:** 25, 34 and 64 are replaced.\n- **Facing tests:** facing.test.ts's light-from-top-left shade-centroid tests may move.\n- **Palette:** the palette gate (dE2000 3.0 or less) runs per region.\n- **Markings:** markings.json area checks (the saddle seen from the front is 1.2-1.4 times phase 2's patch) and markingPlaceShareOfHead 0.03."
+  },
+  {
+   "name": "G8 Marking edges: feathered brush edges, no airbrush blobs, no white scratches",
+   "cause": "marking.ts paints each marking as a blurred fill inside a mask (DECISIONS 83), with thin white hairline streaks across it. Patch shapes are typed squarish, and edges are blurred evenly or regularly scalloped instead of brushed.",
+   "recipeChange": "- **Edges:** uneven, seeded feathered strands along the fur flow, with darker strands inside, and no white hairlines.\n- **Front eye patches:** rounded arcs with a feathered top, keeping the viewer-left cream temple strip.\n- **Tail root:** radiating brush strands, darkest at the root.\n- **Haunch:** tan streaks as on the crop.\n- **Saddle:** streaky edges that follow the back's curve.",
+   "files": [
+    "characters/dog/src/parts/marking.ts",
+    "patch nodes in characters/dog/src/views/front.ts, threeQuarter.ts, side.ts, back.ts"
+   ],
+   "defects": [
+    "front #6 squared eye-patch bands with bumpy tops; no cream strip at the viewer-left temple",
+    "side #18 flat saddle blob with a blurred, regularly scalloped lower edge",
+    "NEW tail root in 3/4 and side: airbrushed blob with white hairline scratches (the tan-root half of 3/4 D14 and side #16)",
+    "front #13 flat tan haunch fill and blurred airbrush patch instead of streaks (shape in G6)"
+   ],
+   "risk": "- **Checks:** marking placement and area checks.\n- **Right side:** the .R facings show their own side's markings (DECISIONS 102).\n- **Seeding:** seeded strands must be fixed, never re-seeded, so they never shimmer."
+  },
+  {
+   "name": "G9 Collar ends and edges; side tag",
+   "cause": "Each view types its own collar, with:\n- a uniform outline all round, including the wobbly top under the chin;\n- blunt, rounded-square ends, allowed by the lint corner exemption for the collar (drawings.ts:49);\n- from behind, a stiff bar.\n\nThe side view's tag is drawn as an apple with a stem and a heavy rim.",
+   "recipeChange": "- **Line:** heavier on the bottom edge. The top edge stays unlined under the chin fur, which G4's scallops overlap.\n- **Ends:** taper and tuck under the cheek fur, or meet the shoulder and head lines (back).\n- **Back band:** curved round the neck, with rounded, tapering ends that dip slightly.\n- **Side tag:** a rounded heart or coin with an embossed heart and a thin darker rim, on a ring, with a darker loop band at the collar's front end.",
+   "files": [
+    "characters/dog/src/views/front.ts",
+    "characters/dog/src/views/threeQuarter.ts",
+    "characters/dog/src/views/side.ts",
+    "characters/dog/src/views/back.ts",
+    "characters/dog/src/parts/tag.ts (side tag)"
+   ],
+   "defects": [
+    "front #7 flatter band with an all-round outline and a wobbly top; blunt, outlined ends",
+    "3/4 D8 unlined fuzzy top edge; near end cut square short of the back line; pale-pill clasp (gap: G1)",
+    "back #5 stiff bar with square ends and an even, heavy outline; no line meets the ends",
+    "side #7 apple-shaped tag with a stem nub; plain tube end with no loop band"
+   ],
+   "risk": "- **Lint:** the collar's corner exemption text in drawings.ts must stay true.\n- **Tag swing:** the tag's pivot and swing (tag.ring landmark).\n- **Chin shadow:** the chin shadow's clip lies on the collar."
+  },
+  {
+   "name": "G10 Ground contact shadow",
+   "cause": "Each view draws a narrow, faint, warm haze close under the paws. The sheet paints a broad soft grey-lilac ellipse reaching well past the haunches and tail.",
+   "recipeChange": "One shadow recipe (a shared helper in lane 1, sized per view from its crop): a wide soft ellipse in the palette's soft-shadow colour, darkest under the paws, extending past both haunches and the tail. It fades from its top edge, with no hard edge at the ground line.",
+   "files": [
+    "characters/dog/src/views/front.ts",
+    "characters/dog/src/views/threeQuarter.ts",
+    "characters/dog/src/views/side.ts",
+    "characters/dog/src/views/back.ts"
+   ],
+   "defects": [
+    "front #15",
+    "3/4 D15",
+    "side #19",
+    "back #10 (also its hard top edge under the tail)"
+   ],
+   "risk": "Silhouette IoU leaves the ground shadow out (groundShadowLeftOut), so keep it its own part so the mask still drops it. On Home it falls on the person's background, a low risk."
+  }
+ ]
+}
