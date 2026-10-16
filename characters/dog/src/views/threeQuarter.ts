@@ -366,7 +366,8 @@ function headLinePiece(F: Facing, temple = false): Piece {
  * near eye a slightly tall oval (the sheet's dark eye runs x −46.5 to −28.4 and y −105.3 to −85.6), its white a
  * crisp crescent down its outer side from about two o'clock round to its foot, widest (1.9 pt) low on the outer
  * side; the far eye narrower and turned 15° toward the nose, its white up its outer side above the level, 1.3 pt at
- * its widest; one catchlight each where the sheet's sits, high on the nose's side.
+ * its widest; the large catchlight each where the sheet's sits, high on the nose's side, and the tiny one below it
+ * that every view's open eye carries (Q26, DECISIONS 201; the crop draws only the large one).
  */
 const EYES: Record<"L" | "R", EyeSpec> = {
   L: {

@@ -452,8 +452,8 @@ function headLinePiece(F: Facing): Piece {
  * tall oval (the sheet's eye runs x −74.3 to −58 and y −110.6 to −89.3, its iris x −73.8 to −63) leaning 6° back at
  * its top; the rim dark all round, heaviest over the top and down the back, where the lash line lies on it; the
  * white a crisp crescent between the rim and the iris all down the back, widest (2.9 pt, the sheet's 2.7 to 3.1) a
- * little below the back's level; and one catchlight where the sheet's sits (x −68.3, y −104.3; Q26's default, the
- * side crop shows one).
+ * little below the back's level; the large catchlight where the sheet's sits (x −68.3, y −104.3), and the tiny one
+ * below it that every view's open eye carries (Q26, DECISIONS 201; the side crop draws only the large one).
  */
 const EYE: EyeSpec = {
   centre: [-66.4, -99.7], rx: 7.6, ry: 10.4, turn: 4, noseward: -1,
