@@ -1,7 +1,7 @@
 """Tests for the pre-commit hook (tools/precommit.sh), run as git runs it, in a
 small repository of stand-ins: the copy lint, the reference prep and the sheet
 match's tests are stub scripts, and node, npm and npx are stubs that record the
-front's sheet match and build into build/ as look.ts does.
+front's sheet match and the Faces check and build into build/ as look.ts does.
 
     python3 -m unittest discover -s tools -p test_precommit.py -v
 
@@ -12,6 +12,7 @@ import os
 import shutil
 import subprocess
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
@@ -65,12 +66,25 @@ FILES = {
     "tsconfig.json": "{}\n",
 }
 
-# node records the front match's folder and arguments and builds into build/ as look.ts does; npm and npx pass.
+# node records each look's folder and arguments and builds into build/ as look.ts does: the front's match, or with
+# --faces the Faces check, which marks while it runs so the front's can see it beside it; npm and npx pass.
 NODE = """#!/bin/sh
 if [ "$1" = runtime-web/lab/look.ts ]; then
   echo "$PWD $*" >> "$STUB_LOG"
-  mkdir -p build/characters/dog build/qa/front
+  mkdir -p build/characters/dog
   echo '{}' > build/characters/dog/atlas.json
+  case " $* " in
+    *" --faces "*)
+      touch "$STUB_LOG.faces-running"
+      mkdir -p build/qa/faces/shy
+      echo evidence > build/qa/faces/shy/beside.png
+      echo "  shy  stand-in verdict"
+      sleep "${STUB_FACES_SECONDS:-0}"
+      rm -f "$STUB_LOG.faces-running"
+      exit "${STUB_FACES_EXIT:-0}";;
+  esac
+  [ -e "$STUB_LOG.faces-running" ] && echo "the front's match ran beside the Faces check" >> "$STUB_LOG.beside"
+  mkdir -p build/qa/front
   echo evidence > build/qa/front/compare.png
   sleep "${STUB_LOOK_SECONDS:-0}"
   exit "${STUB_LOOK_EXIT:-0}"
@@ -82,6 +96,10 @@ FRONT = ["characters/dog/src/front.ts", "characters/draw/paint.ts", "characters/
          "runtime-web/lab/look.ts", "characters/sheetmatch/match.py", "characters/refprep/prepare.py", "characters/dog/model.json",
          "characters/dog/ref/sheet.txt", "characters/dog/refmap/map.json", "package.json", "package-lock.json", "tools/requirements.txt"]
 ELSEWHERE = ["docs/notes.md", "characters/dog/test/dog.test.ts", "characters/dog/DECISIONS.md", "runtime-web/test/rig.test.ts"]
+# What the Faces check watches: the dog's source, the sheet match, and what the dog is judged against; what it does not.
+FACES = ["characters/dog/src/front.ts", "characters/sheetmatch/match.py", "characters/dog/refmap/map.json", "characters/dog/model.json"]
+NOT_FACES = ["characters/draw/paint.ts", "characters/build/build.ts", "runtime-web/src/rig.ts", "runtime-web/lab/look.ts",
+             "characters/refprep/prepare.py", "characters/dog/ref/sheet.txt", "docs/notes.md", "characters/dog/test/dog.test.ts"]
 
 
 class HookTest(unittest.TestCase):
@@ -96,7 +114,7 @@ class HookTest(unittest.TestCase):
             (bin_dir / name).write_text(script)
             (bin_dir / name).chmod(0o755)
         # Nothing of a running commit's git state reaches the little repository's git.
-        self.env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_") and k != "HUDDLINGS_FRONT_MATCH"}
+        self.env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_") and k not in ("HUDDLINGS_FRONT_MATCH", "HUDDLINGS_FACES")}
         self.env.update(PATH=f"{bin_dir}{os.pathsep}{os.environ['PATH']}", STUB_LOG=str(self.log), GIT_CONFIG_NOSYSTEM="1",
                         GIT_AUTHOR_NAME="Hook test", GIT_AUTHOR_EMAIL="hook@example.com", GIT_COMMITTER_NAME="Hook test",
                         GIT_COMMITTER_EMAIL="hook@example.com")
@@ -119,16 +137,18 @@ class HookTest(unittest.TestCase):
 
     def hook(self, *changed, cwd=None, **env):
         """Changes and stages each file, then runs the hook as git would: its exit code, what it said, and the
-        front match's runs."""
+        front match's runs (the Faces check's are self.faces after it)."""
         cwd = cwd or self.repo
         for name in changed:
             with open(cwd / name, "a") as f:
                 f.write("\n")
             self.git("add", name, cwd=cwd)
         self.log.unlink(missing_ok=True)
+        Path(f"{self.log}.beside").unlink(missing_ok=True)
         ran = subprocess.run(["sh", "tools/precommit.sh"], cwd=cwd, env={**self.env, **env}, capture_output=True, text=True)
-        looks = self.log.read_text().splitlines() if self.log.exists() else []
-        return ran.returncode, ran.stdout + ran.stderr, looks
+        runs = self.log.read_text().splitlines() if self.log.exists() else []
+        self.faces = [r for r in runs if " --faces " in f"{r} "]
+        return ran.returncode, ran.stdout + ran.stderr, [r for r in runs if r not in self.faces]
 
     def test_the_reference_prep_check_never_rewrites_what_the_sheet_match_tests_read(self):
         # Before, it deleted and wrote ref/ again in the one checkout while they read it.
@@ -187,17 +207,70 @@ class HookTest(unittest.TestCase):
                 self.git("reset", "-q", "--hard")
                 (self.repo / path).unlink(missing_ok=True)
 
+    def test_the_faces_check_runs_by_default_on_the_dog_s_source_the_sheet_match_and_what_it_is_judged_against(self):
+        for name in FACES:
+            with self.subTest(staged=name):
+                code, said, _ = self.hook(name)
+                self.assertEqual(code, 0, said)
+                self.assertEqual(len(self.faces), 1, said)
+                self.assertIn("shy  stand-in verdict", said, "its lines are shown when it passes")
+                self.git("reset", "-q", "--hard")
+        for name in NOT_FACES:
+            with self.subTest(staged=name):
+                code, said, _ = self.hook(name)
+                self.assertEqual((code, self.faces), (0, []), said)
+                self.git("reset", "-q", "--hard")
+
+    def test_the_faces_check_runs_beside_the_front_s_match_in_a_checkout_of_its_own(self):
+        # It takes the longest, so it starts first and runs while everything else does; it builds in its own checkout,
+        # never where the front's match or the sheet match's tests read.
+        code, said, looks = self.hook("characters/dog/src/front.ts", STUB_FACES_SECONDS="2", STUB_READ_SECONDS="0.5")
+        self.assertEqual(code, 0, said)
+        self.assertEqual((len(looks), len(self.faces)), (1, 1), said)
+        self.assertTrue(Path(f"{self.log}.beside").exists(), "the front's match ran after the Faces check ended")
+        front_dir, faces_dir = looks[0].split()[0], self.faces[0].split()[0]
+        self.assertEqual(faces_dir, f"{front_dir}/faces")
+        self.assertIn("--faces --qa " + faces_dir + "/build/qa", self.faces[0])
+
+    def test_huddlings_faces_0_skips_it_and_says_so(self):
+        code, said, looks = self.hook("characters/sheetmatch/match.py", HUDDLINGS_FACES="0")
+        self.assertEqual((code, self.faces, len(looks)), (0, [], 1), said)
+        self.assertIn("the dog's Faces check is skipped (HUDDLINGS_FACES=0)", said)
+        # Any other value runs it, as no value does; HUDDLINGS_FRONT_MATCH=0 leaves it running.
+        code, said, looks = self.hook("characters/sheetmatch/match.py", HUDDLINGS_FACES="1", HUDDLINGS_FRONT_MATCH="0")
+        self.assertEqual((code, len(self.faces), looks), (0, 1, []), said)
+
+    def test_a_failing_faces_check_fails_the_commit_and_keeps_its_evidence(self):
+        for exit_code in ("1", "2"):
+            with self.subTest(exit=exit_code):
+                code, said, _ = self.hook("characters/dog/model.json", STUB_FACES_EXIT=exit_code)
+                self.assertEqual(code, 1)
+                self.assertIn("the dog's faces fail the Faces check", said)
+                self.assertIn("shy  stand-in verdict", said)
+                self.assertEqual((self.repo / "build/qa/faces/shy/beside.png").read_text(), "evidence\n")
+                self.git("reset", "-q", "--hard")
+
+    def test_a_failing_front_match_ends_the_hook_without_waiting_for_the_faces_check(self):
+        # The front's match fails first; the hook exits at once, stopping the Faces check running beside it.
+        start = time.monotonic()
+        code, said, _ = self.hook("characters/dog/src/front.ts", STUB_LOOK_EXIT="1", STUB_FACES_SECONDS="30")
+        self.assertEqual(code, 1)
+        self.assertIn("the dog's front fails its sheet match", said)
+        self.assertLess(time.monotonic() - start, 20, "the hook waited for the Faces check")
+
     def test_the_raster_cache_is_the_main_checkouts_in_a_worktree_too(self):
         cache = str(self.repo.resolve() / "build" / "cache")
         _, said, looks = self.hook("characters/dog/src/front.ts")
-        self.assertTrue(looks[0].endswith(f"--cache {cache}"), looks)
+        for run in looks + self.faces:
+            self.assertTrue(run.endswith(f"--cache {cache}"), run)
         self.git("reset", "-q", "--hard")
         worktree = self.root / "worktree"
         self.git("worktree", "add", "-q", str(worktree))
         (worktree / "node_modules").mkdir()
         code, said, looks = self.hook("characters/dog/src/front.ts", cwd=worktree)
         self.assertEqual(code, 0, said)
-        self.assertTrue(looks[0].endswith(f"--cache {cache}"), looks)
+        for run in looks + self.faces:
+            self.assertTrue(run.endswith(f"--cache {cache}"), run)
 
 
 if __name__ == "__main__":
