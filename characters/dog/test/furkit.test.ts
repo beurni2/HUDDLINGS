@@ -16,6 +16,7 @@ import { HEAD_FUR, headFur, type HeadFurSpec } from "../src/parts/headfur.ts";
 import { CONTACT_DEPTH, FREE_TAPER, litEdge, litRibbons, SOLE, UNDER_RUN, type LitSpan } from "../src/parts/lines.ts";
 import { brush, type Brush } from "../src/parts/marking.ts";
 import { BUN, bun, SOFT_TOES, toes, type BunSpec } from "../src/parts/paw.ts";
+import { groundShadow } from "../src/parts/shadow.ts";
 import { C, LINES } from "../src/palette.ts";
 
 /** A plump part sitting on the ground, typed clockwise from its top: its lit upper left, its sole along the ground. */
@@ -305,4 +306,23 @@ test("a brushed marking is the same from its seed every build, darker strands in
   const shown = Array.from({ length: 72 }, (_, k) => alpha(on(k * 5, 9.8, [8, 0]))).filter((x) => x > 0.2).length;
   assert.ok(shown >= 12, `only ${shown} of 72 places 0.8 pt past the patch's edge carry a strand`);
   for (let k = 0; k < 360; k += 3) for (const r of [18.4, 19, 20, 21]) assert.equal(alpha(on(k, r, [0, 0])), 0, `a strand shows ${r} pt from the part's middle at ${k}°`);
+});
+
+test("the ground shadow is soft all round, reaches as far as it is asked and is darkest where the paws press", () => {
+  const s = groundShadow({ reach: [-60, 60], presses: [{ x: -20, half: 6 }, { x: 20, half: 6 }] });
+  const fills = new Set([...s.svg.matchAll(/fill="(#[0-9A-Fa-f]{6})"/g)].map((m) => m[1]!));
+  assert.deepEqual([...fills].sort(), [C.contact, C.shadow].sort());
+  const alpha = alphaOf(s, 4);
+  const core = alpha([0, -6.5]);
+  assert.ok(core > 0.9, `the shadow's core is ${core}`);
+  assert.ok(alpha([-57, -6.5]) > 0.3 * core && alpha([57, -6.5]) > 0.3 * core, "the shadow does not reach near its ends");
+  assert.ok(alpha([-64, -6.5]) < 0.05 && alpha([64, -6.5]) < 0.05, "the shadow reaches past its ends");
+  // No hard edge: down through its middle and out along it, the alpha never jumps by more than 0.1 in a quarter point.
+  for (const line of [(t: number): P => [0, -18 + t], (t: number): P => [-66 + t, -6.5], (t: number): P => [-66 + t, -0.5]]) {
+    const xs = Array.from({ length: 4 * 24 }, (_, k) => alpha(line(k / 4)));
+    for (let k = 1; k < xs.length; k++) assert.ok(Math.abs(xs[k]! - xs[k - 1]!) <= 0.1, `the shadow's edge jumps by ${Math.abs(xs[k]! - xs[k - 1]!).toFixed(2)} at ${line(k / 4)}`);
+  }
+  // Along the ground it is darkest under each paw.
+  const ground = (x: number) => alpha([x, -0.3]);
+  assert.ok(ground(-20) > ground(0) && ground(20) > ground(0), `under the paws ${ground(-20)}, ${ground(20)}, between them ${ground(0)}`);
 });
