@@ -84,7 +84,8 @@ as sad, angry or drooped.
 - `<preset>/beside.png` and `match.json`: the Faces check on each face clip's still, made by
   `node runtime-web/lab/look.ts dog --faces`.
 - `states.png`: the states no preset's still shows (peek, the yawn, the pant, the wink and the perked ear on the dog's
-  right, a lifted ear beside a perked one, raised brows over the wide eyes, the half-lid).
+  right, a lifted ear beside a perked one, raised brows over the wide eyes, the half-lid), and the lifted and the
+  perked ears turned to the ear springs' limits, 14° out and in, behind a head that stays whole (DECISIONS 158).
   `node qa/phase3/faces/states.ts build/stills/dog/states`, then
   `python3 qa/phase3/faces/sheet.py states build/stills/dog/states qa/phase3/faces/states.png`.
 - `perked.png`: One ear perked levelled and scaled by its brows, the two half and half, and the render (DECISIONS 133,

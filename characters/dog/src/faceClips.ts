@@ -24,7 +24,8 @@ export function stillOf(p: Preset, peek = false) {
   const ear = (side: "L" | "R"): EarState => (p.ears === "onePerked" ? (side === p.perk ? "onePerked" : "neutral") : p.ears);
   const brow = (side: "L" | "R") => (typeof p.brows === "string" ? p.brows : p.brows[side]);
   const ears = { L: ear("L"), R: ear("R") };
-  // An ear raised off its temple (perked or lifted) leaves the head's line to the temple's edge on that side (DECISIONS 146).
+  // An ear raised off its temple (perked or lifted) uncovers the temple, drawn on the head (temple.<side>), and leaves the
+  // head's line to the temple's edge on that side (DECISIONS 147).
   const up = (side: "L" | "R") => RAISED.has(ears[side]);
   const headLine = up("L") && up("R") ? "temples" : up("L") ? "templeL" : up("R") ? "templeR" : undefined;
   return {
@@ -32,6 +33,7 @@ export function stillOf(p: Preset, peek = false) {
     mouth,
     brows: { L: brow("L"), R: brow("R") },
     ears,
+    temples: { L: up("L"), R: up("R") },
     headLine,
     // The sparkle's stars draw only beside the sparkle eyes.
     stars: eyes === "sparkle",
@@ -47,6 +49,8 @@ export function faceClip(name: string, p: Preset, peek = false): Clip {
   const states: Record<string, [number, string][]> = {
     "eye.L": [[0, s.eyes.L]], "eye.R": [[0, s.eyes.R]], mouth: [[0, s.mouth]],
     "brow.L": [[0, s.brows.L]], "brow.R": [[0, s.brows.R]], "ear.L": [[0, s.ears.L]], "ear.R": [[0, s.ears.R]],
+    ...(s.temples.L ? { "temple.L": [[0, "up"]] as [number, string][] } : {}),
+    ...(s.temples.R ? { "temple.R": [[0, "up"]] as [number, string][] } : {}),
     ...(s.headLine ? { "head.line": [[0, s.headLine]] as [number, string][] } : {}),
     ...(s.stars ? { stars: [[0, "sparkle"]] as [number, string][] } : {}),
     ...(s.cheeks ? { cheeks: [[0, s.cheeks]] as [number, string][] } : {}),

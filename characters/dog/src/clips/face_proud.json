@@ -2,7 +2,7 @@
   "name": "face_proud",
   "lengthMs": 1000,
   "views": { "body": [[0, "front"]], "head": [[0, "front"]] },
-  "states": { "eye.L": [[0, "sparkle"]], "eye.R": [[0, "sparkle"]], "mouth": [[0, "smile"]], "brow.L": [[0, "happy"]], "brow.R": [[0, "happy"]], "ear.L": [[0, "lifted"]], "ear.R": [[0, "lifted"]], "head.line": [[0, "temples"]], "stars": [[0, "sparkle"]] },
+  "states": { "eye.L": [[0, "sparkle"]], "eye.R": [[0, "sparkle"]], "mouth": [[0, "smile"]], "brow.L": [[0, "happy"]], "brow.R": [[0, "happy"]], "ear.L": [[0, "lifted"]], "ear.R": [[0, "lifted"]], "temple.L": [[0, "up"]], "temple.R": [[0, "up"]], "head.line": [[0, "temples"]], "stars": [[0, "sparkle"]] },
   "tracks": { "ear.L": { "rot": [[0, 0]] }, "ear.R": { "rot": [[0, 0]] } },
   "events": [{ "at": 0, "type": "keyPose" }]
 }

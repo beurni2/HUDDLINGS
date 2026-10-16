@@ -457,10 +457,11 @@ function headLinePiece(up: { L: boolean; R: boolean } = { L: false, R: false }, 
   const feathered = (spans: [P, P][], width: number, offset = 0) => spans.map(([a, b]) =>
     strokeOf(spanPoints(head, fracAt(head, cheekRoll(a)), fracAt(head, cheekRoll(b))), width, { taper: 3, tip: 0.4, offset }).d).join("");
   // Under the right overhang the root's tan fades up into the cream; on the left the sheet's tan runs up to the crown.
-  const under = feathered([[[-45.4, -134.6], [-34.6, -135]]], 2.6, 0.8);
-  const side = feathered([[[-34.4, -134.4], [-41.4, -121.4]], [[39.2, -123.4], [31.6, -139.2]]], 3);
+  // Under a raised ear the temple (temple.<side>) is the head's own paint, so there is no tan to feather on that side.
+  const under = up.R ? "" : feathered([[[-45.4, -134.6], [-34.6, -135]]], 2.6, 0.8);
+  const side = feathered([...(up.R ? [] : [[[-34.4, -134.4], [-41.4, -121.4]] as [P, P]]), ...(up.L ? [] : [[[39.2, -123.4], [31.6, -139.2]] as [P, P]])], 3);
   return piece(`<defs>${r.defs}${c.defs}${blur(g, pad(box, 2), 0.35)}${blur(s, pad(box, 2), 0.9)}</defs>` +
-    `<path d="${under}" fill="${C.fur}" opacity="0.95" filter="url(#${s})"/><path d="${side}" fill="${C.fur}" opacity="0.9" filter="url(#${s})"/>` +
+    ([[under, 0.95], [side, 0.9]] as const).filter(([d]) => d).map(([d, o]) => `<path d="${d}" fill="${C.fur}" opacity="${o}" filter="url(#${s})"/>`).join("") +
     `${r.body}${c.body}<g filter="url(#${g})">${strokes.map((l) => l.svg).join("")}</g>`, box, {
     shapes: [{ name: "head.line", nodes: head.typed, segs: head.segs, outlined: [...r.outlined, ...c.outlined], fur: head.fur.map(([a, b]) => [fracAt(head, a), fracAt(head, b)]) }],
     lines: [...r.lines, ...c.lines, ...strokes.map((l) => ({ ...l.line, where: "cheek fur" }))],
@@ -854,34 +855,48 @@ const onPerk = (side: "L" | "R", p: P): P => rollP(side === "R" ? p : [-p[0], p[
 const perkD = (side: "L" | "R", d: string) => rollD(side === "R" ? d : mirrorD(d));
 /**
  * With the ear up, its root no longer fills the notch under the crown's overhang at the temple: the head's side runs on
- * round from the overhang's tip down into the face's side, and the panel paints it the root's tan, deepest under the
- * crown and paling down into the hood. Typed in model space on each side, as the head's temples are (they differ), its
- * inner part under the head; only the notch shows.
+ * round from the overhang's tip down into the face's side. Typed in model space on each side, as the head's temples are
+ * (they differ), its inner part under the head; only the notch shows. Its side runs down from under the overhang's tip
+ * and bows in a little before the cheek, so the head stays round under a raised ear rather than walled (DECISIONS 147).
  */
-// The temple's side runs down from under the overhang's tip and bows in a little before the cheek, so the head stays
-// round under a raised ear rather than walled (DECISIONS 146).
 const temples = {
   R: smooth([[-38, -140], [-44.6, -137.8], [-46.6, -134], [-46, -128.4], [-45.5, -122.6], [-45.6, -116.6], [-46, -111.6], [-44.2, -108.4], [-40, -107.6], [-31, -122], [-29.6, -136.4]]),
   L: smooth([[28, -141.6], [36, -143], [40.6, -141.6], [43, -138.6], [42.9, -133], [42.5, -126.4], [42.4, -120], [43, -115], [44, -110.6], [38, -109], [29, -122], [26, -134]]),
 };
-/** Each temple's lined edge: from the overhang's tip, where the crown's line ends, down to where the face's side takes over. */
-const templeEdge = { R: [[-46.4, -134.6], [-45.8, -114]] as [P, P], L: [[42, -140.4], [43.4, -113.6]] as [P, P] };
+/**
+ * Each temple's lined edge: from the overhang's tip, where the crown's line ends, down to where the face's side takes
+ * over; on the cream to where the hood's band reaches the edge, then on its tan.
+ */
+const templeEdge = { R: [[-46.4, -134.6], [-46, -127], [-45.8, -114]] as [P, P, P], L: [[42, -140.4], [42.6, -127.6], [43.4, -113.6]] as [P, P, P] };
 
-/** The temple a raised ear uncovers, its edge lined where the head's side now runs (the perked and the lifted ear's). */
+/**
+ * The temple a raised ear uncovers, its edge lined where the head's side now runs (the perked and the lifted ear's): a
+ * part of its own on the head bone (temple.L, temple.R, state up), drawn after the ears and before the head, so the ear
+ * swings on its spring behind a head that stays whole (R16). Painted as the head's own side, as Lifted slightly and One
+ * ear perked paint it under a raised ear: the crown's cream coming down to the edge and the hood's tan band carrying on
+ * up the side under it (the head's own patch, continued past the notch), shaded as the head is, with the notch filled
+ * in, so neither the overhang's underside nor the notch's diagonal shows as an edge (DECISIONS 158).
+ */
 function templePiece(side: "L" | "R"): Piece {
-  const tan = uid("tan");
-  const [[, y0], [, y1]] = templeEdge[side];
-  return litPart(`ear.${side} temple`, temples[side], {
-    fill: C.patch,
-    under: `<defs><linearGradient id="${tan}" gradientUnits="userSpaceOnUse" x1="0" y1="${fmt(y0 - 2)}" x2="0" y2="${fmt(y1)}">` +
-      `<stop offset="0" stop-color="${C.earDeep}"/><stop offset="0.35" stop-color="${C.marking}"/><stop offset="1" stop-color="${C.patch}"/></linearGradient></defs>` +
-      `<rect x="-60" y="${fmt(y0 - 6)}" width="120" height="${fmt(y1 - y0 + 12)}" fill="url(#${tan})"/>`,
-  }, [{ from: templeEdge[side][0], to: templeEdge[side][1], on: "tan", taper: [0.8, 6] }]);
+  const g = uid("blur");
+  const [top, turn, foot] = templeEdge[side];
+  const band = `<defs>${blur(g, pad(bbox4(temples[side]), 3), 0.55)}</defs><path d="${pathD(patches[side].segs)}" fill="${C.patch}" filter="url(#${g})"/>`;
+  return litPart(`temple.${side}`, temples[side], {
+    fill: C.fur,
+    under: band,
+    // The head's own shade, from the same outline and light, so it runs on across the notch's edges with no seam.
+    shade: headPaint.shade,
+    // Both temples' paths run down their outer edges; the two spans overlap where the tan takes over, so the line runs on.
+  }, [{ from: top, to: turn, taper: [1.6, 2.5] }, { from: v.add(turn, [0, -2]), to: foot, on: "tan", taper: [2.5, 6] }]);
 }
+/** A shape's bounds as a box. */
+const bbox4 = (shape: Shape): Box => {
+  const [x0, y0, x1, y1] = bbox(shape.segs);
+  return [x0, y0, x1 - x0, y1 - y0];
+};
 
 function perkedEar(side: "L" | "R"): Piece {
   const on = (p: P) => onPerk(side, p);
-  const temple = templePiece(side);
   const paint = earFur({
     ear: perked[side],
     axis: [on([-19.5, -172.6]), on([-55.1, -139.4])],
@@ -900,7 +915,7 @@ function perkedEar(side: "L" | "R"): Piece {
   // Its line from its inner end, beside the topknot, over its top and round the free end, to where its underside goes
   // behind the crown.
   const [a, b] = [on([-10.8, -162]), on([-38.6, -136.8])];
-  return join(temple, litPart(`ear.${side}`, perked[side], paint, [side === "R" ? { from: a, to: b, on: "tan", taper: [3, 4] } : { from: b, to: a, on: "tan", taper: [4, 3] }]));
+  return litPart(`ear.${side}`, perked[side], paint, [side === "R" ? { from: a, to: b, on: "tan", taper: [3, 4] } : { from: b, to: a, on: "tan", taper: [4, 3] }]);
 }
 
 // The lifted ear, the listening tell, as Lifted slightly draws it (DECISIONS 145): the root raised behind the crown's
@@ -908,8 +923,9 @@ function perkedEar(side: "L" | "R"): Piece {
 // paddle running out and down at about 45° to a full lobe level with the brows, about two thirds of the hanging
 // ear's length, its inside showing in a deeper band along its lower inner edge, where it tucks behind the head's side.
 // Typed on the dog's right ear in the head's frame from the panel laid on the head by its width (1.04 pt a pixel)
-// and its top, mirrored for the left and rolled with the face. The temple it uncovers is the perked ear's.
-// Its lower inner edge runs on in under the temple (drawn over it), so no card shows between the ear and the head.
+// and its top, mirrored for the left and rolled with the face. The temple it uncovers is the perked ear's, on the head
+// (templePiece). Its lower inner edge runs on in under the temple (drawn after it), so no card shows between the ear
+// and the head, and the ear's spring swings it behind a head that stays whole.
 const liftedR: Node[] = [[-27.6, -150.6], [-33, -155.8], [-42, -158.4], [-52, -157], [-62, -152.6], [-71.6, -146.8], [-79.6, -139], [-84.2, -129],
   [-84.4, -119.6], [-80.2, -110.6], [-73, -106.6], [-64.8, -108.4], [-57.6, -113.4], [-50.4, -117.6], [-45.6, -123.4], [-43.4, -130], [-40, -137.6],
   [-35, -143.6], [-30.6, -147.6]];
@@ -936,7 +952,7 @@ function liftedEar(side: "L" | "R"): Piece {
   // Its line from beside the topknot over its top, round the lobe and back along its lower edge to where it goes
   // behind the temple's edge.
   const [a, b] = [on([-30, -153.4]), on([-48.6, -119.4])];
-  return join(litPart(`ear.${side}`, lifted[side], paint, [side === "R" ? { from: a, to: b, on: "tan", taper: [3, 3] } : { from: b, to: a, on: "tan", taper: [3, 3] }]), templePiece(side));
+  return litPart(`ear.${side}`, lifted[side], paint, [side === "R" ? { from: a, to: b, on: "tan", taper: [3, 3] } : { from: b, to: a, on: "tan", taper: [3, 3] }]);
 }
 
 /** Every face state the front draws besides its rest, each with its part and state. */
@@ -947,7 +963,11 @@ export function faceStates(): Drawn[] {
   for (const state of ["raised", "happy"] as const) {
     out.push({ part: "brow.L", state, piece: brow(state, 1, FRAME).piece }, { part: "brow.R", state, piece: brow(state, -1, FRAME).piece });
   }
-  for (const side of ["L", "R"] as const) out.push({ part: `ear.${side}`, state: "onePerked", piece: perkedEar(side) }, { part: `ear.${side}`, state: "lifted", piece: liftedEar(side) });
+  for (const side of ["L", "R"] as const) {
+    out.push({ part: `ear.${side}`, state: "onePerked", piece: perkedEar(side) }, { part: `ear.${side}`, state: "lifted", piece: liftedEar(side) });
+    // The temple under either raised ear, on the head: the ear's spring swings the flap, never the head's side.
+    out.push({ part: `temple.${side}`, state: "up", piece: templePiece(side) });
+  }
   out.push({ part: "stars", state: "sparkle", piece: stars(STARS, FRAME) });
   // Huffy's puffed cheeks, inside the head's outline (variant A).
   out.push({ part: "cheeks", state: "puffed", piece: puffedCheeks(FRAME) });

@@ -2,7 +2,7 @@
   "name": "face_curious",
   "lengthMs": 1000,
   "views": { "body": [[0, "front"]], "head": [[0, "front"]] },
-  "states": { "eye.L": [[0, "open"]], "eye.R": [[0, "open"]], "mouth": [[0, "smile"]], "brow.L": [[0, "raised"]], "brow.R": [[0, "raised"]], "ear.L": [[0, "onePerked"]], "ear.R": [[0, "neutral"]], "head.line": [[0, "templeL"]] },
+  "states": { "eye.L": [[0, "open"]], "eye.R": [[0, "open"]], "mouth": [[0, "smile"]], "brow.L": [[0, "raised"]], "brow.R": [[0, "raised"]], "ear.L": [[0, "onePerked"]], "ear.R": [[0, "neutral"]], "temple.L": [[0, "up"]], "head.line": [[0, "templeL"]] },
   "tracks": { "ear.L": { "rot": [[0, 0]] }, "ear.R": { "rot": [[0, 0]] } },
   "events": [{ "at": 0, "type": "keyPose" }]
 }

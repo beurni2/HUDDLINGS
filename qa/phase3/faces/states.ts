@@ -1,6 +1,7 @@
 // The face states no preset's still shows, each rendered as a front still from a copy of the built package with a
 // clip of its own (the package's clips are the presets'): peek, the yawn, the pant, the wink and the perked ear on the
-// dog's other side, raised brows over the wide eyes with the o, and the half-lid. sheet.py lays them out.
+// dog's other side, raised brows over the wide eyes with the o, and the half-lid; and the raised ears turned to the
+// ear springs' limits, 14° out and in, behind a head that stays whole (DECISIONS 158). sheet.py lays them out.
 //
 // node qa/phase3/faces/states.ts <out folder>     (after node characters/build/build.ts dog)
 import { createHash } from "node:crypto";
@@ -11,19 +12,27 @@ import { openStills } from "../../../runtime-web/lab/still.ts";
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 const out = resolve(process.argv[2]!);
-const clip = (states: Record<string, string>) => ({
+const clip = (states: Record<string, string>, turns: Record<string, number> = {}) => ({
   lengthMs: 1000, views: { body: [[0, "front"]], head: [[0, "front"]] },
   states: Object.fromEntries(Object.entries(states).map(([part, state]) => [part, [[0, state]]])),
+  tracks: Object.fromEntries(Object.entries(turns).map(([part, rot]) => [part, { rot: [[0, rot]] }])),
   events: [{ at: 0, type: "keyPose" }],
 });
+/** Both ears lifted, or the dog's left one perked, with their temples and the head's line, turned out (+) or in (−); outward is clockwise for the dog's right ear. */
+const lifted = { "ear.L": "lifted", "ear.R": "lifted", "temple.L": "up", "temple.R": "up", "head.line": "temples", mouth: "smile" };
+const perkedL = { "ear.L": "onePerked", "temple.L": "up", "head.line": "templeL", mouth: "smile" };
 export const STATES: Record<string, ReturnType<typeof clip>> = {
   "peek": clip({ "eye.L": "peek", "eye.R": "peek", mouth: "smile" }),
   "yawn, closed": clip({ "eye.L": "closed", "eye.R": "closed", mouth: "yawn" }),
   "pant": clip({ "eye.L": "happy", "eye.R": "happy", mouth: "pant", "brow.L": "happy", "brow.R": "happy" }),
-  "wink R, perked R": clip({ "eye.R": "wink", mouth: "cheeky", "ear.R": "onePerked", "head.line": "templeR" }),
-  "lifted L, perked R": clip({ "ear.L": "lifted", "ear.R": "onePerked", "head.line": "temples", mouth: "smile" }),
+  "wink R, perked R": clip({ "eye.R": "wink", mouth: "cheeky", "ear.R": "onePerked", "temple.R": "up", "head.line": "templeR" }),
+  "lifted L, perked R": clip({ "ear.L": "lifted", "ear.R": "onePerked", "temple.L": "up", "temple.R": "up", "head.line": "temples", mouth: "smile" }),
   "raised, wide, o": clip({ "eye.L": "wide", "eye.R": "wide", mouth: "o", "brow.L": "raised", "brow.R": "raised" }),
   "sleepy half-lid": clip({ "eye.L": "sleepy", "eye.R": "sleepy", mouth: "smile" }),
+  "lifted, 14° out": clip(lifted, { "ear.L": -14, "ear.R": 14 }),
+  "lifted, 14° in": clip(lifted, { "ear.L": 14, "ear.R": -14 }),
+  "perked L, 14° out": clip(perkedL, { "ear.L": -14 }),
+  "perked L, 14° in": clip(perkedL, { "ear.L": 14 }),
 };
 const slug = (name: string) => name.replace(/[^a-z]+/gi, "-");
 
