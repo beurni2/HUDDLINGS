@@ -154,7 +154,7 @@ function lightness(hex: string): number {
 const over = (top: string, under: string, opacity: number) =>
   `#${[1, 3, 5].map((i) => Math.round(parseInt(top.slice(i, i + 2), 16) * opacity + parseInt(under.slice(i, i + 2), 16) * (1 - opacity)).toString(16).padStart(2, "0")).join("")}`;
 
-const BUN_SPEC: BunSpec = { wrist: [[-6, -15], [6, -15]], bulge: [0.9, 0.9], ground: 0, lobes: [0.32, 0.36, 0.32], scallop: 0.6 };
+const BUN_SPEC: BunSpec = { leg: [[-6, -22], [6, -22]], wrist: [[-6, -15], [6, -15]], bulge: [0.9, 0.9], ground: 0, lobes: [0.32, 0.36, 0.32], scallop: 0.6 };
 
 test("a bun is 10 to 20% wider than its leg, its sole 2 or 3 toe lobes scalloping up 0.5 to 0.8 pt, its toe lines rising 40 to 50% of the paw", () => {
   const b = bun(BUN_SPEC);
@@ -174,7 +174,9 @@ test("a bun is 10 to 20% wider than its leg, its sole 2 or 3 toe lobes scallopin
     const rise = (t[0]![1] - t.at(-1)![1]) / 15;
     assert.ok(rise >= BUN.rise[0] && rise <= BUN.rise[1], `a toe line rises ${rise.toFixed(2)} of the paw`);
   }
-  assert.throws(() => bun({ ...BUN_SPEC, bulge: [0.2, 0.2] }), /1\.03 times the leg's width, not 1\.1 to 1\.2/);
+  assert.throws(() => bun({ ...BUN_SPEC, bulge: [0.2, 0.2] }), /1\.03 times the leg's column, not 1\.1 to 1\.2/);
+  // Measured against the column, not the wrist: a bun that passes by pinching the wrist (the first demo's hourglass) fails.
+  assert.throws(() => bun({ ...BUN_SPEC, wrist: [[-5.4, -15], [5.4, -15]], bulge: [1.2, 1.2] }), /narrows 10% into the wrist .* more than 5%/);
   assert.throws(() => bun({ ...BUN_SPEC, lobes: [1, 1, 1, 1] }), /4 toe lobes, not 2 to 3/);
   assert.throws(() => bun({ ...BUN_SPEC, scallop: 1 }), /scallops 1 pt, not 0\.5 to 0\.8/);
   assert.throws(() => bun({ ...BUN_SPEC, rise: 0.6 }), /rise 0\.6 of the paw, not 0\.4 to 0\.5/);

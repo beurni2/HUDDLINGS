@@ -6,7 +6,7 @@
 // and fading out upward, never ticks on the sole's line (which read as claws). Each view types its paws' nodes and
 // its toe lines from its own crop.
 // The fur pass (DECISIONS 216) adds the bun itself, for a view to put into its leg's outline where the paw is: 10 to
-// 20% wider than the leg, its sole a row of 2 or 3 round toe lobes scalloping up 0.5 to 0.8 pt at each toe line, its
+// 20% wider than the leg's column above it, the leg running straight down into it, its sole a row of 2 or 3 round toe lobes scalloping up 0.5 to 0.8 pt at each toe line, its
 // lower corners the outer toes' own round (tighter than 4 pt where the stubby-paws panel draws them so, Q29), and its
 // toe lines rising 40 to 50% of the paw's height round the middle toe in the warm line at about half strength, never
 // darker than the outline. A view that does not ask for it draws its paws as before.
@@ -46,11 +46,17 @@ export function toes(t: Toes): Pick<Paint, "under" | "inner"> {
 
 export interface BunSpec {
   /**
+   * The leg's column above the paw, typed across it from the crop where it runs straight (its two sides at one
+   * height): what the bun is measured against, so a bun cannot pass by pinching the wrist instead of widening the paw.
+   */
+  leg: [P, P];
+  /**
    * Where the bun leaves the leg on each side, typed from the crop, in the order the leg's outline runs through the
-   * paw: [where it comes down into the paw, where it goes back up]. The leg is as wide as these two lie apart.
+   * paw: [where it comes down into the paw, where it goes back up]. It is the leg's own width there, narrowing from the
+   * column by no more than BUN.pinch (the sheet's legs run straight down into the bun).
    */
   wrist: [P, P];
-  /** How far the bun bulges out past each wrist point, in points, so it is 10 to 20% wider than the leg (the stubby-paws panel's bun, DECISIONS 47). */
+  /** How far the bun bulges out past each wrist point, in points, so it is 10 to 20% wider than the leg's column (the stubby-paws panel's bun, DECISIONS 47). */
   bulge: [number, number];
   /** The ground's y under the sole: 0 under the seat, a little higher under a paw that sits back. */
   ground: number;
@@ -79,8 +85,11 @@ export interface Bun {
   sole: [P, P];
 }
 
-/** What a bun must be (DECISIONS 216). */
-export const BUN = { wider: [1.1, 1.2] as [number, number], lobes: [2, 3] as [number, number], scallop: [0.5, 0.8] as [number, number], rise: [0.4, 0.5] as [number, number] };
+/**
+ * What a bun must be (DECISIONS 216): 10 to 20% wider than the leg's column, the wrist at most 5% narrower than the
+ * column (the first demo's bun met the 10% by pinching the wrist 9%, an hourglass at the ankle the sheet never draws).
+ */
+export const BUN = { wider: [1.1, 1.2] as [number, number], pinch: 0.05, lobes: [2, 3] as [number, number], scallop: [0.5, 0.8] as [number, number], rise: [0.4, 0.5] as [number, number] };
 
 /**
  * A round bun of a paw where the leg comes down to the ground, as the stubby-paws panel draws it: from each wrist point
@@ -90,10 +99,11 @@ export const BUN = { wider: [1.1, 1.2] as [number, number], lobes: [2, 3] as [nu
  */
 export function bun(b: BunSpec): Bun {
   const [w0, w1] = b.wrist;
-  const leg = Math.abs(w1[0] - w0[0]), wide = (leg + b.bulge[0] + b.bulge[1]) / leg;
+  const column = Math.abs(b.leg[1][0] - b.leg[0][0]), wrist = Math.abs(w1[0] - w0[0]), wide = (wrist + b.bulge[0] + b.bulge[1]) / column;
   const rise = b.rise ?? 0.45, full = b.full ?? 0.4;
   const problems: string[] = [];
-  if (wide < BUN.wider[0] - 1e-9 || wide > BUN.wider[1] + 1e-9) problems.push(`the bun is ${wide.toFixed(2)} times the leg's width, not ${BUN.wider[0]} to ${BUN.wider[1]}`);
+  if (wide < BUN.wider[0] - 1e-9 || wide > BUN.wider[1] + 1e-9) problems.push(`the bun is ${wide.toFixed(2)} times the leg's column, not ${BUN.wider[0]} to ${BUN.wider[1]}`);
+  if (1 - wrist / column > BUN.pinch + 1e-9) problems.push(`the leg narrows ${((1 - wrist / column) * 100).toFixed(0)}% into the wrist (${wrist.toFixed(1)} pt from a ${column.toFixed(1)} pt column), more than ${BUN.pinch * 100}%`);
   if (b.lobes.length < BUN.lobes[0] || b.lobes.length > BUN.lobes[1]) problems.push(`${b.lobes.length} toe lobes, not ${BUN.lobes[0]} to ${BUN.lobes[1]}`);
   if (b.scallop < BUN.scallop[0] - 1e-9 || b.scallop > BUN.scallop[1] + 1e-9) problems.push(`the sole scallops ${b.scallop} pt, not ${BUN.scallop[0]} to ${BUN.scallop[1]}`);
   if (rise < BUN.rise[0] - 1e-9 || rise > BUN.rise[1] + 1e-9) problems.push(`the toe lines rise ${rise} of the paw, not ${BUN.rise[0]} to ${BUN.rise[1]}`);
