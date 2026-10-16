@@ -198,18 +198,24 @@ const reversedRow = (locks: Lock[]): Lock[] => locks.map((_, k) => {
 });
 // Each ear's edge (DECISIONS 215, 221), as the front crop and the floppy-ears panel draw it: four rounded lock tips
 // across the hem, of uneven widths, the outer corner's the fullest; and one broad low step a third of the way down the
-// outer edge, where the top lobe overlaps the next (fur.ts's STEP). Typed on the dog's right ear in the head's frame and
-// placed on either ear.
+// outer edge, where the top lobe overlaps the next (fur.ts's STEP). The hem typed on the dog's right ear in the head's
+// frame and placed on either ear; the step typed per ear where its crop notches the edge, a small inward kink with the
+// edge a little further out below it (the crop's right edge turns in to x -78.1 at y -95 between -78.8 above and
+// below, and is out at -80.4 by -92; its left stalls at 75.1 from -104 to -102 and is out at 77.4 by -99; a step 1.5 pt
+// high read as a knob), its tip at the lower end.
 const EAR_HEM: Lock[] = [{ len: 1.5, width: 9, lean: 0.2, dip: 0.45 }, { len: 1.9, width: 12, lean: 0.25, dip: 0.3 }, { len: 1.4, width: 8.5, lean: 0.3, dip: 0.4 },
   { len: 1.8, width: 10.5, lean: 0.35 }];
-const EAR_STEPS: [P, P, Lock][] = [[[-74.6, -105.6], [-67.6, -111.2], { len: 1.5, width: 9.2, lean: -0.45 }]];
+const EAR_STEP: Lock = { len: 0.9, width: 7.8, lean: -0.45 };
+/** The step's ends, lower then upper, where each ear's crop draws them (in model space, the ears placed). */
+const EAR_STEPS = { R: [[-78.8, -95.6], [-74.6, -102.2]] as [P, P], L: [[75.6, -102.2], [72.2, -108.8]] as [P, P] };
 /** Where each ear's line goes under the cheek, in model space: on under it at full width, its fade under the cheek's fur. */
 const EAR_UNDER = { R: [-38.8, -68] as P, L: [37.1, -71.6] as P };
 function earEdgeOf(side: "L" | "R") {
   const on = (p: P) => onEar(side, p), R = side === "R";
-  const steps = EAR_STEPS.map(([a, b, lock]) => (R ? { from: on(a), to: on(b), lock, tipRound: 0.35 } : { from: on(b), to: on(a), lock: { ...lock, lean: -(lock.lean ?? 0) }, tipRound: 0.35 }));
+  const [a, b] = EAR_STEPS[side];
+  const steps = [R ? { from: a, to: b, lock: EAR_STEP, tipRound: 0.35 } : { from: b, to: a, lock: { ...EAR_STEP, lean: -(EAR_STEP.lean ?? 0) }, tipRound: 0.35 }];
   return earEdge({
-    base: ears[side], steps: R ? steps : steps.reverse(),
+    base: ears[side], steps,
     hem: R ? { from: on([-46.6, -64]), to: on([-80.4, -82]), locks: EAR_HEM, tipRound: 0.36 } : { from: on([-80.4, -82]), to: on([-46.6, -64]), locks: reversedRow(EAR_HEM), tipRound: 0.36 },
     axis: [on([-58, -124]), on([-60, -62])],
     // Seen from the front the ear hangs behind the head: its line runs on under the cheek at its foot and under the
@@ -314,9 +320,10 @@ const CROWN_L: Lock[] = [{ len: 1.25, width: 3.6, lean: 0.45, dip: 0.4 }, { len:
 // lobes (sharper or longer ones read as teeth beside the sheet's round puff).
 const CHEEK: Lock[] = [{ len: 2, width: 6.2, lean: 0.35, dip: 0.4 }, { len: 2.5, width: 6.8, lean: 0.4 }];
 // The chin's middle over the collar: seven small low scallops of uneven size combed down and out from the middle, the
-// jaw's round sides plain.
-const CHIN: Lock[] = [{ len: 1.1, width: 6.8, lean: -0.35, dip: 0.3 }, { len: 1.7, width: 7.2, lean: -0.25, dip: 0.35 }, { len: 1.25, width: 6.6, lean: -0.1, dip: 0.25 },
-  { len: 0.95, width: 5.8, dip: 0.3 }, { len: 1.45, width: 7, lean: 0.1, dip: 0.35 }, { len: 1.1, width: 6.4, lean: 0.25, dip: 0.25 }, { len: 1.4, width: 6.8, lean: 0.35 }];
+// jaw's round sides plain; their notches shallow (0.1 to 0.2 pt), so the edge reads as the crop's soft arc with small
+// scallops (deeper ones, 0.25 to 0.35, read as a wavy ribbon at 10 times).
+const CHIN: Lock[] = [{ len: 1.25, width: 7.6, lean: -0.35, dip: 0.15 }, { len: 1, width: 6, lean: -0.25, dip: 0.2 }, { len: 1.25, width: 7.5, lean: -0.1, dip: 0.1 },
+  { len: 1.6, width: 7.4, dip: 0.15 }, { len: 0.95, width: 5.8, lean: 0.1, dip: 0.2 }, { len: 1.25, width: 7, lean: 0.25, dip: 0.1 }, { len: 0.9, width: 5.3, lean: 0.35 }];
 
 /**
  * Each root's unlined stretch, where the ear's tan shows in the notch under the crown, in path order: `top` the crown's
@@ -472,7 +479,7 @@ const headPaintOf = (head: Shape): Paint => ({
     ...[EYE_R, EYE_L].map(([x, y]) => `M${fmt(x - 8)} ${fmt(y - 9.6)} a8 2 0 1 0 16 0 a8 2 0 1 0 -16 0Z`)],
     // The crown stays light right out to its line, as the sheet paints it, the overhangs over the ears' roots
     // included; the cheeks' puffs take the rim's shade round their lower side, so the lower face reads round (G4).
-    ["M-52 -172 L52 -172 L52 -137 L-52 -137Z", "M-49 -137.5 L-31 -137.5 L-31 -131.5 L-49 -131.5Z", "M26 -141 L43 -141 L43 -135.5 L26 -135.5Z"], { inset: 3, toLight: 4.5 }),
+    ["M-52 -172 L52 -172 L52 -137 L-52 -137Z"], { inset: 3, toLight: 4.5 }),
   highlight: { d: headLight, colour: C.light, opacity: 0.4, blur: 4 },
 });
 const headPaint = headPaintOf(head);
@@ -500,7 +507,8 @@ function headLinePiece(up: { L: boolean; R: boolean } = { L: false, R: false }, 
   // #1). A raised ear's side has no notch.
   const sides = (["R", "L"] as const).filter((side) => !up[side]);
   const chord = ([a, b]: [P, P], width: number, offset: number) => strokeOf([a, b], width, { taper: 2, tip: 0.3, offset }).d;
-  const roots = `<path d="${sides.map((side) => chord(h.notches[side].top, 2.4, 0.8)).join("")}" fill="${C.fur}" opacity="0.75" filter="url(#${k})"/>` +
+  const roots = `<path d="${sides.map((side) => chord(h.notches[side].top, 1.4, 0.8)).join("")}" fill="${C.fur}" opacity="0.95" filter="url(#${f})"/>` +
+    `<path d="${sides.map((side) => chord(h.notches[side].top, 2.4, 2)).join("")}" fill="${C.fur}" opacity="0.4" filter="url(#${k})"/>` +
     `<path d="${sides.map((side) => along(...h.notches[side].side, 1.6, 0.1)).join("")}" fill="${C.fur}" opacity="0.55" filter="url(#${k})"/>`;
   // Each cheek's unlined puff: its edge softened where it lies (a narrow band of the cream centred on it, not out over
   // the ear's tan, where soften()'s band read as a pale halo round the wisps), and its wisps' rim lit whiter, as the
@@ -708,16 +716,24 @@ export function front(): Drawn[] {
     [-31, -61.6], [-40.4, -66.6]] as P[]).map(cheekRoll);
   add("shadow.chin", soft(pathD(smooth(jawShade, { corners: [0, 2] }).segs), [-43, -74.6, 86, 20], C.furShade, 1.3));
   // The collar (the sheet's paint): the band's blue, lit along its middle; the keeper the tag's ring hangs from;
-  // and a dark blue rim all round its lower edge and its ends (#597C8F on the sheet), tucked under the cheeks' fur
-  // at the top. The chin's shadow on it is its own part (chinOnCollar), cast by the head.
+  // and a dark blue rim along its lower edge only (#597C8F on the sheet), its top soft under the chin's shadow. Each end
+  // tucks under the fur by the cheek, as the crop draws it (audit front #7, G9): the band fades into the chest's cream
+  // over its last 2.6 pt (the crop's blue ends at x -26 and 27.6), unlined, never a blunt outlined end. The chin's
+  // shadow on it is its own part (shadow.chin.collar), cast by the head.
+  const tuck = uid("tuck");
+  const tucks = `<defs><linearGradient id="${tuck}R" gradientUnits="userSpaceOnUse" x1="-25.2" y1="0" x2="-27.8" y2="0">` +
+    `<stop offset="0" stop-color="${C.fur}" stop-opacity="0"/><stop offset="1" stop-color="${C.fur}"/></linearGradient>` +
+    `<linearGradient id="${tuck}L" gradientUnits="userSpaceOnUse" x1="25.6" y1="0" x2="28.2" y2="0">` +
+    `<stop offset="0" stop-color="${C.fur}" stop-opacity="0"/><stop offset="1" stop-color="${C.fur}"/></linearGradient></defs>` +
+    `<rect x="-30" y="-66" width="4.8" height="18" fill="url(#${tuck}R)"/><rect x="25.6" y="-66" width="4.8" height="18" fill="url(#${tuck}L)"/>`;
   add("collar", part("collar", collar, {
     fill: C.collar,
     // The band's lower part in its shade, turning under toward the chest, and a lighter band along its top where
     // it faces the light, as the sheet paints it; its blue between them.
     shade: { multiply: C.shadeBy, shapes: ["M-32 -58.6 C-16 -50.4 16 -50.4 32 -59.6 L32 -46 L-32 -46Z"], blur: 1.5 },
     highlight: { d: "M-22 -61.4 C-11 -58.4 10 -58.4 22 -62.8 L22 -60.2 C10 -56.2 -11 -56.2 -22 -59Z", colour: C.collarHighlight, opacity: 0.35, blur: 0.8 },
-    under: `<rect x="-1.5" y="-60" width="4.4" height="10.4" rx="1.2" fill="${C.collarLine}" opacity="0.3"/>`,
-    outline: { colour: C.collarRim, width: THIN, taper: 3, blur: 0.2, spans: [{ from: [26.2, -64], to: [-26.2, -62.7] }] },
+    under: `<rect x="-1.5" y="-60" width="4.4" height="10.4" rx="1.2" fill="${C.collarLine}" opacity="0.3"/>${tucks}`,
+    outline: { colour: C.collarRim, width: THIN, taper: 3, blur: 0.2, spans: [{ from: [26.6, -56.6], to: [-25.8, -55.8] }] },
   }));
   add("shadow.chin.collar", chinShadow(head, cheekRoll([-38, -66.2]), cheekRoll([38, -66.2]), C.collarLine, [-44, -74, 88, 22]));
   add("tag", tagPiece());
