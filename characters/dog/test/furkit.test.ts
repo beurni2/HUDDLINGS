@@ -8,7 +8,9 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { Resvg } from "@resvg/resvg-js";
 import { PNG } from "pngjs";
+import type { Lock } from "../../draw/fur.ts";
 import { arc, fracAt, mirrorX, smooth, spanPoints, v, type Node, type P, type Shape } from "../../draw/geom.ts";
+import { EAR, earEdge, earFur, type EarEdgeSpec } from "../src/parts/ear.ts";
 import { CONTACT_DEPTH, FREE_TAPER, litEdge, litRibbons, SOLE, UNDER_RUN, type LitSpan } from "../src/parts/lines.ts";
 import { BUN, bun, SOFT_TOES, toes, type BunSpec } from "../src/parts/paw.ts";
 import { C, LINES } from "../src/palette.ts";
@@ -168,4 +170,54 @@ test("a soft toe line is never darker than the outline: at its strongest it is l
   assert.ok(lightness(over(C.warmLine, C.fur, soft[0]!)) > lit, `the soft toe line at its foot is L* ${lightness(over(C.warmLine, C.fur, soft[0]!)).toFixed(1)}, darker than the lit outline's ${lit.toFixed(1)}`);
   // The first toe lines, at 0.8 at the foot, were darker than the outline there.
   assert.ok(lightness(over(C.warmLine, C.fur, 0.8)) < lit);
+});
+
+/** An ear's droplet typed clockwise on screen from its top: its outer edge down the right, its hem across the foot. */
+const droplet = smooth([[0, -40], [10, -30], [13, -15], [10, -4], [0, 0], [-10, -4], [-13, -15], [-10, -30]] as Node[]);
+const HEM: Lock[] = [{ len: 1.4, width: 5, lean: 0.2, dip: 0.4 }, { len: 1.8, width: 6.5, lean: 0.2, dip: 0.3 }, { len: 1.2, width: 4.6, lean: 0.25, dip: 0.5 }, { len: 1.6, width: 5.4, lean: 0.3 }];
+const EDGE: EarEdgeSpec = {
+  base: droplet,
+  steps: [{ from: [11.4, -27], to: [12.9, -19.6], lock: { len: 1.2, width: 7.4, lean: 0.6 } }],
+  hem: { from: [10, -4], to: [-10, -4], locks: HEM, tipRound: 0.4 },
+  axis: [[0, -40], [0, 0]],
+  line: { from: [-12, -24], to: [6, -36] },
+};
+
+test("an ear's edge is a lock step or two down its outer edge and a hem of 3 or 4 rounded tips, its notches 1 to 2 pt deep", () => {
+  const e = earEdge(EDGE);
+  assert.equal(e.tips.length, 4);
+  assert.equal(e.notches.length, 3, "only the notches between two tips are notches");
+  assert.equal(e.shape.fur.length, 2, "the step and the hem are each declared fur");
+  // Each tip stands out below the base's foot and each notch lies above its neighbouring tips.
+  e.notches.forEach((n, i) => assert.ok(n[1] < e.tips[i]![1] && n[1] < e.tips[i + 1]![1], `notch ${i} is no higher than its tips`));
+  assert.throws(() => earEdge({ ...EDGE, steps: [] }), /1 or 2 lock steps, not 0/);
+  assert.throws(() => earEdge({ ...EDGE, steps: [EDGE.steps[0]!, EDGE.steps[0]!, EDGE.steps[0]!] }), /1 or 2 lock steps, not 3/);
+  assert.throws(() => earEdge({ ...EDGE, hem: { ...EDGE.hem, locks: [{ ...HEM[0]!, dip: 1 }, ...HEM.slice(1)] } }), /notch after tip 0 is 2\.40 pt deep, not 1 to 2/);
+  assert.throws(() => earEdge({ ...EDGE, hem: { ...EDGE.hem, locks: [{ ...HEM[0]!, len: 0.6, dip: 0.2 }, ...HEM.slice(1)] } }), /notch after tip 0 is 0\.80 pt deep/);
+  assert.throws(() => earEdge({ ...EDGE, hem: { ...EDGE.hem, locks: [{ ...HEM[0]!, width: 10 }, { ...HEM[1]!, width: 11.5, dip: undefined }] } }), /2 locks, not 3 to 4/);
+  assert.deepEqual(EAR.hem.count, [3, 4]);
+});
+
+test("an ear's line is one span on the tan, running on under the head at both ends, light at the top and deepest at the hem", () => {
+  const { span } = earEdge(EDGE);
+  assert.equal(span.on, "tan");
+  assert.deepEqual(span.ends, ["under", "under"]);
+  const under = span.under as (p: P) => number;
+  const depths = [-40, -30, -20, -10, 0].map((y) => under([0, y]));
+  assert.equal(depths[0], 0, "the line is the light's own at the ear's top");
+  assert.ok(Math.abs(depths[4]! - 0.7) < 1e-9, `the line lies ${depths[4]} deep at the hem`);
+  for (let k = 1; k < depths.length; k++) assert.ok(depths[k]! > depths[k - 1]!, `the line does not deepen down the ear (${depths})`);
+  // Drawn, it is lighter at the top than at the hem.
+  const drawn = litRibbons(earEdge(EDGE).shape, [{ ...span, from: [-11.6, -26], to: [10.6, -31] }], "ear");
+  assert.ok(drawn.lines.length === 1 && drawn.lines[0]!.span.ends.join() === "under,under");
+});
+
+test("an ear's paint over an edge takes the hem's 3 or 4 tips for its clumps and keeps its locks uneven", () => {
+  const edge = earEdge(EDGE);
+  const ear = { ear: edge.shape, axis: EDGE.axis, light: "", under: [], dips: [] };
+  const uneven: P[][] = [[[-8.5, -26], [-9.4, -14], [-8.5, -5]], [[-4.6, -20], [-5, -10], [-4.6, -2]], [[2.4, -30], [2.7, -16], [2.3, -1]], [[6.8, -22], [7.4, -12], [6.8, -4]]];
+  assert.doesNotThrow(() => earFur({ ...ear, locks: uneven, edge }));
+  const comb: P[][] = [-7.5, -2.5, 2.5, 7.5].map((x): P[] => [[x, -22], [x, -12], [x, -2]]);
+  assert.throws(() => earFur({ ...ear, locks: comb, edge }), /too even .* read as a comb/);
+  assert.throws(() => earFur({ ...ear, locks: uneven, edge: { ...edge, notches: edge.notches.slice(0, 1) } }), /hem is 3 or 4 lock tips, not 2/);
 });

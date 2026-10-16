@@ -129,7 +129,7 @@ test("the eye has one catchlight, no strokes, and its lash line is an outer line
   assert.ok(lid && lid.kind === "outer" && lid.width >= LIMITS.outer[0] && lid.width <= LIMITS.outer[1], "the lash line is not an outer line");
 });
 
-test("a topknot is 3 to 5 curls and an ear 4 to 7 locks over 2 or 3 clumps", () => {
+test("a topknot is 3 to 5 curls and an ear 4 to 7 locks over 2 or 3 clumps, or over a hem of 3 or 4 tips", () => {
   const curl: Curl = { nodes: [[0, -10], [5, -5], [0, 0], [-5, -5]], line: { from: [-5, -5], to: [5, -5] } };
   assert.throws(() => topknot([curl, curl], {} as Paint), /3 to 5 curls/);
   assert.throws(() => topknot(Array(6).fill(curl), {} as Paint), /3 to 5 curls/);
@@ -139,6 +139,11 @@ test("a topknot is 3 to 5 curls and an ear 4 to 7 locks over 2 or 3 clumps", () 
   assert.throws(() => earFur({ ...ear, locks: Array(8).fill(lock), dips: [[0, 0]] }), /4 to 7 locks/);
   assert.throws(() => earFur({ ...ear, locks: Array(5).fill(lock), dips: [] }), /2 or 3 clumps/);
   assert.throws(() => earFur({ ...ear, locks: Array(5).fill(lock), dips: [[0, 0], [1, 0], [2, 0]] }), /2 or 3 clumps/);
+  // An ear whose view builds its edge (DECISIONS 215, from the floppy-ears panel's 3 or 4 lock tips round the hem)
+  // counts the hem's tips instead: 3 or 4, whatever its dips (furkit.test checks the edge itself).
+  const edge = (tips: number) => ({ shape: ear.ear, span: { from: [0, 0] as P, to: [0, 0] as P }, tips: Array.from({ length: tips }, (_, k): P => [k - 2, 0]), notches: Array.from({ length: tips - 1 }, (_, k): P => [k - 1.5, -1]) });
+  assert.throws(() => earFur({ ...ear, locks: Array(5).fill(lock), dips: [], edge: edge(2) }), /3 or 4 lock tips, not 2/);
+  assert.throws(() => earFur({ ...ear, locks: Array(5).fill(lock), dips: [], edge: edge(5) }), /3 or 4 lock tips, not 5/);
 });
 
 test("the eye's rim is darker than the iris it rings, and the lower iris lightens down to its foot", () => {
