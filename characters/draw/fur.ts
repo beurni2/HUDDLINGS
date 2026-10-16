@@ -67,11 +67,20 @@ export interface FurRules {
 export const TUFTS: FurRules = { len: [2, 4], width: [3, 5], tipRound: 0.25, lean: [0.3, 0.6], ratio: 0.5, vary: 0.2, dip: [0.5, 1], fit: 0.15 };
 
 /**
- * Clumps where the sheet draws broad lobes of fur instead (the cheeks over the ears, the tail plume's back): 4 to 10 pt
- * wide, 1.5 to 4 pt long, leaning up to 0.6 so each ends in a point where it tucks under the next. Locks of tuft size
- * along a whole plume read as a saw (dog DECISIONS 213).
+ * Clumps where the sheet draws broad soft lobes of fur instead (the tail plume's back): 4 to 10 pt wide, 1 to 3 pt
+ * long, leaning 0.15 to 0.6 so each ends where it tucks under the next, their notches shallow: a lobe's length and the
+ * deeper notch beside it at most 0.3 of its width (the tail-curve panel's notches are about 1 pt into 8 to 10 pt
+ * lobes), and spaced irregularly. Locks of tuft size along a whole plume read as a saw, and clumps notched 3 pt deep,
+ * alternating big and small, as a saw's teeth (dog DECISIONS 213).
  */
-export const CLUMPS: FurRules = { len: [1.5, 4], width: [4, 10], tipRound: 0.35, lean: [0.15, 0.6], ratio: 0.25, vary: 0.2, dip: [0.3, 1], fit: 0.15 };
+export const CLUMPS: FurRules = { len: [1, 3], width: [4, 10], tipRound: 0.35, lean: [0.15, 0.6], ratio: 0.15, vary: 0.2, dip: [0.2, 0.6], depth: 0.3, noRepeat: true, fit: 0.15 };
+
+/**
+ * A step in a fur edge (an ear's outer edge part way down, the chest under each end of the collar): one broad low lock
+ * leaning along the edge, so the edge steps out below it as the floppy-ears panel draws it, 4 to 10 pt wide and 0.6 to
+ * 1.6 pt high, never a hook or a horn (a step leaning 0.7 or more read as a barb, dog DECISIONS 213 and 215).
+ */
+export const STEP: FurRules = { count: [1, 1], len: [0.6, 1.6], width: [4, 10], tipRound: 0.35, lean: [0.2, 0.5], ratio: 0.08, vary: 0, dip: [0, 0], depth: 0.3, fit: 0.15 };
 
 /** Every way a typed row breaks its rules, in words; none for a row that keeps them. `span` is the span's length in points. */
 export function furCheck(locks: Lock[], tipRound: number, rules: FurRules, span: number): string[] {

@@ -1,7 +1,7 @@
 // Tests for fur edges and lines.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { furCheck, furEdge, furSpan, TUFTS, type Lock } from "../fur.ts";
+import { CLUMPS, furCheck, furEdge, furSpan, STEP, TUFTS, type Lock } from "../fur.ts";
 import { arc, fracAt, onSpan, sample, smooth, spanPoints, v, type Node, type P } from "../geom.ts";
 import { mirrorSpans, ribbons, strokeOf, taperedStroke } from "../line.ts";
 
@@ -59,6 +59,24 @@ test("a typed row of tufts keeps its rules, and each way of breaking them is nam
   assert.match(furCheck(tufts, 0.2, TUFTS, span * 1.4).join("\n"), /typed 19.0 pt wide for a span of 26.6 pt/);
   assert.match(furCheck([{ len: 3 }, { len: 2 }], 0.2, TUFTS, 8).join("\n"), /width in points/);
   assert.throws(() => furEdge(box, [20, 0], [20 - span, 0], tufts.map((l) => ({ ...l, len: 1 })), 0.2, undefined, TUFTS), /breaks its rules/);
+});
+
+test("broad clumps keep their notches shallow and their spacing irregular, and a step is one low broad lock, never a barb", () => {
+  // Five tail lobes typed from the tail-curve panel: 1 to 3 pt long, notched about 1 pt, spaced unevenly.
+  const lobes: Lock[] = [{ len: 1.6, width: 7.8, lean: 0.45, dip: 0.4 }, { len: 2.1, width: 9.2, lean: 0.5, dip: 0.5 }, { len: 1.5, width: 10, lean: 0.4, dip: 0.3 },
+    { len: 1.9, width: 8.2, lean: 0.55, dip: 0.4 }, { len: 1.4, width: 8.8, lean: 0.35 }];
+  const wide = lobes.reduce((s, l) => s + l.width!, 0);
+  assert.deepEqual(furCheck(lobes, 0.3, CLUMPS, wide), []);
+  // The first tail's clumps: 2.2 to 3.4 pt long with dips of 0.4 to 0.6 on 8 to 10 pt widths, big and small by turns: a saw.
+  const saw: Lock[] = [{ len: 2.6, width: 8.6, lean: 0.5, dip: 0.5 }, { len: 3.4, width: 9.8, lean: 0.55, dip: 0.6 }, { len: 2.4, width: 8.2, lean: 0.45, dip: 0.4 },
+    { len: 3.2, width: 9.7, lean: 0.6, dip: 0.5 }, { len: 2.2, width: 8.6, lean: 0.5 }];
+  const said = furCheck(saw, 0.3, CLUMPS, saw.reduce((s, l) => s + l.width!, 0)).join("\n");
+  assert.match(said, /lock 1's notches lie 4.00 pt below its tip, 0.41 of its width, over 0.3/);
+  assert.match(said, /alternate wide and narrow all along/);
+  // A step: one broad low lock leaning along the edge; the first ear's steps leaned 0.7 and 0.75 and read as barbs.
+  assert.deepEqual(furCheck([{ len: 1.1, width: 6.4, lean: 0.4 }], 0.35, STEP, 6.4), []);
+  assert.match(furCheck([{ len: 1.4, width: 6.6, lean: 0.7 }], 0.3, STEP, 6.6).join("\n"), /lock 0 leans 0.7, not 0.2 to 0.5/);
+  assert.match(furCheck([{ len: 2.6, width: 4.9, lean: 0.4 }], 0.2, STEP, 4.9).join("\n"), /stands 2.6 pt out|0.53 of its width/);
 });
 
 test("a typed row lays each tuft out by its width, its notches dipping inside the base and its own ends on it", () => {
