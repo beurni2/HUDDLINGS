@@ -3,7 +3,8 @@
 // inflections read off the front turnaround, then paint. Light groups share one
 // light across joined parts (head and tuft, chest and front legs, haunches and
 // hind paws); joins are feathered and carry no rim and no line.
-import { furEdge, furSpan, type Lock } from "../../../draw/fur.ts";
+import { furEdge, furSpan, STEP, type Lock } from "../../../draw/fur.ts";
+import { lineGate } from "../../../draw/lint.ts";
 import { arc, bbox, ellipse, fracAt, mirrorX, pathD, polyD, rotate, sample, smooth, spanPoints, symmetric, v, type Node, type P, type Seg, type Shape } from "../../../draw/geom.ts";
 import { innerLine, mirrorSpans, strokeOf, type DrawnLine } from "../../../draw/line.ts";
 import { LIGHT, marking, part, soft, type Fade, type Paint } from "../../../draw/paint.ts";
@@ -18,8 +19,10 @@ import { MOUTH_STATES, mouth, oTongue } from "../parts/mouth.ts";
 import { stars, type Star } from "../parts/stars.ts";
 import { litEdge, litMarking, litPart, type LitSpan } from "../parts/lines.ts";
 import { curlShapes, topknot, type Curl } from "../parts/topknot.ts";
-import { earFur } from "../parts/ear.ts";
-import { toes } from "../parts/paw.ts";
+import { earEdge, earFur } from "../parts/ear.ts";
+import { chinShadow, headFur, type HeadFur } from "../parts/headfur.ts";
+import { bun, lobed, toes } from "../parts/paw.ts";
+import { groundShadow } from "../parts/shadow.ts";
 import { tagPaint } from "../parts/tag.ts";
 
 export interface Drawn {
@@ -83,10 +86,12 @@ const FRAME = rolledFrame(FC, ROLL_DEG);
 // haunch to the hind paw, as the sheet draws it, the chest lying in front of
 // them a little inside it; the top lies under the chest and the collar. The
 // shoulders' fur breaks into a few small locks just below the collar.
-const backHalf = symmetric([[0, -54], [-17, -57.6], [-25.4, -63.4], [-29.4, -60.4], [-31.4, -56.6], [-33.4, -53], [-34.9, -50], [-36.4, -46.6], [-38.3, -43],
+const backHalf = symmetric([[0, -54], [-17, -57.6], [-21.4, -61], [-25.2, -63], [-28.8, -61.8], [-30.6, -59.4], [-31.4, -56.6], [-33.4, -53], [-34.9, -50], [-36.4, -46.6], [-38.3, -43],
   [-39.6, -40.6], [-42, -38], [-46.4, -33], [-48.8, -27.4], [-49.6, -21], [-49.2, -15.4], [-47.6, -10.6], [-44.4, -6.8], [-36, -4.8], [-20, -2.4]], [0, -1.6]);
-const shoulderLocks = [{ len: 0.55, w: 0.9, lean: 0.25 }, { len: 0.8, w: 1.2, lean: 0.3 }, { len: 0.6, w: 1, lean: 0.35 }];
-const back = furEdge(furEdge(backHalf, [-30.6, -59], [-34.4, -50.8], shoulderLocks, 0.3), [34.4, -50.8], [30.6, -59], lefthandOf(shoulderLocks), 0.3);
+// Under each collar's end one small low step of fur leaning down the shoulder's line (fur.ts's STEP, DECISIONS 213,
+// 222), as the crop draws it ("a thin, smooth brown line with one small fur step"), not a row of teeth.
+const SHOULDER: Lock[] = [{ len: 1, width: 5.2, lean: 0.45 }];
+const back = furEdge(furEdge(backHalf, [-30.6, -59], [-32.8, -54.6], SHOULDER, 0.3, undefined, STEP), [32.8, -54.6], [30.6, -59], lefthandOf(SHOULDER), 0.3, undefined, STEP);
 
 // The hind paws: plump domes resting in front of the haunches, as the sheet draws them, each a round arc on
 // top from where it comes out from behind the front paw over its crown (y -19 at x -38) and down its outer side
@@ -145,17 +150,17 @@ const embossed = [0.7, 0.44].map((k) => shift(symmetric(HEART.map(inset(k)), ins
 
 // The ears (front a's): droplets hanging from high on the head's sides, narrow
 // at the root (tucked under the crown fur), broad and rounded below, their inner
-// edges running on behind the face. The lower edge hangs in three soft clumps of
-// fur, as the sheet draws it, the fullest at the bottom outer corner, each notch
-// between them a soft dip about 1.2 pt deep. The right ear is typed in the
-// head's frame and rolled with the face.
+// edges running on behind the face. The hem is typed here as one smooth convex
+// curve from the foot round the outer corner, on which earEdge() builds its lock
+// tips (DECISIONS 215, 221). The right ear is typed in the head's frame and
+// rolled with the face.
 const earR: Node[] = [[-37.5, -141.4], [-29.4, -138.6], [-28.2, -132.4], [-40, -86], [-39.4, -73], [-41.4, -66.6], [-46.6, -64], [-52.6, -62.6],
-  [-58.6, -63.1], [-63.2, -65], [-66.6, -69.4], [-70.6, -70.6], [-74.4, -73.6], [-76.2, -78.2], [-80.4, -82], [-81, -88.4], [-80.4, -94.4],
+  [-58.6, -63.1], [-65, -65.8], [-71, -69.4], [-76.2, -74.8], [-80.4, -82], [-81, -88.4], [-80.4, -94.4],
   [-78.2, -100.2], [-73.6, -106.2], [-66.8, -111.6], [-60.8, -117.4], [-56, -125.6], [-50.6, -130.8], [-45.4, -135.2]];
 /** The right ear's node where the left ear's typed upper edge ends (its outer side, at y -82). */
 const EAR_SPLIT = earR.findIndex(([x, y]) => x === -80.4 && y === -82);
-/** The notches between the clumps: a crisp dip each, as the sheet draws them (concave, so no corner rule applies). */
-const EAR_NOTCHES = [[-66.6, -69.4], [-76.2, -78.2]].map(([x, y]) => earR.findIndex((n) => n[0] === x && n[1] === y));
+/** The hem's notches are earEdge()'s now (DECISIONS 221): the typed outline has none. */
+const EAR_NOTCHES: number[] = [];
 /**
  * The left ear below its middle is the right one mirrored, hung 2.8° nearer the face about its root and 3%
  * longer down its length from its top (the face's roll sets the tips 7 pt apart in height, where the sheet
@@ -177,6 +182,34 @@ const ears = { R: smooth(rollN(earR), { corners: EAR_NOTCHES }), L: smooth(earL,
 const onEar = (side: "L" | "R", p: P): P => (side === "R" ? rollP(p) : (hangL([p])[0] as P));
 /** Path data on the dog's right ear, or the same on its left (the hang is small enough to leave out of soft paint), rolled. */
 const earD = (side: "L" | "R", d: string) => rollD(side === "R" ? d : mirrorD(d));
+
+/** A row of locks typed along one side's path, for the other side, whose path runs the other way: reversed, leaning the other way, each notch's dip kept with it. */
+const reversedRow = (locks: Lock[]): Lock[] => locks.map((_, k) => {
+  const l = locks[locks.length - 1 - k]!, before = locks[locks.length - 2 - k];
+  return { ...l, lean: -(l.lean ?? 0), dip: before?.dip };
+});
+// Each ear's edge (DECISIONS 215, 221), as the front crop and the floppy-ears panel draw it: four rounded lock tips
+// across the hem, of uneven widths, the outer corner's the fullest; and one broad low step a third of the way down the
+// outer edge, where the top lobe overlaps the next (fur.ts's STEP). Typed on the dog's right ear in the head's frame and
+// placed on either ear.
+const EAR_HEM: Lock[] = [{ len: 1.5, width: 9, lean: 0.2, dip: 0.45 }, { len: 1.9, width: 12, lean: 0.25, dip: 0.3 }, { len: 1.4, width: 8.5, lean: 0.3, dip: 0.4 },
+  { len: 1.8, width: 10.5, lean: 0.35 }];
+const EAR_STEPS: [P, P, Lock][] = [[[-74.6, -105.6], [-67.6, -111.2], { len: 1.5, width: 9.2, lean: -0.45 }]];
+/** Where each ear's line goes under the cheek, in model space: on under it at full width, its fade under the cheek's fur. */
+const EAR_UNDER = { R: [-38.8, -68] as P, L: [37.1, -71.6] as P };
+function earEdgeOf(side: "L" | "R") {
+  const on = (p: P) => onEar(side, p), R = side === "R";
+  const steps = EAR_STEPS.map(([a, b, lock]) => (R ? { from: on(a), to: on(b), lock, tipRound: 0.35 } : { from: on(b), to: on(a), lock: { ...lock, lean: -(lock.lean ?? 0) }, tipRound: 0.35 }));
+  return earEdge({
+    base: ears[side], steps: R ? steps : steps.reverse(),
+    hem: R ? { from: on([-46.6, -64]), to: on([-80.4, -82]), locks: EAR_HEM, tipRound: 0.36 } : { from: on([-80.4, -82]), to: on([-46.6, -64]), locks: reversedRow(EAR_HEM), tipRound: 0.36 },
+    axis: [on([-58, -124]), on([-60, -62])],
+    // Seen from the front the ear hangs behind the head: its line runs on under the cheek at its foot and under the
+    // crown at its root (DECISIONS 210).
+    line: R ? { from: EAR_UNDER.R, to: on([-38.6, -140.6]), ends: ["under", "under"] } : { from: on([-38.6, -140.6]), to: EAR_UNDER.L, ends: ["under", "under"] },
+  });
+}
+const EDGES = { R: earEdgeOf("R"), L: earEdgeOf("L") };
 
 /**
  * The face's roll carried down into the cheeks and jaw (DECISIONS 8): below the
@@ -217,22 +250,20 @@ const leftSide = ([x, y]: P): P => [x > 0 ? x - 2.4 * Math.min(1, Math.max(0, (y
 // crescents). From there the face's side is a round curve that bows out over
 // the ear and in again above the cheek, as the sheet's line draws it (x -42.6 at
 // y -120, -45 at -115, -46.5 to -47.3 from -110 to -100 and -45.8 at -93 on the
-// right). Below it each cheek is a round puff that comes out from under the
-// side's line over the ear (a concave corner where it leaves the line) and
-// bulges past it to x -47.5 at y -80 on the right, as the sheet draws it.
+// right). Below it each cheek is one convex puff over the ear, bulging out to
+// x -48.4 at y -81 on the right, its fur headFur()'s (DECISIONS 214, 220), and
+// under it the jaw turns round into the chin, a rounded mass over the collar.
 // Typed as its right half, mirrored, the crown lifted and the side drawn in on
 // the left, and the cheeks rolled with the face. The crown's part under the
 // topknot is hidden by it.
-const headHalf: Node[] = [[0, -151.8], [-32.4, -146.8], [-37.6, -143.4], [-42.2, -139.6], [-46.2, -133.6], [-40.4, -135.3], [-33.8, -134.9],
-  [-36.9, -129.4], [-41.6, -120.6], [-45.6, -114.4], [-47, -105], [-46.2, -97.4], [-43.4, -91.6], [-46, -87], [-46.8, -80.6],
-  [-45, -74.4], [-40.2, -70], [-31, -64.2], [-9, -59.4]];
+const headHalf: Node[] = [[0, -151.8], [-32.4, -146.8], [-37.6, -143.4], [-42.2, -139.6], [-46.2, -133.6], [-40.4, -138], [-34.4, -137.4],
+  [-36.9, -129.4], [-41.6, -120.6], [-45.6, -114.4], [-47, -105], [-47, -97.6], [-48.2, -89.4], [-48.4, -81.4],
+  [-46.6, -74.6], [-42.6, -69.4], [-36, -65.2], [-24, -61.4], [-9, -59.4]];
 /**
  * The crown's overhang and the crescent's inner end, on the right: the lock's tip hanging just inside the ear's
  * edge, its underside arching over the root's tan to y -134.9, and the rounded turn into the face's side.
  */
 const TEMPLE = [4, 5, 6];
-/** Where each cheek's puff comes out from under the side's line: a concave corner. */
-const PUFF = 12;
 /**
  * The left temple, typed where the sheet draws it in place of the right's mirror: a shorter overhang, the crown
  * meeting the ear at (41, -140), its underside running in over the ear's tan at y -140.3 and the tan tapering
@@ -246,51 +277,64 @@ const mirroredHalf = mirrorX(headHalf, false).slice(0, -1);
 const at = mirroredHalf.length - TEMPLE[2]!;
 const leftHalf = [...mirroredHalf.slice(0, at - 1).map(([x, y]): Node => leftSide([x, y])), ...[...leftTemple].reverse(),
   ...mirroredHalf.slice(at + TEMPLE.length + 1).map(([x, y]): Node => crownLift([x, y]))];
-// The cheeks' puffs, and the inner end of each root's tan under the crown, a wedge pointing in under the crown's
-// fur where the face's side comes down from it (concave corners, which the corner rule leaves alone).
-const CORNERS = [PUFF, headHalf.length + headHalf.length - PUFF, TEMPLE[2]!, headHalf.length + 1 + at];
-// The cheeks' fluff, as the hero and the front turnaround draw it: each puff
-// bulges out over the ear's inner foot and breaks along its outer and lower edge
-// into a few round clumps of quite different sizes, each combed down and out to
-// a soft point: the fullest high on the cheek, two smaller ones under it and a
-// small hook where the cheek meets the neck; the two cheeks differ, as the
-// sheet's do (on the left the second clump is the small one). Typed top to
-// bottom; the path runs down the right cheek and up the left. And the chin hangs
-// over the collar in a row of small soft tufts, uneven, combed out from its
-// middle.
-const cheekLocks = {
-  R: [{ len: 1.3, w: 1.4, lean: 0.15 }, { len: 1.1, w: 1.1, lean: 0.2 }, { len: 1.25, w: 1.2, lean: 0.25 }, { len: 0.8, w: 0.85, lean: 0.3 }],
-  L: [{ len: 1.4, w: 1.5, lean: 0.15 }, { len: 0.9, w: 0.9, lean: 0.2 }, { len: 1.2, w: 1.15, lean: 0.25 }, { len: 0.9, w: 0.9, lean: 0.3 }],
-};
-const chinLocks = [{ len: 0.6, w: 0.8, lean: -0.4 }, { len: 0.95, w: 1.1, lean: -0.3 }, { len: 0.65, w: 0.9, lean: -0.2 }, { len: 0.9, w: 1.2, lean: -0.05 },
-  { len: 0.7, w: 1, lean: 0.1 }, { len: 0.95, w: 1.15, lean: 0.25 }, { len: 0.65, w: 0.85, lean: 0.4 }];
-const crownLocks = [{ len: 0.85, w: 1, lean: 0.35 }, { len: 0.55, w: 0.8, lean: 0.45 }];
-/** A cheek clump's tip, root and notches (path order), for its line and the shade under it. */
-interface Clump { tip: P; root: P; notches: [P, P] }
+// The inner end of each root's tan under the crown, a wedge pointing in under the crown's fur where the face's side
+// comes down from it (concave corners, which the corner rule leaves alone).
+const CORNERS = [TEMPLE[2]!, headHalf.length + 1 + at];
+
+// The head's fur (parts/headfur.ts, DECISIONS 214, 220), typed from the front crop on the dog's right side and carried
+// to its left reversed. Over each ear's root two broad low locks of the crown's cream hang down and out over the tan,
+// unlined and feathered, the crown's line joining the ear's where their outlines cross (the left root's are fuller, as
+// the sheet's crown overhangs it further).
+const CROWN_R: Lock[] = [{ len: 1.6, width: 4, lean: -0.5, dip: 0.4 }, { len: 1.25, width: 3.6, lean: -0.45 }];
+const CROWN_L: Lock[] = [{ len: 1.25, width: 3.6, lean: 0.45, dip: 0.4 }, { len: 1.6, width: 3.6, lean: 0.5 }];
+// Each cheek's puff over the ear: four pointed wisps combed down and out, of uneven sizes, as the crop's.
+const CHEEK: Lock[] = [{ len: 2.2, width: 5, lean: 0.35, dip: 0.5 }, { len: 2.8, width: 6, lean: 0.45, dip: 0.6 }, { len: 1.8, width: 4.6, lean: 0.4, dip: 0.45 },
+  { len: 2.4, width: 5.4, lean: 0.5 }];
+// The chin's middle over the collar: seven small low scallops of uneven size combed down and out from the middle, the
+// jaw's round sides plain.
+const CHIN: Lock[] = [{ len: 1.1, width: 6.8, lean: -0.35, dip: 0.3 }, { len: 1.7, width: 7.2, lean: -0.25, dip: 0.35 }, { len: 1.25, width: 6.6, lean: -0.1, dip: 0.25 },
+  { len: 0.95, width: 5.8, dip: 0.3 }, { len: 1.45, width: 7, lean: 0.1, dip: 0.35 }, { len: 1.1, width: 6.4, lean: 0.25, dip: 0.25 }, { len: 1.4, width: 6.8, lean: 0.35 }];
 
 /**
- * The head's outline and its cheek clumps. `puff` swells each cheek's puff out sideways by up to that many points
- * (huffy's variant B, review-only: a puffed head.base with a matching head.line), most at the cheek's fullest, about
- * y -82, and not at all above the eyes' foot or under the jaw, so the crown, the temples and the chin stay as they are.
+ * The head's outline with its fur, and its lines (headFur()). `puff` swells each cheek's puff out sideways by up to
+ * that many points (huffy's variant B, review-only: a puffed head.base with a matching head.line), most at the cheek's
+ * fullest, about y -82, and not at all above the eyes' foot or under the jaw, so the crown, the temples and the chin
+ * stay as they are; every typed place moves with it (headFur's `at`), so the puffed head's fur is the rest's.
  */
-function headOf(puff = 0): { head: Shape; clumps: Clump[] } {
+function headOf(puff = 0): { head: Shape; fur: HeadFur } {
   const swell = ([x, y]: P): P => {
     const t = clamp01((y + 104) / 44), across = clamp01((Math.abs(x) - 22) / 14);
     return [x + Math.sign(x) * puff * Math.sin(Math.PI * t) ** 2 * across, y];
   };
   const at = (p: P) => cheekRoll(swell(p));
-  let head = smooth([...headHalf, [0, -58.4], ...leftHalf].map(([x, y]): Node => at([x, y])), { typed: headHalf.length + 1 + leftTemple.length, corners: CORNERS });
-  const clumps: Clump[] = [];
-  const noteClump = (tip: P, root: P, notches: [P, P]) => clumps.push({ tip, root, notches });
-  head = furEdge(head, at([-45, -89.2]), at([-37.6, -68.8]), cheekLocks.R, 0.6, noteClump);
-  head = furEdge(head, at([37.6, -68.8]), at([45, -89.2]), lefthandOf(cheekLocks.L), 0.6, noteClump);
-  head = furEdge(head, at([-32.4, -65.4]), at([32.4, -65.4]), chinLocks, 0.36);
-  // The crown's fur where it overhangs each ear's root is a lock of fur, its tip a fur span, so the crown's line can
-  // run on round it into the ear's own line, unbroken, as the sheet draws it. Between the topknot and each ear the
-  // crown's outline breaks over a small lock of fur, as the sheet's does.
-  head = furSpan(furSpan(head, [-45, -135.6], [-44.4, -134.3]), [39.4, -140.4], [40.2, -141.6]);
-  head = furEdge(furEdge(head, [-35.6, -145.1], [-38.6, -142.6], crownLocks, 0.26), [38.4, -144.6], [35.4, -147], lefthandOf(crownLocks), 0.26);
-  return { head, clumps };
+  // The left overhang's tip is a lock of the crown's fur, as sharp as the sheet draws it (Q29; DECISIONS 89), where the
+  // crown's line runs on into the ear's.
+  const base = furSpan(smooth([...headHalf, [0, -58.4], ...leftHalf].map(([x, y]): Node => at([x, y])), { typed: headHalf.length + 1 + leftTemple.length, corners: CORNERS }),
+    [39.4, -140.4], [40.2, -141.6]);
+  // The face's side over the ear: deep on the tan where it tucks over the ear (DECISIONS 7's #9E5C2C); round the
+  // cheek's puff the fur's own light line, as the front crop draws only a short light line low on the cheek.
+  const sideLadder = (p: P): "cream" | "tan" => (p[1] < -96 ? "tan" : "cream");
+  const sideFace = (p: P) => (p[1] < -96 ? 0.6 : 0.1);
+  const sideMost = (p: P) => (p[1] < -96 ? 1 : 0.35);
+  const fur = headFur({
+    base, at,
+    crown: [
+      { side: "R", from: [-46, -133.8], to: [-39.4, -137.9], locks: CROWN_R, tipRound: 0.25, line: { from: [-24, -149.2], to: [-44, -137] }, ear: EDGES.R.shape },
+      { side: "L", from: [28.8, -138.8], to: [35.8, -140.3], locks: CROWN_L, tipRound: 0.25, line: { from: [41.2, -140.2], to: [19, -150.6] }, ends: ["join", "under"], ear: EDGES.L.shape },
+    ],
+    cheeks: [
+      // From where the face's side comes out of the root's soft overlap, down over the ear to the puff, deep on the tan;
+      // the puff's wisps unlined (its gap); a short light line low on the cheek round the last wisp to the jaw, as the
+      // front crop draws it. headFur frees the line where it borders the root's and the gap's unlined stretches and
+      // cites each by its length (DECISIONS 214).
+      { side: "R", from: [-48.2, -91], to: [-44, -70.8], clumps: CHEEK, tipRound: 0.22,
+        line: { from: [-39.9, -123.8], to: [-42.6, -69.4], ends: ["free", "join"], on: sideLadder, under: sideFace, most: sideMost, gap: [[-47.8, -92], [-46.8, -76.4]] }, raised: [-46.2, -113.4] },
+      { side: "L", from: [44, -70.8], to: [47.2, -91], clumps: reversedRow(CHEEK), tipRound: 0.22,
+        line: { from: [42.6, -69.4], to: [33.7, -129.4], ends: ["join", "free"], on: sideLadder, under: sideFace, most: sideMost, gap: [[46.8, -76.4], [46.8, -92]] }, raised: [44.9, -113.8] },
+    ],
+    chin: { from: [-24, -61.4], to: [24, -61.4], scallops: CHIN, tipRound: 0.25, line: { from: [-42.6, -69.4], to: [42.6, -69.4] }, corners: [[-42.6, -69.4], [42.6, -69.4]] },
+  });
+  return { head: fur.head, fur };
 }
 const HEAD = headOf();
 const head = HEAD.head;
@@ -366,13 +410,16 @@ const hipGroup = [back, hind.R, hind.L];
 
 const backPaint: Paint = { fill: C.fur, shade: furShade(hipGroup) };
 /**
- * The back's line (parts/lines.ts): from under each collar's end down the shoulder and round the haunch. On the right
- * the saddle's tan reaches the line from the shoulder all down the haunch, so the line runs on the tan there; on the
- * left the tan streak lies along the shoulder only, and the haunch's line is the cream's, as the sheet draws them
- * (#A56F50 to #B67F5B on the right haunch, #B19378 to #B79277 on the left).
+ * The back's line (parts/lines.ts), one span down each side (DECISIONS 210, 222): from under the head at the collar's
+ * end down the shoulder and round the haunch to under the hind paw. On the right the saddle's tan reaches the line from
+ * the shoulder all down the haunch, so the line runs on the tan there; on the left the tan streak lies along the
+ * shoulder only, and the haunch's line is the cream's, as the sheet draws them (#A56F50 to #B67F5B on the right
+ * haunch, #B19378 to #B79277 on the left).
  */
-const backLines: LitSpan[] = [{ from: [-29.2, -61.4], to: [-47.4, -11], on: "tan", taper: 6 },
-  { from: [47.4, -11], to: [38.6, -38], taper: 6 }, { from: [40.2, -40.6], to: [29.2, -61.4], on: "tan", taper: 6 }];
+const backLines: LitSpan[] = [{ from: [-25.6, -63.3], to: [-47.4, -11], on: "tan", ends: ["under", "under"] },
+  { from: [47.4, -11], to: [25.6, -63.3], on: (p: P) => (p[1] < -39.4 ? "tan" : "cream"), ends: ["under", "under"] },
+  // Its foot on the ground in the slot between the front paws, where the sheet closes the gap with a short dark line.
+  { from: [-4.14, -1.6], to: [4.14, -1.6], ends: ["join", "join"] }];
 /** The head's paint, its light group the head's outline (the rest's, or one drawn puffed) and the topknot's curls. */
 const headPaintOf = (head: Shape): Paint => ({
   fill: C.fur,
@@ -381,91 +428,31 @@ const headPaintOf = (head: Shape): Paint => ({
   shade: furShade([head, ...tuftShapes], ["M-38 -66 C-28 -61.2 -14 -59.2 0 -59.2 C14 -59.2 28 -61.2 38 -66 L46 -56 L-46 -56Z",
     ...[EYE_R, EYE_L].map(([x, y]) => `M${fmt(x - 8)} ${fmt(y - 9.6)} a8 2 0 1 0 16 0 a8 2 0 1 0 -16 0Z`)],
     // The crown stays light right out to its line, as the sheet paints it, the overhangs over the ears' roots
-    // included; and so do the cheeks' puffs out to their rims, above the jaw.
-    ["M-52 -172 L52 -172 L52 -137 L-52 -137Z", "M-52 -95 L-36 -95 L-36 -72 L-52 -72Z", "M52 -99 L36 -99 L36 -76 L52 -76Z"], { inset: 3, toLight: 4.5 }),
+    // included; the cheeks' puffs take the rim's shade round their lower side, so the lower face reads round (G4).
+    ["M-52 -172 L52 -172 L52 -137 L-52 -137Z"], { inset: 3, toLight: 4.5 }),
   highlight: { d: headLight, colour: C.light, opacity: 0.4, blur: 4 },
 });
 const headPaint = headPaintOf(head);
 /**
- * The head's line (head.line), where the sheet draws one, by the dog's one line rule (parts/lines.ts, DECISIONS 74):
- * on the crown's fur one light line from the topknot down to just short of the overhang's tip, where the ear's own
- * line takes over; down each side, where the face lies over the ear, one round curve on the tan, deep where the face
- * tucks over the ear (the sheet's #9E5C2C there, DECISIONS 7), ending where the cheek's puff comes out over it; and
- * at each jaw's corner, where the cheek's last clump meets the collar's end, a short deep stroke under it. Over the
- * temples' tan and under the overhang the sheet draws no line; under the chin's tufts the collar's own dark rim
- * (chinOnCollar) is the edge.
- */
-const headSpans: LitSpan[] = ([
-  { from: [-39.9, -123.8], to: [-44.8, -93.2], on: "tan", under: 0.6, taper: 4 },
-  { from: [44.4, -93.2], to: [33.7, -129.4], on: "tan", under: 0.6, taper: 4 },
-  { from: [-37.8, -69], to: [-31.4, -64.6], under: 0.35, taper: [1, 2.6] },
-  { from: [31.4, -64.6], to: [37.8, -69], under: 0.35, taper: [2.6, 1] },
-] as LitSpan[]).map((span): LitSpan => ({ ...span, from: cheekRoll(span.from as P), to: cheekRoll(span.to as P) }));
-/**
- * The crown's line, from under the topknot's side lobes over the crown's small lock and round the overhang's tip,
- * where it runs on into the ear's own line: its ends barely taper (the topknot hides the inner one), so the ear's
- * line, coming out from under the overhang at full width, takes it up with no pinch.
- */
-const crownSpans: LitSpan[] = [{ from: [-24, -149.2], to: [-45.6, -134.6], taper: 1.4 }, { from: [40.8, -140.3], to: [19, -150.6], taper: 1.4 }];
-/**
- * The cheeks' lines, as the sheet draws them: a thin, pale line round each clump, from the notch above it over its tip
- * and down into the notch below, tapering out at both, so the line breaks where the fur parts and the edge reads as
- * clumps of fur, not a cookie-cutter row; on the cream ladder, the fur's own pale warm line, never a dark chip on the
- * ear's tan. And in each of the fuller clumps one fine fur stroke, combed with it from inside the cheek out toward
- * its tip.
- */
-function cheekLines(clumps: Clump[]): { spans: LitSpan[]; strokes: P[][] } {
-  const spans: LitSpan[] = clumps.map(({ notches }) => ({ from: notches[0], to: notches[1], taper: 1.6 }));
-  const strokes = clumps.filter(({ tip, root }) => v.len(v.sub(tip, root)) >= 1.9).map(({ tip, root, notches }) => {
-    // The path runs down the right cheek and up the left, so a clump's lower notch is its second on the right.
-    const below = tip[0] < 0 ? notches[1] : notches[0];
-    const along = v.sub(tip, root), aside = v.mul(v.sub(below, root), 0.3);
-    return [v.add(v.add(root, v.mul(along, -0.9)), v.mul(aside, 0.7)), v.add(v.add(root, v.mul(along, -0.15)), v.mul(aside, 1.05)), v.add(v.add(root, v.mul(along, 0.55)), v.mul(aside, 0.85))];
-  });
-  return { spans, strokes };
-}
-/**
- * Under a raised ear (the perked or the lifted, DECISIONS 147) the temple it uncovers carries the head's side, lined
- * along its own edge, so the face's line over the ear would be a crease inside the tan: it starts lower instead, where
- * the temple's edge fades out, and runs on down the face's side to the cheek.
- */
-const headSidesUp: LitSpan[] = ([
-  { from: [-46.2, -113.4], to: [-44.8, -93.2], on: "tan", under: 0.3, taper: [5, 4] },
-  { from: [44.4, -93.2], to: [44.9, -113.8], on: "tan", under: 0.3, taper: [4, 5] },
-] as LitSpan[]).map((span): LitSpan => ({ ...span, from: cheekRoll(span.from as P), to: cheekRoll(span.to as P) }));
-
-/**
  * head.line: the head's outline as its own unclipped region, drawn after the head's clip group, reaching 0.5 pt past
- * the head; `up` names the sides whose ear is raised off the temple (head.line's states templeL, templeR and temples).
+ * the head, crisp on its outer side (DECISIONS 212): the head fur's lines (headFur(), DECISIONS 214, 220), the crown's
+ * running on into each ear's, each cheek's from the face's side over the ear round its puff to the jaw, the chin's from
+ * jaw to jaw over the collar; and under them the crown's cream feathered out over each root's unlined stretch. `up` names
+ * the sides whose ear is raised off the temple (head.line's states templeL, templeR and temples): that side's cheek
+ * line starts lower, from open fur, and its root is not feathered (the temple, temple.<side>, is the head's own paint).
  */
-function headLinePiece(up: { L: boolean; R: boolean } = { L: false, R: false }, { head, clumps } = HEAD): Piece {
+function headLinePiece(up: { L: boolean; R: boolean } = { L: false, R: false }, h = HEAD): Piece {
+  const head = h.head;
   const [x0, y0, x1, y1] = bbox(head.segs);
-  // Room for the feathered cream round the cheeks' fluff, which reaches 3.8 pt past the head (half its width and
-  // three times its blur), so the region's canvas holds all of it.
+  // Room for the feathered cream round the roots, which reaches 3.8 pt past the head (half its width and three times
+  // its blur), so the region's canvas holds all of it.
   const box = pad([x0, y0, x1 - x0, y1 - y0], 4);
-  const cheeks = cheekLines(clumps);
-  const sides = [up.R ? headSidesUp[0]! : headSpans[0]!, up.L ? headSidesUp[1]! : headSpans[1]!, ...headSpans.slice(2)];
-  const r = litEdge(head, [...sides, ...crownSpans], "head.line", box, { reach: 0.5 });
-  const c = litEdge(head, cheeks.spans, "cheek clump", box, { reach: 0.5, blur: 0.2 });
-  const strokes = cheeks.strokes.map((pts) => innerLine(pts, 0.7, C.puffLine, { opacity: 0.45, taper: 1.4, tip: 0.15 }));
-  const g = uid("blur");
-  // Where the crown's fur and the face meet the ears' tan at the temples with no line, the sheet's edge is soft:
-  // the crown's cream fur lies out over the root's tan in a feathered edge, softly along the underside of the
-  // overhang and more broadly (about 3 pt from tan to cream) round the tan's inner end and down the face's side
-  // to where its line begins, so the root's tan tucks in under the cream with no cut edge and no corner.
-  const s = uid("blur");
-  const feathered = (spans: [P, P][], width: number, offset = 0) => spans.map(([a, b]) =>
-    strokeOf(spanPoints(head, fracAt(head, cheekRoll(a)), fracAt(head, cheekRoll(b))), width, { taper: 3, tip: 0.4, offset }).d).join("");
-  // Under the right overhang the root's tan fades up into the cream; on the left the sheet's tan runs up to the crown.
-  // Under a raised ear the temple (temple.<side>) is the head's own paint, so there is no tan to feather on that side.
-  const under = up.R ? "" : feathered([[[-45.4, -134.6], [-34.6, -135]]], 2.6, 0.8);
-  const side = feathered([...(up.R ? [] : [[[-34.4, -134.4], [-41.4, -121.4]] as [P, P]]), ...(up.L ? [] : [[[39.2, -123.4], [31.6, -139.2]] as [P, P]])], 3);
-  return piece(`<defs>${r.defs}${c.defs}${blur(g, pad(box, 2), 0.35)}${blur(s, pad(box, 2), 0.9)}</defs>` +
-    ([[under, 0.95], [side, 0.9]] as const).filter(([d]) => d).map(([d, o]) => `<path d="${d}" fill="${C.fur}" opacity="${o}" filter="url(#${s})"/>`).join("") +
-    `${r.body}${c.body}<g filter="url(#${g})">${strokes.map((l) => l.svg).join("")}</g>`, box, {
-    shapes: [{ name: "head.line", nodes: head.typed, segs: head.segs, outlined: [...r.outlined, ...c.outlined], fur: head.fur.map(([a, b]) => [fracAt(head, a), fracAt(head, b)]) }],
-    lines: [...r.lines, ...c.lines, ...strokes.map((l) => ({ ...l.line, where: "cheek fur" }))],
-  });
+  const r = litEdge(head, h.fur.spans(up), "head.line", box, { reach: 0.5, crisp: true });
+  const soft = h.fur.soften(C.fur, box, up);
+  return lineGate(piece(`<defs>${r.defs}${soft.defs}</defs>${soft.body}${r.body}`, box, {
+    shapes: [{ name: "head.line", nodes: head.typed, segs: head.segs, outlined: r.outlined, fur: head.fur.map(([a, b]) => [fracAt(head, a), fracAt(head, b)]) }],
+    lines: r.lines,
+  }));
 }
 
 /**
@@ -562,10 +549,10 @@ function earPaint(side: "L" | "R"): Paint {
   // Five locks of uneven length coming in from about the ear's middle and curving with its outer bulge down into its
   // lower edge, the outer two into the dips between its clumps, a short one in the outer clump.
   const locks: P[][] = [
-    [[-69.4, -104], [-74, -96], [-76.4, -87.4], [-76.6, -79.6]],
+    [[-69.8, -110], [-72.6, -102], [-74.8, -94], [-76.4, -87.4], [-76.6, -79.6]],
     [[-62.6, -99], [-66.4, -90], [-67.8, -80], [-67, -70.6]],
     [[-56.8, -92], [-59, -83], [-59.4, -74], [-58.4, -65.8]],
-    [[-50.6, -86], [-51.6, -78.6], [-51.2, -71.4]],
+    [[-50.6, -82], [-51.4, -76.6], [-51.2, -71.4]],
     [[-72.4, -89], [-73.4, -82.6], [-72.6, -76.8]],
   ];
   const shadeD = "M-90 -92 C-80 -80 -62 -72 -40 -70 L-40 -50 L-90 -50Z";
@@ -575,7 +562,7 @@ function earPaint(side: "L" | "R"): Paint {
   const innerD = "M-44 -128 C-48.4 -118 -49.4 -104 -48.8 -94 L-43 -94 L-43 -128Z";
   const rootD = "M-54 -140 L-26 -140 L-27 -132.6 C-35 -132.2 -45 -131.8 -54 -130.6Z";
   return earFur({
-    ear: ears[side],
+    ear: EDGES[side].shape, edge: EDGES[side],
     axis: [on([-58, -124]), on([-60, -62])],
     deepen: [0.3, 1],
     locks: locks.map((pts) => pts.map(on)),
@@ -620,49 +607,30 @@ function between(): string {
     `<path d="${pathD(v.segs)}" fill="url(#${g})" filter="url(#${f})"/>`;
 }
 
-/**
- * The chin's shadow on the collar (spec L396, DECISIONS 33), a part of its own on the head bone, clipped to the
- * collar, so it moves with the head and never leaves the band: where the chin's fur lies on the collar, as the
- * sheet paints it, the collar's dark rim right under the fur's edge, following its tufts, and a soft shade of the
- * band's own blue under that. Drawn centred on the chin's edge (the head's own path), so only its lower half shows
- * below the fur.
- */
-function chinOnCollar(): Piece {
-  const f = uid("blur"), g = uid("blur"), box: Box = [-34, -70, 68, 24];
-  const chin = spanPoints(head, fracAt(head, cheekRoll([-32.4, -65.4])), fracAt(head, cheekRoll([32.4, -65.4])));
-  const rim = strokeOf(chin, 2.1, { taper: 2.5, tip: 0.6 }).d;
-  const shade = strokeOf(chin, 5, { taper: 4, tip: 1 }).d;
-  return piece(`<defs>${blur(f, box, 0.3)}${blur(g, box, 0.9)}</defs>` +
-    `<path d="${shade}" fill="${C.collarLine}" opacity="0.45" filter="url(#${g})"/><path d="${rim}" fill="${C.collarRim}" opacity="0.9" filter="url(#${f})"/>`, box);
-}
-
 export function front(): Drawn[] {
   const out: Drawn[] = [];
   const add = (name: string, p: Piece, state?: string) => out.push({ part: name, piece: p, ...(state ? { state } : {}) });
   // The ground shadow, and a soft contact shadow a little deeper under each paw where it sits.
   // The sheet's is a wide soft warm oval centred a little under the ground line, densest just below the paws.
-  add("shadow", join(soft("M-62 -1.4 a62 4.8 0 1 0 124 0 a62 4.8 0 1 0 -124 0Z", [-62, -6.2, 124, 9.6], C.shadow, 2.4),
-    soft("M-44 0.2 a44 2.6 0 1 0 88 0 a44 2.6 0 1 0 -88 0Z", [-44, -2.4, 88, 5.2], C.shadow, 1.8, 0.6),
-    ...[-1, 1].flatMap((sx) => [
-      soft(`M${sx * 15.6 - 12} -0.6 a12 1.8 0 1 0 24 0 a12 1.8 0 1 0 -24 0Z`, [sx * 15.6 - 12, -2.4, 24, 3.6], C.contact, 1.2, 0.7),
-      soft(`M${sx * 38.4 - 8} -2 a8 1.6 0 1 0 16 0 a8 1.6 0 1 0 -16 0Z`, [sx * 38.4 - 8, -3.6, 16, 3.2], C.contact, 1.2, 0.6),
-    ])));
-  add("body.back", litPart("body.back", back, backPaint, backLines));
+  // The ground shadow (parts/shadow.ts, DECISIONS 218, 226): a broad soft oval reaching past both haunches, as the front
+  // crop paints it (x -64 to 60), darkest where the paws press.
+  add("shadow", groundShadow({ reach: [-68, 63], presses: [{ x: -15.4, half: 13 }, { x: 15.4, half: 13 }, { x: -38.4, half: 9 }, { x: 38.4, half: 9 }] }));
+  add("body.back", lineGate(litPart("body.back", back, backPaint, backLines)));
   add("back.patch.R", litMarking("back.patch.R", { shape: back, paint: backPaint, spans: backLines }, saddleR, { fill: C.marking, blur: 1.4 }));
   add("back.patch.L", litMarking("back.patch.L", { shape: back, paint: backPaint, spans: backLines }, saddleL, { fill: C.marking, blur: 1.3, fade: { from: [38, -40], to: [39.4, -29.4] } }));
   for (const side of ["R", "L"] as const) {
     const sx = side === "R" ? -1 : 1, cx = sx * 37.6, cy = -10.9;
-    add(`hind.${side}`, roomy(litPart(`hind.${side}`, hind[side], {
+    add(`hind.${side}`, lineGate(roomy(litPart(`hind.${side}`, hind[side], {
       fill: C.fur,
       shade: furShade(hipGroup, [], [`M${cx - 12} ${cy - 12} L${cx + 12} ${cy - 12} L${cx + 12} ${cy - 4} L${cx - 12} ${cy - 4}Z`]),
       // Two toe lines rising from the sole's dips about 6 pt up the paw's front, each bowing away from the middle toe,
       // as the sheet draws them, so the paw reads as three round toes (parts/paw.ts).
       ...toes({ lines: ([[[-41.6, -3.6], [-42.3, -5.8], [-42.2, -8], [-41.4, -9.8]], [[-35.6, -3.3], [-35, -5.4], [-35.1, -7.6], [-35.8, -9.4]]] as P[][])
-        .map((pts) => flipX(pts, side)), fade: [-3.4, -10] }),
+        .map((pts) => flipX(pts, side)), fade: [-3.4, -10], soft: true }),
     // A bun closed all round where it shows, as the sheet draws it: its line comes out from behind the front paw over
     // its top, where it lies on the haunch, runs on unbroken down its outer side and under its sole to where it goes
     // behind the front paw again, deepening to the darkest where it sits on the ground (parts/lines.ts).
-    }, litSide(side, [{ from: [-31.4, -16.2], to: [-29.2, -4.6], taper: [3, 4] }])), 6));
+    }, litSide(side, [{ from: [-28.9, -14.6], to: [-27.7, -5.4], ends: ["under", "under"], ground: "sole" }])), 6)));
   }
   // Its canvas a point roomier than the chest, so the light group's shade, which reaches 13.7 pt past it, stays
   // inside the paint's reach when the chest's top lands on a whole point.
@@ -671,10 +639,6 @@ export function front(): Drawn[] {
     // The shade falls under the chin, just below the collar.
     shade: furShade(bodyGroup, ["M-22 -52 C-10 -48 10 -48 22 -52 L22 -58 L-22 -58Z"]),
     under: between(),
-    // A few soft fur strokes on the bib, combed down from under the collar's ends and the tag, as the sheet draws them.
-    inner: ([[[-23.4, -47], [-21.8, -42.4], [-21, -38.2]], [[23.4, -47.6], [21.8, -43], [21.2, -38.8]], [[-17.6, -44.6], [-16.6, -41], [-16.2, -38]],
-      [[17.6, -45.2], [16.6, -41.6], [16.4, -38.6]], [[-6.4, -34.6], [-5.4, -31.8]], [[6.6, -34.6], [5.6, -31.8]]] as P[][])
-      .map((pts) => ({ pts: sample(smooth(pts, { closed: false }).segs, 6, false), width: 0.75, colour: LINES.cream[2]!, opacity: 0.4 })),
     // Its edge lies on the saddle's tan inside the silhouette, with no line, as the sheet paints it; no lines beside
     // the tag, and nothing marks the V's top, which fades up into the chest's cream.
   }), 1));
@@ -696,9 +660,9 @@ export function front(): Drawn[] {
     under: `<rect x="-1.5" y="-60" width="4.4" height="10.4" rx="1.2" fill="${C.collarLine}" opacity="0.3"/>`,
     outline: { colour: C.collarRim, width: THIN, taper: 3, blur: 0.2, spans: [{ from: [26.2, -64], to: [-26.2, -62.7] }] },
   }));
-  add("shadow.chin.collar", chinOnCollar());
+  add("shadow.chin.collar", chinShadow(head, cheekRoll([-38, -66.2]), cheekRoll([38, -66.2]), C.collarLine, [-44, -74, 88, 22]));
   add("tag", tagPiece());
-  for (const side of ["R", "L"] as const) add(`ear.${side}`, litPart(`ear.${side}`, ears[side], earPaint(side), earSpans(side)));
+  for (const side of ["R", "L"] as const) add(`ear.${side}`, lineGate(litPart(`ear.${side}`, EDGES[side].shape, earPaint(side), [EDGES[side].span, earSpans(side)[1]!])));
   add("head.base", part("head.base", head, headPaint));
   for (const side of ["L", "R"] as const) {
     // One even pale tan from the eye to the ear's root, as the front crop paints it (L* 80 to 81 by the eye and by the
@@ -734,8 +698,8 @@ export function front(): Drawn[] {
     // Two toe lines rising from the sole's dips about 5.5 pt up the paw's front, each bowing a little away from the
     // middle toe, as the sheet, the paw-stub and the stubby-paws panels draw them (parts/paw.ts).
     const toeLines = toes({ lines: ([[[-11.2, -1.2], [-10.6, -3.4], [-10.8, -5.4], [-11.6, -6.9]], [[-20.8, -1.2], [-21.4, -3.4], [-21.2, -5.4], [-20.4, -6.9]]] as P[][])
-      .map((pts) => flipX(pts, side)), fade: [-1.2, -7] });
-    add(`front.${side}`, litPart(`front.${side}`, legs[side], {
+      .map((pts) => flipX(pts, side)), fade: [-1.2, -7], soft: true });
+    add(`front.${side}`, lineGate(litPart(`front.${side}`, legs[side], {
       fill: C.fur,
       shade: furShade(bodyGroup, [polyD(flipX([[-5, -26], [-4.2, -20], [-3, -12], [-2.2, -6], [-1.2, -6], [-2, -12], [-3, -20], [-3.8, -26]], side))],
         ["M-40 -60 L40 -60 L40 -36 L-40 -36Z", "M-40 -3.4 L40 -3.4 L40 4 L-40 4Z"], { inset: 2, toLight: 3 }),
@@ -746,7 +710,7 @@ export function front(): Drawn[] {
       // The chest is one fluffy mass down to the paws, as the sheet paints it: the leg's line comes in from nothing low
       // on its inner side, where the legs part, runs round the bun of the paw, darkest under its sole on the ground,
       // and up its outer side, fading out below the shoulder (parts/lines.ts). No lines beside the tag.
-    }, litSide(side, [{ from: [-2.4, -15], to: [-35, -40], taper: [6, 16] }])));
+    }, litSide(side, [{ from: [-4.8, -28], to: [-34.8, -38], ends: ["free", "free"], ground: "sole", cites: 216, bare: [0, 47] }]))));
   }
   return out;
 }
