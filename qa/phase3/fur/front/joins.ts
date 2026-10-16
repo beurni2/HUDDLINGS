@@ -5,6 +5,7 @@
 // composited as the rest-frame tests composite a view (characters/draw/test/composite.ts), from the drawings themselves.
 //
 // node qa/phase3/fur/front/joins.ts [--out <folder>]   → <folder>/joins.png and <folder>/states.png (qa/phase3/fur/front/ by default)
+// node qa/phase3/fur/front/joins.ts --only <text> --out <folder>   → <folder>/peek.png: the rows whose label holds the text, for a quick look
 import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -20,7 +21,7 @@ import { composite } from "../../../../characters/draw/test/composite.ts";
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = resolve(here, "../../../..");
 const BASE = "fbbe6d3";
-const { values: args } = parseArgs({ options: { out: { type: "string" } } });
+const { values: args } = parseArgs({ options: { out: { type: "string" }, only: { type: "string" } } });
 const out = resolve(args.out ?? here);
 
 interface Drawn {
@@ -206,6 +207,8 @@ const JOINS: Row[] = [
   { label: "#1, #4 the crown over the dog's left ear's root (zoom 10)", box: [24, -158, 30, 26], zoom: 10 },
   { label: "#4 the topknot and the crown, the dog's right half (zoom 10)", box: [-38, -168, 40, 24], zoom: 10 },
   { label: "#4 the topknot and the crown, the dog's left half (zoom 10)", box: [-2, -168, 40, 24], zoom: 10 },
+  { label: "#6 the dog's right head patch: its hood, the cream strip and the root's tan (zoom 8)", box: [-52, -142, 36, 36], zoom: 8 },
+  { label: "#6 the dog's left head patch: its hood, the cream strip and the root's tan (zoom 8)", box: [12, -144, 38, 36], zoom: 8 },
   { label: "#2 the dog's right cheek over its ear (zoom 10)", box: [-60, -108, 28, 46], zoom: 10 },
   { label: "#2 the dog's left cheek over its ear (zoom 10)", box: [32, -110, 28, 46], zoom: 10 },
   { label: "#3, #7 the chin over the collar, the dog's right half (zoom 10)", box: [-44, -76, 40, 22], zoom: 10 },
@@ -240,6 +243,11 @@ const columns = (box: Box, zoom: number, versions: [string, Drawn[]][], states: 
   return [{ name: "sheet", ...sheetRegion(box) }, ...versions.map(([name, drawn]) => ({ name, png: render(drawn, states, box, zoom), pw: w, ph: h, vb: [0, 0, w, h] as Box }))];
 };
 const rest: [string, Drawn[]][] = [["before", all(before, false)], ["after", all(after, false)]];
+if (args.only) {
+  const rows = JOINS.filter((r) => r.label.includes(args.only!));
+  write(`Front: ${args.only}`, rows.map((row) => ({ row, columns: columns(row.box, row.zoom, rest) })), join(out, "peek.png"));
+  process.exit(0);
+}
 write("Front: the joins the audit names, sheet | before (fbbe6d3) | after", JOINS.map((row) => ({ row, columns: columns(row.box, row.zoom, rest) })), join(out, "joins.png"));
 const review: [string, Drawn[]][] = [["before", all(before, true)], ["after", all(after, true)]];
 write("Front: the face states on the fur pass's parts, sheet | before (fbbe6d3) | after", STATES.map((s) => ({
