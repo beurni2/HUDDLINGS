@@ -396,8 +396,9 @@ const EDGE = earEdge({
   base: smooth([[8.6, -133.6], [13.4, -124.6], [17.6, -114.6], [21, -104.4], [22.4, -94], [21.6, -84.4], [18.6, -76.6], [12.6, -70.4],
     [4, -66], [-13, -62.8], [-21.4, -64], [-28.8, -69], [-35, -77], [-37.6, -86.4], [-37, -96], [-34.6, -106], [-32.4, -115.4],
     [-31.2, -124], [-29.6, -130.6], [-23.6, -138], [-17.8, -142.2], [-12.9, -143.8], [-4.4, -142.4], [2.6, -138.8]]),
-  // One broad, low step high on the back edge, a gentle shelf: the side crop's back edge is nearly smooth.
-  steps: [{ from: [16.3, -117.6], to: [19.6, -109.8], lock: { len: 0.9, width: 8.8, lean: 0.4 }, tipRound: 0.35 }],
+  // One broad, low step 40% of the way down the front edge, where the side crop draws a small lock's S-curve (audit
+  // side #3); its back edge is smooth.
+  steps: [{ from: [-35.4, -103.6], to: [-33, -112.4], lock: { len: 1, width: 8.6, lean: -0.4 }, tipRound: 0.35 }],
   hem: { from: [20.4, -81], to: [-29.4, -70], locks: [{ len: 1.8, width: 12, lean: -0.45, dip: 0.4 }, { len: 1.5, width: 16.5, lean: -0.2, dip: 0.3 },
     { len: 2, width: 17, lean: -0.1, dip: 0.5 }, { len: 1.4, width: 14.5, lean: 0.15 }], tipRound: 0.38 },
   axis: [[-6, -143], [-8, -63]],
