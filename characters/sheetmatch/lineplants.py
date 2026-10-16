@@ -8,7 +8,10 @@ into the crop at the crop's own resolution, in the crop's (left-facing) frame.
 Faults only the render's own scale can show (an edge's softness, its fur) are
 planted in a render's still (a build's, look's stills), at its own ppp, in a
 region that passes today. Each plant returns what it changed, so the evidence
-can name it. Used by test_linematch.py; nothing here ships.
+can name it. The taper (plan 2) is on every span, so it must fail in every
+region a joint falls in; the pale contact line (plan 11) is also planted on
+every contact edge of the right-facing views whose line the sheet draws.
+Used by test_linematch.py; nothing here ships.
 
     python3 characters/sheetmatch/lineplants.py dog --out <dir> [--stills <build stills>]
 
@@ -40,6 +43,7 @@ TAN = (0xD9, 0xA3, 0x79)  # the printed marking tan
 # pt a render plant keeps from the parts it does not plant in: a region's band and the shift it may match by
 # (BAND_PX + SHIFT_PX crop px, at about 0.78 pt each)
 CLEAR_PT = 4.0
+PALE_CLEAR_PX = 2  # crop px past the other boundaries' bands a pale contact line is planted: their ink reads 4 px across
 
 
 def sheet_scene(species, view, calibration, parts, folder):
@@ -159,14 +163,12 @@ def cheek_gap(parts, scene, sheet, region="ear.R|head.base", pt=4.0):
     return (erase(rgb, where, 1), hosts, cover), where
 
 
-def tapers(parts, scene, sheet, every_pt=12.0, taper_pt=4.0):
-    """Every edge's line cut into spans every_pt long, each fading to nothing over taper_pt at both ends: under
-    full width for 2 taper_pt (8 pt) at every joint, as parts/lines.ts drew its spans before the fix."""
-    rgb, hosts, cover = parts
-    h, w = rgb.shape[:2]
-    lines, skeleton, band = crop_of(scene, sheet["lines"]), crop_of(scene, sheet["skeleton"]), crop_of(scene, scene.band)
-    clean = erase(rgb, lines, 1).astype(float)
-    weight = np.zeros((h, w))
+def taper_joints(scene, sheet, every_pt=12.0, taper_pt=4.0):
+    """Where tapers fall when every edge's line is cut into spans every_pt long, each fading to nothing over taper_pt
+    at both ends: each skeleton pixel's fade (a crop-sized weight, 1 at a joint), and the joints in each region."""
+    h, w = scene.frame.sil.shape
+    skeleton, band = crop_of(scene, sheet["skeleton"]), crop_of(scene, scene.band)
+    weight, joints = np.zeros((h, w)), {}
     for index, name in enumerate(scene.names):
         if "|" not in name:
             continue
@@ -175,9 +177,20 @@ def tapers(parts, scene, sheet, every_pt=12.0, taper_pt=4.0):
             run = order(np.argwhere(labels == c))
             steps = np.r_[0, np.cumsum(np.hypot(*np.diff(run, axis=0).T))] * scene.grid.k
             for joint in np.arange(every_pt, steps[-1], every_pt):
+                joints[name] = joints.get(name, 0) + 1
                 near = np.abs(steps - joint) <= taper_pt
-                for (y, x), s in zip(run[near], steps[near]):
-                    weight[y, x] = max(weight[y, x], 1 - abs(s - joint) / taper_pt)
+                for (y, x), at in zip(run[near], steps[near]):
+                    weight[y, x] = max(weight[y, x], 1 - abs(at - joint) / taper_pt)
+    return weight, joints
+
+
+def tapers(parts, scene, sheet, every_pt=12.0, taper_pt=4.0):
+    """Every edge's line cut into spans every_pt long, each fading to nothing over taper_pt at both ends: under
+    full width for 2 taper_pt (8 pt) at every joint, as parts/lines.ts drew its spans before the fix."""
+    rgb, hosts, cover = parts
+    lines = crop_of(scene, sheet["lines"])
+    clean = erase(rgb, lines, 1).astype(float)
+    weight, _ = taper_joints(scene, sheet, every_pt, taper_pt)
     # Each skeleton pixel's fade carried across its line's width.
     weight = ndimage.grey_dilation(weight, footprint=lm.disk(2)) * ndimage.binary_dilation(lines, lm.disk(1))
     out = rgb * (1 - weight[..., None]) + clean * weight[..., None]
@@ -255,11 +268,13 @@ def chin_gone(parts, scene, sheet, region="head.base|outside", reach_pt=12.0):
     return (erase(rgb, lines, 1), hosts, cover), lines
 
 
-def pale_contact(parts, scene, sheet, region="body.back|tail", share=0.6):
+def pale_contact(parts, scene, sheet, region="body.back|tail", share=0.6, margin=PALE_CLEAR_PX):
     """A contact line drawn pale, as the line-by-light rule paints the haunch over the tail in side.R: each of its
-    pixels share of the way to the cream."""
+    pixels share of the way to the cream, where it is clear of the other boundaries' bands by margin px (so a
+    neighbour keeps its ink: its ink is read up to 4 px across its own line)."""
     rgb, hosts, cover = parts
-    lines = ndimage.binary_dilation(crop_of(scene, sheet["lines"]), lm.disk(1)) & (crop_of(scene, scene.band) == scene.names.index(region))
+    lines = (ndimage.binary_dilation(crop_of(scene, sheet["lines"]), lm.disk(1)) & (crop_of(scene, scene.band) == scene.names.index(region))
+             & clear_of(scene, region, margin=margin))
     out = rgb.astype(float)
     out[lines] = out[lines] * (1 - share) + np.array(CREAM) * share
     return (np.clip(np.round(out), 0, 255).astype(np.uint8), hosts, cover), lines
@@ -276,13 +291,27 @@ def loose_tick(parts, scene, sheet, region="tuft|outside", pt=1.0, off_pt=2.0):
     return (draw_line(rgb, tick, 1.5 / scene.grid.k, TONE_10), hosts, cover), mask_of(rgb.shape[:2], np.round(tick))
 
 
+def contact_lines(scene, sheet, margin=PALE_CLEAR_PX, least=lm.MIN_TONE_PX):
+    """The contact edges (one part over another) where the sheet draws a stretch of its own line, clear of the other
+    boundaries' bands by margin px, of at least least skeleton pixels in a row (a window's worth): the edges a pale
+    contact line can be planted on and its tone read."""
+    skeleton, band = crop_of(scene, sheet["skeleton"]), crop_of(scene, scene.band)
+    out = []
+    for name in scene.contact:
+        stretch = skeleton & (band == scene.names.index(name)) & clear_of(scene, name, margin=margin)
+        if len(longest_component(np.argwhere(stretch), stretch.shape)) >= least:
+            out.append(name)
+    return sorted(out)
+
+
 def erased_segment(parts, scene, sheet, region="ear.L|outside", pt=6.0):
     """The sheet's own plant: one line segment erased."""
     return cheek_gap(parts, scene, sheet, region, pt)
 
 
-def blurred_region(parts, scene, sheet, region="tail|outside", sigma_px=1.2):
-    """The sheet's own plant: one region blurred."""
+def blurred_region(parts, scene, sheet, region="tail|outside", sigma_px=2.0):
+    """The sheet's own plant: one region blurred, at twice the softest the calibration counts as noise (its blur of
+    0.5 px after a down-up by 2, about 1 px): a softer blur is one of the sheet's own perturbed copies."""
     rgb, hosts, cover = parts
     inside = crop_of(scene, scene.band) == scene.names.index(region)
     soft = np.stack([ndimage.gaussian_filter(rgb[..., i].astype(float), sigma_px) for i in range(3)], -1)
@@ -291,11 +320,12 @@ def blurred_region(parts, scene, sheet, region="tail|outside", sigma_px=1.2):
     return (np.clip(np.round(out), 0, 255).astype(np.uint8), hosts, cover), inside
 
 
-# (key, the plan's words, view, the region or regions it must fail in (None: every region it touched), the plant)
+JOINTS = "joints"  # the taper's regions: every region with a joint in it (taper_joints), each of which must fail
+# (key, the plan's words, view, the region or regions it must fail in, the plant)
 CROP_PLANTS = (
     ("1", "4 pt of the cheek-over-ear line deleted", "front", "ear.R|head.base", cheek_gap),
-    ("2", "8 pt tapers at every span's joint, a span every 12 pt", "front", None, tapers),
-    ("6", "three dark 3 pt claw ticks on a sole", "front", "front.L|ground", claw_ticks),
+    ("2", "8 pt tapers at every span's joint, a span every 12 pt", "front", JOINTS, tapers),
+    ("6", "three dark 3 pt claw ticks on a sole (standing into the paw)", "front", ("front.L|ground", "front.L"), claw_ticks),
     ("7", "a uniform 1.75 pt tone-10 line along a paw's sole", "front", "front.L|ground", uniform_paw),
     ("8", "a hard-edged tan stripe between the front legs", "front", "body.front", tan_stripe),
     ("9", "a 0.8 pt cream band along the haunch/leg boundary", "front", "body.back|front.R", cream_band),
@@ -303,7 +333,7 @@ CROP_PLANTS = (
     ("11", "side.R's haunch-over-tail line turned pale", "side.R", "body.back|tail", pale_contact),
     ("12", "a detached 1 pt tick beside the crown line", "front", "tuft|outside", loose_tick),
     ("sheet-a", "the sheet's own: 6 pt of an ear's outline erased", "side.L", "ear.L|outside", erased_segment),
-    ("sheet-b", "the sheet's own: the tail's edge blurred (1.2 px)", "side.L", "tail|outside", blurred_region),
+    ("sheet-b", "the sheet's own: the tail's edge blurred (2 px)", "side.L", "tail|outside", blurred_region),
 )
 
 
@@ -320,6 +350,33 @@ def plant_crop(species, key, calibration_path, folder):
     base, _ = lm.check(species, Path(folder) / "base", calibration_path, shift=(0, 0), fine=False)
     after, pieces = lm.check(species, Path(folder) / "planted", calibration_path, shift=(0, 0), fine=False)
     return base, after, painted, entry, pieces
+
+
+class SheetJudge:
+    """The sheet's own still in one view, made once, and any crop plant judged on it without writing a still: the
+    planted crop laid on the grid is what the planted still reads back as, pixel for pixel (linecal.sheet_still)."""
+
+    def __init__(self, species, view, calibration, folder):
+        self.species, self.view, self.calibration = species, view, calibration
+        self.parts = linecal.sheet_parts(species, view, calibration)
+        self.scene = sheet_scene(species, view, calibration, self.parts, Path(folder))
+        self.sheet = self.scene.sheet_map()
+
+    def judge(self, rgb=None):
+        """{region: verdict} for the crop (the sheet's own, or a planted one's rgb, in the crop's own frame)."""
+        scene = self.scene
+        image = scene.crop.copy()
+        if rgb is not None:
+            # The crop's own frame is the grid's (a .R facing is measured in its .L crop's frame).
+            h, w = scene.frame.sil.shape
+            image[scene.grid.top:scene.grid.top + h, scene.grid.left:scene.grid.left + w] = rgb
+        rows = lm.compare(scene, self.sheet, scene.ours_map(image))
+        return lm.judge(scene, rows, {}, self.calibration)
+
+    def plant(self, plant, **options):
+        """A crop plant's verdicts and what it painted."""
+        (rgb, _, _), painted = plant(self.parts, self.scene, self.sheet, **options)
+        return self.judge(rgb), painted
 
 
 class RenderStill:
@@ -478,10 +535,12 @@ def heavy_line(still, host="front.R", pt=1.75, height_pt=8.0):
     return a > 0.5
 
 
-# (key, the plan's words, view, the region it must fail in, the plant)
+# (key, the plan's words, view, the region or regions it must fail in, the plant)
 RENDER_PLANTS = (
     ("3", "an outer edge drawn soft at 0.6 pt, as head.line unclipped (on a crisp ear edge)", "front", "ear.R|outside", soft_edge),
-    ("4", "one ear's outer edge replaced by its smoothed hull", "front", "ear.R|outside", hull_edge),
+    # The hull moves the ear's edge, and its band with it, out past where the sheet draws the edge: the ear's inside
+    # then holds the sheet's outline, which ours no longer draws there.
+    ("4", "one ear's outer edge replaced by its smoothed hull", "front", ("ear.R|outside", "ear.R"), hull_edge),
     ("5", "one paw's sole flattened, with square 4 pt corners", "front", "front.R|ground", flat_sole),
     ("7", "a uniform 1.75 pt tone-10 line all round a paw", "front", "front.R|ground", heavy_line),
 )
@@ -554,20 +613,61 @@ def evidence(species, stills, calibration_path, out):
                     base, after, _, _, _ = plant_render(species, key, stills, calibration_path, folder)
                     before = Path(stills) / view
                 flipped, _ = changed(base, after)
-                names = (region,) if isinstance(region, str) else tuple(region or flipped)
+                names = own_regions(species, view, region, calibration_path)
                 mine = {n for name in names for n in (name, f"{name} {lm.ACROSS}")}
                 failing = new_failures(base, after, sorted(mine | set(flipped)))
-                elsewhere = sorted(set(flipped) - mine)
+                # The taper is on every span, so every edge is its own; each region with a joint must fail.
+                elsewhere = sorted(n for n in flipped if "|" not in n) if region == JOINTS else sorted(set(flipped) - mine)
+                caught = all({n, f"{n} {lm.ACROSS}"} & set(failing) for n in names) if region == JOINTS else bool(set(failing) & mine)
                 rows.append({"plant": key, "planted": kind, "fault": words, "view": view, "regions": list(names),
-                             "newFailures": failing, "flippedElsewhere": elsewhere,
-                             "ok": bool(set(failing) & mine) and not elsewhere})
+                             "newFailures": failing, "flippedElsewhere": elsewhere, "ok": caught and not elsewhere})
                 shown = "; ".join(f"{n}: " + ", ".join(f"{m} {v} ({t})" for m, (v, t) in ms.items()) for n, ms in list(failing.items())[:3])
                 more = f" and {len(failing) - 3} more regions" if len(failing) > 3 else ""
                 caption = (f"plant {key} ({kind}, {view}): {words}\nnewly failing, value (threshold): {shown}{more}\n"
                            f"any other region changed: {', '.join(elsewhere) or 'none'}.   before | after")
                 evidence_picture(before, folder / "planted", out / f"{kind}-{key}.png", caption)
                 print(f"lineplants: {kind} {key}: {'ok' if rows[-1]['ok'] else 'NOT OK'}: {shown}{more}; elsewhere {elsewhere or 'none'}", flush=True)
-    sheets.write_json(out / "plants.json", {"note": "lineplants.py's evidence: each of the plan's faults (D) planted and checked", "plants": rows})
+    contact = pale_everywhere(species, calibration_path)
+    for row in contact:
+        print(f"lineplants: pale {row['view']} {row['region']}: {'ok' if row['ok'] else 'NOT OK'}: {row['failing']}; elsewhere {row['elsewhere'] or 'none'}", flush=True)
+    sheets.write_json(out / "plants.json", {"note": "lineplants.py's evidence: each of the plan's faults (D) planted and checked",
+                                            "plants": rows, "paleOnEveryContactEdge": contact})
+    return rows + contact
+
+
+def own_regions(species, view, region, calibration_path):
+    """A plant's own regions: the ones named, or for the taper every region with a joint."""
+    if region != JOINTS:
+        return (region,) if isinstance(region, str) else tuple(region)
+    calibration = json.loads(Path(calibration_path).read_text())
+    with tempfile.TemporaryDirectory() as tmp:
+        scene = sheet_scene(species, view, calibration, linecal.sheet_parts(species, view, calibration), Path(tmp))
+        return tuple(sorted(taper_joints(scene, scene.sheet_map())[1]))
+
+
+def pale_everywhere(species, calibration_path, views=("threeQuarter.R", "side.R"), share=0.6):
+    """The pale contact line (plant 11) on every contact edge of the right-facing views whose own line the sheet
+    draws (contact_lines): each must fail in its own region and change no other region's verdict. A short edge, whose
+    line lies within reach of a neighbour's (contact_lines at margin 0 only), is planted on all of its line clear of
+    the neighbours' bands; it must fail in its own region, and the neighbours it shares a corner with may fail too
+    ("short": true, its neighbours listed)."""
+    calibration = json.loads(Path(calibration_path).read_text())
+    rows = []
+    with tempfile.TemporaryDirectory() as tmp:
+        for view in views:
+            judge = SheetJudge(species, view, calibration, Path(tmp) / view)
+            base = judge.judge()
+            clear = contact_lines(judge.scene, judge.sheet)
+            for region in contact_lines(judge.scene, judge.sheet, margin=0):
+                short = region not in clear
+                after, painted = judge.plant(pale_contact, region=region, share=share, margin=0 if short else PALE_CLEAR_PX)
+                flipped = sorted(n for n in after if after[n]["pass"] != base[n]["pass"])
+                mine = {region, f"{region} {lm.ACROSS}"}
+                failing = {n: {m: [after[n]["measures"][m]["value"], after[n]["measures"][m]["threshold"]] for m in after[n]["failed"]}
+                           for n in sorted(mine) if n in after and after[n]["failed"]}
+                elsewhere = sorted(set(flipped) - mine)
+                rows.append({"plant": "11", "planted": "crop", "view": view, "region": region, "share": share, "paintedPx": int(painted.sum()),
+                             "short": short, "failing": failing, "elsewhere": elsewhere, "ok": bool(failing) and (short or not elsewhere)})
     return rows
 
 

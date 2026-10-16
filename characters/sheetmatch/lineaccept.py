@@ -52,7 +52,7 @@ def failing(result, regions):
         for n in (name, f"{name} {lm.ACROSS}"):
             row = result["regions"].get(n)
             if row and not row["pass"]:
-                m = max(row["failed"], key=lambda m: lm.badness(m, row["measures"][m]))
+                m = max(row["failed"], key=lambda m: lm.badness(m, row["measures"][m], row))
                 out.append({"region": n, "measure": m, "value": row["measures"][m]["value"], "threshold": row["measures"][m]["threshold"]})
     return out
 
