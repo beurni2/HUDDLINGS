@@ -379,8 +379,7 @@ test("the face clips are what presets.ts writes: one per preset, sound, at the f
   }
   // Shy and blissful at the table's levels, and huffy's puffed cheeks flushed (DECISIONS 152).
   assert.deepEqual(Object.entries(PRESETS).filter(([, p]) => p.blush !== null).map(([n, p]) => [n, p.blush]), [["shy", 0.8], ["blissful", 0.7], ["huffy", 0.6]]);
-  // Only huffy puffs its cheeks, and its peek back lets them go: one eye open again, the other still shut, the tiny smile.
-  for (const clip of faces) assert.equal(clip.states?.cheeks?.[0]?.[1], clip.name === "face_huffy" ? "puffed" : undefined, `${clip.name}'s cheeks`);
+  // Huffy's peek back lets its cheeks go: one eye open again, the other still shut, the tiny smile.
   const peek = stillOf(PRESETS.huffy!, true);
   assert.deepEqual([peek.eyes.L, peek.eyes.R, peek.mouth, peek.cheeks], ["peekBack", "flat", "tinySmile", undefined]);
   assert.throws(() => stillOf(PRESETS.happy!, true), /no peek back/);
@@ -485,4 +484,6 @@ test("the stars draw only beside the sparkle eyes, the puffed cheeks only puffed
   assert.equal(regionFor(cheeks, "front", undefined), undefined);
   for (const view of rig.views.filter((v) => v !== "front")) assert.equal(regionFor(cheeks, view, "puffed"), undefined, `cheeks in ${view}`);
   for (const part of ["head.base", "head.line"]) assert.ok(!Object.keys(rig.parts.find((p) => p.name === part)!.regions).some((k) => k.endsWith(":puffed")), `${part} has no puffed state`);
+  // Only huffy's clip puffs them.
+  for (const clip of faces) assert.equal(clip.states?.cheeks?.[0]?.[1], clip.name === "face_huffy" ? "puffed" : undefined, `${clip.name}'s cheeks`);
 });
