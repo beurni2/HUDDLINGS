@@ -37,16 +37,18 @@ Every face holds its head (the nose 0.65 to 0.68 pt off, the eyes' middle 2.0 pt
 
 ## The blush's levels
 
-Every view's blush is drawn at the reference level, its core the full printed pink, and rests at alpha 0.368
-(DECISIONS 145). Fitted by `characters/sheetmatch/match.py`'s own blush fit: the six rest views 0.348 to 0.35 (the
-resting level 0.35), shy 0.806 and 0.796 (asked 0.8), blissful 0.698 and 0.697 (asked 0.7), huffy 0.602 and 0.6
-(asked 0.6, DECISIONS 152).
+Every view's blush is drawn at the reference level, the reddest tenth of each cheek the full printed pink, so a part
+alpha of 1 is 100% (the fit reads 0.999 to 1 at alpha 1) and the spec's whole range is drawable; the parts rest at
+alpha 0.35 (DECISIONS 145, 160). Fitted by `characters/sheetmatch/match.py`'s own blush fit: the five blushing rest
+views 0.349 to 0.351 (the resting level 0.35), shy 0.8 and 0.801 (asked 0.8), blissful 0.692 and 0.693 (asked 0.7),
+huffy 0.349 and 0.35 (the resting level: the table names none for it, DECISIONS 161).
 
 ## The new faces, for Gate A
 
 `new/sheet.png` (phone size) sets each beside the panels it borrows from, labelled "new drawing", with Q2's
 alternative eyes beside the kitty's and the bear's panels, labelled "not on the dog sheet". Variant A of each ships;
-variant B, the huffy peek back and Q2's alternatives live only in a scratch package `new/new.ts` builds.
+variant B, the huffy peek back, huffy flushed to 60%, tender's softer options and Q2's alternatives live only in a
+scratch package `new/new.ts` builds.
 
 - Hungry, meant to feel eager and sweet ("ooh, a treat"): the wide eye with its pupil larger, the irises meeting on
   the food just in front of the nose, raised brows, lifted ears, the o, then the lick (the smile with the tongue's
@@ -54,10 +56,14 @@ variant B, the huffy peek back and Q2's alternatives live only in a scratch pack
   over B (eyes straight out, the tongue out over the o's foot), whose tongue under the o reads as a drip or a blep
   and whose straight eyes read as Surprised.
 - Huffy, meant to feel like a playful little huff that will melt in a second: flat shut lids, cheeks puffed round a
-  small pressed mouth, flushed, brows and ears at rest; then the peek back, one eye open with a tiny smile. It reads
-  as a mock huff, not cross: no slant, no frown, no pout. A (the puff inside the outline) ships over B (the head
-  itself puffed 4.4 pt at each cheek): at phone size the two read alike, and A keeps the turnaround's silhouette and
-  adds no head drawings to the atlas. Its glance away is phase 4's head turn.
+  small pressed mouth, brows and ears at rest, the blush at its resting level (flushed to 60% for the founder to
+  choose, DECISIONS 161); then the peek back, one eye open, bright and looking back level, with a tiny smile
+  (DECISIONS 159). It reads as a mock huff, not cross: no slant, no frown, no pout. A (the puff inside the outline)
+  ships over B (the head itself puffed 4.4 pt at each cheek): at phone size the two read alike, and A keeps the
+  turnaround's silhouette and adds no head drawings to the atlas. Its glance away is phase 4's head turn.
+- Tender (not a new face, but the last review's weakest read): the sleepy half-lid the table gives it reads deadpan at
+  phone size, as the sheet's own half-lid panel does. It ships so; the sheet shows a softer lid, arched up over the
+  iris with a thinner lash, and the crescents with a 50% blush beside it, for the founder (DECISIONS 162).
 
 ## Seventeen presets, fifteen faces
 
@@ -69,9 +75,11 @@ at 70%.
 
 Every face reads as its panel. The lifted ears stand out above the crown as Lifted slightly draws them, so listening
 now reads as listening; on excited, surprised, proud and singing they change the silhouette more than those panels
-do, whose ears hang (the table lifts them). Shy reads as blushing; its gaze down and tilt are phase 4's. Curious reads
-alert more than inquisitive without its tilt and glance up. Tender's half-lid reads drowsy more than warm. Nothing reads
-as sad, angry or drooped.
+do, whose ears hang (the table lifts them). Under a raised ear the temple is the head's own side, cream with the
+hood's band coming up it, as the panels paint it, and it stays put as the ear's spring swings the flap to its limits
+(DECISIONS 158; `states.png`'s last four). Shy reads as blushing; its gaze down and tilt are phase 4's. Curious reads
+alert more than inquisitive without its tilt and glance up. Tender's half-lid reads drowsy more than warm (its options are in
+`new/sheet.png`). Nothing reads as sad, angry or drooped.
 
 ## Files
 
@@ -99,7 +107,8 @@ as sad, angry or drooped.
   planted in the source each time (an open mouth's lip ends bent below its centre, the neutral brow's inner end below
   its outer, shy's ear turned 12° in, listening's lifted ear turned 12° out, curious without its temple's head line;
   huffy's pressed mouth with its ends bent below its centre, its shut lids slanted inner end down, its left brow
-  raised, its left ear turned 7° in, and the puffed cheeks keyed on happy), then with none; each fails, and none
-  fails with the plants taken out. `python3 qa/phase3/faces/plants.py qa/phase3/faces/r3-plants.txt`.
-- `atlas.json`: the atlas page shares before and after the face states, with round 2's, and with the new faces
-  (DECISIONS 139, 147, 157).
+  raised, its left ear turned 7° in, and the puffed cheeks keyed on happy; mischievous winking the right eye,
+  listening keying no temple, the temple drawn into the lifted ear again, hungry's eye rolled up and the peek back
+  looking up as it was), then with none; each fails, and none fails with the plants taken out. `python3 qa/phase3/faces/plants.py qa/phase3/faces/r3-plants.txt`.
+- `atlas.json`: the atlas page shares before and after the face states, with round 2's, with the new faces, and after
+  the review's fixes (DECISIONS 139, 147, 157, 158).

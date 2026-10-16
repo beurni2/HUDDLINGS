@@ -1,24 +1,28 @@
 == no plant
 ✔ every face state is on the allowlist, and no state, part or preset is named for sorrow
 ✔ no mouth turns down: every lip's ends at or above its centre, every o symmetric and round at its foot, as drawn in the front
+✔ the new faces' open eyes never look up: hungry's eager eye and huffy's peek back, as drawn in the front
 ✔ huffy's shut lids lie level, as drawn in the front, and a slanted lid fails
 ✔ huffy's brows stay level and at rest, in the huff and in its peek back
 ✔ every brow is an arc that bows up, its inner end at or above its outer and within the sheets' tilt, as drawn in the front
 ✔ no face clip turns an ear in past the lowered state or out past the lifted one, and only sleepy lowers and only the lifted faces lift
 ✔ the face clips are what presets.ts writes: one per preset, sound, at the frame each primary panel draws
-✔ the raised ears are drawings of their own, and the head's line runs along the temple each one uncovers
+✔ the raised ears are drawings of their own, the temple each uncovers is the head's, and the head's line runs along it
+✔ a raised ear swings to its limits behind a head that stays whole
 ✔ each preset's first panel is its primary in model.json, and its still winks the eye its primary winks
 ✔ every face state draws a region, or a deliberate null, in every view that draws its part
 ✔ the stars draw only beside the sparkle eyes, the puffed cheeks only puffed, and every eye state draws its own drawing
 == open frown: the open mouth's lip curls bent down, its ends 6.6 pt below its centre
 ✔ every face state is on the allowlist, and no state, part or preset is named for sorrow
 ✖ no mouth turns down: every lip's ends at or above its centre, every o symmetric and round at its foot, as drawn in the front
+✔ the new faces' open eyes never look up: hungry's eager eye and huffy's peek back, as drawn in the front
 ✔ huffy's shut lids lie level, as drawn in the front, and a slanted lid fails
 ✔ huffy's brows stay level and at rest, in the huff and in its peek back
 ✔ every brow is an arc that bows up, its inner end at or above its outer and within the sheets' tilt, as drawn in the front
 ✔ no face clip turns an ear in past the lowered state or out past the lifted one, and only sleepy lowers and only the lifted faces lift
 ✔ the face clips are what presets.ts writes: one per preset, sound, at the frame each primary panel draws
-✔ the raised ears are drawings of their own, and the head's line runs along the temple each one uncovers
+✔ the raised ears are drawings of their own, the temple each uncovers is the head's, and the head's line runs along it
+✔ a raised ear swings to its limits behind a head that stays whole
 ✔ each preset's first panel is its primary in model.json, and its still winks the eye its primary winks
 ✔ every face state draws a region, or a deliberate null, in every view that draws its part
 ✔ the stars draw only beside the sparkle eyes, the puffed cheeks only puffed, and every eye state draws its own drawing
@@ -29,12 +33,14 @@
 == angry brow: the neutral brow sheared so its inner end sits 1.6 pt below its outer
 ✔ every face state is on the allowlist, and no state, part or preset is named for sorrow
 ✔ no mouth turns down: every lip's ends at or above its centre, every o symmetric and round at its foot, as drawn in the front
+✔ the new faces' open eyes never look up: hungry's eager eye and huffy's peek back, as drawn in the front
 ✔ huffy's shut lids lie level, as drawn in the front, and a slanted lid fails
 ✖ huffy's brows stay level and at rest, in the huff and in its peek back
 ✖ every brow is an arc that bows up, its inner end at or above its outer and within the sheets' tilt, as drawn in the front
 ✔ no face clip turns an ear in past the lowered state or out past the lifted one, and only sleepy lowers and only the lifted faces lift
 ✔ the face clips are what presets.ts writes: one per preset, sound, at the frame each primary panel draws
-✔ the raised ears are drawings of their own, and the head's line runs along the temple each one uncovers
+✔ the raised ears are drawings of their own, the temple each uncovers is the head's, and the head's line runs along it
+✔ a raised ear swings to its limits behind a head that stays whole
 ✔ each preset's first panel is its primary in model.json, and its still winks the eye its primary winks
 ✔ every face state draws a region, or a deliberate null, in every view that draws its part
 ✔ the stars draw only beside the sparkle eyes, the puffed cheeks only puffed, and every eye state draws its own drawing
@@ -48,12 +54,14 @@
 == drooped ear: face_shy's left ear turned 12 degrees in
 ✔ every face state is on the allowlist, and no state, part or preset is named for sorrow
 ✔ no mouth turns down: every lip's ends at or above its centre, every o symmetric and round at its foot, as drawn in the front
+✔ the new faces' open eyes never look up: hungry's eager eye and huffy's peek back, as drawn in the front
 ✔ huffy's shut lids lie level, as drawn in the front, and a slanted lid fails
 ✔ huffy's brows stay level and at rest, in the huff and in its peek back
 ✔ every brow is an arc that bows up, its inner end at or above its outer and within the sheets' tilt, as drawn in the front
 ✖ no face clip turns an ear in past the lowered state or out past the lifted one, and only sleepy lowers and only the lifted faces lift
 ✖ the face clips are what presets.ts writes: one per preset, sound, at the frame each primary panel draws
-✔ the raised ears are drawings of their own, and the head's line runs along the temple each one uncovers
+✔ the raised ears are drawings of their own, the temple each uncovers is the head's, and the head's line runs along it
+✔ a raised ear swings to its limits behind a head that stays whole
 ✔ each preset's first panel is its primary in model.json, and its still winks the eye its primary winks
 ✔ every face state draws a region, or a deliberate null, in every view that draws its part
 ✔ the stars draw only beside the sparkle eyes, the puffed cheeks only puffed, and every eye state draws its own drawing
@@ -66,12 +74,14 @@
 == splayed ear: face_listening's lifted left ear turned 12 degrees out
 ✔ every face state is on the allowlist, and no state, part or preset is named for sorrow
 ✔ no mouth turns down: every lip's ends at or above its centre, every o symmetric and round at its foot, as drawn in the front
+✔ the new faces' open eyes never look up: hungry's eager eye and huffy's peek back, as drawn in the front
 ✔ huffy's shut lids lie level, as drawn in the front, and a slanted lid fails
 ✔ huffy's brows stay level and at rest, in the huff and in its peek back
 ✔ every brow is an arc that bows up, its inner end at or above its outer and within the sheets' tilt, as drawn in the front
 ✖ no face clip turns an ear in past the lowered state or out past the lifted one, and only sleepy lowers and only the lifted faces lift
 ✖ the face clips are what presets.ts writes: one per preset, sound, at the frame each primary panel draws
-✔ the raised ears are drawings of their own, and the head's line runs along the temple each one uncovers
+✔ the raised ears are drawings of their own, the temple each uncovers is the head's, and the head's line runs along it
+✔ a raised ear swings to its limits behind a head that stays whole
 ✔ each preset's first panel is its primary in model.json, and its still winks the eye its primary winks
 ✔ every face state draws a region, or a deliberate null, in every view that draws its part
 ✔ the stars draw only beside the sparkle eyes, the puffed cheeks only puffed, and every eye state draws its own drawing
@@ -84,29 +94,34 @@
 == creased temple: face_curious keys no head.line state beside its perked ear
 ✔ every face state is on the allowlist, and no state, part or preset is named for sorrow
 ✔ no mouth turns down: every lip's ends at or above its centre, every o symmetric and round at its foot, as drawn in the front
+✔ the new faces' open eyes never look up: hungry's eager eye and huffy's peek back, as drawn in the front
 ✔ huffy's shut lids lie level, as drawn in the front, and a slanted lid fails
 ✔ huffy's brows stay level and at rest, in the huff and in its peek back
 ✔ every brow is an arc that bows up, its inner end at or above its outer and within the sheets' tilt, as drawn in the front
 ✔ no face clip turns an ear in past the lowered state or out past the lifted one, and only sleepy lowers and only the lifted faces lift
 ✖ the face clips are what presets.ts writes: one per preset, sound, at the frame each primary panel draws
-✖ the raised ears are drawings of their own, and the head's line runs along the temple each one uncovers
+✖ the raised ears are drawings of their own, the temple each uncovers is the head's, and the head's line runs along it
+✔ a raised ear swings to its limits behind a head that stays whole
 ✔ each preset's first panel is its primary in model.json, and its still winks the eye its primary winks
 ✔ every face state draws a region, or a deliberate null, in every view that draws its part
 ✔ the stars draw only beside the sparkle eyes, the puffed cheeks only puffed, and every eye state draws its own drawing
 ✖ failing tests:
 ✖ the face clips are what presets.ts writes: one per preset, sound, at the frame each primary panel draws
   AssertionError [ERR_ASSERTION]: face_curious.json is stale: node characters/dog/src/faceClips.ts
-✖ the raised ears are drawings of their own, and the head's line runs along the temple each one uncovers
-  AssertionError [ERR_ASSERTION]: face_curious: the head's line beside ears onePerked and neutral
+✖ the raised ears are drawings of their own, the temple each uncovers is the head's, and the head's line runs along it
+  AssertionError [ERR_ASSERTION]: face_curious
+  + "its head's line is undefined beside ears onePerked and neutral, not templeL"
 == pressed frown: huffy's pressed mouth with its ends bent 0.9 pt below its centre
 ✔ every face state is on the allowlist, and no state, part or preset is named for sorrow
 ✖ no mouth turns down: every lip's ends at or above its centre, every o symmetric and round at its foot, as drawn in the front
+✔ the new faces' open eyes never look up: hungry's eager eye and huffy's peek back, as drawn in the front
 ✔ huffy's shut lids lie level, as drawn in the front, and a slanted lid fails
 ✔ huffy's brows stay level and at rest, in the huff and in its peek back
 ✔ every brow is an arc that bows up, its inner end at or above its outer and within the sheets' tilt, as drawn in the front
 ✔ no face clip turns an ear in past the lowered state or out past the lifted one, and only sleepy lowers and only the lifted faces lift
 ✔ the face clips are what presets.ts writes: one per preset, sound, at the frame each primary panel draws
-✔ the raised ears are drawings of their own, and the head's line runs along the temple each one uncovers
+✔ the raised ears are drawings of their own, the temple each uncovers is the head's, and the head's line runs along it
+✔ a raised ear swings to its limits behind a head that stays whole
 ✔ each preset's first panel is its primary in model.json, and its still winks the eye its primary winks
 ✔ every face state draws a region, or a deliberate null, in every view that draws its part
 ✔ the stars draw only beside the sparkle eyes, the puffed cheeks only puffed, and every eye state draws its own drawing
@@ -117,12 +132,14 @@
 == slanted lids: huffy's flat lids with their outer ends lifted 1.5 pt, the inner ends down toward the nose
 ✔ every face state is on the allowlist, and no state, part or preset is named for sorrow
 ✔ no mouth turns down: every lip's ends at or above its centre, every o symmetric and round at its foot, as drawn in the front
+✔ the new faces' open eyes never look up: hungry's eager eye and huffy's peek back, as drawn in the front
 ✖ huffy's shut lids lie level, as drawn in the front, and a slanted lid fails
 ✔ huffy's brows stay level and at rest, in the huff and in its peek back
 ✔ every brow is an arc that bows up, its inner end at or above its outer and within the sheets' tilt, as drawn in the front
 ✔ no face clip turns an ear in past the lowered state or out past the lifted one, and only sleepy lowers and only the lifted faces lift
 ✔ the face clips are what presets.ts writes: one per preset, sound, at the frame each primary panel draws
-✔ the raised ears are drawings of their own, and the head's line runs along the temple each one uncovers
+✔ the raised ears are drawings of their own, the temple each uncovers is the head's, and the head's line runs along it
+✔ a raised ear swings to its limits behind a head that stays whole
 ✔ each preset's first panel is its primary in model.json, and its still winks the eye its primary winks
 ✔ every face state draws a region, or a deliberate null, in every view that draws its part
 ✔ the stars draw only beside the sparkle eyes, the puffed cheeks only puffed, and every eye state draws its own drawing
@@ -133,12 +150,14 @@
 == raised brow: huffy's left brow raised over its shut eye
 ✔ every face state is on the allowlist, and no state, part or preset is named for sorrow
 ✔ no mouth turns down: every lip's ends at or above its centre, every o symmetric and round at its foot, as drawn in the front
+✔ the new faces' open eyes never look up: hungry's eager eye and huffy's peek back, as drawn in the front
 ✔ huffy's shut lids lie level, as drawn in the front, and a slanted lid fails
 ✖ huffy's brows stay level and at rest, in the huff and in its peek back
 ✔ every brow is an arc that bows up, its inner end at or above its outer and within the sheets' tilt, as drawn in the front
 ✔ no face clip turns an ear in past the lowered state or out past the lifted one, and only sleepy lowers and only the lifted faces lift
 ✖ the face clips are what presets.ts writes: one per preset, sound, at the frame each primary panel draws
-✔ the raised ears are drawings of their own, and the head's line runs along the temple each one uncovers
+✔ the raised ears are drawings of their own, the temple each uncovers is the head's, and the head's line runs along it
+✔ a raised ear swings to its limits behind a head that stays whole
 ✔ each preset's first panel is its primary in model.json, and its still winks the eye its primary winks
 ✔ every face state draws a region, or a deliberate null, in every view that draws its part
 ✔ the stars draw only beside the sparkle eyes, the puffed cheeks only puffed, and every eye state draws its own drawing
@@ -151,12 +170,14 @@
 == drooped ear: face_huffy's left ear turned 7 degrees in
 ✔ every face state is on the allowlist, and no state, part or preset is named for sorrow
 ✔ no mouth turns down: every lip's ends at or above its centre, every o symmetric and round at its foot, as drawn in the front
+✔ the new faces' open eyes never look up: hungry's eager eye and huffy's peek back, as drawn in the front
 ✔ huffy's shut lids lie level, as drawn in the front, and a slanted lid fails
 ✔ huffy's brows stay level and at rest, in the huff and in its peek back
 ✔ every brow is an arc that bows up, its inner end at or above its outer and within the sheets' tilt, as drawn in the front
 ✖ no face clip turns an ear in past the lowered state or out past the lifted one, and only sleepy lowers and only the lifted faces lift
 ✖ the face clips are what presets.ts writes: one per preset, sound, at the frame each primary panel draws
-✔ the raised ears are drawings of their own, and the head's line runs along the temple each one uncovers
+✔ the raised ears are drawings of their own, the temple each uncovers is the head's, and the head's line runs along it
+✔ a raised ear swings to its limits behind a head that stays whole
 ✔ each preset's first panel is its primary in model.json, and its still winks the eye its primary winks
 ✔ every face state draws a region, or a deliberate null, in every view that draws its part
 ✔ the stars draw only beside the sparkle eyes, the puffed cheeks only puffed, and every eye state draws its own drawing
@@ -169,12 +190,14 @@
 == puffed cheeks elsewhere: face_happy keys the puffed cheeks
 ✔ every face state is on the allowlist, and no state, part or preset is named for sorrow
 ✔ no mouth turns down: every lip's ends at or above its centre, every o symmetric and round at its foot, as drawn in the front
+✔ the new faces' open eyes never look up: hungry's eager eye and huffy's peek back, as drawn in the front
 ✔ huffy's shut lids lie level, as drawn in the front, and a slanted lid fails
 ✔ huffy's brows stay level and at rest, in the huff and in its peek back
 ✔ every brow is an arc that bows up, its inner end at or above its outer and within the sheets' tilt, as drawn in the front
 ✔ no face clip turns an ear in past the lowered state or out past the lifted one, and only sleepy lowers and only the lifted faces lift
 ✖ the face clips are what presets.ts writes: one per preset, sound, at the frame each primary panel draws
-✔ the raised ears are drawings of their own, and the head's line runs along the temple each one uncovers
+✔ the raised ears are drawings of their own, the temple each uncovers is the head's, and the head's line runs along it
+✔ a raised ear swings to its limits behind a head that stays whole
 ✔ each preset's first panel is its primary in model.json, and its still winks the eye its primary winks
 ✔ every face state draws a region, or a deliberate null, in every view that draws its part
 ✖ the stars draw only beside the sparkle eyes, the puffed cheeks only puffed, and every eye state draws its own drawing
@@ -184,15 +207,110 @@
 ✖ the stars draw only beside the sparkle eyes, the puffed cheeks only puffed, and every eye state draws its own drawing
   AssertionError [ERR_ASSERTION]: face_happy's cheeks
   + 'puffed'
-== plants taken out
+== wink on the right: mischievous winks the dog's right eye, where Cheeky, its primary, closes the left
 ✔ every face state is on the allowlist, and no state, part or preset is named for sorrow
 ✔ no mouth turns down: every lip's ends at or above its centre, every o symmetric and round at its foot, as drawn in the front
+✔ the new faces' open eyes never look up: hungry's eager eye and huffy's peek back, as drawn in the front
+✔ huffy's shut lids lie level, as drawn in the front, and a slanted lid fails
+✔ huffy's brows stay level and at rest, in the huff and in its peek back
+✔ every brow is an arc that bows up, its inner end at or above its outer and within the sheets' tilt, as drawn in the front
+✔ no face clip turns an ear in past the lowered state or out past the lifted one, and only sleepy lowers and only the lifted faces lift
+✖ the face clips are what presets.ts writes: one per preset, sound, at the frame each primary panel draws
+✔ the raised ears are drawings of their own, the temple each uncovers is the head's, and the head's line runs along it
+✔ a raised ear swings to its limits behind a head that stays whole
+✖ each preset's first panel is its primary in model.json, and its still winks the eye its primary winks
+✔ every face state draws a region, or a deliberate null, in every view that draws its part
+✔ the stars draw only beside the sparkle eyes, the puffed cheeks only puffed, and every eye state draws its own drawing
+✖ failing tests:
+✖ the face clips are what presets.ts writes: one per preset, sound, at the frame each primary panel draws
+  AssertionError [ERR_ASSERTION]: face_mischievous.json is stale: node characters/dog/src/faceClips.ts
+✖ each preset's first panel is its primary in model.json, and its still winks the eye its primary winks
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + 'mischievous does not wink eye.L, as its primary does'
+== open temple: face_listening keys no temple beside its lifted left ear
+✔ every face state is on the allowlist, and no state, part or preset is named for sorrow
+✔ no mouth turns down: every lip's ends at or above its centre, every o symmetric and round at its foot, as drawn in the front
+✔ the new faces' open eyes never look up: hungry's eager eye and huffy's peek back, as drawn in the front
+✔ huffy's shut lids lie level, as drawn in the front, and a slanted lid fails
+✔ huffy's brows stay level and at rest, in the huff and in its peek back
+✔ every brow is an arc that bows up, its inner end at or above its outer and within the sheets' tilt, as drawn in the front
+✔ no face clip turns an ear in past the lowered state or out past the lifted one, and only sleepy lowers and only the lifted faces lift
+✖ the face clips are what presets.ts writes: one per preset, sound, at the frame each primary panel draws
+✖ the raised ears are drawings of their own, the temple each uncovers is the head's, and the head's line runs along it
+✔ a raised ear swings to its limits behind a head that stays whole
+✔ each preset's first panel is its primary in model.json, and its still winks the eye its primary winks
+✔ every face state draws a region, or a deliberate null, in every view that draws its part
+✔ the stars draw only beside the sparkle eyes, the puffed cheeks only puffed, and every eye state draws its own drawing
+✖ failing tests:
+✖ the face clips are what presets.ts writes: one per preset, sound, at the frame each primary panel draws
+  AssertionError [ERR_ASSERTION]: face_listening.json is stale: node characters/dog/src/faceClips.ts
+✖ the raised ears are drawings of their own, the temple each uncovers is the head's, and the head's line runs along it
+  AssertionError [ERR_ASSERTION]: face_listening
+  + 'temple.L is undefined beside ear.L lifted'
+== temple on the ear: the lifted ear's drawing carries its temple again, so it swings with the ear's spring
+✔ every face state is on the allowlist, and no state, part or preset is named for sorrow
+✔ no mouth turns down: every lip's ends at or above its centre, every o symmetric and round at its foot, as drawn in the front
+✔ the new faces' open eyes never look up: hungry's eager eye and huffy's peek back, as drawn in the front
 ✔ huffy's shut lids lie level, as drawn in the front, and a slanted lid fails
 ✔ huffy's brows stay level and at rest, in the huff and in its peek back
 ✔ every brow is an arc that bows up, its inner end at or above its outer and within the sheets' tilt, as drawn in the front
 ✔ no face clip turns an ear in past the lowered state or out past the lifted one, and only sleepy lowers and only the lifted faces lift
 ✔ the face clips are what presets.ts writes: one per preset, sound, at the frame each primary panel draws
-✔ the raised ears are drawings of their own, and the head's line runs along the temple each one uncovers
+✔ the raised ears are drawings of their own, the temple each uncovers is the head's, and the head's line runs along it
+✖ a raised ear swings to its limits behind a head that stays whole
+✔ each preset's first panel is its primary in model.json, and its still winks the eye its primary winks
+✔ every face state draws a region, or a deliberate null, in every view that draws its part
+✔ the stars draw only beside the sparkle eyes, the puffed cheeks only puffed, and every eye state draws its own drawing
+✖ failing tests:
+✖ a raised ear swings to its limits behind a head that stays whole
+  AssertionError [ERR_ASSERTION]: ear.L lifted draws the ear alone
+== pleading eyes: hungry's eager eye rolled up, its white under the iris (the last review's probe)
+✔ every face state is on the allowlist, and no state, part or preset is named for sorrow
+✔ no mouth turns down: every lip's ends at or above its centre, every o symmetric and round at its foot, as drawn in the front
+✖ the new faces' open eyes never look up: hungry's eager eye and huffy's peek back, as drawn in the front
+✔ huffy's shut lids lie level, as drawn in the front, and a slanted lid fails
+✔ huffy's brows stay level and at rest, in the huff and in its peek back
+✔ every brow is an arc that bows up, its inner end at or above its outer and within the sheets' tilt, as drawn in the front
+✔ no face clip turns an ear in past the lowered state or out past the lifted one, and only sleepy lowers and only the lifted faces lift
+✔ the face clips are what presets.ts writes: one per preset, sound, at the frame each primary panel draws
+✔ the raised ears are drawings of their own, the temple each uncovers is the head's, and the head's line runs along it
+✔ a raised ear swings to its limits behind a head that stays whole
+✔ each preset's first panel is its primary in model.json, and its still winks the eye its primary winks
+✔ every face state draws a region, or a deliberate null, in every view that draws its part
+✔ the stars draw only beside the sparkle eyes, the puffed cheeks only puffed, and every eye state draws its own drawing
+✖ failing tests:
+✖ the new faces' open eyes never look up: hungry's eager eye and huffy's peek back, as drawn in the front
+  AssertionError [ERR_ASSERTION]: eye.L eager
+  + "its dark stands 1.23 pt higher in the eye than the rest eye's, looking up"
+== looking up: huffy's peek back with its white at 186 degrees, as it was
+✔ every face state is on the allowlist, and no state, part or preset is named for sorrow
+✔ no mouth turns down: every lip's ends at or above its centre, every o symmetric and round at its foot, as drawn in the front
+✖ the new faces' open eyes never look up: hungry's eager eye and huffy's peek back, as drawn in the front
+✔ huffy's shut lids lie level, as drawn in the front, and a slanted lid fails
+✔ huffy's brows stay level and at rest, in the huff and in its peek back
+✔ every brow is an arc that bows up, its inner end at or above its outer and within the sheets' tilt, as drawn in the front
+✔ no face clip turns an ear in past the lowered state or out past the lifted one, and only sleepy lowers and only the lifted faces lift
+✔ the face clips are what presets.ts writes: one per preset, sound, at the frame each primary panel draws
+✔ the raised ears are drawings of their own, the temple each uncovers is the head's, and the head's line runs along it
+✔ a raised ear swings to its limits behind a head that stays whole
+✔ each preset's first panel is its primary in model.json, and its still winks the eye its primary winks
+✔ every face state draws a region, or a deliberate null, in every view that draws its part
+✔ the stars draw only beside the sparkle eyes, the puffed cheeks only puffed, and every eye state draws its own drawing
+✖ failing tests:
+✖ the new faces' open eyes never look up: hungry's eager eye and huffy's peek back, as drawn in the front
+  AssertionError [ERR_ASSERTION]: eye.L peekBack
+  + "its dark stands 0.53 pt higher in the eye than the rest eye's, looking up"
+== plants taken out
+✔ every face state is on the allowlist, and no state, part or preset is named for sorrow
+✔ no mouth turns down: every lip's ends at or above its centre, every o symmetric and round at its foot, as drawn in the front
+✔ the new faces' open eyes never look up: hungry's eager eye and huffy's peek back, as drawn in the front
+✔ huffy's shut lids lie level, as drawn in the front, and a slanted lid fails
+✔ huffy's brows stay level and at rest, in the huff and in its peek back
+✔ every brow is an arc that bows up, its inner end at or above its outer and within the sheets' tilt, as drawn in the front
+✔ no face clip turns an ear in past the lowered state or out past the lifted one, and only sleepy lowers and only the lifted faces lift
+✔ the face clips are what presets.ts writes: one per preset, sound, at the frame each primary panel draws
+✔ the raised ears are drawings of their own, the temple each uncovers is the head's, and the head's line runs along it
+✔ a raised ear swings to its limits behind a head that stays whole
 ✔ each preset's first panel is its primary in model.json, and its still winks the eye its primary winks
 ✔ every face state draws a region, or a deliberate null, in every view that draws its part
 ✔ the stars draw only beside the sparkle eyes, the puffed cheeks only puffed, and every eye state draws its own drawing

@@ -241,20 +241,20 @@
   }
  },
  "headGate": {
-  "headShiftPt": [0.02, -0.01],
-  "headIoU": 0.9977,
+  "headShiftPt": [0.03, -0.01],
+  "headIoU": 0.9943,
   "thresholdPt": 2.8,
   "rows": {
    "nose": {
-    "model": [-0.18, -91.61],
+    "model": [-0.17, -91.61],
     "found": [-0.68, -92.05],
-    "errPt": 0.67,
+    "errPt": 0.68,
     "pass": true
    },
    "eyes.middle": {
-    "model": [-1.18, -99.61],
+    "model": [-1.17, -99.61],
     "found": [-1.2, -99.58],
-    "errPt": 0.03,
+    "errPt": 0.04,
     "pass": true,
     "measuredBy": "each eye's parts' pixels in the ID pass"
    }
@@ -265,5 +265,5 @@
  "spacingsHeld": 1,
  "shapesHeld": 2,
  "pass": true,
- "summary": "pass: the eyes' spacing and 2 shapes held on master.expression.curious (it turns the head: each place reported, the eyes held on the head); head held (nose 0.67 pt, eyes.middle 0.03 pt)"
+ "summary": "pass: the eyes' spacing and 2 shapes held on master.expression.curious (it turns the head: each place reported, the eyes held on the head); head held (nose 0.68 pt, eyes.middle 0.04 pt)"
 }

@@ -103,7 +103,7 @@
     "eye.L": {
      "record": [90.06, 56.15],
      "held": true,
-     "found": [90.85, 56.76],
+     "found": [90.84, 56.76],
      "errPt": 1.2,
      "offsetPt": [0.81, 0.89],
      "pass": true
@@ -128,11 +128,11 @@
    "spacing": {},
    "shapes": {
     "eye.R": {
-     "areaPx": 826,
+     "areaPx": 827,
      "recordAreaPx": 832,
-     "areaPt2": 300.8,
-     "areaRatio": 0.993,
-     "iou": 0.901,
+     "areaPt2": 301.2,
+     "areaRatio": 0.994,
+     "iou": 0.9,
      "pass": true,
      "held": true
     },
