@@ -33,6 +33,20 @@ Where the spec is silent or contradicts itself, I don't invent the answer. The q
 - **Decided: a middle way** (recommended in the session, not the default): the catchlight moves with the iris at about half the iris's travel, as a real eye's reflection lags its pupil, so the eye reads as a glossy ball in motion; it never leaves the dark of the iris and goes under the lid as the lid closes. In stills it sits on the iris as the sheets draw it, nearer the open eye's place by about half the iris's shift. Phase 4 draws it as its own layer between the iris and the lid, and sets the fraction (from 0.5) by a wedge render for the founder. `characters/dog/DECISIONS.md` 130.
 - **Answered:** founder, Oct 16, 2026, in the session: "Q28 middle way".
 
+### Q2. What does the dog use for the squeeze (`> <`) and sparkle eyes its sheets never draw?
+- **The spec says:** L452 "squeeze | the `> <` eyes of the kitty's and the bear's Excited"; L457 "sparkle | Sparkle (star highlight) | `show_off`, `celebrate`, proud"; L495 "ticklish | squeeze"; L504 "Add no fur details, markings, toes, claws or shapes the sheets do not show".
+- **Why it matters:** the dog's eye states are open, happy crescent, closed, sleepy, surprised and side glance. Ticklish (core motion 9) and proud call for eyes the dog sheets don't have.
+- **Default (not taken):** for the dog (and later the rabbit), squeeze becomes the happy crescents, as L482 already allows for excited, and sparkle becomes happy crescents with star particles beside the head, as the dog's Proud panel draws. At Gate A I also show a dog-style `> <` and star eye, labelled "not on the dog sheet", so you can choose.
+- **Decided: draw both for the dog, in the sister sheets' style** (recommended in the session). Squeeze is a dog `> <` drawn as the kitty's and the bear's Excited draw theirs, at the dog's eye size and line weight, used for ticklish and giggle fits; excited keeps the happy crescents its own panel draws. Sparkle is the open, glossy eye with its large catchlight a soft star and small yellow stars beside it, as both sister sheets' "Sparkle (star highlight)" draw it, used for `show_off`, `celebrate` and proud's second beat; proud's first beat stays the dog's Proud panel, crescents with stars round the head. Both are judged by eye beside the kitty's and the bear's panels (the dog's sheets draw neither). `characters/dog/DECISIONS.md` 200.
+- **Answered:** founder, Oct 16, 2026, in the session: "Q2 and Q26 as recommended".
+
+### Q26. The sheets draw one catchlight in each eye; the spec asks for two or three. Which do I follow?
+- **The spec says:** L446 "each eye (... two or three catchlights ...)"; L509 "one large catchlight high on the side toward the nose and one or two small ones, placed as the sheets draw them"; L504 "The sheet is the model".
+- **Why it matters:** the dog's turnaround, hero, glossy-eyes panel and expression sheet each draw one catchlight per open eye. A second small one makes the eyes glossier but less like the sheet.
+- **Default (not taken):** one catchlight, as the sheets draw it (`characters/dog/DECISIONS.md` 29). Adding the small ones is one line per eye.
+- **Decided: one large catchlight and one tiny one** (recommended in the session), as the kitty's and the bear's "Default (Large & Glossy)" eyes draw them: the tiny one about a quarter of the large one's size, just below it and toward the eye's outer side. Not three: a third reads as noise at 164 pt. The tiny one moves with the large one (Q28) and shows only where the iris does (none on closed or crescent eyes). `characters/dog/DECISIONS.md` 200.
+- **Answered:** founder, Oct 16, 2026, in the session: "Q2 and Q26 as recommended".
+
 ## Needed before phase 1
 
 ### Q1. Which iPhone will measure the speed budgets?
@@ -42,18 +56,6 @@ Where the spec is silent or contradicts itself, I don't invent the answer. The q
 - **Owner:** founder
 
 ## Needed by Gate A (the dog's look)
-
-### Q2. What does the dog use for the squeeze (`> <`) and sparkle eyes its sheets never draw?
-- **The spec says:** L452 "squeeze | the `> <` eyes of the kitty's and the bear's Excited"; L457 "sparkle | Sparkle (star highlight) | `show_off`, `celebrate`, proud"; L495 "ticklish | squeeze"; L504 "Add no fur details, markings, toes, claws or shapes the sheets do not show".
-- **Why it matters:** the dog's eye states are open, happy crescent, closed, sleepy, surprised and side glance. Ticklish (core motion 9) and proud call for eyes the dog sheets don't have.
-- **Default:** for the dog (and later the rabbit), squeeze becomes the happy crescents, as L482 already allows for excited, and sparkle becomes happy crescents with star particles beside the head, as the dog's Proud panel draws. At Gate A I also show a dog-style `> <` and star eye, labelled "not on the dog sheet", so you can choose.
-- **Owner:** founder
-
-### Q26. The sheets draw one catchlight in each eye; the spec asks for two or three. Which do I follow?
-- **The spec says:** L446 "each eye (... two or three catchlights ...)"; L509 "one large catchlight high on the side toward the nose and one or two small ones, placed as the sheets draw them"; L504 "The sheet is the model".
-- **Why it matters:** the dog's turnaround, hero, glossy-eyes panel and expression sheet each draw one catchlight per open eye. A second small one makes the eyes glossier but less like the sheet.
-- **Default:** one catchlight, as the sheets draw it (`characters/dog/DECISIONS.md` 29). Adding the small ones is one line per eye.
-- **Owner:** founder
 
 ## Needed by phase 4 (the rig and Visual QA)
 
