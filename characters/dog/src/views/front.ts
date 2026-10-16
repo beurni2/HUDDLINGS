@@ -953,7 +953,7 @@ const STARS: Star[] = [{ at: [-74.9, -41.3], size: [11.4, 14.4], turn: 0 }, { at
 // ear's inside shows in a darker wedge behind the fold. Typed on the dog's right ear in the head's frame from the
 // panel levelled and scaled by its brows, mirrored for its left and rolled with the face. Ears draw behind the head in
 // every state, so the crown's line hides the root's foot and the topknot its inner end, as the panel's crown meets it.
-const perkedR: Node[] = [[-10.4, -152.6], [-10.6, -159], [-12.2, -166], [-15.8, -171.8], [-20, -175], [-24.8, -176], [-29.6, -175.4], [-34.8, -173.2],
+const perkedR: Node[] = [[-10.4, -147.6], [-10.6, -159], [-12.2, -166], [-15.8, -171.8], [-20, -175], [-24.8, -176], [-29.6, -175.4], [-34.8, -173.2],
   [-39.6, -169], [-44, -164.8], [-48.4, -161.6], [-53.2, -157.6], [-57, -152.6], [-59, -147.4], [-58.4, -142], [-56, -137.8], [-52, -135.4], [-46.4, -134.4],
   [-41, -135.4], [-36.4, -138.6], [-31.4, -143], [-25, -148.2], [-18.4, -150.6], [-13, -151.8]];
 const perked = { R: smooth(rollN(perkedR)), L: smooth(rollN(mirrorX(perkedR))) };
@@ -1001,10 +1001,39 @@ const bbox4 = (shape: Shape): Box => {
   return [x0, y0, x1 - x0, y1 - y0];
 };
 
+/**
+ * A raised ear's edge, by the rest ear's builder (earEdge(), DECISIONS 215, 221), so a swap between them never changes
+ * the fur's hand: one low step on the flap's upper edge and the free end's hem in 3 or 4 rounded lock tips, as the One
+ * ear perked and Lifted slightly panels draw them (each free end scalloped in soft lobes, the upper edge plain but for
+ * one small step), and one line round it whose ends run on under the head. Typed on the dog's right ear in the head's
+ * frame, in its path order (`step` and `hem` from the end nearer the root), and carried to the left reversed.
+ */
+function raisedEdge(side: "L" | "R", base: Shape, on: (p: P) => P, e: { step: [P, P]; hem: [P, P]; locks: Lock[]; line: [P, P]; lineL?: [P, P]; axis: [P, P] }) {
+  const line = side === "L" && e.lineL ? e.lineL : e.line;
+  const R = side === "R";
+  const step = { lock: { ...EAR_STEP, lean: R ? 0.45 : -0.45 }, tipRound: 0.35 };
+  return earEdge({
+    base,
+    steps: [R ? { ...step, from: on(e.step[0]), to: on(e.step[1]) } : { ...step, from: on(e.step[1]), to: on(e.step[0]) }],
+    hem: R ? { from: on(e.hem[0]), to: on(e.hem[1]), locks: e.locks, tipRound: 0.4 } : { from: on(e.hem[1]), to: on(e.hem[0]), locks: reversedRow(e.locks), tipRound: 0.4 },
+    axis: [on(e.axis[0]), on(e.axis[1])],
+    line: R ? { from: on(line[0]), to: on(line[1]), ends: ["under", "under"] } : { from: on(line[1]), to: on(line[0]), ends: ["under", "under"] },
+  });
+}
+// The perked flap's free end, over the head's side: three soft lobes round its end, the middle the fullest.
+const PERK_HEM: Lock[] = [{ len: 1.2, width: 6.4, lean: 0.2, dip: 0.3 }, { len: 1.5, width: 8.4, lean: 0.3, dip: 0.3 }, { len: 1.1, width: 6.8, lean: 0.35 }];
+const perkedEdge = (side: "L" | "R") => raisedEdge(side, perked[side], (p) => onPerk(side, p), {
+  step: [[-43.6, -165.1], [-50.4, -160.2]], hem: [[-58.8, -149], [-47, -134.4]], locks: PERK_HEM,
+  // Its line from its inner end, under the topknot, over its top and round the free end, to where its underside goes
+  // behind the crown.
+  line: [[-10.5, -154.6], [-38.6, -136.8]], axis: [[-19.5, -172.6], [-55.1, -139.4]],
+});
+
 function perkedEar(side: "L" | "R"): Piece {
   const on = (p: P) => onPerk(side, p);
+  const edge = perkedEdge(side);
   const paint = earFur({
-    ear: perked[side],
+    ear: edge.shape, edge,
     axis: [on([-19.5, -172.6]), on([-55.1, -139.4])],
     deepen: [0.35, 1],
     // Four locks running out along the flap to its free end, as the panel paints its fur.
@@ -1018,10 +1047,7 @@ function perkedEar(side: "L" | "R"): Piece {
     fold: { line: ([[-21.7, -161.5], [-24.8, -156.8], [-26.9, -151.9], [-29, -146.9]] as P[]).map(on),
       back: perkD(side, "M-19.6 -160.4 L-21.7 -161.5 L-24.8 -156.8 L-26.9 -151.9 L-29 -146.9 L-18 -148Z") },
   });
-  // Its line from its inner end, beside the topknot, over its top and round the free end, to where its underside goes
-  // behind the crown.
-  const [a, b] = [on([-10.8, -162]), on([-38.6, -136.8])];
-  return litPart(`ear.${side}`, perked[side], paint, [side === "R" ? { from: a, to: b, on: "tan", taper: [3, 4] } : { from: b, to: a, on: "tan", taper: [4, 3] }]);
+  return lineGate(litPart(`ear.${side}`, edge.shape, paint, [edge.span]));
 }
 
 // The lifted ear, the listening tell, as Lifted slightly draws it (DECISIONS 146): the root raised behind the crown's
@@ -1032,15 +1058,27 @@ function perkedEar(side: "L" | "R"): Piece {
 // and its top, mirrored for the left and rolled with the face. The temple it uncovers is the perked ear's, on the head
 // (templePiece). Its lower inner edge runs on in under the temple (drawn after it), so no card shows between the ear
 // and the head, and the ear's spring swings it behind a head that stays whole.
-const liftedR: Node[] = [[-27.6, -150.6], [-33, -155.8], [-42, -158.4], [-52, -157], [-62, -152.6], [-71.6, -146.8], [-79.6, -139], [-84.2, -129],
+const liftedR: Node[] = [[-27.6, -141.6], [-33, -155.8], [-42, -158.4], [-52, -157], [-62, -152.6], [-71.6, -146.8], [-79.6, -139], [-84.2, -129],
   [-84.4, -119.6], [-80.2, -110.6], [-73, -106.6], [-64.8, -108.4], [-57.6, -113.4], [-50.4, -117.6], [-45.6, -123.4], [-43.4, -130], [-40, -137.6],
-  [-35, -143.6], [-30.6, -147.6]];
+  [-35, -143.6], [-31, -145.4]];
 const lifted = { R: smooth(rollN(liftedR)), L: smooth(rollN(mirrorX(liftedR))) };
+
+// The lifted paddle's lobe: four soft lock tips round its end and along its lower edge, as Lifted slightly draws them.
+const LIFT_HEM: Lock[] = [{ len: 1.25, width: 7.4, lean: 0.2, dip: 0.25 }, { len: 1.6, width: 8.6, lean: 0.25, dip: 0.3 }, { len: 1.1, width: 6.2, lean: 0.3, dip: 0.3 },
+  { len: 1.4, width: 6.8, lean: 0.35 }];
+const liftedEdge = (side: "L" | "R") => raisedEdge(side, lifted[side], (p) => onPerk(side, p), {
+  step: [[-63.6, -151.8], [-70.4, -147.6]], hem: [[-84.2, -124], [-66.4, -107.8]], locks: LIFT_HEM,
+  // Its line from where the root comes out from behind the topknot, over its top, round the lobe and back along its
+  // lower edge to where it goes behind the head (the temple's edge, or with the temple down the head's own notch, which
+  // on the left lies higher).
+  line: [[-28.8, -146.4], [-41.4, -135.6]], lineL: [[-28.8, -146.4], [-36.4, -142.6]], axis: [[-36, -152], [-76, -108]],
+});
 
 function liftedEar(side: "L" | "R"): Piece {
   const on = (p: P) => onPerk(side, p);
+  const edge = liftedEdge(side);
   const paint = earFur({
-    ear: lifted[side],
+    ear: edge.shape, edge,
     axis: [on([-36, -152]), on([-76, -108])],
     deepen: [0.3, 1],
     // Five locks running out along the paddle into its lobe, as the panel paints its fur.
@@ -1055,10 +1093,7 @@ function liftedEar(side: "L" | "R"): Piece {
     fold: { line: ([[-38.4, -146.2], [-45.6, -139.4], [-51, -131.2], [-55.6, -122.4], [-60.4, -114.6]] as P[]).map(on),
       back: perkD(side, "M-30.6 -147.6 L-38.4 -146.2 L-45.6 -139.4 L-51 -131.2 L-55.6 -122.4 L-60.4 -114.6 L-57.6 -113.4 L-50.4 -117.6 L-45.6 -123.4 L-43.4 -130 L-40 -137.6 L-35 -143.6Z") },
   });
-  // Its line from beside the topknot over its top, round the lobe and back along its lower edge to where it goes
-  // behind the temple's edge.
-  const [a, b] = [on([-30, -153.4]), on([-48.6, -119.4])];
-  return litPart(`ear.${side}`, lifted[side], paint, [side === "R" ? { from: a, to: b, on: "tan", taper: [3, 3] } : { from: b, to: a, on: "tan", taper: [3, 3] }]);
+  return lineGate(litPart(`ear.${side}`, edge.shape, paint, [edge.span]));
 }
 
 /** Every face state the front draws besides its rest, each with its part and state. */
