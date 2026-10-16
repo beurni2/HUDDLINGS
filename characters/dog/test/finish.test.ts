@@ -2,7 +2,8 @@
 // line, its topknot, its ear paint, its paws' toe lines and its tag from characters/dog/src/parts/; the line darkens and fills out from where the light
 // falls to where the part meets the ground, on warm ladders with no grey; the eye's white is a crescent as wide as
 // its view asks on its outer side and none on the other, under a large catchlight and a tiny one (Q26, DECISIONS 201); and the topknot and the ears keep
-// their counts (3 to 5 curls, 4 to 7 locks over 2 or 3 clumps).
+// their counts (3 to 5 curls, 4 to 7 locks over 2 or 3 clumps, or over a hem of 3 or 4 tips where the view builds the
+// ear's edge, DECISIONS 215). A sole that takes the fur pass's ground term holds 216's pin instead of the darkest.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -11,7 +12,7 @@ import { LIMITS } from "../../draw/lint.ts";
 import type { Paint } from "../../draw/paint.ts";
 import { earFur } from "../src/parts/ear.ts";
 import { eye, eyeGeometry, type EyeSpec } from "../src/parts/eye.ts";
-import { litRibbons, type LitSpan } from "../src/parts/lines.ts";
+import { litRibbons, SOLE, type LitSpan } from "../src/parts/lines.ts";
 import { topknot, type Curl } from "../src/parts/topknot.ts";
 import { toes } from "../src/parts/paw.ts";
 import { tagPaint } from "../src/parts/tag.ts";
@@ -77,6 +78,11 @@ test("the line is lightest and thinnest where the light falls, darkest and fulle
   assert.ok(l[1] <= 1.45, `the lit line swells to ${l[1]} pt`);
   assert.ok(g[0] >= 1.55, `the ground line thins to ${g[0]} pt`);
   for (const w of [...l, ...g]) assert.ok(w >= LIMITS.outer[0] && w <= LIMITS.outer[1], `a drawn width ${w} is outside the outer line's band`);
+  // A sole whose view asks for the fur pass's ground term (DECISIONS 216, replacing 74's and 79's soles-darkest pin
+  // there) is the sole tone under its middle, lighter than the darkest, and eases out toward its ends.
+  const sole = tones(litRibbons(ball, [{ from: [8, -2], to: [-8, -2], ground: "sole" }], "sole").svg, LINES.cream);
+  assert.equal(Math.max(...sole), Math.round(SOLE.depth * 10), `the sole's tones ${sole} do not peak at its own tone`);
+  assert.ok(Math.max(...sole) < Math.min(...groundTones), "the sole is as dark as the ground line it replaces");
 });
 
 test("a span's place deepens the line whatever the light, and a span on the tan takes the tan ladder", () => {
@@ -124,7 +130,7 @@ test("the eye has one large and one tiny catchlight, no strokes, and its lash li
   assert.ok(lid && lid.kind === "outer" && lid.width >= LIMITS.outer[0] && lid.width <= LIMITS.outer[1], "the lash line is not an outer line");
 });
 
-test("a topknot is 3 to 5 curls and an ear 4 to 7 locks over 2 or 3 clumps", () => {
+test("a topknot is 3 to 5 curls and an ear 4 to 7 locks over 2 or 3 clumps, or over a hem of 3 or 4 tips", () => {
   const curl: Curl = { nodes: [[0, -10], [5, -5], [0, 0], [-5, -5]], line: { from: [-5, -5], to: [5, -5] } };
   assert.throws(() => topknot([curl, curl], {} as Paint), /3 to 5 curls/);
   assert.throws(() => topknot(Array(6).fill(curl), {} as Paint), /3 to 5 curls/);
@@ -134,6 +140,11 @@ test("a topknot is 3 to 5 curls and an ear 4 to 7 locks over 2 or 3 clumps", () 
   assert.throws(() => earFur({ ...ear, locks: Array(8).fill(lock), dips: [[0, 0]] }), /4 to 7 locks/);
   assert.throws(() => earFur({ ...ear, locks: Array(5).fill(lock), dips: [] }), /2 or 3 clumps/);
   assert.throws(() => earFur({ ...ear, locks: Array(5).fill(lock), dips: [[0, 0], [1, 0], [2, 0]] }), /2 or 3 clumps/);
+  // An ear whose view builds its edge (DECISIONS 215, from the floppy-ears panel's 3 or 4 lock tips round the hem)
+  // counts the hem's tips instead: 3 or 4, whatever its dips (furkit.test checks the edge itself).
+  const edge = (tips: number) => ({ shape: ear.ear, span: { from: [0, 0] as P, to: [0, 0] as P }, tips: Array.from({ length: tips }, (_, k): P => [k - 2, 0]), notches: Array.from({ length: tips - 1 }, (_, k): P => [k - 1.5, -1]) });
+  assert.throws(() => earFur({ ...ear, locks: Array(5).fill(lock), dips: [], edge: edge(2) }), /3 or 4 lock tips, not 2/);
+  assert.throws(() => earFur({ ...ear, locks: Array(5).fill(lock), dips: [], edge: edge(5) }), /3 or 4 lock tips, not 5/);
 });
 
 test("the eye's rim is darker than the iris it rings, and the lower iris lightens down to its foot", () => {
