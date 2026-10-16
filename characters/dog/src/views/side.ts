@@ -766,7 +766,7 @@ export function profileSqueeze(): Chevron {
   };
   const [lu, au] = foreshorten(16.8, 14), [ll, al] = foreshorten(15.8, 26);
   return { tip: [EYE.centre[0] + EYE.noseward * 8.8 * k, EYE.centre[1]], tilt: 0, noseward: EYE.noseward, length: [lu, ll], angle: [au, al],
-    thickness: 4.2, ends: 3.6, bow: 0.4, point: 1 };
+    thickness: 4.8, ends: 4.1, bow: 0.8, point: 1 };
 }
 
 function eyeState(state: (typeof EYE_STATES)[number], light: P): Piece {

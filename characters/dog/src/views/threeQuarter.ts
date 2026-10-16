@@ -862,7 +862,8 @@ export function turnedEyeSpec(state: "open" | "wide" | "peek" | "sparkle" | "eag
 /**
  * The squeeze on each eye (Q2, DECISIONS 202), the front's `>` `<` placed from each eye's open eye as the front places
  * its own, along the eye's lean: the near one the front's, the far one shortened across with its eye (its arms' run
- * across times FAR, their rise kept, so they open a little wider on screen) and a little thinner.
+ * across times FAR, their rise kept, so they open a little wider on screen) and drawn at the far eye's line weight,
+ * 0.84 of the near one's, as its half-lid's lash is (1.6 pt to 1.9).
  */
 /** The muzzle's level (the line through the rest mouth's corners), the face's level for the R3 guards (DECISIONS 179). */
 const threeQuarterLevel = 7.5;
@@ -879,7 +880,7 @@ export function turnedSqueeze(side: "L" | "R"): Chevron {
   // dropping 36° and its upper rising 4°, and the pair no longer read as one squeeze.
   const tilt = SQUEEZE_TILT, t = (tilt * Math.PI) / 180, back = 8.8 * k, out = -spec.noseward;
   return { tip: [spec.centre[0] - out * back * Math.cos(t), spec.centre[1] - out * back * Math.sin(t)], tilt,
-    noseward: spec.noseward, length: [lu, ll], angle: [au, al], thickness: near ? 4.4 : 3.9, ends: near ? 3.8 : 3.3, bow: 0.4, point: near ? 1 : 0.9 };
+    noseward: spec.noseward, length: [lu, ll], angle: [au, al], thickness: near ? 5 : 4.2, ends: near ? 4.3 : 3.6, bow: near ? 0.8 : 0.7, point: near ? 1 : 0.9 };
 }
 
 function eyeState(state: (typeof EYE_STATES)[number], side: "L" | "R", light: P): Piece {

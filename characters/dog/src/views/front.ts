@@ -833,13 +833,15 @@ const SPARKLE_STARS = [{ at: [-13.6, 8.6] as [number, number], r: 3.8, points: 5
  * The squeeze (Q2, DECISIONS 202): the dog's own `>` `<`, as the kitty's and the bear's Excited draw theirs, at the
  * open eye's size: its point 8.2 pt in from the open eye's middle toward the nose, 0.6 below it, its arms reaching
  * out to the open eye's outer side (the upper 16.8 pt, turned 14° up, the lower 15.8, 26° down, as the sister sheets'
- * arms rise 11 to 14° and fall 18 to 27°), 4.4 pt thick, a little under the crescent band's 5, in the lash bands'
- * warm near-black, as dark as the sister sheets' (the outline's warm brown read faded beside them: 202).
+ * arms rise 11 to 14° and fall 18 to 27°), 5 pt thick, the crescent band's weight, each arm bowing out 0.8 pt, in the
+ * lash bands' warm near-black, as dark as the sister sheets' (the outline's warm brown read faded beside them: 202).
+ * The sisters' arms are 0.36 as thick as long; at 4.4 pt and straighter (0.27) the dog's read as typed `> <` beside
+ * them, where the bear's are bold and curved.
  */
 export function squeeze(side: "L" | "R"): Chevron {
   const sx = side === "L" ? 1 : -1;
   return { tip: FRAME.at([sx * (EYE_HALF - 8.2), 0.6]), tilt: ROLL_DEG, noseward: side === "L" ? -1 : 1, length: [16.8, 15.8], angle: [14, 26],
-    thickness: 4.4, ends: 3.8, bow: 0.4, point: 1 };
+    thickness: 5, ends: 4.3, bow: 0.8, point: 1 };
 }
 
 /**
