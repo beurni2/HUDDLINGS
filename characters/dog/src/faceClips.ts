@@ -19,21 +19,30 @@ export function stillOf(p: Preset) {
   const eye = (side: "L" | "R"): EyeState => (p.wink ? (side === p.wink ? eyes : "open") : eyes);
   const ear = (side: "L" | "R"): EarState => (p.ears === "onePerked" ? (side === p.perk ? "onePerked" : "neutral") : p.ears);
   const brow = (side: "L" | "R") => (typeof p.brows === "string" ? p.brows : p.brows[side]);
+  const ears = { L: ear("L"), R: ear("R") };
+  // An ear raised off its temple (perked or lifted) leaves the head's line to the temple's edge on that side (DECISIONS 146).
+  const up = (side: "L" | "R") => RAISED.has(ears[side]);
+  const headLine = up("L") && up("R") ? "temples" : up("L") ? "templeL" : up("R") ? "templeR" : undefined;
   return {
     eyes: { L: eye("L"), R: eye("R") },
     mouth,
     brows: { L: brow("L"), R: brow("R") },
-    ears: { L: ear("L"), R: ear("R") },
+    ears,
+    headLine,
     // The sparkle's stars draw only beside the sparkle eyes.
     stars: eyes === "sparkle",
   };
 }
+
+/** The ear states drawn off the temple, whose head's line runs along the temple's edge instead. */
+export const RAISED: ReadonlySet<EarState> = new Set(["onePerked", "lifted"]);
 
 export function faceClip(name: string, p: Preset): Clip {
   const s = stillOf(p);
   const states: Record<string, [number, string][]> = {
     "eye.L": [[0, s.eyes.L]], "eye.R": [[0, s.eyes.R]], mouth: [[0, s.mouth]],
     "brow.L": [[0, s.brows.L]], "brow.R": [[0, s.brows.R]], "ear.L": [[0, s.ears.L]], "ear.R": [[0, s.ears.R]],
+    ...(s.headLine ? { "head.line": [[0, s.headLine]] as [number, string][] } : {}),
     ...(s.stars ? { stars: [[0, "sparkle"]] as [number, string][] } : {}),
   };
   // The blush's level where the table names one, as the cheeks' alpha over their drawing at the reference level

@@ -14,11 +14,12 @@ export const EAR_STATES = ["neutral", "lifted", "onePerked", "relaxed", "lowered
 export type EarState = (typeof EAR_STATES)[number];
 
 /**
- * Each ear state's rest angle in degrees, outward positive (the ear's tip away from the face): lifted from the Lifted
- * slightly panel and the motion sheet's Ear twitch, relaxed and lowered turned in toward the face, never so far that
- * the ear goes behind the head (14 to 18° inward hides it). The one perked ear is its own drawing at 0° (DECISIONS 133).
+ * Each ear state's rest angle in degrees, outward positive (the ear's tip away from the face): relaxed and lowered
+ * turned in toward the face, never so far that the ear goes behind the head (14 to 18° inward hides it). The lifted and
+ * the one perked ear are drawings of their own, at 0° (DECISIONS 133, 145): Lifted slightly raises the root and tips
+ * the flap toward us, which no turn about the root gives.
  */
-export const EAR_ANGLES: Record<EarState, number> = { neutral: 0, lifted: 10, onePerked: 0, relaxed: -3, lowered: -7 };
+export const EAR_ANGLES: Record<EarState, number> = { neutral: 0, lifted: 0, onePerked: 0, relaxed: -3, lowered: -7 };
 
 /**
  * The level every view's blush part is drawn at (DECISIONS 144): the printed pink's level over the fur that

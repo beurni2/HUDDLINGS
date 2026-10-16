@@ -14,7 +14,7 @@ import { validate } from "../../../runtime-web/src/format.ts";
 import { regionFor } from "../../../runtime-web/src/rig.ts";
 import type { P } from "../../draw/geom.ts";
 import { scopeIds } from "../../draw/svg.ts";
-import { blushAlpha, clipText, earRot, faceClips, stillOf } from "../src/faceClips.ts";
+import { blushAlpha, clipText, earRot, faceClips, RAISED, stillOf } from "../src/faceClips.ts";
 import { BROW_STATES, brow } from "../src/parts/brow.ts";
 import { MOUTH_STATES, mouth, type Mouth } from "../src/parts/mouth.ts";
 import { BLUSH_REFERENCE, EAR_ANGLES, EAR_STATES, EYE_STATES, PRESETS, type EarState } from "../src/presets.ts";
@@ -27,10 +27,10 @@ const faces = clips.filter((c) => c.name.startsWith("face_"));
 
 /** Names for sorrow and anger, which no face state, part or preset may carry (rule R3). */
 const SORROW = /sad|angry|anger|pout|tear|cry|droop|frown|sorrow|sulk|grief/i;
-/** The face states each face part may take: the spec's eye, mouth, brow and ear states (L450-472), and the sparkle's stars. */
+/** The face states each face part may take: the spec's eye, mouth, brow and ear states (L450-472), the sparkle's stars, and the head's line beside a raised ear (DECISIONS 146). */
 const ALLOWED: Record<string, readonly string[]> = {
   "eye.L": EYE_STATES, "eye.R": EYE_STATES, mouth: MOUTH_STATES, "brow.L": BROW_STATES, "brow.R": BROW_STATES,
-  "ear.L": EAR_STATES, "ear.R": EAR_STATES, stars: ["sparkle"],
+  "ear.L": EAR_STATES, "ear.R": EAR_STATES, stars: ["sparkle"], "head.line": ["templeL", "templeR", "temples"],
 };
 
 /** A point list turned into the face's level frame (the front's face is rolled with the head, DECISIONS 27). */
@@ -246,7 +246,9 @@ test("every brow is an arc that bows up, its inner end at or above its outer and
 test("no face clip turns an ear in past the lowered state or out past the lifted one, and only sleepy lowers and only the lifted faces lift", () => {
   // The risk designer's measure: ears turned 14 to 18° in disappear behind the head; the bones' limits keep the spec's 14° either way.
   assert.ok(LOWERED > RELAXED && LOWERED < 14, `lowered is ${LOWERED}° in`);
-  assert.ok(LIFTED > 0 && LIFTED <= 14, `lifted is ${LIFTED}° out`);
+  // The lifted ear is a drawing of its own at 0° (DECISIONS 145), so no face turns an ear out at all; the guard still
+  // bounds any outward turn by the lifted state's angle.
+  assert.ok(LIFTED >= 0 && LIFTED <= 14, `lifted is ${LIFTED}° out`);
   for (const ear of ["ear.L", "ear.R"]) assert.deepEqual(rig.bones.find((b) => b.name === ear)!.rot, [-14, 14], `${ear}'s limits`);
   for (const clip of faces) {
     const preset = PRESETS[clip.name.slice("face_".length)]!;
@@ -264,7 +266,8 @@ test("no face clip turns an ear in past the lowered state or out past the lifted
   const splayed: Clip = { ...listening, tracks: { ...listening.tracks, "ear.L": { rot: [[0, -20]] } } };
   assert.match(earProblem(splayed, "lifted") ?? "", /20° out, past the lifted state/);
   const out: Clip = { ...happy, tracks: { ...happy.tracks, "ear.R": { rot: [[0, 5]] } } };
-  assert.match(earProblem(out, "neutral") ?? "", /does not lift/);
+  // With the lifted ear drawn at 0°, an outward turn is past the lifted state before it is in a face that does not lift.
+  assert.match(earProblem(out, "neutral") ?? "", /past the lifted state|does not lift/);
 });
 
 test("the face clips are what presets.ts writes: one per preset drawn now, sound, at the frame each primary panel draws", () => {
@@ -299,6 +302,32 @@ test("the face clips are what presets.ts writes: one per preset drawn now, sound
     }
   }
   assert.deepEqual(Object.entries(PRESETS).filter(([, p]) => p.blush !== null && !p.next).map(([n, p]) => [n, p.blush]), [["shy", 0.8], ["blissful", 0.7]]);
+});
+
+test("the raised ears are drawings of their own, and the head's line runs along the temple each one uncovers", () => {
+  // Lifted slightly raises the root and tips the flap toward us, as the perked ear flips over the head: each is its own
+  // drawing (DECISIONS 133, 145). Either leaves its temple to the drawing's own lined edge, so the head's line drops
+  // its side over that ear, or it shows as a crease inside the tan (DECISIONS 146).
+  for (const ear of ["ear.L", "ear.R"]) {
+    const part = rig.parts.find((p) => p.name === ear)!;
+    for (const state of RAISED) assert.equal(regionFor(part, "front", state), `${ear}/front:${state}`, `${ear} ${state} is its own drawing`);
+  }
+  const line = rig.parts.find((p) => p.name === "head.line")!;
+  for (const state of ["templeL", "templeR", "temples"]) assert.equal(regionFor(line, "front", state), `head.line/front:${state}`);
+  const expected = (L: boolean, R: boolean) => (L && R ? "temples" : L ? "templeL" : R ? "templeR" : undefined);
+  let raised = 0;
+  for (const clip of faces) {
+    const ears = { L: clip.states!["ear.L"]![0]![1] as EarState, R: clip.states!["ear.R"]![0]![1] as EarState };
+    const want = expected(RAISED.has(ears.L), RAISED.has(ears.R));
+    assert.equal(clip.states!["head.line"]?.[0]?.[1], want, `${clip.name}: the head's line beside ears ${ears.L} and ${ears.R}`);
+    if (want) raised++;
+  }
+  // The lifted faces (excited, surprised, proud, listening, singing) and the perked ones (curious, mischievous, sly).
+  assert.equal(raised, 8);
+  // Planted: a perked face whose head's line keeps its side over the ear fails.
+  const curious = faces.find((c) => c.name === "face_curious")!;
+  const creased = { ...curious, states: Object.fromEntries(Object.entries(curious.states!).filter(([part]) => part !== "head.line")) };
+  assert.notEqual(creased.states["head.line"]?.[0]?.[1], expected(true, false));
 });
 
 test("each preset's first panel is its primary in model.json, and its still winks the eye its primary winks", () => {

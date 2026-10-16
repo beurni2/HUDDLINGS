@@ -20,7 +20,8 @@ export const STATES: Record<string, ReturnType<typeof clip>> = {
   "peek": clip({ "eye.L": "peek", "eye.R": "peek", mouth: "smile" }),
   "yawn, closed": clip({ "eye.L": "closed", "eye.R": "closed", mouth: "yawn" }),
   "pant": clip({ "eye.L": "happy", "eye.R": "happy", mouth: "pant", "brow.L": "happy", "brow.R": "happy" }),
-  "wink L, perked R": clip({ "eye.L": "wink", mouth: "cheeky", "brow.L": "happy", "ear.R": "onePerked" }),
+  "wink R, perked R": clip({ "eye.R": "wink", mouth: "cheeky", "ear.R": "onePerked", "head.line": "templeR" }),
+  "lifted L, perked R": clip({ "ear.L": "lifted", "ear.R": "onePerked", "head.line": "temples", mouth: "smile" }),
   "raised, wide, o": clip({ "eye.L": "wide", "eye.R": "wide", mouth: "o", "brow.L": "raised", "brow.R": "raised" }),
   "sleepy half-lid": clip({ "eye.L": "sleepy", "eye.R": "sleepy", mouth: "smile" }),
 };
