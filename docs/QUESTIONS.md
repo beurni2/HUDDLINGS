@@ -57,6 +57,8 @@ Where the spec is silent or contradicts itself, I don't invent the answer. The q
 
 ## Needed by Gate A (the dog's look)
 
+None open: Q2, Q26, Q27 and Q28 are decided (above). At Gate A you still approve the look itself and the new hungry and huffy faces.
+
 ## Needed by phase 4 (the rig and Visual QA)
 
 ### Q3. As the spec words them, four Visual QA checks would fail good animation. May I narrow them?
