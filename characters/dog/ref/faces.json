@@ -152,10 +152,7 @@
      "mouth.R",
      "mouth.L"
     ],
-    "ticklish": [
-     "eye.R",
-     "eye.L"
-    ]
+    "ticklish": []
    },
    "mask": "ref/faces/master.expression.excited.png"
   },
@@ -237,8 +234,6 @@
      "eye.L"
     ],
     "ticklish": [
-     "eye.R",
-     "eye.L",
      "mouth.R",
      "mouth.L"
     ]
@@ -826,10 +821,7 @@
      "mouth.R",
      "mouth.L"
     ],
-    "ticklish": [
-     "eye.R",
-     "eye.L"
-    ]
+    "ticklish": []
    },
    "mask": "ref/faces/expressions.expression.excited.png"
   },
@@ -907,8 +899,6 @@
      "eye.L"
     ],
     "ticklish": [
-     "eye.R",
-     "eye.L",
      "mouth.R",
      "mouth.L"
     ]
@@ -1454,7 +1444,7 @@
     "expressions.expression.laughing",
     "expressions.expression.excited"
    ],
-   "note": "The master sheet's Laughing: squeeze is the happy crescent (Q2), held with the laughing mouth. Excited (both sheets) and the expression sheet's Laughing are beside it."
+   "note": "The master sheet's Laughing holds ticklish's laughing mouth. Its eyes are the squeeze, the dog's own > < drawn as the kitty's and the bear's Excited draw theirs (docs/QUESTIONS.md Q2, the founder's choice of Oct 16, 2026; DECISIONS.md 200, 202, 206): no panel of the dog's sheets draws them, so they are judged by eye beside those two panels (qa/phase3/faces/eyes.png) and held on the face's head only, and this record lists no eye state for the check to hold (listed as squeeze, the aliases' Q2 default would hold them to Laughing's crescents, which they are not). Excited (both sheets) and the expression sheet's Laughing are beside it."
   },
   "hungry": {
    "primary": null,
