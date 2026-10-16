@@ -24,6 +24,13 @@ export interface Lock {
   width?: number;
   /** How far the notch after it dips inside the base curve, in points (not after the row's last lock, which ends on the base). */
   dip?: number;
+  /**
+   * How the edge runs through the notch after it, 0 to 1: left out (0) it turns sharply out of the notch, as every row
+   * first did, so the notches are the points and the locks round bumps; toward 1 it flows through the notch along the
+   * base, so the notch is soft and the tips are the points, as the sheet's wisps (the chin's and the cheeks', dog
+   * DECISIONS 214), where sharp notches between low bumps read as a cloud's scallops.
+   */
+  notch?: number;
 }
 
 /** What a typed row of locks must be, for one use (DECISIONS 213): each range is [least, most]. */
@@ -44,6 +51,10 @@ export interface FurRules {
   vary: number;
   /** How far each notch between two locks dips inside the base, in points. */
   dip: [number, number];
+  /** How deep a lock's notches lie below its tip, at most, as a share of its width (its length and the deeper notch beside it): a deep notch on a broad lobe reads as a saw tooth. */
+  depth?: number;
+  /** A row of 4 or more may not alternate wide and narrow all along: broad lobes spaced so read as a repeat (the tail's first clumps). */
+  noRepeat?: boolean;
   /** How far the typed widths may be stretched or squeezed to fill their span, as a share. */
   fit: number;
 }
@@ -80,12 +91,18 @@ export function furCheck(locks: Lock[], tipRound: number, rules: FurRules, span:
     if (!within(lean, rules.lean)) problems.push(`lock ${i} leans ${lean}, not ${rules.lean[0]} to ${rules.lean[1]}`);
     if (l.len / w < rules.ratio - 1e-9) problems.push(`lock ${i} is ${(l.len / w).toFixed(2)} as long as it is wide, under ${rules.ratio}`);
     if (i < n - 1 && !within(l.dip ?? 0, rules.dip)) problems.push(`the notch after lock ${i} dips ${l.dip ?? 0} pt, not ${rules.dip[0]} to ${rules.dip[1]}`);
+    const deeper = Math.max(i > 0 ? locks[i - 1]!.dip ?? 0 : 0, i < n - 1 ? l.dip ?? 0 : 0);
+    if (rules.depth !== undefined && (l.len + deeper) / w > rules.depth + 1e-9)
+      problems.push(`lock ${i}'s notches lie ${(l.len + deeper).toFixed(2)} pt below its tip, ${((l.len + deeper) / w).toFixed(2)} of its width, over ${rules.depth}`);
     const next = locks[i + 1];
     if (next) {
       const differ = Math.max(Math.abs(l.len - next.len) / Math.max(l.len, next.len), Math.abs(l.width! - next.width!) / Math.max(l.width!, next.width!));
       if (differ < rules.vary - 1e-9) problems.push(`locks ${i} and ${i + 1} differ by ${(differ * 100).toFixed(0)}%, under ${rules.vary * 100}%`);
     }
   });
+  // A row of broad lobes whose widths go wide, narrow, wide, narrow all along reads as a repeat, not fur.
+  const turns = locks.slice(1).map((l, i) => Math.sign(l.width! - locks[i]!.width!));
+  if (rules.noRepeat && n >= 4 && turns.every((t, i) => t !== 0 && (i === 0 || t === -turns[i - 1]!))) problems.push(`the locks' widths alternate wide and narrow all along (${locks.map((l) => l.width).join(", ")}): a repeat, not fur`);
   return problems;
 }
 
@@ -123,7 +140,9 @@ export function furEdge(base: Shape, from: string | P, to: string | P, locks: Lo
   }
   const typed = locks.every((l) => l.width !== undefined);
   const at = (s: number) => {
-    let k = samples.findIndex((x) => x.s >= s);
+    // A typed row reads a place that falls on a sample as that sample whatever the rounding in the walked length, so the
+    // same row on a moved outline (a face state's) lies exactly where it did, its tangents included.
+    let k = samples.findIndex((x) => x.s >= s - (typed ? 1e-9 : 0));
     if (k < 1) k = 1;
     const x = samples[k]!, y = samples[k - 1]!;
     // A typed row is laid out to its widths, so its places are read between samples (1 to 2 pt apart on a long cubic).
@@ -150,8 +169,11 @@ export function furEdge(base: Shape, from: string | P, to: string | P, locks: Lo
     const tt: P = [Math.cos(angle), Math.sin(angle)];
     const h = w * tipRound;
     onLock?.(tip, mid.p, [p0, p1]);
-    out.push([p0, v.add(p0, v.add(v.mul(n0, (l.len + dipBefore) * 0.55), v.mul(v0.tan, w * 0.05))), v.sub(tip, v.mul(tt, h)), tip]);
-    out.push([tip, v.add(tip, v.mul(tt, h)), v.add(p1, v.sub(v.mul(n1, (l.len + dipAfter) * 0.55), v.mul(v1.tan, w * 0.05))), p1]);
+    // Out of a notch the edge turns sharply up, or with `notch` flows on along the base through it.
+    const flowBefore = k > 0 ? locks[k - 1]!.notch ?? 0 : 0, flowAfter = k < locks.length - 1 ? l.notch ?? 0 : 0;
+    const rise = (flow: number) => 0.55 * (1 - 0.6 * flow), along = (flow: number) => w * (0.05 + 0.3 * flow);
+    out.push([p0, v.add(p0, v.add(v.mul(n0, (l.len + dipBefore) * rise(flowBefore)), v.mul(v0.tan, along(flowBefore)))), v.sub(tip, v.mul(tt, h)), tip]);
+    out.push([tip, v.add(tip, v.mul(tt, h)), v.add(p1, v.sub(v.mul(n1, (l.len + dipAfter) * rise(flowAfter)), v.mul(v1.tan, along(flowAfter)))), p1]);
     s += w;
   });
   const rest = split(base.segs[B.i]!, B.t)[1];
