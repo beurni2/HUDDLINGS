@@ -164,10 +164,15 @@ const at = headHalf.length - 1 - CRESCENT;
 const headNodes: Node[] = [...headHalf, HEAD_FOOT, ...mirrored.slice(0, at).map(widen), ...rightCrown, ...mirrored.slice(headHalf.length - 2)];
 const RIGHT_CRESCENT = headHalf.length + 1 + at, RIGHT_NOTCH = RIGHT_CRESCENT + 3;
 const headBase = smooth(headNodes, { typed: headHalf.length + 1 + rightCrown.length, corners: [NOTCH, CRESCENT, RIGHT_CRESCENT, RIGHT_NOTCH] });
-/** Over each ear's root, from the lowest lock's tip in toward the crescent: broad low locks combed hard down and out, two on the left (DECISIONS 214, 243). */
-const CROWN: Lock[] = [{ len: 2, width: 5.6, lean: -0.5, dip: 0.45 }, { len: 1.5, width: 5, lean: -0.55 }];
-/** The right root is longer on the sheet (its crescent sits further in): three locks, typed in its path's order, from the crescent out. */
-const CROWN_R: Lock[] = [{ len: 1.6, width: 4.3, lean: 0.5, dip: 0.4 }, { len: 2.1, width: 4, lean: 0.55, dip: 0.45 }, { len: 1.5, width: 4.6, lean: 0.45 }];
+/**
+ * Over each ear's root, from the lowest lock's tip in toward the crescent: two broad low locks combed down and out, as
+ * short and as little leaning as the crown's rules let them (HEAD_FUR.crown), since the sheet's cream ends over the tan
+ * there in a soft, nearly straight edge; narrower and longer, three to the right root, they read as white teeth on the
+ * tan (DECISIONS 214, 243).
+ */
+const CROWN: Lock[] = [{ len: 1.65, width: 5.6, lean: -0.4, dip: 0.4 }, { len: 1.3, width: 5, lean: -0.45 }];
+/** The right root is longer on the sheet (its crescent sits further in): its two locks broader, typed in its path's order, from the crescent out. */
+const CROWN_R: Lock[] = [{ len: 1.65, width: 6.45, lean: 0.4, dip: 0.4 }, { len: 2.1, width: 6.45, lean: 0.45 }];
 /** Where each lower lobe's edge goes under the collar's end. */
 const JAW = { L: crossing(headBase, collar, [-29.6, -70.2]), R: crossing(headBase, collar, [29.6, -70.2]) };
 const fur = headFur({
@@ -537,7 +542,10 @@ function tailOnBody(): Piece {
 // locks, down to y -86; its inner edge, where the cream lies over it, a soft wave
 // (x -33.6 at y -126, -35.8 at -121, in to -32.2 from y -116 to -102, out to -37.4
 // by -88), as the sheet's; typed with bleed past the head's edge, which the
-// head's clip takes off. The right band is typed from its own side of the crop,
+// head's clip takes off. Its top tints the lowest of the crown's locks over the
+// root a little (L* 86 to 90 against the sheet's 91 to 96 there): kept, since it is
+// what joins the root's tan to the crown's line, where phase 2's ear roots lie (89);
+// with the locks clean the finder reads each root 4.8 and 8.9 pt low. The right band is typed from its own side of the crop,
 // which stands further out (the cream to 33.6 to 36.8 from y -132 to -120, 33.6 to
 // 34.4 down the side, 36.8 by -93), its tan deepening out to the side's line at x 41.
 const earShadowL: Node[] = [[-44, -146], [-36.4, -141.8], [-31.2, -141], [-30.2, -136.4], [-30.6, -132.4], [-33.6, -126.4], [-35.8, -121.2], [-32.8, -116.4], [-32.8, -109],
