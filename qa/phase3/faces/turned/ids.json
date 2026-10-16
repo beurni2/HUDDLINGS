@@ -1,0 +1,462 @@
+[
+ {
+  "view": "front",
+  "eye": "eye.L",
+  "state": "happy",
+  "area": 484,
+  "openArea": 2662,
+  "share": 0.182,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "front",
+  "eye": "eye.L",
+  "state": "squeeze",
+  "area": 484,
+  "openArea": 2662,
+  "share": 0.182,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "front",
+  "eye": "eye.L",
+  "state": "sparkle",
+  "area": 484,
+  "openArea": 2662,
+  "share": 0.182,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "front",
+  "eye": "eye.L",
+  "state": "closed",
+  "area": 401,
+  "openArea": 2662,
+  "share": 0.151,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "front",
+  "eye": "eye.L",
+  "state": "wink",
+  "area": 479,
+  "openArea": 2662,
+  "share": 0.18,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "front",
+  "eye": "eye.R",
+  "state": "happy",
+  "area": 484,
+  "openArea": 2661,
+  "share": 0.182,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "front",
+  "eye": "eye.R",
+  "state": "squeeze",
+  "area": 484,
+  "openArea": 2661,
+  "share": 0.182,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "front",
+  "eye": "eye.R",
+  "state": "sparkle",
+  "area": 484,
+  "openArea": 2661,
+  "share": 0.182,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "front",
+  "eye": "eye.R",
+  "state": "closed",
+  "area": 409,
+  "openArea": 2661,
+  "share": 0.154,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "front",
+  "eye": "eye.R",
+  "state": "wink",
+  "area": 481,
+  "openArea": 2661,
+  "share": 0.181,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "threeQuarter.L",
+  "eye": "eye.L",
+  "state": "happy",
+  "area": 484,
+  "openArea": 2769,
+  "share": 0.175,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "threeQuarter.L",
+  "eye": "eye.L",
+  "state": "squeeze",
+  "area": 484,
+  "openArea": 2769,
+  "share": 0.175,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "threeQuarter.L",
+  "eye": "eye.L",
+  "state": "sparkle",
+  "area": 484,
+  "openArea": 2769,
+  "share": 0.175,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "threeQuarter.L",
+  "eye": "eye.L",
+  "state": "closed",
+  "area": 412,
+  "openArea": 2769,
+  "share": 0.149,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "threeQuarter.L",
+  "eye": "eye.L",
+  "state": "wink",
+  "area": 483,
+  "openArea": 2769,
+  "share": 0.174,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "threeQuarter.L",
+  "eye": "eye.L",
+  "state": "sleepy",
+  "area": 1789,
+  "openArea": 2769,
+  "share": 0.646,
+  "lidDrop": 0.3,
+  "pass": true
+ },
+ {
+  "view": "threeQuarter.L",
+  "eye": "eye.R",
+  "state": "happy",
+  "area": 320,
+  "openArea": 1747,
+  "share": 0.183,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "threeQuarter.L",
+  "eye": "eye.R",
+  "state": "squeeze",
+  "area": 320,
+  "openArea": 1747,
+  "share": 0.183,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "threeQuarter.L",
+  "eye": "eye.R",
+  "state": "sparkle",
+  "area": 320,
+  "openArea": 1747,
+  "share": 0.183,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "threeQuarter.L",
+  "eye": "eye.R",
+  "state": "closed",
+  "area": 263,
+  "openArea": 1747,
+  "share": 0.151,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "threeQuarter.L",
+  "eye": "eye.R",
+  "state": "wink",
+  "area": 316,
+  "openArea": 1747,
+  "share": 0.181,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "threeQuarter.L",
+  "eye": "eye.R",
+  "state": "sleepy",
+  "area": 1158,
+  "openArea": 1747,
+  "share": 0.663,
+  "lidDrop": 0.283,
+  "pass": true
+ },
+ {
+  "view": "threeQuarter.R",
+  "eye": "eye.L",
+  "state": "happy",
+  "area": 321,
+  "openArea": 1748,
+  "share": 0.184,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "threeQuarter.R",
+  "eye": "eye.L",
+  "state": "squeeze",
+  "area": 321,
+  "openArea": 1748,
+  "share": 0.184,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "threeQuarter.R",
+  "eye": "eye.L",
+  "state": "sparkle",
+  "area": 321,
+  "openArea": 1748,
+  "share": 0.184,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "threeQuarter.R",
+  "eye": "eye.L",
+  "state": "closed",
+  "area": 263,
+  "openArea": 1748,
+  "share": 0.15,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "threeQuarter.R",
+  "eye": "eye.L",
+  "state": "wink",
+  "area": 316,
+  "openArea": 1748,
+  "share": 0.181,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "threeQuarter.R",
+  "eye": "eye.L",
+  "state": "sleepy",
+  "area": 1159,
+  "openArea": 1748,
+  "share": 0.663,
+  "lidDrop": 0.283,
+  "pass": true
+ },
+ {
+  "view": "threeQuarter.R",
+  "eye": "eye.R",
+  "state": "happy",
+  "area": 484,
+  "openArea": 2770,
+  "share": 0.175,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "threeQuarter.R",
+  "eye": "eye.R",
+  "state": "squeeze",
+  "area": 484,
+  "openArea": 2770,
+  "share": 0.175,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "threeQuarter.R",
+  "eye": "eye.R",
+  "state": "sparkle",
+  "area": 484,
+  "openArea": 2770,
+  "share": 0.175,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "threeQuarter.R",
+  "eye": "eye.R",
+  "state": "closed",
+  "area": 412,
+  "openArea": 2770,
+  "share": 0.149,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "threeQuarter.R",
+  "eye": "eye.R",
+  "state": "wink",
+  "area": 482,
+  "openArea": 2770,
+  "share": 0.174,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "threeQuarter.R",
+  "eye": "eye.R",
+  "state": "sleepy",
+  "area": 1790,
+  "openArea": 2770,
+  "share": 0.646,
+  "lidDrop": 0.3,
+  "pass": true
+ },
+ {
+  "view": "side.L",
+  "eye": "eye.L",
+  "state": "happy",
+  "area": 392,
+  "openArea": 2510,
+  "share": 0.156,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "side.L",
+  "eye": "eye.L",
+  "state": "squeeze",
+  "area": 392,
+  "openArea": 2510,
+  "share": 0.156,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "side.L",
+  "eye": "eye.L",
+  "state": "sparkle",
+  "area": 392,
+  "openArea": 2510,
+  "share": 0.156,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "side.L",
+  "eye": "eye.L",
+  "state": "closed",
+  "area": 318,
+  "openArea": 2510,
+  "share": 0.127,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "side.L",
+  "eye": "eye.L",
+  "state": "wink",
+  "area": 385,
+  "openArea": 2510,
+  "share": 0.153,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "side.L",
+  "eye": "eye.L",
+  "state": "sleepy",
+  "area": 1645,
+  "openArea": 2510,
+  "share": 0.655,
+  "lidDrop": 0.369,
+  "pass": true
+ },
+ {
+  "view": "side.R",
+  "eye": "eye.R",
+  "state": "happy",
+  "area": 392,
+  "openArea": 2509,
+  "share": 0.156,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "side.R",
+  "eye": "eye.R",
+  "state": "squeeze",
+  "area": 392,
+  "openArea": 2509,
+  "share": 0.156,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "side.R",
+  "eye": "eye.R",
+  "state": "sparkle",
+  "area": 392,
+  "openArea": 2509,
+  "share": 0.156,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "side.R",
+  "eye": "eye.R",
+  "state": "closed",
+  "area": 318,
+  "openArea": 2509,
+  "share": 0.127,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "side.R",
+  "eye": "eye.R",
+  "state": "wink",
+  "area": 385,
+  "openArea": 2509,
+  "share": 0.153,
+  "darkOutsideBand": 0,
+  "pass": true
+ },
+ {
+  "view": "side.R",
+  "eye": "eye.R",
+  "state": "sleepy",
+  "area": 1644,
+  "openArea": 2509,
+  "share": 0.655,
+  "lidDrop": 0.369,
+  "pass": true
+ }
+]
