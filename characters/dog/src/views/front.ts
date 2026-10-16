@@ -770,10 +770,11 @@ function eyeState(state: (typeof EYE_STATES)[number], side: "L" | "R"): Piece {
     // nose and 8 pt above it, the open eye's height).
     case "wink":
       return band(2.7, -0.6, { width: 17.6, rise: 3.2, drop: -1.2, thickness: 4.8, ends: [2.4, 2.4], fullness: 0.35, flick: { length: 1.6, hook: -60 } });
-    // The open eye with its upper lid closed down to just below its middle, its edge bowing a little, as Sleepy half-lid
-    // draws it; the catchlight just under the lash.
+    // The open eye with its upper lid closed down over about two fifths of it, its edge bowing down a little, as Sleepy
+    // half-lid draws it, the catchlight just under the lash: the lid's ends 3.2 pt above the ball's middle, its middle
+    // 1.4. Closed down past the middle, as it was, the flat lid across the iris read as unimpressed (DECISIONS 147).
     case "sleepy":
-      return sharedEye({ ...spec, cover: { level: 0.6, tilt: ROLL_DEG, lash: 1.9, overhang: 1, shine: { at: [2.7, -4], r: 1.2 } } });
+      return sharedEye({ ...spec, cover: { level: -3.2, bow: 1.8, tilt: ROLL_DEG, lash: 1.9, overhang: 1, shine: { at: [2.8, -0.8], r: 1.4 } } });
     // Surprised round: 7% larger and a point higher, the white broader and longer, the catchlight bigger; its larger
     // pupil baked in (phase 3 has no pupil scale).
     case "wide":

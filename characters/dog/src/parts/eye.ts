@@ -43,9 +43,10 @@ export interface EyeSpec {
    * The sleepy half-lid, as the expression sheet's Sleepy half-lid draws it: the upper lid closed down over the eye to a
    * level line `level` pt below the ball's centre (up negative), turned with the face by `tilt` degrees, its fur the
    * hood's pale tan deepening toward its edge, a lash line `lash` pt thick along that edge that runs `overhang` pt
-   * past the ball either side, and the catchlight moved just under it (`shine`, as `shine` above).
+   * past the ball either side, and the catchlight moved just under it (`shine`, as `shine` above); `bow`, how far the
+   * edge bows down in its middle below its ends (1.6 pt by default).
    */
-  cover?: { level: number; tilt: number; lash: number; overhang: number; shine: { at: [number, number]; r: number } };
+  cover?: { level: number; tilt: number; lash: number; overhang: number; shine: { at: [number, number]; r: number }; bow?: number };
 }
 
 const r3 = (n: number) => Math.round(n * 1000) / 1000;
@@ -147,7 +148,7 @@ function halfLid(e: EyeSpec, c: NonNullable<EyeSpec["cover"]>, box: Box): string
   // The lid's edge bows down a little in its middle, as an eyelid's does.
   const edge = Array.from({ length: 25 }, (_, k): P => {
     const x = -half + (2 * half * k) / 24;
-    return L(x, c.level + 1.6 * (1 - (x / half) ** 2));
+    return L(x, c.level + (c.bow ?? 1.6) * (1 - (x / half) ** 2));
   });
   const ball = uid("ball"), shade = uid("lidshade"), soft = uid("blur"), lash = uid("blur"), shine = uid("blur");
   // Grown past the ball by the open eye's lash line and its flick, so none of its rim shows round the lid.
