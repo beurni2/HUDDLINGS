@@ -1,7 +1,9 @@
 """Rule R3's guards (characters/dog/test/faces.test.ts) run on a copy of the committed tree with a fault planted in the
 source each time, then with none, written to r3-plants.txt: an open mouth whose lip's ends hang below its centre (a
-frown under an open mouth), the neutral brow turned so its inner end sits below its outer (an angry slant), and shy's
-left ear turned 12° in (a droop past the lowered state). Nothing in the working tree is touched.
+frown under an open mouth), the neutral brow turned so its inner end sits below its outer (an angry slant), shy's
+left ear turned 12° in (a droop past the lowered state), listening's lifted left ear turned 12° out (the drooped ears'
+splay), and curious keying no head.line state beside its perked ear (the crease in the temple). Nothing in the working
+tree is touched.
 
     python3 qa/phase3/faces/plants.py qa/phase3/faces/r3-plants.txt"""
 import os
@@ -25,6 +27,10 @@ PLANTS = [
      "[[27.4, -25.4], [26, -26.77], [24.2, -27.36], [22.2, -27.06], [20.2, -25.61], [18.6, -23.74]]"),
     ("drooped ear: face_shy's left ear turned 12 degrees in",
      "characters/dog/src/clips/face_shy.json", '"ear.L": { "rot": [[0, 3]] }', '"ear.L": { "rot": [[0, 12]] }'),
+    ("splayed ear: face_listening's lifted left ear turned 12 degrees out",
+     "characters/dog/src/clips/face_listening.json", '"ear.L": { "rot": [[0, 0]] }', '"ear.L": { "rot": [[0, -12]] }'),
+    ("creased temple: face_curious keys no head.line state beside its perked ear",
+     "characters/dog/src/clips/face_curious.json", ', "head.line": [[0, "templeL"]]', ""),
 ]
 
 

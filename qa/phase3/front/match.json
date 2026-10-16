@@ -355,10 +355,10 @@
    {
     "centrePx": [162.6, 117.46],
     "centrePt": [29.67, -88.25],
-    "level": 0.344,
-    "peak": "#FCDED1",
-    "coreColour": "#F7B3A6",
-    "coreDeltaE2000": 0.0,
+    "level": 0.349,
+    "peak": "#FCDDD1",
+    "coreColour": "#F6B3A6",
+    "coreDeltaE2000": 0.21,
     "levelPass": true,
     "sheetBox": 1,
     "pass": true
@@ -366,10 +366,10 @@
    {
     "centrePx": [85.64, 122.74],
     "centrePt": [-30.15, -84.15],
-    "level": 0.347,
+    "level": 0.348,
     "peak": "#FCDDD1",
-    "coreColour": "#F7B3A6",
-    "coreDeltaE2000": 0.0,
+    "coreColour": "#F6B3A6",
+    "coreDeltaE2000": 0.21,
     "levelPass": true,
     "sheetBox": 0,
     "pass": true
@@ -543,10 +543,10 @@
   },
   "atlas": {
    "set": "3x",
-   "pages": 1,
-   "pageAreaPx": 4194304,
-   "allRegionsShare": 0.709,
-   "thisStillShare": 0.152
+   "pages": 2,
+   "pageAreaPx": 4718592,
+   "allRegionsShare": 0.697,
+   "thisStillShare": 0.202
   }
  },
  "failed": [],

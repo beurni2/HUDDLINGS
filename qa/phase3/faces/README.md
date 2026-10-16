@@ -2,51 +2,74 @@
 
 ## What the Faces check held
 
-Re-run after the merge with the full Faces check (`characters/sheetmatch/facematch.py`): each held feature by its
-place and its shape, each face held on its own head, every preset against one primary panel (`characters/dog/DECISIONS.md`
-107 to 119). `node runtime-web/lab/look.ts dog --faces` writes each preset's `match.json` and `beside.png` here.
+`node runtime-web/lab/look.ts dog --faces` with the full Faces check (`characters/sheetmatch/facematch.py`): each held
+feature by its place and its shape, each face held on its own head, every preset against one primary panel
+(`characters/dog/DECISIONS.md` 107 to 119). It writes each preset's `match.json` and `beside.png` here.
 
-- Pass (6): neutral, happy, surprised, curious and shy (their panels turn the head, so the eyes are held by their
-  spacing and shapes: Q27), listening (nothing held: judged by eye, its head held).
-- Fail (11), each on a measured difference the next round redraws:
-  - laughing, singing, ticklish: eye.L's crescent is a thinner band than the sheet's (shape).
-  - content, tender, blissful, proud: the smile's left end is short and its outline differs from Content's.
-  - excited: both mouth corners; the panel's open mouth is wider than the rest mouth.
-  - mischievous, sly: the wink is on the right eye, where Cheeky closes the left.
-  - sleepy: the closed arcs' shape against the master Sleepy panel.
-  - The head gate reads 2.33 pt for the crescent faces' eyes, inside its 2.8 pt limit.
+All 17 presets pass, by their drawings (DECISIONS 141 to 149); no threshold was moved:
 
-## Seventeen presets, fourteen faces
+| Preset | Primary | Held anchors (pt off, gate 2.8) | Shapes (area ratio / IoU) |
+| --- | --- | --- | --- |
+| neutral | master Happy | eyes 1.08, 1.2 | eyes x0.99/0.90, x1.01/0.89 |
+| happy | master Happy | eyes 1.08, 1.2; mouth 1.62, 1.4 | eyes x0.99/0.90, x1.01/0.89; mouth x0.71/0.71 |
+| excited | master Excited | eyes 0.55, 0.21; mouth 1.46, 0.88 | eyes x1.04/0.87, x1.03/0.89; mouth x0.91/0.83 |
+| laughing | master Laughing | eyes 0.46, 0.2; mouth 1.64, 1.24 | eyes x0.98/0.85, x0.97/0.90; mouth x0.91/0.90 |
+| curious | master Curious (turned) | eyes' spacing 0.91 | eyes x1.07/0.88, x0.85/0.83 |
+| surprised | expression Surprised | eyes 0.91, 1.57; mouth 1.36, 0.78 | eyes x1.04/0.82, x1.05/0.82; mouth x0.99/0.90 |
+| shy | expression Shy (turned) | eyes' spacing 1.6 | eyes x1.06/0.85, x0.89/0.85 |
+| proud | master Content | eyes 0.97, 1.2; mouth 0.5, 1.15 | eyes x1.12/0.87, x1.05/0.89; mouth x0.64/0.58 |
+| mischievous | master Cheeky | eyes 0.74, 0.19; mouth 1.67, 2.2 | eyes x1.01/0.88, x1.07/0.85; mouth x0.75/0.74 |
+| content | master Content | eyes 0.97, 1.2; mouth 0.5, 1.15 | eyes x1.12/0.87, x1.05/0.89; mouth x0.64/0.58 |
+| sleepy | master Sleepy (turned) | eyes' spacing 2.05 | eyes x0.97/0.83, x0.93/0.87 |
+| listening | Lifted slightly | nothing (judged by eye) | none |
+| tender | master Content | mouth 0.5, 1.15 | mouth x0.64/0.58 |
+| singing | master Laughing | eyes 0.46, 0.19 | eyes x0.98/0.85, x0.97/0.90 |
+| blissful | master Content | eyes 0.97, 1.2; mouth 0.5, 1.15 | eyes x1.12/0.87, x1.05/0.89; mouth x0.64/0.58 |
+| ticklish | master Laughing | eyes 0.46, 0.2; mouth 1.64, 1.24 | eyes x0.98/0.85, x0.97/0.90; mouth x0.91/0.90 |
+| sly | master Cheeky | eyes 0.74, 0.19; mouth 1.67, 2.2 | eyes x1.01/0.88, x1.07/0.85; mouth x0.75/0.74 |
 
-Three pairs draw the same still: laughing and ticklish, mischievous and sly, content and blissful. What tells each
-pair apart is timing or a level not keyed yet: ticklish's bounce, sly's glance aside after the wink, blissful's closed
-eyes opening to the crescents (phase 4), and blissful's blush at 70% (next round). Shy differs from neutral only by its
-ears turned 3° in, since its blush at 80% and its gaze down are not keyed yet.
+Every face holds its head (the nose 0.65 to 0.68 pt off, the eyes' middle 2.0 pt at most, on sleepy).
+
+## The blush's levels
+
+Every view's blush is drawn at the reference level, its core the full printed pink, and rests at alpha 0.368
+(DECISIONS 145). Fitted by `characters/sheetmatch/match.py`'s own blush fit: the six rest views 0.348 to 0.35 (the
+resting level 0.35), shy 0.806 and 0.796 (asked 0.8), blissful 0.698 and 0.697 (asked 0.7).
+
+## Seventeen presets, fifteen faces
+
+Two pairs draw the same still: laughing and ticklish, mischievous and sly. What tells each pair apart is timing:
+ticklish's bounce and sly's glance aside after the wink (phase 4). Content and blissful now differ by blissful's blush
+at 70%.
 
 ## Read by eye
 
-Neutral, happy, laughing, surprised, content, sleepy, proud and singing read as their panels. Curious reads alert more
-than inquisitive: it has the perked ear and raised brows but no head tilt (phase 4). Excited reads close to happy: its
-open mouth is narrower than the panel's and its ears turn only 10° out. Listening does not read as lifted: a turn about
-the root cannot raise the ear as Lifted slightly does (DECISIONS 132). Shy reads as neutral, and tender's half-lid reads
-a little deadpan at phone size. Nothing reads as sad, angry or drooped.
+Every face reads as its panel. The lifted ears stand out above the crown as Lifted slightly draws them, so listening
+now reads as listening; on excited, surprised, proud and singing they change the silhouette more than those panels
+do, whose ears hang (the table lifts them). Shy reads as blushing; its gaze down and tilt are phase 4's. Curious reads
+alert more than inquisitive without its tilt and glance up. Tender's half-lid reads drowsy more than warm. Nothing reads
+as sad, angry or drooped.
 
 ## Files
 
-- `sheet.png`: the 17 presets drawn now, each beside its primary panel at the panel's scale, labelled. Each cell is
-  the panel's frame grown across and up to hold the whole render (the perked ear, the stars), the panel padded with
-  white. `python3 qa/phase3/faces/sheet.py build/stills/dog/faces qa/phase3/faces/sheet.png`.
+- `sheet.png`: the 17 presets drawn now, each beside its primary panel (model.json's) at the panel's scale, labelled.
+  Each cell is the panel's frame grown across and up to hold the whole render (a raised ear, the stars), the panel
+  padded with white. `python3 qa/phase3/faces/sheet.py build/stills/dog/faces qa/phase3/faces/sheet.png`.
 - `<preset>/beside.png` and `match.json`: the Faces check on each face clip's still, made by
-  `node runtime-web/lab/still.ts --species dog --still face_<preset> --ppp 3 --out build/stills/dog/faces/<preset>` and
-  `python3 characters/sheetmatch/facematch.py dog --still build/stills/dog/faces/<preset> --out qa/phase3/faces/<preset>`.
-- `states.png`: the states no preset's still shows (peek, the yawn, the pant, the wink and the perked ear on the
-  other side, raised brows over the wide eyes, the half-lid). `node qa/phase3/faces/states.ts build/stills/dog/states`,
-  then `python3 qa/phase3/faces/sheet.py states build/stills/dog/states qa/phase3/faces/states.png`.
-- `perked.png`: One ear perked levelled and scaled by its brows, the two half and half, and the render (DECISIONS 133).
-  `python3 qa/phase3/faces/perked.py build/stills/dog/faces/curious qa/phase3/faces/perked.png`.
+  `node runtime-web/lab/look.ts dog --faces`.
+- `states.png`: the states no preset's still shows (peek, the yawn, the pant, the wink and the perked ear on the dog's
+  right, a lifted ear beside a perked one, raised brows over the wide eyes, the half-lid).
+  `node qa/phase3/faces/states.ts build/stills/dog/states`, then
+  `python3 qa/phase3/faces/sheet.py states build/stills/dog/states qa/phase3/faces/states.png`.
+- `perked.png`: One ear perked levelled and scaled by its brows, the two half and half, and the render (DECISIONS 133,
+  147: no crease in the temple). `python3 qa/phase3/faces/perked.py build/stills/dog/faces/curious qa/phase3/faces/perked.png`.
+- `lifted.png`: Neutral and Lifted slightly laid on the rest front and on listening by the head, the two half and half,
+  and the render (DECISIONS 146); `--grid` draws the placement guide the lifted ear's nodes were read off.
+  `python3 qa/phase3/faces/lifted.py build/stills/dog/front build/stills/dog/faces/listening qa/phase3/faces/lifted.png`.
 - `brows.json` and `brows.png`: the sheets' brows measured by `brows.py`, the tilt the R3 brow guard holds to
   (DECISIONS 131).
 - `r3-plants.txt`: the R3 guards (`characters/dog/test/faces.test.ts`) run on a copy of the committed tree with a fault
   planted in the source each time (an open mouth's lip ends bent below its centre, the neutral brow's inner end below
-  its outer, shy's ear turned 12° in), then with none. `python3 qa/phase3/faces/plants.py qa/phase3/faces/r3-plants.txt`.
-- `atlas.json`: the atlas page shares before and after the face states (DECISIONS 139).
+  its outer, shy's ear turned 12° in, listening's lifted ear turned 12° out, curious without its temple's head line),
+  then with none. `python3 qa/phase3/faces/plants.py qa/phase3/faces/r3-plants.txt`.
+- `atlas.json`: the atlas page shares before and after the face states, and with round 2's (DECISIONS 139, 147).

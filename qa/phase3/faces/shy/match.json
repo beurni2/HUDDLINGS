@@ -104,8 +104,8 @@
     "eye.L": {
      "record": [132.75, 96.04],
      "held": false,
-     "found": [129.27, 102.42],
-     "errPt": 5.1,
+     "found": [129.28, 102.43],
+     "errPt": 5.11,
      "offsetPt": [-3.15, 4.02],
      "pass": true,
      "note": "reported: the panel turns the head, so the pair is held by its spacing and the eyes on the head"
@@ -115,7 +115,7 @@
     "eyes": {
      "held": true,
      "recordPt": [46.23, -0.01],
-     "foundPt": [47.83, 0.03],
+     "foundPt": [47.83, 0.04],
      "errPt": 1.6,
      "pass": true
     }

@@ -199,7 +199,7 @@
     "heldTo": "#FFF4E8",
     "heldBy": "palette.fur",
     "deltaE2000": 0.0,
-    "pixels": 13205,
+    "pixels": 13210,
     "pass": true
    },
    "furShade": {
@@ -288,12 +288,12 @@
   "placeThresholdPt": 2.8,
   "cheeks": [
    {
-    "centrePx": [67.77, 123.11],
-    "centrePt": [60.03, -84.64],
-    "level": 0.332,
-    "peak": "#FCDED2",
-    "coreColour": "#F7B3A6",
-    "coreDeltaE2000": 0.0,
+    "centrePx": [67.64, 123.11],
+    "centrePt": [60.13, -84.64],
+    "level": 0.35,
+    "peak": "#FCDDD1",
+    "coreColour": "#F6B3A6",
+    "coreDeltaE2000": 0.21,
     "levelPass": true,
     "sheetBox": 0,
     "pass": true
@@ -445,10 +445,10 @@
   },
   "atlas": {
    "set": "3x",
-   "pages": 1,
-   "pageAreaPx": 4194304,
-   "allRegionsShare": 0.709,
-   "thisStillShare": 0.106
+   "pages": 2,
+   "pageAreaPx": 4718592,
+   "allRegionsShare": 0.697,
+   "thisStillShare": 0.095
   }
  },
  "failed": [],

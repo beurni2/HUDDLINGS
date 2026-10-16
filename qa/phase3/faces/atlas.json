@@ -1,6 +1,7 @@
 {
-  "what": "the dog's atlas page shares: build/dev/dog/report.json's pageShare after node characters/build/build.ts dog, at the base and with the face library",
+  "what": "the dog's atlas page shares: build/dev/dog/report.json's pageShare after node characters/build/build.ts dog, at the base, with the face library, and with round 2's states (the lifted ear a side, head.line's three temple states, openWide)",
   "before": { "commit": "06ddf1a", "2x": { "pages": ["2048×2048"], "share": 0.303 }, "3x": { "pages": ["2048×2048"], "share": 0.678 }, "small": { "pages": ["1024×1024"], "share": 0.307 } },
   "after": { "2x": { "pages": ["2048×2048"], "share": 0.317 }, "3x": { "pages": ["2048×2048"], "share": 0.709 }, "small": { "pages": ["1024×1024"], "share": 0.322 } },
-  "bytes3x": { "rgba": 16777216, "budget": 25165824 }
+  "round2": { "2x": { "pages": ["2048×2048"], "share": 0.35 }, "3x": { "pages": ["2048×2048", "2048×256"], "share": 0.697 }, "small": { "pages": ["1024×1024"], "share": 0.355 } },
+  "bytes3x": { "rgba": 16777216, "round2Rgba": 18874368, "budget": 25165824 }
 }
