@@ -762,6 +762,12 @@ const NOSE_FOOT: P = [-67, -88.4];
 /** How much smaller the far eye is than the near one, across (its open eye's 6.6 pt half-width against 9.5). */
 const FAR = EYES.R.rx / EYES.L.rx;
 /**
+ * How much lighter the far eye's lash bands and squeeze are than the near one's (DECISIONS 202): as the far eye's own
+ * lines are (its rim's top 1 pt to the near one's 1.2, its half-lid's lash 1.6 to 1.9), and as Soft landing draws its
+ * far crescent, 0.81 as thick as its near one (3.3 px of dark to 4.1, measured column by column on the panel).
+ */
+const WEIGHT = 0.84;
+/**
  * Each eye's crescents and lids lean (degrees, clockwise): 2.5° outward from the muzzle's level (7.5°), the near eye's
  * toward the viewer's right and the far eye's toward the left, so both lie as the front's pair do, a touch lower at
  * their outer ends, as Soft landing lays its crescents along the turned face. Laid along one lean, the far lid ran down
@@ -774,21 +780,23 @@ const LID_TILT = { L: 10, R: 5 };
  * the front's lash bands (DECISIONS 130), placed from the open eye's centre as the front places its own (the crescent
  * 2.35 pt lower and 1.9 pt further out, the closed lid 2 pt lower and 1.6 out, the wink at the open eye's height), out
  * shortened on the far eye, and as wide as each eye: the near band the front's 17.6 pt, the far one shortened with its
- * eye; the half-lid, the wide eye and the peek the open eye's own spec changed as the front changes its own.
+ * eye; each at the front's weight, the master sheet's even 5 pt band with round ends (141, 202: the crescent 5 pt, the
+ * closed lid and the wink 4.8), the far eye's lighter as its own lines are (WEIGHT); the half-lid, the wide
+ * eye and the peek the open eye's own spec changed as the front changes its own.
  */
 function lidOf(state: LidState, side: "L" | "R"): TurnedEyeLid {
-  const spec = EYES[side], near = side === "L", k = near ? 1 : FAR, out = near ? 1 : -FAR;
+  const spec = EYES[side], near = side === "L", k = near ? 1 : FAR, out = near ? 1 : -FAR, w = near ? 1 : WEIGHT;
   const band = (o: number, down: number, b: Omit<LidBand, "centre" | "tilt" | "noseward">): TurnedEyeLid =>
     ({ band: { centre: [spec.centre[0] + out * o, spec.centre[1] + down], tilt: LID_TILT[side], noseward: spec.noseward, ...b } });
   switch (state) {
     case "happy":
-      return band(1.9, 2.35, { width: 17.6 * k, rise: near ? 4.4 : 3.8, drop: near ? 1 : 0.8, thickness: near ? 3.3 : 3, ends: near ? [1.5, 0.8] : [1.3, 0.7],
+      return band(1.9, 2.35, { width: 17.6 * k, rise: near ? 4.4 : 3.8, drop: near ? 1 : 0.8, thickness: 5 * w, ends: [2.6 * w, 3.2 * w], fullness: 0.35,
         flick: { length: near ? 1.4 : 1.1, hook: -10 } });
     case "closed":
-      return band(1.6, 2, { width: 17 * k, rise: near ? -3 : -2.6, drop: 0, thickness: near ? 3 : 2.7, ends: near ? [1.3, 0.8] : [1.2, 0.7],
+      return band(1.6, 2, { width: 17 * k, rise: near ? -3 : -2.6, drop: 0, thickness: 4.8 * w, ends: [2.4 * w, 2.2 * w], fullness: 0.35,
         flick: { length: near ? 1.3 : 1, hook: -30 } });
     case "wink":
-      return band(0.5, 0.6, { width: 17.6 * k, rise: near ? 4 : 3.5, drop: near ? -1.4 : -1.1, thickness: near ? 3.3 : 3, ends: near ? [1.5, 0.8] : [1.3, 0.7],
+      return band(0.5, 0.6, { width: 17.6 * k, rise: near ? 4 : 3.5, drop: near ? -1.4 : -1.1, thickness: 4.8 * w, ends: [2.4 * w, 2.4 * w], fullness: 0.35,
         flick: { length: near ? 1.8 : 1.4, hook: -75 } });
     // The upper lid closed over about two fifths of the eye, as the front's: its middle 1.4 pt above the middle of an
     // eye 9.2 pt tall, its ends 3.2 pt above it where they meet the ball's sides, each eye's grown with its height; a
@@ -799,11 +807,12 @@ function lidOf(state: LidState, side: "L" | "R"): TurnedEyeLid {
       return { spec, lid: { level: -3.2 * s, bow: 1.8 * s, tilt: LID_TILT[side], lash: near ? 1.9 : 1.6, overhang: near ? 0.5 : 0.4, shine: { at: near ? [2.7, 0] : [1.8, 0], r: near ? 1.4 : 1.1 } } };
     }
     // Huffy's flat lid (DECISIONS 153, 207), as the front's: shut, a hair lower in its middle than at its ends, 1.4 pt
-    // further out and 1.3 pt lower than the open eye's middle, the far one shortened and thinner with its eye; both
-    // level with the muzzle (7.5°), its ends level in the face's own frame as the front's are: leant outward as the
-    // crescents are (LID_TILT), the near lid's outer end dropped 0.7 pt and the shut pair read tired, not huffy.
+    // further out and 1.3 pt lower than the open eye's middle, at the front's weight (4.4 pt, a little lighter than the
+    // crescent), the far one shortened and lighter with its eye; both level with the muzzle (7.5°), its ends level in
+    // the face's own frame as the front's are: leant outward as the crescents are (LID_TILT), the near lid's outer end
+    // dropped 0.7 pt and the shut pair read tired, not huffy.
     case "flat": {
-      const b = band(1.4, 1.3, { width: 16.4 * k, rise: -1, drop: 0, thickness: near ? 4 : 3.4, ends: near ? [2.4, 1.7] : [2.1, 1.5], fullness: 0.45,
+      const b = band(1.4, 1.3, { width: 16.4 * k, rise: -1, drop: 0, thickness: 4.4 * w, ends: [2.6 * w, 1.8 * w], fullness: 0.45,
         flick: { length: near ? 1.2 : 0.9, hook: 10 } });
       return "band" in b ? { band: { ...b.band, tilt: threeQuarterLevel } } : b;
     }
@@ -862,8 +871,8 @@ export function turnedEyeSpec(state: "open" | "wide" | "peek" | "sparkle" | "eag
 /**
  * The squeeze on each eye (Q2, DECISIONS 202), the front's `>` `<` placed from each eye's open eye as the front places
  * its own, along the eye's lean: the near one the front's, the far one shortened across with its eye (its arms' run
- * across times FAR, their rise kept, so they open a little wider on screen) and drawn at the far eye's line weight,
- * 0.84 of the near one's, as its half-lid's lash is (1.6 pt to 1.9).
+ * across times FAR, their rise kept, so they open a little wider on screen); each at its eye's crescent weight, the near
+ * 5 pt and the far lighter as its own lines are (WEIGHT), so ticklish's `>` `<` and laughing's crescents weigh the same.
  */
 /** The muzzle's level (the line through the rest mouth's corners), the face's level for the R3 guards (DECISIONS 179). */
 const threeQuarterLevel = 7.5;
@@ -880,7 +889,7 @@ export function turnedSqueeze(side: "L" | "R"): Chevron {
   // dropping 36° and its upper rising 4°, and the pair no longer read as one squeeze.
   const tilt = SQUEEZE_TILT, t = (tilt * Math.PI) / 180, back = 8.8 * k, out = -spec.noseward;
   return { tip: [spec.centre[0] - out * back * Math.cos(t), spec.centre[1] - out * back * Math.sin(t)], tilt,
-    noseward: spec.noseward, length: [lu, ll], angle: [au, al], thickness: near ? 5 : 4.2, ends: near ? 4.3 : 3.6, bow: near ? 0.8 : 0.7, point: near ? 1 : 0.9 };
+    noseward: spec.noseward, length: [lu, ll], angle: [au, al], thickness: near ? 5 : 5 * WEIGHT, ends: near ? 4.3 : 4.3 * WEIGHT, bow: near ? 0.8 : 0.7, point: near ? 1 : 0.9 };
 }
 
 function eyeState(state: (typeof EYE_STATES)[number], side: "L" | "R", light: P): Piece {

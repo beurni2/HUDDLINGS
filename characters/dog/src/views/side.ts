@@ -691,7 +691,11 @@ export const landmarks: Record<string, P> = {
 // clipped to the head (rig.json), so every opening lies inside the head's outline, its front along the chin's line,
 // which head.line draws over it as the lower lip's edge. side.R is each drawn again in its facing (views/facing.ts).
 
-/** The profile's lash bands: placed from the open eye's centre as the front places its own, the band about as wide as the profile eye's opening. */
+/**
+ * The profile's lash bands: placed from the open eye's centre as the front places its own, the band about as wide as the
+ * profile eye's opening, at the front's weight (DECISIONS 141, 202): the master sheet's even band with round ends, the
+ * crescent 5 pt, the closed lid and the wink 4.8, as the profile's eye is the near one.
+ */
 function lidOf(state: LidState): TurnedEyeLid {
   const band = (out: number, down: number, b: Omit<LidBand, "centre" | "tilt" | "noseward">): TurnedEyeLid =>
     ({ band: { centre: [EYE.centre[0] + out, EYE.centre[1] + down], tilt: 0, noseward: EYE.noseward, ...b } });
@@ -699,11 +703,11 @@ function lidOf(state: LidState): TurnedEyeLid {
     // The crescent 2.6 pt below the open eye's centre and 1.3 pt back (the profile eye is taller than the front's: the
     // front's 2.35 grown with it), 14 pt across, the profile eye's 15.2 less its soft edge, its back end a little lower.
     case "happy":
-      return band(1.3, 2.6, { width: 14, rise: 4.2, drop: 1, thickness: 3.2, ends: [1.4, 0.8], flick: { length: 1.3, hook: -10 } });
+      return band(1.3, 2.6, { width: 14, rise: 4.2, drop: 1, thickness: 5, ends: [2.6, 3.2], fullness: 0.35, flick: { length: 1.3, hook: -10 } });
     case "closed":
-      return band(1.1, 2.2, { width: 13.4, rise: -2.8, drop: 0, thickness: 2.9, ends: [1.3, 0.8], flick: { length: 1.2, hook: -30 } });
+      return band(1.1, 2.2, { width: 13.4, rise: -2.8, drop: 0, thickness: 4.8, ends: [2.4, 2.2], fullness: 0.35, flick: { length: 1.2, hook: -30 } });
     case "wink":
-      return band(0.4, 0.6, { width: 14, rise: 3.8, drop: -1.2, thickness: 3.2, ends: [1.4, 0.8], flick: { length: 1.7, hook: -75 } });
+      return band(0.4, 0.6, { width: 14, rise: 3.8, drop: -1.2, thickness: 4.8, ends: [2.4, 2.4], fullness: 0.35, flick: { length: 1.7, hook: -75 } });
     // The three-quarter's half-lid (parts/turned.ts), over the same two fifths of the eye, so the lid never changes as
     // the head turns between the two; the catchlight on the iris just under the lash, its top tucked under it (Q28),
     // the tiny one below it (Q26).
@@ -712,9 +716,9 @@ function lidOf(state: LidState): TurnedEyeLid {
       return { spec: EYE, lid: { level: -3.2 * s, bow: 1.8 * s, tilt: 0, lash: 1.9, overhang: 0.5, shine: { at: [2.2, 0.1], r: 1.3 } } };
     }
     // Huffy's flat lid (DECISIONS 153, 207), as the front's: shut and level, a hair lower in its middle than at its ends,
-    // as wide as the profile's closed lid.
+    // as wide as the profile's closed lid, at the front's weight (4.4 pt, a little lighter than the crescent).
     case "flat":
-      return band(1.1, 1.3, { width: 13.4, rise: -1, drop: 0, thickness: 4.2, ends: [2.5, 1.7], fullness: 0.45, flick: { length: 1.1, hook: 10 } });
+      return band(1.1, 1.3, { width: 13.4, rise: -1, drop: 0, thickness: 4.4, ends: [2.6, 1.8], fullness: 0.45, flick: { length: 1.1, hook: 10 } });
   }
 }
 
@@ -756,7 +760,8 @@ export function profileEyeSpec(state: "open" | "wide" | "peek" | "sparkle" | "ea
 
 /**
  * The profile's squeeze (Q2, DECISIONS 202): the front's `>` `<` on the one eye, its point 7 pt in from the ball's middle
- * toward the nose, its arms' run across shortened to the profile eye's width (0.8 of the front's), their rise kept.
+ * toward the nose, its arms' run across shortened to the profile eye's width (0.8 of the front's), their rise kept; at
+ * the profile crescent's weight, the front's 5 pt.
  */
 export function profileSqueeze(): Chevron {
   const k = EYE.rx / 9.5;
@@ -766,7 +771,7 @@ export function profileSqueeze(): Chevron {
   };
   const [lu, au] = foreshorten(16.8, 14), [ll, al] = foreshorten(15.8, 26);
   return { tip: [EYE.centre[0] + EYE.noseward * 8.8 * k, EYE.centre[1]], tilt: 0, noseward: EYE.noseward, length: [lu, ll], angle: [au, al],
-    thickness: 4.8, ends: 4.1, bow: 0.8, point: 1 };
+    thickness: 5, ends: 4.3, bow: 0.8, point: 1 };
 }
 
 function eyeState(state: (typeof EYE_STATES)[number], light: P): Piece {
