@@ -3,7 +3,7 @@ still beside the expression panels it is judged against, its eyes and mouth
 held to its primary panel's by place and by shape, its face held to its head,
 and a beside image for the eyes of the agent and the founder.
 
-    python3 characters/sheetmatch/facematch.py dog --still <dir> --rest <dir> --out <dir> [--preset <name>]
+    python3 characters/sheetmatch/facematch.py dog --still <dir> --rest <dir> --out <dir> [--preset <name>] [--presets <json>]
 
 Reads a still of a face clip as runtime-web/lab/still.ts writes it (still.json,
 white.png, black.png, ids.png; the clip face_<preset> names the preset unless
@@ -74,9 +74,20 @@ by the face rules) and eyes' middle (each eye's parts' pixels in the ID pass,
 which no eye state moves, or its dark mark where the ID pass names no eye
 part) must be, within 3% of the head's width.
 
+The blush (docs/QUESTIONS.md Q25): each cheek's level, fitted exactly as
+match.py fits a view's (the still laid on its view's turnaround crop, each
+blush part's cheek fitted as refprep/palette.py fits the sheet's), held to the
+level the preset asks for in presets.ts, read from the build's
+build/dev/<species>/presets.json (--presets): within the sheet's resting spread
+(model.json's blush, 29 to 43%) where it names none, and within
+BLUSH_LEVEL_TOLERANCE of its level otherwise, a tolerance set from the fit's
+measured error (blushcal.py; DECISIONS.md 190). The blush part's own colour and
+each cheek in its own one of the sheet's blush boxes are held as match.py
+holds them. A still whose parts name no blush part fits no level and says so.
+
 A preset no panel judges (hungry, huffy) and a primary panel that holds
 nothing (the ear positions draw no face) are judged by eye beside the panels;
-the head is still held."""
+the head and the blush are still held."""
 import os
 import sys
 import traceback
@@ -100,6 +111,7 @@ from scipy import ndimage, signal  # noqa: E402
 
 import match  # noqa: E402  (puts characters/refprep on the path)
 import faces  # noqa: E402
+import measure  # noqa: E402
 
 sheets = match.sheets
 LANDMARK_SHARE = match.LANDMARK_SHARE  # of the head's width (L523)
@@ -125,6 +137,10 @@ HEAD_BOX_PT = (-70.0, -190.0, 70.0, -30.0)
 BESIDE_HEAD_PX = 400  # about how wide each head is drawn in beside.png, whatever its panel's size
 FEATURE_PARTS = {"eye": match.EYE_PARTS, "nose": ("nose*",), "mouth": match.MOUTH_PARTS}
 HEAD_PART = "head.base"
+# The blush: how far a cheek's fitted level may lie from the level its preset asks for (presets.ts), halfway between
+# the fit's worst error on cheeks keyed at known levels and the nearest two distinct levels the presets name, measured
+# by blushcal.py (DECISIONS.md 190). At rest (no level named) the cheek is held to model.json's resting spread instead.
+BLUSH_LEVEL_TOLERANCE = 0.05
 PAIRS = {"eyes": ("eye.R", "eye.L"), "mouth": ("mouth.R", "mouth.L")}  # what a turned panel holds by its spacing
 OUTLINED = ("eye.R", "eye.L", "mouth")  # the marks beside.png outlines
 
@@ -138,7 +154,10 @@ def thresholds(head_width):
             "pinReachShareOfHead": PIN_REACH_SHARE, "pinRounds": PIN_ROUNDS, "pinSettledPx": PIN_SETTLED_PX,
             "windowShareOfHead": WINDOW_SHARE,
             "subsamples": SUBSAMPLES, "softL": list(faces.SOFT_L), "endPx": faces.END_PX, "eyeMinPx": faces.EYE_MIN_PX,
-            "noseCorePx": faces.NOSE_CORE, "openChroma": faces.OPEN_CHROMA, "openHue": faces.OPEN_HUE, "openL": faces.OPEN_L}
+            "noseCorePx": faces.NOSE_CORE, "openChroma": faces.OPEN_CHROMA, "openHue": faces.OPEN_HUE, "openL": faces.OPEN_L,
+            "blushLevelTolerance": BLUSH_LEVEL_TOLERANCE, "blushMinPx": match.BLUSH_MIN_PX, "blushLightLMin": match.BLUSH_LIGHT_L_MIN,
+            "blushLightChromaMax": match.BLUSH_LIGHT_CHROMA_MAX, "blushLevelMin": match.BLUSH_LEVEL_MIN,
+            "blushPlaceShareOfHead": match.BLUSH_PLACE_SHARE, "blushDeltaE2000Max": match.DELTA_E_MAX}
 
 
 def face_roll(model):
@@ -506,6 +525,46 @@ def check_head(still, rest, model):
     return result, drawn
 
 
+def blush_asked(presets, preset):
+    """The blush level a preset asks for, from presets.ts's data (build/dev/<species>/presets.json): a level from 0 to
+    1, or None where it names none and the resting level holds."""
+    table = presets.get("PRESETS") if isinstance(presets, dict) else None
+    if not isinstance(table, dict) or preset not in table:
+        raise ValueError(f"the presets name no preset {preset!r} (presets.ts's PRESETS, in build/dev/<species>/presets.json)")
+    level = table[preset].get("blush")
+    if level is not None and not (isinstance(level, (int, float)) and 0 <= level <= 1):
+        raise ValueError(f"{preset}'s blush is {level!r}, not a level from 0 to 1 or null")
+    return level
+
+
+def check_blush(species, model, still, asked):
+    """Each cheek's level, fitted exactly as match.py fits a view's: the still laid on its view's turnaround crop as
+    match.py lays it, and match.check_blush, held to the resting spread where the preset names no level and within
+    BLUSH_LEVEL_TOLERANCE of its level otherwise. Each cheek is named by the blush part that covers most of it. With
+    what the beside image needs: each cheek's box on the crop's grid and the render there."""
+    names = [n for n in still.names if match.matches(n, match.BLUSH_PARTS)]
+    if not names:
+        return {"measured": False, "asked": asked, "note": "the still names no blush part, so no level is fitted: judged by eye",
+                "pass": True}, None
+    views = still.meta.get("views", {})
+    if views.get("body") != views.get("head"):
+        raise ValueError(f"the still's body is in {views.get('body')} and its head in {views.get('head')}: the blush is fitted on one view's crop")
+    frame = match.Frame(species, model, views["head"])
+    seen = still.mirrored() if frame.mirrored else still
+    grid = match.Grid(frame, seen)
+    render = match.Render(grid, frame)
+    result = match.check_blush(frame, grid, render, seen, asked, None if asked is None else BLUSH_LEVEL_TOLERANCE)
+    # The cheeks in check_blush's own order, each named by the blush part that covers most of it.
+    _, mask = match.masks_for(render, seen, match.BLUSH_PARTS)
+    boxes = []
+    for cheek, blob in zip(result["cheeks"], measure.components(mask, match.BLUSH_MIN_PX)):
+        cheek["part"] = max(names, key=lambda n: float(render.coverage[n][blob].sum()) if n in render.coverage else -1.0)
+        ys, xs = np.nonzero(blob)
+        boxes.append((cheek["part"], (int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1)))
+    result.update(measured=True, view=frame.view, crop=frame.rec["crop"], ptPerCropPx=frame.k)
+    return result, {"rgb": render.rgb, "boxes": sorted(boxes), "fur": frame.model["palette"]["fur"], "pink": frame.model["palette"]["blush"]}
+
+
 def preset_of(still, given):
     if given:
         return given
@@ -519,14 +578,30 @@ def load(still):
     return still if isinstance(still, match.Still) else match.Still.load(still)
 
 
-def check(species, still_dir, rest_dir, preset=None):
-    """The head, and every panel that judges the preset, its primary first. Returns the result and what the beside
-    image needs."""
+def presets_path(species):
+    """Where the build writes presets.ts's data (characters/build/build.ts)."""
+    return sheets.ROOT / "build" / "dev" / species / "presets.json"
+
+
+def load_presets(species, presets):
+    """presets.ts's data: as given, from a path, or from the build's development output."""
+    if isinstance(presets, dict):
+        return presets
+    path = Path(presets) if presets else presets_path(species)
+    if not path.is_file():
+        raise ValueError(f"no presets at {path}: the build writes them (node characters/build/build.ts {species}), or name them with --presets")
+    return json.loads(path.read_text())
+
+
+def check(species, still_dir, rest_dir, preset=None, presets=None):
+    """The head, the blush, and every panel that judges the preset, its primary first. presets is presets.ts's data,
+    or a path to it (default: the build's). Returns the result and what the beside image needs."""
     model = json.loads((sheets.ROOT / "characters" / species / "model.json").read_text())
     still, rest = load(still_dir), load(rest_dir)
     preset = preset_of(still, preset)
     if preset not in faces.PRESETS:
         raise ValueError(f"{preset!r} is not one of the spec's face presets")
+    asked = blush_asked(load_presets(species, presets), preset)
     head_width = float(model["proportions"]["headWidth"])
     tolerance = LANDMARK_SHARE * head_width
     views = still.meta.get("views", {})
@@ -537,6 +612,8 @@ def check(species, still_dir, rest_dir, preset=None):
     if rest.meta.get("views", {}).get("head") != "front":
         raise ValueError(f"the rest still's head is in the {rest.meta.get('views', {}).get('head')} view, not the front")
     result["headGate"], head = check_head(still, rest, model)
+    result["thresholds"]["blushRestingSpread"] = model["blush"]["restingSpread"]
+    result["blush"], cheeks = check_blush(species, model, still, asked)
     parts = []
     front = model["landmarks"]["front"]
     judged = [(pid, rec) for pid, rec in model["faceCrops"].items() if preset in rec["presets"]]
@@ -553,24 +630,44 @@ def check(species, still_dir, rest_dir, preset=None):
     primary = result["records"].get(result["primary"], {})
     for count in ("anchorsHeld", "spacingsHeld", "shapesHeld"):
         result[count] = primary.get(count, 0)
-    result["pass"] = result["headGate"]["pass"] and primary.get("pass", True)
+    result["pass"] = result["headGate"]["pass"] and result["blush"]["pass"] and primary.get("pass", True)
     if not result["records"]:
-        result["note"] = f"no panel judges {preset} (refmap/faces.json): it is judged by eye; the head is held"
+        result["note"] = f"no panel judges {preset} (refmap/faces.json): it is judged by eye; the head and the blush are held"
     elif "problem" not in primary and not held_count(result):
-        result["note"] = f"its primary panel holds nothing of {preset}: it is judged by eye beside it; the head is held"
+        result["note"] = f"its primary panel holds nothing of {preset}: it is judged by eye beside it; the head and the blush are held"
     result["summary"] = summary(result)
-    return result, {"head": head, "panels": parts}
+    return result, {"head": head, "panels": parts, "blush": cheeks}
 
 
 def held_count(result):
     return result["anchorsHeld"] + result["spacingsHeld"] + result["shapesHeld"]
 
 
+def blush_text(blush):
+    """The blush in a few words: each cheek's fitted level and what it was held to, or why it was not."""
+    if not blush["measured"]:
+        return "no blush part, its level judged by eye"
+    held = (f"rest {blush['restingSpread'][0]:g} to {blush['restingSpread'][1]:g}" if blush.get("asked") is None
+            else f"{blush['asked']:g} asked, within {blush['tolerance']:g}")
+    cheeks = []
+    for c in blush["cheeks"]:
+        side = c.get("part", "cheek").replace("blush.", "")
+        level = f"{side} {c['level']:.3f}" if "level" in c else f"{side} unfitted"
+        if c.get("coreDeltaE2000", 0) > match.DELTA_E_MAX:
+            level += f" (its pink ΔE {c['coreDeltaE2000']})"
+        if "placeProblem" in c:
+            level += " (off the sheet's blush boxes)"
+        cheeks.append(level)
+    text = ("blush held (" if blush["pass"] else "blush FAILS (") + (", ".join(cheeks) or "no cheek") + f"; {held})"
+    return text + (f", {blush['problem']}" if "problem" in blush else "")
+
+
 def summary(result):
-    """One line: the verdict, what was held on the primary panel (or why nothing could be measured), and the head."""
+    """One line: the verdict, what was held on the primary panel (or why nothing could be measured), the head and the
+    blush."""
     head = result["headGate"]["rows"]
     errs = ", ".join(f"{n} {r['errPt']} pt" if "errPt" in r else f"{n} not found" for n, r in head.items())
-    head_text = ("head held (" if result["headGate"]["pass"] else "head FAILS (") + errs + ")"
+    head_text = ("head held (" if result["headGate"]["pass"] else "head FAILS (") + errs + "); " + blush_text(result["blush"])
     verdict = "pass" if result["pass"] else "FAIL"
     if not result["records"]:
         return f"{verdict}: no panel, judged by eye; {head_text}"
@@ -674,9 +771,45 @@ def panel_rows(panel, row, rgb, marks):
     return [strip(body.width, line, colour), body]
 
 
+def blush_row(result, cheeks):
+    """Each cheek as the fit saw it, on the turnaround crop's grid: the render round its blush part, then a chip of the
+    peak the fit took and one of the level asked for (the printed pink over the printed fur at that level; at rest,
+    the resting spread's two ends), so a level can be judged by eye beside its number."""
+    blush = result["blush"]
+    if cheeks is None:
+        return [strip(900, f"blush: {blush_text(blush)}", (0, 0, 0))]
+    fur, pink = (sheets.hex_to_rgb(cheeks[k]).astype(float) for k in ("fur", "pink"))
+    at = lambda level: np.round(fur + level * (pink - fur)).astype(np.uint8)  # noqa: E731
+    wanted = [at(level) for level in (blush["restingSpread"] if blush.get("asked") is None else [blush["asked"]])]
+    zoom, chip, gap = 8, 64, 8
+    tiles = []
+    for (part, (x0, y0, x1, y1)), cheek in zip(cheeks["boxes"], sorted(blush["cheeks"], key=lambda c: c["part"])):
+        m = 4
+        crop = cheeks["rgb"][max(y0 - m, 0):y1 + m, max(x0 - m, 0):x1 + m]
+        image = Image.fromarray(match.upscale(crop, zoom))
+        swatches = [sheets.hex_to_rgb(cheek["peak"]).astype(np.uint8)] if "peak" in cheek else []
+        tile = Image.new("RGB", (image.width + gap + chip * (len(swatches) + len(wanted)) + gap, max(image.height + 18, chip + 30)), "white")
+        tile.paste(image, (0, 0))
+        draw = ImageDraw.Draw(tile)
+        x = image.width + gap
+        for colour, name in [(c, "fitted") for c in swatches] + [(c, "asked" if blush.get("asked") is not None else "rest") for c in wanted]:
+            draw.rectangle([x, 0, x + chip - 4, chip], fill=tuple(int(v) for v in colour), outline=(120, 120, 120))
+            draw.text((x, chip + 4), name, fill=(60, 60, 60))
+            x += chip
+        draw.text((2, image.height + 3), f"{part} {cheek['level']:.3f}" if "level" in cheek else f"{part} unfitted", fill=(40, 40, 40))
+        tiles.append(tile)
+    body = Image.new("RGB", (sum(t.width + gap for t in tiles) or 1, max((t.height for t in tiles), default=1)), "white")
+    x = 0
+    for tile in tiles:
+        body.paste(tile, (x, 0))
+        x += tile.width + gap
+    colour = (0, 0, 0) if blush["pass"] else (200, 0, 30)
+    return [strip(max(body.width, 900), f"blush on the {blush['view']} crop's grid: {blush_text(blush)}", colour), body]
+
+
 def beside_image(result, drawn, path):
-    """The verdict, the face on its head, then each panel, the primary first."""
-    rows = head_row(result, drawn["head"])
+    """The verdict, the face on its head, the blush, then each panel, the primary first."""
+    rows = head_row(result, drawn["head"]) + blush_row(result, drawn.get("blush"))
     for panel, row, rgb, found, marks in drawn["panels"]:
         rows += panel_rows(panel, row, rgb, marks)
     head = Image.new("RGB", (max(r.width for r in rows), 22), "white")
@@ -698,12 +831,13 @@ def main(argv):
     parser.add_argument("--rest", required=True)
     parser.add_argument("--out", required=True)
     parser.add_argument("--preset")
+    parser.add_argument("--presets", help="presets.ts's data (default: build/dev/<species>/presets.json, which the build writes)")
     args = parser.parse_args(argv)
     out = Path(args.out)
     written = out / "match.json"
     try:
         written.unlink(missing_ok=True)
-        result, drawn = check(args.species, args.still, args.rest, args.preset)
+        result, drawn = check(args.species, args.still, args.rest, args.preset, args.presets)
         out.mkdir(parents=True, exist_ok=True)
         beside_image(result, drawn, out / "beside.png")
         sheets.write_json(written, result)
