@@ -2,7 +2,8 @@
 // line, its topknot, its ear paint, its paws' toe lines and its tag from characters/dog/src/parts/; the line darkens and fills out from where the light
 // falls to where the part meets the ground, on warm ladders with no grey; the eye's white is a crescent as wide as
 // its view asks on its outer side and none on the other, under one catchlight; and the topknot and the ears keep
-// their counts (3 to 5 curls, 4 to 7 locks over 2 or 3 clumps).
+// their counts (3 to 5 curls, 4 to 7 locks over 2 or 3 clumps, or over a hem of 3 or 4 tips where the view builds the
+// ear's edge, DECISIONS 215). A sole that takes the fur pass's ground term holds 216's pin instead of the darkest.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -11,7 +12,7 @@ import { LIMITS } from "../../draw/lint.ts";
 import type { Paint } from "../../draw/paint.ts";
 import { earFur } from "../src/parts/ear.ts";
 import { eye, eyeGeometry, type EyeSpec } from "../src/parts/eye.ts";
-import { litRibbons, type LitSpan } from "../src/parts/lines.ts";
+import { litRibbons, SOLE, type LitSpan } from "../src/parts/lines.ts";
 import { topknot, type Curl } from "../src/parts/topknot.ts";
 import { toes } from "../src/parts/paw.ts";
 import { tagPaint } from "../src/parts/tag.ts";
@@ -77,6 +78,11 @@ test("the line is lightest and thinnest where the light falls, darkest and fulle
   assert.ok(l[1] <= 1.45, `the lit line swells to ${l[1]} pt`);
   assert.ok(g[0] >= 1.55, `the ground line thins to ${g[0]} pt`);
   for (const w of [...l, ...g]) assert.ok(w >= LIMITS.outer[0] && w <= LIMITS.outer[1], `a drawn width ${w} is outside the outer line's band`);
+  // A sole whose view asks for the fur pass's ground term (DECISIONS 216, replacing 74's and 79's soles-darkest pin
+  // there) is the sole tone under its middle, lighter than the darkest, and eases out toward its ends.
+  const sole = tones(litRibbons(ball, [{ from: [8, -2], to: [-8, -2], ground: "sole" }], "sole").svg, LINES.cream);
+  assert.equal(Math.max(...sole), Math.round(SOLE.depth * 10), `the sole's tones ${sole} do not peak at its own tone`);
+  assert.ok(Math.max(...sole) < Math.min(...groundTones), "the sole is as dark as the ground line it replaces");
 });
 
 test("a span's place deepens the line whatever the light, and a span on the tan takes the tan ladder", () => {

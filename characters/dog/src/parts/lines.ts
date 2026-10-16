@@ -23,8 +23,8 @@ export type SpanEnd = "free" | "join" | "under";
 export interface LitSpan {
   from: At;
   to: At;
-  /** The ladder: round the cream fur (the default) or on the tan. */
-  on?: "cream" | "tan";
+  /** The ladder: round the cream fur (the default) or on the tan, along the span or at each point (a cheek's line runs from the tan over the ear onto the cream). */
+  on?: "cream" | "tan" | ((p: P) => "cream" | "tan");
   /** How deep the place lies whatever the light, 0 to 1, along the span or at each point: a floor under the light's own depth (1 is the sole's). */
   under?: number | ((p: P) => number);
   /** How long each end tapers, in points: both ends alike, or [its start, its end]. With `ends`, how long a free end tapers (1.8 pt when left out). */
@@ -67,11 +67,11 @@ export const UNDER_RUN = 1.5;
 export const CONTACT_DEPTH = 0.5;
 /**
  * Under a paw's sole (DECISIONS 216): the ground's dark only under the middle 60% of the sole, easing out over the
- * 20% at each end; there the line is tone 8 (L* 49, the sheet's front soles 51 ± 5.5 and hind soles 44 ± 3.6) and
+ * 20% at each end; there the line is tone 7 (L* 51.5, the sheet's front soles 51 ± 5.5 and hind soles 44 ± 3.6) and
  * 1.45 pt; elsewhere round the paw it is the light's own tone, from 1.2 pt where lit; and it wobbles ±15% along its
  * length, as the sheet's paw lines vary (the founder's "a lighter, warmer, varied line").
  */
-export const SOLE = { depth: 0.8, width: [1.2, 1.45] as [number, number], middle: 0.6, wobble: 0.15 };
+export const SOLE = { depth: 0.7, width: [1.2, 1.45] as [number, number], middle: 0.6, wobble: 0.15 };
 
 /** How deep a point of an edge lies, 0 to 1, from the light and the ground. */
 function depth(p: P, out: P, light: P): number {
@@ -217,21 +217,22 @@ export function litRibbons(shape: Shape, spans: LitSpan[], where: string, o: Lit
     const bleed = o.crisp && o.reach !== undefined ? 2 * (o.blur ?? SOFT) : 0;
     const left = centre.map((c, i) => v.add(c, v.mul(out[i]!, (w[i]!.shown * twice) / 2 + bleed)));
     const right = centre.map((c, i) => v.sub(c, v.mul(out[i]!, (w[i]!.shown * twice) / 2)));
-    const family = LINES[span.on ?? "cream"];
-    const tone = d.map((di) => Math.max(0, Math.min(10, Math.round(di * 10))));
+    // Each point's colour: its depth's tone on its ladder (a span may cross from the tan onto the cream).
+    const ladder = (p: P) => LINES[(typeof span.on === "function" ? span.on(p) : span.on) ?? "cream"];
+    const colour = d.map((di, i) => ladder(pts[i]!)[Math.max(0, Math.min(10, Math.round(di * 10)))]!);
     let a = 0;
     while (a < pts.length) {
       let b = a;
-      while (b + 1 < pts.length && tone[b + 1] === tone[a]) b++;
+      while (b + 1 < pts.length && colour[b + 1] === colour[a]) b++;
       const i0 = Math.max(0, a - 1), i1 = Math.min(pts.length - 1, b + 1);
-      svg += `<path fill="${family[tone[a]!]}" d="${poly([...left.slice(i0, i1 + 1), ...right.slice(i0, i1 + 1).reverse()])}"/>`;
+      svg += `<path fill="${colour[a]}" d="${poly([...left.slice(i0, i1 + 1), ...right.slice(i0, i1 + 1).reverse()])}"/>`;
       a = b + 1;
     }
     // A joined end ends round, so it meets the other line at any angle with no notch: clipped, a disc as deep as the line shows; unclipped, as wide as the line.
     span.ends?.forEach((e, i) => {
       if (e !== "join") return;
       const j = i === 0 ? 0 : pts.length - 1;
-      svg += `<path fill="${family[tone[j]!]}" d="${disc(centre[j]!, (w[j]!.shown * twice) / 2)}"/>`;
+      svg += `<path fill="${colour[j]}" d="${disc(centre[j]!, (w[j]!.shown * twice) / 2)}"/>`;
     });
     const full = w.filter((x) => x.e >= 1).map((x) => x.full);
     const shown = full.length ? full : [Math.max(...w.map((x) => x.shown))];

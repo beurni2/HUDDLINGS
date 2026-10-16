@@ -2,14 +2,16 @@
 // that changes nothing until a view asks for it, and each does what its decision promises when one does. The line
 // (parts/lines.ts): one span per edge, tapering only at a free end, joined ends at full width with a round cap, covered
 // ends running on under their part, contact lines as dark in both facings, the ground's dark under the middle of the
-// sole only, and a crisp outer edge on head.line.
+// sole only, and a crisp outer edge on head.line. The paws' bun and soft toe lines (paw.ts), the ears' edge
+// (ear.ts), the head's fur (headfur.ts), the markings' brushed edge (marking.ts) and the ground shadow (shadow.ts).
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { Resvg } from "@resvg/resvg-js";
 import { PNG } from "pngjs";
 import { arc, fracAt, mirrorX, smooth, spanPoints, v, type Node, type P, type Shape } from "../../draw/geom.ts";
 import { CONTACT_DEPTH, FREE_TAPER, litEdge, litRibbons, SOLE, UNDER_RUN, type LitSpan } from "../src/parts/lines.ts";
-import { LINES } from "../src/palette.ts";
+import { BUN, bun, SOFT_TOES, toes, type BunSpec } from "../src/parts/paw.ts";
+import { C, LINES } from "../src/palette.ts";
 
 /** A plump part sitting on the ground, typed clockwise from its top: its lit upper left, its sole along the ground. */
 const paw = smooth([[0, -30, "top"], [14, -24], [17, -12, "right"], [14, -1.2], [0, 0, "sole"], [-14, -1.2], [-17, -12, "left"], [-14, -24]] as Node[]);
@@ -75,13 +77,18 @@ test("under a paw's sole the ground's dark lies only under the middle 60%, light
   const after = litRibbons(paw, [{ ...sole, ground: "sole" }], "after");
   const middle = Math.round(SOLE.depth * 10);
   assert.ok([-5, 0, 5].every((x) => toneAt(after.svg, x).every((t) => t === middle)), `the sole's middle is tone ${toneAt(after.svg, 0)}, not ${middle}`);
-  assert.ok([14.5, -14.5].every((x) => Math.max(...toneAt(after.svg, x)) < middle), `the sole's ends (${toneAt(after.svg, 14.5)}, ${toneAt(after.svg, -14.5)}) are as dark as its middle`);
+  // Toward the sole's ends the ground's dark eases out, leaving the light's own tone: lighter than before at both ends,
+  // and on the lit side lighter than the sole's middle (on the side away from the light the light rule alone runs about
+  // as deep as the sole's middle).
+  for (const x of [15.5, -15.5])
+    assert.ok(Math.max(...toneAt(after.svg, x)) < Math.min(...toneAt(before, x)), `at x ${x} the sole's end is tone ${toneAt(after.svg, x)}, as dark as before (${toneAt(before, x)})`);
+  assert.ok(Math.max(...toneAt(after.svg, -15.5)) < middle, `the lit end of the sole is tone ${toneAt(after.svg, -15.5)}, as dark as its middle`);
   const [lo, hi] = after.lines[0]!.drawn;
   assert.ok(hi <= SOLE.width[1] * (1 + SOLE.wobble) + 1e-9 && hi > SOLE.width[1], `the sole's line peaks at ${hi} pt`);
   assert.ok(lo >= 1.2 - 1e-9, `the line round the paw thins to ${lo} pt, under the outer band`);
-  // The ground's dark never reaches the paw's sides.
-  const side = litRibbons(paw, [{ from: "right", to: [15.6, -4], ground: "sole" }], "side");
-  assert.ok(tonesOf(side.svg, LINES.cream).every((t) => t < Math.round(SOLE.depth * 10)));
+  // Up the paw's side, off the ground, the line is the light rule's alone: as it is with no ground under it at all.
+  const up = (s: LitSpan) => tonesOf(litRibbons(paw, [s], "side").svg, LINES.cream);
+  assert.deepEqual(up({ from: "right", to: [16.6, -8], ground: "sole" }), up({ from: "right", to: [16.6, -8] }));
 });
 
 /** head.line round a ring, rendered alone on transparent at 12 px/pt, and its alpha along a ray out through its edge. */
@@ -113,4 +120,52 @@ test("a crisp head.line keeps the silhouette's edge sharp: its outer alpha rises
   const profile = edgeProfile(true);
   assert.ok(profile[18]! > 0.95, `the crisp line's alpha on the path itself is ${profile[18]}`);
   assert.ok(profile[21]! > 0.9, `the crisp line's alpha 0.1 pt inside its outer edge is ${profile[21]}`);
+});
+
+// sRGB to CIE L*, and a colour laid over another at an opacity, for the toe lines against the outline.
+function lightness(hex: string): number {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((u) => (u <= 0.04045 ? u / 12.92 : ((u + 0.055) / 1.055) ** 2.4)) as [number, number, number];
+  const Y = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return Y > 216 / 24389 ? 116 * Math.cbrt(Y) - 16 : (Y * 24389) / 27;
+}
+const over = (top: string, under: string, opacity: number) =>
+  `#${[1, 3, 5].map((i) => Math.round(parseInt(top.slice(i, i + 2), 16) * opacity + parseInt(under.slice(i, i + 2), 16) * (1 - opacity)).toString(16).padStart(2, "0")).join("")}`;
+
+const BUN_SPEC: BunSpec = { wrist: [[-6, -15], [6, -15]], bulge: [0.9, 0.9], ground: 0, lobes: [0.32, 0.36, 0.32], scallop: 0.6 };
+
+test("a bun is 10 to 20% wider than its leg, its sole 2 or 3 toe lobes scalloping up 0.5 to 0.8 pt, its toe lines rising 40 to 50% of the paw", () => {
+  const b = bun(BUN_SPEC);
+  const xs = b.nodes.map((n) => n[0]);
+  const wide = (Math.max(...xs) - Math.min(...xs)) / 12;
+  assert.ok(wide >= BUN.wider[0] && wide <= BUN.wider[1], `the bun is ${wide.toFixed(2)} times the leg`);
+  assert.equal(b.lobes.length, 3);
+  // Each lobe's lowest point on the ground, each notch between two lobes the scallop above it.
+  const notches = b.notches.map((i) => b.nodes[i]!);
+  assert.equal(notches.length, 2);
+  for (const n of notches) assert.ok(Math.abs(n[1] - (BUN_SPEC.ground - BUN_SPEC.scallop)) < 1e-9, `a notch lies at y ${n[1]}`);
+  assert.equal(b.nodes.filter((n) => n[1] === BUN_SPEC.ground).length, 3, "each toe lobe touches the ground once, at its middle");
+  // The lobes run from corner to notch to notch to corner, so the line round the sole is one closed run.
+  assert.deepEqual(b.lobes[0]![0], b.sole[0]);
+  assert.deepEqual(b.lobes.at(-1)![1], b.sole[1]);
+  for (const t of b.toes) {
+    const rise = (t[0]![1] - t.at(-1)![1]) / 15;
+    assert.ok(rise >= BUN.rise[0] && rise <= BUN.rise[1], `a toe line rises ${rise.toFixed(2)} of the paw`);
+  }
+  assert.throws(() => bun({ ...BUN_SPEC, bulge: [0.2, 0.2] }), /1\.03 times the leg's width, not 1\.1 to 1\.2/);
+  assert.throws(() => bun({ ...BUN_SPEC, lobes: [1, 1, 1, 1] }), /4 toe lobes, not 2 to 3/);
+  assert.throws(() => bun({ ...BUN_SPEC, scallop: 1 }), /scallops 1 pt, not 0\.5 to 0\.8/);
+  assert.throws(() => bun({ ...BUN_SPEC, rise: 0.6 }), /rise 0\.6 of the paw, not 0\.4 to 0\.5/);
+});
+
+test("a soft toe line is never darker than the outline: at its strongest it is lighter than the line's lightest tone", () => {
+  const line: P[] = [[0, 0], [0.4, -2], [0.4, -4], [0, -5.6]];
+  const stops = (soft?: boolean) => [...toes({ lines: [line, line], fade: [0, -6], soft }).under!.matchAll(/stop-opacity="([0-9.]+)"/g)].map((m) => Number(m[1]));
+  assert.deepEqual(stops(), [0.8, 0.08], "the toe lines a view does not soften are as they were");
+  const soft = stops(true);
+  assert.deepEqual(soft, [SOFT_TOES.foot, SOFT_TOES.top]);
+  assert.ok(soft[0]! > soft[1]!, "the soft toe line does not fade out upward");
+  const lit = lightness(LINES.cream[0]!);
+  assert.ok(lightness(over(C.warmLine, C.fur, soft[0]!)) > lit, `the soft toe line at its foot is L* ${lightness(over(C.warmLine, C.fur, soft[0]!)).toFixed(1)}, darker than the lit outline's ${lit.toFixed(1)}`);
+  // The first toe lines, at 0.8 at the foot, were darker than the outline there.
+  assert.ok(lightness(over(C.warmLine, C.fur, 0.8)) < lit);
 });
