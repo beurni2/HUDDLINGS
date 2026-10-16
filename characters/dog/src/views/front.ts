@@ -248,7 +248,6 @@ const leftHalf = [...mirroredHalf.slice(0, at - 1).map(([x, y]): Node => leftSid
 // The cheeks' puffs, and the inner end of each root's tan under the crown, a wedge pointing in under the crown's
 // fur where the face's side comes down from it (concave corners, which the corner rule leaves alone).
 const CORNERS = [PUFF, headHalf.length + headHalf.length - PUFF, TEMPLE[2]!, headHalf.length + 1 + at];
-let head = smooth([...headHalf, [0, -58.4], ...leftHalf].map(([x, y]): Node => cheekRoll([x, y])), { typed: headHalf.length + 1 + leftTemple.length, corners: CORNERS });
 // The cheeks' fluff, as the hero and the front turnaround draw it: each puff
 // bulges out over the ear's inner foot and breaks along its outer and lower edge
 // into a few round clumps of quite different sizes, each combed down and out to
@@ -264,20 +263,36 @@ const cheekLocks = {
 };
 const chinLocks = [{ len: 0.6, w: 0.8, lean: -0.4 }, { len: 0.95, w: 1.1, lean: -0.3 }, { len: 0.65, w: 0.9, lean: -0.2 }, { len: 0.9, w: 1.2, lean: -0.05 },
   { len: 0.7, w: 1, lean: 0.1 }, { len: 0.95, w: 1.15, lean: 0.25 }, { len: 0.65, w: 0.85, lean: 0.4 }];
-/** Each cheek clump's tip, root and notches (path order), for its line and the shade under it. */
-const clumps: { tip: P; root: P; notches: [P, P] }[] = [];
-const noteClump = (tip: P, root: P, notches: [P, P]) => clumps.push({ tip, root, notches });
-head = furEdge(head, cheekRoll([-45, -89.2]), cheekRoll([-37.6, -68.8]), cheekLocks.R, 0.6, noteClump);
-head = furEdge(head, cheekRoll([37.6, -68.8]), cheekRoll([45, -89.2]), lefthandOf(cheekLocks.L), 0.6, noteClump);
-/** The chin's tufts' notches, in path order, for their lines. */
-const chinTufts: [P, P][] = [];
-head = furEdge(head, cheekRoll([-32.4, -65.4]), cheekRoll([32.4, -65.4]), chinLocks, 0.36, (_tip, _root, notches) => chinTufts.push(notches));
-// The crown's fur where it overhangs each ear's root is a lock of fur, its tip a fur span, so the crown's line can
-// run on round it into the ear's own line, unbroken, as the sheet draws it. Between the topknot and each ear the
-// crown's outline breaks over a small lock of fur, as the sheet's does.
-head = furSpan(furSpan(head, [-45, -135.6], [-44.4, -134.3]), [39.4, -140.4], [40.2, -141.6]);
 const crownLocks = [{ len: 0.85, w: 1, lean: 0.35 }, { len: 0.55, w: 0.8, lean: 0.45 }];
-head = furEdge(furEdge(head, [-35.6, -145.1], [-38.6, -142.6], crownLocks, 0.26), [38.4, -144.6], [35.4, -147], lefthandOf(crownLocks), 0.26);
+/** A cheek clump's tip, root and notches (path order), for its line and the shade under it. */
+interface Clump { tip: P; root: P; notches: [P, P] }
+
+/**
+ * The head's outline and its cheek clumps. `puff` swells each cheek's puff out sideways by up to that many points
+ * (huffy's variant B, review-only: a puffed head.base with a matching head.line), most at the cheek's fullest, about
+ * y -82, and not at all above the eyes' foot or under the jaw, so the crown, the temples and the chin stay as they are.
+ */
+function headOf(puff = 0): { head: Shape; clumps: Clump[] } {
+  const swell = ([x, y]: P): P => {
+    const t = clamp01((y + 104) / 44), across = clamp01((Math.abs(x) - 22) / 14);
+    return [x + Math.sign(x) * puff * Math.sin(Math.PI * t) ** 2 * across, y];
+  };
+  const at = (p: P) => cheekRoll(swell(p));
+  let head = smooth([...headHalf, [0, -58.4], ...leftHalf].map(([x, y]): Node => at([x, y])), { typed: headHalf.length + 1 + leftTemple.length, corners: CORNERS });
+  const clumps: Clump[] = [];
+  const noteClump = (tip: P, root: P, notches: [P, P]) => clumps.push({ tip, root, notches });
+  head = furEdge(head, at([-45, -89.2]), at([-37.6, -68.8]), cheekLocks.R, 0.6, noteClump);
+  head = furEdge(head, at([37.6, -68.8]), at([45, -89.2]), lefthandOf(cheekLocks.L), 0.6, noteClump);
+  head = furEdge(head, at([-32.4, -65.4]), at([32.4, -65.4]), chinLocks, 0.36);
+  // The crown's fur where it overhangs each ear's root is a lock of fur, its tip a fur span, so the crown's line can
+  // run on round it into the ear's own line, unbroken, as the sheet draws it. Between the topknot and each ear the
+  // crown's outline breaks over a small lock of fur, as the sheet's does.
+  head = furSpan(furSpan(head, [-45, -135.6], [-44.4, -134.3]), [39.4, -140.4], [40.2, -141.6]);
+  head = furEdge(furEdge(head, [-35.6, -145.1], [-38.6, -142.6], crownLocks, 0.26), [38.4, -144.6], [35.4, -147], lefthandOf(crownLocks), 0.26);
+  return { head, clumps };
+}
+const HEAD = headOf();
+const head = HEAD.head;
 
 // The topknot (parts/topknot.ts): three separate curls of fur, as the sheet draws them, back to front. The left
 // curl low and broad, its crown at y -156.4, its pointed tip at the crown's line (-30.4, -150.2), where the line dips
@@ -347,7 +362,6 @@ const furShade = (group: Shape[], shapes: string[] = [], keep: string[] = [], ri
   ({ multiply: C.furShadeBy, rim, shapes, keep, group, blur: 2.4 });
 const bodyGroup = [chest, legs.R, legs.L];
 const hipGroup = [back, hind.R, hind.L];
-const headGroup = [head, ...tuftShapes];
 
 const backPaint: Paint = { fill: C.fur, shade: furShade(hipGroup) };
 /**
@@ -358,17 +372,19 @@ const backPaint: Paint = { fill: C.fur, shade: furShade(hipGroup) };
  */
 const backLines: LitSpan[] = [{ from: [-29.2, -61.4], to: [-47.4, -11], on: "tan", taper: 6 },
   { from: [47.4, -11], to: [38.6, -38], taper: 6 }, { from: [40.2, -40.6], to: [29.2, -61.4], on: "tan", taper: 6 }];
-const headPaint: Paint = {
+/** The head's paint, its light group the head's outline (the rest's, or one drawn puffed) and the topknot's curls. */
+const headPaintOf = (head: Shape): Paint => ({
   fill: C.fur,
   // Under the jaw, where the head turns under toward the collar; a faint wash in each hood just over the eye,
   // under the brow's overhang, where the sheet's tan deepens (#ECB888 against the hood's #F0BC92).
-  shade: furShade(headGroup, ["M-38 -66 C-28 -61.2 -14 -59.2 0 -59.2 C14 -59.2 28 -61.2 38 -66 L46 -56 L-46 -56Z",
+  shade: furShade([head, ...tuftShapes], ["M-38 -66 C-28 -61.2 -14 -59.2 0 -59.2 C14 -59.2 28 -61.2 38 -66 L46 -56 L-46 -56Z",
     ...[EYE_R, EYE_L].map(([x, y]) => `M${fmt(x - 8)} ${fmt(y - 9.6)} a8 2 0 1 0 16 0 a8 2 0 1 0 -16 0Z`)],
     // The crown stays light right out to its line, as the sheet paints it, the overhangs over the ears' roots
     // included; and so do the cheeks' puffs out to their rims, above the jaw.
     ["M-52 -172 L52 -172 L52 -137 L-52 -137Z", "M-52 -95 L-36 -95 L-36 -72 L-52 -72Z", "M52 -99 L36 -99 L36 -76 L52 -76Z"], { inset: 3, toLight: 4.5 }),
   highlight: { d: headLight, colour: C.light, opacity: 0.4, blur: 4 },
-};
+});
+const headPaint = headPaintOf(head);
 /**
  * The head's line (head.line), where the sheet draws one, by the dog's one line rule (parts/lines.ts, DECISIONS 74):
  * on the crown's fur one light line from the topknot down to just short of the overhang's tip, where the ear's own
@@ -397,7 +413,7 @@ const crownSpans: LitSpan[] = [{ from: [-24, -149.2], to: [-45.6, -134.6], taper
  * ear's tan. And in each of the fuller clumps one fine fur stroke, combed with it from inside the cheek out toward
  * its tip.
  */
-function cheekLines(): { spans: LitSpan[]; strokes: P[][] } {
+function cheekLines(clumps: Clump[]): { spans: LitSpan[]; strokes: P[][] } {
   const spans: LitSpan[] = clumps.map(({ notches }) => ({ from: notches[0], to: notches[1], taper: 1.6 }));
   const strokes = clumps.filter(({ tip, root }) => v.len(v.sub(tip, root)) >= 1.9).map(({ tip, root, notches }) => {
     // The path runs down the right cheek and up the left, so a clump's lower notch is its second on the right.
@@ -421,12 +437,12 @@ const headSidesUp: LitSpan[] = ([
  * head.line: the head's outline as its own unclipped region, drawn after the head's clip group, reaching 0.5 pt past
  * the head; `up` names the sides whose ear is raised off the temple (head.line's states templeL, templeR and temples).
  */
-function headLinePiece(up: { L: boolean; R: boolean } = { L: false, R: false }): Piece {
+function headLinePiece(up: { L: boolean; R: boolean } = { L: false, R: false }, { head, clumps } = HEAD): Piece {
   const [x0, y0, x1, y1] = bbox(head.segs);
   // Room for the feathered cream round the cheeks' fluff, which reaches 3.8 pt past the head (half its width and
   // three times its blur), so the region's canvas holds all of it.
   const box = pad([x0, y0, x1 - x0, y1 - y0], 4);
-  const cheeks = cheekLines();
+  const cheeks = cheekLines(clumps);
   const sides = [up.R ? headSidesUp[0]! : headSpans[0]!, up.L ? headSidesUp[1]! : headSpans[1]!, ...headSpans.slice(2)];
   const r = litEdge(head, [...sides, ...crownSpans], "head.line", box, { reach: 0.5 });
   const c = litEdge(head, cheeks.spans, "cheek clump", box, { reach: 0.5, blur: 0.2 });
