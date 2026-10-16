@@ -38,7 +38,7 @@ jobs:
   web-frames-dog:
     # The WebGL side of the dog's parity: every view's rest still and every face clip, posed as a still (the clip at
     # time 0 on a fresh player), full size (2 px/pt, the 2x set) and small (0.6 px/pt, the small set), on frames
-    # that hold the widest view. ParityRender.swift renders the same with SpriteKit.
+    # that hold the widest view, with soft.json, each soft part's box. ParityRender.swift renders the same with SpriteKit.
     needs: dog-package
     runs-on: ubuntu-latest
     steps:
@@ -192,8 +192,10 @@ jobs:
 
   parity:
     # Section 5b: the same frames on the web and on the simulator, SSIM 0.95 or more: the test character's dance, and
-    # the dog's stills (Gate A), soft alpha included (the blush at its rest alpha and at each face clip's keyed level,
-    # the soft shades and shadows).
+    # the dog's stills (Gate A), soft alpha included: the soft shades and shadows by the score and the patches, and each
+    # soft part's level (the blush at its rest alpha and at each face clip's keyed level) fitted in both runtimes'
+    # frames, in the boxes the web render's soft.json names. TestFlight runs this workflow too, so its upload waits on
+    # the dog's parity as well.
     needs: [web-frames, web-frames-dog, ios]
     # Also when the ios job failed after rendering (a probe, a UI test): parity
     # fails on its own if the SpriteKit frames are missing.

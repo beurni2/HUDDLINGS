@@ -11,8 +11,11 @@
 // clip the package holds, each posed as still.ts poses a still (the clip at time 0
 // on a fresh player), on the same stage and white background as the frames, into
 // <out>/<clip>.png, with the report: the WebGL side of the dog's parity (ios.yml).
+// Beside them, soft.json: in each still, the footprint of every soft part (a part
+// whose rest alpha is under 1, or that its clip keys), from the ID pass at the
+// same stage, as the box parity.py fits its level in, in both runtimes' frames.
 import { spawnSync, spawn } from "node:child_process";
-import { mkdirSync, rmSync, writeFileSync, existsSync } from "node:fs";
+import { mkdirSync, readFileSync, rmSync, writeFileSync, existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
@@ -69,13 +72,41 @@ try {
     if (names.length === 0) throw new Error("the package holds no still_<view> or face_<preset> clip");
     rmSync(out, { recursive: true, force: true });
     mkdirSync(out, { recursive: true });
+    const read = (file: string) => JSON.parse(readFileSync(join(packageDir, file), "utf8"));
+    const manifest = read("package.json") as { species: string; files: Record<string, string> };
+    const restingSoft = (read("rig.json") as { parts: { name: string; alpha?: number }[] }).parts.filter((p) => (p.alpha ?? 1) < 1).map((p) => p.name);
+    const clipFiles = new Map(Object.keys(manifest.files).filter((f) => f.startsWith("clips/")).map((f) => [read(f).name as string, f]));
+    const soft: Record<string, { part: string; box: number[]; pixels: number }[]> = {};
     for (const name of names) {
-      await page.evaluate((n) => window.lab.still(n), name);
-      const rgba = Buffer.from(await page.evaluate((o) => window.lab.drawStill(o), { width: size, height: size, stage, background: [1, 1, 1] as [number, number, number] }), "base64");
+      const posed = await page.evaluate((n) => window.lab.still(n), name);
+      const draw = (ids: boolean) => page.evaluate((o) => window.lab.drawStill(o), { width: size, height: size, stage, background: (ids ? [0, 0, 0] : [1, 1, 1]) as [number, number, number], ids });
+      const rgba = Buffer.from(await draw(false), "base64");
       const png = new PNG({ width: size, height: size });
       rgba.copy(png.data);
       writeFileSync(join(out, `${name}.png`), PNG.sync.write(png));
+      // A part's level is the one thing the frames' patches can miss (a resting blush is a faint tint), so parity fits it.
+      const keyed = Object.keys((read(clipFiles.get(name)!) as { alpha?: Record<string, unknown> }).alpha ?? {});
+      const parts = [...new Set([...restingSoft, ...keyed])].filter((part) => posed.drawn.includes(part)).sort();
+      if (parts.length === 0) continue;
+      const ids = Buffer.from(await draw(true), "base64");
+      soft[`${name}.png`] = parts.flatMap((part) => {
+        const [r, g, b] = [1, 3, 5].map((i) => parseInt(posed.parts[part]!.id.slice(i, i + 2), 16));
+        const box = [Infinity, Infinity, -Infinity, -Infinity];
+        let pixels = 0;
+        for (let i = 0; i < size * size; i++) {
+          if (ids[i * 4] !== r || ids[i * 4 + 1] !== g || ids[i * 4 + 2] !== b) continue;
+          const x = i % size, y = Math.floor(i / size);
+          box[0] = Math.min(box[0]!, x);
+          box[1] = Math.min(box[1]!, y);
+          box[2] = Math.max(box[2]!, x);
+          box[3] = Math.max(box[3]!, y);
+          pixels++;
+        }
+        // A part at alpha 0 has no footprint, and shows nothing to fit.
+        return pixels ? [{ part, box, pixels }] : [];
+      });
     }
+    writeFileSync(join(out, "soft.json"), JSON.stringify({ species: manifest.species, stills: soft }, null, 1) + "\n");
     writeFileSync(join(out, "report.json"), JSON.stringify({ stills: names, size, pixelsPerPoint: ppp, set: loaded.set, device }, null, 1) + "\n");
     console.log(`rendered ${names.length} stills (set ${loaded.set}, ${device}) into ${out}`);
   } else {

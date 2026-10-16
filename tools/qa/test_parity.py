@@ -1,6 +1,9 @@
 """Tests for the parity check: it scores the character, not the background, and
 fails a missing part (strong, faint or only in coverage), a missing run or frame,
-an empty frame and a size change; its evidence shows the frames it names."""
+an empty frame and a size change; its evidence shows the frames it names. A soft
+part's level, which neither the score nor a patch sees, is fitted in both frames:
+a resting blush missing, or drawn at twice its level, fails; a fraction of a pixel
+does not."""
 import contextlib
 import io
 import json
@@ -226,6 +229,167 @@ class Parity(unittest.TestCase):
         _, _, printed = self.check()
         self.assertIn("PARITY-SHEET-BEGIN full", printed)
         self.assertIn("PARITY-SHEET-END full", printed)
+
+
+MODEL = json.loads((parity.ROOT / "characters/dog/model.json").read_text())
+
+
+def hex_rgb(value):
+    return np.array([int(value[i:i + 2], 16) for i in (1, 3, 5)], float)
+
+
+def cheeks(size, level, dx=0.0, levels=None):
+    """A head in the dog's printed fur with two soft cheeks of its printed pink, each peaking at its level (levels gives
+    each its own), as the blush is drawn, shifted by dx frame pixels; and each cheek's box as render.ts finds a soft part's
+    footprint: where its alpha is at least half its peak. A resting cheek peaks at 0.368, about 24 from the fur at
+    most, so neither the score nor a patch can see it go."""
+    k = 4
+    fur, pink = hex_rgb(MODEL["palette"]["fur"]), hex_rgb(MODEL["palette"]["blush"])
+    ys, xs = np.mgrid[:size * k, :size * k] / k
+    unit = size / 100
+    head = ((xs - 50 * unit - dx) / (30 * unit)) ** 2 + ((ys - 50 * unit) / (26 * unit)) ** 2 <= 1
+    rgb = np.full((size * k, size * k, 3), 255.0)
+    rgb[head] = fur
+    boxes = []
+    for (cx, cy), peak in zip(((38, 58), (62, 58)), levels or (level, level)):
+        spread = 5 * unit
+        alpha = peak * np.exp(-(((xs - cx * unit - dx) ** 2 + (ys - cy * unit) ** 2) / (2 * spread ** 2)))
+        alpha[~head] = 0
+        rgb = rgb * (1 - alpha[..., None]) + pink * alpha[..., None]
+        core = peak * np.exp(-(((np.arange(size) + 0.5 - cx * unit) ** 2)[None, :] + ((np.arange(size) + 0.5 - cy * unit) ** 2)[:, None])
+                             / (2 * spread ** 2)) >= peak / 2
+        yy, xx = np.nonzero(core)
+        boxes.append([int(xx.min()), int(yy.min()), int(xx.max()), int(yy.max())])
+    eye = (((xs - 50 * unit - dx) / (3 * unit)) ** 2 + ((ys - 44 * unit) / (2 * unit)) ** 2) <= 1
+    rgb[eye] = (40, 30, 30)
+    image = Image.fromarray(np.clip(np.round(rgb), 0, 255).astype(np.uint8))
+    return image.resize((size, size), Image.LANCZOS), boxes
+
+
+class SoftLevels(unittest.TestCase):
+    """The soft parts' levels, fitted in both runtimes' frames where render.ts --stills declares them (soft.json)."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def stills(self, web_level=0.368, spritekit=None, parts=("blush.L", "blush.R"), species="dog"):
+        """Two stills a run, still_front and face_shy, on both sides; spritekit maps a run to cheeks()'s options for
+        SpriteKit's frames; soft.json in each web run names each cheek's box."""
+        for run, size in (("full", 200), ("small", 160)):
+            declared = {}
+            for side in ("web", "spritekit"):
+                folder = self.root / side / run
+                folder.mkdir(parents=True)
+                for name in ("still_front", "face_shy"):
+                    options = {"level": web_level} if side == "web" else dict({"level": web_level}, **(spritekit or {}).get(run, {}))
+                    image, boxes = cheeks(size, **options)
+                    image.save(folder / f"{name}.png")
+                    if side == "web":
+                        declared[f"{name}.png"] = [{"part": part, "box": box, "pixels": 1} for part, box in zip(parts, boxes)]
+            (self.root / "web" / run / "soft.json").write_text(json.dumps({"species": species, "stills": declared}))
+
+    def check(self):
+        with contextlib.redirect_stdout(io.StringIO()) as printed:
+            code = parity.main(self.root / "web", self.root / "spritekit", self.root / "report")
+        return code, json.loads((self.root / "report" / "report.json").read_text()), printed.getvalue()
+
+    def test_the_same_levels_pass_and_are_reported(self):
+        self.stills()
+        code, report, printed = self.check()
+        self.assertEqual(0, code, printed)
+        soft = report["runs"]["full"]["soft"]
+        self.assertEqual((soft["levels"], soft["apart"], soft["largest difference"], soft["tolerance"]), (4, 0, 0.0, parity.SOFT_LEVEL_TOLERANCE))
+        for row in soft["rows"]:
+            self.assertAlmostEqual(row["web"], 0.368, delta=0.02)
+        self.assertIn("parity: full: soft parts' levels: 4 fitted in both runtimes, the largest difference 0.000, 0 more than 0.05 apart", printed)
+        self.assertEqual(report["softLevelTolerance"], parity.SOFT_LEVEL_TOLERANCE)
+
+    def test_a_missing_resting_blush_fails_where_the_score_and_the_patches_pass(self):
+        # Planted: SpriteKit reads the blush's missing alpha key as 0, not the rig's rest alpha (DECISIONS.md 191).
+        self.stills(spritekit={"full": {"level": 0.0}, "small": {"level": 0.0}})
+        code, report, printed = self.check()
+        self.assertEqual(1, code)
+        for run in ("full", "small"):
+            entry = report["runs"][run]
+            self.assertGreater(entry["min"], parity.THRESHOLD, "the score alone passes it")
+            self.assertEqual(0, entry["with patches"], "and so do the patches")
+            self.assertEqual(4, entry["soft"]["apart"], printed)
+            self.assertTrue(all(s["soft levels apart"] == ["blush.L", "blush.R"] for s in entry["worst"]), entry["worst"])
+        self.assertTrue(any(p.startswith("full/face_shy.png: blush.L's level is 0.3") and p.endswith("more than 0.05 apart")
+                            for p in report["problems"]), report["problems"])
+        # The worst sheet outlines each cheek's box on the difference, a pixel outside it.
+        sheet = np.asarray(Image.open(self.root / "report" / "full-worst.png").convert("RGB"))
+        x0, y0, _, _ = report["runs"]["full"]["soft"]["rows"][0]["box"]
+        self.assertEqual((220, 0, 160), tuple(sheet[y0 - 1, 400 + x0 - 1]))
+
+    def test_twice_the_resting_level_fails_and_a_level_within_the_tolerance_passes(self):
+        self.stills(spritekit={"full": {"level": 0.75}})
+        code, report, _ = self.check()
+        self.assertEqual(1, code)
+        self.assertEqual(4, report["runs"]["full"]["soft"]["apart"])
+        self.assertEqual(0, report["runs"]["small"]["soft"]["apart"])
+        self.tearDown()
+        self.setUp()
+        self.stills(spritekit={"full": {"level": 0.39}, "small": {"level": 0.35}})
+        code, report, printed = self.check()
+        self.assertEqual(0, code, printed)
+
+    def test_one_cheek_wrong_fails_that_cheek_alone(self):
+        self.stills(spritekit={"full": {"levels": (0.368, 0.2)}})
+        code, report, _ = self.check()
+        self.assertEqual(1, code)
+        apart = [(r["frame"], r["part"]) for r in report["runs"]["full"]["soft"]["rows"] if not r["pass"]]
+        self.assertEqual([("face_shy.png", "blush.R"), ("still_front.png", "blush.R")], apart)
+
+    def test_a_fraction_of_a_pixel_moves_no_level_past_the_tolerance(self):
+        self.stills(spritekit={"full": {"dx": 0.5}, "small": {"dx": 0.25}})
+        code, report, printed = self.check()
+        for run in ("full", "small"):
+            self.assertEqual(0, report["runs"][run]["soft"]["apart"], printed)
+            self.assertLess(report["runs"][run]["soft"]["largest difference"], parity.SOFT_LEVEL_TOLERANCE / 2)
+
+    def test_a_soft_part_with_no_fit_or_nothing_to_fit_fails(self):
+        self.stills(parts=("blush.L", "shadow.ground"))
+        code, report, _ = self.check()
+        self.assertEqual(1, code)
+        self.assertIn("full/still_front.png: shadow.ground is soft, and parity has no fit for its level (SOFT_FITS)", report["problems"])
+        self.tearDown()
+        self.setUp()
+        self.stills()
+        dark = Image.new("RGB", (200, 200), (255, 255, 255))
+        ImageDraw.Draw(dark).ellipse((40, 40, 160, 160), fill=(40, 30, 30))
+        dark.save(self.root / "spritekit/full/still_front.png")
+        code, report, _ = self.check()
+        self.assertEqual(1, code)
+        self.assertTrue(any(p.startswith("full/still_front.png: the SpriteKit frame has no light pixel in blush.L's box") for p in report["problems"]),
+                        report["problems"])
+
+    def test_soft_json_must_name_frames_the_web_run_holds_and_a_species_with_a_model(self):
+        self.stills(species="nobody")
+        code, report, _ = self.check()
+        self.assertEqual(1, code)
+        self.assertIn("full: soft.json names the species 'nobody', which has no model.json for its colours", report["problems"])
+        self.tearDown()
+        self.setUp()
+        self.stills()
+        (self.root / "web/small/face_shy.png").unlink()
+        (self.root / "spritekit/small/face_shy.png").unlink()
+        code, report, _ = self.check()
+        self.assertEqual(1, code)
+        self.assertIn("small/face_shy.png: soft.json names a still the web run does not hold", report["problems"])
+
+    def test_frames_without_soft_json_declare_none(self):
+        self.stills()
+        for run in ("full", "small"):
+            (self.root / "web" / run / "soft.json").unlink()
+        code, report, printed = self.check()
+        self.assertEqual(0, code, printed)
+        self.assertNotIn("soft", report["runs"]["full"])
+        self.assertIn("parity: full: soft parts' levels: none declared (no soft.json in the web run)", printed)
 
 
 class Patches(unittest.TestCase):

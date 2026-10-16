@@ -541,7 +541,7 @@ test("render.ts --stills poses each still as still.ts does, on the frames' stage
   const run = spawnSync(process.execPath, [join(repo, "runtime-web/lab/render.ts"), "--stills", "--package", join(dir, "package"), "--out", out,
     "--size", String(size), "--ppp", String(PPP), "--set", "3x"], { encoding: "utf8" });
   assert.equal(run.status, 0, run.stderr);
-  assert.deepEqual(readdirSync(out).sort(), ["report.json", "still_faded.png", "still_front.png", "still_side.R.png"]);
+  assert.deepEqual(readdirSync(out).sort(), ["report.json", "soft.json", "still_faded.png", "still_front.png", "still_side.R.png"]);
   const frame = PNG.sync.read(readFileSync(join(out, "still_front.png")));
   assert.deepEqual([frame.width, frame.height], [size, size]);
   // The root sits at size / 2 across and 24 px above the foot; the still's at rootPx: both on whole pixels.
@@ -557,6 +557,26 @@ test("render.ts --stills poses each still as still.ts does, on the frames' stage
   }
   assert.ok(compared > 0.9 * front.white.width * front.white.height, `${compared} pixels compared`);
   assert.equal(differ, 0, "render.ts --stills draws still_front as still.ts's white pass does");
+  // soft.json: in each still, every part drawn at an alpha its clip keys (or its rig rests under 1) with its footprint's
+  // box on the frame, the ID pass's footprint moved by the same whole pixels; the eye at 0 has none, so none is fitted.
+  const soft = JSON.parse(readFileSync(join(out, "soft.json"), "utf8")) as { species: string; stills: Record<string, { part: string; box: number[]; pixels: number }[]> };
+  assert.equal(soft.species, "test");
+  assert.deepEqual(Object.keys(soft.stills), ["still_faded.png"], "only the faded still draws a part at another alpha");
+  assert.deepEqual(soft.stills["still_faded.png"]!.map((e) => e.part), Object.keys(fadedAlpha).filter((part) => fadedAlpha[part]! > 0).sort());
+  const [fx, fy] = [size / 2 - fadedShot.info.rootPx[0], size - 24 - fadedShot.info.rootPx[1]];
+  for (const { part, box, pixels } of soft.stills["still_faded.png"]!) {
+    const want = [Infinity, Infinity, -Infinity, -Infinity];
+    let n = 0;
+    for (let y = 0; y < fadedShot.ids.height; y++) {
+      for (let x = 0; x < fadedShot.ids.width; x++) {
+        const k = 4 * (y * fadedShot.ids.width + x);
+        if (hex([...fadedShot.ids.data.subarray(k, k + 3)]) !== fadedShot.info.parts[part]!.id) continue;
+        [want[0], want[1], want[2], want[3]] = [Math.min(want[0]!, x + fx), Math.min(want[1]!, y + fy), Math.max(want[2]!, x + fx), Math.max(want[3]!, y + fy)];
+        n++;
+      }
+    }
+    assert.deepEqual([box, pixels], [want, n], `${part}'s footprint is still.ts's ID pass's`);
+  }
   const none = spawnSync(process.execPath, [join(repo, "runtime-web/lab/render.ts"), "--stills", "--clip", "x", "--out", out], { encoding: "utf8" });
   assert.equal(none.status, 2, "--stills and --clip are one or the other");
 });
