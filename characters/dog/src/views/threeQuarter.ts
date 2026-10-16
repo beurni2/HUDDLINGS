@@ -330,9 +330,11 @@ const headSpans: LitSpan[] = [
 ];
 /**
  * head.line: the head's outline as its own unclipped region, drawn after the head's clip group, reaching 0.5 pt past the
- * head. `temple`: the near ear raised (its perked state), where the head runs on behind the face's side into the nape
- * the perked ear uncovers, so the near side's curve, which would lie inside it as a crease, is left out, as the front's
- * temple states leave theirs (head.line's templeL, templeR and temples, keyed by the face clips beside a raised ear).
+ * head. `temple`: the near ear perked, where the head runs on behind the face's side into the nape the perked ear
+ * uncovers, so the near side's curve, which would lie inside it as a crease, is left out, as the front's temple states
+ * leave theirs. It is keyed by the front lane's name for that ear raised alone (templeL, or templeR in .R), which every
+ * preset gives only a perked ear; `temples` (both ears raised, the lifted presets) keeps the rest line, since this view
+ * draws no lifted ear and the ear hangs there still (DECISIONS 176).
  */
 function headLinePiece(F: Facing, temple = false): Piece {
   const [x0, y0, x1, y1] = bbox(head.segs);
@@ -886,7 +888,7 @@ export function threeQuarterFaces(facingSide: Side = "L"): Drawn[] {
     for (const side of ["L", "R"] as const) out.push({ part: `brow.${side}`, state, piece: brow(browState(BROWS[side].pts, state), BROWS[side].width) });
   }
   for (const side of ["L", "R"] as const) out.push({ part: `ear.${side}`, state: "onePerked", piece: perkedEar(side, F) });
-  // The head's line beside the near ear raised: the state names the dog's side (the front's), so .R's near ear is its right.
+  // The head's line beside the near ear perked: the state names the dog's side (the front's), so .R's near ear is its right.
   out.push({ part: "head.line", state: facingSide === "L" ? "templeL" : "templeR", piece: headLinePiece(F, true) });
   return F.finish(out);
 }
