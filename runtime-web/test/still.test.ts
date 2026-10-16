@@ -12,7 +12,9 @@ import { after, before, test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { spawnSync } from "node:child_process";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { PNG } from "pngjs";
 import { buildPackage, pngChunks, readSource, writePackage } from "../../characters/build/build.ts";
 import type { Clip } from "../src/format.ts";
@@ -23,6 +25,7 @@ import { faceClips, failures, lookFaces, matchVerdict } from "../lab/look.ts";
 import { MARGIN, openStills, type StillInfo, type Stills } from "../lab/still.ts";
 
 const PPP = 3;
+const repo = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const still = (name: string, view: string): Clip => ({ name, lengthMs: 1000, views: { body: [[0, view]], head: [[0, view]] } });
 // The front with parts faded: the mask head.base (its own ID colour gone, its clip group whole), a clipped
 // part, the soft shadow, and an eye at 0.
@@ -511,6 +514,23 @@ test("the look loop's faces mode checks every face clip against the rest front, 
   // A package with no face clip says so and passes.
   const none = await lookFaces(stills, { packageDir: join(dir, "package"), stillsDir: join(dir, "face-stills"), qa: join(dir, "face-qa"), matcher });
   assert.deepEqual(none, { verdict: "pass", lines: ["the package holds no face_<preset> clip, so no face is checked"] });
+});
+
+test("the command draws any built package, and several stills each into its own folder, the same bytes as one", () => {
+  // blushcal.py renders a calibration package beside the built one, many stills in one Chromium.
+  const out = join(dir, "cli");
+  const run = spawnSync(process.execPath, [join(repo, "runtime-web/lab/still.ts"), "--package", join(dir, "package"), "--ppp", String(PPP), "--out", out,
+    "--still", "still_front", "--still", "still_side.R"], { encoding: "utf8" });
+  assert.equal(run.status, 0, run.stderr);
+  assert.deepEqual(readdirSync(out).sort(), ["still_front", "still_side.R"]);
+  for (const name of ["white.png", "black.png", "ids.png"]) assert.ok(readFileSync(join(out, "still_front", name)).equals(read("a", name)), name);
+  const one = spawnSync(process.execPath, [join(repo, "runtime-web/lab/still.ts"), "--package", join(dir, "package"), "--ppp", String(PPP), "--out", join(dir, "cli-one"),
+    "--still", "still_side.R"], { encoding: "utf8" });
+  assert.equal(one.status, 0, one.stderr);
+  assert.ok(existsSync(join(dir, "cli-one", "still.json")), "one still goes into --out itself");
+  const none = spawnSync(process.execPath, [join(repo, "runtime-web/lab/still.ts"), "--package", join(dir, "nothing"), "--still", "still_front", "--out", join(dir, "cli-none")], { encoding: "utf8" });
+  assert.equal(none.status, 1);
+  assert.match(none.stderr, /no package at/);
 });
 
 test("ID colours are fixed by a part's index, distinct and never black", () => {
