@@ -829,14 +829,14 @@ const perkedFar = smooth([[-58, -150], [-61, -158], [-66.4, -164.6], [-73.8, -16
 
 /**
  * With the near ear up, the back of the head and the nape it hung over show: the head's round runs on from under the
- * crown's overhang (3.6, −136.8) down round the back of the skull, out to x 9.6 at y −104 (a head as wide as the front's
- * 93 pt, turned, from the far cheek's puff at x −100), and in along the nape to the back's line at (−6.6, −53), where
- * the back runs on down; its fur hangs over the collar's near end in a few soft locks. Cream, its far side in the fur's
- * shade, and the root's tan under the crown, as the front's temple carries it (DECISIONS 133), paling down into the cream.
- * Its inner side lies under the head.
+ * crown's overhang (3.6, −136.8) round the back of the skull, widest (x 11) a little above the eyes' height, and in
+ * under it, where the skull meets the neck (x 2.4 at y −89), then down the neck to the back's line at (−6.6, −53), where
+ * the back runs on down; the neck's fur hangs over the collar's near end in a few soft locks. As One ear perked paints
+ * the head under its raised ear, the skull there is the patch's tan, deepest at the ear's root and paling down into the
+ * cream of the neck, which lies in the skull's shade just under it. Its inner side lies under the head.
  */
-let nape = smooth([[-12, -146], [2, -142.6], [5.4, -136], [8, -127], [9.4, -116], [9.6, -104], [8.4, -92], [5.4, -81], [1, -72], [-3, -64.4], [-5.6, -57.6],
-  [-6.6, -53], [-10, -55.6], [-14, -57.6], [-19.6, -60.4], [-24, -66], [-23, -90], [-21, -120], [-18, -138]], { corners: [11] });
+let nape = smooth([[-12, -146], [2, -142.6], [6.6, -138], [9.8, -130.4], [11.4, -121], [11.2, -111], [9.2, -101.4], [5.8, -94], [2.4, -89.4], [1.2, -83],
+  [0, -74], [-2.2, -65], [-4.6, -57.4], [-6.6, -53], [-10, -55.6], [-14, -57.6], [-19.6, -60.4], [-24, -66], [-23, -90], [-21, -120], [-18, -138]], { corners: [13] });
 nape = furEdge(nape, [-7.4, -53.8], [-19.6, -60.4], [{ len: 0.9, w: 1.4, lean: 0.3 }, { len: 0.6, w: 1, lean: 0.25 }, { len: 1, w: 1.5, lean: 0.35 }], 0.4);
 
 function perkedEar(side: "L" | "R", F: Facing): Piece {
@@ -864,22 +864,27 @@ function perkedEar(side: "L" | "R", F: Facing): Piece {
     : [{ from: [-60.6, -156], to: [-103.2, -137.6], on: "tan", taper: [3, 2] }, { from: [-103.2, -137.6], to: [-80, -145.8], on: "tan", taper: [2, 5] }];
   const flap = litPart(`ear.${side}`, shape, { ...paint, light: F.light }, spans);
   if (!near) return flap;
-  const tan = uid("tan"), band = uid("band"), fade = uid("blur");
+  const tan = uid("tan"), band = uid("band"), neck = uid("neck"), fade = uid("blur"), under = uid("blur");
   const back = litPart("ear.L nape", nape, {
     fill: C.fur,
-    // The root's tan under the crown's overhang, deepest there and paling down the back of the head into the cream; and
-    // the near hood's band up the face's side (38), which ran on under the hanging ear, behind the face's side down to
-    // the cheek, paling back into the cream, so the face's line there lies on the tan, as it did on the ear.
-    under: `<defs><linearGradient id="${tan}" gradientUnits="userSpaceOnUse" x1="-4" y1="-143" x2="2" y2="-112">` +
-      `<stop offset="0" stop-color="${C.earDeep}" stop-opacity="0.75"/><stop offset="0.35" stop-color="${C.patch}" stop-opacity="0.8"/>` +
-      `<stop offset="1" stop-color="${C.patch}" stop-opacity="0"/></linearGradient>` +
+    // The skull's tan, from the ear's root under the crown's overhang, deepest there, over the back of the skull and
+    // paling out into the cream above the neck; the near hood's band up the face's side (38), which ran on under the
+    // hanging ear, so the face's line there lies on the tan, as it did on the ear; and the skull's shade on the neck
+    // just under it, which turns the head's round in where it meets the neck.
+    under: `<defs><linearGradient id="${tan}" gradientUnits="userSpaceOnUse" x1="-2" y1="-144" x2="2" y2="-94">` +
+      `<stop offset="0" stop-color="${C.earDeep}" stop-opacity="0.8"/><stop offset="0.22" stop-color="${C.patch}" stop-opacity="0.9"/>` +
+      `<stop offset="0.62" stop-color="${C.patch}" stop-opacity="0.75"/><stop offset="1" stop-color="${C.patch}" stop-opacity="0"/></linearGradient>` +
       `<linearGradient id="${band}" gradientUnits="userSpaceOnUse" x1="-9" y1="0" x2="3" y2="0">` +
-      `<stop offset="0" stop-color="${C.patch}"/><stop offset="1" stop-color="${C.patch}" stop-opacity="0"/></linearGradient>${blur(fade, [-30, -150, 46, 76], 2)}</defs>` +
-      `<path d="M-22 -146 L8 -146 C12 -132 10 -118 2 -110 C-6 -106 -16 -108 -22 -112Z" fill="url(#${tan})"/>` +
-      `<path d="M-24 -132 L-2 -132 C-2 -118 -4 -104 -7 -94 C-9 -88 -12 -84 -16 -82 L-24 -82Z" fill="url(#${band})" filter="url(#${fade})"/>`,
+      `<stop offset="0" stop-color="${C.patch}"/><stop offset="1" stop-color="${C.patch}" stop-opacity="0"/></linearGradient>` +
+      `<linearGradient id="${neck}" gradientUnits="userSpaceOnUse" x1="0" y1="-96" x2="0" y2="-60">` +
+      `<stop offset="0" stop-color="${C.furShade}" stop-opacity="0.95"/><stop offset="1" stop-color="${C.furShade}" stop-opacity="0.35"/></linearGradient>` +
+      `${blur(fade, [-30, -150, 46, 76], 2)}${blur(under, [-30, -104, 46, 60], 2.4)}</defs>` +
+      `<g filter="url(#${fade})"><path d="M-24 -148 L14 -148 L14 -104 C10 -98 4 -95 -4 -95 C-12 -95 -18 -97 -24 -100Z" fill="url(#${tan})"/></g>` +
+      `<path d="M-24 -132 L-2 -132 C-2 -118 -4 -104 -7 -94 C-9 -88 -12 -84 -16 -82 L-24 -82Z" fill="url(#${band})" filter="url(#${fade})"/>` +
+      `<path d="M-24 -96 C-12 -93 0 -93.4 12 -97 L12 -50 L-24 -50Z" fill="url(#${neck})" filter="url(#${under})"/>`,
     shade: furShade([nape]),
     light: F.light,
-  }, [{ from: [5, -137], to: [-5, -59], taper: [6, 8] }]);
+  }, [{ from: [5.6, -137], to: [-5, -59], taper: [6, 8] }]);
   // Its canvas grown to hold its rim of shade's whole reach (front.ts's roomy rule).
   return join(roomy(back, 2), flap);
 }
