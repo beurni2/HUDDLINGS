@@ -302,8 +302,8 @@ function ride(e: EyeSpec, centred: EyeSpec): { share: number; along: number } {
 
 /**
  * The catchlights (docs/QUESTIONS.md Q26, Q28, the founder's choices of Oct 16, 2026; DECISIONS 200, 201, 204): every eye
- * that shows its iris paints one large catchlight and one tiny one, a quarter its size, just below it toward the outer
- * side, both wholly on the dark iris inside the opening, never on the white; under the half-lid what shows below the lid
+ * that shows its iris paints one large catchlight and one tiny one, a quarter its size, just below it toward the nose
+ * (as the sister sheets draw it), both wholly on the dark iris inside the opening, never on the white; under the half-lid what shows below the lid
  * lies on the iris and some of each shows; where the iris looks aside (peek, huffy's peek back, hungry's eager eye) the
  * large one has moved about half the iris's travel, along it; the closed eyes (the lash bands, the squeeze) paint none.
  * The founder's "about a quarter" (a fifth to a third) and "about half" are held as numbers of their own, not read from
@@ -317,7 +317,7 @@ test("every eye that shows its iris has its large and its tiny catchlight on the
       const e = eyeStateSpec(state, side), [big, tiny] = lightsOf(e);
       for (const [name, l] of [["large", big!], ["tiny", tiny!]] as const) assert.equal(lightProblem(e, l), undefined, `eye.${side} ${state}: its ${name} catchlight`);
       const size = tiny!.r / big!.r;
-      assert.ok(size >= QUARTER[0] && size <= QUARTER[1] && tiny!.at[1] < big!.at[1] - big!.r && tiny!.at[0] < big!.at[0], `eye.${side} ${state}: the tiny catchlight is ${size.toFixed(2)} of the large one, not about a quarter below it toward the outer side`);
+      assert.ok(size >= QUARTER[0] && size <= QUARTER[1] && tiny!.at[1] < big!.at[1] - big!.r && tiny!.at[0] > big!.at[0], `eye.${side} ${state}: the tiny catchlight is ${size.toFixed(2)} of the large one, not about a quarter below it toward the nose`);
       if (state !== "open") assert.equal(whites(drawn.get(`eye.${side}:${state}`)!), state === "sparkle" ? 3 : 2, `eye.${side} ${state}'s whites`);
     }
     assert.equal(whites(eye(eyeStateSpec("open", side)).svg), 2, `eye.${side} open's whites`);

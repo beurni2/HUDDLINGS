@@ -6236,5 +6236,5 @@
  "advisory": true,
  "pass": false,
  "summary": "lines FAIL 28 of 69 regions: body.back, body.back|front.L, body.back|front.R, body.back|hind.L and 24 more; worst body.front|front.L gapPt 19.25 (threshold 1.943)",
- "seconds": 3.33
+ "seconds": 2.08
 }

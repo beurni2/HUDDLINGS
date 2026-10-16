@@ -538,8 +538,8 @@ test("every turned eye that shows its iris has its large and its tiny catchlight
         assert.ok(shown > 0 && off === 0, `${label} ${state}: ${off} of the ${name} catchlight's ${shown} points lie off the dark iris`);
       }
       const tiny = tinyOf(e.shine), size = tiny.r / e.shine.r;
-      assert.ok(size >= QUARTER[0] && size <= QUARTER[1] && tiny.at[1] < e.shine.at[1] - e.shine.r && tiny.at[0] < e.shine.at[0],
-        `${label} ${state}: the tiny catchlight is ${size.toFixed(2)} of the large one, not about a quarter below it toward the outer side`);
+      assert.ok(size >= QUARTER[0] && size <= QUARTER[1] && tiny.at[1] < e.shine.at[1] - e.shine.r && tiny.at[0] > e.shine.at[0],
+        `${label} ${state}: the tiny catchlight is ${size.toFixed(2)} of the large one, not about a quarter below it toward the nose`);
     }
     assert.ok(!("band" in half), `${label}: the half-lid is not a lid over the eye`);
     const { spec: s, lid } = half as Extract<TurnedEyeLid, { lid: unknown }>;

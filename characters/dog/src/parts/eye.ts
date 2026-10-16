@@ -64,14 +64,14 @@ export interface EyeSpec {
 
 /**
  * The tiny catchlight from the large one (Q26, DECISIONS 201): a quarter its radius, 1.45 radii below its middle and
- * 0.3 radii toward the eye's outer side, as the founder's words put it. The kitty's Default eyes put it 1.4 to 1.5
- * radii below, the bear's just under the large one's edge (about one radius); neither settles its side: the kitty
- * leans it toward the nose in both eyes, the bear sets it below and to the viewer's right in both, a sheet pixel or two
- * either way.
+ * 0.3 radii toward the nose, as the sister sheets draw it, which the founder's choice follows. The kitty's Default
+ * eyes put it 1.4 to 1.5 radii below and lean it toward the nose in both eyes; the bear's sit just under the large
+ * one's edge (about one radius), a sheet pixel or two either way. (The decision's first wording said the outer side;
+ * the sheets say the nose, and the sheets were what was chosen.)
  */
-export const TINY = { scale: 0.25, below: 1.45, out: 0.3 };
+export const TINY = { scale: 0.25, below: 1.45, nose: 0.3 };
 export const tinyOf = (shine: { at: [number, number]; r: number }) => ({
-  at: [shine.at[0] - TINY.out * shine.r, shine.at[1] - TINY.below * shine.r] as [number, number],
+  at: [shine.at[0] + TINY.nose * shine.r, shine.at[1] - TINY.below * shine.r] as [number, number],
   r: shine.r * TINY.scale,
 });
 

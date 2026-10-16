@@ -211,10 +211,10 @@
     "pass": true
    },
    "eyes": {
-    "dominant": "#200D02",
+    "dominant": "#200C02",
     "heldTo": "#200C02",
     "heldBy": "palettePainted.eyeDark",
-    "deltaE2000": 0.62,
+    "deltaE2000": 0.0,
     "pixels": 317,
     "pass": true
    },

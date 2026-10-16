@@ -4276,5 +4276,5 @@
  "advisory": true,
  "pass": false,
  "summary": "lines FAIL 22 of 47 regions: body.back|ground, body.back|hind.L, body.back|hind.R, body.back|outside and 18 more; worst collar|head.base furCrossings10Pt 0.0 (threshold 0.868)",
- "seconds": 1.69
+ "seconds": 1.83
 }

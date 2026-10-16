@@ -43,7 +43,7 @@ GROUPS = [
                ("eyes", "eyes_sideL_sparkle", ONE["sideL"], "side")],
               [("face", "proud", HEAD, "proud's still: its panel (205)"), ("eyes", "eyes_front_sparkle", HEAD, "the sparkle beat, front"),
                ("eyes", "eyes_threeQuarterL_sparkle", HEAD, "three-quarter"), ("eyes", "eyes_sideL_sparkle", HEAD, "side")]]},
-    {"title": "Q26: a tiny catchlight, a quarter the size, below the large one toward the outer side (201)",
+    {"title": "Q26: a tiny catchlight, a quarter the size, below the large one toward the nose (201)",
      "rows": [[("panel", "kitty Default", "kitty Default"), ("panel", "bear Default", "bear Default"),
                ("dog", "expressions.eyes.open", "dog: eyes.open"),
                ("eyes", "eyes_front_open", ONE["front"], "front"), ("eyes", "eyes_threeQuarterL_open", ONE["threeQuarterL"], "three-quarter"),

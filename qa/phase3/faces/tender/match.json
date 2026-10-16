@@ -105,7 +105,7 @@
      "held": false,
      "found": [49.51, 61.29],
      "errPt": 2.47,
-     "offsetPt": [1.22, 2.15],
+     "offsetPt": [1.21, 2.15],
      "pass": true
     },
     "eye.L": {
@@ -113,7 +113,7 @@
      "held": false,
      "found": [89.27, 60.96],
      "errPt": 3.54,
-     "offsetPt": [-2.79, 2.18],
+     "offsetPt": [-2.8, 2.18],
      "pass": true
     },
     "mouth.R": {

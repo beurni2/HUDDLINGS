@@ -124,7 +124,7 @@
      "held": true,
      "recordPt": [46.23, -0.01],
      "foundPt": [47.83, 0.04],
-     "errPt": 1.61,
+     "errPt": 1.6,
      "pass": true
     }
    },
