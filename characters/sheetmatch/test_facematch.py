@@ -635,12 +635,29 @@ class BlushTest(unittest.TestCase):
         self.assertEqual(blush["problem"], "1 cheek blush; the sheet shows 2")
         self.assertEqual([c["part"] for c in blush["cheeks"]], ["blush.L"])
 
-    def test_a_still_naming_no_blush_part_fits_none_and_says_so(self):
-        # A panel carried into a still is one part, head.base: no cheek to fit, and nothing held.
+    def test_a_still_naming_no_blush_part_fails_wherever_a_blush_is_asked_for(self):
+        # Planted: the rest front with its blush parts renamed, the pixels the same. Shy asks for 80% and the front's
+        # crop shows two blushing cheeks, so neither passes without a cheek to fit (match.py fails it the same way).
+        def renamed(fixture):
+            for side in ("L", "R"):
+                fixture.names[fixture.names.index(f"blush.{side}")] = f"pinkcheek.{side}"
+                fixture.clip[f"pinkcheek.{side}"] = fixture.clip.pop(f"blush.{side}")
+        still = Turnaround.still(Path(self.tmp.name) / "renamed", plant=renamed)
+        result, _ = check(still, self.at(None), "shy")
+        self.assertEqual((result["blush"]["measured"], result["blush"]["pass"], result["pass"]), (False, False, False))
+        self.assertIn("blush FAILS (the still names no blush part, so no cheek is held to the 0.8 its preset asks for)", result["summary"])
+        blush = self.blush(still, "neutral")
+        self.assertEqual((blush["pass"], blush["sheetCheeks"]), (False, 2))
+        self.assertEqual(blush["problem"], "the still names no blush part; the sheet shows 2 cheeks blushing")
+        # A sheet panel carried into a still is one part, head.base, its cheeks the sheet's own: judged by eye where its
+        # preset asks for no level, and failed where it asks for one. Without the panel's mark it is a still like any.
         fixture = PanelStill(M + "laughing").still("face_laughing")
         result, _ = check(fixture, fixture)
         self.assertEqual((result["blush"]["measured"], result["blush"]["pass"]), (False, True))
-        self.assertIn("no blush part", result["summary"])
+        self.assertIn(f"blush held (a sheet panel ({M}laughing), its cheeks the sheet's own: judged by eye)", result["summary"])
+        self.assertFalse(self.blush(fixture, "shy")["pass"])
+        del fixture.meta["panel"]
+        self.assertFalse(self.blush(fixture, "laughing")["pass"])
 
 
 class CommandTest(unittest.TestCase):

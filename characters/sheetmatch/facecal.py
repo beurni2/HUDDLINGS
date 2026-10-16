@@ -66,7 +66,8 @@ class PanelStill:
         self.names = ["head.base"]
 
     def still(self, clip="face_fixture"):
-        meta = {"species": "dog", "still": "panel", "clip": clip, "views": {"body": "front", "head": "front"},
+        # "panel" names the sheet panel the still carries: its cheeks are the sheet's own, with no blush part to fit.
+        meta = {"species": "dog", "still": "panel", "panel": self.panel.pid, "clip": clip, "views": {"body": "front", "head": "front"},
                 "ppp": self.ppp, "sizePx": [self.alpha.shape[1], self.alpha.shape[0]], "rootPx": [float(v) for v in self.root],
                 "parts": {n: {"id": c, "bone": "head"} for n, c in zip(self.names, ("#808080", "#20A040", "#A02040", "#2040A0", "#A0A020"))},
                 "drawn": list(self.names)}

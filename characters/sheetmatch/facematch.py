@@ -544,8 +544,7 @@ def check_blush(species, model, still, asked):
     what the beside image needs: each cheek's box on the crop's grid and the render there."""
     names = [n for n in still.names if match.matches(n, match.BLUSH_PARTS)]
     if not names:
-        return {"measured": False, "asked": asked, "note": "the still names no blush part, so no level is fitted: judged by eye",
-                "pass": True}, None
+        return unnamed_blush(species, model, still, asked), None
     views = still.meta.get("views", {})
     if views.get("body") != views.get("head"):
         raise ValueError(f"the still's body is in {views.get('body')} and its head in {views.get('head')}: the blush is fitted on one view's crop")
@@ -563,6 +562,25 @@ def check_blush(species, model, still, asked):
         boxes.append((cheek["part"], (int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1)))
     result.update(measured=True, view=frame.view, crop=frame.rec["crop"], ptPerCropPx=frame.k)
     return result, {"rgb": render.rgb, "boxes": sorted(boxes), "fur": frame.model["palette"]["fur"], "pink": frame.model["palette"]["blush"]}
+
+
+def unnamed_blush(species, model, still, asked):
+    """A still that names no blush part has no cheek to fit, so it fails wherever a blush is asked for: by its preset's
+    level, or by the sheet's blushing cheeks on its head's view crop (refmap/palette.json), as match.py fails a view
+    showing fewer cheeks than the sheet. Only a sheet panel carried into a still (facecal.PanelStill, which marks its
+    still with the panel), whose cheeks are the sheet's own pixels with no part of their own, is judged by eye, and only
+    where its preset asks for no level."""
+    frame = match.Frame(species, model, still.meta.get("views", {}).get("head"))
+    plan = json.loads((frame.folder / "refmap" / "palette.json").read_text())
+    shown = sum(b["panel"] == frame.rec["crop"] for b in plan["blush"])
+    result = {"measured": False, "asked": asked, "sheetCheeks": shown}
+    if asked is not None:
+        return dict(result, problem=f"the still names no blush part, so no cheek is held to the {asked:g} its preset asks for", **{"pass": False})
+    if still.meta.get("panel"):
+        return dict(result, note=f"a sheet panel ({still.meta['panel']}), its cheeks the sheet's own: judged by eye", **{"pass": True})
+    if shown:
+        return dict(result, problem=f"the still names no blush part; the sheet shows {shown} cheek{'' if shown == 1 else 's'} blushing", **{"pass": False})
+    return dict(result, note="the still names no blush part, and neither its preset nor the sheet asks for one", **{"pass": True})
 
 
 def preset_of(still, given):
@@ -646,7 +664,7 @@ def held_count(result):
 def blush_text(blush):
     """The blush in a few words: each cheek's fitted level and what it was held to, or why it was not."""
     if not blush["measured"]:
-        return "no blush part, its level judged by eye"
+        return f"blush held ({blush['note']})" if blush["pass"] else f"blush FAILS ({blush['problem']})"
     held = (f"rest {blush['restingSpread'][0]:g} to {blush['restingSpread'][1]:g}" if blush.get("asked") is None
             else f"{blush['asked']:g} asked, within {blush['tolerance']:g}")
     cheeks = []
@@ -777,7 +795,7 @@ def blush_row(result, cheeks):
     the resting spread's two ends), so a level can be judged by eye beside its number."""
     blush = result["blush"]
     if cheeks is None:
-        return [strip(900, f"blush: {blush_text(blush)}", (0, 0, 0))]
+        return [strip(900, blush_text(blush), (0, 0, 0) if blush["pass"] else (200, 0, 30))]
     fur, pink = (sheets.hex_to_rgb(cheeks[k]).astype(float) for k in ("fur", "pink"))
     at = lambda level: np.round(fur + level * (pink - fur)).astype(np.uint8)  # noqa: E731
     wanted = [at(level) for level in (blush["restingSpread"] if blush.get("asked") is None else [blush["asked"]])]
