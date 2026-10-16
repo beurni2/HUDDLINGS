@@ -1,11 +1,18 @@
-"""The face library's contact sheet, phone size: each face preset's front still beside its primary panel at the
-panel's own scale, both drawn the same height and labelled. A panel with a face crop record (model.json's faceCrops)
-places the render by its scale and its nose; Content, which has none, by the scale its crescents' spacing gives
-(the render's are 49.9 pt apart) and its nose's dark blob. Neither is rolled: the panels' own tilt shows.
+"""The face library's contact sheets, phone size.
+
+Presets: each face preset's front still beside its primary panel at the panel's own scale, both drawn the same height
+and labelled. A panel with a face crop record (model.json's faceCrops) places the render by its scale and its nose;
+Content, which has none, by the scale its crescents' spacing gives (the render's are 49.9 pt apart) and its nose's dark
+blob. Neither is rolled: the panels' own tilt shows. Each cell is the panel's frame grown to hold the whole render
+across and above it (a perked ear, the stars), the panel padded with white, so nothing the render draws is cut off.
 
     python3 qa/phase3/faces/sheet.py <stills folder> <out.png>
 
-<stills folder> holds a still per preset (runtime-web/lab/still.ts), named by the preset."""
+<stills folder> holds a still per preset (runtime-web/lab/still.ts), named by the preset.
+
+States: the stills states.ts renders, each the head and its labels, in a row of three.
+
+    python3 qa/phase3/faces/sheet.py states <states folder> <out.png>"""
 import json
 import sys
 from pathlib import Path
@@ -57,17 +64,36 @@ def placing(model, crop, rgb):
     return k, np.array([nose[1], nose[2]]) + 0.5, True
 
 
-def render_tile(still, model, crop, k, nose_px, by_nose, shape):
+def drawn_box(still):
+    """The model-space box of everything the still draws: alpha is 1 - (white - black)/255."""
+    info = json.loads((still / "still.json").read_text())
+    white = np.asarray(Image.open(still / "white.png").convert("RGB"), float)
+    black = np.asarray(Image.open(still / "black.png").convert("RGB"), float)
+    alpha = 1 - (white - black).mean(axis=2) / 255
+    ys, xs = np.nonzero(alpha > 0.1)
+    ppp, (rx, ry) = info["ppp"], info["rootPx"]
+    return (xs.min() - rx) / ppp, (ys.min() - ry) / ppp, (xs.max() + 1 - rx) / ppp, (ys.max() + 1 - ry) / ppp
+
+
+def render_tile(still, model, panel, k, nose_px, by_nose):
+    """The panel and the render in one frame, both at the panel's scale: the panel's own frame grown across and up to
+    hold the whole render, the panel padded with white."""
     info = json.loads((still / "still.json").read_text())
     im = Image.open(still / "white.png").convert("RGB")
     ppp, (rx, ry) = info["ppp"], info["rootPx"]
     front = model["landmarks"]["front"]
     # The panel's pixel (u, v) shows model point anchor + k·((u, v) - panel's anchor).
     anchor = np.array(front["nose"] if by_nose else front["head.top"], float)
-    h, w = shape
+    w, h = panel.size
     x0, y0 = anchor - k * nose_px
-    box = (rx + ppp * x0, ry + ppp * y0, rx + ppp * (x0 + k * w), ry + ppp * (y0 + k * h))
-    return im.transform((w, h), Image.EXTENT, box, Image.BICUBIC, fillcolor=(255, 255, 255))
+    dx0, dy0, dx1, _ = drawn_box(still)
+    X0, Y0, X1, Y1 = min(x0, dx0), min(y0, dy0), max(x0 + k * w, dx1), y0 + k * h
+    size = (round((X1 - X0) / k), round((Y1 - Y0) / k))
+    box = (rx + ppp * X0, ry + ppp * Y0, rx + ppp * X1, ry + ppp * Y1)
+    render = im.transform(size, Image.EXTENT, box, Image.BICUBIC, fillcolor=(255, 255, 255))
+    padded = Image.new("RGB", size, "white")
+    padded.paste(panel, (round((x0 - X0) / k), round((y0 - Y0) / k)))
+    return padded, render
 
 
 def main(stills, out):
@@ -78,7 +104,7 @@ def main(stills, out):
         sheet = crop.split(".")[0]
         panel = Image.open(DOG / "ref" / "panels" / sheet / f"{crop}.png").convert("RGB")
         k, nose_px, by_nose = placing(model, crop, np.asarray(panel).astype(float))
-        render = render_tile(Path(stills) / p, model, crop, k, nose_px, by_nose, (panel.height, panel.width))
+        panel, render = render_tile(Path(stills) / p, model, panel, k, nose_px, by_nose)
         z = HEIGHT / panel.height
         size = (round(panel.width * z), HEIGHT)
         pair = Image.new("RGB", (size[0] * 2 + 4, HEIGHT + 16), "white")
@@ -96,5 +122,32 @@ def main(stills, out):
     print(out, full.size)
 
 
+def states(folder, out):
+    """The states.ts stills, each its head (model x -88 to 88, y -186 to -50) at its still's scale, labelled."""
+    folder = Path(folder)
+    tiles = []
+    for entry in json.loads((folder / "states.json").read_text()):
+        still = folder / entry["still"]
+        info = json.loads((still / "still.json").read_text())
+        ppp, (rx, ry) = info["ppp"], info["rootPx"]
+        im = Image.open(still / "white.png").convert("RGB")
+        size = (round(176 * 1.6), round(136 * 1.6))
+        head = im.transform(size, Image.EXTENT, (rx - 88 * ppp, ry - 186 * ppp, rx + 88 * ppp, ry - 50 * ppp), Image.BICUBIC, fillcolor=(255, 255, 255))
+        tile = Image.new("RGB", (size[0], size[1] + 16), "white")
+        tile.paste(head, (0, 16))
+        ImageDraw.Draw(tile).text((3, 2), entry["name"], fill=(0, 0, 0))
+        tiles.append(tile)
+    w, h = tiles[0].size
+    rows = (len(tiles) + COLS - 1) // COLS
+    full = Image.new("RGB", (w * COLS + 8 * (COLS - 1), rows * (h + 6)), "white")
+    for i, t in enumerate(tiles):
+        full.paste(t, ((i % COLS) * (w + 8), (i // COLS) * (h + 6)))
+    full.quantize(colors=256).save(out, optimize=True)
+    print(out, full.size)
+
+
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2])
+    if sys.argv[1] == "states":
+        states(sys.argv[2], sys.argv[3])
+    else:
+        main(sys.argv[1], sys.argv[2])

@@ -86,17 +86,17 @@
     "mouth.R": {
      "record": [121.52, 130.67],
      "held": true,
-     "found": [122.76, 131.0],
-     "errPt": 0.91,
-     "offsetPt": [0.87, 0.28],
+     "found": [122.41, 128.98],
+     "errPt": 1.36,
+     "offsetPt": [0.69, -1.17],
      "pass": true
     },
     "mouth.L": {
      "record": [133.37, 129.6],
      "held": true,
-     "found": [132.54, 130.62],
-     "errPt": 0.93,
-     "offsetPt": [-0.62, 0.69],
+     "found": [133.5, 128.51],
+     "errPt": 0.78,
+     "offsetPt": [0.13, -0.77],
      "pass": true
     }
    },

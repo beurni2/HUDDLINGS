@@ -10,8 +10,8 @@
    "head": "front"
   },
   "ppp": 3,
-  "sizePx": [504, 591],
-  "rootPx": [268, 538]
+  "sizePx": [494, 610],
+  "rootPx": [268, 557]
  },
  "thresholds": {
   "landmarkShareOfHead": 0.03,
