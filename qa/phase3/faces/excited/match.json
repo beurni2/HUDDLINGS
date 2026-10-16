@@ -10,8 +10,8 @@
    "head": "front"
   },
   "ppp": 3,
-  "sizePx": [557, 570],
-  "rootPx": [287, 517]
+  "sizePx": [562, 558],
+  "rootPx": [289, 517]
  },
  "rest": {
   "still": "still_front",
@@ -229,7 +229,7 @@
     "eye.L": {
      "record": [163.11, 93.38],
      "held": true,
-     "found": [166.02, 92.79],
+     "found": [166.03, 92.79],
      "errPt": 2.03,
      "offsetPt": [2.03, 0.03],
      "pass": true
@@ -293,20 +293,20 @@
   }
  },
  "headGate": {
-  "headShiftPt": [0.01, -0.01],
-  "headIoU": 0.9895,
+  "headShiftPt": [0.0, 0.0],
+  "headIoU": 0.9931,
   "thresholdPt": 2.8,
   "rows": {
    "nose": {
-    "model": [-0.19, -91.61],
+    "model": [-0.2, -91.6],
     "found": [-0.68, -92.05],
-    "errPt": 0.65,
+    "errPt": 0.66,
     "pass": true
    },
    "eyes.middle": {
-    "model": [-1.19, -99.61],
+    "model": [-1.2, -99.6],
     "found": [-1.07, -98.15],
-    "errPt": 1.47,
+    "errPt": 1.46,
     "pass": true,
     "measuredBy": "each eye's parts' pixels in the ID pass"
    }
@@ -324,7 +324,7 @@
   "placeThresholdPt": 2.8,
   "cheeks": [
    {
-    "centrePx": [93.57, 122.83],
+    "centrePx": [94.57, 122.83],
     "centrePt": [-30.2, -84.08],
     "level": 0.349,
     "peak": "#FCDDD1",
@@ -336,7 +336,7 @@
     "part": "blush.R"
    },
    {
-    "centrePx": [170.65, 117.28],
+    "centrePx": [171.65, 117.28],
     "centrePt": [29.7, -88.39],
     "level": 0.35,
     "peak": "#FCDDD1",
@@ -372,5 +372,5 @@
  "spacingsHeld": 0,
  "shapesHeld": 3,
  "pass": true,
- "summary": "pass: 4 anchors and 3 shapes held on master.expression.excited; head held (nose 0.65 pt, eyes.middle 1.47 pt); blush held (R 0.349, L 0.350; rest 0.29 to 0.43)"
+ "summary": "pass: 4 anchors and 3 shapes held on master.expression.excited; head held (nose 0.66 pt, eyes.middle 1.46 pt); blush held (R 0.349, L 0.350; rest 0.29 to 0.43)"
 }

@@ -10,7 +10,7 @@
    "head": "front"
   },
   "ppp": 3,
-  "sizePx": [533, 570],
+  "sizePx": [534, 558],
   "rootPx": [269, 517]
  },
  "rest": {
@@ -212,12 +212,12 @@
    {
     "centrePx": [85.57, 122.83],
     "centrePt": [-30.2, -84.08],
-    "level": 0.693,
+    "level": 0.692,
     "peak": "#F9C7BA",
     "coreColour": "#F6B3A6",
     "coreDeltaE2000": 0.21,
     "levelPass": true,
-    "levelErr": -0.007,
+    "levelErr": -0.008,
     "sheetBox": 0,
     "pass": true,
     "part": "blush.R"
@@ -260,5 +260,5 @@
  "spacingsHeld": 0,
  "shapesHeld": 3,
  "pass": true,
- "summary": "pass: 4 anchors and 3 shapes held on master.expression.content; head held (nose 0.66 pt, eyes.middle 1.46 pt); blush held (R 0.693, L 0.693; 0.7 asked, within 0.05)"
+ "summary": "pass: 4 anchors and 3 shapes held on master.expression.content; head held (nose 0.66 pt, eyes.middle 1.46 pt); blush held (R 0.692, L 0.693; 0.7 asked, within 0.05)"
 }

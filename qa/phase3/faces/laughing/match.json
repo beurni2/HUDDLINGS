@@ -10,7 +10,7 @@
    "head": "front"
   },
   "ppp": 3,
-  "sizePx": [531, 570],
+  "sizePx": [532, 558],
   "rootPx": [268, 517]
  },
  "rest": {
@@ -156,16 +156,16 @@
      "held": true
     },
     "mouth": {
-     "areaPx": 1125,
+     "areaPx": 1123,
      "recordAreaPx": 1235,
-     "areaPt2": 417.3,
-     "areaRatio": 0.911,
-     "iou": 0.902,
+     "areaPt2": 416.6,
+     "areaRatio": 0.909,
+     "iou": 0.9,
      "pass": true,
-     "openPx": 1085,
+     "openPx": 1083,
      "recordOpenPx": 1120,
-     "openRatio": 0.976,
-     "redShare": 0.443,
+     "openRatio": 0.974,
+     "redShare": 0.444,
      "recordRedShare": 0.347,
      "held": true
     }

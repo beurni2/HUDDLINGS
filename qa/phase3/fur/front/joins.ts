@@ -6,6 +6,8 @@
 //
 // node qa/phase3/fur/front/joins.ts [--out <folder>]   → <folder>/joins.png and <folder>/states.png (qa/phase3/fur/front/ by default)
 // node qa/phase3/fur/front/joins.ts --only <text> --out <folder>   → <folder>/peek.png: the rows whose label holds the text, for a quick look
+// The committed joins.png and states.png are its output reduced to 256 colours (PIL's median cut, no dither), 1 MB
+// and 0.5 MB instead of 3.4 and 1.3, so they open quickly on a phone.
 import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
