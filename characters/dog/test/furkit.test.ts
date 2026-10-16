@@ -248,15 +248,15 @@ const ring = (r: number, c: P, n = 24): Shape => smooth(Array.from({ length: n }
 const on = (deg: number, r = 40, c: P = [0, -100]): P => [c[0] + r * Math.cos((deg * Math.PI) / 180), c[1] + r * Math.sin((deg * Math.PI) / 180)];
 const HEAD: HeadFurSpec = {
   base: ring(40, [0, -100]),
-  crown: [{ side: "R", from: on(222), to: on(233.2), locks: [{ len: 2.6, width: 4.2, lean: 0.4, dip: 0.6 }, { len: 2, width: 3.6, lean: 0.5 }], tipRound: 0.22, line: { from: on(250), to: on(205) } }],
+  crown: [{ side: "R", from: on(220), to: on(233.2), locks: [{ len: 1.9, width: 4.8, lean: 0.5, dip: 0.45 }, { len: 1.45, width: 4.3, lean: 0.45 }], tipRound: 0.24, line: { from: on(250), to: on(205) } }],
   cheeks: [{
-    side: "R", from: on(150), to: on(185), tipRound: 0.3, raised: on(170), line: { from: on(140), to: on(195) },
-    clumps: [{ len: 2.4, width: 8, lean: 0.3, dip: 0.6 }, { len: 3.2, width: 9.5, lean: 0.4, dip: 0.8 }, { len: 2, width: 7, lean: 0.35 }],
+    side: "R", from: on(155), to: on(179), tipRound: 0.22, raised: on(170), line: { from: on(140), to: on(195) },
+    clumps: [{ len: 2.4, width: 5.4, lean: 0.35, dip: 0.6 }, { len: 3, width: 6.6, lean: 0.45, dip: 0.7 }, { len: 2, width: 4.6, lean: 0.4 }],
   }],
   chin: {
-    from: on(60), to: on(120), tipRound: 0.5, corners: [on(50), on(130)], line: { from: on(40), to: on(140) },
-    scallops: [{ len: 1.2, width: 7, lean: 0.1, dip: 0.3 }, { len: 0.8, width: 6, lean: 0.2, dip: 0.4 }, { len: 1.4, width: 8, dip: 0.2 }, { len: 0.9, width: 6.5, lean: 0.1, dip: 0.3 },
-      { len: 1.3, width: 7.5, lean: 0.2, dip: 0.4 }, { len: 1, width: 6.9 }],
+    from: on(60), to: on(120), tipRound: 0.25, corners: [on(50), on(130)], line: { from: on(40), to: on(140) },
+    scallops: [{ len: 1.3, width: 6.2, lean: 0.1, dip: 0.3 }, { len: 1.9, width: 7.8, lean: 0.2, dip: 0.4 }, { len: 1.4, width: 6.4, dip: 0.2 }, { len: 1.8, width: 5.6, lean: 0.1, dip: 0.3 },
+      { len: 1.5, width: 7.4, lean: 0.2, dip: 0.4 }, { len: 1.9, width: 7.9 }],
   },
 };
 
@@ -268,12 +268,47 @@ test("the head's fur lies where the view types it, each place with its one line"
   assert.equal(h.cheeks[0]!.on, "tan");
   assert.deepEqual(h.cheeks[0]!.ends, ["join", "join"]);
   assert.deepEqual(h.chin!.ends, ["join", "join"]);
+  // The lower face's lines come and go with the fur, as the sheet's: lightest over each wisp's tip, darker in its notches,
+  // and the light rule's own away from the wisps.
+  for (const [line, tufts] of [[h.chin!, h.tufts.chin], [h.cheeks[0]!, h.tufts.cheeks]] as const) {
+    const most = line.most as (p: P) => number;
+    for (const t of tufts) {
+      assert.equal(most(t.tip), HEAD_FUR.wisps.tip);
+      assert.ok(Math.abs(most(t.notches[1]) - HEAD_FUR.wisps.notch) < 1e-9 || t === tufts.at(-1), "a notch is the darkest");
+    }
+    assert.equal(most(on(0)), 1, "no ceiling away from the wisps");
+  }
   assert.equal(h.spans().length, 3, "one line per place");
   // Under a raised ear the cheek's line starts lower, at `raised`, from open fur.
   const raised = h.spans({ R: true })[1]!;
   assert.deepEqual(raised.to, on(170));
   assert.deepEqual(raised.ends, ["join", "free"]);
   assert.deepEqual(h.spans({ L: true })[1], h.cheeks[0], "a raised ear on the other side moves this cheek's line");
+});
+
+test("the crown's line joins the ear's where the two outlines cross, and the root's stretch past it is cited by its length and feathered", () => {
+  // An ear of radius 10 whose centre lies 48 pt out at 230°: the outlines cross 7.85° either side of it.
+  const ear = ring(10, on(230, 48), 24);
+  const spec: HeadFurSpec = { ...HEAD, crown: [{ ...HEAD.crown![0]!, line: { from: on(200), to: on(223) }, ear }] };
+  const h = headFur(spec);
+  const join = h.crown[0]!.to as P;
+  const off = (shape: Shape) => Math.min(...sample(shape.segs, 64).map((q) => v.len(v.sub(q, join))));
+  assert.ok(off(h.head) < 0.3 && off(ear) < 0.3, `the join (${join}) lies ${off(h.head).toFixed(2)} and ${off(ear).toFixed(2)} pt off the two outlines`);
+  // From the cheek's upper end (195°) to the crossing (222.15°) the head's edge lies over the root: 27.15° of a 40 pt ring.
+  const length = (27.15 * Math.PI * 40) / 180;
+  assert.equal(h.roots.length, 1);
+  assert.ok(Math.abs(h.roots[0]!.length - length) < 0.6, `the root's stretch is ${h.roots[0]!.length.toFixed(2)} pt, not ${length.toFixed(2)}`);
+  const cheek = h.cheeks[0]!;
+  assert.deepEqual(cheek.ends, ["join", "free"], "the cheek's line comes out of the root's overlap free");
+  assert.equal(cheek.cites, 214);
+  assert.ok(Math.abs(cheek.bare![1] - (h.roots[0]!.length + 0.5)) < 1e-9 && cheek.bare![0] === 0, `the cheek cites ${cheek.bare} pt`);
+  assert.match(h.soften(C.fur, [-60, -160, 120, 120]).body, /<path d="M/, "the root's stretch is feathered");
+  assert.equal(h.soften(C.fur, [-60, -160, 120, 120], { R: true }).body, "", "not under a raised ear");
+  // Without its ear, a crown root's line ends where it is typed and no stretch is cited.
+  assert.deepEqual(headFur(HEAD).cheeks[0]!.cites, undefined);
+  // An ear whose outline does not cross the head's near the typed join is refused.
+  assert.throws(() => headFur({ ...spec, crown: [{ ...spec.crown![0]!, ear: ring(10, on(230, 60), 24) }] }), /outlines cross nowhere from the crown's join/);
+  assert.throws(() => headFur({ ...spec, crown: [{ ...spec.crown![0]!, ear: ring(10, on(246, 48), 24) }] }), /outlines cross \d+\.\d\d pt from the crown's join .* at most 4/);
 });
 
 test("a state that moves the head's outline moves every typed place with it, so the fur never pops", () => {
@@ -290,6 +325,12 @@ test("the head's fur keeps its counts and the chin stays a rounded mass", () => 
   const chin = HEAD.chin!;
   assert.throws(() => headFur({ ...HEAD, chin: { ...chin, scallops: chin.scallops.slice(0, 4).map((l, i) => (i === 3 ? { ...l, dip: undefined } : l)) } }), /4 locks, not 5 to 7/);
   assert.throws(() => headFur({ base: ring(5, [0, -100]), chin: { ...chin, corners: [on(50, 5)] } }), /jaw turns r [0-5]\.\d\d pt .* at least 6: the chin is a rounded mass/);
+  // The first recipe's chin and cheeks, which read as a cookie-cutter cloud: broad round scallops, round clumps.
+  const cloud: Lock[] = [{ len: 1.2, width: 12, lean: -0.35, dip: 0.3 }, { len: 1, width: 13.5, lean: -0.25, dip: 0.25 }, { len: 1.4, width: 12.5, lean: -0.1, dip: 0.3 },
+    { len: 1.1, width: 13, lean: 0.1, dip: 0.25 }, { len: 1.3, width: 12, lean: 0.25, dip: 0.3 }, { len: 0.9, width: 13, lean: 0.35 }];
+  assert.throws(() => headFur({ ...HEAD, chin: { ...chin, tipRound: 0.4, scallops: cloud } }), /tipRound 0.4 is blunter than 0.25.*a repeat, not fur/);
+  const cheek = HEAD.cheeks![0]!;
+  assert.throws(() => headFur({ ...HEAD, cheeks: [{ ...cheek, tipRound: 0.3 }] }), /tipRound 0.3 is blunter than 0.25/);
   assert.equal(HEAD_FUR.cornerPt, 6);
 });
 
