@@ -4,9 +4,9 @@
 // view at runtime, so the package itself gets no new clip). The review build is the package's own source plus the
 // turned views' stars and puffed cheeks and the profile's mouths, which the package holds out for now (DECISIONS 183, 208), and these
 // clips. Also the ID-pass check of
-// "nothing of the open eye under a closed one": every closed eye state (happy, squeeze, closed, wink, flat), in every
-// view that draws an eye, has the eye's ID footprint of its own band, never the open eye's, and under each view's
-// sleepy half-lid nothing dark of the open eye shows over the eye's top (ids.json).
+// "nothing of the open eye under a closed one": under every closed eye state (happy, squeeze, closed, wink, flat), in
+// every view that draws an eye, none of the open eye's own pixels shows, and under each view's sleepy half-lid nothing
+// dark of the open eye shows over the eye's top (ids.json).
 //
 // node qa/phase3/faces/turned/render.ts <out folder> [--cache <raster cache>]
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
@@ -169,12 +169,18 @@ try {
 }
 writeFileSync(join(out, "cells.json"), JSON.stringify(plan, null, 1));
 
-// The ID check. In each still the eye parts' ID colours give each eye's footprint; under a closed state it must be its
-// own band's, which is far smaller than the open eye's and lies along its foot: no more than 60% of the open eye's
-// footprint, and no dark iris of the open eye left outside the band (white.png's pixels darker than L* 30 within the
-// open eye's footprint but outside the band's own footprint grown by 2 px).
+// The ID check. In each still the eye parts' ID colours give each eye's footprint. Under a closed state, nothing the
+// open eye paints may show: none of its light pixels (its white, its catchlights, its iris's glow: white.png lighter
+// than L* 30 within the open eye's footprint, which no lash band or squeeze ever paints) may come out the same in the
+// closed still (within 1/255 a channel), as they would were the open eye drawn under the band, in its region or in
+// another part's; and no dark iris of the open eye may be left outside the band (white.png's pixels darker than L* 30
+// within the open eye's footprint but outside the band's own footprint grown by 2 px). This looks for the open eye
+// itself rather than holding the band's footprint under a share of the open eye's (60% until DECISIONS 202): a share
+// says nothing about where the pixels come from, and the bolder squeeze sat 0.012 under it.
 const read = (path: string) => PNG.sync.read(readFileSync(path));
 const lum = (d: Buffer, k: number) => 0.2126 * d[k]! + 0.7152 * d[k + 1]! + 0.0722 * d[k + 2]!;
+/** Whether two stills' pixels are the same, within 1/255 a channel. */
+const same = (a: Buffer, b: Buffer, k: number) => Math.abs(a[k]! - b[k]!) <= 1 && Math.abs(a[k + 1]! - b[k + 1]!) <= 1 && Math.abs(a[k + 2]! - b[k + 2]!) <= 1;
 const results: Record<string, unknown>[] = [];
 for (const view of ID_VIEWS) {
   const eyes = ["eye.L", "eye.R"].filter((e) => (rig.drawOrder[`head.${view}`] ?? []).includes(e));
@@ -200,10 +206,14 @@ for (const view of ID_VIEWS) {
           if (prev[p] || prev[p - 1] || prev[p + 1] || prev[p - closed.w] || prev[p + closed.w]) grown[p] = 1;
         }
       }
-      let dark = 0;
-      for (let p = 0; p < open.mask.length; p++) if (open.mask[p] && !grown[p] && lum(closed.white.data, p * 4) < 66) dark++;
-      const pass = area > 0 && area <= 0.6 * openArea && dark === 0;
-      results.push({ view, eye, state, area, openArea, share: Math.round((area / openArea) * 1000) / 1000, darkOutsideBand: dark, pass });
+      let dark = 0, lit = 0, shows = 0;
+      for (let p = 0; p < open.mask.length; p++) {
+        if (!open.mask[p]) continue;
+        if (!grown[p] && lum(closed.white.data, p * 4) < 66) dark++;
+        if (lum(open.white.data, p * 4) >= 66) (lit++, shows += +same(open.white.data, closed.white.data, p * 4));
+      }
+      const pass = area > 0 && dark === 0 && shows === 0;
+      results.push({ view, eye, state, area, openArea, share: Math.round((area / openArea) * 1000) / 1000, openLit: lit, openLitShowing: shows, darkOutsideBand: dark, pass });
     }
     // A half-lid closes the open eye over its top: the lid's pale fur and its lash lie over the ball's upper part, so
     // nothing dark of the open eye (its rim, its iris) shows in the top fifth of the open eye's footprint, which the
