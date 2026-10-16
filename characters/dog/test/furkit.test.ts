@@ -11,6 +11,7 @@ import { PNG } from "pngjs";
 import type { Lock } from "../../draw/fur.ts";
 import { arc, fracAt, mirrorX, smooth, spanPoints, v, type Node, type P, type Shape } from "../../draw/geom.ts";
 import { EAR, earEdge, earFur, type EarEdgeSpec } from "../src/parts/ear.ts";
+import { HEAD_FUR, headFur, type HeadFurSpec } from "../src/parts/headfur.ts";
 import { CONTACT_DEPTH, FREE_TAPER, litEdge, litRibbons, SOLE, UNDER_RUN, type LitSpan } from "../src/parts/lines.ts";
 import { BUN, bun, SOFT_TOES, toes, type BunSpec } from "../src/parts/paw.ts";
 import { C, LINES } from "../src/palette.ts";
@@ -220,4 +221,54 @@ test("an ear's paint over an edge takes the hem's 3 or 4 tips for its clumps and
   const comb: P[][] = [-7.5, -2.5, 2.5, 7.5].map((x): P[] => [[x, -22], [x, -12], [x, -2]]);
   assert.throws(() => earFur({ ...ear, locks: comb, edge }), /too even .* read as a comb/);
   assert.throws(() => earFur({ ...ear, locks: uneven, edge: { ...edge, notches: edge.notches.slice(0, 1) } }), /hem is 3 or 4 lock tips, not 2/);
+});
+
+/** A round head: 24 nodes round a circle of radius 40, clockwise on screen from its right, and a place on it by angle. */
+const ring = (r: number, c: P, n = 24): Shape => smooth(Array.from({ length: n }, (_, k): Node => [c[0] + r * Math.cos((k / n) * 2 * Math.PI), c[1] + r * Math.sin((k / n) * 2 * Math.PI)]));
+const on = (deg: number, r = 40, c: P = [0, -100]): P => [c[0] + r * Math.cos((deg * Math.PI) / 180), c[1] + r * Math.sin((deg * Math.PI) / 180)];
+const HEAD: HeadFurSpec = {
+  base: ring(40, [0, -100]),
+  crown: [{ side: "R", from: on(222), to: on(233.2), locks: [{ len: 2.6, width: 4.2, lean: 0.4, dip: 0.6 }, { len: 2, width: 3.6, lean: 0.5 }], tipRound: 0.22, line: { from: on(250), to: on(205) } }],
+  cheeks: [{
+    side: "R", from: on(150), to: on(185), tipRound: 0.3, raised: on(170), line: { from: on(140), to: on(195) },
+    clumps: [{ len: 2.4, width: 8, lean: 0.3, dip: 0.6 }, { len: 3.2, width: 9.5, lean: 0.4, dip: 0.8 }, { len: 2, width: 7, lean: 0.35 }],
+  }],
+  chin: {
+    from: on(60), to: on(120), tipRound: 0.5, corners: [on(50), on(130)], line: { from: on(40), to: on(140) },
+    scallops: [{ len: 1.2, width: 7, lean: 0.1, dip: 0.3 }, { len: 0.8, width: 6, lean: 0.2, dip: 0.4 }, { len: 1.4, width: 8, dip: 0.2 }, { len: 0.9, width: 6.5, lean: 0.1, dip: 0.3 },
+      { len: 1.3, width: 7.5, lean: 0.2, dip: 0.4 }, { len: 1, width: 6.9 }],
+  },
+};
+
+test("the head's fur lies where the view types it, each place with its one line", () => {
+  const h = headFur(HEAD);
+  assert.deepEqual([h.tufts.crown.length, h.tufts.cheeks.length, h.tufts.chin.length], [2, 3, 6]);
+  assert.equal(h.head.fur.length, 3, "the crown, the cheek and the chin are each declared fur");
+  assert.deepEqual(h.crown[0]!.ends, ["under", "join"], "the crown's line does not run on under the topknot and join the ear's line");
+  assert.equal(h.cheeks[0]!.on, "tan");
+  assert.deepEqual(h.cheeks[0]!.ends, ["join", "join"]);
+  assert.deepEqual(h.chin!.ends, ["join", "join"]);
+  assert.equal(h.spans().length, 3, "one line per place");
+  // Under a raised ear the cheek's line starts lower, at `raised`, from open fur.
+  const raised = h.spans({ R: true })[1]!;
+  assert.deepEqual(raised.to, on(170));
+  assert.deepEqual(raised.ends, ["join", "free"]);
+  assert.deepEqual(h.spans({ L: true })[1], h.cheeks[0], "a raised ear on the other side moves this cheek's line");
+});
+
+test("a state that moves the head's outline moves every typed place with it, so the fur never pops", () => {
+  const d: P = [1.5, -0.8];
+  const moved = headFur({ ...HEAD, base: { ...HEAD.base, segs: HEAD.base.segs.map((s) => s.map((p) => v.add(p, d)) as typeof s) }, at: (p) => v.add(p, d) });
+  const still = headFur(HEAD);
+  moved.head.segs.forEach((s, i) => s.forEach((p, k) => assert.ok(v.len(v.sub(p, v.add(still.head.segs[i]![k]!, d))) < 1e-6, `segment ${i} point ${k} moves apart from the outline`)));
+  assert.deepEqual(moved.spans()[2]!.from, v.add(still.spans()[2]!.from as P, d));
+});
+
+test("the head's fur keeps its counts and the chin stays a rounded mass", () => {
+  const lock = HEAD.crown![0]!.locks;
+  assert.throws(() => headFur({ ...HEAD, crown: [{ ...HEAD.crown![0]!, locks: [...lock, { len: 2.6, width: 4.2, lean: 0.4 }, { len: 2, width: 3.6, lean: 0.5 }].map((l, i, all) => (i < all.length - 1 ? { ...l, dip: 0.6 } : l)) }] }), /4 locks, not 2 to 3/);
+  const chin = HEAD.chin!;
+  assert.throws(() => headFur({ ...HEAD, chin: { ...chin, scallops: chin.scallops.slice(0, 4).map((l, i) => (i === 3 ? { ...l, dip: undefined } : l)) } }), /4 locks, not 5 to 7/);
+  assert.throws(() => headFur({ base: ring(5, [0, -100]), chin: { ...chin, corners: [on(50, 5)] } }), /jaw turns r [0-5]\.\d\d pt .* at least 6: the chin is a rounded mass/);
+  assert.equal(HEAD_FUR.cornerPt, 6);
 });

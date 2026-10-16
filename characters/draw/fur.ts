@@ -55,6 +55,13 @@ export interface FurRules {
  */
 export const TUFTS: FurRules = { len: [2, 4], width: [3, 5], tipRound: 0.25, lean: [0.3, 0.6], ratio: 0.5, vary: 0.2, dip: [0.5, 1], fit: 0.15 };
 
+/**
+ * Clumps where the sheet draws broad lobes of fur instead (the cheeks over the ears, the tail plume's back): 4 to 10 pt
+ * wide, 1.5 to 4 pt long, leaning up to 0.6 so each ends in a point where it tucks under the next. Locks of tuft size
+ * along a whole plume read as a saw (dog DECISIONS 213).
+ */
+export const CLUMPS: FurRules = { len: [1.5, 4], width: [4, 10], tipRound: 0.35, lean: [0.15, 0.6], ratio: 0.25, vary: 0.2, dip: [0.3, 1], fit: 0.15 };
+
 /** Every way a typed row breaks its rules, in words; none for a row that keeps them. `span` is the span's length in points. */
 export function furCheck(locks: Lock[], tipRound: number, rules: FurRules, span: number): string[] {
   const problems: string[] = [];
@@ -112,7 +119,7 @@ export function furEdge(base: Shape, from: string | P, to: string | P, locks: Lo
   if (B.s <= A.s) throw new Error("furEdge: the span must not wrap past the path's start; start the path elsewhere");
   if (rules) {
     const problems = furCheck(locks, tipRound, rules, B.s - A.s);
-    if (problems.length) throw new Error(`furEdge: a typed row of locks breaks its rules: ${problems.join("; ")}`);
+    if (problems.length) throw new Error(`furEdge: the typed row of locks from (${A.p.map((n) => n.toFixed(1)).join(", ")}) to (${B.p.map((n) => n.toFixed(1)).join(", ")}), ${(B.s - A.s).toFixed(1)} pt along the path, breaks its rules: ${problems.join("; ")}`);
   }
   const typed = locks.every((l) => l.width !== undefined);
   const at = (s: number) => {
