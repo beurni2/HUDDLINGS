@@ -204,7 +204,7 @@ test("the WebGL still of the dog's side reproduces the resvg composite of its mo
   const pieces = new Map(side().map((d) => [d.part, d.piece]));
   const clipOf = (name: string) => rig.parts.find((p) => p.name === name)!.clipTo;
   assert.deepEqual([...info.drawn].sort(), [...pieces.keys()].sort(), "the still draws every drawing of the view");
-  const reference = composite(resvgLayers(info.drawn, pieces, clipOf, SCALE), W, Hpx);
+  const reference = composite(resvgLayers(info.drawn, pieces, clipOf, SCALE, (name) => rig.parts.find((p) => p.name === name)!.alpha), W, Hpx);
   const dx = info.rootPx[0] + SCALE * BOX.x, dy = info.rootPx[1] + SCALE * BOX.y;
   assert.ok(Number.isInteger(dx) && Number.isInteger(dy));
   const [w, h] = info.sizePx;

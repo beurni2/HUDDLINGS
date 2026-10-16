@@ -7,7 +7,7 @@ import { readdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Clip } from "../../../runtime-web/src/format.ts";
-import { EAR_ANGLES, PRESETS, type EarState, type EyeState, type Preset } from "./presets.ts";
+import { BLUSH_REFERENCE, EAR_ANGLES, PRESETS, type EarState, type EyeState, type Preset } from "./presets.ts";
 
 /** An ear's rotation for an ear state: outward is clockwise for the dog's right ear (on the viewer's left), anticlockwise for its left. */
 export const earRot = (side: "L" | "R", state: EarState) => (side === "R" ? 1 : -1) * EAR_ANGLES[state] + 0;
@@ -36,15 +36,22 @@ export function faceClip(name: string, p: Preset): Clip {
     "brow.L": [[0, s.brows.L]], "brow.R": [[0, s.brows.R]], "ear.L": [[0, s.ears.L]], "ear.R": [[0, s.ears.R]],
     ...(s.stars ? { stars: [[0, "sparkle"]] as [number, string][] } : {}),
   };
+  // The blush's level where the table names one, as the cheeks' alpha over their drawing at the reference level
+  // (DECISIONS 144); elsewhere the parts' rest alpha keeps the resting level.
+  const alpha = p.blush === null ? undefined : blushAlpha(p.blush);
   return {
     name: `face_${name}`,
     lengthMs: 1000,
     views: { body: [[0, "front"]], head: [[0, "front"]] },
     states,
     tracks: { "ear.L": { rot: [[0, earRot("L", s.ears.L)]] }, "ear.R": { rot: [[0, earRot("R", s.ears.R)]] } },
+    ...(alpha === undefined ? {} : { alpha: { "blush.L": [[0, alpha]], "blush.R": [[0, alpha]] } }),
     events: [{ at: 0, type: "keyPose" }],
   } as Clip;
 }
+
+/** A blush level (0 to 1) as the blush parts' alpha: the level over the reference level each view's blush is drawn at. */
+export const blushAlpha = (level: number) => Math.round((level / BLUSH_REFERENCE) * 1000) / 1000;
 
 /** Every face clip: one per preset drawn now (hungry and huffy are next round's). */
 export function faceClips(): Clip[] {

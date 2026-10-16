@@ -20,6 +20,14 @@ export type EarState = (typeof EAR_STATES)[number];
  */
 export const EAR_ANGLES: Record<EarState, number> = { neutral: 0, lifted: 10, onePerked: 0, relaxed: -3, lowered: -7 };
 
+/**
+ * The level every view's blush part is drawn at (DECISIONS 144): the printed pink's level over the fur that
+ * match.py's fit (palette.py's, Q25) reads on each cheek with the part at alpha 1, its core at full #F7B3A6 (0.950 to
+ * 0.964 measured, each view's stretch evened to 0.95). A level is drawn as the parts' alpha, level over this: the
+ * rest alpha in rig.json is model.json's resting level over it, and a face clip keys the level its preset names.
+ */
+export const BLUSH_REFERENCE = 0.95;
+
 export interface Preset {
   /** The table's eyes, mouth and ears, each a state or several, in the table's order, and how several combine. */
   eyes: EyeState[];

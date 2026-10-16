@@ -14,10 +14,10 @@ import { validate } from "../../../runtime-web/src/format.ts";
 import { regionFor } from "../../../runtime-web/src/rig.ts";
 import type { P } from "../../draw/geom.ts";
 import { scopeIds } from "../../draw/svg.ts";
-import { clipText, earRot, faceClips, stillOf } from "../src/faceClips.ts";
+import { blushAlpha, clipText, earRot, faceClips, stillOf } from "../src/faceClips.ts";
 import { BROW_STATES, brow } from "../src/parts/brow.ts";
 import { MOUTH_STATES, mouth, type Mouth } from "../src/parts/mouth.ts";
-import { EAR_ANGLES, EAR_STATES, EYE_STATES, PRESETS, type EarState } from "../src/presets.ts";
+import { BLUSH_REFERENCE, EAR_ANGLES, EAR_STATES, EYE_STATES, PRESETS, type EarState } from "../src/presets.ts";
 import { faceFrame, faceStates, front } from "../src/views/front.ts";
 
 const rig = JSON.parse(readFileSync(new URL("../src/rig.json", import.meta.url), "utf8")) as Rig;
@@ -287,7 +287,18 @@ test("the face clips are what presets.ts writes: one per preset drawn now, sound
     assert.ok(p.mouth.includes(s.mouth), `${name}: mouth ${s.mouth}`);
     assert.ok(p.crops.length > 0, `${name} has a primary panel`);
     for (const ear of ["L", "R"] as const) assert.equal(earRot(ear, s.ears[ear]), (ear === "R" ? 1 : -1) * EAR_ANGLES[s.ears[ear]] + 0);
+    // The blush at the preset's level: both cheeks' alpha the level over the reference level they are drawn at
+    // (DECISIONS 144); a preset that names none keys none, so the rest alpha keeps the resting level.
+    const clip = written.find((c) => c.name === `face_${name}`)!;
+    if (p.blush === null) assert.equal(clip.alpha, undefined, `${name} keys no blush`);
+    else {
+      for (const cheek of ["blush.L", "blush.R"]) {
+        assert.deepEqual(clip.alpha?.[cheek], [[0, blushAlpha(p.blush)]], `${name}'s ${cheek}`);
+        assert.ok(Math.abs(blushAlpha(p.blush) * BLUSH_REFERENCE - p.blush) < 0.001, `${name}'s ${cheek} draws its level`);
+      }
+    }
   }
+  assert.deepEqual(Object.entries(PRESETS).filter(([, p]) => p.blush !== null && !p.next).map(([n, p]) => [n, p.blush]), [["shy", 0.8], ["blissful", 0.7]]);
 });
 
 test("each preset's first panel is its primary in model.json, and its still winks the eye its primary winks", () => {

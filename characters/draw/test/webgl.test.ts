@@ -40,7 +40,7 @@ test("the WebGL still of the dog's front reproduces the resvg composite of its m
   const pieces = new Map(front().map((d) => [d.part, d.piece]));
   const clipOf = (name: string) => rig.parts.find((p) => p.name === name)!.clipTo;
   assert.deepEqual([...info.drawn].sort(), [...pieces.keys()].sort(), "the still draws every drawing of the view");
-  const reference = composite(resvgLayers(info.drawn, pieces, clipOf, SCALE), W, H);
+  const reference = composite(resvgLayers(info.drawn, pieces, clipOf, SCALE, (name) => rig.parts.find((p) => p.name === name)!.alpha), W, H);
   // Still pixel (i, j) and reference pixel (i − dx, j − dy) cover the same model points: both grids are whole pixels at 3 px/pt.
   const dx = info.rootPx[0] + SCALE * BOX.x, dy = info.rootPx[1] + SCALE * BOX.y;
   assert.ok(Number.isInteger(dx) && Number.isInteger(dy));

@@ -7,7 +7,7 @@ import { furEdge, furSpan, type Lock } from "../../../draw/fur.ts";
 import { arc, bbox, ellipse, fracAt, mirrorX, pathD, polyD, rotate, sample, smooth, spanPoints, symmetric, v, type Node, type P, type Seg, type Shape } from "../../../draw/geom.ts";
 import { innerLine, mirrorSpans, strokeOf, type DrawnLine } from "../../../draw/line.ts";
 import { marking, part, soft, type Fade, type Paint } from "../../../draw/paint.ts";
-import { blur, join, pad, piece, uid, type Box, type Piece } from "../../../draw/svg.ts";
+import { blur, filter, join, pad, piece, uid, type Box, type Piece } from "../../../draw/svg.ts";
 import { model } from "../model.ts";
 import { C, LINES } from "../palette.ts";
 import { brow } from "../parts/brow.ts";
@@ -476,17 +476,26 @@ function nose(): Piece {
     `<ellipse cx="-1.3" cy="6.05" rx="2.9" ry="1.05" transform="rotate(-6 -1.3 6.05)" fill="${C.noseSheen}" opacity="0.8" filter="url(#${f})"/>`), FRAME.box(box));
 }
 
-/** A blush in the face frame, under the eye's outer side: an ellipse turned with the face. */
+/**
+ * A blush in the face frame, under the eye's outer side: an ellipse turned with the face, drawn at the blush's
+ * reference level (DECISIONS 144): the printed pink blurred, its alpha stretched so its core reaches the full
+ * #F7B3A6, where the blur alone takes it down by about a fifth. The part's rest alpha (rig.json) sets it at the
+ * resting level, and a face clip keys its alpha for the levels the presets ask (presets.ts BLUSH_REFERENCE).
+ */
 function blush(sx: number): Piece {
   const [cx, cy] = face([sx * 30, 13.4]);
   // As compact as the sheet's (its pink covers about 40% of what a 7 by 4.4 pt blush does), so the cream just under
   // the eye stays clear.
-  const rx = 5.8, ry = 3.6;
+  const rx = 5.8, ry = 3.6, sd = 2.2;
   const [dx, dy] = [rx * cosR, rx * sinR], deg = r3((ROLL * 180) / Math.PI);
   const d = `M${r3(cx - dx)} ${r3(cy - dy)} a${rx} ${ry} ${deg} 1 0 ${r3(2 * dx)} ${r3(2 * dy)} a${rx} ${ry} ${deg} 1 0 ${r3(-2 * dx)} ${r3(-2 * dy)}Z`;
-  // The blur takes the small blush's peak down by about a fifth: painted that much stronger, its core reads at the resting level.
-  return soft(d, [cx - rx - 0.5, cy - ry - 0.6, 2 * rx + 1, 2 * ry + 1.2], C.blush, 2.2, Math.round(model.blush.restingLevel * 1.28 * 100) / 100);
+  const f = uid("blush"), box = pad([cx - rx - 0.5, cy - ry - 0.6, 2 * rx + 1, 2 * ry + 1.2], 3 * sd);
+  // The blurred oval peaks at 0.81 of its fill at 3x (dog.test.ts holds the stretched core at full strength).
+  const stretch = `<feComponentTransfer><feFuncA type="linear" slope="${BLUSH_STRETCH.front}"/></feComponentTransfer>`;
+  return piece(`<defs>${filter(f, box, `<feGaussianBlur stdDeviation="${sd}"/>${stretch}`)}</defs><path d="${d}" fill="${C.blush}" filter="url(#${f})"/>`, box);
 }
+/** How far each view's blush is stretched past its blurred peak (DECISIONS 144); the turned views' are typed in their own blush(). */
+const BLUSH_STRETCH = { front: 1.229 };
 
 /**
  * The tag and the ring it swings from, which the turnaround paints blue on the blue collar. The heart is painted by
