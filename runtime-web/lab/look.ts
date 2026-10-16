@@ -3,7 +3,10 @@
 // the sheet match on it into qa/phase3/<view>/ (or --qa <folder>/<view>/), one
 // line per view. It exits 0 when every view's match passes, 1 when a check
 // fails, and 2 when anything errs: the build, a still, or match.py itself (its
-// exit 2), which is never read as failed checks. With --watch, Chromium stays
+// exit 2), which is never read as failed checks. After each view's match the
+// line check (linematch.py) runs on the same still into the same folder
+// (lines.json, lines.png) and prints a second line: the regions failing and the
+// worst measure. It is advisory: it never changes the exit code. With --watch, Chromium stays
 // open and the loop runs again on every change to the species' source or the
 // drawing kit.
 //
@@ -85,6 +88,32 @@ export async function matchVerdict(command: string, argv: string[], out: string)
 }
 
 const seconds = (ms: number) => `${(ms / 1000).toFixed(1)} s`;
+
+/**
+ * Runs the line check (linematch.py: writes <out>/lines.json and lines.png,
+ * exits 0 when every region passes, 1 when one fails, 2 on any error) and
+ * returns its one line: its own summary (the regions failing, the worst
+ * measure) or the crash, never a stale lines.json's. It is advisory: its
+ * verdict never reaches look's exit code until the lead makes it gating
+ * (docs/phase3-fur-plan.md, E).
+ */
+export async function linesLine(command: string, argv: string[], out: string): Promise<string> {
+  const json = join(out, "lines.json");
+  rmSync(json, { force: true });
+  const t0 = performance.now();
+  const m = await run(command, argv);
+  const took = seconds(performance.now() - t0);
+  if (m.code === 0 || m.code === 1) {
+    try {
+      const summary = (JSON.parse(readFileSync(json, "utf8")) as { summary?: unknown }).summary;
+      if (typeof summary === "string") return `${summary} (advisory) · ${took}`;
+    } catch {
+      // reported below as a crash: a 0 or 1 with no lines.json of its own is not a verdict
+    }
+  }
+  const said = m.err.trim().split("\n").at(-1) ?? "";
+  return `lines ERROR the line check crashed (exit ${m.code}): ${said} (advisory) · ${took}`;
+}
 
 /** The face presets a built package holds a clip for (clips/face_<preset>.json in its package.json), sorted. */
 export function faceClips(packageDir: string): string[] {
@@ -210,9 +239,13 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       }
       const t1 = performance.now();
       const argv = [join(repo, "characters/sheetmatch/match.py"), species, "--still", still, "--out", out, ...(existsSync(landmarks) ? ["--landmarks", landmarks] : [])];
-      matches.push(matchVerdict("python3", argv, out).then(({ verdict, text }) => {
+      const lines = [join(repo, "characters/sheetmatch/linematch.py"), species, "--still", still, "--out", out];
+      matches.push(matchVerdict("python3", argv, out).then(async ({ verdict, text }) => {
         const times = `still ${seconds(t1 - t0)} · match ${seconds(performance.now() - t1)} · ${relative(repo, out)}`;
-        return { verdict, line: `  ${label}  ${text}  ·  ${times}` };
+        // The line check runs after the sheet match, on the same still, into the same folder; its line never
+        // changes the view's verdict.
+        const advisory = await linesLine("python3", lines, out);
+        return { verdict, line: `  ${label}  ${text}  ·  ${times}\n  ${" ".repeat(label.length)}  ${advisory}` };
       }));
     }
     const results = await Promise.all(matches);
