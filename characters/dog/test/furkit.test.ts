@@ -366,8 +366,12 @@ test("a brushed marking is the same from its seed every build, darker strands in
   assert.notEqual(scopeIds(brush("patch", PART, PATCH, 0.9, { ...BRUSH, seed: 8 }).svg, "x"), scopeIds(a.svg, "x"));
   assert.equal(a.meta.lines.length, 4);
   for (const l of a.meta.lines) assert.equal(l.kind, "inner");
-  assert.throws(() => brush("patch", PART, PATCH, 0.9, { ...BRUSH, colour: C.fur }), /no light streaks/);
-  assert.throws(() => brush("patch", PART, PATCH, 0.9, { ...BRUSH, inside: { ...BRUSH.inside, colour: C.light } }), /no light streaks/);
+  // Nothing lighter than the marking, by how light it reads: cream, white, the fur's shade, the eyes' white.
+  for (const light of [C.fur, C.light, C.furShade, C.furShadeBy, C.eyeWhite]) {
+    assert.throws(() => brush("patch", PART, PATCH, 0.9, { ...BRUSH, colour: light }), /no light streaks/, `${light} as the marking's own colour`);
+    assert.throws(() => brush("patch", PART, PATCH, 0.9, { ...BRUSH, inside: { ...BRUSH.inside, colour: light } }), /lighter than the marking's own/, `${light} as its inner strands`);
+  }
+  assert.throws(() => brush("patch", PART, PATCH, 0.9, { ...BRUSH, inside: { ...BRUSH.inside, colour: C.patch } }), /lighter than the marking's own/, "the head patches' paler tan inside the tan");
   // Every fill is the marking's or its darker strands' (the white is only the masks').
   const fills = new Set([...a.svg.matchAll(/fill="(#[0-9A-Fa-f]{6})"/g)].map((m) => m[1]!).filter((c) => c !== "#FFFFFF"));
   assert.deepEqual([...fills].sort(), [C.earDeep, C.marking].sort());

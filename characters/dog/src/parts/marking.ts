@@ -64,8 +64,12 @@ export interface Brush {
  * Drawn after the marking (join it on), clipped to its part as the marking is.
  */
 export function brush(name: string, on: Shape, patch: Shape, soft: number, b: Brush): Piece {
-  if ([C.fur, C.light, C.furShade].includes(b.colour) || [C.fur, C.light, C.furShade].includes(b.inside.colour))
-    throw new Error(`brush: ${name}'s strands are cream or white; a marking carries no light streaks (DECISIONS 217)`);
+  // A marking is a tan on the cream, and nothing in it is lighter than it: no cream, white or pale strands, by how
+  // light each reads, not by name.
+  if (lightness(b.colour) > lightness(C.fur) - MARKED)
+    throw new Error(`brush: ${name}'s own colour ${b.colour} (L* ${lightness(b.colour).toFixed(1)}) is not ${MARKED} L* darker than the fur; a marking carries no light streaks (DECISIONS 217)`);
+  if (lightness(b.inside.colour) > lightness(b.colour) + 1e-6)
+    throw new Error(`brush: ${name}'s inner strands ${b.inside.colour} (L* ${lightness(b.inside.colour).toFixed(1)}) are lighter than the marking's own ${b.colour} (L* ${lightness(b.colour).toFixed(1)}); a marking carries no light streaks (DECISIONS 217)`);
   const random = rng(b.seed);
   const between = ([lo, hi]: [number, number]) => lo + (hi - lo) * random();
   const flowAt = (p: P) => v.norm(typeof b.flow === "function" ? b.flow(p) : b.flow);
@@ -122,6 +126,16 @@ export function brush(name: string, on: Shape, patch: Shape, soft: number, b: Br
     `${mask(m, area2, `<g filter="url(#${e})"><path d="${pathD(on.segs)}" fill="#FFFFFF"/></g>`)}${blur(g, area2, b.soft ?? 0.45)}</defs>` +
     `<g clip-path="url(#${clip})"><g mask="url(#${m})"><path d="${strokes.join("")}" fill="${b.colour}" opacity="${b.opacity ?? 0.8}" filter="url(#${g})"/>${inner.svg}</g></g>`,
   partBox, { shapes: [], lines: inner.meta.lines });
+}
+
+/** How much darker than the cream fur a marking's own colour reads, at least, in L* (the tan is about 22 darker, the fur's shade 4). */
+const MARKED = 10;
+
+/** CIE L* of an sRGB colour (#RRGGBB): how light it reads. */
+function lightness(hex: string): number {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+  const y = 0.2126 * r! + 0.7152 * g! + 0.0722 * b!;
+  return y > 216 / 24389 ? 116 * Math.cbrt(y) - 16 : (24389 / 27) * y;
 }
 
 /** A marking deepening toward one side inside its own soft edge: the tan at nothing at `from`, at `opacity` at `to`. */
