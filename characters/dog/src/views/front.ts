@@ -762,35 +762,61 @@ function eyeState(state: (typeof EYE_STATES)[number], side: "L" | "R"): Piece {
 /** Proud's stars beside the head on the dog's right, where the panel puts them from the nose, its raised chin levelled. */
 const STARS: Star[] = [{ at: [-74.9, -41.3], size: [11.4, 14.4], turn: 0 }, { at: [-60.3, -56.7], size: [9.6, 10.4], turn: 0 }];
 
-// The one perked ear, as the One ear perked panel draws it: flipped up off the head's side, its root still beside the
-// temple, coming out from behind the face's side and under the crown's overhang where the hanging ear's does, and the
-// flap turned up over the crown's corner and out, a bean whose free end hangs a little; typed on the dog's right ear
-// in the head's frame, mirrored for its left, and rolled with the face. Ears draw behind the head in every state, so
-// the flap's inner end tucks behind the crown and the topknot (DECISIONS 133).
-const perkedR: Node[] = [[-33, -137.4], [-36, -127], [-38.8, -121.8], [-42.4, -117.8], [-46.8, -117.8], [-49.8, -121.8], [-51.2, -127.8], [-53.6, -135], [-58.6, -141.2], [-65, -145],
-  [-71.4, -148.2], [-75.4, -153], [-74.4, -159.6], [-68, -164.6], [-58.8, -167.4], [-49.4, -167], [-41.4, -163.4], [-35.2, -158.2], [-31.4, -151.2], [-30.6, -143.6]];
+// The one perked ear, as the One ear perked panel draws it (DECISIONS 133): flipped up over the head, a broad bean
+// whose root rises from the crown's top corner beside the topknot and stands over the crown, the flap running out and a
+// little down to its free end, which hangs just past the head's side (the panel's flap spans 0.2 to 1.2 of the head's
+// half-width from the midline; its top stands about 11 pt above the topknot's). Where it turns over at the root the
+// ear's inside shows in a darker wedge behind the fold. Typed on the dog's right ear in the head's frame from the
+// panel levelled and scaled by its brows, mirrored for its left and rolled with the face. Ears draw behind the head in
+// every state, so the crown's line hides the root's foot and the topknot its inner end, as the panel's crown meets it.
+const perkedR: Node[] = [[-10.4, -152.6], [-10.6, -159], [-12.2, -166], [-15.8, -171.8], [-20, -175], [-24.8, -176], [-29.6, -175.4], [-34.8, -173.2],
+  [-39.6, -169], [-44, -164.8], [-48.4, -161.6], [-53.2, -157.6], [-57, -152.6], [-59, -147.4], [-58.4, -142], [-56, -137.8], [-52, -135.4], [-46.4, -134.4],
+  [-41, -135.4], [-36.4, -138.6], [-31.4, -143], [-25, -148.2], [-18.4, -150.6], [-13, -151.8]];
 const perked = { R: smooth(rollN(perkedR)), L: smooth(rollN(mirrorX(perkedR))) };
 const onPerk = (side: "L" | "R", p: P): P => rollP(side === "R" ? p : [-p[0], p[1]]);
 const perkD = (side: "L" | "R", d: string) => rollD(side === "R" ? d : mirrorD(d));
+/**
+ * With the ear up, its root no longer fills the notch under the crown's overhang at the temple: the head's side runs on
+ * round from the overhang's tip down into the face's side, and the panel paints it the root's tan, deepest under the
+ * crown and paling down into the hood. Typed in model space on each side, as the head's temples are (they differ), its
+ * inner part under the head; only the notch shows.
+ */
+const temples = {
+  R: smooth([[-38, -140], [-44.6, -137.8], [-47.8, -133.6], [-48.4, -128.4], [-48.2, -122.6], [-47.4, -116.6], [-46.6, -111], [-40, -108], [-31, -122], [-29.6, -136.4]]),
+  L: smooth([[28, -141.6], [36, -143], [40.6, -141.6], [43.2, -138.6], [43.7, -133], [43.6, -126.4], [43.6, -120], [44, -115], [44.6, -110.6], [38, -109], [29, -122], [26, -134]]),
+};
+/** Each temple's lined edge: from the overhang's tip, where the crown's line ends, down to where the face's side takes over. */
+const templeEdge = { R: [[-47, -135.2], [-46.8, -112.4]] as [P, P], L: [[42, -140.4], [44.2, -113.6]] as [P, P] };
 
 function perkedEar(side: "L" | "R"): Piece {
   const on = (p: P) => onPerk(side, p);
+  const tan = uid("tan");
+  const [[, y0], [, y1]] = templeEdge[side];
+  const temple = litPart(`ear.${side} temple`, temples[side], {
+    fill: C.patch,
+    under: `<defs><linearGradient id="${tan}" gradientUnits="userSpaceOnUse" x1="0" y1="${fmt(y0 - 2)}" x2="0" y2="${fmt(y1)}">` +
+      `<stop offset="0" stop-color="${C.earDeep}"/><stop offset="0.35" stop-color="${C.marking}"/><stop offset="1" stop-color="${C.patch}"/></linearGradient></defs>` +
+      `<rect x="-60" y="${fmt(y0 - 6)}" width="120" height="${fmt(y1 - y0 + 12)}" fill="url(#${tan})"/>`,
+  }, [side === "R" ? { from: templeEdge.R[0], to: templeEdge.R[1], on: "tan", taper: [0.8, 6] } : { from: templeEdge.L[0], to: templeEdge.L[1], on: "tan", taper: [0.8, 6] }]);
   const paint = earFur({
     ear: perked[side],
-    axis: [on([-46, -124]), on([-75, -155])],
-    deepen: [0.4, 1],
-    // Four locks along the flap toward its free end, as the panel paints its fur.
-    locks: ([[[-52, -162], [-60, -164.5], [-67, -162.5], [-72, -157.5]], [[-50, -155], [-58, -157], [-65, -155.6], [-71, -152]],
-      [[-52, -147], [-59, -149.4], [-66, -149.2], [-71, -147.6]], [[-47, -140], [-53, -142], [-58, -144]]] as P[][]).map((pts) => pts.map(on)),
-    dips: [on([-74.6, -151])],
-    light: perkD(side, "M-42 -162 C-48 -166.4 -56 -167.8 -63 -166.6 C-58 -164 -50 -162.6 -45 -159.6Z"),
-    // The crown's and the face's shade where the root runs down behind the face and turns up under the crown.
-    under: [perkD(side, "M-26 -152 L-40 -152 C-44 -146 -46 -138 -47 -130 L-49 -116 L-26 -116Z")],
+    axis: [on([-19.5, -172.6]), on([-55.1, -139.4])],
+    deepen: [0.35, 1],
+    // Four locks running out along the flap to its free end, as the panel paints its fur.
+    locks: ([[[-30.6, -171], [-39.2, -166], [-47.6, -159.2], [-53.2, -151.9]], [[-32.3, -163.3], [-40.8, -157.4], [-48.3, -150.7], [-54, -144.2]],
+      [[-33.8, -154.6], [-41.5, -148.8], [-48, -142.3], [-52.1, -137.9]], [[-38, -146.4], [-43, -141.4], [-46.6, -137.4]]] as P[][]).map((pts) => pts.map(on)),
+    dips: [on([-54.4, -137.6])],
+    light: perkD(side, "M-16 -171 C-20 -175 -28 -175.4 -36 -172 C-42 -168.8 -46 -164.6 -48 -162.4 C-42 -164 -36 -167.4 -29 -169.6 C-24 -170.6 -19.6 -170.2 -16 -171Z"),
+    // Where the root sits down behind the crown, the crown's contact shade.
+    under: [perkD(side, "M-8 -156 C-16 -152.6 -26 -150 -34 -143 C-38 -139.8 -42 -136.4 -46 -134 L-30 -130 L-8 -146Z")],
+    // The fold where the root turns over, the ear's inside a little deeper behind it.
+    fold: { line: ([[-21.7, -161.5], [-24.8, -156.8], [-26.9, -151.9], [-29, -146.9]] as P[]).map(on),
+      back: perkD(side, "M-19.6 -160.4 L-21.7 -161.5 L-24.8 -156.8 L-26.9 -151.9 L-29 -146.9 L-18 -148Z") },
   });
-  // Its line from where its root comes out beside the face, up round the flap's free end and over its top, to where the
-  // top goes behind the topknot.
-  const [a, b] = [on([-43.4, -118.2]), on([-31.8, -150.4])];
-  return litPart(`ear.${side}`, perked[side], paint, [side === "R" ? { from: a, to: b, on: "tan", taper: [3, 4] } : { from: b, to: a, on: "tan", taper: [4, 3] }]);
+  // Its line from its inner end, beside the topknot, over its top and round the free end, to where its underside goes
+  // behind the crown.
+  const [a, b] = [on([-10.8, -162]), on([-38.6, -136.8])];
+  return join(temple, litPart(`ear.${side}`, perked[side], paint, [side === "R" ? { from: a, to: b, on: "tan", taper: [3, 4] } : { from: b, to: a, on: "tan", taper: [4, 3] }]));
 }
 
 /** Every face state the front draws besides its rest, each with its part and state. */
