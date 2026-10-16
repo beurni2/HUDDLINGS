@@ -7,7 +7,9 @@ fail wherever the two draw different states; the same still with a fault
 planted (an eye moved 3 pt, a mouth corner moved 3 pt, the nose moved, an open
 eye on a crescent panel) must fail; and the turnaround's front, the rest front's
 stand-in, passes as neutral, fails as laughing, singing and excited, and fails
-with its face moved 4 pt on its head.
+with its face moved 4 pt on its head. Its cheeks, the printed pink over the fur
+at a known level, are held to the level each preset asks for: a level half way
+where shy asks for 80% fails, and so do the neighbouring levels the presets name.
 
     python3 -m unittest discover -s characters/sheetmatch -p test_facematch.py -v"""
 import contextlib
@@ -46,6 +48,13 @@ DRAWN_ALIKE = {(M + "excited", M + "laughing", "laughing"), (M + "excited", M + 
 # their shapes and spacing, so every panel that draws the same eyes as far apart passes there.
 SAME_STATES = {(M + "excited", M + "laughing", "singing"), (M + "content", M + "laughing", "singing"),
                (E + "surprised", M + "happy", "neutral")}
+# A stand-in for the build's presets.json (presets.ts's data): every face preset at the resting level but the two the
+# spec's table blushes, shy at 80% and blissful at 70% (L486, L494). The check holds whatever levels it is given.
+PRESETS = {"PRESETS": {name: {"blush": {"shy": 0.8, "blissful": 0.7}.get(name)} for name in faces.PRESETS}}
+
+
+def check(still, rest, preset=None, presets=None):
+    return facematch.check("dog", still, rest, preset, PRESETS if presets is None else presets)
 
 
 @functools.cache
@@ -357,6 +366,15 @@ class Turnaround:
         return match.Still.load(folder)
 
 
+def blushed(level):
+    """The fixture's cheeks repainted at a level: the printed pink over the printed fur, flat over each blush part."""
+    def plant(fixture):
+        fur, pink = (sheets.hex_to_rgb(MODEL["palette"][k]).astype(float) for k in ("fur", "blush"))
+        for name in ("blush.L", "blush.R"):
+            fixture.rgb[fixture.part == fixture.names.index(name)] = np.round(fur + level * (pink - fur))
+    return plant
+
+
 def fur_of(fixture):
     return np.median(fixture.rgb[fixture.part == fixture.names.index("head.base")], axis=0)
 
@@ -415,12 +433,12 @@ class RestFrontTest(unittest.TestCase):
         return Turnaround.still(Path(self.tmp.name) / name, **kwargs)
 
     def test_it_passes_as_neutral_and_fails_as_laughing_singing_and_excited(self):
-        result, _ = facematch.check("dog", self.rest, self.rest, "neutral")
+        result, _ = check(self.rest, self.rest, "neutral")
         self.assertTrue(result["pass"], result["summary"])
         self.assertEqual((result["anchorsHeld"], result["shapesHeld"]), (2, 2))
         for preset in ("laughing", "singing", "excited"):
             with self.subTest(preset=preset):
-                result, _ = facematch.check("dog", self.rest, self.rest, preset)
+                result, _ = check(self.rest, self.rest, preset)
                 self.assertFalse(result["pass"])
                 shapes = result["records"][result["primary"]]["shapes"]
                 # Its round open eyes are about three times the crescents' area.
@@ -430,10 +448,12 @@ class RestFrontTest(unittest.TestCase):
 
     def test_its_open_eyes_pass_curious_and_shy_whose_panels_turn_the_head(self):
         # Curious and Shy draw open eyes on a head turned 4 to 5 pt toward the sheet's left: held by place against the
-        # nose, the front's eyes lay 5 to 6 pt off. They are held by their shapes and spacing, and on the head.
-        for preset in ("curious", "shy"):
+        # nose, the front's eyes lay 5 to 6 pt off. They are held by their shapes and spacing, and on the head. Shy
+        # blushes at 80% (its cheeks repainted so; the turnaround's rest at 35%).
+        shy = self.planted("shy", plant=blushed(0.8))
+        for preset, still in (("curious", self.rest), ("shy", shy)):
             with self.subTest(preset=preset):
-                result, _ = facematch.check("dog", self.rest, self.rest, preset)
+                result, _ = check(still, self.rest, preset)
                 self.assertTrue(result["pass"], result["summary"])
                 primary = result["records"][result["primary"]]
                 self.assertTrue(primary["turned"])
@@ -444,7 +464,7 @@ class RestFrontTest(unittest.TestCase):
                 self.assertIn("eyes' spacing", result["summary"])
         # Sleepy's panel turns the head too, and draws closed arcs further apart than open eyes, as the crescents are:
         # the open eyes fail by their shape and their spacing.
-        result, _ = facematch.check("dog", self.rest, self.rest, "sleepy")
+        result, _ = check(self.rest, self.rest, "sleepy")
         primary = result["records"][result["primary"]]
         self.assertTrue(primary["turned"])
         self.assertFalse(result["pass"])
@@ -452,14 +472,14 @@ class RestFrontTest(unittest.TestCase):
 
     def test_the_face_moved_4_pt_on_its_head_fails_and_in_place_passes(self):
         k = MODEL["crops"]["front"]["ptPerCropPx"]
-        gate = facematch.check("dog", self.rest, self.rest, "neutral")[0]["headGate"]
+        gate = check(self.rest, self.rest, "neutral")[0]["headGate"]
         self.assertTrue(gate["pass"])
         self.assertEqual(gate["headShiftPt"], [0.0, 0.0])
         for move in ((1, 0), (-1, 0), (0, 1), (0, -1)):
             px = int(round(4 / k))  # whole crop pixels, about 4 pt
             with self.subTest(move=move):
                 moved = self.planted(f"moved{move}", move_face=(move[0] * px, move[1] * px))
-                result, _ = facematch.check("dog", moved, self.rest, "neutral")
+                result, _ = check(moved, self.rest, "neutral")
                 # Pinned at its own nose the face still matches the panel; on its head it does not.
                 self.assertTrue(result["records"][result["primary"]]["pass"], result["summary"])
                 self.assertFalse(result["headGate"]["pass"])
@@ -471,7 +491,7 @@ class RestFrontTest(unittest.TestCase):
         # The half-lid's dark mark (the lower iris and the lash line) sits about 4 pt below the open eye's; the eye's own
         # pixels do not move. In place it passes; the same eyes moved 4 pt fail; read from the dark marks alone (a still
         # whose ID pass names no eye part), the half-lid in place would fail.
-        lids = facematch.check("dog", self.planted("lids", plant=half_lids), self.rest, "tender")[0]["headGate"]
+        lids = check(self.planted("lids", plant=half_lids), self.rest, "tender")[0]["headGate"]
         self.assertTrue(lids["pass"], lids)
         self.assertLess(lids["rows"]["eyes.middle"]["errPt"], 0.5)
         self.assertIn("parts' pixels", lids["rows"]["eyes.middle"]["measuredBy"])
@@ -481,14 +501,14 @@ class RestFrontTest(unittest.TestCase):
             for name in ("eye.R", "eye.L"):
                 fixture.move(name, 0, px, "head.base")
             half_lids(fixture)
-        moved = facematch.check("dog", self.planted("lids-moved", plant=moved_lids), self.rest, "tender")[0]["headGate"]
+        moved = check(self.planted("lids-moved", plant=moved_lids), self.rest, "tender")[0]["headGate"]
         self.assertFalse(moved["pass"])
         self.assertGreater(moved["rows"]["eyes.middle"]["errPt"], TOLERANCE)
 
         def marks_only(fixture):
             half_lids(fixture)
             unnamed_eyes(fixture)
-        dark = facematch.check("dog", self.planted("lids-unnamed", plant=marks_only), self.rest, "tender")[0]["headGate"]
+        dark = check(self.planted("lids-unnamed", plant=marks_only), self.rest, "tender")[0]["headGate"]
         self.assertIn("dark mark", dark["rows"]["eyes.middle"]["measuredBy"])
         self.assertGreater(dark["rows"]["eyes.middle"]["errPt"], TOLERANCE)
 
@@ -496,11 +516,11 @@ class RestFrontTest(unittest.TestCase):
         # Cheeks drawn up to 3 pt fuller into head.base, and the whole dog drawn 5 pt off: the face stays on its head.
         for points in (1.0, 2.0, 3.0):
             with self.subTest(puffed_pt=points):
-                result = facematch.check("dog", self.planted(f"puff{points}", plant=puffed(points)), self.rest, "neutral")[0]
+                result = check(self.planted(f"puff{points}", plant=puffed(points)), self.rest, "neutral")[0]
                 self.assertTrue(result["headGate"]["pass"], result["headGate"])
                 self.assertLess(float(np.hypot(*result["headGate"]["headShiftPt"])), 0.5)
         shift = int(round(5 / MODEL["crops"]["front"]["ptPerCropPx"]))
-        away = facematch.check("dog", self.planted("away", root_shift=(shift, -shift)), self.rest, "neutral")[0]
+        away = check(self.planted("away", root_shift=(shift, -shift)), self.rest, "neutral")[0]
         self.assertTrue(away["pass"], away["summary"])
         self.assertAlmostEqual(float(np.hypot(*away["headGate"]["headShiftPt"])), np.hypot(shift, shift) * MODEL["crops"]["front"]["ptPerCropPx"], delta=0.3)
         self.assertGreater(away["headGate"]["headIoU"], 0.99)
@@ -519,12 +539,125 @@ class RestFrontTest(unittest.TestCase):
     def test_a_render_with_no_nose_says_so_and_holds_nothing(self):
         def no_nose(fixture):
             fixture.relabel("nose", "head.base", fur_of(fixture))
-        result, _ = facematch.check("dog", self.planted("nonose", plant=no_nose), self.rest, "laughing")
+        result, _ = check(self.planted("nonose", plant=no_nose), self.rest, "laughing")
         primary = result["records"][result["primary"]]
         self.assertFalse(result["pass"])
         self.assertEqual((primary["anchorsHeld"], primary["spacingsHeld"], primary["shapesHeld"]), (0, 0, 0))
         self.assertIn("no nose near the record's", result["summary"])
         self.assertNotIn("anchors", result["summary"].split(";")[0])
+
+
+class BlushTest(unittest.TestCase):
+    """The blush as a level (docs/QUESTIONS.md Q25), on the turnaround's front: each cheek fitted as match.py fits a
+    view's, held to the resting spread where the preset names no level and within BLUSH_LEVEL_TOLERANCE of its level
+    otherwise (DECISIONS.md 190)."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.tmp = tempfile.TemporaryDirectory()
+        cls.stills = {}
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.tmp.cleanup()
+
+    def at(self, level, **kwargs):
+        """The turnaround's front with its cheeks at a level (None: as the sheet paints them, at rest)."""
+        key = (level, tuple(sorted(kwargs)))
+        if key not in self.stills:
+            plant = blushed(level) if level is not None else None
+            self.stills[key] = Turnaround.still(Path(self.tmp.name) / f"blush{len(self.stills)}", plant=plant, **kwargs)
+        return self.stills[key]
+
+    def blush(self, still, preset, presets=None):
+        return facematch.check_blush("dog", MODEL, still, facematch.blush_asked(presets or PRESETS, preset))[0]
+
+    def test_at_rest_each_cheek_lies_in_the_sheet_s_resting_spread(self):
+        result, drawn = check(self.at(None), self.at(None), "neutral")
+        blush = result["blush"]
+        self.assertTrue(blush["measured"] and blush["pass"], blush)
+        self.assertEqual(sorted(c["part"] for c in blush["cheeks"]), ["blush.L", "blush.R"])
+        for cheek in blush["cheeks"]:
+            self.assertAlmostEqual(cheek["level"], 0.35, delta=0.02)
+        self.assertEqual(blush["restingSpread"], MODEL["blush"]["restingSpread"])
+        self.assertIsNone(blush.get("asked"))
+        self.assertIn("blush held (", result["summary"])
+        self.assertIn("rest 0.29 to 0.43", result["summary"])
+        self.assertEqual(result["thresholds"]["blushLevelTolerance"], facematch.BLUSH_LEVEL_TOLERANCE)
+        self.assertEqual(result["thresholds"]["blushRestingSpread"], MODEL["blush"]["restingSpread"])
+        with tempfile.TemporaryDirectory() as tmp:
+            facematch.beside_image(result, drawn, Path(tmp) / "beside.png")
+            self.assertTrue((Path(tmp) / "beside.png").exists())
+
+    def test_a_level_half_way_where_shy_asks_for_80_percent_fails(self):
+        # Planted: the cheeks at 50% where the preset asks for 80%.
+        result, _ = check(self.at(0.5), self.at(None), "shy")
+        blush = result["blush"]
+        self.assertFalse(blush["pass"])
+        self.assertFalse(result["pass"])
+        self.assertEqual((blush["asked"], blush["tolerance"]), (0.8, facematch.BLUSH_LEVEL_TOLERANCE))
+        for cheek in blush["cheeks"]:
+            self.assertAlmostEqual(cheek["level"], 0.5, delta=0.02)
+            self.assertAlmostEqual(cheek["levelErr"], -0.3, delta=0.02)
+            self.assertFalse(cheek["pass"])
+        self.assertIn("blush FAILS (", result["summary"])
+        self.assertIn("0.8 asked, within 0.05", result["summary"])
+        # The primary panel and the head pass: the blush alone fails it.
+        self.assertTrue(result["records"][result["primary"]]["pass"] and result["headGate"]["pass"])
+        self.assertTrue(self.blush(self.at(0.8), "shy")["pass"])
+
+    def test_the_neighbouring_levels_the_presets_name_are_told_apart(self):
+        # Shy at 80% and blissful at 70%: each passes its own and fails the other's, and the resting preset's spread
+        # takes neither. Within the tolerance of the level asked a cheek passes; past it, it fails.
+        for level, preset, passes in ((0.8, "shy", True), (0.7, "shy", False), (0.7, "blissful", True), (0.8, "blissful", False),
+                                      (0.8, "neutral", False), (0.7, "neutral", False), (0.35, "neutral", True), (0.35, "shy", False)):
+            with self.subTest(level=level, preset=preset):
+                self.assertEqual(self.blush(self.at(level), preset)["pass"], passes)
+        tolerance = facematch.BLUSH_LEVEL_TOLERANCE
+        for off, passes in ((tolerance - 0.02, True), (-(tolerance - 0.02), True), (tolerance + 0.02, False), (-(tolerance + 0.02), False)):
+            with self.subTest(off=off):
+                self.assertEqual(self.blush(self.at(round(0.8 + off, 3)), "shy")["pass"], passes)
+
+    def test_the_level_asked_is_the_presets_own(self):
+        # Whatever presets.json says is what is held: shy asking 50% passes the 50% cheeks.
+        asking = {"PRESETS": dict(PRESETS["PRESETS"], shy={"blush": 0.5})}
+        self.assertTrue(self.blush(self.at(0.5), "shy", asking)["pass"])
+        with self.assertRaisesRegex(ValueError, "name no preset 'shy'"):
+            facematch.blush_asked({"PRESETS": {}}, "shy")
+        with self.assertRaisesRegex(ValueError, "not a level from 0 to 1"):
+            facematch.blush_asked({"PRESETS": {"shy": {"blush": 1.5}}}, "shy")
+
+    def test_a_missing_cheek_fails_as_the_sheet_match_s_does(self):
+        def one_cheek(fixture):
+            fixture.relabel("blush.R", "head.base", fur_of(fixture))
+        blush = self.blush(Turnaround.still(Path(self.tmp.name) / "onecheek", plant=one_cheek), "neutral")
+        self.assertFalse(blush["pass"])
+        self.assertEqual(blush["problem"], "1 cheek blush; the sheet shows 2")
+        self.assertEqual([c["part"] for c in blush["cheeks"]], ["blush.L"])
+
+    def test_a_still_naming_no_blush_part_fails_wherever_a_blush_is_asked_for(self):
+        # Planted: the rest front with its blush parts renamed, the pixels the same. Shy asks for 80% and the front's
+        # crop shows two blushing cheeks, so neither passes without a cheek to fit (match.py fails it the same way).
+        def renamed(fixture):
+            for side in ("L", "R"):
+                fixture.names[fixture.names.index(f"blush.{side}")] = f"pinkcheek.{side}"
+                fixture.clip[f"pinkcheek.{side}"] = fixture.clip.pop(f"blush.{side}")
+        still = Turnaround.still(Path(self.tmp.name) / "renamed", plant=renamed)
+        result, _ = check(still, self.at(None), "shy")
+        self.assertEqual((result["blush"]["measured"], result["blush"]["pass"], result["pass"]), (False, False, False))
+        self.assertIn("blush FAILS (the still names no blush part, so no cheek is held to the 0.8 its preset asks for)", result["summary"])
+        blush = self.blush(still, "neutral")
+        self.assertEqual((blush["pass"], blush["sheetCheeks"]), (False, 2))
+        self.assertEqual(blush["problem"], "the still names no blush part; the sheet shows 2 cheeks blushing")
+        # A sheet panel carried into a still is one part, head.base, its cheeks the sheet's own: judged by eye where its
+        # preset asks for no level, and failed where it asks for one. Without the panel's mark it is a still like any.
+        fixture = PanelStill(M + "laughing").still("face_laughing")
+        result, _ = check(fixture, fixture)
+        self.assertEqual((result["blush"]["measured"], result["blush"]["pass"]), (False, True))
+        self.assertIn(f"blush held (a sheet panel ({M}laughing), its cheeks the sheet's own: judged by eye)", result["summary"])
+        self.assertFalse(self.blush(fixture, "shy")["pass"])
+        del fixture.meta["panel"]
+        self.assertFalse(self.blush(fixture, "laughing")["pass"])
 
 
 class CommandTest(unittest.TestCase):
@@ -548,7 +681,8 @@ class CommandTest(unittest.TestCase):
             failing = PanelStill(M + "laughing")
             failing.move(failing.feature("eye.R"), 3.0)
             self.write(tmp / "fail", failing, "face_laughing")
-            rest = ["--rest", str(tmp / "pass")]
+            (tmp / "presets.json").write_text(json.dumps(PRESETS))
+            rest = ["--rest", str(tmp / "pass"), "--presets", str(tmp / "presets.json")]
             with contextlib.redirect_stdout(io.StringIO()):
                 self.assertEqual(facematch.main(["dog", "--still", str(tmp / "pass"), "--out", str(tmp / "out-pass")] + rest), 0)
                 self.assertEqual(facematch.main(["dog", "--still", str(tmp / "fail"), "--out", str(tmp / "out-fail")] + rest), 1)
@@ -568,17 +702,24 @@ class CommandTest(unittest.TestCase):
             with contextlib.redirect_stderr(io.StringIO()):
                 self.assertEqual(facematch.main(["dog", "--still", str(tmp / "notface"), "--out", str(tmp / "out-pass")] + rest), 2)
                 self.assertEqual(facematch.main(["dog", "--still", str(tmp / "none"), "--out", str(tmp / "out-pass")] + rest), 2)
-                self.assertEqual(facematch.main(["dog", "--still", str(tmp / "pass"), "--out", str(tmp / "out-pass"), "--rest", str(tmp / "none")]), 2)
+                self.assertEqual(facematch.main(["dog", "--still", str(tmp / "pass"), "--out", str(tmp / "out-pass"), "--rest", str(tmp / "none"),
+                                                 "--presets", str(tmp / "presets.json")]), 2)
+                # And no presets: the build writes them, and nothing stands in for them.
+                said = io.StringIO()
+                with contextlib.redirect_stderr(said):
+                    self.assertEqual(facematch.main(["dog", "--still", str(tmp / "pass"), "--out", str(tmp / "out-pass"), "--rest", str(tmp / "pass"),
+                                                     "--presets", str(tmp / "nopresets.json")]), 2)
+                self.assertIn("no presets at", said.getvalue())
             self.assertFalse((tmp / "out-pass" / "match.json").exists())
 
     def test_a_preset_no_panel_holds_is_judged_by_eye_and_its_head_still_held(self):
         fixture = PanelStill(M + "content").still("face_hungry")
-        result, drawn = facematch.check("dog", fixture, fixture, None)
+        result, drawn = check(fixture, fixture, None)
         self.assertEqual((result["records"], result["anchorsHeld"]), ({}, 0))
         self.assertIn("judged by eye", result["summary"])
         self.assertIn("nose", result["headGate"]["rows"])
         fixture = PanelStill("expressions.ears.lifted-slightly").still("face_listening")
-        result, drawn = facematch.check("dog", fixture, fixture, None)
+        result, drawn = check(fixture, fixture, None)
         self.assertEqual((result["primary"], result["anchorsHeld"]), ("expressions.ears.lifted-slightly", 0))
         self.assertIn("judged by eye", result["summary"])
         with tempfile.TemporaryDirectory() as tmp:
@@ -589,8 +730,8 @@ class CommandTest(unittest.TestCase):
         still = PanelStill(M + "happy").still("face_happy")
         rest = PanelStill(M + "happy").still("still_front")
         still.meta["views"] = {"body": "side.L", "head": "side.L"}
-        with self.assertRaises(ValueError):
-            facematch.check("dog", still, rest)
+        with self.assertRaisesRegex(ValueError, "draws the front view"):
+            check(still, rest)
 
 
 class RecordsTest(unittest.TestCase):

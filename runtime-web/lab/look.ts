@@ -11,8 +11,9 @@
 // spec section 5b, The sheet match: Faces): the rest front (still_front) and
 // each face clip rendered at 3 px/pt, and facematch.py run on each into
 // qa/phase3/faces/<preset>/ (match.json, beside.png), one line per preset: pass
-// or fail, how many anchors and shapes its primary panel held, the head, and
-// "judged by eye" where nothing is held. A package with no face clip says so and
+// or fail, how many anchors and shapes its primary panel held, the head, the
+// blush's level against the one its preset asks for (build/dev/<species>/
+// presets.json, from presets.ts), and "judged by eye" where nothing is held. A package with no face clip says so and
 // passes. The exit codes are the views' own.
 //
 // node runtime-web/lab/look.ts <species> <view...> [--watch] [--qa <folder>] [--cache <folder>]
@@ -165,6 +166,8 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   const qa = resolve(args.qa ?? join(repo, "qa", "phase3"));
   const packageDir = join(repo, "build", "characters", species);
   const landmarks = join(repo, "build", "dev", species, "landmarks.json");
+  // The presets' data the build writes from src/presets.ts: each face's blush level, which the Faces check holds.
+  const presets = join(repo, "build", "dev", species, "presets.json");
   const width = Math.max(...views.map((v) => v.length));
   const stills = await openStills(packageDir);
 
@@ -186,7 +189,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     }
     if (args.faces) {
       const matcher = (still: string, rest: string, out: string): [string, string[]] =>
-        ["python3", [join(repo, "characters/sheetmatch/facematch.py"), species, "--still", still, "--rest", rest, "--out", out]];
+        ["python3", [join(repo, "characters/sheetmatch/facematch.py"), species, "--still", still, "--rest", rest, "--out", out, "--presets", presets]];
       const { verdict, lines } = await lookFaces(stills, { packageDir, stillsDir: join(repo, "build", "stills", species), qa, matcher });
       for (const line of lines) console.log(`  ${line}`);
       console.log(`look ${species}: faces built in ${seconds(builtAt - start)}, loop ${seconds(performance.now() - start)}`);

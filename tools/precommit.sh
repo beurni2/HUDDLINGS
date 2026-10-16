@@ -6,16 +6,23 @@
 # guide's tests, the runtimes' typecheck and tests, a check that the shared test
 # vectors match the code that writes them, and, when a commit touches what
 # draws, renders or judges the dog or the references it is judged against, its
-# front's sheet match. A fast Visual QA subset joins in phase 4, with the checks (PLAN.md).
+# front's sheet match, and when it touches the dog's source, the sheet match or
+# what the dog is judged against, its Faces check. A fast Visual QA subset joins
+# in phase 4, with the checks (PLAN.md).
 set -e
 top=$(git rev-parse --show-toplevel)
 tmp=$(mktemp -d)
-sheetmatch="" hooktests=""
-# An early exit stops the background tests too; a failing kill must not become the hook's own status.
-trap 'for pid in $sheetmatch $hooktests; do kill "$pid" 2> /dev/null || true; done; rm -rf "$tmp"' EXIT
+sheetmatch="" hooktests="" faces=""
+# An early exit stops the background checks too; a failing kill must not become the hook's own status.
+trap 'for pid in $sheetmatch $hooktests $faces; do kill "$pid" 2> /dev/null || true; done; rm -rf "$tmp"' EXIT
 git -C "$top" checkout-index -a --prefix="$tmp/"
 # --no-renames lists a moved file at both its old and its new path, so moving one out of a watched folder counts.
 staged=$(git -C "$top" diff --cached --name-only --no-renames)
+# The raster cache is the main checkout's build/cache, which its worktrees share: rasters are keyed on what makes
+# them (characters/build/raster.ts), so any checkout's are good in any other and only changed parts are drawn.
+common=$(git -C "$top" rev-parse --path-format=absolute --git-common-dir)
+cache="$top/build/cache"
+if [ "$(basename "$common")" = .git ]; then cache="$(dirname "$common")/build/cache"; fi
 
 # The sheet match's tests take the longest of the Python ones and need nothing
 # else, so they run beside everything below and are waited for at the end. They
@@ -35,6 +42,23 @@ fi
 if [ -f "$tmp/tools/test_precommit.py" ]; then
   TMPDIR="$tmp/bg" PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s "$tmp/tools" -p test_precommit.py -q > "$tmp/hooktests.log" 2>&1 &
   hooktests=$!
+fi
+# The dog's Faces check (spec section 5b, The sheet match: Faces), when the commit touches the dog's source, the sheet
+# match, or what the dog is judged against (its refmap/ and model.json): every face clip built from the committed
+# source, rendered and held to its expression panels, its head and its blush's level, as CI does, failing the commit
+# when a face fails or the check cannot run. It takes the longest of all, so it runs beside everything else, in a
+# checkout of its own, so it never builds where the front's match or the sheet match's tests read. Its evidence goes
+# to build/qa/faces. HUDDLINGS_FACES=0 skips it, for a commit that must land while a face fails.
+facesWatch='^(characters/(dog/src|sheetmatch|dog/refmap)/|characters/dog/model\.json$)'
+if [ -f "$tmp/package.json" ] && [ -d "$top/node_modules" ] && [ -d "$tmp/characters/dog/src" ] && echo "$staged" | grep -Eq "$facesWatch"; then
+  if [ "${HUDDLINGS_FACES:-1}" = 0 ]; then
+    echo "pre-commit: the dog's Faces check is skipped (HUDDLINGS_FACES=0)" >&2
+  else
+    git -C "$top" checkout-index -a --prefix="$tmp/faces/"
+    ln -s "$top/node_modules" "$tmp/faces/node_modules"
+    (cd "$tmp/faces" && TMPDIR="$tmp/bg" PYTHONDONTWRITEBYTECODE=1 exec node runtime-web/lab/look.ts dog --faces --qa "$tmp/faces/build/qa" --cache "$cache") > "$tmp/faces.log" 2>&1 &
+    faces=$!
+  fi
 fi
 
 python3 "$tmp/tools/copylint/copylint.py"
@@ -90,14 +114,9 @@ if [ -f "$tmp/package.json" ]; then
   # judged against (its model.json, ref/ and refmap/): the dog built from the committed source, its still rendered
   # and the sheet match run, as CI does, failing the commit when the match fails or cannot run. Its evidence goes
   # to build/qa/front. HUDDLINGS_FRONT_MATCH=0 skips it, for a commit that must land while the front fails.
-  # The raster cache is the main checkout's build/cache, which its worktrees share: rasters are keyed on what makes
-  # them (characters/build/raster.ts), so any checkout's are good in any other and only changed parts are drawn.
   # The installed tools count too: a new resvg, Playwright or numpy can change the still or the match.
   front='^(characters/(dog/src|draw|build|sheetmatch|refprep)/|runtime-web/(src|lab)/|characters/dog/(model\.json$|ref/|refmap/)|(package(-lock)?\.json|tools/requirements\.txt)$)'
   if [ -d "$tmp/characters/dog/src" ] && echo "$staged" | grep -Eq "$front"; then
-    common=$(git -C "$top" rev-parse --path-format=absolute --git-common-dir)
-    cache="$top/build/cache"
-    if [ "$(basename "$common")" = .git ]; then cache="$(dirname "$common")/build/cache"; fi
     if [ "${HUDDLINGS_FRONT_MATCH:-1}" = 0 ]; then
       echo "pre-commit: the dog's front sheet match is skipped (HUDDLINGS_FRONT_MATCH=0)" >&2
     elif ! (cd "$tmp" && node runtime-web/lab/look.ts dog front --qa "$tmp/build/qa" --cache "$cache"); then
@@ -125,4 +144,15 @@ if [ -n "$sheetmatch" ]; then
     exit 1
   fi
   sheetmatch=""
+fi
+if [ -n "$faces" ]; then
+  if ! wait "$faces"; then
+    faces=""
+    cat "$tmp/faces.log" >&2
+    rm -rf "$top/build/qa/faces" && mkdir -p "$top/build/qa" && cp -R "$tmp/faces/build/qa/faces" "$top/build/qa/faces" 2> /dev/null || true
+    echo "pre-commit: the dog's faces fail the Faces check (or it could not run); see build/qa/faces/<preset>/beside.png" >&2
+    exit 1
+  fi
+  faces=""
+  cat "$tmp/faces.log"
 fi

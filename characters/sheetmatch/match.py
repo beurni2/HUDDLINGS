@@ -656,14 +656,15 @@ def pair_cheeks(centres, boxes, grow):
     return paired
 
 
-def check_blush(frame, grid, render, still):
+def check_blush(frame, grid, render, still, asked=None, tolerance=None):
     """The blush as a level (Q25): each cheek fitted as palette.py fits the sheet's, in a box around the blush part,
-    within the sheet's resting spread; and the blush part's own colour, the cheek carried along the fitted blend
-    from the fur to full strength, within ΔE2000 3 of the printed pink. And where the sheet blushes: phase 2's blush
-    boxes for the crop (refmap/palette.json) and the cheeks pair one to one, each cheek's centroid inside its box
-    grown by 3% of the head's width; a box with no cheek and a cheek with no box both fail."""
+    within the sheet's resting spread at rest, or within tolerance of the level a clip asks for (the Faces check);
+    and the blush part's own colour, the cheek carried along the fitted blend from the fur to full strength, within
+    ΔE2000 3 of the printed pink. And where the sheet blushes: phase 2's blush boxes for the crop
+    (refmap/palette.json) and the cheeks pair one to one, each cheek's centroid inside its box grown by 3% of the
+    head's width; a box with no cheek and a cheek with no box both fail."""
     fur_hex, pink_hex = frame.model["palette"]["fur"], frame.model["palette"]["blush"]
-    lo, hi = frame.model["blush"]["restingSpread"]
+    lo, hi = frame.model["blush"]["restingSpread"] if asked is None else (asked - tolerance, asked + tolerance)
     fur, pink = sheets.hex_to_rgb(fur_hex).astype(float), sheets.hex_to_rgb(pink_hex).astype(float)
 
     def own(pt):
@@ -689,6 +690,8 @@ def check_blush(frame, grid, render, still):
         de = palette.delta(np.clip(core, 0, 255), pink_hex)
         cheek.update(level=round(level, 3), peak=sheets.rgb_to_hex(peak), coreColour=sheets.rgb_to_hex(np.clip(core, 0, 255)),
                      coreDeltaE2000=round(de, 2), levelPass=lo <= level <= hi and de <= DELTA_E_MAX)
+        if asked is not None:
+            cheek["levelErr"] = round(level - asked, 3)
     boxes = blush_boxes(frame, grid)
     grow = BLUSH_PLACE_SHARE * frame.head_width / frame.k
     paired = pair_cheeks(centres, boxes, grow)
@@ -707,7 +710,8 @@ def check_blush(frame, grid, render, still):
         if cheek is None:
             row["problem"] = "no cheek blushes here"
         rows.append(row)
-    result = {"parts": names, "restingSpread": [lo, hi], "heldTo": pink_hex, "thresholdDeltaE2000": DELTA_E_MAX,
+    held = {"restingSpread": [lo, hi]} if asked is None else {"asked": asked, "tolerance": tolerance, "levelRange": [round(lo, 3), round(hi, 3)]}
+    result = {"parts": names, **held, "heldTo": pink_hex, "thresholdDeltaE2000": DELTA_E_MAX,
               "placeThresholdPt": round(BLUSH_PLACE_SHARE * frame.head_width, 2), "cheeks": cheeks, "sheetBoxes": rows,
               "sheetShowsBlush": bool(boxes), "sheetCheeks": len(boxes)}
     if len(cheeks) < len(boxes):

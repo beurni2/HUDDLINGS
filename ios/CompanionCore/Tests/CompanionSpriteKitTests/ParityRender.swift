@@ -31,6 +31,16 @@ private let runs = [
 ]
 private let fps = 30.0
 
+/// The dog's stills (Gate A): the same two sets, on frames that hold the widest view (the three-quarter's tail reaches
+/// 122 pt from the root) with the root as the dance has it. ios.yml renders the web side with the same numbers.
+private let dogRuns = [
+    Run(name: "full", size: 512, pixelsPerPoint: 2, set: "2x"),
+    Run(name: "small", size: 160, pixelsPerPoint: 0.6, set: "small"),
+]
+/// Where CI puts the dog's package, built once on Linux, so both runtimes draw the same bytes; build/characters is
+/// what the app bundles, and stays the test character's.
+private let dogPackage = "build/parity/package/dog"
+
 /// Draws SpriteKit scenes into an offscreen texture and reads them back (README, Rendering).
 @MainActor
 final class Offscreen {
@@ -197,6 +207,78 @@ final class ParityRender: XCTestCase {
                 try writePNG(pixels, size: run.size, to: out.appendingPathComponent(String(format: "f%04d.png", i)))
             }
             note("parity: rendered \(count + 1) frames of \(run.name) (set \(run.set)) into \(out.path)")
+        }
+    }
+
+    /// The dog's parity: every still_<view> and face_<preset> clip of its package, each posed as the web poses a still
+    /// (the clip at time 0 on a fresh player, runtime-web/lab/lab.ts still()), on the dance's stage and white
+    /// background, into build/parity/spritekit-dog/<run>/<clip>.png for tools/qa/parity.py beside render.ts --stills.
+    /// The blush's rest alpha and the face clips' keyed alpha are drawn as they are: soft alpha included.
+    func testRenderTheDogStillsForParity() throws {
+        let folder = repository.appendingPathComponent("build/parity/spritekit-dog")
+        defer {
+            try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            try? (notes.joined(separator: "\n") + "\n").write(to: folder.appendingPathComponent("notes.txt"), atomically: true, encoding: .utf8)
+        }
+        let package = repository.appendingPathComponent(dogPackage)
+        guard FileManager.default.fileExists(atPath: package.appendingPathComponent("package.json").path) else {
+            XCTFail("no package at \(package.path): CI downloads it (ios.yml, dog-package); here, node characters/build/build.ts dog \(dogPackage)")
+            return
+        }
+        guard let device = MTLCreateSystemDefaultDevice(), let queue = device.makeCommandQueue() else {
+            XCTFail("no Metal device: parity cannot be rendered here")
+            return
+        }
+        note("parity (dog): Metal device \(device.name)")
+        let decoder = JSONDecoder()
+        let rig = try decoder.decode(Rig.self, from: Data(contentsOf: package.appendingPathComponent("rig.json")))
+        let atlas = try decoder.decode(Atlas.self, from: Data(contentsOf: package.appendingPathComponent("atlas.json")))
+        let manifest = try JSONSerialization.jsonObject(with: Data(contentsOf: package.appendingPathComponent("package.json"))) as! [String: Any]
+        let clipFiles = (manifest["files"] as! [String: String]).keys.filter { $0.hasPrefix("clips/") }.sorted()
+        let clips = try clipFiles.map { try decoder.decode(Clip.self, from: Data(contentsOf: package.appendingPathComponent($0))) }
+        let compiled = compile(rig)
+        let stills = clips.map(\.name).filter { $0.hasPrefix("still_") || $0.hasPrefix("face_") }.sorted()
+        XCTAssertFalse(stills.isEmpty, "the dog's package holds no still_<view> or face_<preset> clip")
+        note("parity (dog): \(stills.count) stills: \(stills.joined(separator: " "))")
+
+        for run in dogRuns {
+            let set = try XCTUnwrap(atlas.sets.first { $0.name == run.set })
+            let out = folder.appendingPathComponent(run.name)
+            try? FileManager.default.removeItem(at: out)
+            try FileManager.default.createDirectory(at: out, withIntermediateDirectories: true)
+            let offscreen = try Offscreen(device: device, queue: queue, size: run.size)
+            let k = Double(try pixelsPerScenePoint(offscreen))
+            note("parity (dog): \(run.name): SKRenderer draws \(k) px per scene point")
+            let scene = SKScene(size: CGSize(width: Double(run.size) / k, height: Double(run.size) / k))
+            scene.anchorPoint = .zero
+            scene.scaleMode = .fill
+            scene.backgroundColor = SKColor(red: 1, green: 1, blue: 1, alpha: 1)
+            let textures = try AtlasTextures(set: set, folder: package)
+            let companion = CompanionNode(rig: rig, textures: textures, pointScale: CGFloat(run.pixelsPerPoint / k))
+            companion.position = CGPoint(x: Double(run.size) / 2 / k, y: 24 / k)
+            scene.addChild(companion)
+            // SpriteKit's own clock only moves forward; the stills' poses come from their own players at time 0.
+            var clock = 0.0
+            for name in stills {
+                let player = Player(rig: compiled, clips: clips)
+                try player.play(name, at: 0)
+                let frame = try player.advance(to: 0)
+                try companion.show(drawList(compiled, frame.pose, set, frame.state))
+                // Each still is drawn twice; SpriteKit may prepare textures on its first render.
+                clock += 1.0 / 120
+                _ = try offscreen.render(scene, at: clock)
+                clock += 1.0 / 120
+                let pixels = try offscreen.render(scene, at: clock)
+                var ink = 0
+                var p = 0
+                while p < pixels.count {
+                    if Int(pixels[p]) + Int(pixels[p + 1]) + Int(pixels[p + 2]) < 750 { ink += 1 }
+                    p += 4
+                }
+                note("parity (dog): \(run.name): \(name) has \(ink) drawn pixels")
+                try writePNG(pixels, size: run.size, to: out.appendingPathComponent("\(name).png"))
+            }
+            note("parity (dog): rendered \(stills.count) stills of \(run.name) (set \(run.set)) into \(out.path)")
         }
     }
 
