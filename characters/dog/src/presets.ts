@@ -116,7 +116,7 @@ export const PRESETS: Record<string, Preset> = {
     sequence: "happy, then sparkle",
     eyes: ["happy", "sparkle"], eyesHow: "then", mouth: ["smile"], ears: "lifted", brows: "happy", blush: null,
     // The still is the dog's Proud panel: the crescents with the stars round the head (DECISIONS 205); the sparkle
-    // eye (Q2) is its second beat, whose timing is phase 4's.
+    // eye (Q2) is its second beat, whose timing is phase 4's, and brings its own gold stars as the head's go.
     panels: "Proud", crops: ["master.expression.content", "expressions.expression.proud"], still: { eyes: "happy" },
   },
   mischievous: {

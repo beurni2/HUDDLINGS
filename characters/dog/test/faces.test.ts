@@ -746,6 +746,8 @@ test("the stars round the head draw only in a sparkling face, the puffed cheeks 
   for (const clip of faces) assert.equal(clip.states?.stars?.[0]?.[1], clip.name === "face_proud" ? "sparkle" : undefined, `${clip.name}'s stars`);
   const proud = stillOf(PRESETS.proud!);
   assert.deepEqual([proud.eyes.L, proud.eyes.R, proud.stars], ["happy", "happy", true], "proud's still is the crescents with the stars round the head");
+  // Its sparkle beat shows the sparkle's own gold stars beside each eye and not the head's as well: one set at a time.
+  assert.equal(stillOf({ ...PRESETS.proud!, still: { eyes: "sparkle" } }).stars, false, "proud's sparkle beat keeps the stars round the head as well");
   const eye = rig.parts.find((p) => p.name === "eye.L")!;
   // No closed state falls back to the open eye: each has a region of its own, so nothing of the open eye draws under it.
   for (const state of EYE_STATES) {

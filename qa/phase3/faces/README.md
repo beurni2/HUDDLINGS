@@ -106,8 +106,8 @@ and the tiny catchlight as a second glint below the first.
 - `<preset>/beside.png` and `match.json`: the Faces check on each face clip's still, made by
   `node runtime-web/lab/look.ts dog --faces`.
 - `states.png`: the states no preset's still shows (peek, the yawn, the pant, the wink and the perked ear on the dog's
-  right, a lifted ear beside a perked one, raised brows over the wide eyes, the half-lid, the sparkle with proud's
-  stars, huffy's peek back, hungry's o with its eager eyes), and the lifted and the
+  right, a lifted ear beside a perked one, raised brows over the wide eyes, the half-lid, the sparkle as proud's
+  second beat, its own gold stars in place of the head's, huffy's peek back, hungry's o with its eager eyes), and the lifted and the
   perked ears turned to the ear springs' limits, 14° out and in, behind a head that stays whole (DECISIONS 158).
   `node qa/phase3/faces/states.ts build/stills/dog/states`, then
   `python3 qa/phase3/faces/sheet.py states build/stills/dog/states qa/phase3/faces/states.png`.

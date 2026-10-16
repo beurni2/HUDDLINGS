@@ -35,9 +35,10 @@ export function stillOf(p: Preset, peek = false) {
     ears,
     temples: { L: up("L"), R: up("R") },
     headLine,
-    // The stars round the head (Proud's) draw only in a face whose sequence sparkles, through both its beats: proud's
-    // still is its panel, the crescents with the stars (DECISIONS 205).
-    stars: p.eyes.includes("sparkle"),
+    // The stars round the head (Proud's) draw only in a face whose sequence sparkles, and only while its eyes are not the
+    // sparkle, which brings its own gold stars beside each eye: one set of stars at a time, as each of the sheets' panels
+    // draws one (DECISIONS 205). Proud's still is its panel, the crescents with the stars round the head.
+    stars: p.eyes.includes("sparkle") && eyes !== "sparkle",
     cheeks: peek ? undefined : p.cheeks,
   };
 }
