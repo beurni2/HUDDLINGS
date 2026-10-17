@@ -333,7 +333,7 @@ const CHEEK_L: Lock[] = [{ len: 1.5, width: 4.6, lean: -0.6, dip: 0.3, notch: 1 
 // jaw's round sides plain; their notches shallow (0.1 to 0.2 pt), so the edge reads as the crop's soft arc with small
 // scallops (deeper ones, 0.25 to 0.35, read as a wavy ribbon at 10 times).
 /** The chin's line at its deepest along the scallops (a ceiling on headFur's notch depth there, 0.55). */
-const CHIN_LINE = 0.3;
+const CHIN_LINE = 0.15;
 const CHIN: Lock[] = [{ len: 1.3, width: 7.6, lean: -0.45, dip: 0.15 }, { len: 0.95, width: 6, lean: -0.2, dip: 0.2 }, { len: 1.5, width: 7.5, lean: -0.3, dip: 0.1 },
   { len: 1.2, width: 7.4, lean: 0.05, dip: 0.15 }, { len: 1.6, width: 5.8, lean: 0.35, dip: 0.2 }, { len: 1.1, width: 7, lean: 0.2, dip: 0.1 }, { len: 1.35, width: 5.3, lean: 0.5 }];
 
@@ -349,7 +349,7 @@ const NOTCHES = {
   L: { top: [[28.4, -138.8], [39.4, -141]] as [P, P], side: [[33.7, -129.4], [27.8, -137.6]] as [P, P] },
 };
 /** The crown's cream over each root's top (headLinePiece): how far it reaches in past the head's edge and out past the crown locks' tips, in points. */
-const ROOT_CAP = { above: 0.8, below: 0.35 };
+const ROOT_CAP = { above: 0.8, below: 0.5 };
 /**
  * Each root's point under the crown, where its tan fades out: the way into the tan's wedge from the point (between its
  * top and its side), how far in along it the fade's middle lies and its half-axes, in points.
@@ -590,7 +590,7 @@ function headLinePiece(up: { L: boolean; R: boolean } = { L: false, R: false }, 
   }).join("");
   const puffs = `<path d="${gapEdge}" fill="${C.fur}" opacity="0.6" filter="url(#${f})"/><path d="${gapRim}" fill="${C.light}" opacity="0.55" filter="url(#${g})"/>` +
     `<path d="${flicks}" fill="${C.light}" opacity="0.7" filter="url(#${f})"/>`;
-  return lineGate(piece(`<defs>${r.defs}${blur(f, pad(box, 2), 0.4)}${blur(g, pad(box, 2), 0.5)}${blur(k, pad(box, 2), 0.8)}${blur(m, pad(box, 2), 0.5)}</defs>${roots}${puffs}${r.body}`, box, {
+  return lineGate(piece(`<defs>${r.defs}${blur(f, pad(box, 2), 0.4)}${blur(g, pad(box, 2), 0.5)}${blur(k, pad(box, 2), 0.8)}${blur(m, pad(box, 2), 0.65)}</defs>${roots}${puffs}${r.body}`, box, {
     shapes: [{ name: "head.line", nodes: head.typed, segs: head.segs, outlined: r.outlined, fur: head.fur.map(([a, b]) => [fracAt(head, a), fracAt(head, b)]) }],
     lines: r.lines,
   }));

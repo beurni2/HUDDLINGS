@@ -1,8 +1,10 @@
 // The front's joins sheet for the fur pass (docs/phase3-fur-plan.md, the front lane; DECISIONS 220 to 227): one row per
 // join the audit names (qa/phase3/audit/defects.json, view "front"), each the sheet's crop | the base (fbbe6d3, before
 // the lane) | today's drawing, at one scale and 3 to 4 times the phone's 3 px/pt, labelled; and the face states drawn
-// on the same parts (the raised ears and their temples, huffy's puffed head), before and after. Each region is
-// composited as the rest-frame tests composite a view (characters/draw/test/composite.ts), from the drawings themselves.
+// on the same parts (the raised ears and their temples, huffy's puffed head), before and after, each raised ear beside
+// its own panel (One ear perked levelled and scaled by its brows, DECISIONS 133; Lifted slightly by its record's scale
+// with its head's top on the model's, 146), the rest beside the turnaround crop. Each region is composited as the
+// rest-frame tests composite a view (characters/draw/test/composite.ts), from the drawings themselves.
 //
 // node qa/phase3/fur/front/joins.ts [--out <folder>]   → <folder>/joins.png and <folder>/states.png (qa/phase3/fur/front/ by default)
 // node qa/phase3/fur/front/joins.ts --only <text> --out <folder>   → <folder>/peek.png: the rows whose label holds the text, for a quick look
@@ -149,6 +151,57 @@ function readPng(path: string): Image {
 const crop = model.crops["front"]!;
 const sheetImg = readPng(join(repo, "characters/dog/ref/panels/master", `${crop.crop}.png`));
 
+type Pt = [number, number];
+/** A panel resampled (bilinear) over a model-space box at `zoom`, through the map from model points to its pixels. */
+function panelRegion(img: Image, toPanel: (m: Pt) => Pt, box: Box, zoom: number) {
+  const w = Math.round(box[2] * zoom), h = Math.round(box[3] * zoom), png = new PNG({ width: w, height: h });
+  const at = (x: number, y: number, k: number) => img.data[(Math.min(img.h - 1, Math.max(0, y)) * img.w + Math.min(img.w - 1, Math.max(0, x))) * 4 + k]!;
+  for (let j = 0; j < h; j++) {
+    for (let i = 0; i < w; i++) {
+      const [px, py] = toPanel([box[0] + (i + 0.5) / zoom, box[1] + (j + 0.5) / zoom]);
+      const x0 = Math.floor(px - 0.5), y0 = Math.floor(py - 0.5), fx = px - 0.5 - x0, fy = py - 0.5 - y0;
+      for (let k = 0; k < 4; k++) {
+        png.data[(j * w + i) * 4 + k] = Math.round(at(x0, y0, k) * (1 - fx) * (1 - fy) + at(x0 + 1, y0, k) * fx * (1 - fy) + at(x0, y0 + 1, k) * (1 - fx) * fy + at(x0 + 1, y0 + 1, k) * fx * fy);
+      }
+    }
+  }
+  return { png: PNG.sync.write(png), pw: w, ph: h, vb: [0, 0, w, h] as Box };
+}
+const panels = join(repo, "characters/dog/ref/panels/expressions");
+const lm = (model as unknown as { landmarks: Record<string, Record<string, Pt>> }).landmarks["front"]!;
+const faceCrops = (model as unknown as { faceCrops: Record<string, { ptPerCropPx: number }> }).faceCrops;
+/**
+ * One ear perked, which has no face crop record, levelled and scaled by its brows onto the front's face frame, as
+ * qa/phase3/faces/perked.py lays it (DECISIONS 133): its brows' middles at (49.5, 62) and (98.5, 55) px, the render's
+ * 46 pt apart, 28.4 pt above the eyes' midpoint, rolled with the face.
+ */
+function perkedPanel() {
+  const img = readPng(join(panels, "expressions.ears.one-ear-perked.png"));
+  const bl: Pt = [49.5, 62], br: Pt = [98.5, 55], mid: Pt = [(bl[0] + br[0]) / 2, (bl[1] + br[1]) / 2];
+  const a = -Math.atan2(br[1] - bl[1], br[0] - bl[0]), k = 46 / Math.hypot(br[0] - bl[0], br[1] - bl[1]);
+  const el = lm["eye.L"]!, er = lm["eye.R"]!, fc: Pt = [(el[0] + er[0]) / 2, (el[1] + er[1]) / 2], roll = Math.atan2(el[1] - er[1], el[0] - er[0]);
+  const t = roll + a, c = Math.cos(t) * k, sn = Math.sin(t) * k;
+  // model = lin·panel + off, lin = k·rot(roll + a); off places the brows' middle 28.4 pt above the eyes' midpoint.
+  const off: Pt = [fc[0] - Math.sin(roll) * -28.4 - (c * mid[0] - sn * mid[1]), fc[1] + Math.cos(roll) * -28.4 - (sn * mid[0] + c * mid[1])];
+  const det = c * c + sn * sn;
+  return { img, toPanel: ([x, y]: Pt): Pt => { const dx = x - off[0], dy = y - off[1]; return [(c * dx + sn * dy) / det, (-sn * dx + c * dy) / det]; } };
+}
+/** Lifted slightly at its record's scale (1.04 pt a pixel), its head's top (the tuft's highest point) on the model's, as qa/phase3/faces/lifted.py lays it (DECISIONS 146). */
+function liftedPanel() {
+  const img = readPng(join(panels, "expressions.ears.lifted-slightly.png"));
+  const k = faceCrops["expressions.ears.lifted-slightly"]!.ptPerCropPx;
+  // The tuft's highest point: the topmost row in the middle third with a pixel 12 off the card in any channel, the middle of its run.
+  const card = [0, 1, 2].map((ch) => { const v: number[] = []; for (let x = 0; x < img.w; x++) v.push(img.data[x * 4 + ch]!, img.data[((img.h - 1) * img.w + x) * 4 + ch]!); v.sort((p, q) => p - q); return v[v.length >> 1]!; });
+  let top: Pt = [img.w / 2, 0];
+  find: for (let y = 0; y < img.h; y++) {
+    const xs: number[] = [];
+    for (let x = Math.floor(img.w / 3); x < Math.floor((2 * img.w) / 3); x++) if ([0, 1, 2].some((ch) => Math.abs(img.data[(y * img.w + x) * 4 + ch]! - card[ch]!) > 12)) xs.push(x);
+    if (xs.length) { top = [xs.reduce((p, q) => p + q, 0) / xs.length, y + 0.5]; break find; }
+  }
+  const head = lm["head.top"]!;
+  return { img, toPanel: ([x, y]: Pt): Pt => [top[0] + (x - head[0]) / k, top[1] + (y - head[1]) / k] };
+}
+
 /** The sheet's crop of a region of model space, cut to whole crop pixels, with the region's place in them (the root on the crop's ground anchor, as the sheet match aligns them). */
 function sheetRegion(box: Box) {
   const k = 1 / crop.ptPerCropPx, [gx, gy] = crop.anchorsCropPx.ground;
@@ -228,11 +281,13 @@ const JOINS: Row[] = [
 ];
 
 /** The face states drawn on the fur pass's parts: each composite's parts and states, and the region shown. */
-const STATES: { label: string; states: Record<string, string>; review?: boolean; box: Box; zoom: number }[] = [
+const STATES: { label: string; states: Record<string, string>; review?: boolean; box: Box; zoom: number; panel?: "perked" | "lifted" }[] = [
   { label: "rest (phone size, 3 px/pt)", states: {}, box: [-90, -180, 180, 76], zoom: 3 },
-  { label: "the dog's right ear perked: ear.R onePerked, temple.R up, head.line templeR (phone size, 3 px/pt)", states: { "ear.R": "onePerked", "temple.R": "up", "head.line": "templeR" }, box: [-90, -184, 180, 80], zoom: 3 },
-  { label: "both ears lifted: ears lifted, temples up, head.line temples (phone size, 3 px/pt)", states: { "ear.L": "lifted", "ear.R": "lifted", "temple.L": "up", "temple.R": "up", "head.line": "temples" }, box: [-90, -184, 180, 80], zoom: 3 },
-  { label: "the dog's left ear lifted: ear.L lifted, temple.L up, head.line templeL (phone size, 3 px/pt)", states: { "ear.L": "lifted", "temple.L": "up", "head.line": "templeL" }, box: [-90, -184, 180, 80], zoom: 3 },
+  { label: "the dog's left ear perked beside One ear perked: ear.L onePerked, temple.L up, head.line templeL (phone size, 3 px/pt)", states: { "ear.L": "onePerked", "temple.L": "up", "head.line": "templeL" }, box: [-90, -184, 180, 80], zoom: 3, panel: "perked" },
+  { label: "the dog's left ear perked, the temple and the head's side (zoom 8)", states: { "ear.L": "onePerked", "temple.L": "up", "head.line": "templeL" }, box: [24, -150, 32, 44], zoom: 8, panel: "perked" },
+  { label: "both ears lifted beside Lifted slightly: ears lifted, temples up, head.line temples (phone size, 3 px/pt)", states: { "ear.L": "lifted", "ear.R": "lifted", "temple.L": "up", "temple.R": "up", "head.line": "temples" }, box: [-90, -184, 180, 80], zoom: 3, panel: "lifted" },
+  { label: "both ears lifted, the dog's right temple and the head's side (zoom 8)", states: { "ear.L": "lifted", "ear.R": "lifted", "temple.L": "up", "temple.R": "up", "head.line": "temples" }, box: [-58, -150, 32, 44], zoom: 8, panel: "lifted" },
+  { label: "the dog's left ear lifted beside Lifted slightly: ear.L lifted, temple.L up, head.line templeL (phone size, 3 px/pt)", states: { "ear.L": "lifted", "temple.L": "up", "head.line": "templeL" }, box: [-90, -184, 180, 80], zoom: 3, panel: "lifted" },
   { label: "huffy A: cheeks puffed, flat lids, pressed mouth (phone size, 3 px/pt)", states: { cheeks: "puffed", "eye.L": "flat", "eye.R": "flat", mouth: "pressed" }, box: [-90, -150, 180, 96], zoom: 3 },
   { label: "huffy B (review only): the head puffed, head.base and head.line (phone size, 3 px/pt)", states: { "head.base": "puffed", "head.line": "puffed", "eye.L": "flat", "eye.R": "flat", mouth: "pressed" }, review: true, box: [-90, -150, 180, 96], zoom: 3 },
 ];
@@ -240,9 +295,11 @@ const STATES: { label: string; states: Record<string, string>; review?: boolean;
 const before = await baseFront();
 const after = (await import(pathToFileURL(join(repo, "characters/dog/src/views/front.ts")).href)) as FrontModule;
 const all = (m: FrontModule, review: boolean) => [...m.front(), ...m.faceStates(), ...(review ? m.reviewStates() : [])];
-const columns = (box: Box, zoom: number, versions: [string, Drawn[]][], states: Record<string, string> = {}): Column[] => {
+const PANELS = { perked: perkedPanel(), lifted: liftedPanel() };
+const columns = (box: Box, zoom: number, versions: [string, Drawn[]][], states: Record<string, string> = {}, panel?: keyof typeof PANELS): Column[] => {
   const w = Math.round(box[2] * zoom), h = Math.round(box[3] * zoom);
-  return [{ name: "sheet", ...sheetRegion(box) }, ...versions.map(([name, drawn]) => ({ name, png: render(drawn, states, box, zoom), pw: w, ph: h, vb: [0, 0, w, h] as Box }))];
+  const sheet = panel ? { name: panel === "perked" ? "One ear perked" : "Lifted slightly", ...panelRegion(PANELS[panel].img, PANELS[panel].toPanel, box, zoom) } : { name: "sheet", ...sheetRegion(box) };
+  return [sheet, ...versions.map(([name, drawn]) => ({ name, png: render(drawn, states, box, zoom), pw: w, ph: h, vb: [0, 0, w, h] as Box }))];
 };
 const rest: [string, Drawn[]][] = [["before", all(before, false)], ["after", all(after, false)]];
 if (args.only) {
@@ -253,5 +310,5 @@ if (args.only) {
 write("Front: the joins the audit names, sheet | before (fbbe6d3) | after", JOINS.map((row) => ({ row, columns: columns(row.box, row.zoom, rest) })), join(out, "joins.png"));
 const review: [string, Drawn[]][] = [["before", all(before, true)], ["after", all(after, true)]];
 write("Front: the face states on the fur pass's parts, sheet | before (fbbe6d3) | after", STATES.map((s) => ({
-  row: { label: s.label, box: s.box, zoom: s.zoom }, columns: columns(s.box, s.zoom, s.review ? review : rest, s.states),
+  row: { label: s.label, box: s.box, zoom: s.zoom }, columns: columns(s.box, s.zoom, s.review ? review : rest, s.states, s.panel),
 })), join(out, "states.png"));
