@@ -10,7 +10,7 @@
    "head": "front"
   },
   "ppp": 3,
-  "sizePx": [532, 558],
+  "sizePx": [533, 558],
   "rootPx": [268, 517]
  },
  "rest": {
@@ -105,17 +105,17 @@
     "eye.R": {
      "record": [47.23, 61.36],
      "held": true,
-     "found": [47.53, 61.13],
-     "errPt": 0.46,
-     "offsetPt": [0.41, -0.2],
+     "found": [47.55, 61.12],
+     "errPt": 0.48,
+     "offsetPt": [0.44, -0.21],
      "pass": true
     },
     "eye.L": {
      "record": [88.63, 52.64],
      "held": true,
-     "found": [88.62, 52.48],
+     "found": [88.6, 52.48],
      "errPt": 0.2,
-     "offsetPt": [0.03, -0.2],
+     "offsetPt": [0.0, -0.2],
      "pass": true
     },
     "mouth.R": {
@@ -138,20 +138,20 @@
    "spacing": {},
    "shapes": {
     "eye.R": {
-     "areaPx": 277,
+     "areaPx": 278,
      "recordAreaPx": 282,
-     "areaPt2": 102.8,
-     "areaRatio": 0.982,
-     "iou": 0.845,
+     "areaPt2": 103.1,
+     "areaRatio": 0.986,
+     "iou": 0.842,
      "pass": true,
      "held": true
     },
     "eye.L": {
-     "areaPx": 281,
+     "areaPx": 283,
      "recordAreaPx": 290,
-     "areaPt2": 104.2,
-     "areaRatio": 0.969,
-     "iou": 0.903,
+     "areaPt2": 105.0,
+     "areaRatio": 0.976,
+     "iou": 0.897,
      "pass": true,
      "held": true
     },
@@ -221,17 +221,17 @@
     "eye.R": {
      "record": [85.09, 108.74],
      "held": true,
-     "found": [84.33, 107.66],
-     "errPt": 0.93,
-     "offsetPt": [-0.24, -0.89],
+     "found": [84.38, 107.6],
+     "errPt": 0.94,
+     "offsetPt": [-0.19, -0.92],
      "pass": true
     },
     "eye.L": {
      "record": [152.25, 84.28],
      "held": true,
-     "found": [152.8, 82.74],
-     "errPt": 1.15,
-     "offsetPt": [0.73, -0.88],
+     "found": [152.76, 82.75],
+     "errPt": 1.14,
+     "offsetPt": [0.71, -0.89],
      "pass": true
     },
     "mouth.R": {
@@ -254,20 +254,20 @@
    "spacing": {},
    "shapes": {
     "eye.R": {
-     "areaPx": 212,
+     "areaPx": 213,
      "recordAreaPx": 174,
-     "areaPt2": 104.6,
-     "areaRatio": 1.218,
-     "iou": 0.763,
+     "areaPt2": 105.1,
+     "areaRatio": 1.224,
+     "iou": 0.759,
      "pass": true,
      "held": true
     },
     "eye.L": {
-     "areaPx": 209,
+     "areaPx": 211,
      "recordAreaPx": 182,
-     "areaPt2": 103.1,
-     "areaRatio": 1.148,
-     "iou": 0.802,
+     "areaPt2": 104.1,
+     "areaRatio": 1.159,
+     "iou": 0.811,
      "pass": true,
      "held": true
     },

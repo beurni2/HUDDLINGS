@@ -99,7 +99,7 @@
  },
  "headGate": {
   "headShiftPt": [0.0, 0.0],
-  "headIoU": 0.9931,
+  "headIoU": 0.9916,
   "thresholdPt": 2.8,
   "rows": {
    "nose": {
@@ -111,7 +111,7 @@
    "eyes.middle": {
     "model": [-1.2, -99.6],
     "found": [-1.2, -99.58],
-    "errPt": 0.02,
+    "errPt": 0.01,
     "pass": true,
     "measuredBy": "each eye's parts' pixels in the ID pass"
    }
@@ -178,5 +178,5 @@
  "shapesHeld": 0,
  "pass": true,
  "note": "its primary panel holds nothing of listening: it is judged by eye beside it; the head and the blush are held",
- "summary": "pass: nothing held on expressions.ears.lifted-slightly, judged by eye; head held (nose 0.66 pt, eyes.middle 0.02 pt); blush held (R 0.349, L 0.350; rest 0.29 to 0.43)"
+ "summary": "pass: nothing held on expressions.ears.lifted-slightly, judged by eye; head held (nose 0.66 pt, eyes.middle 0.01 pt); blush held (R 0.349, L 0.350; rest 0.29 to 0.43)"
 }
