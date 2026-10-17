@@ -473,7 +473,7 @@ test("each right-facing view's face states are its left-facing ones mirrored, na
     assert.deepEqual([...R.keys()].sort(), [...L.keys()].map(swapKey).sort(), `${kind}: the facings draw the same states`);
     // Every face state, hungry's and huffy's and Q2's squeeze and sparkle among them (DECISIONS 202 to 208), with the held
     // stars, puffed cheeks and profile mouths.
-    assert.equal(R.size, kind === "side" ? 25 : 40, `${kind}.R draws ${R.size} face states`);
+    assert.equal(R.size, kind === "side" ? 25 : 41, `${kind}.R draws ${R.size} face states`);
     for (const [key, r] of R) {
       const l = L.get(swapKey(key))!;
       assert.ok(r.svg.startsWith(MIRROR), `${kind}.R ${key} is not its .L drawing mirrored`);
@@ -488,15 +488,26 @@ test("each right-facing view's face states are its left-facing ones mirrored, na
           .replace(/<path d="[^"]+" fill="#FFFFFF" opacity="[^"]+" filter="url\(#[^)]+\)"\/>/g, "") : svg);
       if (key.startsWith("head.line:")) {
         // The head's line follows the light on its inner side (the line rule's width), so, as the rest test above, its
-        // coverage is not held to the mirror's; it is held to its own facing's rest line, which that test holds: the
-        // same line with only the near side's curve left out, on the near ear's side of the face.
+        // coverage is not held to the mirror's; it is held to its own facing's rest line, which that test holds. Beside
+        // the near ear perked: the same line with only the near side's curve left out, on the near ear's side of the face.
+        // Beside the far ear perked (DECISIONS 234; .R's templeL, .L's templeR): the same line with the far root's
+        // stretch lined and its feathering gone, every change on the far side of the face about the far root.
+        const far = key === "head.line:templeL";
         for (const [view, p, near] of [[`${kind}.L`, l, -1], [`${kind}.R`, r, 1]] as const) {
           const t = raster(p.svg, 2), rest = raster(pieces(view).get("head.line")!.svg, 2);
-          let extra = 0, gone = 0, gx = 0;
+          let extra = 0, added = 0, gone = 0, gx = 0, mass = 0, mx = 0, inner = Infinity;
           for (let k = 0; k < t.width * t.height; k++) {
-            const d = (t.data[k * 4 + 3]! - rest.data[k * 4 + 3]!) / 255;
+            const d = (t.data[k * 4 + 3]! - rest.data[k * 4 + 3]!) / 255, x = BOX.x + ((k % t.width) + 0.5) / 2;
             extra = Math.max(extra, d);
-            if (d < 0) (gone -= d), (gx += -d * (BOX.x + ((k % t.width) + 0.5) / 2));
+            if (d > 0) added += d;
+            if (d < 0) (gone -= d), (gx += -d * x);
+            if (Math.abs(d) >= 2 / 255) (mass += Math.abs(d)), (mx += Math.abs(d) * x), (inner = Math.min(inner, near * x));
+          }
+          if (far) {
+            assert.ok(added > 5 && gone > 5, `${view} ${key} adds ${added.toFixed(1)} px and leaves out ${gone.toFixed(1)}: the far root's stretch is not lined`);
+            // The far side lies at x < 0 in .L (the far root about x -83) and its mirror in .R: near * x reads it as positive.
+            assert.ok(near * (mx / mass) > 75 && inner > 55, `${view} ${key} changes the line about x = ${(mx / mass).toFixed(1)}, as far in as x = ${(near * inner).toFixed(1)}: not only the far root`);
+            continue;
           }
           assert.ok(extra < 2 / 255, `${view} ${key} draws ${(extra * 255).toFixed(1)}/255 where its rest line draws nothing`);
           assert.ok(gone > 0 && near * (gx / gone) > 10, `${view} ${key} leaves out ${gone.toFixed(1)} px about x = ${(gx / gone).toFixed(1)}, not the near side's curve`);

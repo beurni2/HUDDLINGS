@@ -8,7 +8,7 @@ import { CLUMPS, furEdge, furSpan, STEP, TUFTS, type Lock } from "../../../draw/
 import { bbox, ellipse, fracAt, pathD, rotate, sample, smooth, spanPoints, v, type Node, type P, type Shape } from "../../../draw/geom.ts";
 import { innerLine, strokeOf, type DrawnLine, type Stroke } from "../../../draw/line.ts";
 import { LIMITS, lineGate } from "../../../draw/lint.ts";
-import { headFur, type HeadFur } from "../parts/headfur.ts";
+import { HEAD_FUR, headFur } from "../parts/headfur.ts";
 import { groundShadow } from "../parts/shadow.ts";
 import { LIGHT, marking, part, soft, type Paint } from "../../../draw/paint.ts";
 import { blur, join, pad, piece, uid, type Box, type Piece } from "../../../draw/svg.ts";
@@ -181,57 +181,47 @@ const ears = { R: EDGES.R.shape, L: EDGES.L.shape };
 // The head: the crown under the topknot; on the near side the crown's fur overhangs the near ear's root, and the
 // face's side runs down over the ear to the near cheek; the jaw lies along the collar's top from the near cheek
 // to the chin, dipping lowest under the near cheek, and rises from the chin up the far side of the jaw to the far
-// cheek's puff, which bulges out over the far ear; above it the face's far side runs up over the far ear to its
-// root and the crown.
+// cheek's puff, which bulges out over the far ear in two round lobes, the upper the larger, a soft notch between them
+// (the crop's puff: x -96.8 at y -85, the notch -96 at -89.5, -97.8 at -91, a point left of ours there being the head's
+// own offset on the crop); above it the face's far side runs up over the far ear to its root and the crown. The face's
+// near side is one smooth S from under the overhang down over the near ear to the jaw, as the crop draws it.
 const headNodes: Node[] = [[-68.6, -149.6], [-11.2, -149.6], [-2.4, -144.2], [3.6, -136.8], [1.4, -135.6], [-17.4, -132], [-20.6, -127.6], [-13.6, -115.4],
-  [-11.4, -105], [-14.6, -91], [-18, -78], [-17.4, -70.2], [-22.4, -63.4], [-48, -58.4], [-73.5, -62.4], [-84.2, -68.6], [-90.6, -74.4],
-  [-95.6, -78.8], [-98.4, -84.4], [-98.8, -90.4], [-96, -97.2], [-91.2, -100.6], [-88.8, -121.6], [-79.6, -143.8]];
+  [-11.4, -105], [-14.6, -91], [-17.4, -70.2], [-22.4, -63.4], [-48, -58.4], [-73.5, -62.4], [-84.2, -68.6],
+  [-95.8, -79.8], [-97.6, -84], [-96.3, -88.9], [-98.2, -92.2], [-96.8, -96.2], [-91.2, -100.6], [-88.8, -121.6], [-79.6, -143.8]];
 /**
  * The overhang's tip over the near ear's root; where the face's near side leaves the overhang's underside, a concave
  * corner; and where the far cheek's puff comes out from under the side's line.
  */
-const OVERHANG = 3, TEMPLE = 6, PUFF = 21;
+const OVERHANG = 3, TEMPLE = 6, PUFF = 20;
 const headBase = smooth(headNodes, { corners: [OVERHANG, TEMPLE, PUFF] });
 
 // The head's fur, by the dog's one head-fur builder (parts/headfur.ts, DECISIONS 214, 228), each place typed from this
 // crop. Over the far ear's root, where the far side of the face meets the crown, two broad low locks of the crown's cream
 // lie over the ear's top, unlined and feathered; the crown's line runs down to where the head's outline crosses the far
 // ear's and runs on into the ear's own line. Over the near ear's root the overhang's underside hangs in two broad locks
-// combed down toward the face. The far cheek is the crop's two-lobed puff over the far ear: its upper lobe the outline's
-// own round, its lower lobe two broad wisps swept down; its line one span from the far jaw round every wisp up the face's
-// far side to the root, on the ear's tan where it lies on the ear. The near cheek two small wisps where it laps over the
-// near ear, its line the near ear's inner S-line from under the overhang down to the jaw. The chin a rounded mass over
-// the collar, its lower edge six small scallops of uneven width (4.2 to 6.6 pt) and height (0.8 to 1.2 pt), the
-// smallest the recipe allows, with one lit line.
+// combed down toward the face. The chin a rounded mass over the collar, its lower edge six small scallops of uneven
+// width (4.2 to 6.6 pt) and height (0.8 to 1.2 pt), the smallest the recipe allows.
+// The cheeks are not headFur's: its cheek is a puff of 2 to 4 pointed wisps, as the front crop draws its cheeks, and this
+// crop draws neither cheek so (DECISIONS 228, Q30: the fur the sheet draws, nothing more). The far cheek's two lobes are
+// the outline's own rounds, and the near cheek is the face's smooth S; each is lined by one span of this view's, and
+// each root's unlined stretch is measured and feathered here as the builder measures and feathers its own (rootSpans).
 const CROWN_FAR: Lock[] = [{ len: 1.25, width: 3.8, lean: -0.5, dip: 0.4 }, { len: 1.6, width: 4.4, lean: -0.45 }];
 const CROWN_NEAR: Lock[] = [{ len: 1.8, width: 6.2, lean: 0.5, dip: 0.45 }, { len: 1.35, width: 5.2, lean: 0.55 }];
-const FAR_CHEEK: Lock[] = [{ len: 2.1, width: 6.8, lean: 0.55, dip: 0.3 }, { len: 1.7, width: 5.4, lean: 0.6 }];
-const NEAR_CHEEK: Lock[] = [{ len: 1.8, width: 5.4, lean: 0.6, dip: 0.3 }, { len: 1.5, width: 4.2, lean: 0.6 }];
 const CHIN: Lock[] = [{ len: 0.9, width: 5.2, lean: -0.3, dip: 0.1 }, { len: 1.2, width: 6.6, lean: -0.2, dip: 0 }, { len: 0.95, width: 5.4, lean: -0.05, dip: 0.15 },
   { len: 0.8, width: 4.2, lean: 0.1, dip: 0.05 }, { len: 1.1, width: 6.4, lean: 0.2, dip: 0.1 }, { len: 0.85, width: 4.8, lean: 0.3 }];
-/** Where the near cheek's line starts when the near ear is raised off its temple (head.line's temple state), below the temple, from open fur. */
-const NEAR_RAISED: P = [-11.6, -103.4];
-function headOf(base: Shape): HeadFur {
-  return headFur({
-    base,
-    crown: [
-      { side: "R", from: [-83.6, -135.4], to: [-80.5, -142.4], locks: CROWN_FAR, tipRound: 0.25, line: { from: [-79.7, -143.6], to: [-62, -150] }, ends: ["join", "under"], ear: ears.R },
-      { side: "L", from: [-1.6, -135.2], to: [-12.8, -132.6], locks: CROWN_NEAR, tipRound: 0.25, line: { from: [-15, -149.6], to: [1.5, -135.5] }, ear: ears.L },
-    ],
-    cheeks: [
-      { side: "L", from: [-15.4, -86.2], to: [-17.8, -76.2], clumps: NEAR_CHEEK, tipRound: 0.22, raised: NEAR_RAISED,
-        line: { from: [-19.4, -125.6], to: [-18.6, -64.4], on: (p) => (p[1] < -69 ? "tan" : "cream"), under: (p) => (p[1] < -69 ? 0.3 : 0.15) } },
-      { side: "R", from: [-94.6, -77.8], to: [-98.7, -89], clumps: FAR_CHEEK, tipRound: 0.22,
-        line: { from: [-88.4, -72.4], to: [-84.2, -134.2], on: (p) => (p[1] < -80.5 ? "tan" : "cream"), under: (p) => (p[1] < -98 ? 0.3 : 0.1) } },
-    ],
-    chin: { from: [-29.8, -61], to: [-66, -61.4], scallops: CHIN, tipRound: 0.25, line: { from: [-18.6, -64.4], to: [-88.4, -72.4], under: 0.15 },
-      corners: [[-18.8, -64.2], [-84.2, -68.6]] },
-  });
-}
-const FUR = headOf(headBase);
-// The crown's fur where it overhangs the near ear's root is a lock of fur, its tip a fur span.
-const head = furSpan(FUR.head, [3.2, -137.4], [0.4, -135.5]);
-
+const FUR = headFur({
+  base: headBase,
+  crown: [
+    { side: "R", from: [-83.6, -135.4], to: [-80.5, -142.4], locks: CROWN_FAR, tipRound: 0.25, line: { from: [-79.7, -143.6], to: [-62, -150] }, ends: ["join", "under"], ear: ears.R },
+    { side: "L", from: [-1.6, -135.2], to: [-12.8, -132.6], locks: CROWN_NEAR, tipRound: 0.25, line: { from: [-15, -149.6], to: [1.5, -135.5] }, ear: ears.L },
+  ],
+  chin: { from: [-29.8, -61], to: [-66, -61.4], scallops: CHIN, tipRound: 0.25, line: { from: [-18.6, -64.4], to: [-88.4, -72.4], under: 0.15 },
+    corners: [[-18.8, -64.2], [-84.2, -68.6]] },
+});
+// The crown's fur where it overhangs the near ear's root is a lock of fur, its tip a fur span; so is the far cheek's puff,
+// its two lobes clumps of the cheek's fur, the notch between them tighter than the 4 pt corner rule as the crop draws it
+// (Q29's default, DECISIONS 213).
+const head = furSpan(furSpan(FUR.head, [3.2, -137.4], [0.4, -135.5]), [-95.8, -79.8], [-91.2, -100.6]);
 // The topknot (parts/topknot.ts): three separate curls of fur, seen turned, as the sheet draws them, back to front.
 // The left curl low and broad, a leaf pointing out to its tip at the left (x -67.2), the crown's line running in
 // under it to a V at its underside, and its own line from there along its underside, round the tip and over its
@@ -377,40 +367,89 @@ const headPaint = (F: Facing): Paint => ({
   light: F.light,
 });
 
+/** Where each cheek's line ends by its root: the near one under the overhang, the far one up the face's far side. */
+const NEAR_TOP: P = [-19.4, -125.6], FAR_TOP: P = [-84.2, -134.2];
+/** Where the near cheek's line starts when the near ear is raised off its temple (head.line's near temple state), below the temple, from open fur. */
+const NEAR_RAISED: P = [-11.6, -103.4];
+/** Where each crown's line meets its ear's: headFur's, on the crossing of the head's outline and the ear's (DECISIONS 214). */
+const FAR_JOIN = FUR.crown[0]!.from as P, NEAR_JOIN = FUR.crown[1]!.to as P;
+/** Each root's unlined stretch, in points, with the half point for the outline's sampling (214's measure): from the far cheek's line to the far crown's join, and from the near crown's join to the near cheek's line, in path order. */
+const rootBare = (from: P, to: P) => along(head, from, to) + 0.5;
 /**
- * head.line: the head's outline as its own unclipped region, drawn after the head's clip group, reaching 0.5 pt past the
- * head, crisp on its outer side (DECISIONS 212): its lines are headFur's (DECISIONS 214, 228), one span per visible
- * edge, the crown's line running on into each ear's own, and the cream feathered out over each root's unlined stretch
- * under them. `temple`: the near ear perked, where the head runs on behind the face's side into the nape the perked ear
- * uncovers, so the near cheek's line starts lower, from open fur, and its root is not feathered (headFur's `raised`), as
- * the front's temple states leave theirs. It is keyed by the front lane's name for that ear raised alone (templeL, or
- * templeR in .R), which every preset gives only a perked ear; `temples` (both ears raised, the lifted presets) keeps
- * the rest line, since this view draws no lifted ear and the ear hangs there still (DECISIONS 176).
+ * The cheeks' lines (DECISIONS 228). The far cheek's: from the chin's line at the far jaw round both lobes of its puff and
+ * up the face's far side to its root's unlined stretch, on the far ear's tan where it lies on the ear. The near cheek's:
+ * the crop's one S-line from under the overhang down over the near ear to the jaw, on the near ear's tan above y -69, in
+ * two spans joined where the near temple state's line begins (NEAR_RAISED), so that state draws the lower span exactly as
+ * the rest does. Each end by a root is free, and cites its root's stretch by its measured length (214).
  */
+const FAR_CHEEK: LitSpan = { from: [-88.4, -72.4], to: FAR_TOP, on: (p) => (p[1] < -80.5 ? "tan" : "cream"), under: (p) => (p[1] < -98 ? 0.3 : 0.1),
+  ends: ["join", "free"], cites: 214, bare: [0, rootBare(FAR_TOP, FAR_JOIN)] };
+const nearOn = (p: P) => (p[1] < -69 ? "tan" : "cream"), nearUnder = (p: P) => (p[1] < -69 ? 0.3 : 0.15);
+const NEAR_UPPER: LitSpan = { from: NEAR_TOP, to: NEAR_RAISED, on: nearOn, under: nearUnder, ends: ["free", "join"], cites: 214, bare: [rootBare(NEAR_JOIN, NEAR_TOP), 0] };
+const NEAR_LOWER: LitSpan = { from: NEAR_RAISED, to: [-18.6, -64.4], on: nearOn, under: nearUnder, ends: ["join", "join"] };
 /**
- * head.line's spans: headFur's, in its order [the crown's two, the near cheek's, the far cheek's, the chin's]. At rest the
- * near cheek's line is two spans joined where the temple state's line begins (NEAR_RAISED), so the temple state draws its
- * lower span exactly as the rest does; with the near ear raised its upper span is left out, shortened to its first step
- * along the outline so every other span keeps its place in the list (the line rule wobbles each span's width by its place).
+ * Which ear is raised off its temple beside head.line: none at rest; the near one perked (the nape it uncovers lies
+ * behind the face's side); or the far one perked, which leaves the far side of the head the silhouette from the crown down
+ * to the jaw.
  */
-function headSpans(temple: boolean): LitSpan[] {
-  const rest = FUR.spans(), cheek = rest[2]!;
-  const upper: LitSpan = { ...cheek, to: NEAR_RAISED, ends: [cheek.ends![0], "join"], bare: [cheek.bare![0], 0] };
-  const lower: LitSpan = { ...cheek, from: NEAR_RAISED, ends: ["join", cheek.ends![1]] };
-  delete lower.cites;
-  delete lower.bare;
-  if (!temple) return [...rest.slice(0, 2), upper, lower, ...rest.slice(3)];
-  const raised = FUR.spans({ L: true });
-  const step = spanPoints(head, fracAt(head, upper.from as P), fracAt(head, upper.to as P)).slice(0, 2) as [P, P];
-  return [...raised.slice(0, 2), { ...upper, from: step[0], to: step[1] }, ...raised.slice(2)];
+type Temple = "rest" | "near" | "far";
+
+/**
+ * head.line's spans, in one order in every state [the far crown's, the near crown's, the near cheek's two, the far
+ * cheek's, the chin's], so every span a state does not change is drawn exactly as the rest draws it (the line rule wobbles
+ * each span's width by its place in the list).
+ * - At rest each root's stretch is unlined and feathered over the ear's tan, as the crop paints it (214).
+ * - The near ear perked (176): the near cheek's upper span is left out, shortened to its first step along the outline, and
+ *   its lower span starts from open fur at NEAR_RAISED, its stretch up to the near crown's join cited by its length, as
+ *   headFur's `raised` starts a cheek's line under a raised ear.
+ * - The far ear perked: nothing lies behind the far root any more, so the head's far side is its silhouette from the
+ *   crown down to the jaw: the far crown's line runs on down over the root's locks to the far cheek's line and joins it,
+ *   and the far cheek's line is the cream's own, since no ear lies under it.
+ */
+function headSpans(temple: Temple): LitSpan[] {
+  const [farCrown, nearCrown] = FUR.crown as [LitSpan, LitSpan], chin = FUR.chin!;
+  if (temple === "near") {
+    const step = spanPoints(head, fracAt(head, NEAR_TOP), fracAt(head, NEAR_RAISED)).slice(0, 2) as [P, P];
+    return [farCrown, nearCrown, { ...NEAR_UPPER, from: step[0], to: step[1] },
+      { ...NEAR_LOWER, ends: ["free", "join"], cites: 214, bare: [rootBare(NEAR_JOIN, NEAR_RAISED), 0] }, FAR_CHEEK, chin];
+  }
+  if (temple === "far") {
+    const { cites: _c, bare: _b, ...far } = FAR_CHEEK;
+    return [{ ...farCrown, from: FAR_TOP, ends: ["join", "under"] }, nearCrown, NEAR_UPPER, NEAR_LOWER, { ...far, on: "cream", ends: ["join", "join"] }, chin];
+  }
+  return [farCrown, nearCrown, NEAR_UPPER, NEAR_LOWER, FAR_CHEEK, chin];
 }
 
-function headLinePiece(F: Facing, temple = false): Piece {
+/**
+ * The cream feathered out over each root's unlined stretch, under head.line's lines, as headFur's soften() feathers the
+ * stretches it measures (HEAD_FUR.soft: a band 3 pt wide, 0.8 pt out over the tan, σ 0.9, from 3 pt clear of the crown's
+ * join to 5 pt past the cheek line's free end); a root whose ear is raised has no tan under it, so it is left out.
+ */
+function softRoots(temple: Temple, box: Box): { defs: string; body: string } {
+  const { width, offset, blur: sd, opacity, past, clear } = HEAD_FUR.soft;
+  const total = along(head, [-68.6, -149.6], [-68.6, -149.6]) || 1;
+  const at = (p: P) => fracAt(head, p), wrap = (f: number) => ((f % 1) + 1) % 1;
+  const bands: [number, number][] = [];
+  if (temple !== "far") bands.push([wrap(at(FAR_TOP) - past / total), wrap(at(FAR_JOIN) - clear / total)]);
+  if (temple !== "near") bands.push([wrap(at(NEAR_JOIN) + clear / total), wrap(at(NEAR_TOP) + past / total)]);
+  const f = uid("blur"), d = bands.map(([a, b]) => strokeOf(spanPoints(head, a, b), width, { taper: 3, tip: 0.4, offset }).d).join("");
+  return { defs: blur(f, pad(box, 2), sd), body: `<path d="${d}" fill="${C.fur}" opacity="${opacity}" filter="url(#${f})"/>` };
+}
+
+/**
+ * head.line: the head's outline as its own unclipped region, drawn after the head's clip group, reaching 0.5 pt past the
+ * head, crisp on its outer side (DECISIONS 212): one span per visible edge (headSpans), the crown's lines headFur's
+ * running on into each ear's own, and the cream feathered out over each root's unlined stretch under them (softRoots).
+ * Its temple states are keyed by the front lane's name for an ear raised alone, by the dog's side (templeL, templeR),
+ * which every preset gives only a perked ear: in threeQuarter.L the near ear is the left, so templeL is `near` and
+ * templeR `far`, and in threeQuarter.R the other way round; `temples` (both ears raised, the lifted presets) keeps the
+ * rest line, since this view draws no lifted ear and the ears hang there still (DECISIONS 176, 234).
+ */
+function headLinePiece(F: Facing, temple: Temple = "rest"): Piece {
   const [x0, y0, x1, y1] = bbox(head.segs);
   const box = pad([x0, y0, x1 - x0, y1 - y0], 4);
-  const raised = { L: temple };
   const r = litEdge(head, headSpans(temple), "head.line", box, { reach: 0.5, crisp: true, light: F.light });
-  const soft = FUR.soften(C.fur, box, raised);
+  const soft = softRoots(temple, box);
   return lineGate(piece(`<defs>${r.defs}${soft.defs}</defs>${soft.body}${r.body}`, box, {
     shapes: [{ name: "head.line", nodes: head.typed, segs: head.segs, outlined: r.outlined, fur: head.fur.map(([a, b]) => [fracAt(head, a), fracAt(head, b)]) }],
     lines: r.lines,
@@ -1084,8 +1123,10 @@ export function threeQuarterFaces(facingSide: Side = "L"): Drawn[] {
     for (const side of ["L", "R"] as const) out.push({ part: `brow.${side}`, state, piece: brow(browState(BROWS[side].pts, state), BROWS[side].width) });
   }
   for (const side of ["L", "R"] as const) out.push({ part: `ear.${side}`, state: "onePerked", piece: perkedEar(side, F) });
-  // The head's line beside the near ear perked: the state names the dog's side (the front's), so .R's near ear is its right.
-  out.push({ part: "head.line", state: facingSide === "L" ? "templeL" : "templeR", piece: headLinePiece(F, true) });
+  // The head's line beside either ear perked: the state names the dog's side (the front's), so .R's near ear is its right
+  // and its far ear its left (DECISIONS 234).
+  out.push({ part: "head.line", state: facingSide === "L" ? "templeL" : "templeR", piece: headLinePiece(F, "near") });
+  out.push({ part: "head.line", state: facingSide === "L" ? "templeR" : "templeL", piece: headLinePiece(F, "far") });
   return F.finish(out);
 }
 
