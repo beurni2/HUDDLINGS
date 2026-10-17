@@ -111,12 +111,13 @@ let chest = smooth([[-73, -59.6], [-60, -64], [-40, -64.5], [-24, -64], [-21, -5
   [-52, -3.5], [-53.6, -16.6], [-55.4, -20.4], [-58.4, -24], [-61.6, -27.4], [-65.4, -31], [-69.6, -34.3], [-74.6, -36.2], [-77.6, -38.9], [-78.7, -43],
   [-78.1, -47.6], [-75.8, -53.6]]);
 // Under the collar's end the chest's front edge steps out once (fur.ts's STEP), as the crop's line steps at y -45 to -50.
-// Its lower edge over the far leg is lined only from x -67.4 down into the slot, light where it comes out of the fur and
-// deepening into the slot, with a few short fur strokes branching off it, the crop's fluffy V (a row of tufts there read
-// as a saw); from there up to its corner the crop leaves it unlined, the chest's cream on the far leg's (DECISIONS 231).
+// Its lower edge over the far leg is lined only from x -64.6 down into the slot, as the crop's line runs from (-66, -31)
+// to the slot, light where it comes out of the fur and deepening into the slot, with short fur strokes branching off it,
+// the crop's fluffy V (a row of tufts there read as a saw); from there up to its corner the crop leaves it unlined, the
+// chest's cream on the far leg's (DECISIONS 231). Lined from x -67.4 it drew a long dark diagonal the crop does not.
 chest = furEdge(chest, [-78.4, -42.8], [-77, -49.6], [{ len: 1, width: 7, lean: -0.4 }], 0.35, undefined, STEP);
-/** How deep the chest's lower edge's line may lie: light (0.18) where it comes out over the far leg (x -67.4), 0.45 in the slot (x -55). */
-const chestLower = (p: P) => 0.18 + 0.27 * Math.min(1, Math.max(0, (-p[0] - 67) / -12));
+/** How deep the chest's lower edge's line may lie: light (0.18) where it comes out over the far leg (x -64.6), 0.45 in the slot (x -55). */
+const chestLower = (p: P) => 0.18 + 0.27 * Math.min(1, Math.max(0, (-p[0] - 64.6) / -9.6));
 
 // The collar: the band round the neck from under the chin, where its rounded end shows, along the near side
 // to where it passes behind the near ear, as the sheet draws it: deepest (7.5 pt) under the near side of the chin,
@@ -176,7 +177,7 @@ const EDGES = {
   }),
   L: earEdge({
     base: earLBase,
-    steps: [{ from: [18.2, -112.6], to: [23.2, -105], lock: { len: 1.3, width: 9, lean: 0.4 }, tipRound: 0.35 }],
+    steps: [{ from: [18.2, -112.6], to: [23.2, -105], lock: { len: 0.8, width: 9.6, lean: 0.3 }, tipRound: 0.35 }],
     hem: { from: [30.4, -77.4], to: [-8.6, -61.6], locks: [{ len: 1.4, width: 11, lean: 0.2, dip: 0.25 }, { len: 1.75, width: 15, lean: 0.25, dip: 0.35 },
       { len: 1.3, width: 16, lean: 0.3, dip: 0.5 }, { len: 1.1, width: 4.6, lean: 0.35 }], tipRound: 0.45 },
     axis: [[4, -134], [10, -61]],
@@ -689,7 +690,7 @@ const CHEST_SIDE: [P, P] = [[-21.4, -60.6], [-30.4, -24]];
  * Where the chest's lower edge's line ends, coming up out of the slot over the far leg: the crop leaves the edge from
  * here to its corner unlined, the chest's cream on the far leg's (DECISIONS 231).
  */
-const CHEST_LOWER_END: P = [-67.4, -32.6];
+const CHEST_LOWER_END: P = [-64.6, -29.9];
 
 /** The three-quarter view in a facing: threeQuarter.L as the crop draws it, or threeQuarter.R, its mirror lit from the top left (views/facing.ts). */
 export function threeQuarter(facingSide: Side = "L"): Drawn[] {
@@ -786,7 +787,7 @@ export function threeQuarter(facingSide: Side = "L"): Drawn[] {
     inner: [[[-72, -47.4], [-72.8, -43], [-72.4, -38.6]], [[-67.6, -45.6], [-68.6, -41.6], [-69.2, -37.8]]]
       .map((pts) => ({ pts: sample(smooth(pts as P[], { closed: false }).segs, 6, false), width: 0.7, colour: C.crownLine, opacity: 0.4 }))
       // Short fur strokes branching down off the chest's lower edge toward the slot, the crop's fluffy V.
-      .concat([[[-67.8, -34], [-66.4, -31.8], [-65.6, -29.6]], [[-63.4, -30.2], [-62, -28], [-61.4, -25.8]], [[-60.2, -27.2], [-58.6, -25.2], [-57.8, -23]]]
+      .concat([[[-63.4, -30.2], [-62, -28], [-61.4, -25.8]], [[-60.2, -27.2], [-58.6, -25.2], [-57.8, -23]]]
         .map((pts) => ({ pts: sample(smooth(pts as P[], { closed: false }).segs, 6, false), width: 0.7, colour: C.crownLine, opacity: 0.55 }))),
     light: F.light,
   }, [{ from: [-53.7, -17], to: CHEST_LOWER_END, most: chestLower, ends: ["under", "free"], cites: 231, bare: [sideBare + 0.5, lowerBare + 0.5] },
