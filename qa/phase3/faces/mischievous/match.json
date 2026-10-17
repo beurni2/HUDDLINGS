@@ -203,9 +203,9 @@
     "head.top": {
      "record": [65.25, 4.03],
      "held": false,
-     "found": [70.5, 10.56],
-     "errPt": 10.67,
-     "offsetPt": [6.62, 8.38],
+     "found": [70.64, 10.61],
+     "errPt": 10.83,
+     "offsetPt": [6.8, 8.43],
      "pass": true,
      "note": "reported, never held: the sheet draws the tuft differently in every panel"
     },
@@ -430,7 +430,7 @@
  },
  "headGate": {
   "headShiftPt": [0.01, 0.0],
-  "headIoU": 0.9959,
+  "headIoU": 0.9956,
   "thresholdPt": 2.8,
   "rows": {
    "nose": {
