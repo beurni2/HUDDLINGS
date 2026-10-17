@@ -290,8 +290,10 @@ const HEEL = { L: { notch: bodyNodes[HEEL_NOTCH] as P, meet: bodyNodes[MEET] as 
 // -9.5 and down onto the ground by x 10, in five broad soft clumps, each lying
 // over the one below, its edge running on into the plume from the notch (246);
 // its foot rests on the ground on the body's own line there, so the two read as
-// the one ground line the sheet draws under it, its lowest clump just over it;
-// and up its left side over the left haunch to the hook.
+// the one ground line the sheet draws under it, its middle dipping 0.5 pt below
+// it from x 0 to 8, as the sheet's lowest lobe does (its ground line at y -1
+// there, -2 to -2.25 beside it); and up its left side over the left haunch to
+// the hook. Its top right is the sheet's arc (its line at x 24.5 by y -44).
 /** The pointed tuft at the hook's end, and the hook's inner bend over the saddle. */
 const TAIL_TIP = 0;
 /** The plume's right clumps (CLUMPS: broad soft lobes, uneven, never a repeat), low enough that the arc stays round. */
@@ -300,9 +302,9 @@ const PLUME: Lock[] = [{ len: 1.5, width: 9.8, lean: 0.3, dip: 0.3 }, { len: 1.9
 /** Each clump of the plume: its tip, root and notches, for the shades and partings drawn inside it. */
 const tailLocks: { tip: P; root: P; notches: [P, P] }[] = [];
 const tail = furSpan(furEdge(smooth([[-9.8, -24.2], [-5.6, -28.4], [-1.4, -31.2], [0.9, -33.8], [0.8, -39.6], [2.6, -45], [7, -48.6], [13.6, -49.6],
-  [20.2, -46.4], [24.9, -41.2], [28.4, -33.6], [29.5, -25.9], [28.5, -20.4], [25.4, -12.6], [20.6, -7.4], [15.6, -3.2], [9.6, -0.95], [3, -0.75], [-1.6, -0.75],
+  [21, -47.1], [25.8, -42.1], [28.4, -33.6], [29.5, -25.9], [28.5, -20.4], [25.4, -12.6], [20.6, -7.4], [15.6, -3.2], [9.6, -0.95], [4, -0.25], [-1.4, -0.8],
   [-6.4, -0.95], [-10.6, -6.8], [-12.2, -13.6], [-11.6, -19.6]], { corners: [TAIL_TIP] }),
-[24.9, -41.2], [15.6, -3.2], PLUME, 0.35, (tip, root, notches) => tailLocks.push({ tip, root, notches }), CLUMPS), [-9, -25.2], [-10.4, -21.6]);
+[25.8, -42.1], [15.6, -3.2], PLUME, 0.35, (tip, root, notches) => tailLocks.push({ tip, root, notches }), CLUMPS), [-9, -25.2], [-10.4, -21.6]);
 /**
  * The tail's root, where it leaves the rump (rig.json's tail pivot in this view): the middle of its tan root as it shows
  * from behind (phase 2's patch there centres on -5.7, -23.7), at the side view's root height (-23), on the tail.
@@ -398,24 +400,33 @@ const tailPaint: Paint = {
       const p1 = v.add(v.add(n, v.mul(towards, 0.3)), v.mul(into, 1.4)), p2 = v.add(v.add(n, v.mul(towards, 0.7)), v.mul(into, 2));
       return { pts: curve([n, p1, p2], 6), width: 0.75, colour: C.softLine, opacity: 0.8 };
     }),
-    { pts: curve([[23, -46], [21.6, -44.2], [20.6, -42.4]], 6), width: 0.7, colour: C.softLine, opacity: 0.7 },
+    { pts: curve([[23.2, -45.6], [21.9, -43.8], [21, -42.2]], 6), width: 0.7, colour: C.softLine, opacity: 0.7 },
   ],
 };
 /**
- * The tail's line (parts/lines.ts; DECISIONS 242, 246): one line round the plume from its left side under the hook,
- * over the hook's tip, under the hook and up over the curl, down its clumps and round its foot, to its left side above
- * the ground; a contact line where the plume lies over the saddle and the haunches (Q31), light over the clumps down
- * its right side (the sheet's L* 62 to 75) and under the hook (58 to 62), deepening only at its foot on the ground,
- * where it lies over the bottom's own line as the sheet's one ground line there, as the bottom's own does: the ground's
- * dark only under the middle of the foot, the line thinner and more varied round it (L* 50 to 55 from x 0 to 13.5; at
- * the line rule's full depth all along the foot it read 10 L* dark and 0.2 pt wide, the line check's tone and width
- * there). Up its left side over the left haunch, from y -8.4 to -21.4, the sheet leaves the plume unlined (its L* 79 to 95
- * there): that stretch is cited by its length.
+ * The tail's line (parts/lines.ts; DECISIONS 242, 246), where the sheet draws one, and as light as it draws it: from its
+ * left side under the hook, over the hook's tip, under the hook and up to the curl's inner bend, where the plume lies
+ * over the saddle (the sheet's L* 52 to 60 there, the tan ladder's lightest); then none up the curl's left side above
+ * y -37.5 and round the curl's top over the saddle to x 21.6, where the sheet's cream meets the saddle's tan with no line
+ * (its darkest within 3 L* of the tan's 71 to 74 at x 3 to 20, 67 up the curl's side); then from where the plume leaves
+ * the saddle (x 21.6) down its right side in the cream ladder's lightest (the sheet's 66 to 75 above y -26), a little deeper
+ * over the lower clumps (63 to 67), deepening only at its foot on the ground, where it lies over the bottom's own line
+ * as the sheet's one ground line there, as the bottom's own does: the ground's dark only under the middle of the foot,
+ * the line thinner and more varied round it (L* 50 to 55 from x 0 to 13.5; at the line rule's full depth all along the
+ * foot it read 10 L* dark and 0.2 pt wide, the line check's tone and width there); to its left side above the ground.
+ * Up its left side over the left haunch, from y -7.4 to -20.6, the sheet leaves the plume unlined too (its L* 79 to 95
+ * there). Two spans, each unlined stretch cited by its length (246).
  */
-const tailMost = (p: P) => (p[1] > -5 ? 1 : p[0] > 14 ? 0.25 : 0.35);
+const tailMost = (p: P) => (p[1] > -5 ? 1 : p[0] < 1.4 && p[1] < -24 ? 0 : p[1] < -26 ? 0 : 0.1);
+const tailOn = (p: P): "cream" | "tan" => (p[0] < 1.4 && p[1] < -24 ? "tan" : "cream");
+/** Where the sheet leaves the plume unlined: up its left side over the haunch, and over the saddle from the curl's side round its top. */
 const TAIL_SIDE: [P, P] = [[-10.4, -7.4], [-11.4, -20.6]];
-const tailSpans: LitSpan[] = [{ from: TAIL_SIDE[1], to: TAIL_SIDE[0], ends: ["free", "free"], contact: true, ground: "sole", most: tailMost, on: (p) => (p[0] < 1.4 && p[1] < -24 ? "tan" : "cream"),
-  cites: 246, bare: [0, along(tail, TAIL_SIDE[0], TAIL_SIDE[1]) + 0.5] }];
+const TAIL_TOP: [P, P] = [[0.8, -37.5], [21.6, -46.5]];
+const SIDE_PT = along(tail, TAIL_SIDE[0], TAIL_SIDE[1]), TOP_PT = along(tail, TAIL_TOP[0], TAIL_TOP[1]);
+const tailSpans: LitSpan[] = [
+  { from: TAIL_SIDE[1], to: TAIL_TOP[0], ends: ["free", "free"], contact: true, most: tailMost, on: tailOn, cites: 246, bare: [SIDE_PT + 0.5, TOP_PT + 0.5] },
+  { from: TAIL_TOP[1], to: TAIL_SIDE[0], ends: ["free", "free"], contact: true, ground: "sole", most: tailMost, on: tailOn, cites: 246, bare: [TOP_PT + 0.5, SIDE_PT + 0.5] },
+];
 const headLight = `${pathD(ellipse([-9, -140], 15, 9, -10))}`;
 const WHORL: P = [2, -151.6];
 /** The crown's whorl under the topknot's V: long soft strokes parting from it, combed down and out over the head's upper third, some toward the ears' roots. */
