@@ -56,10 +56,11 @@ const middle = (s: Shape) => {
 // The back and the near haunch: the back's line comes out from under the near ear's lower corner and runs down
 // the sloping back to the rump, round the haunch's rear and down to the ground behind the hind paw, then along
 // the haunch's underside under the paw; the rest lies hidden under the chest, the near front leg and the collar.
-// Its underside runs in under the hind paw's sole (y -3 under the paw), so the paw's own line is the one along the
-// ground there.
+// Its underside stays on the ground until it is under the hind paw's first toe (x -12.2), so no background shows
+// between the haunch and the paw's heel as it rounds up, then runs in under the paw's sole (y -3.4 under it), so the
+// paw's own line is the one along the ground there, taking up the haunch's where the two meet (HIND_SOLE).
 const back = smooth([[-36, -63], [-25, -66.5], [-17, -62], [-10, -55.3], [0.2, -48.5], [8.7, -40.9], [12.6, -34.4], [14.7, -26], [14.7, -17.5],
-  [12, -10.2], [7.8, -5.9], [1.5, -1.8], [-6, -1.6], [-10.6, -4.2], [-17, -3.4], [-23.4, -3.6], [-27.8, -4.2], [-31.4, -5.6], [-35, -20], [-36, -42]]);
+  [12, -10.2], [7.8, -5.9], [1.5, -1.8], [-6, -1.6], [-12.2, -2.6], [-17, -3.4], [-23.4, -3.6], [-27.8, -4.2], [-31.4, -5.6], [-35, -20], [-36, -42]]);
 
 // The paws, by the dog's one paw recipe (parts/paw.ts bun, DECISIONS 216, 230): each a round bun 10 to 20% wider than
 // its leg's column, its sole three toe lobes scalloping up a little at each toe line, two soft toe lines rising from the
@@ -80,10 +81,18 @@ const legL = lobed(smooth(legLNodes, { corners: [12, 14, 20] }), [[[-32.8, -3.9]
 
 // The far front leg: behind the chest (spec L369), its outer edge the silhouette from under the chest's corner (y -35)
 // down, gently convex, to its wrist (y -19.8), where the bun swells out 5 pt to its toe end; its heel runs on behind
-// the near paw. Its inner side shows only in the slot beside the near leg, under the chest's lower edge. The crop's
-// toe lines at x -70 and -76.
-const FAR_BUN = bun({ leg: [[-53.6, -26], [-78.9, -26]], wrist: [[-54, -15.4], [-78.6, -19.8]], bulge: [0.4, 5.2], ground: -3.6, lobes: [0.4, 0.33, 0.27],
+// the near paw. Its inner side shows only in the slot beside the near leg, under the chest's lower edge. Its toe lines
+// rise at x -71.1 and -75.3, on the crop's (its toe lines faint at about -70 and -76, its sole line darkening at -72.3);
+// the lobe hidden behind the near paw is the broad one, and the outer lobe is kept 5.2 pt wide, so it turns no tighter
+// than the toe lobes' 2.5 pt (the lint's lobePt): the crop's darker spot at -78.5 is where the sole turns up into it.
+const FAR_BUN = bun({ leg: [[-53.6, -26], [-78.9, -26]], wrist: [[-54, -15.4], [-78.6, -19.8]], bulge: [0.4, 5.2], ground: -3.6, lobes: [0.6, 0.18, 0.22],
   scallop: 0.55, full: 0.42, rise: 0.45 });
+/**
+ * Its toe lines bow away from the middle toe, as the panel draws them round it: bun() bows each away from the bun's own
+ * middle, which here lies behind the near paw, so the nearer one (x -71.1) is turned to bow away from the visible middle
+ * toe between the two.
+ */
+const FAR_TOES = FAR_BUN.toes.map((t, i) => (i === 0 ? t.map(([x, y]): P => [2 * t[0]![0] - x, y]) : t));
 const legR = lobed(smooth([[-75.6, -50], [-61, -46], [-56.2, -36], [-53.6, -26], ...FAR_BUN.nodes, [-78.8, -25], [-78.5, -31], [-77.6, -38], [-76.6, -46]],
   { corners: [...FAR_BUN.notches.map((i) => i + 4), 4 + FAR_BUN.nodes.length - 1] }), FAR_BUN.lobes);
 
@@ -339,7 +348,7 @@ const backPaint = (F: Facing): Paint => ({
 const backLines = (F: Facing): LitSpan[] => [
   { from: [-22.6, -64.8], to: [13.1, -33.8], on: (p) => (p[0] > -18 && p[0] < 9.6 ? "tan" : "cream"), ends: ["under", "join"] },
   { from: [13.1, -33.8], to: [12.7, -11.4], contact: true, on: (p) => (F.shows("rump.patch.L") && p[1] > -34.6 && p[1] < -14 ? "tan" : "cream"), ends: ["join", "join"] },
-  { from: [12.7, -11.4], to: [-9.8, -3.6], ground: "sole", ends: ["join", "under"] },
+  { from: [12.7, -11.4], to: HIND_SOLE, ground: "sole", ends: ["join", "under"] },
 ];
 
 /** The face's middle across, halfway between the far cheek's puff (x -100.4) and the near face's side (x -14.2). */
@@ -672,8 +681,8 @@ function along(shape: Shape, from: P, to: P): number {
 const NEAR_BACK_TOP: P = [-21.3, -34], NEAR_BACK_LINE: P = [-24.2, -22], NEAR_FRONT_TOP: P = [-53.2, -30];
 /** How deep the near leg's back edge's line may lie: lighter where it comes out of the soft shade (y -22), full from y -19 down to the hind paw. */
 const nearBack = (p: P) => 0.5 + 0.5 * Math.min(1, Math.max(0, (p[1] + 22) / 3));
-/** The hind paw's line's ends: on the sole where the haunch's underside goes under it, and on its crown where it fades out over the thigh. */
-const HIND_SOLE: P = [-8.8, -1.7], HIND_CROWN: P = [-11.4, -15.6];
+/** The hind paw's line's ends: on its heel where the haunch's underside goes under it, joining the haunch's line, and on its crown where it fades out over the thigh. */
+const HIND_SOLE: P = [-9.87, -2.15], HIND_CROWN: P = [-11.4, -15.6];
 /** The chest's right side, where it lies on the haunch with no line (DECISIONS 231): from under the collar's near end to under the near leg. */
 const CHEST_SIDE: [P, P] = [[-21.4, -60.6], [-30.4, -24]];
 /**
@@ -742,7 +751,7 @@ export function threeQuarter(facingSide: Side = "L"): Drawn[] {
     shade: furShade(hipGroup, [], ["M-34 -24 L-4 -24 L-4 -9 L-34 -9Z"]),
     ...toes({ lines: HIND_BUN.toes, fade: HIND_BUN.fade, soft: true, width: 0.9 }),
     light: F.light,
-  }, [{ from: HIND_SOLE, to: HIND_CROWN, ground: "sole", most: (p) => (p[1] < -12 ? 0.3 : 1), ends: ["free", "free"], cites: 230, bare: [0, hindBare + 0.5] }]), 6)));
+  }, [{ from: HIND_SOLE, to: HIND_CROWN, ground: "sole", most: (p) => (p[1] < -12 ? 0.3 : 1), ends: ["join", "free"], cites: 230, bare: [0, hindBare + 0.5] }]), 6)));
   // The far front leg: the fur most of the way to its own warm shade (palette.ts, farFur), 6.2% darker than the
   // near leg; from where it comes out from under the chest it eases in from the fur over 11 pt, so the two join
   // with no edge. The sheet keeps it light: no rim of shade down its front, only a soft shade down its inner side
@@ -755,7 +764,7 @@ export function threeQuarter(facingSide: Side = "L"): Drawn[] {
     ...((): Pick<Paint, "under" | "inner"> => {
       // Two soft toe lines rising from the sole's notches round the middle toe (parts/paw.ts), with the gradient that
       // eases the far leg in from the fur.
-      const t = toes({ lines: FAR_BUN.toes, fade: FAR_BUN.fade, soft: true, width: 0.9 });
+      const t = toes({ lines: FAR_TOES, fade: FAR_BUN.fade, soft: true, width: 0.9 });
       return { under: `<defs><linearGradient id="${farTop}" gradientUnits="userSpaceOnUse" x1="0" y1="-33.4" x2="0" y2="-22">` +
         `<stop offset="0" stop-color="${C.fur}"/><stop offset="1" stop-color="${C.fur}" stop-opacity="0"/></linearGradient></defs>` +
         `<rect x="-86" y="-48" width="34" height="26" fill="url(#${farTop})"/>` + t.under, inner: t.inner };
