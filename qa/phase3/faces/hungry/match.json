@@ -61,7 +61,7 @@
  "records": {},
  "headGate": {
   "headShiftPt": [0.0, 0.0],
-  "headIoU": 0.9916,
+  "headIoU": 0.9924,
   "thresholdPt": 2.8,
   "rows": {
    "nose": {

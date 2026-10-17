@@ -133,11 +133,12 @@ const chest = symmetric([[0, -66], [-16, -65.4], [-25.6, -63.2], [-28, -60], [-2
   [-32.4, -34], [-31.6, -26], [-29.6, -17], [-26.4, -9], [-20, -4.4], [-8, -3.2]], [0, -3]);
 
 // The front legs: short chubby legs that come out of the chest side by side under the tag and come together going
-// down, as the sheet draws them (the gap between their inner edges about 10 pt at y -30, 5 at -16 and under 2 between
-// the paws), so the paws nearly touch over a narrow slot; each comes out from under the shoulder's saddle, its outer
-// edge where the sheet draws the leg's fine line against the haunch (x -35.2 at y -41, -31.6 at -21), narrowing a
-// little to the wrist (x -29.8 at y -16) and swelling into a round bun of a paw a little wider than the leg (x -30.6 at
-// y -12 outside, -1 at -5.4 inside), its sole convex and dipping a little at the two toe lines (concave corners), so
+// down, as the sheet draws them (the gap between their inner edges about 10 pt at y -30, 5 at -16), so the slot
+// between them closes where the paws meet, their lines touching at y -6.8 (x ∓0.4), and opens again below into a
+// small triangle of the chest's tan down to the ground, as the crop draws it (its slot closing at about y -6.2;
+// DECISIONS 270); each comes out from under the shoulder's saddle, its outer edge where the sheet draws the leg's
+// fine line against the haunch (x -35.2 at y -41, -31.6 at -21), narrowing a little to the wrist (x -29.8 at y -16)
+// and swelling into a round bun of a paw a little wider than the leg (x -30.6 at y -12 outside), its sole convex and dipping a little at the two toe lines (concave corners), so
 // it rests on the ground in three round toes, as the sheet's does. Its top, hidden in the chest's fur, stays under the
 // tag's point and clear of the heart's sides, so the tag hangs in front of the chest whole.
 const legR: Node[] = [[-5.8, -33.6], [-4.6, -27.6], [-2.9, -20.6], [-2.3, -13.4], [-1.1, -9.6], [-0.4, -6.8], [-1.7, -3.5], [-6.4, -1], [-11.2, -0.9], [-16, -0.2],
@@ -150,14 +151,15 @@ const legs = { R: smooth(legR, { corners: FRONT_TOES }), L: smooth(mirrorX(legR)
 // The collar: a band of nearly even width round the neck, following the chin down to a gentle dip at the front, as
 // the sheet draws it: about 8.5 pt deep at the front with its rims (the sheet's 8.2 to 8.7 at x -14 to 16), never a
 // crescent tapering to horns in open fur. Each end tucks under the jaw's fur (DECISIONS 270), as the crop draws it:
-// its lower edge curving up into the jaw, so what shows of the end narrows to a point at the jaw's edge (the crop's
-// blue below the jaw 5.4, 3.9 and 1.6 pt deep at x -24, -25 and -26 on the right, 5.4, 3.9 and 2.3 at x 25, 27 and 28
-// on the left), the end's tip itself under the head. Its blunt square ends, 6.5 pt deep where they met the jaw, read as
-// a strap's cut ends at phone size. The sheet's head roll tips it a little: its left end sits higher and further out.
+// its lower edge rounding up into the jaw, so what shows of the end narrows as it goes under the head (the crop's blue
+// below the jaw 5.4, 3.9 and 1.6 pt deep at x -24, -25 and -26 on the right, 5.4, 3.9 and 2.3 at x 25, 27 and 28 on
+// the left; ours 5.3, 4.5, 3.3 and 1.6 at x -24 to -27, 4.7, 3.0 and 1.8 at x 25, 27 and 28), the end's tip itself
+// under the head. Its blunt square ends, 6.5 pt deep where they met the jaw, read as a strap's cut ends at phone size;
+// tapered to a point (2 pt at x -26), as a crescent's horns. The sheet's head roll tips it: its left end sits higher.
 const COLLAR_TIPS = [0, 7];
-const collar = smooth([[-27.6, -63.6], [-21, -61.2], [-10, -59], [0, -58.2], [10, -59.4], [20.5, -62], [26.4, -64.2], [29, -66.1], [28, -62.6],
-  [26.4, -60.2], [24.8, -58.2], [21.5, -55], [18, -52.4], [10, -50.4], [0, -49.8], [-10, -50], [-17, -51.6], [-22.6, -54.6], [-24.4, -56.6],
-  [-25.9, -60.3]], { corners: COLLAR_TIPS });
+const collar = smooth([[-27.8, -63.6], [-21, -61.2], [-10, -59], [0, -58.2], [10, -59.4], [20.5, -62], [26.4, -64.2], [29.2, -65.9], [29.1, -64.2],
+  [27.9, -61.8], [25.9, -59.2], [22, -55.4], [18, -52.4], [10, -50.4], [0, -49.8], [-10, -50], [-17, -51.6], [-22.6, -54.6], [-25, -56.9],
+  [-26.5, -59.4], [-27.6, -61.8]], { corners: COLLAR_TIPS });
 
 // The tag: a true heart, as the sheet draws it: two round lobes with a clear
 // cleft between them at the top, widest a little above mid-height (17.1 pt
@@ -304,13 +306,15 @@ const leftPuff = ([x, y]: P): P => {
 // y -120, -45 at -115, -46.5 to -47.3 from -110 to -100 and -45.8 at -93 on the
 // right). Below it each cheek is one convex puff over the ear, bulging out to
 // x -48.4 at y -81 on the right, its fur headFur()'s (DECISIONS 214, 220), and
-// under it the jaw turns round into the chin, a rounded mass over the collar.
+// under it the jaw turns round into the chin, a rounded mass over the collar,
+// low enough at its sides to come over the collar's ends as the crop's does
+// (the crop's jaw at y -60.6 at x -26, ours -61.5; DECISIONS 270).
 // Typed as its right half, mirrored, the crown lifted and the side drawn in on
 // the left, and the cheeks rolled with the face. The crown's part under the
 // topknot is hidden by it.
 const headHalf: Node[] = [[0, -151.8], [-32.4, -146.8], [-37.6, -143.4], [-42.2, -139.6], [-46.2, -133.6], [-40.4, -134.6], [-33, -134.2],
   [-35.4, -130], [-41.6, -120.6], [-45.6, -114.4], [-47, -105], [-45.8, -95.4], [-44.8, -91.6], [-44.8, -86.2], [-44, -80.4],
-  [-43.6, -75.6], [-39.6, -70.4], [-30, -64.8], [-9, -59.4]];
+  [-43.6, -75.6], [-39.6, -70.4], [-30, -63.6], [-9, -59.2]];
 /**
  * The crown's overhang and the root's tan under it, on the right: the lock's tip hanging just inside the ear's edge,
  * its underside running in over the root's tan at y -134.6, the tan tapering in under the crown's fur to a soft point
@@ -344,14 +348,15 @@ const leftHalf = [...mirroredHalf.slice(0, at - 1).map(([x, y]): Node => leftSid
 const CROWN_R: Lock[] = [{ len: 1.25, width: 4.6, lean: -0.5, dip: 0.3 }, { len: 1.2, width: 3.6, lean: -0.55 }];
 const CROWN_L: Lock[] = [{ len: 1.2, width: 3.6, lean: 0.55, dip: 0.3 }, { len: 1.25, width: 4.6, lean: 0.5 }];
 // Each cheek's puff over the ear, as the crop and the hero draw it in the head's frame (alike on both sides; DECISIONS
-// 270): three pointed wisps of different sizes combed down along the edge toward the jaw, the middle the longest, each
-// notch between them a small crisp cut, as the crop's puff breaks into flicks of fur over the ear's tan. Its two round
-// lobes over a flowing notch (220: a full lobe and a small low one) read as a pair of lips in profile at phone size.
-const CHEEK: Lock[] = [{ len: 2.3, width: 5.8, lean: 0.55, dip: 0.5 }, { len: 1.8, width: 4.4, lean: 0.6 }];
+// 270): one full round puff (3.2 pt out on 7) whose edge flows on through a soft notch into a small low wisp (1.6 on
+// 4.2) combed down toward the jaw, so the cheek reads as one mass of fur with a flick under it. Two lobes nearer one
+// size (220's 2 on 6.6 and 1.5 on 4.6) read as a pair of lips in profile at phone size; three pointed wisps read as a
+// saw, a long comma as a beak.
+const CHEEK: Lock[] = [{ len: 3.2, width: 7, lean: 0.4, dip: 0.35, notch: 1 }, { len: 1.6, width: 4.2, lean: 0.6 }];
 /** How light the left cheek's line lies in the notches between its wisps (a ceiling on its depth), easing back over `reach` pt. */
 const PINCH = { depth: 0.15, reach: 2.5 };
 /** The left cheek's row, in its path's order (up from the jaw): the right's reversed, each notch's dip carried with it. */
-const CHEEK_L: Lock[] = [{ len: 1.8, width: 4.4, lean: -0.6, dip: 0.5 }, { len: 2.3, width: 5.8, lean: -0.55 }];
+const CHEEK_L: Lock[] = [{ len: 1.6, width: 4.2, lean: -0.6, dip: 0.35, notch: 1 }, { len: 3.2, width: 7, lean: -0.4 }];
 // The chin over the collar (DECISIONS 261, 268), as the hero draws it and the founder set the sheet's beside ours: one
 // smooth soft arc whose lower edge breaks into a few fine wisps of different sizes, unevenly spaced, each combed out
 // away from the middle, the line firm only down the jaw's sides to where the chin comes over the collar's ends, the
@@ -449,9 +454,9 @@ function headOf(puff = 0): { head: Shape; fur: HeadFur; notches: Record<"R" | "L
       // the puff's wisps unlined (its gap); a short light line low on the cheek round the last wisp to the jaw, as the
       // front crop draws it. headFur frees the line where it borders the root's and the gap's unlined stretches and
       // cites each by its length (DECISIONS 214).
-      { side: "R", from: [-45, -86.2], to: [-44.1, -75.4], clumps: CHEEK, tipRound: 0.24,
+      { side: "R", from: [-45, -86.2], to: [-44.1, -75.4], clumps: CHEEK, tipRound: 0.25,
         line: { from: [-39.9, -123.8], to: [-39.6, -70.4], ends: ["free", "join"], on: sideLadder, under: sideFace, gap: GAPS.R }, raised: RAISED.R },
-      { side: "L", from: [44.6, -76.2], to: [45, -86.2], clumps: CHEEK_L, tipRound: 0.24,
+      { side: "L", from: [44.6, -76.2], to: [45, -86.2], clumps: CHEEK_L, tipRound: 0.25,
         line: { from: [39.6, -70.4], to: [33.7, -129.4], ends: ["join", "free"], on: sideLadder, under: sideFace, most: pinch, gap: GAPS.L }, raised: RAISED.L },
     ],
     chin: { from: [-16.3, -59.6], to: [16.3, -59.6], scallops: [], tipRound: 0.15, line: { from: [-39.6, -70.4], to: [39.6, -70.4] }, corners: [[-39.6, -70.4], [39.6, -70.4]], soft: CHIN_SOFT },
@@ -843,7 +848,7 @@ export function front(): Drawn[] {
       // Two toe lines rising from the sole's dips about 6 pt up the paw's front, each bowing away from the middle toe,
       // as the sheet draws them, so the paw reads as three round toes (parts/paw.ts).
       ...toes({ lines: ([[[-41.6, -3.6], [-42.3, -5.8], [-42.2, -8], [-41.4, -9.8]], [[-35.6, -3.3], [-35, -5.4], [-35.1, -7.6], [-35.8, -9.4]]] as P[][])
-        .map((pts) => flipX(pts, side)), fade: [-3.4, -10], soft: true, dome: { centre: flipX([[-38.6, -6.5]], side)[0]!, size: [8, 5.5] } }),
+        .map((pts) => flipX(pts, side)), fade: [-2.8, -12.5], soft: true, dome: { centre: flipX([[-38.6, -6.5]], side)[0]!, size: [8, 5.5] } }),
     // A bun closed all round where it shows, as the sheet draws it: its line comes out from behind the front paw over
     // its top, where it lies on the haunch, runs on unbroken down its outer side and under its sole to where it goes
     // behind the front paw again, deepening to the darkest where it sits on the ground (parts/lines.ts).
@@ -881,7 +886,7 @@ export function front(): Drawn[] {
     shade: { multiply: C.shadeBy, shapes: ["M-32 -58.6 C-16 -50.4 16 -50.4 32 -59.6 L32 -46 L-32 -46Z"], blur: 1.5 },
     highlight: { d: "M-22 -61.4 C-11 -58.4 10 -58.4 22 -62.8 L22 -60.2 C10 -56.2 -11 -56.2 -22 -59Z", colour: C.collarHighlight, opacity: 0.35, blur: 0.8 },
     under: `<rect x="-1.5" y="-60" width="4.4" height="10.4" rx="1.2" fill="${C.collarLine}" opacity="0.3"/>`,
-    outline: { colour: C.collarRim, width: THIN, taper: 3, blur: 0.2, spans: [{ from: [29, -66.1], to: [-27.6, -63.6] }] },
+    outline: { colour: C.collarRim, width: THIN, taper: 3, blur: 0.2, spans: [{ from: [29.2, -65.9], to: [-27.8, -63.6] }] },
   }));
   add("shadow.chin.collar", chinShadow(head, cheekRoll([-38, -66.2]), cheekRoll([38, -66.2]), C.collarLine, [-44, -74, 88, 22], CHIN_SHADOW));
   add("tag", tagPiece());
@@ -921,7 +926,7 @@ export function front(): Drawn[] {
     // Two toe lines rising from the sole's dips about 5.5 pt up the paw's front, each bowing a little away from the
     // middle toe, as the sheet, the paw-stub and the stubby-paws panels draw them (parts/paw.ts).
     const toeLines = toes({ lines: ([[[-11.2, -1.2], [-10.6, -3.4], [-10.8, -5.4], [-11.6, -6.9]], [[-20.8, -1.2], [-21.4, -3.4], [-21.2, -5.4], [-20.4, -6.9]]] as P[][])
-      .map((pts) => flipX(pts, side)), fade: [-1.2, -7], soft: true, width: 0.9, dome: { centre: flipX([[-16, -4.4]], side)[0]!, size: [10.5, 6] } });
+      .map((pts) => flipX(pts, side)), fade: [-0.6, -9.5], soft: true, width: 0.9, dome: { centre: flipX([[-16, -4.4]], side)[0]!, size: [10.5, 6] } });
     add(`front.${side}`, lineGate(litPart(`front.${side}`, legs[side], {
       fill: C.fur,
       shade: furShade(bodyGroup, [polyD(flipX([[-5, -26], [-4.2, -20], [-3, -12], [-2.2, -6], [-1.2, -6], [-2, -12], [-3, -20], [-3.8, -26]], side))],
@@ -1122,7 +1127,7 @@ const perkD = (side: "L" | "R", d: string) => rollD(side === "R" ? d : mirrorD(d
  * and bows in a little before the cheek, so the head stays round under a raised ear rather than walled (DECISIONS 147).
  */
 const temples = {
-  R: smooth([[-38, -140], [-44.2, -137.6], [-46.6, -134], [-46, -128.4], [-45.5, -122.6], [-45.6, -116.6], [-46.2, -112.4], [-45.6, -108.6], [-43.2, -105.8], [-38, -106.8],
+  R: smooth([[-38, -140], [-43.9, -137.8], [-46.25, -134], [-46, -128.4], [-45.5, -122.6], [-45.6, -116.6], [-46.2, -112.4], [-45.6, -108.6], [-43.2, -105.8], [-38, -106.8],
     [-31, -122], [-29.6, -136.4]]),
   L: smooth([[28, -141.6], [35.8, -142.8], [40.4, -141.2], [42.8, -137.8], [42.9, -133], [42.5, -126.4], [42.4, -120], [43, -115], [43.7, -112], [43.3, -108.4], [41.2, -105.6],
     [36, -106.6], [29, -122], [26, -134]]),

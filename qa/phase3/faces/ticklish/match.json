@@ -265,16 +265,16 @@
      "held": false
     },
     "mouth": {
-     "areaPx": 1096,
+     "areaPx": 1097,
      "recordAreaPx": 924,
-     "areaPt2": 418.3,
-     "areaRatio": 1.186,
-     "iou": 0.786,
+     "areaPt2": 418.7,
+     "areaRatio": 1.187,
+     "iou": 0.785,
      "pass": true,
-     "openPx": 1053,
+     "openPx": 1054,
      "recordOpenPx": 815,
      "openRatio": 1.228,
-     "redShare": 0.439,
+     "redShare": 0.438,
      "recordRedShare": 0.399,
      "held": false
     }

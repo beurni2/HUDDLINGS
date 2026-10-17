@@ -85,9 +85,9 @@
     "head.top": {
      "record": [56.44, 15.09],
      "held": false,
-     "found": [53.42, 19.58],
-     "errPt": 6.98,
-     "offsetPt": [-1.58, 6.8],
+     "found": [53.17, 19.59],
+     "errPt": 7.17,
+     "offsetPt": [-1.87, 6.92],
      "pass": true,
      "note": "reported, never held: the sheet draws the tuft differently in every panel"
     },
@@ -179,9 +179,9 @@
     "head.top": {
      "record": [110.82, 29.65],
      "held": false,
-     "found": [100.0, 36.72],
-     "errPt": 9.49,
-     "offsetPt": [-5.53, 7.7],
+     "found": [99.25, 36.75],
+     "errPt": 9.96,
+     "offsetPt": [-6.04, 7.92],
      "pass": true,
      "note": "reported, never held: the sheet draws the tuft differently in every panel"
     },
@@ -250,7 +250,7 @@
  },
  "headGate": {
   "headShiftPt": [0.01, 0.0],
-  "headIoU": 0.9953,
+  "headIoU": 0.9959,
   "thresholdPt": 2.8,
   "rows": {
    "nose": {
