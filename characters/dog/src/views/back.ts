@@ -265,11 +265,14 @@ function tuckD(pts: P[]): string {
 }
 /** How much of the outer band the topknot's line swells across (260, 281): its thin end, as the crisp topknot's ceiling keeps its tone; at the whole band its feet's turns swelled into dark knots. */
 const TUFT_WEIGHT = 0.4;
-/** The tucks as one piece over the topknot, unclipped (a stroke clipped to a pointed V is a sliver). */
-function tucks(box: Box): Piece {
+/** Tucks along each of `paths`, each in its colour, softened and faded as the crisp topknot's are, unclipped (a stroke clipped to a pointed V is a sliver). */
+function tuckPaths(paths: P[][], colour: (i: number) => string, box: Box): string {
   const f = uid("blur");
-  return piece(`<defs>${blur(f, pad(box, 2), CRISP.tuck.blur)}</defs><path d="${TUCKS.map(tuckD).join("")}" fill="${LINES.cream[1]}" opacity="${CRISP.tuck.opacity}" filter="url(#${f})"/>`, box);
+  return `<defs>${blur(f, pad(box, 2), CRISP.tuck.blur)}</defs><g opacity="${CRISP.tuck.opacity}" filter="url(#${f})">` +
+    paths.map((pts, i) => `<path d="${tuckD(pts)}" fill="${colour(i)}"/>`).join("") + "</g>";
 }
+/** The topknot's tucks as one piece over it. */
+const tucks = (box: Box): Piece => piece(tuckPaths(TUCKS, () => LINES.cream[1]!, box), box);
 
 // The body from behind: the shoulders come out from under the collar's ends
 // and run down and out, a lock stepping out a little under each collar end, to a
@@ -562,18 +565,19 @@ function headLinePiece(): Piece {
   // Under each first lock's tip the outline itself curls back in, where the lock lies over the next, as the sheet draws
   // it: from the notch between the two locks the line runs on in under the first lock, 4 to 6 pt, as dark as the
   // outline there (the sheet's L* 64 to 77 along it, at y -150.3 from x -30.5 to -26 on the left and -148.3 to -149 from
-  // x 38 to 34 on the right), its start inside the outline's own ribbon, so it grows out of the line, never floats.
+  // x 38 to 34 on the right). Each is the crisp topknot's tuck (262, 281): from the notch's V at the tuck's full width
+  // with a round end there, so the line turns into it, easing out only toward its inner end; drawn tapering at both
+  // ends from 0.76 pt inside the notch, they read zoomed as dashes floating under the line (281).
   const f = uid("blur");
-  const hooks = [[[-31.7, -150.7], [-29.8, -150.5], [-27.6, -150.4], [-26.2, -150.7]], [[39.7, -148.1], [38, -148.5], [36, -148.5], [34.2, -149]],
+  const tucked = [[[-32.2, -150.5], [-30.6, -150.4], [-28.4, -150.4], [-26.4, -150.7]], [[40.2, -147.95], [38.4, -148.4], [36.2, -148.5], [34.4, -149]],
     // Under each lowest lock's tip, over the ear's root, the sheet's line curls in the same way along the lock's underside,
     // 3 to 4 pt, then leaves the rest of the root's edge unlined (its L* 59 to 67 at x -40 to -38 and 42 to 43); on the
     // right in the root's light tan, as the crown's line there (105).
-    [[-41.3, -143.9], [-40.2, -143.6], [-38.6, -143.1], [-37.4, -142.8]], [[43.6, -143.7], [42.6, -143.6], [41.2, -143.3], [40, -143]]]
-    .map((pts) => tapered(curve(pts as P[], 6), 0.9, "inner", "crown lock", { taper: 1.2, tip: 0.15 }));
+    [[-41.4, -143.9], [-40.2, -143.6], [-38.6, -143.1], [-37.2, -142.8]], [[43.8, -143.6], [42.6, -143.6], [41.2, -143.3], [39.8, -143]]] as P[][];
   return piece(`<defs>${r.defs}${blur(f, pad(box, 2), 0.15)}${rootGradient(ROOT.R, [35.4, -152.4], [40.6, -148.4])}</defs>${r.body}` +
-    `<g filter="url(#${f})">${root.svg}</g><g fill="${LINES.cream[1]}" filter="url(#${f})">${hooks.map((h, i) => `<path d="${h.d}"${i === 3 ? ` fill="${C.rootTan}"` : ""}/>`).join("")}</g>`, box, {
+    `<g filter="url(#${f})">${root.svg}</g>` + tuckPaths(tucked, (i) => (i === 3 ? C.rootTan : LINES.cream[1]!), box), box, {
     shapes: [{ name: "head.line", nodes: head.typed, segs: head.segs, outlined: [...r.outlined, ...root.outlined], fur: head.fur.map(([a, b]) => [fracAt(head, a), fracAt(head, b)]) }],
-    lines: [...r.lines, ...root.lines, ...hooks.map((h) => h.line)],
+    lines: [...r.lines, ...root.lines],
   });
 }
 
@@ -605,7 +609,10 @@ function earPaint(side: "L" | "R"): Paint {
     if (i === 0) return { pts: curve([n, v.add(n, [-k * 0.45, -5.5]), v.add(n, [-k * 0.7, -11])], 6), width: 0.9, colour: C.earLine, opacity: 1 };
     return { pts: curve([n, v.add(n, v.mul(up, 2.2)), v.add(v.add(n, v.mul(up, 4.4)), [k * 0.4, 0])], 6), width: 0.75, colour: C.earLine, opacity: 0.45 };
   });
-  return { ...paint, under: (paint.under ?? "") + earWarmth(side), inner: [...(paint.inner ?? []), ...partings] };
+  // The recipe's soft light high on the outer side, at half its strength (282): at full strength it paled the ear inside
+  // its outer line, so the line stood out at phone size as a hard brown rim where the sheet's ear darkens into its line.
+  const light = paint.highlight ? { highlight: { ...paint.highlight, opacity: paint.highlight.opacity * EAR_LIGHT } } : {};
+  return { ...paint, ...light, under: (paint.under ?? "") + earWarmth(side), inner: [...(paint.inner ?? []), ...partings] };
 }
 
 /**
@@ -622,6 +629,8 @@ function earWarmth(side: "L" | "R"): string {
     `<stop offset="1" stop-color="${C.earDeeper}" stop-opacity="${EAR_WARMTH[2]}"/></linearGradient></defs>` +
     `<rect x="${x0}" y="${y0}" width="${x1 - x0}" height="${y1 - y0}" fill="url(#${g})"/>`;
 }
+/** How much of the recipe's light on each ear's outer side is kept. */
+const EAR_LIGHT = 0.5;
 /** How much of the ears' deep tan lies over the recipe's paint: at the ear's top, a little below its middle, and of the deeper tan at its hem. */
 const EAR_WARMTH = [0.3, 0.55, 0.45] as const;
 
