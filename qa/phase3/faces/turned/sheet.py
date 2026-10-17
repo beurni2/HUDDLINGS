@@ -32,10 +32,9 @@ BESIDE = {
 
 
 # What a cell shows that the package on this branch does not play (render.ts's `review`), and its footnote.
-MARKS = {"held": "*", "temple": "**"}
+MARKS = {"held": "*"}
 NOTES = [
-    "* review build: a state held out of the package for now (the turned stars and puffed cheeks, the profile's mouths; DECISIONS 183, 208)",
-    "** the three-quarter's line beside its near ear perked: keyed only by p3/faces2's face clips; here the package draws the rest line (176)",
+    "* review build: a state held out of the package for now (the turned stars, the profile's mouths and puffed cheek; DECISIONS 183, 208)",
 ]
 
 
@@ -89,7 +88,7 @@ def sheet(view, cells, out_dir, qa):
     H = 50 + sum(36 + -(-len(ts) // COLS) * (cell_h + LABEL_H + PAD) for _, ts in sections) + 30 + 20 * len(NOTES)
     page = Image.new("RGB", (W, H), "white")
     d = ImageDraw.Draw(page)
-    d.text((PAD, 10), f"{view}: face states at 3x, WebGL (review build, cells marked * and ** below)", fill=(40, 30, 20), font=font(22))
+    d.text((PAD, 10), f"{view}: face states at 3x, WebGL (review build, cells marked * below)", fill=(40, 30, 20), font=font(22))
     y = 50
     for title, ts in sections:
         d.text((PAD, y + 6), title, fill=(90, 60, 40), font=font(20))

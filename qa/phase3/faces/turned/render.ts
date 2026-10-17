@@ -2,7 +2,7 @@
 // stills (presets.ts, faceClips.ts's stillOf) in threeQuarter.L, threeQuarter.R, side.L and side.R, each a still of a
 // review build of the dog with a clip of its own that sets the view and the states (a face preset's states apply in any
 // view at runtime, so the package itself gets no new clip). The review build is the package's own source plus the
-// turned views' stars and puffed cheeks and the profile's mouths, which the package holds out for now (DECISIONS 183, 208), and these
+// turned views' stars and the profile's mouths and puffed cheek, which the package holds out for now (DECISIONS 183, 208), and these
 // clips. Also the ID-pass check of
 // "nothing of the open eye under a closed one": under every closed eye state (happy, squeeze, closed, wink, flat), in
 // every view that draws an eye, none of the open eye's own pixels shows, and under each view's sleepy half-lid nothing
@@ -35,21 +35,20 @@ const restStill = (view: string) => JSON.parse(readFileSync(join(repo, `characte
 
 /**
  * A cell: its label, the states it keys and the ears' turns, in one view; and what it shows that the package on this
- * branch does not play (`review`): a state held out of the package (DECISIONS 183), or the head's line beside a perked
- * ear, which only p3/faces2's face clips key (176).
+ * branch does not play (`review`): a state held out of the package (DECISIONS 183).
  */
 interface Cell {
   label: string;
   group: "state" | "preset";
   states: Record<string, string>;
   ears?: { L: EarState; R: EarState };
-  review?: ("held" | "temple")[];
+  review?: "held"[];
 }
 
 /**
- * The head's line beside a raised ear, as p3/faces2's face clips key it (its faceClips.ts and DECISIONS 146): an ear
- * raised off its temple, perked or lifted, leaves the line to the temple's edge on its side (templeL, templeR, temples).
- * This branch's face clips key no head.line state, so the package here draws the rest line beside every ear.
+ * The head's line beside a raised ear, as the face clips key it (faceClips.ts, DECISIONS 146): an ear raised off its
+ * temple, perked or lifted, leaves the line to the temple's edge on its side (templeL, templeR, temples); the
+ * three-quarter draws its own line beside either ear perked (DECISIONS 176, 234).
  */
 const temple = (ears: { L: string; R: string }): Record<string, string> => {
   const up = (e: string) => e === "onePerked" || e === "lifted";
@@ -117,7 +116,9 @@ const pkg = join(out, "package");
 rmSync(out, { recursive: true, force: true });
 const source = await readSource("dog");
 // The states the package holds out for now, in the review build only (DECISIONS 183): the turned views' stars, a
-// sparkle region and nothing otherwise, last in each turned head; and the profile's mouths, each keyed to its state.
+// sparkle region and nothing otherwise, last in each turned head; the profile's mouths, each keyed to its state; and the
+// profile's puffed cheek, in the cheeks slot the rig now gives every turned head after the blush (DECISIONS 208, 234),
+// which the three-quarter's package fills and the profile's does not yet (side.ts holds its puff out).
 const part = (name: string) => source.rig.parts.find((p) => p.name === name)!;
 for (const [view, drawn] of [["threeQuarter.L", threeQuarterHeld("L")], ["threeQuarter.R", threeQuarterHeld("R")], ["side.L", sideHeld("L")], ["side.R", sideHeld("R")]] as const) {
   for (const d of drawn) {
@@ -126,10 +127,6 @@ for (const [view, drawn] of [["threeQuarter.L", threeQuarterHeld("L")], ["threeQ
   }
   part("stars").regions[view] = null;
   source.rig.drawOrder[`head.${view}`]!.push("stars");
-  // Huffy's puffed cheeks, held out as the stars are (DECISIONS 208): after the blush, in the head base's clip group, as the front draws them.
-  part("cheeks").regions[view] = null;
-  const order = source.rig.drawOrder[`head.${view}`]!;
-  order.splice(order.findIndex((p) => p.startsWith("blush.")) + 1, 0, "cheeks");
 }
 const add = (c: ReturnType<typeof clip>) => source.clips.push(c as unknown as Clip);
 const plan: { view: View; cells: (Cell & { clip: string })[] }[] = VIEWS.map((view) => ({
@@ -145,16 +142,11 @@ for (const view of ID_VIEWS) {
     idClips.push({ view, state, clip: name });
   }
 }
-// Each cell's states the package does not play: a region the review build adds, or the temple line beside a perked ear.
+// Each cell's states the package does not play: a region the review build adds.
 for (const { view, cells: cs } of plan) {
   for (const c of cs) {
-    const review = new Set<"held" | "temple">();
-    for (const [name, state] of Object.entries(c.states)) {
-      const own = regionFor(rig.parts.find((q) => q.name === name)!, view, state), built = regionFor(part(name), view, state);
-      if (own !== built) review.add("held");
-      else if (name === "head.line" && built !== `head.line/${view}`) review.add("temple");
-    }
-    if (review.size) c.review = [...review];
+    const held = Object.entries(c.states).some(([name, state]) => regionFor(rig.parts.find((q) => q.name === name)!, view, state) !== regionFor(part(name), view, state));
+    if (held) c.review = ["held"];
   }
 }
 writePackage(await buildPackage(source, { cache: resolve(args.cache ?? join(repo, "build/cache")) }), pkg);

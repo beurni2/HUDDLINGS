@@ -43,8 +43,9 @@ const OWN = (view: string): Record<string, readonly string[]> => ({
   "eye.L": TURNED_EYES, "eye.R": TURNED_EYES,
   mouth: view.startsWith("side") ? ["smile"] : ["open", ...TURNED_MOUTHS],
   "brow.L": ["raised", "happy"], "brow.R": ["raised", "happy"], "ear.L": ["onePerked"], "ear.R": ["onePerked"],
-  // The three-quarter's near ear raised uncovers the nape, so its line beside it is its own; the far ear's is the rest.
-  ...(view.startsWith("threeQuarter") ? { "head.line": [view.endsWith("L") ? "templeL" : "templeR"] } : {}),
+  // The three-quarter draws its own line beside either ear perked: the near one uncovers the nape behind the face's
+  // side, the far one leaves the far side of the head the silhouette (DECISIONS 176, 234); and its own puffed cheeks.
+  ...(view.startsWith("threeQuarter") ? { "head.line": ["templeL", "templeR"], cheeks: ["puffed"] } : {}),
 });
 const drawsIn = (part: Rig["parts"][number], view: string) => Object.keys(part.regions).some((k) => k.split(":")[0] === view);
 const deciding = (part: Rig["parts"][number], view: string, state: string) =>
@@ -103,6 +104,14 @@ test("every face state of every face part draws its own region, or a deliberate 
     for (const d of all) assert.ok(ALLOWED[d.part]?.includes(d.state!), `${view} draws ${d.part} ${d.state}, not an allowed state`);
     const keys = all.map((d) => `${d.part}:${d.state}`);
     assert.equal(new Set(keys).size, keys.length, `${view} draws a state twice`);
+    // Each turned view draws its cheeks in huffy's puffed state only, never at rest (DECISIONS 208, 234).
+    assert.deepEqual(all.filter((d) => d.part === "cheeks").map((d) => d.state), ["puffed"], `${view}'s cheeks`);
+  }
+  // In the package the three-quarter's puffed cheeks draw in their slot, and the rest draws nothing there.
+  const cheeks = rig.parts.find((p) => p.name === "cheeks")!;
+  for (const view of ["threeQuarter.L", "threeQuarter.R"]) {
+    assert.equal(regionFor(cheeks, view, "puffed"), `cheeks/${view}:puffed`);
+    assert.equal(regionFor(cheeks, view, undefined), undefined);
   }
 });
 
@@ -117,31 +126,38 @@ const lineState = (ears: { L: string; R: string }) => {
   return l && r ? "temples" : l ? "templeL" : r ? "templeR" : undefined;
 };
 /**
- * A problem with the three-quarter's line beside the ears, for each preset's still: its near-side curve is left out
- * (head.line's temple drawing) only where that view's near ear is perked, the one raised ear a turned view draws off
- * its temple (176). A lifted ear hangs there still (the turned views draw no lifted ear), so leaving the curve out
- * beside it would cut the face's line over the ear.
+ * A problem with the three-quarter's line beside the ears, for each preset's still: each three-quarter view draws its own
+ * line beside one ear perked, by that ear's name (the dog's side), and the rest line otherwise. Beside the near ear the
+ * face's near-side curve is left out over the nape the ear uncovers (176); beside the far ear the far root's stretch is
+ * lined, the head's far side being the silhouette once the ear is up (234). A lifted ear hangs there still (the turned
+ * views draw no lifted ear), so leaving the curve out beside it would cut the face's line over the ear.
  */
 function templeProblem(r: Rig, presets: [string, { L: EarState; R: EarState }][]): string | undefined {
   const line = r.parts.find((p) => p.name === "head.line")!;
   for (const [name, ears] of presets) {
-    for (const [view, near] of [["threeQuarter.L", "L"], ["threeQuarter.R", "R"]] as const) {
-      const region = regionFor(line, view, lineState(ears)), perked = ears[near] === "onePerked";
-      if (perked !== (region !== `head.line/${view}`)) return `${name} in ${view} (ears ${ears.L}, ${ears.R}) draws ${region}`;
+    const perked = (["L", "R"] as const).filter((s) => ears[s] === "onePerked");
+    for (const view of ["threeQuarter.L", "threeQuarter.R"]) {
+      const region = regionFor(line, view, lineState(ears)), want = perked.length === 1 ? `head.line/${view}:temple${perked[0]}` : `head.line/${view}`;
+      if (region !== want) return `${name} in ${view} (ears ${ears.L}, ${ears.R}) draws ${region}, not ${want}`;
     }
   }
   return undefined;
 }
 
-test("a three-quarter view leaves its face's near-side line out only beside its near ear perked, for every preset", () => {
+test("a three-quarter view draws its own line beside either ear perked, and the rest line beside every other ear, for every preset", () => {
   const presets = Object.entries(PRESETS).map(([name, p]): [string, { L: EarState; R: EarState }] => [name, stillOf(p).ears]);
   assert.equal(templeProblem(rig, presets), undefined);
-  // Every lifted preset keys temples (both ears raised), and the perked ones templeL: both are covered.
+  // Every lifted preset keys temples (both ears raised), and the perked ones templeL, which is the near ear in
+  // threeQuarter.L and the far ear in threeQuarter.R: all three are covered.
   assert.ok(presets.some(([, e]) => lineState(e) === "temples") && presets.some(([, e]) => lineState(e) === "templeL"));
   // Planted: temples read as the near ear's line, as this lane first keyed it, cuts the line over a lifted (hanging) ear.
   const line = rig.parts.find((p) => p.name === "head.line")!;
   const keyed: Rig = { ...rig, parts: rig.parts.map((p) => (p === line ? { ...p, regions: { ...p.regions, "threeQuarter.L:temples": "head.line/threeQuarter.L:templeL" } } : p)) };
   assert.match(templeProblem(keyed, presets) ?? "", /in threeQuarter\.L \(ears lifted, lifted\) draws head\.line\/threeQuarter\.L:templeL/);
+  // Planted: the far ear's line taken out of threeQuarter.R, as the review found it, the perked far ear leaves the rest
+  // line's unlined, feathered root on the silhouette.
+  const noFar: Rig = { ...rig, parts: rig.parts.map((p) => (p === line ? { ...p, regions: Object.fromEntries(Object.entries(p.regions).filter(([k]) => k !== "threeQuarter.R:templeL")) } : p)) };
+  assert.match(templeProblem(noFar, presets) ?? "", /in threeQuarter\.R \(ears onePerked, neutral\) draws head\.line\/threeQuarter\.R, not head\.line\/threeQuarter\.R:templeL/);
   // Planted: an ear lifted alone keys its temple by the same name as a perked one; were a preset to lift one ear
   // alone, the guard fails, and the front's names must then tell perked from lifted.
   assert.match(templeProblem(rig, [["one ear lifted", { L: "lifted", R: "neutral" }]]) ?? "", /one ear lifted in threeQuarter\.L/);

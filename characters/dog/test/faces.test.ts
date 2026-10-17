@@ -766,7 +766,16 @@ test("the stars round the head draw only in a sparkling face, the puffed cheeks 
   assert.equal(cheeks.clipTo, "head.base");
   assert.equal(regionFor(cheeks, "front", "puffed"), "cheeks/front:puffed");
   assert.equal(regionFor(cheeks, "front", undefined), undefined);
-  for (const view of rig.views.filter((v) => v !== "front")) assert.equal(regionFor(cheeks, view, "puffed"), undefined, `cheeks in ${view}`);
+  // Every turned head has the cheeks' slot right after its blush, as the front does (DECISIONS 208, 234), drawing
+  // nothing at rest. The three-quarter's puffed cheeks are the package's own drawings there, in huffy's state only; the
+  // profile's slot draws nothing yet, its puff held out with its mouths (side.ts sideHeld); and the back draws none.
+  for (const view of rig.views.filter((v) => v !== "front")) {
+    const order = rig.drawOrder[`head.${view}`]!;
+    if (view !== "back") assert.equal(order.indexOf("cheeks"), order.findIndex((p) => p.startsWith("blush.")) + 1, `the cheeks' slot in ${view}`);
+    else assert.ok(!order.includes("cheeks"), "the back draws no cheeks");
+    assert.equal(regionFor(cheeks, view, "puffed"), view.startsWith("threeQuarter") ? `cheeks/${view}:puffed` : undefined, `cheeks puffed in ${view}`);
+    for (const state of [undefined, ...CHEEK_STATES.filter((s) => s !== "puffed")]) assert.equal(regionFor(cheeks, view, state), undefined, `cheeks ${state ?? "at rest"} in ${view}`);
+  }
   for (const part of ["head.base", "head.line"]) assert.ok(!Object.keys(rig.parts.find((p) => p.name === part)!.regions).some((k) => k.endsWith(":puffed")), `${part} has no puffed state`);
   // Only huffy's clip puffs them.
   for (const clip of faces) assert.equal(clip.states?.cheeks?.[0]?.[1], clip.name === "face_huffy" ? "puffed" : undefined, `${clip.name}'s cheeks`);

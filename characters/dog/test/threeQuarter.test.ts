@@ -13,7 +13,7 @@ import { Resvg } from "@resvg/resvg-js";
 import { PNG } from "pngjs";
 import type { AtlasSet, Clip, Rig } from "../../../runtime-web/src/format.ts";
 import { validate } from "../../../runtime-web/src/format.ts";
-import { compile, drawList, evaluatePose } from "../../../runtime-web/src/rig.ts";
+import { compile, drawList, evaluatePose, regionFor } from "../../../runtime-web/src/rig.ts";
 import { openStills, type StillInfo, type Stills } from "../../../runtime-web/lab/still.ts";
 import { buildPackage, readSource, writePackage } from "../../build/build.ts";
 import { restTransform, toBone } from "../../draw/frame.ts";
@@ -93,7 +93,10 @@ test("the three-quarter view's clip and order are the crop's: ears behind the he
   assert.deepEqual(validate(rig, clips), []);
   assert.deepEqual(clips[1]!.views, { body: [[0, VIEW]], head: [[0, VIEW]] });
   const at = (part: string) => order.indexOf(part);
-  assert.deepEqual([...order].sort(), [...pieces.keys()].sort(), "the order draws every drawing of the view, once");
+  // Every part the order lists draws at rest but the cheeks, whose slot after the blush draws only huffy's puffed state (DECISIONS 234).
+  const resting = order.filter((p) => regionFor(rig.parts.find((q) => q.name === p)!, VIEW, undefined) !== undefined);
+  assert.deepEqual(order.filter((p) => !resting.includes(p)), ["cheeks"]);
+  assert.deepEqual([...resting].sort(), [...pieces.keys()].sort(), "the order draws every drawing of the view, once");
   assert.ok(at("tail") < at("body.back"), "the tail is behind the body (L298)");
   assert.ok(at("ear.R") < at("head.base") && at("ear.L") < at("head.base"), "the ears are behind the head (L298)");
   assert.ok(at("front.R") < at("body.front"), "the far front leg sits behind the chest (L369)");
@@ -125,7 +128,8 @@ test("each placed landmark of the three-quarter view lies on its own part, the t
   assert.deepEqual(Object.keys(landmarks).sort(), Object.keys(owner).sort());
   const scale = 3, r = rasters(scale);
   for (const [name, p] of Object.entries(landmarks)) {
-    const top = order.filter((part) => part !== "shadow" && alphaAt(r.get(part)!, scale, p) >= 0.5).at(-1);
+    // Every drawn part (the cheeks' slot draws nothing at rest).
+    const top = order.filter((part) => part !== "shadow" && r.has(part) && alphaAt(r.get(part)!, scale, p) >= 0.5).at(-1);
     assert.equal(top, owner[name], `${name} at (${p}) lies on ${top}`);
     const sheet = L[name];
     if (sheet) assert.ok(Math.hypot(p[0] - sheet[0], p[1] - sheet[1]) < 0.03 * model.proportions.headWidth, `${name} is ${Math.hypot(p[0] - sheet[0], p[1] - sheet[1]).toFixed(1)} pt from the sheet's`);

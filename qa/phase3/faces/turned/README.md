@@ -14,12 +14,11 @@ settles (mirrored for a .L view, as the motion sheet faces right). DECISIONS 170
   a number to read, no longer a bound.
 
 The stills come from a review build: the package's own source, plus what the package does not play yet, each cell
-that shows it marked. `*`: the turned stars, huffy's turned puffed cheeks and the profile's mouths, which the package
-holds out for now (183, 208).
-`**`: the three-quarter's head line beside its near ear perked, keyed as p3/faces2's face clips key head.line (an ear
-raised off its temple, perked or lifted, gives templeL, templeR or temples); this branch's face clips key no head.line
-state, so its package draws the rest line there, with its crease, until that merges (176). A face preset's states
-apply in any view at runtime, so the package gets no new clip. The ears' lifted, relaxed and lowered cells are the
+that shows it marked. `*`: the turned stars, the profile's mouths and the profile's puffed cheek, which the package
+holds out for now (183, 208); the three-quarter's puffed cheeks are the package's own, in the cheeks slot after the
+blush (234). The three-quarter's head line beside either ear perked is the package's own too, keyed as the face clips
+key head.line (an ear raised off its temple gives templeL or templeR; 176, 234). A face preset's states apply in any
+view at runtime, so the package gets no new clip. The ears' lifted, relaxed and lowered cells are the
 neutral ear turned by the clip, as at this lane's base.
 
 ```
