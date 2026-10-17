@@ -333,7 +333,7 @@ const CHEEK_L: Lock[] = [{ len: 1.5, width: 4.6, lean: -0.6, dip: 0.3, notch: 1 
 // jaw's round sides plain; their notches shallow (0.1 to 0.2 pt), so the edge reads as the crop's soft arc with small
 // scallops (deeper ones, 0.25 to 0.35, read as a wavy ribbon at 10 times).
 /** The chin's line at its deepest along the scallops (a ceiling on headFur's notch depth there, 0.55). */
-const CHIN_LINE = 0.15;
+const CHIN_LINE = 0.3;
 const CHIN: Lock[] = [{ len: 1.3, width: 7.6, lean: -0.45, dip: 0.15 }, { len: 0.95, width: 6, lean: -0.2, dip: 0.2 }, { len: 1.5, width: 7.5, lean: -0.3, dip: 0.1 },
   { len: 1.2, width: 7.4, lean: 0.05, dip: 0.15 }, { len: 1.6, width: 5.8, lean: 0.35, dip: 0.2 }, { len: 1.1, width: 7, lean: 0.2, dip: 0.1 }, { len: 1.35, width: 5.3, lean: 0.5 }];
 
@@ -582,11 +582,11 @@ function headLinePiece(up: { L: boolean; R: boolean } = { L: false, R: false }, 
   // beside it in the full lobe.
   const lerp = (a: P, b: P, t: number): P => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
   const flicks = h.fur.tufts.cheeks.flatMap((t, i) => {
-    const one = strokeOf([lerp(t.root, t.tip, -0.6), lerp(t.root, t.tip, 0.7)], 1.1, { taper: 1, tip: 0.2 }).d;
+    const one = strokeOf([lerp(t.root, t.tip, -0.6), lerp(t.root, t.tip, 0.7)], 0.7, { taper: 1, tip: 0.15 }).d;
     // The full lobe: the right row's first wisp, the left's (reversed) last.
     if (i !== 0 && i !== h.fur.tufts.cheeks.length - 1) return [one];
     const side = lerp(t.notches[0], t.notches[1], 0.3);
-    return [one, strokeOf([lerp(side, t.tip, -0.4), lerp(side, t.tip, 0.55)], 0.9, { taper: 0.8, tip: 0.2 }).d];
+    return [one, strokeOf([lerp(side, t.tip, -0.4), lerp(side, t.tip, 0.55)], 0.6, { taper: 0.8, tip: 0.15 }).d];
   }).join("");
   const puffs = `<path d="${gapEdge}" fill="${C.fur}" opacity="0.6" filter="url(#${f})"/><path d="${gapRim}" fill="${C.light}" opacity="0.55" filter="url(#${g})"/>` +
     `<path d="${flicks}" fill="${C.light}" opacity="0.7" filter="url(#${f})"/>`;
