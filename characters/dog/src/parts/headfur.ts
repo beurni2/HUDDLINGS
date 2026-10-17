@@ -18,7 +18,7 @@
 // head (huffy's puffed head) passes its own outline and moves every typed place with it (`at`), and a state that
 // raises an ear off its temple (head.line's temple states) starts that side's cheek line lower (`raised`).
 import { furEdge, type FurRules, type Lock } from "../../../draw/fur.ts";
-import { fracAt, minRadius, sample, spanPoints, arc, type P, type Shape } from "../../../draw/geom.ts";
+import { fracAt, minRadius, sample, spanPoints, arc, v, type P, type Shape } from "../../../draw/geom.ts";
 import { strokeOf } from "../../../draw/line.ts";
 import { blur, pad, piece, uid, type Box, type Piece } from "../../../draw/svg.ts";
 import type { LitSpan, SpanEnd } from "./lines.ts";
@@ -43,6 +43,19 @@ export const HEAD_FUR = {
    */
   chin: { count: [5, 7], len: [0.8, 2], width: [4, 8], tipRound: 0.25, lean: [0, 0.6], ratio: 0.15, vary: 0.2, dip: [0, 0.6], noRepeat: true, fit: 0.15 } as FurRules,
   profileChin: { count: [2, 3], len: [0.8, 2], width: [2.5, 6], tipRound: 0.25, lean: [0, 0.6], ratio: 0.2, vary: 0.2, dip: [0, 0.6], fit: 0.15 } as FurRules,
+  /**
+   * The soft chin's wisps (DECISIONS 261), as the hero draws its lower face over the collar: 2 to 4 fine wisps, each
+   * hanging 0.9 to 2.8 pt and 1.6 to 4.5 pt wide at its root, at least 0.35 as long as wide, sharp (tipRound 0.2 or
+   * less), leaning 0.3 to 0.75 away from the chin's middle; neighbours differ by 25% or more in length or width, and the
+   * gaps between them by 30% or more, so they never read as a row; the arc between them plain.
+   */
+  softChin: { count: [2, 4] as [number, number], len: [0.9, 2.8] as [number, number], width: [1.6, 4.5] as [number, number], tipRound: 0.2, lean: [0.3, 0.75] as [number, number], ratio: 0.35, vary: 0.25, spacing: 0.3, light: 0.15,
+    /**
+     * The soft cream fringe along the chin's unlined bottom (fringe()): a band `width` pt wide, `offset` pt out from
+     * the edge, blurred, so the edge reads soft over the collar as the hero's does and the head's stencil edge there
+     * (which head.line's line covers everywhere else) is covered.
+     */
+    fringe: { width: 1.4, offset: 0, blur: 0.35, opacity: 1 } },
   /** The chin's corners, where the jaw turns under: at least this round. */
   cornerPt: 6,
   /** How far from the crown's typed join end the head's and the ear's outlines must cross, in points. */
@@ -113,6 +126,43 @@ export interface Chin {
   corners: P[];
   /** A profile's chin: 2 or 3 tufts in its wiggle at the collar instead of 5 to 7 scallops. */
   profile?: boolean;
+  /**
+   * The chin as the hero and the turnaround crops draw it (DECISIONS 261), in place of `scallops` (left empty): the
+   * smooth soft arc, its lower edge breaking into a few fine, irregular wisps, its line firm only at the sides.
+   */
+  soft?: SoftChin;
+}
+
+/** A fine wisp breaking the chin's lower edge (DECISIONS 261), typed from the crop. */
+export interface Wisp {
+  /** Where it hangs, on the chin's outline. */
+  at: P;
+  /** How far its tip hangs out past the arc, and how wide it is at its root, in points. */
+  len: number;
+  width: number;
+  /** How far it leans along the outline (fur.ts's lean): away from the chin's middle, along the fur's flow. */
+  lean: number;
+}
+
+/** The soft chin (DECISIONS 261). */
+export interface SoftChin {
+  /** Its 2 to 4 wisps, in path order, each its own size and spaced unevenly (HEAD_FUR.softChin). */
+  wisps: Wisp[];
+  /**
+   * How far the chin's line runs on firm from each of its ends, in points ([from its start, back from its end]): the
+   * sides where the cheek's fur turns under into the chin. Between them the bottom is unlined but for `strokes`.
+   */
+  firm: [number, number];
+  /** A few short light strokes along the bottom, each from and to in path order, where the crop's faint line shows (none by default). */
+  strokes?: [P, P][];
+  /** How deep the bottom's strokes lie at most (lines.ts's `most`): light (0.15 by default). */
+  light?: number;
+  /**
+   * The way the fur flows over the collar, which every wisp leans along (a direction in the view): a profile's jaw
+   * combs back down the neck. Left out, each wisp leans away from the chin's middle, as the chin seen from the front
+   * or turned combs out to either side.
+   */
+  flow?: P;
 }
 
 export interface HeadFurSpec {
@@ -137,6 +187,8 @@ export interface HeadFur {
   crown: LitSpan[];
   cheeks: LitSpan[];
   chin?: LitSpan;
+  /** The chin's lines: its one line, or with a soft chin (DECISIONS 261) its firm sides and the bottom's light strokes, in path order. */
+  chins: LitSpan[];
   /** Each lock, clump and scallop, for the strokes and shades a view paints inside the edge. */
   tufts: { crown: Tuft[]; cheeks: Tuft[]; chin: Tuft[] };
   /** Every line, with the cheek lines of the raised sides started lower (head.line's temple states). */
@@ -149,6 +201,11 @@ export interface HeadFur {
    * its lines. Under a raised ear (the temple states) there is no tan at the root to feather, so its root is left out.
    */
   soften(colour: string, box: Box, raised?: Partial<Record<Side, boolean>>): { defs: string; body: string };
+  /**
+   * A soft chin's fringe (DECISIONS 261): the cream feathered along the chin's unlined bottom and its wisps
+   * (HEAD_FUR.softChin.fringe), drawn in head.line under its lines; nothing for a chin that is lined all along.
+   */
+  fringe(colour: string, box: Box): { defs: string; body: string };
 }
 
 /** Where two closed outlines cross, every point, from their samples. */
@@ -204,6 +261,85 @@ export function wispy(tufts: Tuft[]): (p: P) => number {
   };
 }
 
+/** The place `d` pt along a closed outline from the point on it nearest `p` (in path order; back along it when `d` is negative). */
+function along(shape: Shape, p: P, d: number): P {
+  const pts = sample(shape.segs, 48), at = arc([...pts, pts[0]!]), total = at.at(-1)!;
+  let k = 0, best = Infinity;
+  pts.forEach((q, i) => {
+    const e = Math.hypot(q[0] - p[0], q[1] - p[1]);
+    if (e < best) (best = e, k = i);
+  });
+  const s = (((at[k]! + d) % total) + total) % total;
+  let i = at.findIndex((x) => x > s) - 1;
+  if (i < 0) i = pts.length - 1;
+  const a = pts[i]!, b = pts[(i + 1) % pts.length]!, t = (s - at[i]!) / Math.max(1e-9, at[i + 1]! - at[i]!);
+  return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+}
+
+/** Every way a soft chin breaks HEAD_FUR.softChin, in words (DECISIONS 261). */
+function softChinCheck(head: Shape, chin: Chin, at: (p: P) => P): string[] {
+  const rules = HEAD_FUR.softChin, wisps = chin.soft!.wisps, problems: string[] = [];
+  const within = (x: number, [lo, hi]: [number, number]) => x >= lo - 1e-9 && x <= hi + 1e-9;
+  if (chin.scallops.length) problems.push("a soft chin has wisps, not scallops: leave `scallops` empty");
+  if (!within(wisps.length, rules.count)) problems.push(`${wisps.length} wisps, not ${rules.count[0]} to ${rules.count[1]}`);
+  // Where each wisp lies along the outline from the chin's line's start, in points (behind it, negative): the middle is the line's own middle.
+  const from = at(chin.line.from), lineLength = between(head, from, at(chin.line.to)).length;
+  const place = wisps.map((w) => {
+    const b = between(head, from, at(w.at));
+    return b.forward ? b.length : -b.length;
+  });
+  const flow = chin.soft!.flow;
+  place.forEach((s, i) => {
+    const w = wisps[i]!;
+    if (!within(w.len, rules.len)) problems.push(`wisp ${i} hangs ${w.len} pt, not ${rules.len[0]} to ${rules.len[1]}`);
+    if (!within(w.width, rules.width)) problems.push(`wisp ${i} is ${w.width} pt wide, not ${rules.width[0]} to ${rules.width[1]}`);
+    if (w.len / w.width < rules.ratio - 1e-9) problems.push(`wisp ${i} is ${(w.len / w.width).toFixed(2)} as long as it is wide, under ${rules.ratio}`);
+    if (!within(Math.abs(w.lean), rules.lean)) problems.push(`wisp ${i} leans ${Math.abs(w.lean)}, not ${rules.lean[0]} to ${rules.lean[1]}`);
+    if (flow) {
+      const c = at(w.at), t = v.sub(along(head, c, 0.5), along(head, c, -0.5));
+      if (w.lean * v.dot(t, flow) <= 0) problems.push(`wisp ${i} leans against the fur's flow`);
+    } else if (w.lean * (s - lineLength / 2) <= 0) problems.push(`wisp ${i} leans toward the chin's middle, not away from it along the fur's flow`);
+    if (i > 0 && s <= place[i - 1]!) problems.push(`wisp ${i} does not follow wisp ${i - 1} along the chin`);
+    const next = wisps[i + 1];
+    if (next) {
+      const differ = Math.max(Math.abs(w.len - next.len) / Math.max(w.len, next.len), Math.abs(w.width - next.width) / Math.max(w.width, next.width));
+      if (differ < rules.vary - 1e-9) problems.push(`wisps ${i} and ${i + 1} differ by ${(differ * 100).toFixed(0)}%, under ${rules.vary * 100}%: a row`);
+    }
+  });
+  const gaps = place.slice(1).map((s, i) => s - place[i]!);
+  gaps.slice(1).forEach((g, i) => {
+    const differ = Math.abs(g - gaps[i]!) / Math.max(g, gaps[i]!);
+    if (differ < rules.spacing - 1e-9) problems.push(`the gaps after wisps ${i} and ${i + 1} differ by ${(differ * 100).toFixed(0)}%, under ${rules.spacing * 100}%: evenly spaced`);
+  });
+  return problems;
+}
+
+/**
+ * A soft chin's lines (DECISIONS 261), in path order: firm from each end of its line (its jaw, where the cheek's fur
+ * turns under) for `firm` pt, ending free; between them the bottom unlined but for a few light strokes, each free at
+ * both ends; every unlined stretch measured and cited by its length (the gate's `bare`), half a point added for the
+ * outline's sampling.
+ */
+function softChinLines(head: Shape, chin: Chin, at: (p: P) => P): LitSpan[] {
+  const soft = chin.soft!, ends = chin.line.ends ?? ["join", "join"], under = chin.line.under ?? 0;
+  const from = at(chin.line.from), to = at(chin.line.to);
+  // Firm sides that meet (a profile's chin, lined from the lip round to the collar) are the one line, as typed.
+  if (soft.firm[0] + soft.firm[1] >= between(head, from, to).length && !soft.strokes?.length) return [{ from, to, under, ends }];
+  // A side with no firm run (`firm` 0) leaves the bottom's unlined stretch running on to that end of the line.
+  const pieces: { from: P; to: P; ends: [SpanEnd, SpanEnd]; most?: number }[] = [
+    ...(soft.firm[0] > 0 ? [{ from, to: along(head, from, soft.firm[0]), ends: [ends[0], "free"] as [SpanEnd, SpanEnd] }] : []),
+    ...(soft.strokes ?? []).map(([a, b]) => ({ from: at(a), to: at(b), ends: ["free", "free"] as [SpanEnd, SpanEnd], most: soft.light ?? HEAD_FUR.softChin.light })),
+    ...(soft.firm[1] > 0 ? [{ from: along(head, to, -soft.firm[1]), to, ends: ["free", ends[1]] as [SpanEnd, SpanEnd] }] : []),
+  ];
+  if (!pieces.length) throw new Error("headFur: a soft chin's line needs a firm side or a stroke");
+  return pieces.map((p, i) => {
+    const next = pieces[i + 1];
+    const before = i === 0 && soft.firm[0] <= 0 ? between(head, from, p.from).length + 0.5 : 0;
+    const after = next ? between(head, p.to, next.from).length + 0.5 : i === pieces.length - 1 && soft.firm[1] <= 0 ? between(head, p.to, to).length + 0.5 : 0;
+    return { from: p.from, to: p.to, under, ends: p.ends, ...(p.most !== undefined ? { most: p.most } : {}), cites: 261, bare: [before, after] as [number, number] };
+  });
+}
+
 /** The head with its fur where the view places it, and its lines (see the file's head). Throws when a row or a corner breaks its rules. */
 export function headFur(h: HeadFurSpec): HeadFur {
   const at = h.at ?? ((p: P) => p);
@@ -216,7 +352,17 @@ export function headFur(h: HeadFurSpec): HeadFur {
       const r = roundness(head, at(c), 3);
       if (r < HEAD_FUR.cornerPt) throw new Error(`headFur: the jaw turns r ${r.toFixed(2)} pt at (${at(c).map((n) => n.toFixed(1)).join(", ")}), at least ${HEAD_FUR.cornerPt}: the chin is a rounded mass`);
     }
-    head = furEdge(head, at(h.chin.from), at(h.chin.to), flowing(h.chin.scallops), h.chin.tipRound, note(tufts.chin), h.chin.profile ? HEAD_FUR.profileChin : HEAD_FUR.chin);
+    if (h.chin.soft) {
+      // The soft chin (DECISIONS 261): each wisp its own one-lock row on the smooth arc, the arc between them plain.
+      const soft = h.chin.soft, problems = softChinCheck(head, h.chin, at);
+      if (problems.length) throw new Error(`headFur: the soft chin breaks its rules: ${problems.join("; ")}`);
+      // Each wisp is laid on its own width either side of where it hangs (furEdge snaps its ends to its samples, so a
+      // 2 pt wisp's laid width can differ from its typed one by a sample's length: softChinCheck holds the typed row).
+      for (const w of soft.wisps) {
+        const c = at(w.at);
+        head = furEdge(head, along(head, c, -w.width / 2), along(head, c, w.width / 2), [{ len: w.len, lean: w.lean }], Math.min(HEAD_FUR.softChin.tipRound, h.chin.tipRound), note(tufts.chin));
+      }
+    } else head = furEdge(head, at(h.chin.from), at(h.chin.to), flowing(h.chin.scallops), h.chin.tipRound, note(tufts.chin), h.chin.profile ? HEAD_FUR.profileChin : HEAD_FUR.chin);
   }
   for (const c of h.cheeks ?? []) head = furEdge(head, at(c.from), at(c.to), flowing(c.clumps), c.tipRound, note(tufts.cheeks), HEAD_FUR.cheek);
   for (const c of h.crown ?? []) head = furEdge(head, at(c.from), at(c.to), c.locks, c.tipRound, note(tufts.crown), HEAD_FUR.crown);
@@ -279,9 +425,10 @@ export function headFur(h: HeadFurSpec): HeadFur {
     return parts;
   };
   const cheeks = (h.cheeks ?? []).flatMap((c) => cheek(c, false));
-  const chin = h.chin
+  const chin = h.chin && !h.chin.soft
     ? { from: at(h.chin.line.from), to: at(h.chin.line.to), under: h.chin.line.under ?? 0, most: wispy(tufts.chin), ends: h.chin.line.ends ?? ["join", "join"] } satisfies LitSpan
     : undefined;
+  const chins = h.chin?.soft ? softChinLines(head, h.chin, at) : chin ? [chin] : [];
   const rooted = (["R", "L"] as const).map((side) => rootOf(side, false)).filter((r) => !!r);
   const roots = rooted.map(({ side, from, to, length }) => ({ side, from, to, length }));
   // A root's band runs on past the cheek line's free end, under its taper, so the face's side where the line comes out
@@ -293,8 +440,23 @@ export function headFur(h: HeadFurSpec): HeadFur {
     return r.cheekAt === 1 ? [(a + clear) % 1, (b + more) % 1] : [(a - more + 1) % 1, (b - clear + 1) % 1];
   };
   return {
-    head, crown, cheeks, chin, tufts, roots,
-    spans: (raised = {}) => [...crown, ...(h.cheeks ?? []).flatMap((c) => cheek(c, !!raised[c.side])), ...(chin ? [chin] : [])],
+    head, crown, cheeks, chin, chins, tufts, roots,
+    fringe: (colour, box) => {
+      if (!h.chin?.soft) return { defs: "", body: "" };
+      const f = uid("blur"), { width, offset, blur: sd, opacity } = HEAD_FUR.softChin.fringe;
+      const d = chins.slice(0, -1).map((p, i) => strokeOf(spanPoints(head, fracAt(head, p.to as P), fracAt(head, chins[i + 1]!.from as P)), width, { taper: 1.5, tip: 0.4, offset }).d);
+      const first = chins[0]!, last = chins.at(-1)!, ends = [at(h.chin.line.from), at(h.chin.line.to)];
+      // A side with no firm run leaves its stretch of the bottom bare from the line's own end.
+      if (h.chin.soft.firm[0] <= 0 && first.from !== ends[0]) d.unshift(strokeOf(spanPoints(head, fracAt(head, ends[0]!), fracAt(head, first.from as P)), width, { taper: 1.5, tip: 0.4, offset }).d);
+      if (h.chin.soft.firm[1] <= 0 && last.to !== ends[1]) d.push(strokeOf(spanPoints(head, fracAt(head, last.to as P), fracAt(head, ends[1]!)), width, { taper: 1.5, tip: 0.4, offset }).d);
+      // And round each wisp, wherever it hangs (a profile's lie on the jaw over the collar, behind the chin's line).
+      for (const w of h.chin.soft.wisps) {
+        const c = at(w.at);
+        d.push(strokeOf(spanPoints(head, fracAt(head, along(head, c, -1.5 * w.width)), fracAt(head, along(head, c, 1.5 * w.width))), width, { taper: 1.5, tip: 0.4, offset }).d);
+      }
+      return { defs: blur(f, pad(box, 2), sd), body: `<path d="${d.join("")}" fill="${colour}" opacity="${opacity}" filter="url(#${f})"/>` };
+    },
+    spans: (raised = {}) => [...crown, ...(h.cheeks ?? []).flatMap((c) => cheek(c, !!raised[c.side])), ...chins],
     soften: (colour, box, raised = {}) => {
       const f = uid("blur"), { width, offset, blur: sd, opacity } = HEAD_FUR.soft;
       const stretches: [number, number][] = [...rooted.filter((r) => !raised[r.side]).map(rootBand),
