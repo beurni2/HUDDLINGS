@@ -1059,9 +1059,22 @@ const perkedFar = smooth([[-58, -150], [-61, -158], [-66.4, -164.6], [-73.8, -16
  * the head under its raised ear, the skull there is the patch's tan, deepest at the ear's root and paling down into the
  * cream of the neck, which lies in the skull's shade just under it. Its inner side lies under the head.
  */
-let nape = smooth([[-12, -146], [2, -142.6], [6.6, -138], [9.8, -130.4], [11.4, -121], [11.2, -111], [9.2, -101.4], [5.8, -94], [2.4, -89.4], [1.2, -83],
-  [0, -74], [-2.2, -65], [-4.6, -57.4], [-6.6, -53], [-10, -55.6], [-14, -57.6], [-19.6, -60.4], [-24, -66], [-23, -90], [-21, -120], [-18, -138]], { corners: [13] });
+let nape = smooth([[-8, -141], [2, -142.6], [6.6, -138], [9.8, -130.4], [11.4, -121], [11.2, -111], [9.2, -101.4], [5.8, -94], [2.4, -89.4], [1.2, -83],
+  [0, -74], [-2.2, -65], [-4.6, -57.4], [-6.6, -53], [-10, -55.6], [-14, -57.6], [-19.6, -60.4], [-24, -66], [-23, -90], [-22.6, -120], [-20, -136]], { corners: [13] });
 nape = furEdge(nape, [-7.4, -53.8], [-19.6, -60.4], [{ len: 0.9, w: 1.4, lean: 0.3 }, { len: 0.6, w: 1, lean: 0.25 }, { len: 1, w: 1.5, lean: 0.35 }], 0.4);
+
+/**
+ * The nape's lines (DECISIONS 234), one per visible edge, through the line gate: from where its top comes out from under
+ * the crown, between the crown and the raised flap, round the back of the skull and down the neck to where the neck meets
+ * the back's line, on the skull's tan above y -100; and from there along the neck fur's lower edge, which lies on the
+ * back's top, to where it goes under the jaw, one span over its locks. They first tapered out over 6 and 8 pt at both
+ * ends, leaving 9.3 pt of the top unlined under the flap and the neck fur unlined over the back.
+ */
+const NAPE_CORNER: P = [-6.6, -53];
+const NAPE_LINES: LitSpan[] = [
+  { from: [-1.4, -142.2], to: NAPE_CORNER, on: (p) => (p[1] < -100 ? "tan" : "cream"), ends: ["under", "join"] },
+  { from: NAPE_CORNER, to: [-23.2, -64.6], ends: ["join", "under"] },
+];
 
 function perkedEar(side: "L" | "R", F: Facing): Piece {
   const near = side === "L", shape = near ? perkedNear : perkedFar;
@@ -1109,9 +1122,9 @@ function perkedEar(side: "L" | "R", F: Facing): Piece {
       `<path d="M-24 -96 C-12 -93 0 -93.4 12 -97 L12 -50 L-24 -50Z" fill="url(#${neck})" filter="url(#${under})"/>`,
     shade: furShade([nape]),
     light: F.light,
-  }, [{ from: [5.6, -137], to: [-5, -59], taper: [6, 8] }]);
-  // Its canvas grown to hold its rim of shade's whole reach (front.ts's roomy rule).
-  return join(roomy(back, 2), flap);
+  }, NAPE_LINES);
+  // Its canvas grown to hold its rim of shade's whole reach (front.ts's roomy rule); its lines gated as the flap's are.
+  return join(lineGate(roomy(back, 2)), flap);
 }
 
 /**
