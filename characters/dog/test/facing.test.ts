@@ -207,7 +207,11 @@ interface LineSample {
   width: number;
 }
 const MIRROR = '<g transform="scale(-1 1)">';
-const TONES = new Map([...LINES.cream.map((c, i) => [c, i] as const), ...LINES.tan.map((c, i) => [c, i] as const)]);
+// Each ladder's lit steps (DECISIONS 285) are the steps lighter than its lightest, nearest it first: -1, -2 and on. The
+// three-quarter's living lines are the first to draw in them (DECISIONS 294); read as no tone at all, every sample the
+// light lightens past the ladder's lightest in .R would drop out of the comparison.
+const TONES = new Map([...LINES.cream.map((c, i) => [c, i] as const), ...LINES.tan.map((c, i) => [c, i] as const),
+  ...LINES.lit.cream.map((c, i) => [c, -1 - i] as const), ...LINES.lit.tan.map((c, i) => [c, -1 - i] as const)]);
 
 /**
  * Every lined edge's samples in a view's drawings, keyed by their centre. lines.ts draws each run of one tone as a
@@ -280,6 +284,7 @@ test("in both .R facings, lined edges facing up-left are lighter and thinner tha
   // half of it under the part's clip: its widths are not comparable with theirs, so it is left out here.
   const clipped = (view: string, mirror = false) => drawn.get(view)!.filter((d) => d.part !== "head.line").map((d) => (mirror ? mirrorPiece(d.piece) : d.piece));
   for (const kind of KINDS) {
+    const gap: Record<string, number> = {};
     for (const [label, drawings] of [[`${kind}.R`, clipped(`${kind}.R`)], [`${kind}.L mirrored`, clipped(`${kind}.L`, true)]] as const) {
       const s = lineSamples(drawings);
       const [ul, ur, dr] = [toward(s, -1, -1), toward(s, 1, -1), toward(s, 1, 1)];
@@ -290,8 +295,14 @@ test("in both .R facings, lined edges facing up-left are lighter and thinner tha
       // against up-right, at the same height, is what tells the light's side.
       assert.ok(ul.tone < dr.tone - 2 && ul.width < dr.width, `${label}: edges facing up-left (${f(ul)}) are not lighter and thinner than those facing down-right (${f(dr)})`);
       if (label.endsWith(".R")) assert.ok(ul.tone < ur.tone - 1, `${label}: edges facing up-left (${f(ul)}) are not lighter than those facing up-right (${f(ur)})`);
-      else assert.ok(ul.tone > ur.tone, `${label}: a plain mirror lights its up-left edges (${f(ul)}) over its up-right ones (${f(ur)}), which this test would not catch`);
+      gap[label.endsWith(".R") ? "lit" : "plain"] = ur.tone - ul.tone;
     }
+    // A plain mirror keeps the .L drawing's own balance between its up-left and up-right edges. In the three-quarter that
+    // balance follows the crop's tone along its lines (DECISIONS 294: its lightest line, the plume's top and hook, L* 75 to
+    // 83, faces up and right, and its far ear's outer edge, L* 50 to 60, up and left), so a plain mirror no longer reverses
+    // it there: the light must move .R's up-left edges lighter against its up-right ones by over a tone more than a plain
+    // mirror's do, which a plain mirror never does.
+    assert.ok(gap.lit! - gap.plain! > 1, `${kind}.R: the light moves its up-left edges against its up-right ones by ${(gap.lit! - gap.plain!).toFixed(2)} tones over a plain mirror's, not over 1`);
   }
 });
 

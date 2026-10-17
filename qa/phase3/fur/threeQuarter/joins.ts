@@ -1,6 +1,6 @@
 // The three-quarter view's joins sheets for the fur pass (docs/phase3-fur-plan.md; DECISIONS 228 to 234, 272 to 275): for
 // each facing, one row per join the audit names (qa/phase3/audit/defects.json, three-quarter D1 to D15), each the sheet's
-// crop, the base's drawing (8912ced, before the fur kit's second round) and this branch's, side by side, drawn at 10 px/pt and shown at 7 to 9 (2.3
+// crop, the base's drawing (46011a2, before the fur kit's third round) and this branch's, side by side, drawn at 10 px/pt and shown at 7 to 9 (2.3
 // to 3 times the phone's 3), and a last row of the whole dog at phone size. threeQuarter.R is held against the .L crop
 // mirrored (DECISIONS 2, 254).
 // Each view's rest drawings are composited as the rest-frame tests composite them (each part rendered by resvg in model
@@ -24,7 +24,7 @@ import { composite } from "../../../../characters/draw/test/composite.ts";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = resolve(here, "../../../..");
-const BASE = "8912ced";
+const BASE = "46011a2";
 const rig = JSON.parse(readFileSync(join(repo, "characters/dog/src/rig.json"), "utf8")) as Rig;
 const model = JSON.parse(readFileSync(join(repo, "characters/dog/model.json"), "utf8")) as {
   crops: Record<string, { crop: string; ptPerCropPx: number; anchorsCropPx: { ground: [number, number] } }>;
