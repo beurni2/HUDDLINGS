@@ -44,8 +44,8 @@ const OWN = (view: string): Record<string, readonly string[]> => ({
   mouth: view.startsWith("side") ? ["smile"] : ["open", ...TURNED_MOUTHS],
   "brow.L": ["raised", "happy"], "brow.R": ["raised", "happy"], "ear.L": ["onePerked"], "ear.R": ["onePerked"],
   // The three-quarter draws its own line beside either ear perked: the near one uncovers the nape behind the face's
-  // side, the far one leaves the far side of the head the silhouette (DECISIONS 176, 234).
-  ...(view.startsWith("threeQuarter") ? { "head.line": ["templeL", "templeR"] } : {}),
+  // side, the far one leaves the far side of the head the silhouette (DECISIONS 176, 234); and its own puffed cheeks.
+  ...(view.startsWith("threeQuarter") ? { "head.line": ["templeL", "templeR"], cheeks: ["puffed"] } : {}),
 });
 const drawsIn = (part: Rig["parts"][number], view: string) => Object.keys(part.regions).some((k) => k.split(":")[0] === view);
 const deciding = (part: Rig["parts"][number], view: string, state: string) =>
@@ -104,6 +104,14 @@ test("every face state of every face part draws its own region, or a deliberate 
     for (const d of all) assert.ok(ALLOWED[d.part]?.includes(d.state!), `${view} draws ${d.part} ${d.state}, not an allowed state`);
     const keys = all.map((d) => `${d.part}:${d.state}`);
     assert.equal(new Set(keys).size, keys.length, `${view} draws a state twice`);
+    // Each turned view draws its cheeks in huffy's puffed state only, never at rest (DECISIONS 208, 234).
+    assert.deepEqual(all.filter((d) => d.part === "cheeks").map((d) => d.state), ["puffed"], `${view}'s cheeks`);
+  }
+  // In the package the three-quarter's puffed cheeks draw in their slot, and the rest draws nothing there.
+  const cheeks = rig.parts.find((p) => p.name === "cheeks")!;
+  for (const view of ["threeQuarter.L", "threeQuarter.R"]) {
+    assert.equal(regionFor(cheeks, view, "puffed"), `cheeks/${view}:puffed`);
+    assert.equal(regionFor(cheeks, view, undefined), undefined);
   }
 });
 

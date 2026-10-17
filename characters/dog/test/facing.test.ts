@@ -11,6 +11,7 @@ import { join } from "node:path";
 import { Resvg } from "@resvg/resvg-js";
 import { PNG } from "pngjs";
 import type { Clip, Rig } from "../../../runtime-web/src/format.ts";
+import { regionFor } from "../../../runtime-web/src/rig.ts";
 import { validate } from "../../../runtime-web/src/format.ts";
 import { openStills, type StillInfo, type Stills } from "../../../runtime-web/lab/still.ts";
 import { buildPackage, readSource, writePackage } from "../../build/build.ts";
@@ -68,7 +69,9 @@ test("each right-facing view draws its left-facing view's parts in the same orde
     }
     const left = [...pieces(`${k}.L`).keys()], right = [...pieces(`${k}.R`).keys()];
     assert.deepEqual(right.sort(), left.filter((n) => !marked.has(n) || marked.has(swapSides(n))).map(swapSides).sort());
-    assert.deepEqual([...order(`${k}.R`)].sort(), right.sort(), "the order draws every drawing of the view, once");
+    // Every part the order lists draws at rest but the cheeks, whose slot draws only huffy's puffed state (DECISIONS 234).
+    const resting = order(`${k}.R`).filter((n) => regionFor(rig.parts.find((q) => q.name === n)!, `${k}.R`, undefined) !== undefined);
+    assert.deepEqual([...resting].sort(), right.sort(), "the order draws every drawing of the view, once");
   }
 });
 
@@ -449,7 +452,8 @@ test("each right-facing view's placed landmarks are the left-facing view's mirro
     const alpha = new Map([...R].map(([part, p]) => [part, raster(p.svg, scale)]));
     for (const [name, [x, y]] of Object.entries(right)) {
       const at = (png: PNG) => png.data[(Math.floor((y - BOX.y) * scale) * png.width + Math.floor((x - BOX.x) * scale)) * 4 + 3]! / 255;
-      const top = order(`${kind}.R`).filter((part) => part !== "shadow" && at(alpha.get(part)!) >= 0.5).at(-1);
+      // Every drawn part (the cheeks' slot draws nothing at rest).
+      const top = order(`${kind}.R`).filter((part) => part !== "shadow" && alpha.has(part) && at(alpha.get(part)!) >= 0.5).at(-1);
       assert.equal(top, owner[name], `${kind}.R ${name} at (${x}, ${y}) lies on ${top}`);
     }
   }

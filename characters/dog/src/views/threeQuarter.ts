@@ -1127,26 +1127,26 @@ export function threeQuarterFaces(facingSide: Side = "L"): Drawn[] {
   // and its far ear its left (DECISIONS 234).
   out.push({ part: "head.line", state: facingSide === "L" ? "templeL" : "templeR", piece: headLinePiece(F, "near") });
   out.push({ part: "head.line", state: facingSide === "L" ? "templeR" : "templeL", piece: headLinePiece(F, "far") });
+  // Huffy's puffed cheeks (DECISIONS 208), in the cheeks slot after the blush (rig.json).
+  out.push({ part: "cheeks", state: "puffed", piece: turnedCheeks(puffs(F.light), F) });
   return F.finish(out);
 }
 
 /**
- * The face states drawn and tested but held out of the package for now, in a facing: proud's stars round the head and
- * huffy's puffed cheeks. The rig holds the stars to the front and has no cheeks in the turned views' draw orders (the
- * draw orders are the lead's; faces.test.ts holds that no turned view draws the stars, and the turned views' order
- * tests hold their draw orders), so the review build of the turned faces' evidence adds them
- * (qa/phase3/faces/turned/render.ts; DECISIONS 183, 208).
+ * The face states drawn and tested but held out of the package for now, in a facing: proud's stars round the head. The
+ * rig holds the stars to the front (faces.test.ts holds that no turned view draws them), so the review build of the
+ * turned faces' evidence adds them (qa/phase3/faces/turned/render.ts; DECISIONS 183).
  */
 export function threeQuarterHeld(facingSide: Side = "L"): Drawn[] {
   const F = facing(facingSide);
-  return F.finish([{ part: "stars", state: "sparkle", piece: turnedStars(STARS, F.light) }, { part: "cheeks", state: "puffed", piece: turnedCheeks(puffs(F.light), F) }]);
+  return F.finish([{ part: "stars", state: "sparkle", piece: turnedStars(STARS, F.light) }]);
 }
 
 /**
- * Huffy's puffed cheeks seen from this view (DECISIONS 208): the front's balls (parts/cheeks.ts PUFF) carried onto the
- * muzzle as its mouths are, the near one drawn 1.14 times as wide and the far one shortened to 0.64, along the muzzle's
- * level, each crease hugging the pressed mouth's end. Held out of the package with the stars: `cheeks` has no place in
- * a turned head's draw order (rig.json, the lead's).
+ * Huffy's puffed cheeks seen from this view (DECISIONS 208, 234): the front's balls (parts/cheeks.ts PUFF) carried onto
+ * the muzzle as its mouths are, the near one drawn 1.14 times as wide and the far one shortened to 0.64, along the
+ * muzzle's level, each crease hugging the pressed mouth's end. Drawn in the cheeks slot after the blush in each turned
+ * head's order (rig.json), keyed by huffy's clip.
  */
 const puffs = (light: P): TurnedPuff[] => {
   const f = muzzle(light);
