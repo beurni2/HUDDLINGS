@@ -128,6 +128,39 @@ class Shapes(unittest.TestCase):
                 self.assertAlmostEqual(stats["widthMedianPt"], width_pt, delta=0.05 * width_pt)
                 self.assertAlmostEqual(stats["widthPt"], width_pt, delta=0.08 * width_pt)
 
+    def test_the_tone_along_a_line_reads_how_far_it_lightens_and_darkens_along_itself(self):
+        """The advisory tone along the line (dog DECISIONS 284): a line one tone all along reads no spread; one that runs
+        from L* 45 to 80 along itself reads most of it, its pixel noise under 1.5 pt smoothed away; neither its width
+        nor how many pixels it has moves it."""
+        def line(tones, width_px=3, length=120):
+            rgb = np.full((40, length + 20, 3), (255, 245, 230), np.uint8)
+            for x in range(length):
+                t = tones(x / (length - 1))
+                rgb[20 - width_px // 2:20 - width_px // 2 + width_px, 10 + x] = lm_rgb(t)
+            return rgb
+
+        def lm_rgb(L):
+            """A warm brown at lightness L* (the line ladder's hue, a* 14, b* 25), in sRGB."""
+            fy = (L + 16) / 116
+            fx, fz = fy + 14 / 500, fy - 25 / 200
+            inv = lambda t: t ** 3 if t ** 3 > 0.008856 else (t - 16 / 116) / 7.787  # noqa: E731
+            X, Y, Z = 0.95047 * inv(fx), inv(fy), 1.08883 * inv(fz)
+            rgb = (3.2404542 * X - 1.5371385 * Y - 0.4985314 * Z, -0.969266 * X + 1.8760108 * Y + 0.041556 * Z, 0.0556434 * X - 0.2040259 * Y + 1.0572252 * Z)
+            return tuple(int(round(255 * min(1, max(0, 12.92 * c if c <= 0.0031308 else 1.055 * c ** (1 / 2.4) - 0.055)))) for c in rgb)
+
+        def read(rgb):
+            lines = lm.line_map(rgb, 8.0, np.ones(rgb.shape[:2], bool))
+            pts = np.argwhere(lines["plain"])
+            return lm.tone_along(lm.tone_map(lines)[tuple(pts.T)], pts, 0.5)
+
+        even, ramp = read(line(lambda u: 50)), read(line(lambda u: 45 + 35 * u))
+        self.assertLess(even["spreadL"], 1.0)
+        self.assertLess(even["sdL"], 0.5)
+        self.assertGreater(ramp["spreadL"], 15)
+        self.assertGreater(ramp["sdL"], 5)
+        self.assertGreater(read(line(lambda u: 45 + 35 * u, width_px=4))["spreadL"], 15)
+        self.assertIsNone(lm.tone_along(np.array([50.0, 51.0]), np.array([[0, 0], [0, 1]]), 0.5))
+
     def test_a_long_break_outranks_a_few_scattered_pixels_when_the_worst_is_named(self):
         """The review: the front's headline was 19 px of fur strokes in six pieces read as recall 0."""
         scattered = {"measures": {"recall": {"value": 0.0, "threshold": 0.9}, "gapPt": {"value": 3.9, "threshold": 1.9}}, "failed": ["recall"]}
@@ -246,6 +279,19 @@ class Sheet(unittest.TestCase):
         self.assertIn("1 regions uncalibrated", line)
         self.assertIn("rerun linecal.py", line)
         self.assertIn("5%", line)
+
+    def test_the_tone_along_the_line_is_reported_never_judged_and_reads_the_sheet_against_itself_alike(self):
+        """The advisory tone along the line (dog DECISIONS 284): in every view, each region the sheet lines carries it,
+        the sheet's and ours alike on the sheet's own still, and it is no measure the check judges."""
+        self.assertFalse(set(lm.ADVISORY) & set(lm.MEASURES))
+        for view, result in self.results.items():
+            with self.subTest(view=view):
+                read = [row["advisory"]["toneAlong"] for row in result["regions"].values() if (row.get("advisory", {}).get("toneAlong") or {}).get("sheet")]
+                self.assertGreater(len(read), 10)
+                for t in read:
+                    self.assertEqual(t["sheet"], t["ours"])
+                    self.assertGreaterEqual(t["sheet"]["spreadL"], 0)
+                self.assertEqual(result["failed"], [])
 
 
 class CropPlants(unittest.TestCase):

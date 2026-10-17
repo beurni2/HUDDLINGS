@@ -1,0 +1,1316 @@
+{
+ "heroPtPerPx": 0.4696,
+ "hero": {
+  "edges": [
+   {
+    "class": "legs",
+    "kind": "line",
+    "box": [
+     134,
+     262,
+     156,
+     338
+    ],
+    "note": "the right front leg against its haunch",
+    "widthCv": 0.386,
+    "widthPt": 1.358,
+    "sdL": 7.15,
+    "spreadL": 18.17,
+    "meanL": 74.1
+   },
+   {
+    "class": "legs",
+    "kind": "line",
+    "box": [
+     192,
+     282,
+     210,
+     346
+    ],
+    "note": "the right front leg's inner edge",
+    "widthCv": 0.375,
+    "widthPt": 1.173,
+    "sdL": 10.6,
+    "spreadL": 34.4,
+    "meanL": 70.8
+   },
+   {
+    "class": "legs",
+    "kind": "line",
+    "box": [
+     212,
+     282,
+     230,
+     346
+    ],
+    "note": "the left front leg's inner edge",
+    "widthCv": 0.581,
+    "widthPt": 1.154,
+    "sdL": 11.09,
+    "spreadL": 29.2,
+    "meanL": 69.1
+   },
+   {
+    "class": "legs",
+    "kind": "line",
+    "box": [
+     256,
+     256,
+     280,
+     330
+    ],
+    "note": "the left front leg against its haunch",
+    "widthCv": 0.535,
+    "widthPt": 1.192,
+    "sdL": 8.45,
+    "spreadL": 19.91,
+    "meanL": 63.4
+   },
+   {
+    "class": "back",
+    "kind": "silhouette",
+    "box": [
+     258,
+     215,
+     300,
+     330
+    ],
+    "note": "the left flank and haunch",
+    "widthCv": 0.27,
+    "widthPt": 1.174,
+    "sdL": 7.08,
+    "spreadL": 18.45,
+    "meanL": 62.3
+   },
+   {
+    "class": "back",
+    "kind": "line",
+    "box": [
+     70,
+     240,
+     104,
+     330
+    ],
+    "note": "the right haunch over the tail",
+    "widthCv": 0.302,
+    "widthPt": 1.138,
+    "sdL": 11.09,
+    "spreadL": 28.81,
+    "meanL": 61.6
+   },
+   {
+    "class": "soles",
+    "kind": "silhouette",
+    "box": [
+     82,
+     350,
+     146,
+     372
+    ],
+    "note": "the right front sole",
+    "widthCv": 0.213,
+    "widthPt": 1.222,
+    "sdL": 7.25,
+    "spreadL": 7.96,
+    "meanL": 55.7
+   },
+   {
+    "class": "soles",
+    "kind": "silhouette",
+    "box": [
+     155,
+     350,
+     205,
+     372
+    ],
+    "note": "the middle sole",
+    "widthCv": 0.186,
+    "widthPt": 1.166,
+    "sdL": 4.32,
+    "spreadL": 12.16,
+    "meanL": 55.2
+   },
+   {
+    "class": "soles",
+    "kind": "silhouette",
+    "box": [
+     214,
+     350,
+     260,
+     372
+    ],
+    "note": "the left front sole",
+    "widthCv": 0.168,
+    "widthPt": 1.171,
+    "sdL": 5.24,
+    "spreadL": 7.16,
+    "meanL": 55.7
+   },
+   {
+    "class": "tail",
+    "kind": "silhouette",
+    "box": [
+     5,
+     240,
+     76,
+     352
+    ],
+    "note": "the tail's plume",
+    "widthCv": 0.313,
+    "widthPt": 1.249,
+    "sdL": 10.77,
+    "spreadL": 29.53,
+    "meanL": 70.1
+   },
+   {
+    "class": "ears",
+    "kind": "silhouette",
+    "box": [
+     5,
+     95,
+     100,
+     248
+    ],
+    "note": "the right ear: outer edge and hem",
+    "widthCv": 0.307,
+    "widthPt": 1.085,
+    "sdL": 5.32,
+    "spreadL": 7.8,
+    "meanL": 52.4
+   },
+   {
+    "class": "ears",
+    "kind": "silhouette",
+    "box": [
+     270,
+     40,
+     358,
+     205
+    ],
+    "note": "the left ear: outer edge and hem",
+    "widthCv": 0.328,
+    "widthPt": 1.101,
+    "sdL": 5.51,
+    "spreadL": 12.66,
+    "meanL": 53.2
+   },
+   {
+    "class": "head",
+    "kind": "silhouette",
+    "box": [
+     80,
+     20,
+     262,
+     70
+    ],
+    "note": "the crown and topknot",
+    "widthCv": 0.249,
+    "widthPt": 1.398,
+    "sdL": 6.09,
+    "spreadL": 14.82,
+    "meanL": 69.8
+   }
+  ],
+  "byClass": {
+   "legs": {
+    "widthCv": {
+     "min": 0.38,
+     "median": 0.46,
+     "max": 0.58,
+     "n": 4
+    },
+    "sdL": {
+     "min": 7.15,
+     "median": 9.52,
+     "max": 11.09,
+     "n": 4
+    },
+    "spreadL": {
+     "min": 18.17,
+     "median": 24.55,
+     "max": 34.4,
+     "n": 4
+    },
+    "meanL": {
+     "min": 63.4,
+     "median": 69.95,
+     "max": 74.1,
+     "n": 4
+    }
+   },
+   "back": {
+    "widthCv": {
+     "min": 0.27,
+     "median": 0.29,
+     "max": 0.3,
+     "n": 2
+    },
+    "sdL": {
+     "min": 7.08,
+     "median": 9.09,
+     "max": 11.09,
+     "n": 2
+    },
+    "spreadL": {
+     "min": 18.45,
+     "median": 23.63,
+     "max": 28.81,
+     "n": 2
+    },
+    "meanL": {
+     "min": 61.6,
+     "median": 61.95,
+     "max": 62.3,
+     "n": 2
+    }
+   },
+   "soles": {
+    "widthCv": {
+     "min": 0.17,
+     "median": 0.19,
+     "max": 0.21,
+     "n": 3
+    },
+    "sdL": {
+     "min": 4.32,
+     "median": 5.24,
+     "max": 7.25,
+     "n": 3
+    },
+    "spreadL": {
+     "min": 7.16,
+     "median": 7.96,
+     "max": 12.16,
+     "n": 3
+    },
+    "meanL": {
+     "min": 55.2,
+     "median": 55.7,
+     "max": 55.7,
+     "n": 3
+    }
+   },
+   "tail": {
+    "widthCv": {
+     "min": 0.31,
+     "median": 0.31,
+     "max": 0.31,
+     "n": 1
+    },
+    "sdL": {
+     "min": 10.77,
+     "median": 10.77,
+     "max": 10.77,
+     "n": 1
+    },
+    "spreadL": {
+     "min": 29.53,
+     "median": 29.53,
+     "max": 29.53,
+     "n": 1
+    },
+    "meanL": {
+     "min": 70.1,
+     "median": 70.1,
+     "max": 70.1,
+     "n": 1
+    }
+   },
+   "ears": {
+    "widthCv": {
+     "min": 0.31,
+     "median": 0.32,
+     "max": 0.33,
+     "n": 2
+    },
+    "sdL": {
+     "min": 5.32,
+     "median": 5.42,
+     "max": 5.51,
+     "n": 2
+    },
+    "spreadL": {
+     "min": 7.8,
+     "median": 10.23,
+     "max": 12.66,
+     "n": 2
+    },
+    "meanL": {
+     "min": 52.4,
+     "median": 52.8,
+     "max": 53.2,
+     "n": 2
+    }
+   },
+   "head": {
+    "widthCv": {
+     "min": 0.25,
+     "median": 0.25,
+     "max": 0.25,
+     "n": 1
+    },
+    "sdL": {
+     "min": 6.09,
+     "median": 6.09,
+     "max": 6.09,
+     "n": 1
+    },
+    "spreadL": {
+     "min": 14.82,
+     "median": 14.82,
+     "max": 14.82,
+     "n": 1
+    },
+    "meanL": {
+     "min": 69.8,
+     "median": 69.8,
+     "max": 69.8,
+     "n": 1
+    }
+   }
+  }
+ },
+ "crops": {
+  "front": {
+   "byClass": {
+    "legs": {
+     "sdL": {
+      "min": 0.85,
+      "median": 5.34,
+      "max": 7.76,
+      "n": 8
+     },
+     "spreadL": {
+      "min": 2.31,
+      "median": 10.56,
+      "max": 18.97,
+      "n": 8
+     },
+     "meanL": {
+      "min": 69.6,
+      "median": 74.15,
+      "max": 81.9,
+      "n": 8
+     }
+    },
+    "back": {
+     "sdL": {
+      "min": 4.59,
+      "median": 5.23,
+      "max": 5.87,
+      "n": 2
+     },
+     "spreadL": {
+      "min": 4.53,
+      "median": 9.68,
+      "max": 14.82,
+      "n": 2
+     },
+     "meanL": {
+      "min": 69.1,
+      "median": 69.35,
+      "max": 69.6,
+      "n": 2
+     }
+    },
+    "soles": {
+     "sdL": {
+      "min": 1.06,
+      "median": 2.71,
+      "max": 3.32,
+      "n": 3
+     },
+     "spreadL": {
+      "min": 2.41,
+      "median": 6.55,
+      "max": 8.52,
+      "n": 3
+     },
+     "meanL": {
+      "min": 64.3,
+      "median": 64.7,
+      "max": 65.4,
+      "n": 3
+     }
+    },
+    "ears": {
+     "sdL": {
+      "min": 5.28,
+      "median": 5.62,
+      "max": 5.95,
+      "n": 2
+     },
+     "spreadL": {
+      "min": 13.91,
+      "median": 14.27,
+      "max": 14.63,
+      "n": 2
+     },
+     "meanL": {
+      "min": 59.2,
+      "median": 60.5,
+      "max": 61.8,
+      "n": 2
+     }
+    },
+    "head": {
+     "sdL": {
+      "min": 3.14,
+      "median": 3.35,
+      "max": 3.57,
+      "n": 2
+     },
+     "spreadL": {
+      "min": 6.91,
+      "median": 7.54,
+      "max": 8.17,
+      "n": 2
+     },
+     "meanL": {
+      "min": 79.1,
+      "median": 81.2,
+      "max": 83.3,
+      "n": 2
+     }
+    }
+   },
+   "regions": [
+    {
+     "class": "back",
+     "region": "body.back|body.front",
+     "sdL": 4.59,
+     "spreadL": 4.53,
+     "meanL": 69.1,
+     "px": 10
+    },
+    {
+     "class": "legs",
+     "region": "body.back|front.L",
+     "sdL": 5.75,
+     "spreadL": 12.22,
+     "meanL": 75.5,
+     "px": 26
+    },
+    {
+     "class": "legs",
+     "region": "body.back|front.R",
+     "sdL": 4.93,
+     "spreadL": 8.9,
+     "meanL": 76.8,
+     "px": 18
+    },
+    {
+     "class": "legs",
+     "region": "body.back|hind.L",
+     "sdL": 3.35,
+     "spreadL": 5.48,
+     "meanL": 81.9,
+     "px": 14
+    },
+    {
+     "class": "legs",
+     "region": "body.back|hind.R",
+     "sdL": 7.76,
+     "spreadL": 18.97,
+     "meanL": 74.3,
+     "px": 12
+    },
+    {
+     "class": "back",
+     "region": "body.back|outside",
+     "sdL": 5.87,
+     "spreadL": 14.82,
+     "meanL": 69.6,
+     "px": 79
+    },
+    {
+     "class": "legs",
+     "region": "body.front|front.L",
+     "sdL": 6.96,
+     "spreadL": 12.76,
+     "meanL": 71.3,
+     "px": 22
+    },
+    {
+     "class": "legs",
+     "region": "body.front|front.R",
+     "sdL": 6.66,
+     "spreadL": 16.42,
+     "meanL": 74.0,
+     "px": 23
+    },
+    {
+     "class": "ears",
+     "region": "ear.L|outside",
+     "sdL": 5.95,
+     "spreadL": 14.63,
+     "meanL": 61.8,
+     "px": 110
+    },
+    {
+     "class": "ears",
+     "region": "ear.R|outside",
+     "sdL": 5.28,
+     "spreadL": 13.91,
+     "meanL": 59.2,
+     "px": 93
+    },
+    {
+     "class": "soles",
+     "region": "front.L|ground",
+     "sdL": 3.32,
+     "spreadL": 8.52,
+     "meanL": 64.7,
+     "px": 17
+    },
+    {
+     "class": "legs",
+     "region": "front.L|hind.L",
+     "sdL": 1.25,
+     "spreadL": 3.05,
+     "meanL": 70.9,
+     "px": 8
+    },
+    {
+     "class": "soles",
+     "region": "front.R|ground",
+     "sdL": 2.71,
+     "spreadL": 6.55,
+     "meanL": 65.4,
+     "px": 13
+    },
+    {
+     "class": "legs",
+     "region": "front.R|hind.R",
+     "sdL": 0.85,
+     "spreadL": 2.31,
+     "meanL": 69.6,
+     "px": 10
+    },
+    {
+     "class": "head",
+     "region": "head.base|outside",
+     "sdL": 3.57,
+     "spreadL": 6.91,
+     "meanL": 79.1,
+     "px": 65
+    },
+    {
+     "class": "soles",
+     "region": "hind.L|ground",
+     "sdL": 1.06,
+     "spreadL": 2.41,
+     "meanL": 64.3,
+     "px": 8
+    },
+    {
+     "class": "head",
+     "region": "tuft|outside",
+     "sdL": 3.14,
+     "spreadL": 8.17,
+     "meanL": 83.3,
+     "px": 69
+    }
+   ]
+  },
+  "threeQuarter.L": {
+   "byClass": {
+    "legs": {
+     "sdL": {
+      "min": 1.3,
+      "median": 5.5,
+      "max": 11.05,
+      "n": 5
+     },
+     "spreadL": {
+      "min": 2.7,
+      "median": 14.83,
+      "max": 27.22,
+      "n": 5
+     },
+     "meanL": {
+      "min": 65.9,
+      "median": 72.2,
+      "max": 80.8,
+      "n": 5
+     }
+    },
+    "back": {
+     "sdL": {
+      "min": 3.65,
+      "median": 4.12,
+      "max": 4.59,
+      "n": 2
+     },
+     "spreadL": {
+      "min": 9.37,
+      "median": 10.42,
+      "max": 11.47,
+      "n": 2
+     },
+     "meanL": {
+      "min": 63.5,
+      "median": 68.3,
+      "max": 73.1,
+      "n": 2
+     }
+    },
+    "soles": {
+     "sdL": {
+      "min": 1.34,
+      "median": 2.41,
+      "max": 3.47,
+      "n": 2
+     },
+     "spreadL": {
+      "min": 3.56,
+      "median": 6.27,
+      "max": 8.98,
+      "n": 2
+     },
+     "meanL": {
+      "min": 62.6,
+      "median": 63.2,
+      "max": 63.8,
+      "n": 2
+     }
+    },
+    "tail": {
+     "sdL": {
+      "min": 1.44,
+      "median": 5.51,
+      "max": 9.58,
+      "n": 2
+     },
+     "spreadL": {
+      "min": 3.81,
+      "median": 14.58,
+      "max": 25.36,
+      "n": 2
+     },
+     "meanL": {
+      "min": 56.1,
+      "median": 66.3,
+      "max": 76.5,
+      "n": 2
+     }
+    },
+    "ears": {
+     "sdL": {
+      "min": 5.19,
+      "median": 5.26,
+      "max": 5.33,
+      "n": 2
+     },
+     "spreadL": {
+      "min": 13.17,
+      "median": 13.17,
+      "max": 13.17,
+      "n": 2
+     },
+     "meanL": {
+      "min": 58.7,
+      "median": 60.6,
+      "max": 62.5,
+      "n": 2
+     }
+    },
+    "head": {
+     "sdL": {
+      "min": 3.04,
+      "median": 4.25,
+      "max": 5.47,
+      "n": 2
+     },
+     "spreadL": {
+      "min": 7.06,
+      "median": 7.92,
+      "max": 8.78,
+      "n": 2
+     },
+     "meanL": {
+      "min": 74.2,
+      "median": 77.35,
+      "max": 80.5,
+      "n": 2
+     }
+    }
+   },
+   "regions": [
+    {
+     "class": "legs",
+     "region": "body.back|front.L",
+     "sdL": 2.4,
+     "spreadL": 5.73,
+     "meanL": 76.7,
+     "px": 8
+    },
+    {
+     "class": "soles",
+     "region": "body.back|ground",
+     "sdL": 3.47,
+     "spreadL": 8.98,
+     "meanL": 62.6,
+     "px": 13
+    },
+    {
+     "class": "legs",
+     "region": "body.back|hind.L",
+     "sdL": 11.05,
+     "spreadL": 27.22,
+     "meanL": 72.2,
+     "px": 18
+    },
+    {
+     "class": "back",
+     "region": "body.back|outside",
+     "sdL": 4.59,
+     "spreadL": 11.47,
+     "meanL": 63.5,
+     "px": 55
+    },
+    {
+     "class": "tail",
+     "region": "body.back|tail",
+     "sdL": 1.44,
+     "spreadL": 3.81,
+     "meanL": 56.1,
+     "px": 23
+    },
+    {
+     "class": "legs",
+     "region": "body.front|front.R",
+     "sdL": 7.11,
+     "spreadL": 15.68,
+     "meanL": 80.8,
+     "px": 21
+    },
+    {
+     "class": "back",
+     "region": "body.front|outside",
+     "sdL": 3.65,
+     "spreadL": 9.37,
+     "meanL": 73.1,
+     "px": 23
+    },
+    {
+     "class": "ears",
+     "region": "ear.L|outside",
+     "sdL": 5.33,
+     "spreadL": 13.17,
+     "meanL": 58.7,
+     "px": 116
+    },
+    {
+     "class": "ears",
+     "region": "ear.R|outside",
+     "sdL": 5.19,
+     "spreadL": 13.17,
+     "meanL": 62.5,
+     "px": 103
+    },
+    {
+     "class": "legs",
+     "region": "front.L|front.R",
+     "sdL": 1.3,
+     "spreadL": 2.7,
+     "meanL": 65.9,
+     "px": 9
+    },
+    {
+     "class": "soles",
+     "region": "front.L|ground",
+     "sdL": 1.34,
+     "spreadL": 3.56,
+     "meanL": 63.8,
+     "px": 18
+    },
+    {
+     "class": "legs",
+     "region": "front.R|outside",
+     "sdL": 5.5,
+     "spreadL": 14.83,
+     "meanL": 70.9,
+     "px": 55
+    },
+    {
+     "class": "head",
+     "region": "head.base|outside",
+     "sdL": 5.47,
+     "spreadL": 7.06,
+     "meanL": 74.2,
+     "px": 70
+    },
+    {
+     "class": "tail",
+     "region": "tail|outside",
+     "sdL": 9.58,
+     "spreadL": 25.36,
+     "meanL": 76.5,
+     "px": 115
+    },
+    {
+     "class": "head",
+     "region": "tuft|outside",
+     "sdL": 3.04,
+     "spreadL": 8.78,
+     "meanL": 80.5,
+     "px": 79
+    }
+   ]
+  },
+  "side.L": {
+   "byClass": {
+    "legs": {
+     "sdL": {
+      "min": 1.27,
+      "median": 3.02,
+      "max": 8.83,
+      "n": 5
+     },
+     "spreadL": {
+      "min": 3.24,
+      "median": 6.71,
+      "max": 18.46,
+      "n": 5
+     },
+     "meanL": {
+      "min": 70.3,
+      "median": 74.0,
+      "max": 84.4,
+      "n": 5
+     }
+    },
+    "back": {
+     "sdL": {
+      "min": 3.98,
+      "median": 4.95,
+      "max": 5.91,
+      "n": 2
+     },
+     "spreadL": {
+      "min": 8.85,
+      "median": 11.93,
+      "max": 15.01,
+      "n": 2
+     },
+     "meanL": {
+      "min": 62.0,
+      "median": 73.0,
+      "max": 84.0,
+      "n": 2
+     }
+    },
+    "soles": {
+     "sdL": {
+      "min": 0.99,
+      "median": 1.77,
+      "max": 3.21,
+      "n": 3
+     },
+     "spreadL": {
+      "min": 2.45,
+      "median": 4.46,
+      "max": 8.44,
+      "n": 3
+     },
+     "meanL": {
+      "min": 63.1,
+      "median": 63.4,
+      "max": 64.7,
+      "n": 3
+     }
+    },
+    "tail": {
+     "sdL": {
+      "min": 2.49,
+      "median": 5.81,
+      "max": 9.13,
+      "n": 2
+     },
+     "spreadL": {
+      "min": 6.61,
+      "median": 13.57,
+      "max": 20.53,
+      "n": 2
+     },
+     "meanL": {
+      "min": 56.6,
+      "median": 67.65,
+      "max": 78.7,
+      "n": 2
+     }
+    },
+    "ears": {
+     "sdL": {
+      "min": 4.21,
+      "median": 4.21,
+      "max": 4.21,
+      "n": 1
+     },
+     "spreadL": {
+      "min": 11.04,
+      "median": 11.04,
+      "max": 11.04,
+      "n": 1
+     },
+     "meanL": {
+      "min": 59.0,
+      "median": 59.0,
+      "max": 59.0,
+      "n": 1
+     }
+    },
+    "head": {
+     "sdL": {
+      "min": 3.3,
+      "median": 5.48,
+      "max": 7.67,
+      "n": 2
+     },
+     "spreadL": {
+      "min": 9.21,
+      "median": 15.17,
+      "max": 21.12,
+      "n": 2
+     },
+     "meanL": {
+      "min": 74.5,
+      "median": 78.3,
+      "max": 82.1,
+      "n": 2
+     }
+    }
+   },
+   "regions": [
+    {
+     "class": "back",
+     "region": "body.back|body.front",
+     "sdL": 5.91,
+     "spreadL": 15.01,
+     "meanL": 84.0,
+     "px": 17
+    },
+    {
+     "class": "soles",
+     "region": "body.back|ground",
+     "sdL": 3.21,
+     "spreadL": 8.44,
+     "meanL": 63.1,
+     "px": 35
+    },
+    {
+     "class": "legs",
+     "region": "body.back|hind.L",
+     "sdL": 8.83,
+     "spreadL": 18.46,
+     "meanL": 84.4,
+     "px": 11
+    },
+    {
+     "class": "back",
+     "region": "body.back|outside",
+     "sdL": 3.98,
+     "spreadL": 8.85,
+     "meanL": 62.0,
+     "px": 25
+    },
+    {
+     "class": "tail",
+     "region": "body.back|tail",
+     "sdL": 2.49,
+     "spreadL": 6.61,
+     "meanL": 56.6,
+     "px": 23
+    },
+    {
+     "class": "legs",
+     "region": "body.front|front.L",
+     "sdL": 5.49,
+     "spreadL": 13.4,
+     "meanL": 80.3,
+     "px": 14
+    },
+    {
+     "class": "legs",
+     "region": "body.front|front.R",
+     "sdL": 2.32,
+     "spreadL": 5.6,
+     "meanL": 74.0,
+     "px": 8
+    },
+    {
+     "class": "ears",
+     "region": "ear.L|outside",
+     "sdL": 4.21,
+     "spreadL": 11.04,
+     "meanL": 59.0,
+     "px": 76
+    },
+    {
+     "class": "legs",
+     "region": "front.L|front.R",
+     "sdL": 1.27,
+     "spreadL": 3.24,
+     "meanL": 70.3,
+     "px": 18
+    },
+    {
+     "class": "soles",
+     "region": "front.L|ground",
+     "sdL": 1.77,
+     "spreadL": 4.46,
+     "meanL": 64.7,
+     "px": 16
+    },
+    {
+     "class": "legs",
+     "region": "front.R|outside",
+     "sdL": 3.02,
+     "spreadL": 6.71,
+     "meanL": 72.7,
+     "px": 34
+    },
+    {
+     "class": "head",
+     "region": "head.base|outside",
+     "sdL": 7.67,
+     "spreadL": 21.12,
+     "meanL": 74.5,
+     "px": 108
+    },
+    {
+     "class": "soles",
+     "region": "hind.L|ground",
+     "sdL": 0.99,
+     "spreadL": 2.45,
+     "meanL": 63.4,
+     "px": 9
+    },
+    {
+     "class": "tail",
+     "region": "tail|outside",
+     "sdL": 9.13,
+     "spreadL": 20.53,
+     "meanL": 78.7,
+     "px": 92
+    },
+    {
+     "class": "head",
+     "region": "tuft|outside",
+     "sdL": 3.3,
+     "spreadL": 9.21,
+     "meanL": 82.1,
+     "px": 64
+    }
+   ]
+  },
+  "back": {
+   "byClass": {
+    "legs": {
+     "sdL": {
+      "min": 3.7,
+      "median": 4.78,
+      "max": 5.85,
+      "n": 2
+     },
+     "spreadL": {
+      "min": 4.57,
+      "median": 8.45,
+      "max": 12.33,
+      "n": 2
+     },
+     "meanL": {
+      "min": 68.3,
+      "median": 68.6,
+      "max": 68.9,
+      "n": 2
+     }
+    },
+    "back": {
+     "sdL": {
+      "min": 4.93,
+      "median": 4.93,
+      "max": 4.93,
+      "n": 1
+     },
+     "spreadL": {
+      "min": 13.5,
+      "median": 13.5,
+      "max": 13.5,
+      "n": 1
+     },
+     "meanL": {
+      "min": 74.5,
+      "median": 74.5,
+      "max": 74.5,
+      "n": 1
+     }
+    },
+    "soles": {
+     "sdL": {
+      "min": 1.07,
+      "median": 1.07,
+      "max": 1.07,
+      "n": 1
+     },
+     "spreadL": {
+      "min": 2.99,
+      "median": 2.99,
+      "max": 2.99,
+      "n": 1
+     },
+     "meanL": {
+      "min": 63.3,
+      "median": 63.3,
+      "max": 63.3,
+      "n": 1
+     }
+    },
+    "tail": {
+     "sdL": {
+      "min": 2.94,
+      "median": 4.99,
+      "max": 7.04,
+      "n": 2
+     },
+     "spreadL": {
+      "min": 7.46,
+      "median": 12.6,
+      "max": 17.73,
+      "n": 2
+     },
+     "meanL": {
+      "min": 63.7,
+      "median": 68.75,
+      "max": 73.8,
+      "n": 2
+     }
+    },
+    "ears": {
+     "sdL": {
+      "min": 4.73,
+      "median": 4.87,
+      "max": 5.0,
+      "n": 2
+     },
+     "spreadL": {
+      "min": 12.32,
+      "median": 12.52,
+      "max": 12.72,
+      "n": 2
+     },
+     "meanL": {
+      "min": 60.5,
+      "median": 60.65,
+      "max": 60.8,
+      "n": 2
+     }
+    },
+    "head": {
+     "sdL": {
+      "min": 1.38,
+      "median": 3.48,
+      "max": 5.58,
+      "n": 2
+     },
+     "spreadL": {
+      "min": 3.55,
+      "median": 5.48,
+      "max": 7.41,
+      "n": 2
+     },
+     "meanL": {
+      "min": 79.5,
+      "median": 79.75,
+      "max": 80.0,
+      "n": 2
+     }
+    }
+   },
+   "regions": [
+    {
+     "class": "soles",
+     "region": "body.back|ground",
+     "sdL": 1.07,
+     "spreadL": 2.99,
+     "meanL": 63.3,
+     "px": 36
+    },
+    {
+     "class": "legs",
+     "region": "body.back|hind.L",
+     "sdL": 5.85,
+     "spreadL": 12.33,
+     "meanL": 68.9,
+     "px": 16
+    },
+    {
+     "class": "legs",
+     "region": "body.back|hind.R",
+     "sdL": 3.7,
+     "spreadL": 4.57,
+     "meanL": 68.3,
+     "px": 13
+    },
+    {
+     "class": "back",
+     "region": "body.back|outside",
+     "sdL": 4.93,
+     "spreadL": 13.5,
+     "meanL": 74.5,
+     "px": 110
+    },
+    {
+     "class": "tail",
+     "region": "body.back|tail",
+     "sdL": 7.04,
+     "spreadL": 17.73,
+     "meanL": 73.8,
+     "px": 87
+    },
+    {
+     "class": "ears",
+     "region": "ear.L|outside",
+     "sdL": 5.0,
+     "spreadL": 12.32,
+     "meanL": 60.5,
+     "px": 83
+    },
+    {
+     "class": "ears",
+     "region": "ear.R|outside",
+     "sdL": 4.73,
+     "spreadL": 12.72,
+     "meanL": 60.8,
+     "px": 95
+    },
+    {
+     "class": "head",
+     "region": "head.base|outside",
+     "sdL": 5.58,
+     "spreadL": 7.41,
+     "meanL": 79.5,
+     "px": 55
+    },
+    {
+     "class": "tail",
+     "region": "tail|ground",
+     "sdL": 2.94,
+     "spreadL": 7.46,
+     "meanL": 63.7,
+     "px": 12
+    },
+    {
+     "class": "head",
+     "region": "tuft|outside",
+     "sdL": 1.38,
+     "spreadL": 3.55,
+     "meanL": 80.0,
+     "px": 51
+    }
+   ]
+  }
+ },
+ "ours": {}
+}
