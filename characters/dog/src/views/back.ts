@@ -86,14 +86,18 @@ function crossing(a: Shape, b: Shape, near: P): P {
 // widest (x -77.4 on the left at y -92, 76 on the right at -97); its hem hangs in
 // three rounded lock tips, the outer one small and highest, the inner one the
 // lowest (the silhouette's -66.3 at x -49), with a notch 1 to 2 pt deep between
-// each (244); its inner edge runs up under the head's side, hidden. Each typed
-// from its own crop.
+// each (244); its inner edge runs up under the head's side, hidden, its foot
+// staying under the head's lower lobe down to the notch below it and turning out
+// into the hem only there, so the head's cream lies over the ear's foot with no
+// ground between them (the sheet's notch opens below y -71.4 on the left and
+// -72.3 on the right, its line at x -37.3 to -37.8 from y -76 to -74 and 38.1 to
+// 38.8 on the right; 243). Each typed from its own crop.
 const earLNodes: Node[] = [[-28.4, -141.8], [-34.6, -144.6], [-38.6, -144.6], [-42, -143], [-43.8, -141], [-49.6, -135.1], [-56.6, -128.6], [-62.6, -120.2],
   [-68.4, -114.4], [-73, -108.4], [-76.2, -101], [-77.4, -92.4], [-76.6, -87.4], [-73.4, -82.2], [-68.4, -77.2], [-61.8, -72.4], [-54, -69.6], [-47, -68.6],
-  [-42.4, -69.8], [-39.6, -73.4], [-38.4, -78], [-35.6, -88], [-34.4, -104], [-31.6, -126]];
+  [-41.6, -69.7], [-38.8, -71.6], [-37, -75.2], [-35.6, -88], [-34.4, -104], [-31.6, -126]];
 const earRNodes: Node[] = [[28.6, -142.6], [36.4, -145.2], [41, -145.4], [44, -143.4], [47.4, -140.6], [49.6, -138], [55.8, -131.5], [61.2, -124.6], [67, -118.8],
-  [72.2, -112.6], [75, -105.8], [76, -97], [75.6, -88.6], [72.8, -82.4], [67.8, -77], [61, -72.4], [53.4, -69.8], [47.4, -69], [43.4, -70],
-  [40.4, -72.8], [38.6, -77.2], [36.2, -88], [35.4, -104], [31.8, -126]];
+  [72.2, -112.6], [75, -105.8], [76, -97], [75.6, -88.6], [72.8, -82.4], [67.8, -77], [61, -72.4], [53.4, -69.8], [47.4, -69], [42.8, -70.2],
+  [39.7, -71.5], [37.8, -74.5], [36.2, -88], [35.4, -104], [31.8, -126]];
 /** The hem's three tips, from the outer side in: the small outer lock, the broad middle one, the inner one hanging lowest. */
 const HEM: Lock[] = [{ len: 1.3, width: 11.6, lean: 0.35, dip: 0.45 }, { len: 1.8, width: 17, lean: 0.15, dip: 0.3 }, { len: 1.4, width: 14.4, lean: 0.1 }];
 /** The step down the outer edge, a third of the way down, where the top lobe lies over the next: one broad low lock leaning down the edge. */
@@ -135,8 +139,9 @@ const collar = smooth([[-26.4, -70.6], [-23, -72.1], [-18, -73.4], [-9, -74.6], 
 // rises to a point under the head's side (the crescent, -30.6, -138.8). From
 // there the side runs down over the ear's inner edge, widest at x -39.4 (the
 // sheet's line at -39.4 to -38.6 from y -118 to -96), to its lower lobe, which
-// comes down beside the ear's foot and rests on the collar's end (the silhouette's
-// notch opens only below y -70.6 there; 98): its lowest lock lies over the fur
+// lies over the ear's foot down to the notch under it (the ear's foot stays under
+// it to y -72, the sheet's notch opening below -71.4) and rests on the collar's
+// end (98): its lowest lock lies over the fur
 // under it on a diagonal from the lobe's corner to the collar's end, the sheet's
 // dark line there, and the fur under that lock is unlined, as the sheet paints it
 // (243). Its foot lies behind the collar and the shoulders. Typed as its left half
@@ -188,11 +193,13 @@ const head = furSpan(furSpan(fur.head, [-16.6, -155.6], [-41.4, -143.6]), [43.8,
 const JOIN = { L: fur.crown[0]!.to as P, R: fur.crown[1]!.from as P };
 /**
  * The head's side line over each ear (DECISIONS 243): from y -120.6, where the sheet's line begins (none above it, down
- * from the root, which headFur leaves unlined under the crown's locks), down the side to the lobe's corner, on the tan
- * and as dark as the sheet's (#A96737 by y -100), a contact line (the head lies over the ear, Q31). The stretch above it
- * to the crown's join and the lobe's unlined fur below it to the collar's end are cited by their lengths.
+ * from the root, which headFur leaves unlined under the crown's locks), down the side over the ear's foot to y -73.6,
+ * just above the notch, where the ear's own line comes out from under the lobe and takes it on round the foot into the
+ * hem, as the sheet's one line runs; on the tan and as dark as the sheet's (#A96737 by y -100), a contact line (the
+ * head lies over the ear, Q31). The stretch above it to the crown's join and the lobe's unlined fur below it to the
+ * collar's end are cited by their lengths.
  */
-const SIDE = { L: { top: [-37.8, -120.6] as P, foot: [-38.4, -77.6] as P }, R: { top: widen([37.8, -120.6]) as P, foot: [38.4, -77.6] as P } };
+const SIDE = { L: { top: [-37.8, -120.6] as P, foot: [-38.3, -73.6] as P }, R: { top: widen([37.8, -120.6]) as P, foot: [38.3, -73.6] as P } };
 const ROOT_PT = { L: along(head, JOIN.L, SIDE.L.top), R: along(head, SIDE.R.top, JOIN.R) };
 const LOBE_PT = { L: along(head, SIDE.L.foot, JAW.L), R: along(head, JAW.R, SIDE.R.foot) };
 const sideOn = "tan" as const;
@@ -447,8 +454,9 @@ function whorlStrokes(): string {
  * The head's line, where the sheet draws one, by the line rule (parts/lines.ts) and headFur(): the crown's line from
  * under each of the topknot's feet over its two locks, on into the ear's outer line where the two cross; none over the
  * ear's root, where the crown's locks hang over the tan, nor down the head's side above y -120.6, as the sheet's (the
- * root's stretch, cited by its length, 214, 243); then down each side over the ear, on the tan, to the lobe's corner,
- * and on round the lobe's lowest lock into the collar's end (lobeLock). Crisp on its outside (212).
+ * root's stretch, cited by its length, 214, 243); then down each side over the ear, on the tan, to just above the
+ * notch, where the ear's own line takes it on, and on round the lobe's lowest lock into the collar's end (lobeLock).
+ * Crisp on its outside (212).
  */
 /**
  * Over the right ear's root, from where the crown's line meets the ear's to the first lock's tip, the sheet paints the

@@ -241,6 +241,24 @@ test("the back view's head rests on the collar's ends: beside each end the groun
   assert.equal(gaps.length, 0, `the ground shows beside the collar's ends at ${gaps.slice(0, 4).join(" ")}`);
 });
 
+test("the back view's head lies over each ear's inner foot down to the notch: no ground shows between them (DECISIONS 243)", () => {
+  // On the sheet the head's cream lies over each ear's inner foot and the two stay one mass down to the notch under the
+  // head's lower lobe, which opens only below y -71.4 on the left and -72.3 on the right (the sheet's mask at |x| 36.5
+  // to 41), read here to within one of the crop's pixels (0.79 pt). An ear's foot that curves out from under the lobe
+  // higher up opens a slit of ground between them.
+  const scale = 4, r = rasters(scale), PX = 0.79;
+  const drawn = order.filter((n) => n !== "shadow").map((n) => r.get(n)!);
+  const gaps: string[] = [];
+  for (const [sx, notch] of [[-1, -71.4], [1, -72.3]] as const) {
+    for (let x = 34; x <= 44; x += 1 / scale) {
+      for (let y = -92; y <= notch - PX; y += 1 / scale) {
+        if (!drawn.some((png) => alphaAt(png, scale, [sx * x, y]) >= 0.5)) gaps.push(`(${(sx * x).toFixed(2)}, ${y.toFixed(2)})`);
+      }
+    }
+  }
+  assert.equal(gaps.length, 0, `${gaps.length} points of ground between an ear and the head, from ${gaps.slice(0, 4).join(" ")}`);
+});
+
 test("the back view's tail rests its foot on the bottom's line, and its cast shadow stays off that line (DECISIONS 246)", () => {
   // The sheet draws one ground line under the tail's foot: the plume's lower edge lies on the body's bottom there, never
   // above it with cream between (a doubled line) nor below it (out of the silhouette); and the tail's shadow on the
