@@ -225,33 +225,66 @@ test("the back view's ears come out from under the crown: above the crown's lowe
   }
 });
 
-test("the back view's head rests on the collar's ends: beside each end the ground shows only below the band's middle", () => {
-  // On the sheet the head's lower fur stays full down onto the collar, and the notch between the ear, the head and the
-  // shoulder opens only from y -71 (the band's ends run from -70 to -62): no gap above it beside either end.
-  const r = rasters(2);
+/**
+ * The sheet's line along each lower lobe's diagonal, from the notch under the ear's foot down into the collar's end: the
+ * darkest pixel of each of the crop's columns there (master.turnaround.back, read on its own pixel centres, 0.785 pt
+ * apart), [|x|, y] from the collar's end out to the notch; below it the sheet shows its card, not fur (DECISIONS 282).
+ */
+const SHEET_LOBE = {
+  L: [[28.84, -71.41], [29.62, -71.41], [30.41, -72.19], [32.76, -72.19], [33.55, -72.98], [34.33, -73.76], [35.11, -73.76], [36.68, -75.33]],
+  R: [[30.8, -71.41], [31.58, -72.19], [33.15, -72.19], [33.94, -72.98], [34.72, -72.98], [35.51, -73.76], [36.29, -74.55], [37.08, -75.33], [37.86, -76.11]],
+} as const;
+/** The column of each ear's foot line on the sheet, |x|, where the lobe's line meets it at the notch's top (the ear's line at x -37.47 from y -77 to -73, and at 38.65 by -74.55). */
+const SHEET_FOOT = { L: 37.47, R: 38.65 } as const;
+/**
+ * The sheet's lobe line's y at |x|: between its columns; the innermost's inside them; the outermost's on out to the ear's
+ * foot line, where the two meet at the top of the notch between them, to within one of the crop's pixels (0.79 pt) of
+ * it; and none past that, over the ear.
+ */
+const lobeLineAt = (side: "L" | "R", ax: number): number => {
+  const cols = SHEET_LOBE[side];
+  if (ax <= cols[0]![0]) return cols[0]![1];
+  for (let i = 1; i < cols.length; i++) {
+    const [x0, y0] = cols[i - 1]!, [x1, y1] = cols[i]!;
+    if (ax <= x1) return y0 + ((ax - x0) / (x1 - x0)) * (y1 - y0);
+  }
+  return ax < SHEET_FOOT[side] + 0.79 ? cols[cols.length - 1]![1] : Infinity;
+};
+
+test("the back view's head rests on the collar's ends: no ground above the lobe's line beside each end, and none of its fur below it", () => {
+  // On the sheet each lower lobe's edge runs down a diagonal from the notch under the ear's foot into the collar's end,
+  // its line the lobe's own edge: above it the head's fur is full down onto the collar, with no gap, and below it the
+  // sheet shows its card (its grey 238 and lighter from 1.6 pt under the line's darkest pixel), never a band of the
+  // head's fur ending in a flat edge (DECISIONS 282). Read to within one of the crop's pixels (0.79 pt) above the line,
+  // and from 2.4 pt below it (the line's half and the card's start, and a pixel).
+  const r = rasters(2), PX = 0.79;
   const drawn = order.filter((n) => n !== "shadow").map((n) => r.get(n)!);
-  const gaps: string[] = [];
-  for (const sx of [-1, 1]) {
-    for (let x = 30; x <= 37.6; x += 0.5) {
-      for (let y = -82; y <= -71.8; y += 0.5) {
-        if (!drawn.some((png) => alphaAt(png, 2, [sx * x, y]) >= 0.5)) gaps.push(`(${sx * x}, ${y})`);
+  const gaps: string[] = [], fur: string[] = [];
+  for (const [side, sx] of [["L", -1], ["R", 1]] as const) {
+    for (let x = 30.4; x <= 36.6; x += 0.5) {
+      const line = lobeLineAt(side, x);
+      for (let y = -82; y <= line - PX; y += 0.5) {
+        if (!drawn.some((png) => alphaAt(png, 2, [sx * x, y]) >= 0.5)) gaps.push(`(${(sx * x).toFixed(1)}, ${y.toFixed(1)})`);
       }
+      if (drawn.some((png) => alphaAt(png, 2, [sx * x, line + 2.4]) >= 0.5)) fur.push(`(${(sx * x).toFixed(1)}, ${(line + 2.4).toFixed(2)})`);
     }
   }
-  assert.equal(gaps.length, 0, `the ground shows beside the collar's ends at ${gaps.slice(0, 4).join(" ")}`);
+  assert.equal(gaps.length, 0, `the ground shows above a lobe's line beside the collar's ends at ${gaps.slice(0, 4).join(" ")}`);
+  assert.equal(fur.length, 0, `the head's fur reaches below a lobe's line at ${fur.slice(0, 4).join(" ")}`);
 });
 
-test("the back view's head lies over each ear's inner foot down to the notch: no ground shows between them (DECISIONS 243)", () => {
+test("the back view's head lies over each ear's inner foot down to the notch: no ground shows between them (DECISIONS 243, 282)", () => {
   // On the sheet the head's cream lies over each ear's inner foot and the two stay one mass down to the notch under the
   // head's lower lobe, which opens only below y -71.4 on the left and -72.3 on the right (the sheet's mask at |x| 36.5
-  // to 41), read here to within one of the crop's pixels (0.79 pt). An ear's foot that curves out from under the lobe
-  // higher up opens a slit of ground between them.
+  // to 41), and beside the ear's foot below the lobe's line (SHEET_LOBE), read here to within one of the crop's pixels
+  // (0.79 pt). An ear's foot that curves out from under the lobe higher up opens a slit of ground between them.
   const scale = 4, r = rasters(scale), PX = 0.79;
   const drawn = order.filter((n) => n !== "shadow").map((n) => r.get(n)!);
   const gaps: string[] = [];
-  for (const [sx, notch] of [[-1, -71.4], [1, -72.3]] as const) {
+  for (const [side, sx, notch] of [["L", -1, -71.4], ["R", 1, -72.3]] as const) {
     for (let x = 34; x <= 44; x += 1 / scale) {
-      for (let y = -92; y <= notch - PX; y += 1 / scale) {
+      const open = Math.min(notch, lobeLineAt(side, x));
+      for (let y = -92; y <= open - PX; y += 1 / scale) {
         if (!drawn.some((png) => alphaAt(png, scale, [sx * x, y]) >= 0.5)) gaps.push(`(${(sx * x).toFixed(2)}, ${y.toFixed(2)})`);
       }
     }

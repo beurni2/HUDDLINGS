@@ -1,6 +1,6 @@
 # The back view's joins sheet (the fur pass's back lane, docs/phase3-fur-plan.md): one row per join the audit names
-# (qa/phase3/audit/defects.json, view "back"), each the sheet's crop | before (the fur pass's base, fbbe6d3) | after
-# (this build's still), cut to the same box in model points and zoomed to the same scale, labelled, at a size that
+# (qa/phase3/audit/defects.json, view "back"), each the sheet's crop | before (the fur kit's second round's base,
+# 8912ced) | after (this build's still), cut to the same box in model points and zoomed to the same scale, labelled, at a size that
 # reads on a phone. The sheet's crop is placed as the sheet match places it: the root on its ground anchor (model.json).
 #
 # python3 qa/phase3/fur/back/joins.py [--after build/stills/dog/back/white.png] [--out qa/phase3/fur/back/joins.png]
@@ -63,7 +63,7 @@ def main():
     ap.add_argument("--before", default=os.path.join(HERE, "before.png"))
     ap.add_argument("--after", default=os.path.join(REPO, "build/stills/dog/back/white.png"))
     ap.add_argument("--out", default=os.path.join(HERE, "joins.png"))
-    ap.add_argument("--title", default="back: the joins, sheet | before (fbbe6d3) | after")
+    ap.add_argument("--title", default="back: the joins, sheet | before (8912ced) | after")
     ap.add_argument("--zoom", type=float, default=1, help="every row's zoom times this (for a closer look than a phone's)")
     a = ap.parse_args()
     crop, pt_per_px, ground = load_crop()
@@ -89,7 +89,7 @@ def main():
         d.text((gap, yy + 3), name, fill=(58, 42, 32), font=font)
         yy += label
         xx = gap
-        for tag, p in zip(("sheet", "before", "after"), row):
+        for tag, p in zip(("sheet", "8912ced", "now"), row):
             sheet.paste(p, (xx, yy))
             d.rectangle([xx, yy, xx + p.width - 1, yy + p.height - 1], outline=(200, 192, 184))
             d.text((xx + 4, yy + p.height - 16), tag, fill=(122, 106, 94), font=small)

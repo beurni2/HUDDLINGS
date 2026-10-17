@@ -41,19 +41,19 @@
  },
  "alignment": {
   "rootOnCropGroundPlusHalf": true,
-  "bestFitShiftPx": [0.01, 0.09],
-  "bestFitShiftPt": [0.0, 0.07],
-  "iouAtBestWholePixelShift": 0.9835,
+  "bestFitShiftPx": [0.01, 0.17],
+  "bestFitShiftPt": [0.01, 0.14],
+  "iouAtBestWholePixelShift": 0.9825,
   "thresholdPx": 2.0,
   "pass": true
  },
  "silhouette": {
-  "iou": 0.9835,
+  "iou": 0.9825,
   "threshold": 0.85,
   "groundShadowLeftOut": true,
   "pass": true,
-  "iouHeadAligned": 0.9835,
-  "headCentreOffsetPt": [0.02, -0.19]
+  "iouHeadAligned": 0.9699,
+  "headCentreOffsetPt": [1.12, -0.51]
  },
  "landmarks": {
   "thresholdPt": 2.8,
@@ -92,10 +92,10 @@
    },
    "ear.L.tip": {
     "how": "finder",
-    "found": [-47.75, -69.05],
+    "found": [-47.48, -69.05],
     "model": [-49.3, -68.3],
-    "errPt": 1.72,
-    "errShareOfHead": 0.018,
+    "errPt": 1.97,
+    "errShareOfHead": 0.021,
     "pass": true
    },
    "ear.R.root": {
@@ -108,10 +108,10 @@
    },
    "ear.R.tip": {
     "how": "finder",
-    "found": [48.67, -69.84],
+    "found": [48.45, -69.84],
     "model": [49.6, -69.8],
-    "errPt": 0.93,
-    "errShareOfHead": 0.01,
+    "errPt": 1.15,
+    "errShareOfHead": 0.012,
     "pass": true
    },
    "ground": {
@@ -141,7 +141,7 @@
     "heldTo": "#FFF4E8",
     "heldBy": "palette.fur",
     "deltaE2000": 0.0,
-    "pixels": 15728,
+    "pixels": 15701,
     "pass": true
    },
    "furShade": {
@@ -149,15 +149,15 @@
     "heldTo": "#FDE3C8",
     "heldBy": "palettePainted.furShade",
     "deltaE2000": 2.33,
-    "pixels": 1364,
+    "pixels": 1274,
     "pass": true
    },
    "ears": {
-    "dominant": "#DFA97F",
+    "dominant": "#DBA074",
     "heldTo": "#D9A379",
     "heldBy": "palette.marking",
-    "deltaE2000": 1.65,
-    "pixels": 6429,
+    "deltaE2000": 1.29,
+    "pixels": 6439,
     "pass": true
    },
    "bodyMarkings": {
@@ -303,9 +303,9 @@
  },
  "advisory": {
   "edgeDistance": {
-   "meanRenderToSheetPt": 0.44,
+   "meanRenderToSheetPt": 0.48,
    "p95RenderToSheetPt": 1.11,
-   "meanSheetToRenderPt": 0.54,
+   "meanSheetToRenderPt": 0.55,
    "p95SheetToRenderPt": 1.11,
    "targetP95Pt": 2.0,
    "meetsTarget": true
@@ -317,12 +317,12 @@
     "meetsTarget": true
    },
    "ear.L": {
-    "iou": 0.881,
+    "iou": 0.878,
     "target": 0.85,
     "meetsTarget": true
    },
    "ear.R": {
-    "iou": 0.822,
+    "iou": 0.821,
     "target": 0.85,
     "meetsTarget": false
    }
@@ -331,8 +331,8 @@
    "set": "3x",
    "pages": 2,
    "pageAreaPx": 8388608,
-   "allRegionsShare": 0.513,
-   "thisStillShare": 0.049
+   "allRegionsShare": 0.514,
+   "thisStillShare": 0.05
   }
  },
  "failed": [],
