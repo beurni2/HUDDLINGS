@@ -11,7 +11,7 @@ import { LIMITS, lineGate } from "../../../draw/lint.ts";
 import { HEAD_FUR, headFur } from "../parts/headfur.ts";
 import { groundShadow } from "../parts/shadow.ts";
 import { LIGHT, marking, part, soft, type Paint } from "../../../draw/paint.ts";
-import { blur, join, pad, piece, uid, type Box, type Piece } from "../../../draw/svg.ts";
+import { blur, join, mask, pad, piece, region, uid, type Box, type Piece } from "../../../draw/svg.ts";
 import { model } from "../model.ts";
 import { C, LINES } from "../palette.ts";
 import type { BrowState } from "../parts/brow.ts";
@@ -318,16 +318,17 @@ const headGroup = [head, ...tuftShapes];
 const GAP = uid("gap"), GAP_BLUR = uid("blur");
 /**
  * In the narrow gap between the near front leg's back edge and the hind paw's crown, the flank in a warm shade, as the
- * sheet paints it there (the crop's tan wedge). The shade stays lighter than a marking's tan (L* 86 and up), as it is a
- * shade, not a patch; the sheet's own gap is darker. The thigh's front is the near leg's back edge's own line, one line
+ * sheet paints it there (the crop's tan wedge). The shade stays lighter than a marking's tan (L* 84 to 86 at 0.36), as it
+ * is a shade, not a patch: the sheet's own gap is darker (L* 71 to 83), but at 0.45 the sheet match reads the wedge as a
+ * tan marking the map does not have (22 px at (-24.1, -17.7)). The thigh's front is the near leg's back edge's own line, one line
  * from the heel up over the flank, as the crop draws it (DECISIONS 230): the separate thigh arc beside it, and the pale
  * strip between them, read as two lines and a seam where the crop draws one.
  */
 const gapNodes: P[] = [[-21.8, -30], [-20.6, -24], [-21.6, -18.4], [-24, -13.4], [-26, -9], [-27.6, -7.2], [-28.6, -10.2], [-26.8, -15.4], [-24.8, -20.6],
   [-23.2, -26]];
 const thighLayers = `<defs><linearGradient id="${GAP}" gradientUnits="userSpaceOnUse" x1="0" y1="-28" x2="0" y2="-6">` +
-  `<stop offset="0" stop-color="${C.earDeep}" stop-opacity="0"/><stop offset="0.45" stop-color="${C.earDeep}" stop-opacity="0.26"/>` +
-  `<stop offset="0.8" stop-color="${C.earDeep}" stop-opacity="0.28"/><stop offset="1" stop-color="${C.earDeep}" stop-opacity="0.08"/></linearGradient>` +
+  `<stop offset="0" stop-color="${C.earDeep}" stop-opacity="0"/><stop offset="0.45" stop-color="${C.earDeep}" stop-opacity="0.36"/>` +
+  `<stop offset="0.8" stop-color="${C.earDeep}" stop-opacity="0.36"/><stop offset="1" stop-color="${C.earDeep}" stop-opacity="0.12"/></linearGradient>` +
   `${blur(GAP_BLUR, [-36, -32, 18, 30], 0.7)}</defs>` +
   `<path d="${pathD(smooth(gapNodes).segs)}" fill="url(#${GAP})" filter="url(#${GAP_BLUR})"/>`;
 
@@ -649,7 +650,7 @@ function between(): string {
   const g = uid("between"), f = uid("blur");
   const v = smooth([[-61, -29.6], [-57.6, -26.6], [-54.6, -23.4], [-53.2, -19], [-53.4, -14], [-55.4, -13.6], [-56.4, -18], [-58, -22.4]]);
   return `<defs><linearGradient id="${g}" gradientUnits="userSpaceOnUse" x1="0" y1="-30" x2="0" y2="-14">` +
-    `<stop offset="0" stop-color="${C.marking}" stop-opacity="0"/><stop offset="0.5" stop-color="${C.marking}" stop-opacity="0.2"/>` +
+    `<stop offset="0" stop-color="${C.marking}" stop-opacity="0"/><stop offset="0.5" stop-color="${C.marking}" stop-opacity="0.36"/>` +
     `<stop offset="1" stop-color="${C.marking}" stop-opacity="0.35"/></linearGradient>` +
     `${blur(f, [-66, -34, 18, 24], 1.4)}</defs>` +
     `<path d="${pathD(v.segs)}" fill="url(#${g})" filter="url(#${f})"/>`;
@@ -723,13 +724,21 @@ export function threeQuarter(facingSide: Side = "L"): Drawn[] {
   add("tail", lineGate(litPart("tail", tail, tailPaint, tailLines)));
   // The tail's tan root painted as a flame of brush strokes, as the sheet paints it (parts/marking.ts): darkest at the
   // root, a few darker strands radiating up along the plume's fur from the root, its edge brushed into the cream
-  // (DECISIONS 217), with no lighter streaks.
+  // (DECISIONS 217), with no lighter streaks. Its brushed edge fades up the plume with the patch itself, so no strand
+  // is left floating over the cream above the patch's faded top, as the crop's flames melt into the plume (D14).
   const fromRoot = (p: P): P => v.sub(p, [16, -6]);
-  add("tail.base", lineGate(join(litMarking("tail.base", { shape: tail, paint: tailPaint, spans: tailLines }, tailBase, { fill: C.marking, blur: 0.8, fade: { from: [19.5, -22], to: [22.5, -41] } }),
+  const rootFade = { from: [19.5, -22] as P, to: [22.5, -41] as P };
+  const rootBrush = brush("tail.base", tail, tailBase, 0.8, { flow: fromRoot, seed: 3317, edge: 20, out: [1.6, 3.2], in: [1.8, 3], width: [0.8, 1.2], soft: 0.45,
+    opacity: 0.8, inside: { count: 3, length: [4, 7], colour: C.earLow, opacity: 0.3, width: 0.8 }, colour: C.marking });
+  const rootMask = uid("fade"), rootGrad = uid("fade");
+  const rootFaded: Piece = { ...rootBrush, svg: `<defs>${mask(rootMask, pad(rootBrush.box, 2), `<linearGradient id="${rootGrad}" gradientUnits="userSpaceOnUse" ` +
+    `x1="${rootFade.from[0]}" y1="${rootFade.from[1]}" x2="${rootFade.to[0]}" y2="${rootFade.to[1]}"><stop offset="0" stop-color="#FFFFFF"/>` +
+    `<stop offset="1" stop-color="#000000"/></linearGradient><rect ${region(pad(rootBrush.box, 2))} fill="url(#${rootGrad})"/>`)}</defs>` +
+    `<g mask="url(#${rootMask})">${rootBrush.svg}</g>` };
+  add("tail.base", lineGate(join(litMarking("tail.base", { shape: tail, paint: tailPaint, spans: tailLines }, tailBase, { fill: C.marking, blur: 0.8, fade: rootFade }),
     strands("tail.base", tailBase, 0.8, [[[13.4, -14.4], [16.6, -22], [18.4, -30]], [[15.6, -13.2], [20.4, -19.4], [24, -26.4]], [[17.4, -12.6], [23, -16.4], [27.4, -21]]],
       { colour: C.earLow, opacity: 0.4, width: 0.85 }),
-    brush("tail.base", tail, tailBase, 0.8, { flow: fromRoot, seed: 3317, edge: 20, out: [1.6, 3.2], in: [1.8, 3], width: [0.8, 1.2], soft: 0.45, opacity: 0.8,
-      inside: { count: 3, length: [4, 7], colour: C.earLow, opacity: 0.3, width: 0.8 }, colour: C.marking }))));
+    rootFaded)));
   add("body.back", lineGate(litPart("body.back", back, backPaintF, backLinesF)));
   // The saddle's near half and the rump's spot, their edges brushed along the fur (DECISIONS 217): the saddle's combed
   // down and back along the sloping back, the rump's down the haunch.
@@ -1111,7 +1120,7 @@ function perkedEar(side: "L" | "R", F: Facing): Piece {
     // hanging ear, so the face's line there lies on the tan, as it did on the ear; and the skull's shade on the neck
     // just under it, which turns the head's round in where it meets the neck.
     under: `<defs><linearGradient id="${tan}" gradientUnits="userSpaceOnUse" x1="-2" y1="-144" x2="2" y2="-94">` +
-      `<stop offset="0" stop-color="${C.earDeep}" stop-opacity="0.8"/><stop offset="0.22" stop-color="${C.patch}" stop-opacity="0.9"/>` +
+      `<stop offset="0" stop-color="${C.earDeep}" stop-opacity="0.8"/><stop offset="0.22" stop-color="${C.patch}" stop-opacity="0.36"/>` +
       `<stop offset="0.62" stop-color="${C.patch}" stop-opacity="0.75"/><stop offset="1" stop-color="${C.patch}" stop-opacity="0"/></linearGradient>` +
       `<linearGradient id="${band}" gradientUnits="userSpaceOnUse" x1="-9" y1="0" x2="3" y2="0">` +
       `<stop offset="0" stop-color="${C.patch}"/><stop offset="1" stop-color="${C.patch}" stop-opacity="0"/></linearGradient>` +
