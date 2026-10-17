@@ -361,6 +361,35 @@ test("a join end must meet another line at full width, and an under end must run
   assert.match(gateOf(spanned(ring, [half]), coverOf("below/front")), /runs on under no part/, "a part drawn under the line does not cover its end");
 });
 
+test("with `shown`, a line lines an edge only where it shows in the composite: a span run on under a later part leaves that part's edge bare (DECISIONS 264)", () => {
+  // The front's temple.L in perkedL, liftedL and listening, planted: a part drawn under the ring ("below"), its edge a
+  // sliver 0.3 pt outside the ring's, lined all round on its inside, so its line runs on under the ring; the ring's own
+  // line broken by 12 pt on its right. Its line lies within 0.75 pt of the ring's edge all round, but its ribbon's
+  // middle (0.7 pt in from its edge) lies under the ring, so only a 0.3 pt sliver of a soft line shows there.
+  const grown = (k: number) => smooth(round.map(([x, y]): Node => [x * k, y * k]));
+  const pair: Partial<SpanMeta>[] = [
+    { from: share(6), to: 0.5, ends: ["free", "join"], taper: [1.8, 0] }, { from: 0.5, to: 1 - share(6), ends: ["join", "free"], taper: [0, 1.8] }];
+  const temple = spanned(grown(20.3 / 20), [whole], true, "below/front");
+  const shownOf = (...ds: Drawing[]) => lint(ds, { palette: PALETTE, rig: RIG, decisions: DECISIONS, shown: true }).filter((s) => /line gate|lit span|fur edge|edge of/.test(s)).join("\n");
+  assert.equal(gateOf(spanned(ring, pair), temple), "", "the first gate counts the line under the ring as lining the ring's edge: the blind spot");
+  const found = shownOf(spanned(ring, pair), temple);
+  assert.match(found, /ring\/front: the edge of ring shows 15\.\d\d pt below full line width/, "counted only where it shows, the ring's edge is bare over its gap");
+  assert.match(found, /below\/front: the edge of below shows \d+\.\d\d pt below full line width/, "and the sliver of the part under it shows no line of its own");
+  // The same line drawn where it shows, half its width or more clear of the ring: a part over the ring, its edge on the
+  // ring's, lines the gap (the ring is clear of it but for its line).
+  const ringed = drawing(lineGate({ ...part("over", grown(20.3 / 20), { fill: "#FFF4E8" }), meta: { ...temple.meta! } }), "over/front");
+  assert.doesNotMatch(shownOf(spanned(ring, pair), ringed), /edge of ring/, "a line drawn over the ring's edge lines it");
+  // A join onto a line wholly under a later part meets nothing: the ring's two spans joined across their gap onto the
+  // line of a part under the ring whose edge lies 0.4 pt inside the ring's.
+  const joined: Partial<SpanMeta>[] = [{ from: share(0.5), to: 1 - share(0.5), ends: ["join", "join"], taper: [0, 0] }];
+  const hidden = spanned(grown(19.6 / 20), [whole], true, "below/front");
+  assert.equal(gateOf(spanned(ring, joined), hidden), "", "the first gate takes the hidden line as the join's partner");
+  assert.match(shownOf(spanned(ring, joined), hidden), /joins no line at its start/, "a join onto a line under a later part meets nothing");
+  // Nothing changes where every line shows.
+  assert.equal(shownOf(spanned(ring, [whole])), "", "the ring lined all round passes");
+  assert.match(shownOf(spanned(ring, pair)), /shows 15\.\d\d pt below full line width/, "and its gap fails as before");
+});
+
 test("the line gate fails a fur edge drawn as more than one span, and a span ending in the middle of fur", () => {
   // Fur over about a fifth of the way round, as shares of the ring's length (as the meta holds it).
   const furred = furSpan(ring, ringPts[Math.round(ringPts.length * 0.1)]!, ringPts[Math.round(ringPts.length * 0.3)]!);
