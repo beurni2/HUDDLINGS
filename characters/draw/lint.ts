@@ -5,7 +5,7 @@
 // attributes; markup it cannot read fails rather than slipping past.
 import type { Drawing } from "../build/atlas.ts";
 import type { Rig } from "../../runtime-web/src/format.ts";
-import { arc, minRadius, onSpan, sample, type P, type Seg } from "./geom.ts";
+import { arc, area, minRadius, onSpan, sample, type P, type Seg } from "./geom.ts";
 import type { DrawnLine } from "./line.ts";
 import type { Piece, ShapeMeta } from "./svg.ts";
 
@@ -34,7 +34,8 @@ export const LIMITS = {
  * under a part drawn above its line; a fur edge is one span; and a span may end in the middle of fur only within `endPt`
  * of another line's end or of where the edge goes under a part. A point lies under a part when it lies at least
  * `coverPt` inside it; a visible stretch is lined by another shape's line within `linedPt` of it, or by a typed line
- * its shape reports (ShapeMeta.outlined). A span that cites a current DECISIONS entry (LintRules.decisions: one that
+ * its shape reports (ShapeMeta.outlined), and with LintRules.shown only where that line shows in the composite, as a
+ * join meets only a line that shows (dog DECISIONS 264). A span that cites a current DECISIONS entry (LintRules.decisions: one that
  * exists and that no later entry replaces) may taper longer, end in the middle of fur, or share a fur edge, and a bare
  * stretch beside it is let through as far as its own taper there and what the span says the sheet leaves unlined
  * (SpanMeta.bare); its joins and its ends under parts are held whatever it cites.
@@ -103,6 +104,14 @@ export interface LintRules {
   rig?: Pick<Rig, "drawOrder" | "parts">;
   /** The species' DECISIONS entries, for the line gate's cites (decisionsOf()): a cite that names no current entry fails, and with none given every cite does. */
   decisions?: Decisions;
+  /**
+   * The line gate counts a line only where it shows in the composite (dog DECISIONS 264): a line lines an edge, its own
+   * or a neighbour's, only where half its width or more lies under no part drawn after it, and a join meets a line only
+   * where some of that line shows. Without it the gate counts every full-width point of every line, even one a later
+   * part covers, as the first gate did (219), so the front's temple.L line, running on under head.base along the head's
+   * side, passed as lining it while the head's side showed bare.
+   */
+  shown?: boolean;
 }
 
 /** A species' DECISIONS entries as the line gate reads them: every entry's number, and each entry later ones replace, in whole or in part, with the entries that replace it. */
@@ -688,6 +697,8 @@ interface Placed {
   at: number[];
   total: number;
   box: [number, number, number, number];
+  /** Which way round its outline runs: geom.ts's area of it is positive (the dog's parts/lines.ts then takes [t1, -t0] as outward). */
+  cw: boolean;
 }
 
 /** A lit span placed on its shape in a composited view. */
@@ -712,7 +723,15 @@ function placed(meta: ShapeMeta, part: string, region: string, layer: [number, n
   let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
   for (const [x, y] of pts) (x0 = Math.min(x0, x), y0 = Math.min(y0, y), x1 = Math.max(x1, x), y1 = Math.max(y1, y));
   const mirror = meta.segs.map((seg) => seg.map(([x, y]): P => [-x, y]) as Seg);
-  return { meta, part, region, key: shapeKey(meta.segs), mirrorKey: shapeKey(mirror), layer, covers, clipTo, pts, at: a.slice(0, -1), total: a.at(-1)!, box: [x0, y0, x1, y1] };
+  return { meta, part, region, key: shapeKey(meta.segs), mirrorKey: shapeKey(mirror), layer, covers, clipTo, pts, at: a.slice(0, -1), total: a.at(-1)!, box: [x0, y0, x1, y1], cw: area(pts) > 0 };
+}
+
+/** The way into a placed shape at share f of its outline, a unit vector: the side of the edge a part's lit line is drawn on, inside its clip (the dog's parts/lines.ts). */
+function inward(s: Placed, f: number): P {
+  const d = 0.1 / s.total, a = pointAt(s, f - d), b = pointAt(s, f + d);
+  const t: P = [b[0] - a[0], b[1] - a[1]], l = Math.hypot(t[0], t[1]) || 1;
+  // lines.ts's outward normal is [t1, -t0] on a shape whose area is positive, [-t1, t0] on one whose area is not.
+  return s.cw ? [-t[1] / l, t[0] / l] : [t[1] / l, -t[0] / l];
 }
 
 /** The point at share f of a placed shape's outline. */
@@ -744,21 +763,29 @@ function insideBy(q: P, s: Placed): number {
   return inside ? nearest : -nearest;
 }
 
-/** Points along every lit line's full-width run, in 1 pt cells, to find the lines near a place. */
+/**
+ * How much of a line shows at a point of it in the composite (dog DECISIONS 264): none (every part of it there lies under
+ * a part drawn after it), some (its edge shows, but less than half its width), or enough to line the edge (half its
+ * width or more).
+ */
+const Seen = { None: 0, Some: 1, Lines: 2 } as const;
+type Seen = (typeof Seen)[keyof typeof Seen];
+
+/** Points along every lit line's full-width run, in 1 pt cells, to find the lines near a place, each with how much of it shows. */
 class Lined {
-  private cells = new Map<string, { p: P; line: number }[]>();
-  add(p: P, line: number) {
+  private cells = new Map<string, { p: P; line: number; seen: Seen }[]>();
+  add(p: P, line: number, seen: Seen) {
     const k = `${Math.floor(p[0])},${Math.floor(p[1])}`;
     let c = this.cells.get(k);
     if (!c) this.cells.set(k, (c = []));
-    c.push({ p, line });
+    c.push({ p, line, seen });
   }
-  /** Whether a full-width point of a line other than those `skip` refuses lies within `r` (at most 1 pt) of q. */
-  near(q: P, r: number, skip: (line: number) => boolean): boolean {
+  /** Whether a full-width point of a line other than those `skip` refuses, showing at least `least`, lies within `r` (at most 1 pt) of q. */
+  near(q: P, r: number, skip: (line: number) => boolean, least: Seen = Seen.None): boolean {
     const cx = Math.floor(q[0]), cy = Math.floor(q[1]);
     for (let i = cx - 1; i <= cx + 1; i++) {
       for (let j = cy - 1; j <= cy + 1; j++) {
-        for (const e of this.cells.get(`${i},${j}`) ?? []) if (!skip(e.line) && Math.hypot(e.p[0] - q[0], e.p[1] - q[1]) <= r) return true;
+        for (const e of this.cells.get(`${i},${j}`) ?? []) if (!skip(e.line) && e.seen >= least && Math.hypot(e.p[0] - q[0], e.p[1] - q[1]) <= r) return true;
       }
     }
     return false;
@@ -772,8 +799,8 @@ const STEP = 0.25;
  * each state a gated drawing draws, that state's drawings in place of the rest's), each part's shapes in the rig's draw
  * order, and every lit span of a gated drawing is held to the gate, with the whole outline of every shape one runs on.
  */
-export function gateProblems(drawings: Drawing[], rules: Pick<LintRules, "rig" | "decisions"> = {}): string[] {
-  const { rig, decisions } = rules;
+export function gateProblems(drawings: Drawing[], rules: Pick<LintRules, "rig" | "decisions" | "shown"> = {}): string[] {
+  const { rig, decisions, shown: onlyShown = false } = rules;
   const problems: string[] = [];
   // What is wrong with a cite, if anything: it must name a current entry.
   const citeFault = (n: number) => !decisions ? `cites ${n}, and the lint was given no DECISIONS entries to check it against (LintRules.decisions)`
@@ -819,8 +846,9 @@ export function gateProblems(drawings: Drawing[], rules: Pick<LintRules, "rig" |
       });
     }
     const find = (key: string) => shapes.find((s) => s.key === key) ?? shapes.find((s) => s.mirrorKey === key);
-    const covered = (q: P, above: [number, number]) => shapes.some((c) => c.covers && after(c.layer, above) && insideBy(q, c) > GATE.coverPt &&
-      (!c.clipTo || shapes.some((m) => m.part === c.clipTo && insideBy(q, m) > GATE.coverPt)));
+    // A point lies under a part drawn after `above` when it lies more than `by` inside it (and inside its clip).
+    const covered = (q: P, above: [number, number], by = GATE.coverPt) => shapes.some((c) => c.covers && after(c.layer, above) && insideBy(q, c) > by &&
+      (!c.clipTo || shapes.some((m) => m.part === c.clipTo && insideBy(q, m) > by)));
     // Every lit span of the composite, placed on its shape, with where it is drawn at full width.
     const lines: Placing[] = [];
     for (const { z, d } of layers) {
@@ -849,7 +877,22 @@ export function gateProblems(drawings: Drawing[], rules: Pick<LintRules, "rig" |
       const runs = (sh.meta.outlined ?? []).filter(([a, b]) => !own.some((l) => Math.abs(l.span.from - a) < 1e-6 && Math.abs(l.span.to - b) < 1e-6));
       if (runs.length) typed.set(sh.key, [...(typed.get(sh.key) ?? []), ...runs]);
     }
-    // Every line's full-width points, each with the shape it runs on: the lit spans' (by their index) and the typed lines'.
+    // How much of a lit line shows at share f of its shape, as composited (LintRules.shown, DECISIONS 264): a part's lit
+    // line is drawn on the inside of its edge (lines.ts), so half of it or more shows where the middle of its ribbon,
+    // half its width in from the edge, lies under no part drawn after the line, and some of it where its edge does.
+    // Without `shown`, every line counts wherever it is drawn, as the first gate counted it (219).
+    const seen = (l: Placing, f: number): Seen => {
+      if (!onlyShown) return Seen.Lines;
+      const q = pointAt(l.shape!, f), n = inward(l.shape!, f), half = l.line.width / 2;
+      return !covered([q[0] + n[0] * half, q[1] + n[1] * half], l.layer, 0) ? Seen.Lines : !covered(q, l.layer) ? Seen.Some : Seen.None;
+    };
+    const shows = (l: Placing, f: number) => seen(l, f) === Seen.Lines;
+    // Every line's full-width points, each with the shape it runs on: the lit spans' (by their index) and the typed lines',
+    // each with how much of it shows. A line that runs on under a later part is drawn, but what shows of the composite
+    // there is that part, so it lines nothing of that part's edge: the front's temple.L line ran on along the head's side,
+    // its ribbon under head.base, within 0.75 pt of the head's edge, and was counted as lining it, while the head's side
+    // showed bare between the temple's line and the cheek's (DECISIONS 264). A typed line is drawn on its shape's own
+    // edge, and shows where that does.
     const lined = new Lined();
     const owner: (Placed | undefined)[] = lines.map((l) => l.shape);
     lines.forEach((l, k) => {
@@ -857,14 +900,18 @@ export function gateProblems(drawings: Drawing[], rules: Pick<LintRules, "rig" |
       const length = extent(l.full[0], l.full[1]) * l.shape.total;
       for (let s = 0; s <= length + 1e-9; s += STEP) {
         const f = l.full[0] + s / l.shape.total;
-        if (!fadedAt(l.span, f)) lined.add(pointAt(l.shape, f), k);
+        if (fadedAt(l.span, f)) continue;
+        lined.add(pointAt(l.shape, f), k, seen(l, f));
       }
     });
     for (const [key, runs] of typed) {
       const sh = shapes.find((x) => x.key === key)!;
       for (const [a, b] of runs) {
         const id = owner.push(sh) - 1, length = extent(a, b) * sh.total;
-        for (let s = 0; s <= length + 1e-9; s += STEP) lined.add(pointAt(sh, a + s / sh.total), id);
+        for (let s = 0; s <= length + 1e-9; s += STEP) {
+          const q = pointAt(sh, a + s / sh.total);
+          lined.add(q, id, onlyShown && covered(q, sh.layer) ? Seen.None : Seen.Lines);
+        }
       }
     }
     const named = (l: Placing) => `the lit span on ${l.line.where} from ${l.span.from.toFixed(3)} to ${l.span.to.toFixed(3)}`;
@@ -898,8 +945,10 @@ export function gateProblems(drawings: Drawing[], rules: Pick<LintRules, "rig" |
           problems.push(`${l.region}: ${named(l)} tapers over ${s.taper[i]!.toFixed(2)} pt at its ${which[i]} (at most ${GATE.taperPt} pt, unless it cites a current DECISIONS entry)`);
         if (e === "join") {
           // Its own other end, on a ring drawn whole, or another line at full width.
+          // Where the joined end shows, the line it meets must show there too, if only its edge (a line that comes out
+          // from under a part at a crossing shows its edge first): a line wholly under a later part meets nothing.
           const ring = s.ends[1 - i] === "join" && apart(s.from, s.to) * shape.total <= GATE.joinPt;
-          if (!ring && !lined.near(p, GATE.joinPt, (m) => m === k))
+          if (!ring && !lined.near(p, GATE.joinPt, (m) => m === k, seen(l, f) === Seen.None ? Seen.None : Seen.Some))
             problems.push(`${l.region}: ${named(l)} joins no line at its ${which[i]}: no other lit line runs at full width within ${GATE.joinPt} pt of ${at1(p)}`);
         }
         if (e === "under") {
@@ -928,6 +977,7 @@ export function gateProblems(drawings: Drawing[], rules: Pick<LintRules, "rig" |
 
     for (const [shape, region] of subjects) {
       const on = lines.map((l, k) => ({ l, k })).filter(({ l }) => l.shape === shape && !l.copy);
+      const drawnOn = lines.filter((l) => l.shape === shape);
       // A fur edge is one span.
       for (const fur of shape.meta.fur) {
         const over = on.filter(({ l }) => overlap([l.span.from, l.span.to], fur) * shape.total > 1);
@@ -938,9 +988,10 @@ export function gateProblems(drawings: Drawing[], rules: Pick<LintRules, "rig" |
       const n = Math.max(1, Math.round(shape.total / STEP)), step = shape.total / n;
       const bare = Array.from({ length: n }, (_, i) => {
         const f = ((i + 0.5) * step) / shape.total, q = pointAt(shape, f);
-        if (on.some(({ l }) => l.full && (extent(l.full[0], l.full[1]) === 1 || onSpan(f, l.full[0], l.full[1])) && !fadedAt(l.span, f))) return false;
+        // Its own line where it shows: the span's, or a marking's copy of it drawn again over the marking (litMarking).
+        if (drawnOn.some((l) => l.full && (extent(l.full[0], l.full[1]) === 1 || onSpan(f, l.full[0], l.full[1])) && !fadedAt(l.span, f) && shows(l, f))) return false;
         if ((typed.get(shape.key) ?? []).some(([a, b]) => extent(a, b) === 1 || onSpan(f, a, b))) return false;
-        if (lined.near(q, GATE.linedPt, (m) => owner[m]?.key === shape.key)) return false;
+        if (lined.near(q, GATE.linedPt, (m) => owner[m]?.key === shape.key, Seen.Lines)) return false;
         return !covered(q, shape.layer);
       });
       // The bare runs, walked round from a sample that is not bare (the whole outline, when none is).

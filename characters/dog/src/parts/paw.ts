@@ -10,9 +10,10 @@
 // lower corners the outer toes' own round (tighter than 4 pt where the stubby-paws panel draws them so, Q29), and its
 // toe lines rising 40 to 50% of the paw's height round the middle toe in the warm line at about half strength, never
 // darker than the outline. A view that does not ask for it draws its paws as before.
-import { sample, smooth, type Node, type P, type Shape } from "../../../draw/geom.ts";
+import { polyD, sample, smooth, v, type Node, type P, type Shape } from "../../../draw/geom.ts";
+import { LIMITS } from "../../../draw/lint.ts";
 import type { Paint } from "../../../draw/paint.ts";
-import { uid } from "../../../draw/svg.ts";
+import { blur, pad, uid, type Box } from "../../../draw/svg.ts";
 import { C } from "../palette.ts";
 import type { Lobed } from "./lines.ts";
 
@@ -25,14 +26,108 @@ export interface Toes {
   width?: number;
   /** The fur pass's soft toe line (DECISIONS 216): about half strength at the sole, fading gently to a fifth at its top, as the stubby-paws panel draws them, where the first lines ran from 0.8 to nearly nothing and only their dark feet showed. */
   soft?: boolean;
+  /**
+   * The toe line that follows the paw's dome (DECISIONS 263): each line, from its foot (its first point) up to its top's
+   * height (its last point's y), runs along the paw's ball as a meridian of it, so it bows out round the ball's widest
+   * and comes back in over its top, as the turnaround's and the stubby-paws panel's ")" and "(" do; its ends round and
+   * soft, never a pointed tick. Its points in between are left out: the dome sets the curve. Left out, the lines run as
+   * typed, as before.
+   */
+  dome?: Dome;
 }
+
+/** A paw's ball as the crop draws it (DECISIONS 263): its centre, where the bun is fullest, and its half-width and half-height, in points. */
+export interface Dome {
+  centre: P;
+  size: [number, number];
+}
+
+/**
+ * The toe line along the dome (DECISIONS 263): its width at its foot and at its top as shares of its full width, each
+ * end a round cap, so it starts from the sole's dip as a round soft stroke and ends in a round soft top, never a point;
+ * full from `full` of its length to `ease`, where it starts to narrow to its top; softened by `blur` (σ, pt); faded
+ * along its length as the soft toe line is (SOFT_TOES). Its foot lies at least `off` of the ball's half-width off the
+ * ball's middle meridian, which runs straight up the middle (a foot there would make a straight tick, and throws).
+ */
+export const DOME_TOES = { foot: 0.8, top: 0.6, full: 0.2, ease: 0.55, blur: 0.25, off: 0.25 };
 
 /** The soft toe line's strength at the sole and at its top (DECISIONS 216). */
 export const SOFT_TOES = { foot: 0.55, top: 0.2 };
 
-/** A paw's toe lines as paint: their fading colour (under the shade, in `under`) and the lines (`inner`). */
+/**
+ * The meridian of the dome `d` through `foot`, from the foot up to the height `top`; how far off the ball's middle
+ * meridian it lies, as a share of the ball's half-width (`off`); and how far it bows off its chord, as a share of its length.
+ */
+export function meridian(d: Dome, foot: P, top: number, n = 24): { pts: P[]; off: number; bow: number } {
+  const [cx, cy] = d.centre, [rx, ry] = d.size;
+  const lat = (y: number) => {
+    const k = (cy - y) / ry;
+    if (Math.abs(k) >= 1) throw new Error(`a toe line at y ${y} lies off its paw's ball (${cy - ry} to ${cy + ry})`);
+    return Math.asin(k);
+  };
+  const f0 = lat(foot[1]), f1 = lat(top);
+  // The meridian's own half-width: where it crosses the ball's widest, it is its foot's offset over the foot's latitude's cos.
+  const along = (foot[0] - cx) / Math.cos(f0);
+  if (Math.abs(along) > rx + 1e-9) throw new Error(`a toe line's foot at x ${foot[0]} lies off its paw's ball (${cx - rx} to ${cx + rx})`);
+  const pts = Array.from({ length: n + 1 }, (_, i): P => {
+    const f = f0 + ((f1 - f0) * i) / n;
+    return [cx + along * Math.cos(f), cy - ry * Math.sin(f)];
+  });
+  const a = pts[0]!, b = pts[n]!, chord = v.sub(b, a), l = v.len(chord);
+  let length = 0, off = 0;
+  pts.forEach((p, i) => {
+    if (i) length += v.len(v.sub(p, pts[i - 1]!));
+    off = Math.max(off, Math.abs(chord[0] * (p[1] - a[1]) - chord[1] * (p[0] - a[0])) / l);
+  });
+  return { pts, off: Math.abs(along) / rx, bow: off / length };
+}
+
+/** One toe line along the dome as a filled outline: round at both ends, its width easing as DOME_TOES says. */
+function domeStroke(pts: P[], width: number): string {
+  const { foot, top, full, ease } = DOME_TOES;
+  const at = [0];
+  for (let i = 1; i < pts.length; i++) at.push(at[i - 1]! + v.len(v.sub(pts[i]!, pts[i - 1]!)));
+  const length = at.at(-1)!;
+  const smooth = (x: number) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
+  const w = (u: number) => width * Math.min(foot + (1 - foot) * smooth(u / full), 1 - (1 - top) * smooth((u - ease) / (1 - ease)));
+  const left: P[] = [], right: P[] = [];
+  pts.forEach((p, i) => {
+    const t = v.norm(v.sub(pts[Math.min(pts.length - 1, i + 1)]!, pts[Math.max(0, i - 1)]!));
+    const n: P = [-t[1], t[0]], h = w(at[i]! / length) / 2;
+    left.push(v.add(p, v.mul(n, h)));
+    right.push(v.sub(p, v.mul(n, h)));
+  });
+  const cap = ([x, y]: P, r: number) => {
+    const k = +r.toFixed(3);
+    return `${polyD([[x - r, y]], false)}a${k} ${k} 0 1 0 ${2 * k} 0a${k} ${k} 0 1 0 ${-2 * k} 0Z`;
+  };
+  return polyD([...left, ...right.reverse()]) + cap(pts[0]!, w(0) / 2) + cap(pts.at(-1)!, w(1) / 2);
+}
+
+/** A paw's toe lines along its dome (DECISIONS 263): soft round strokes under the shade, faded as the soft toe line is. Throws on a straight line or one off the ball. */
+function domeToes(t: Toes, d: Dome): Pick<Paint, "under" | "inner"> {
+  const width = t.width ?? 0.8;
+  if (width < LIMITS.inner[0] || width > LIMITS.inner[1]) throw new Error(`a toe line is ${width} pt, not an inner line's ${LIMITS.inner[0]} to ${LIMITS.inner[1]}`);
+  const lines = t.lines.map((pts) => {
+    const m = meridian(d, pts[0]!, pts.at(-1)![1]);
+    if (m.off < DOME_TOES.off) throw new Error(`a toe line from (${pts[0]!.join(", ")}) lies ${m.off.toFixed(2)} of its paw's half-width off the ball's middle, under ${DOME_TOES.off}: it would run straight up the middle`);
+    return m.pts;
+  });
+  const all = lines.flat(), xs = all.map((p) => p[0]), ys = all.map((p) => p[1]);
+  const box: Box = pad([Math.min(...xs), Math.min(...ys), Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)], width + 2);
+  const id = uid("toe"), f = uid("blur");
+  const stops = `<stop offset="0" stop-color="${C.warmLine}" stop-opacity="${SOFT_TOES.foot}"/><stop offset="1" stop-color="${C.warmLine}" stop-opacity="${SOFT_TOES.top}"/>`;
+  return {
+    under: `<defs><linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="0" y1="${t.fade[0]}" x2="0" y2="${t.fade[1]}">${stops}</linearGradient>${blur(f, box, DOME_TOES.blur)}</defs>` +
+      `<path d="${lines.map((pts) => domeStroke(pts, width)).join("")}" fill="url(#${id})" filter="url(#${f})"/>`,
+    inner: [],
+  };
+}
+
+/** A paw's toe lines as paint: their fading colour (under the shade, in `under`) and the lines (`inner`); along the paw's dome with `dome` (DECISIONS 263). */
 export function toes(t: Toes): Pick<Paint, "under" | "inner"> {
   if (t.lines.length < 2 || t.lines.length > 3) throw new Error(`a paw has two or three toe lines, not ${t.lines.length}`);
+  if (t.dome) return domeToes(t, t.dome);
   const id = uid("toe");
   const stops = t.soft
     ? `<stop offset="0" stop-color="${C.warmLine}" stop-opacity="${SOFT_TOES.foot}"/><stop offset="1" stop-color="${C.warmLine}" stop-opacity="${SOFT_TOES.top}"/>`

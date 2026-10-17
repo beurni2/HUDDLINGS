@@ -156,16 +156,16 @@
      "held": true
     },
     "mouth": {
-     "areaPx": 839,
+     "areaPx": 838,
      "recordAreaPx": 924,
-     "areaPt2": 320.2,
-     "areaRatio": 0.908,
-     "iou": 0.833,
+     "areaPt2": 319.8,
+     "areaRatio": 0.907,
+     "iou": 0.832,
      "pass": true,
-     "openPx": 796,
+     "openPx": 795,
      "recordOpenPx": 815,
-     "openRatio": 0.982,
-     "redShare": 0.451,
+     "openRatio": 0.981,
+     "redShare": 0.452,
      "recordRedShare": 0.399,
      "held": true
     }
@@ -294,7 +294,7 @@
  },
  "headGate": {
   "headShiftPt": [0.0, 0.0],
-  "headIoU": 0.9916,
+  "headIoU": 0.9924,
   "thresholdPt": 2.8,
   "rows": {
    "nose": {

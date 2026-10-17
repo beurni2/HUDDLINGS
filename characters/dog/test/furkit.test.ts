@@ -12,15 +12,16 @@ import { PNG } from "pngjs";
 import type { Drawing } from "../../build/atlas.ts";
 import type { Rig } from "../../../runtime-web/src/format.ts";
 import { furEdge, type Lock } from "../../draw/fur.ts";
-import { decisionsOf, gateProblems, lineGate } from "../../draw/lint.ts";
+import { decisionsOf, gateProblems, lineGate, LIMITS } from "../../draw/lint.ts";
 import { arc, fracAt, mirrorX, sample, smooth, spanPoints, v, type Node, type P, type Shape } from "../../draw/geom.ts";
 import { scopeIds, type Piece } from "../../draw/svg.ts";
 import { EAR, earEdge, earFur, type EarEdgeSpec } from "../src/parts/ear.ts";
 import { HEAD_FUR, headFur, type HeadFurSpec } from "../src/parts/headfur.ts";
 import { drawings } from "../src/drawings.ts";
-import { CONTACT_DEPTH, FREE_TAPER, litEdge, litPart, litRibbons, SOLE, UNDER_RUN, type LitLine, type LitSpan } from "../src/parts/lines.ts";
+import { CONTACT_DEPTH, FREE_TAPER, litEdge, litPart, litRibbons, SOLE, UNDER_RUN, WEIGHT, type LitLine, type LitSpan } from "../src/parts/lines.ts";
 import { brush, type Brush } from "../src/parts/marking.ts";
-import { BUN, bun, SOFT_TOES, toes, type BunSpec } from "../src/parts/paw.ts";
+import { BUN, bun, DOME_TOES, meridian, SOFT_TOES, toes, type BunSpec, type Dome } from "../src/parts/paw.ts";
+import { CRISP, topknot, type Curl } from "../src/parts/topknot.ts";
 import { groundShadow } from "../src/parts/shadow.ts";
 import { C, LINES } from "../src/palette.ts";
 import { mirrorPiece } from "../src/views/facing.ts";
@@ -455,6 +456,59 @@ test("today's views, gated whole, fail the line gate, and each right-facing view
   for (const view of ["threeQuarter", "side"]) assert.deepEqual(kinds(`${view}.R`), kinds(`${view}.L`), `${view}.R is held as ${view}.L`);
 });
 
+test("counting only what shows (`shown`), the gate finds the front's head side bare under temple.L's line in every face that raises the left ear (DECISIONS 264, 267)", () => {
+  // Each raised-ear face composited as it is drawn, every part's state under the face's own name, as the front lane's
+  // gate script composites them (qa/phase3/fur/front/gate.ts).
+  const front = drawings().filter((d) => d.region.split("/")[1]!.split(":")[0] === "front");
+  const FACES: Record<string, Record<string, string>> = {
+    perkedL: { "ear.L": "onePerked", "temple.L": "up", "head.line": "templeL" },
+    liftedL: { "ear.L": "lifted", "temple.L": "up", "head.line": "templeL" },
+    listening: { "ear.L": "lifted", "ear.R": "lifted", "temple.L": "up", "temple.R": "up", "head.line": "temples" },
+  };
+  const decisions = decisionsOf(readFileSync(new URL("../DECISIONS.md", import.meta.url), "utf8"));
+  // The break the reviewers saw, planted back: the left cheek's line under a raised ear starting free where it started
+  // before the front lane's fix (267), 4.6 pt down the head's side at (43.7, -113.8), after temple.L's line has gone
+  // under head.base.
+  const planted = (d: Drawing): Drawing => {
+    const shape = d.meta!.shapes[0]!, pts = sample(shape.segs, 48), at = arc([...pts, pts[0]!]), total = at.at(-1)!;
+    const point = (f: number): P => {
+      const s = (((f % 1) + 1) % 1) * total, i = Math.max(0, at.findIndex((a) => a > s) - 1), t = (s - at[i]!) / (at[i + 1]! - at[i]! || 1);
+      const p = pts[i]!, q = pts[(i + 1) % pts.length]!;
+      return [p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t];
+    };
+    const near = (f: number, q: P) => Math.hypot(point(f)[0] - q[0], point(f)[1] - q[1]) < 1;
+    const nearest = pts.reduce((b, p, i) => (Math.hypot(p[0] - 43.7, p[1] + 113.8) < Math.hypot(pts[b]![0] - 43.7, pts[b]![1] + 113.8) ? i : b), 0);
+    const old = at[nearest]! / total;
+    let moved: { from: number; to: number } | undefined;
+    const lines = d.meta!.lines.map((l) => {
+      const s = (l as LitLine).span;
+      if (!s || !(s.ends[1] === "free" && near(s.to, [41.2, -118.05]))) return l;
+      moved = { from: s.from, to: s.to };
+      return { ...l, span: { ...s, to: old } };
+    });
+    assert.ok(moved, `${d.region}: the left cheek's line starts where 267 starts it`);
+    // The shape reports the run its line is drawn along: moved with it, or the gate reads the old run as a typed line.
+    const shapes = d.meta!.shapes.map((m) => ({ ...m, outlined: m.outlined.map(([a, b]): [number, number] => (a === moved!.from && b === moved!.to ? [a, old] : [a, b])) }));
+    return { ...d, meta: { ...d.meta!, shapes, lines } };
+  };
+  for (const [face, parts] of Object.entries(FACES)) {
+    const drawn = (plant: boolean) => [...front.filter((d) => !d.region.includes(":")), ...Object.entries(parts).map(([part, state]) => {
+      const d = { ...front.find((x) => x.region === `${part}/front:${state}`)!, region: `${part}/front:${face}` };
+      return plant && part === "head.line" ? planted(d) : d;
+    })];
+    const temple = (plant: boolean, shown: boolean) => gateProblems(drawn(plant), { rig, decisions, shown }).filter((p) => p.startsWith(`temple.L/front:${face}`));
+    // As drawn, the cheek's line takes over from the temple's at full width (267): neither gate finds the head's side bare.
+    assert.deepEqual(temple(false, true), [], `${face}: the head's side is lined where it shows`);
+    assert.deepEqual(temple(false, false), [], `${face}: and the first gate agrees`);
+    // Planted, the first gate takes temple.L's line under head.base as lining the head's side; `shown` finds it bare.
+    assert.deepEqual(temple(true, false), [], `${face}: the first gate takes temple.L's line under head.base as lining the head's side`);
+    const found = temple(true, true).join("\n");
+    assert.match(found, /the edge of temple\.L shows (\d+\.\d\d) pt below full line width from \(42\.\d, -11[67]\.\d\)/, `${face}: the break the reviewers saw, found`);
+    const pt = Number(/shows (\d+\.\d\d) pt/.exec(found)![1]);
+    assert.ok(pt > 2 && pt < 4, `${face}: ${pt} pt bare, the reviewers' 2.2 pt and its free end's taper`);
+  }
+});
+
 test("the dog's DECISIONS, as the line gate reads them: the fur pass's entries stand, and the entries they replace cannot be cited", () => {
   const d = decisionsOf(readFileSync(new URL("../DECISIONS.md", import.meta.url), "utf8"));
   for (let n = 210; n <= 219; n++) assert.ok(d.entries.includes(n) && !d.replaced[n], `${n} is a current entry`);
@@ -463,4 +517,181 @@ test("the dog's DECISIONS, as the line gate reads them: the fur pass's entries s
   // What the fur pass replaced, in whole or in part, each by the entry that says so.
   for (const [n, by] of [[74, 210], [79, 212], [72, 213], [85, 213], [7, 214], [33, 214], [76, 215], [81, 215], [64, 216], [82, 216], [45, 218]] as const)
     assert.ok(d.replaced[n]?.includes(by), `${n} is replaced by ${by}`);
+});
+
+// The fur kit's second round (DECISIONS 260 to 263): four more options, each drawing exactly what it drew before until
+// a view asks for it.
+
+/** Each point's width along an unclipped line (`reach`), from its polygons: [where it is, how wide]. */
+function widths(svg: string): [P, number][] {
+  const out: [P, number][] = [];
+  for (const pts of polygons(svg)) {
+    if (pts.length === 16) continue; // a join's disc
+    const n = pts.length / 2;
+    for (let j = 0; j < n; j++) out.push([v.mul(v.add(pts[j]!, pts[pts.length - 1 - j]!), 0.5), v.len(v.sub(pts[j]!, pts[pts.length - 1 - j]!))]);
+  }
+  return out;
+}
+const mean = (xs: number[]) => xs.reduce((s, x) => s + x, 0) / xs.length;
+const cv = (xs: number[]) => Math.sqrt(mean(xs.map((x) => (x - mean(xs)) ** 2))) / mean(xs);
+
+test("a living weight is fixed by its span's seed, stays inside the outer band, and changes nothing until a span asks for it", () => {
+  const span: LitSpan = { from: "top", to: "left", ends: ["join", "join"] };
+  assert.equal(litRibbons(paw, [span], "a").svg, litRibbons(paw, [{ ...span, weight: undefined }], "a").svg, "no weight, the line as before");
+  const a = litRibbons(paw, [{ ...span, weight: { seed: 3 } }], "a", { reach: 1 });
+  assert.equal(a.svg, litRibbons(paw, [{ ...span, weight: { seed: 3 } }], "a", { reach: 1 }).svg, "the same seed, the same line in every build");
+  assert.notEqual(a.svg, litRibbons(paw, [{ ...span, weight: { seed: 4 } }], "a", { reach: 1 }).svg, "another seed, another line");
+  for (const seed of [1, 2, 3, 4, 5, 6, 7, 8]) {
+    const l = litRibbons(paw, [{ ...span, weight: { seed } }], "a").lines[0]!;
+    assert.ok(l.drawn[0] >= LIMITS.outer[0] - 1e-9 && l.drawn[1] <= LIMITS.outer[1] + 1e-9, `seed ${seed}: ${l.drawn} pt, outside ${LIMITS.outer}`);
+  }
+  // With none of the band, the line is the band's thinnest all along.
+  for (const [, w] of widths(litRibbons(paw, [{ ...span, weight: { seed: 3, amount: 0 } }], "a", { reach: 1 }).svg).slice(8, -8)) assert.ok(Math.abs(w - LIMITS.outer[0]) < 0.01, `${w} pt`);
+});
+
+test("a living weight is thick where the part turns under and thin on its lit top, its strokes coming and going along the top where the depth's width is even", () => {
+  // Round the paw from its right down under its sole and up its left side to its top, its lit top on the upper left.
+  const span: LitSpan = { from: "right", to: "top", ends: ["join", "join"] };
+  const isTop = (p: P) => p[1] < -22 && p[0] < 0, isUnder = (p: P) => p[1] > -10 && p[1] < -3;
+  const top: number[] = [], under: number[] = [], alongTop: number[] = [];
+  for (const seed of [11, 12, 13, 14, 15, 16]) {
+    const w = widths(litRibbons(paw, [{ ...span, weight: { seed } }], "a", { reach: 1 }).svg).slice(6, -6);
+    for (const [p, x] of w) {
+      if (isTop(p)) top.push(x);
+      if (isUnder(p)) under.push(x);
+    }
+    alongTop.push(cv(w.filter(([p]) => isTop(p)).map(([, x]) => x)));
+  }
+  const today = cv(widths(litRibbons(paw, [span], "a", { reach: 1 }).svg).slice(6, -6).filter(([p]) => isTop(p)).map(([, x]) => x));
+  assert.ok(mean(under) - mean(top) > 0.15, `turning under ${mean(under).toFixed(2)} pt, its lit top ${mean(top).toFixed(2)} pt`);
+  assert.ok(mean(top) < 1.4, `its lit top ${mean(top).toFixed(2)} pt: at the band's thin end`);
+  assert.ok(mean(alongTop) > 1.3 * today, `along its lit top its widths vary by ${mean(alongTop).toFixed(3)} (CV), the depth's by ${today.toFixed(3)}`);
+});
+
+test("under a paw's sole a living weight stays as fine as the sheet's where the paw presses", () => {
+  const sole: LitSpan = { from: "right", to: "left", ground: "sole", ends: ["join", "join"] };
+  for (const seed of [21, 22, 23, 24]) {
+    const w = widths(litRibbons(paw, [{ ...sole, weight: { seed } }], "a", { reach: 1 }).svg).filter(([p]) => Math.abs(p[0]) < 3);
+    assert.ok(w.length > 0);
+    // Read back from the polygons' points, written to a thousandth of a point.
+    for (const [p, x] of w) assert.ok(x <= LIMITS.outer[0] + (LIMITS.outer[1] - LIMITS.outer[0]) * WEIGHT.sole + 0.003, `seed ${seed}: ${x.toFixed(3)} pt under the sole's middle at x ${p[0].toFixed(1)}`);
+  }
+});
+
+const SOFT_CHIN: HeadFurSpec = {
+  ...HEAD,
+  chin: { ...HEAD.chin!, scallops: [], soft: { wisps: [{ at: on(78), len: 1.7, width: 2.2, lean: -0.4 }, { at: on(97), len: 1.1, width: 1.7, lean: 0.35 }, { at: on(108), len: 2, width: 2.6, lean: 0.45 }], firm: [14, 14] } },
+};
+
+test("a soft chin is a smooth arc breaking into a few fine wisps, lined firm only at its sides, its bare bottom cited and feathered", () => {
+  const h = headFur(SOFT_CHIN);
+  assert.equal(h.chin, undefined, "no one line along the chin");
+  assert.equal(h.tufts.chin.length, 3, "a wisp each");
+  const [left, right] = h.chins;
+  assert.equal(h.chins.length, 2, "its two firm sides");
+  assert.deepEqual([left!.ends, right!.ends], [["join", "free"], ["free", "join"]], "each side joins the jaw's line and ends free in the chin's fur");
+  assert.deepEqual(h.spans().slice(-2), h.chins);
+  // The bottom between the firm sides is unlined, and the first side cites its length along the outline as drawn, its
+  // wisps and all: longer than the arc's own (the chin's 100° of a 40 pt ring less 14 pt a side).
+  const bare = arc(spanPoints(h.head, fracAt(h.head, left!.to as P), fracAt(h.head, right!.from as P))).at(-1)!;
+  assert.ok(bare > (100 * Math.PI * 40) / 180 - 28, `the bottom is ${bare.toFixed(2)} pt along the outline`);
+  assert.equal(left!.cites, 261);
+  assert.ok(Math.abs(left!.bare![1] - (bare + 0.5)) < 0.6 && left!.bare![0] === 0, `the bottom cites ${left!.bare} pt, not [0, ${(bare + 0.5).toFixed(2)}]`);
+  // Each wisp hangs past the arc where it is typed, by about its length.
+  for (const w of SOFT_CHIN.chin!.soft!.wisps) {
+    const out = Math.max(...sample(h.head.segs, 96).filter((p) => v.len(v.sub(p, w.at)) < w.width).map((p) => v.len(v.sub(p, [0, -100])) - 40));
+    assert.ok(out > 0.6 * w.len && out < 1.3 * w.len, `the wisp at (${w.at.map((n) => n.toFixed(1))}) hangs ${out.toFixed(2)} pt, typed ${w.len}`);
+  }
+  assert.match(h.fringe(C.fur, [-60, -160, 120, 120]).body, /<path d="M.*filter="url\(#/, "the bare bottom is feathered");
+  // A chin lined all along is as before: its one line, and no fringe.
+  const lined = headFur(HEAD);
+  assert.deepEqual(lined.chins, [lined.chin]);
+  assert.deepEqual(lined.fringe(C.fur, [-60, -160, 120, 120]), { defs: "", body: "" });
+});
+
+test("a soft chin's wisps are never an even row: 2 to 4 of them, each its own size and spacing, fine and leaning out along the flow", () => {
+  const soft = SOFT_CHIN.chin!.soft!;
+  const withWisps = (wisps: typeof soft.wisps, extra = {}) => headFur({ ...SOFT_CHIN, chin: { ...SOFT_CHIN.chin!, soft: { ...soft, wisps, ...extra } } });
+  // An even row: the same wisp at even steps.
+  assert.throws(() => withWisps([75, 90, 105].map((deg, i) => ({ at: on(deg), len: 1.5, width: 2.4, lean: i === 0 ? -0.4 : 0.4 }))), /differ by 0%, under 25%: a row.*evenly spaced/);
+  assert.throws(() => withWisps([66, 72, 80, 97, 104].map((deg, i) => ({ at: on(deg), len: [1, 1.8, 1.2, 2.2, 1.4][i]!, width: [1.7, 3, 2, 3.8, 2.2][i]!, lean: deg < 90 ? -0.4 : 0.4 }))), /5 wisps, not 2 to 4/);
+  assert.throws(() => withWisps([{ ...soft.wisps[0]!, lean: 0.4 }, ...soft.wisps.slice(1)]), /wisp 0 leans toward the chin's middle/);
+  assert.throws(() => withWisps([{ ...soft.wisps[0]!, len: 3.4, width: 5 }, ...soft.wisps.slice(1)]), /wisp 0 hangs 3\.4 pt, not 0\.9 to 2\.8; wisp 0 is 5 pt wide, not 1\.6 to 4\.5/);
+  assert.throws(() => withWisps(soft.wisps, { flow: [-1, 0] }), /wisp 0 leans against the fur's flow/);
+  assert.throws(() => headFur({ ...SOFT_CHIN, chin: { ...SOFT_CHIN.chin!, scallops: HEAD.chin!.scallops } }), /a soft chin has wisps, not scallops/);
+});
+
+/** A piece rendered alone on transparent at `zoom` px/pt, and how much darker than the fur it is at a model point (L*). */
+function darknessOf(p: Piece, zoom: number): (at: P) => number {
+  const [x, y, w, h] = p.box;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="${x} ${y} ${w} ${h}">${p.svg}</svg>`;
+  const png = PNG.sync.read(new Resvg(svg, { fitTo: { mode: "zoom", value: zoom }, background: "rgba(0,0,0,0)" }).render().asPng());
+  const fur = lightness(C.fur);
+  return ([px, py]) => {
+    const i = Math.floor((px - x) * zoom), j = Math.floor((py - y) * zoom), k = (j * png.width + i) * 4;
+    const hex = "#" + [0, 1, 2].map((c) => png.data[k + c]!.toString(16).padStart(2, "0")).join("");
+    return fur - lightness(hex);
+  };
+}
+
+/** Four small locks along a crown, back to front: a broad one on the left, a small flick, one on the right and the tall middle one in front. */
+function lock(c: P, r: [number, number], line: [number, number], into?: P[]): Curl {
+  const at = (deg: number): P => [c[0] + r[0] * Math.cos((deg * Math.PI) / 180), c[1] + r[1] * Math.sin((deg * Math.PI) / 180)];
+  return { nodes: Array.from({ length: 10 }, (_, k): Node => at(36 * k)), line: { from: at(line[0]), to: at(line[1]), taper: [0.6, 3] }, ...(into ? { into: [into] } : {}) };
+}
+const LOCKS: Curl[] = [
+  lock([-22, -151], [8, 5], [185, 335], [[-29.9, -151.4], [-26.6, -150.2], [-23, -149.6]]),
+  lock([-13.5, -152], [3.2, 3.4], [200, 330], [[-16.6, -152.6], [-15.4, -151.2], [-14.2, -150.4]]),
+  lock([12, -152], [9, 5.6], [195, 345]),
+  lock([-3, -155], [8, 8.6], [190, 350], [[-10.9, -156.4], [-9.8, -154.4], [-8.4, -152.8]]),
+];
+const TUFT_PAINT = { fill: C.fur };
+
+test("a crisp topknot is 4 or 5 small locks in a crisp thin line, each lock's base tucked into a short soft stroke, never a dark sliver", () => {
+  assert.throws(() => topknot(LOCKS.slice(0, 3), TUFT_PAINT, { crisp: true }), /a crisp topknot is 4 or 5 small locks, not 3/);
+  const today = topknot(LOCKS, TUFT_PAINT), crisp = topknot(LOCKS, TUFT_PAINT, { crisp: true });
+  // The line's own soft edge (σ 0.3) is gone: the silhouette's side of each lock is its clip's own edge.
+  assert.match(today.svg, /stdDeviation="0\.3"/);
+  assert.doesNotMatch(crisp.svg, /stdDeviation="0\.3"/);
+  for (const l of crisp.meta.lines.filter((l) => l.kind === "outer") as LitLine[]) {
+    assert.ok(l.span.taper.every((t) => t <= FREE_TAPER + 1e-9), `a lock's line tapers over ${l.span.taper} pt, more than a free end's ${FREE_TAPER}`);
+    assert.ok(l.drawn[1] <= 1.4, `a lock's line is ${l.drawn[1]} pt at its widest: thin, at the band's light end`);
+  }
+  // Each tuck: in the notch strokes' light tone, at the V full and round, thinning out toward its inner end, nothing
+  // past the V outside the lock.
+  assert.match(crisp.svg, new RegExp(`fill="${LINES.cream[1]}" opacity="${CRISP.tuck.opacity}" filter=`));
+  const alpha = alphaOf(crisp, 16), dark = darknessOf(crisp, 16);
+  const [v0, v1, v2] = LOCKS[0]!.into![0]!;
+  const into = v.norm(v.sub(v1!, v0!)), near = v.add(v0!, v.mul(into, 0.7));
+  assert.ok(dark(near) > 8, `the tuck at the V is ${dark(near).toFixed(1)} L* darker than the fur`);
+  assert.ok(dark(v2!) < 0.5 * dark(near), `the tuck thins out toward its inner end: ${dark(v2!).toFixed(1)} L* there`);
+  assert.ok(lightness(LINES.cream[1]!) > lightness(LINES.cream[3]!), "its tone the ladder's light end");
+  assert.ok(alpha(v.sub(v0!, v.mul(into, 0.8))) < 0.1, `past the V outside the lock: alpha ${alpha(v.sub(v0!, v.mul(into, 0.8))).toFixed(2)}`);
+});
+
+test("a toe line along the paw's dome is the ball's meridian through its foot, round at both ends, never a straight pointed tick", () => {
+  const dome: Dome = { centre: [0, -5], size: [9, 6] };
+  const m = meridian(dome, [-5, -1.2], -8);
+  assert.ok(v.len(v.sub(m.pts[0]!, [-5, -1.2])) < 1e-9);
+  assert.ok(Math.abs(m.pts.at(-1)![1] + 8) < 1e-9);
+  // From below the ball's widest it bows out round it and comes back in over its top: the turnaround's "(".
+  assert.ok(Math.min(...m.pts.map((p) => p[0])) < -5.3 && m.pts.at(-1)![0] > Math.min(...m.pts.map((p) => p[0])));
+  assert.ok(m.bow > 0.04, `it bows ${m.bow.toFixed(3)} of its length`);
+  const t = toes({ lines: [[[-5, -1.2], [-5.5, -8]], [[5, -1.2], [5.5, -8]]], fade: [-1.2, -8], soft: true, width: 0.9, dome });
+  assert.deepEqual(t.inner, [], "drawn as paint under the shade");
+  const caps = [...t.under!.matchAll(/a([0-9.]+) \1 0 1 0/g)].map((c) => Number(c[1]));
+  assert.deepEqual(caps, [0.9 * DOME_TOES.foot / 2, 0.9 * DOME_TOES.foot / 2, 0.9 * DOME_TOES.top / 2, 0.9 * DOME_TOES.top / 2, 0.9 * DOME_TOES.foot / 2, 0.9 * DOME_TOES.foot / 2, 0.9 * DOME_TOES.top / 2, 0.9 * DOME_TOES.top / 2].map((r) => +r.toFixed(3)),
+    "each line round at its foot and at its top, never a point");
+  assert.match(t.under!, new RegExp(`stdDeviation="${DOME_TOES.blur}"`), "soft");
+  assert.throws(() => toes({ lines: [[[-1, -1.2], [-1, -8]], [[5, -1.2], [5.5, -8]]], fade: [-1.2, -8], dome }), /lies 0\.1\d of its paw's half-width off the ball's middle, under 0\.25: it would run straight up the middle/);
+  assert.throws(() => toes({ lines: [[[-5, -1.2], [-5, -12]], [[5, -1.2], [5.5, -8]]], fade: [-1.2, -8], dome }), /a toe line at y -12 lies off its paw's ball/);
+  assert.throws(() => toes({ lines: [[[-5, -1.2], [-5, -8]], [[5, -1.2], [5.5, -8]]], fade: [-1.2, -8], width: 1.2, dome }), /a toe line is 1\.2 pt, not an inner line's 0\.6 to 0\.9/);
+  // Without a dome, the toe lines as before.
+  assert.deepEqual(toes({ lines: [[[-5, -1.2], [-5.5, -8]], [[5, -1.2], [5.5, -8]]], fade: [-1.2, -8], soft: true }).inner!.length, 2);
+});
+
+test("the fur kit's second round's entries stand, and a soft chin's bare bottom cites one of them", () => {
+  const d = decisionsOf(readFileSync(new URL("../DECISIONS.md", import.meta.url), "utf8"));
+  for (let n = 260; n <= 266; n++) assert.ok(d.entries.includes(n) && !d.replaced[n], `${n} is a current entry`);
+  assert.ok(headFur(SOFT_CHIN).chins.every((c) => c.cites === undefined || (d.entries.includes(c.cites) && !d.replaced[c.cites])));
 });
