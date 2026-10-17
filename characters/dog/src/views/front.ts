@@ -449,6 +449,8 @@ const patches = {
     [35, -118.8], [33.2, -116.6], [31, -119], [28.6, -120.8], [24.4, -121.7], [20, -120.9], [16.8, -118.8], [14.2, -115.4], [12.6, -110.4], [12.2, -105.2], [15.6, -98.4],
     [28, -95.2], [34.4, -95.6], [39.6, -95]]),
 };
+/** The patches' soft edge (σ, pt), the hood's top the crop's soft arc (its L* 95 to 82 over about 2 pt). */
+const PATCH_SOFT = 0.7;
 // The saddle's two halves where they show from the front, as the sheet paints them. The right half runs down the
 // shoulder from under the collar's end as a narrow strip of tan along the line, and opens into a round soft patch
 // over the outer thigh, out to the front leg's line (x -34.6 at y -30, the sheet's tan reaches x -34 there) and down
@@ -785,7 +787,7 @@ export function front(): Drawn[] {
   for (const side of ["L", "R"] as const) {
     // One even pale tan from the eye to the ear's root, as the front crop paints it (L* 80 to 81 by the eye and by the
     // ear alike).
-    add(`head.patch.${side}`, marking(`head.patch.${side}`, { shape: head, paint: headPaint }, patches[side], { fill: C.patch, blur: 0.7, clip: false }));
+    add(`head.patch.${side}`, marking(`head.patch.${side}`, { shape: head, paint: headPaint }, patches[side], { fill: C.patch, blur: PATCH_SOFT, clip: false }));
   }
   add("blush.L", blush(1));
   add("blush.R", blush(-1));
@@ -1011,14 +1013,25 @@ const perkD = (side: "L" | "R", d: string) => rollD(side === "R" ? d : mirrorD(d
  * and bows in a little before the cheek, so the head stays round under a raised ear rather than walled (DECISIONS 147).
  */
 const temples = {
-  R: smooth([[-38, -140], [-44.6, -137.8], [-46.6, -134], [-46, -128.4], [-45.5, -122.6], [-45.6, -116.6], [-46, -111.6], [-44.2, -108.4], [-40, -107.6], [-31, -122], [-29.6, -136.4]]),
-  L: smooth([[28, -141.6], [36, -143], [40.6, -141.6], [43, -138.6], [42.9, -133], [42.5, -126.4], [42.4, -120], [43, -115], [44, -110.6], [38, -109], [29, -122], [26, -134]]),
+  R: smooth([[-38, -140], [-44.2, -137.6], [-46.6, -134], [-46, -128.4], [-45.5, -122.6], [-45.6, -116.6], [-46.2, -112.4], [-45.6, -108.6], [-43.2, -105.8], [-38, -106.8],
+    [-31, -122], [-29.6, -136.4]]),
+  L: smooth([[28, -141.6], [35.8, -142.8], [40.4, -141.2], [42.8, -137.8], [42.9, -133], [42.5, -126.4], [42.4, -120], [43, -115], [43.7, -112], [43.3, -108.4], [41.2, -105.6],
+    [36, -106.6], [29, -122], [26, -134]]),
 };
 /**
- * Each temple's lined edge: from the overhang's tip, where the crown's line ends, down to where the face's side takes
- * over; on the cream to where the hood's band reaches the edge, then on its tan.
+ * Each temple's line (DECISIONS 222), one span down its outer edge by the fur pass's recipes (DECISIONS 210): from where
+ * the crown's line ends on the head (its join onto the resting ear's line, headFur's crossing, which a raised ear leaves
+ * where it was), joined to it at full width, down to where the edge goes under the head's side, past the raised cheek
+ * line's free end (`raised`), so the cheek's line takes over at full width with no thin stretch between them; on the
+ * cream to where the hood's band reaches the edge, then on its tan, as deep there as the face's side at rest (0.6).
+ * Before, two spans tapered over 2.5 and 6 pt, so the head's side faded where the line handed over (L* 66 at y -115
+ * with the ear raised, 47 at rest).
  */
-const templeEdge = { R: [[-46.4, -134.6], [-46, -127], [-45.8, -114]] as [P, P, P], L: [[42, -140.4], [42.6, -127.6], [43.4, -113.6]] as [P, P, P] };
+const TEMPLE_LINE = { R: { foot: [-45.9, -110.6] as P, tan: -129 }, L: { foot: [43.5, -110.2] as P, tan: -129 } };
+function templeSpans(side: "L" | "R"): LitSpan[] {
+  const join = (side === "R" ? HEAD.fur.crown[0]!.to : HEAD.fur.crown[1]!.from) as P, { foot, tan } = TEMPLE_LINE[side];
+  return [{ from: join, to: foot, ends: ["join", "under"], on: (p: P) => (p[1] < tan ? "cream" : "tan"), under: (p: P) => (p[1] < tan ? 0 : 0.6) }];
+}
 
 /**
  * The temple a raised ear uncovers, its edge lined where the head's side now runs (the perked and the lifted ear's): a
@@ -1030,15 +1043,14 @@ const templeEdge = { R: [[-46.4, -134.6], [-46, -127], [-45.8, -114]] as [P, P, 
  */
 function templePiece(side: "L" | "R"): Piece {
   const g = uid("blur");
-  const [top, turn, foot] = templeEdge[side];
-  const band = `<defs>${blur(g, pad(bbox4(temples[side]), 3), 0.55)}</defs><path d="${pathD(patches[side].segs)}" fill="${C.patch}" filter="url(#${g})"/>`;
-  return litPart(`temple.${side}`, temples[side], {
+  // The hood's band as the head paints it (head.patch, the same shape and softness), so the swap never changes it.
+  const band = `<defs>${blur(g, pad(bbox4(temples[side]), 3), PATCH_SOFT)}</defs><path d="${pathD(patches[side].segs)}" fill="${C.patch}" filter="url(#${g})"/>`;
+  return lineGate(litPart(`temple.${side}`, temples[side], {
     fill: C.fur,
     under: band,
     // The head's own shade, from the same outline and light, so it runs on across the notch's edges with no seam.
     shade: headPaint.shade,
-    // Both temples' paths run down their outer edges; the two spans overlap where the tan takes over, so the line runs on.
-  }, [{ from: top, to: turn, taper: [1.6, 2.5] }, { from: v.add(turn, [0, -2]), to: foot, on: "tan", taper: [2.5, 6] }]);
+  }, templeSpans(side)));
 }
 /** A shape's bounds as a box. */
 const bbox4 = (shape: Shape): Box => {
