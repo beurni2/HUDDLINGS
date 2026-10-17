@@ -626,11 +626,13 @@ export function back(): Drawn[] {
     shade: { multiply: C.furShadeBy, rim: { inset: 3, toLight: 4.5 }, group: headGroup, shapes: ["M-16 -152.6 C-10 -155.4 -2 -155 2.4 -153.2 C6 -155.6 14 -155.6 20 -153 L20 -150 L-16 -150Z"],
       keep: ["M-40 -168 L40 -168 L40 -157.4 L-40 -157.4Z"], blur: 1.2 },
     highlight: { d: `${pathD(ellipse([-8.6, -160.6], 4.6, 2.2, -10))} ${pathD(ellipse([11.4, -159.8], 4.6, 2, 6))}`, colour: C.light, opacity: 0.45, blur: 1.6 },
-    // The lobes' lines curl in at their feet and into the notch between them, as the sheet draws them.
+    // The lobes' lines curl in at their feet and into the notch between them, as the sheet draws them: at each foot the
+    // curl runs on in under the lobe, 4 to 5 pt, to x -11 at y -154.3 and 18.6 at -155 (the sheet's L* 67 and 73 there,
+    // its right curl at -154.4, 0.6 pt below the lobe's base, which clips ours).
     inner: [
-      { pts: [[-16.2, -156.4], [-14.6, -155.2], [-12.6, -154.8]], width: 0.85, colour: C.softLine },
+      { pts: [[-16.2, -156.4], [-14.4, -155], [-12.2, -154.3], [-10.8, -154.2]], width: 0.85, colour: C.softLine },
       { pts: [[1.6, -157.2], [2.4, -155.2], [1.8, -153.4]], width: 0.8, colour: C.softLine, opacity: 0.9 },
-      { pts: [[23.2, -156.4], [21.8, -155.3], [19.4, -155]], width: 0.85, colour: C.softLine },
+      { pts: [[23.4, -156.3], [22, -155.6], [20.2, -155.4], [18.6, -155]], width: 0.85, colour: C.softLine },
     ],
     feather: { from: [0, -150.8], to: [0, -154.6] },
     // One line round both lobes and into the notch between them, from where the left lobe meets the crown's line to
