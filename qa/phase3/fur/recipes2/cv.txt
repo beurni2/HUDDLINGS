@@ -1,0 +1,62 @@
+== front
+  legs  sheet cv 0.375 to 0.581
+    body.back|front.L        cv 0.121 -> 0.132   (check's floor 0.135)   width 1.316 -> 1.469 pt
+    body.back|front.R        cv 0.243 -> 0.22   (check's floor 0.135)   width 1.134 -> 1.295 pt
+    body.back|hind.L         cv 0.053 -> 0.088   (check's floor 0.135)   width 1.243 -> 1.33 pt
+    body.back|hind.R         cv 0.22 -> 0.204   (check's floor 0.135)   width 0.958 -> 0.992 pt
+    body.front|front.L       cv 0.098 -> 0.103   (check's floor 0.135)   width 1.139 -> 1.137 pt
+    body.front|front.R       cv 0.089 -> 0.144   (check's floor 0.135)   width 1.183 -> 1.119 pt
+    front.R|hind.R           cv 0.123 -> None   (check's floor 0.135)   width 1.29 -> 1.525 pt
+  back  sheet cv 0.27 to 0.302
+    body.back|body.front     cv 0.372 -> 0.325   (check's floor 0.135)   width 1.561 -> 1.635 pt
+    body.back|outside        cv 0.171 -> 0.173   (check's floor 0.135)   width 1.264 -> 1.33 pt
+  soles sheet cv 0.168 to 0.213
+    front.L|ground           cv 0.127 -> 0.085   (check's floor 0.084)   width 1.225 -> 1.313 pt   sole middle 1.458 -> 1.386
+    front.R|ground           cv 0.1 -> 0.119   (check's floor 0.084)   width 1.303 -> 1.284 pt   sole middle 1.31 -> 1.409
+    hind.L|ground            cv 0.074 -> 0.117   (check's floor 0.084)   width 1.441 -> 1.307 pt   sole middle 1.523 -> 1.428
+    hind.R|ground            cv 0.128 -> 0.126   (check's floor 0.084)   width 1.297 -> 1.321 pt   sole middle 1.307 -> 1.407
+  tail  sheet cv 0.313 to 0.313
+== threeQuarter.L
+  legs  sheet cv 0.375 to 0.581
+    body.back|front.L        cv 0.14 -> 0.188   (check's floor 0.135)   width 1.403 -> 1.39 pt
+    body.back|hind.L         cv 0.133 -> 0.147   (check's floor 0.135)   width 1.218 -> 1.274 pt
+    body.front|front.R       cv 0.139 -> 0.146   (check's floor 0.135)   width 1.178 -> 1.335 pt
+    front.L|front.R          cv 0.05 -> 0.085   (check's floor 0.135)   width 1.337 -> 1.293 pt
+    front.R|outside          cv 0.045 -> 0.068   (check's floor 0.135)   width 1.241 -> 1.29 pt
+  back  sheet cv 0.27 to 0.302
+    body.back|outside        cv 0.083 -> 0.087   (check's floor 0.135)   width 1.184 -> 1.276 pt
+    body.front|outside       cv 0.051 -> 0.117   (check's floor 0.135)   width 1.259 -> 1.35 pt
+  soles sheet cv 0.168 to 0.213
+    body.back|ground         cv 0.087 -> 0.099   (check's floor 0.084)   width 1.317 -> 1.32 pt   sole middle 1.353 -> 1.381
+    front.L|ground           cv 0.073 -> 0.118   (check's floor 0.084)   width 1.28 -> 1.279 pt   sole middle 1.345 -> 1.326
+    front.R|ground           cv 0.098 -> 0.141   (check's floor 0.084)   width 1.295 -> 1.325 pt   sole middle 1.476 -> 1.369
+    hind.L|ground            cv 0.104 -> 0.157   (check's floor 0.084)   width 1.44 -> 1.302 pt   sole middle 1.576 -> 1.343
+  tail  sheet cv 0.313 to 0.313
+    body.back|tail           cv 0.056 -> 0.105   (check's floor 0.157)   width 1.396 -> 1.392 pt
+    tail|ground              cv 0.072 -> 0.076   (check's floor 0.084)   width 1.394 -> 1.604 pt   sole middle 1.478 -> 1.635
+    tail|outside             cv 0.063 -> 0.11   (check's floor 0.157)   width 1.281 -> 1.377 pt
+== side.L
+  legs  sheet cv 0.375 to 0.581
+    front.L|front.R          cv 0.103 -> 0.119   (check's floor 0.135)   width 1.348 -> 1.258 pt
+    front.R|outside          cv 0.033 -> 0.071   (check's floor 0.135)   width 1.34 -> 1.294 pt
+  back  sheet cv 0.27 to 0.302
+    body.back|body.front     cv 0.228 -> 0.229   (check's floor 0.135)   width 0.83 -> 0.857 pt
+    body.back|outside        cv 0.054 -> 0.074   (check's floor 0.135)   width 1.168 -> 1.254 pt
+  soles sheet cv 0.168 to 0.213
+    body.back|ground         cv 0.092 -> 0.079   (check's floor 0.084)   width 1.341 -> 1.318 pt   sole middle 1.429 -> 1.326
+    front.L|ground           cv 0.067 -> 0.068   (check's floor 0.084)   width 1.344 -> 1.35 pt   sole middle 1.361 -> 1.413
+    front.R|ground           cv 0.118 -> 0.173   (check's floor 0.084)   width 1.288 -> 1.369 pt   sole middle 1.32 -> 1.508
+    hind.L|ground            cv 0.109 -> 0.12   (check's floor 0.084)   width 1.456 -> 1.344 pt   sole middle 1.546 -> 1.357
+  tail  sheet cv 0.313 to 0.313
+    body.back|tail           cv 0.098 -> 0.081   (check's floor 0.157)   width 1.371 -> 1.426 pt
+    tail|ground              cv 0.049 -> 0.108   (check's floor 0.084)   width 1.362 -> 1.403 pt   sole middle 1.417 -> 1.466
+    tail|outside             cv 0.071 -> 0.121   (check's floor 0.157)   width 1.274 -> 1.407 pt
+== back
+  legs  sheet cv 0.375 to 0.581
+  back  sheet cv 0.27 to 0.302
+    body.back|outside        cv 0.116 -> 0.124   (check's floor 0.135)   width 1.3 -> 1.347 pt
+  soles sheet cv 0.168 to 0.213
+    body.back|ground         cv 0.069 -> 0.077   (check's floor 0.084)   width 1.362 -> 1.393 pt   sole middle 1.481 -> 1.412
+  tail  sheet cv 0.313 to 0.313
+    body.back|tail           cv 0.234 -> 0.216   (check's floor 0.157)   width 1.258 -> 1.375 pt
+    tail|ground              cv 0.097 -> 0.078   (check's floor 0.084)   width 1.378 -> 1.411 pt   sole middle 1.393 -> 1.423
