@@ -1,14 +1,16 @@
 # The side view's fur and joins
 
-- `joins.png` (side.L) and `joins.R.png` (side.R): one row per join the audit names in profile (side #1 to #19),
-  then the fur kit's second round's rows ("round 2: ..."), the crop, 8912ced (that round's base) and this branch
-  side by side at 3.4 to 10 px per pt, then the whole dog at phone size.
-- `joins.ts`: draws them (`node qa/phase3/fur/side/joins.ts [side.L|side.R] [--only <words>] [--out <folder>]`).
+- `joins.png` (side.L) and `joins.R.png` (side.R): one row per join the fur kit's third round's blocking items and
+  minors name in profile, the crop, 46011a2 (that round's base, the side drawn as 8a410a7 draws it) and this branch
+  side by side at 4 to 9 px per pt, then the head and the whole dog at phone size (3 px per pt); with `--audit`, also
+  the audit's rows these do not cover (side #1 to #5, #7, #10, #11, #14 to #16, #19). The second round's sheets, with
+  its own rows, are as committed at 46011a2 (DECISIONS 276 to 279).
+- `joins.ts`: draws them (`node qa/phase3/fur/side/joins.ts [side.L|side.R] [--only <words>] [--audit] [--out <folder>]`).
 - `gate.ts`: the line gate on both facings with every face state, counting every line and counting only what shows
   (264; `--all` holds every drawing, gated or not).
 - The sheet match and the line check: `qa/phase3/side.L/`, `qa/phase3/side.R/` (`phone.png` the dog at phone size);
   the face states and the turned ears: `qa/phase3/faces/turned/side.L.png`, `side.R.png`. DECISIONS 235 to 241 and,
-  for the kit's second round, 276 to 279.
+  for the kit's second round, 276 to 279, for its third, 298 to 301.
 
 ## The look rounds, and the three weakest joins each named
 
@@ -60,3 +62,26 @@ problems), the joins zoomed beside the crop and the dog at phone size; DECISIONS
     tops); the near leg at the band's whole. Weakest, left: the plume's line darker than the crop's (the cream
     ladder's lightest is L* 66, the crop's plume line 72 to 85); the topknot's locks domed, with dark ticks where
     they meet, where the crop's hook open; the toe lines long and nearly straight where the crop's are short soft arcs.
+
+## The fur kit's third round (against 46011a2), its look rounds and the three weakest joins each named
+
+Each round: `look.ts dog side.L side.R` (the sheet match green in both, the line check read, advisory), `gate.ts` (0
+problems), `facing.test.ts`, the joins zoomed beside the crop and the dog at phone size; DECISIONS 298 to 301 hold the
+numbers.
+
+0. The base (46011a2) beside the crop: the topline and the rump one even line; the plume's line L* 66 all round with
+   dark tucks (L* 62) and a rim of shade beside it; the jaw behind the chin a straight cream cut on the blue; the
+   topknot's flick and back lock 0.7 and 1.4 pt high, dark slivers where the locks meet; the far paw's claw and spike.
+1. Every span's life; the back, the plume and the chin typed from the crop; the tucks hooks off the locks' lines; the
+   chin's flicks, its warm band and crease; the topknot retyped with its hooks; the far paw on a ball; the toe lines
+   short arcs. Weakest: side.R's typed back as side.L's (its edges facing left not lighter, the facing test failing);
+   the plume's rim still a second line beside the light one; the near leg's front in the lit steps (L* 73 against the
+   crop's 53).
+2. `faced()` for side.R's typed swells; the plume's rim kept off over the plume; the lit steps sampled by the facing
+   test; the far leg typed dark (the plain mirror's control failed; taken out). Weakest: the near leg's front still
+   light; the back lock's lint corner (2.8 pt); the chin's bare jaw and the flicks' cites short of the gate's measure.
+3. The near leg's floor and swell; the back lock smoothed; the chin's cites at the gate's measure (46.5 and 14.5 pt);
+   the rump lightened to the crop's (L* 49 and 46 against 53 and 54); the back of the head washed under the turned
+   ears. Weakest, left: the topknot's inside lighter than the crop's (recall 0.692, gap 3.11 pt) with the lit steps
+   showing as paler bands along its lines at 7 px per pt; the far leg's front lighter than the crop's (L* about 72
+   against 57 to 60); the turned ears' sliver, peach now but still lighter than the ear at 9 px per pt.

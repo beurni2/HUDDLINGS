@@ -1,15 +1,15 @@
-// The side view's joins (the fur pass's side lane, DECISIONS 235 to 241, and its second round, 276 to 279): one row per
-// join the audit names and per join this round's reviewers named, each the sheet's crop, the drawing at this round's
-// base (8912ced, the "before") and the drawing now, side by side at one zoom, labelled; and the whole dog at phone size.
-// For side.R the crop is the side crop mirrored (DECISIONS 2). The base's drawing is its own source at 8912ced (the view,
-// its facing and its tag recipe, the lane's files), read from git into a scratch folder, so "before" is always the base
-// whatever this branch changes; the shared recipes it imports draw as they did there unless a view opts in (DECISIONS
-// 210 to 219, 260 to 266).
+// The side view's joins (the fur pass's side lane, DECISIONS 235 to 241, its second round, 276 to 279, and its third,
+// 298 to 301): one row per join this round's blocking items and minors name (and, with --audit, per join the audit
+// named), each the sheet's crop, the drawing at this round's base (46011a2, the "before") and the drawing now, side by
+// side at one zoom, labelled; then the head and the whole dog at phone size. For side.R the crop is the side crop
+// mirrored (DECISIONS 2). The base's drawing is drawn from the base's own source tree (characters/ and the runtime's
+// sources at 46011a2, read from git into a scratch folder, removed after), so "before" is the base as it was drawn
+// there, whatever this branch or its shared recipes change.
 //
-// node qa/phase3/fur/side/joins.ts [side.L|side.R ...] [--only <word>,...] [--out <folder>]
+// node qa/phase3/fur/side/joins.ts [side.L|side.R ...] [--only <word>,...] [--audit] [--out <folder>]
 //   (writes joins.png and joins.R.png here, or into --out; --only keeps the rows whose label holds one of the words)
 import { execFileSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -21,28 +21,20 @@ import { rest, type Drawn, type Image } from "../recipes/render.ts";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = resolve(here, "../../../..");
-const BASE = "8912ced";
-/** The lane's own files the base's drawing is read from at the base; every other import is the branch's own file. */
-const OWN = ["characters/dog/src/views/side.ts", "characters/dog/src/views/facing.ts", "characters/dog/src/parts/tag.ts"];
+const BASE = "46011a2";
+/** What the base's drawing is drawn from: the dog's source, its model and decisions, the drawing kit and the runtime's sources. */
+const TREE = ["characters/dog/src", "characters/dog/model.json", "characters/dog/DECISIONS.md", "characters/draw", "characters/build", "runtime-web/src"];
 /** The composites' scale, px/pt: every row is drawn down from it. */
 const SCALE = 8;
 
-/** The base's side view: the lane's files at the base in a scratch tree, their other relative imports pointed at the branch's files. */
-async function baseSide(): Promise<(f: "L" | "R") => Drawn[]> {
+/** The base's side view, drawn from the base's own source tree in a scratch folder (removed once it is drawn). */
+function baseSide(): { side: Promise<(f: "L" | "R") => Drawn[]>; done: () => void } {
   const root = mkdtempSync(join(tmpdir(), "side-joins-"));
-  for (const file of OWN) {
-    const src = execFileSync("git", ["show", `${BASE}:${file}`], { cwd: repo, encoding: "utf8" });
-    const out = join(root, file);
-    mkdirSync(dirname(out), { recursive: true });
-    const fixed = src.replace(/from "(\.\.?\/[^"]+)"/g, (m, spec: string) => {
-      const target = resolve(dirname(join(repo, file)), spec);
-      const rel = target.startsWith(repo) ? target.slice(repo.length + 1) : "";
-      return OWN.includes(rel) ? m : `from "${pathToFileURL(target).href}"`;
-    });
-    writeFileSync(out, fixed);
-  }
-  const m = (await import(pathToFileURL(join(root, OWN[0]!)).href)) as { side: (f: "L" | "R") => Drawn[] };
-  return m.side;
+  const tar = execFileSync("git", ["archive", BASE, ...TREE], { cwd: repo, maxBuffer: 1 << 28 });
+  execFileSync("tar", ["-x", "-C", root], { input: tar });
+  symlinkSync(join(repo, "node_modules"), join(root, "node_modules"));
+  const side = import(pathToFileURL(join(root, "characters/dog/src/views/side.ts")).href).then((m: { side: (f: "L" | "R") => Drawn[] }) => m.side);
+  return { side, done: () => rmSync(root, { recursive: true, force: true }) };
 }
 
 /** A region of the dog, in model points: [x, y, width, height] (in side.L's frame; mirrored for side.R). */
@@ -53,29 +45,29 @@ interface Row {
   zoom: number;
 }
 
-/** The joins the audit names in profile (qa/phase3/audit/defects.json, side #1 to #19), each at about 3 to 4 times the crop's own scale. */
-const ROWS: Row[] = [
+/** The joins the audit names in profile (qa/phase3/audit/defects.json, side #1 to #19), each at about 3 to 4 times the crop's own scale (with --audit). */
+const AUDIT: Row[] = [
   { label: "crown: the forehead's locks and the topknot (#1, #8)", box: [-98, -168, 108, 34], zoom: 4 },
   { label: "the back of the head into the ear's top, the patch at the ear's root (#2, #3)", box: [-50, -160, 72, 46], zoom: 4 },
   { label: "the ear's outer edge and hem over the collar and the back (#4, #5)", box: [-42, -146, 68, 88], zoom: 3.4 },
-  { label: "chin over the collar, the jaw (#6)", box: [-100, -92, 62, 36], zoom: 5 },
   { label: "chest, the collar's front and the tag (#7)", box: [-80, -68, 34, 40], zoom: 5 },
   { label: "the front legs: the near leg's top, back and elbow, the far leg (#10, #11, #14)", box: [-80, -48, 56, 30], zoom: 5 },
-  { label: "the front paws (#9)", box: [-80, -24, 50, 26], zoom: 5 },
-  { label: "the hind paw, the heel crease and the haunch's underside (#11, #12, #13)", box: [-40, -40, 58, 42], zoom: 5 },
-  { label: "the back's topline, the saddle and the rump over the tail (#17, #18)", box: [-24, -68, 50, 66], zoom: 3.4 },
   { label: "the tail's plume and its tan root (#15, #16)", box: [6, -66, 46, 62], zoom: 3.6 },
   { label: "the ground shadow (#19)", box: [-104, -16, 156, 18], zoom: 2 },
-  // This round's reviewers' joins, closer (DECISIONS 276 to 279).
-  { label: "round 2: the tail's outline, thin, light and broken (#15)", box: [8, -66, 42, 60], zoom: 7 },
-  { label: "round 2: the rump's contact line over the tail (#17)", box: [6, -42, 20, 40], zoom: 8 },
-  { label: "round 2: the jaw over the collar, no row of teeth (#6)", box: [-74, -72, 42, 18], zoom: 9 },
-  { label: "round 2: the topknot, crisp, with its flicked lock", box: [-72, -168, 72, 24], zoom: 7 },
-  { label: "round 2: the near front paw's toe lines, no claws (#9)", box: [-68, -16, 32, 17], zoom: 10 },
-  { label: "round 2: the hind paw's toe lines and the thigh's thin line (#11, #13)", box: [-36, -36, 26, 36], zoom: 9 },
-  { label: "round 2: the outline's weight along the back, the haunch and the chest", box: [-66, -68, 90, 70], zoom: 4 },
+];
+/** This round's joins (DECISIONS 298 to 301): the five blocking items, then the minors, closer. */
+const ROWS: Row[] = [
+  { label: "1. the line's life: thin under the ear's hem, fuller down the rump and round the haunch", box: [-26, -70, 52, 72], zoom: 4 },
+  { label: "1. the rump over the tail, the haunch's underside and the tail-foot knot", box: [-2, -40, 26, 40], zoom: 7 },
+  { label: "2. the plume: its line and tucks as light as the crop's, no second line", box: [8, -66, 42, 60], zoom: 7 },
+  { label: "3. the chin over the collar: hair-fine flicks, the warm band, no cut", box: [-98, -84, 72, 28], zoom: 6 },
+  { label: "4. the topknot: flicked locks, continuous joins", box: [-72, -168, 72, 24], zoom: 7 },
+  { label: "5. the far paw: no claw", box: [-80, -24, 28, 24], zoom: 9 },
+  { label: "minor: the near and hind paws' toe lines", box: [-68, -16, 58, 16], zoom: 7 },
+  { label: "minor: the thigh's thin line", box: [-36, -36, 26, 36], zoom: 7 },
 ];
 const PHONE: Row = { label: "the whole dog at phone size (3 px/pt)", box: [-100, -170, 150, 176], zoom: 3 };
+const PHONE_HEAD: Row = { label: "the head and the chin at phone size (3 px/pt)", box: [-100, -170, 124, 116], zoom: 3 };
 
 const model = JSON.parse(readFileSync(join(repo, "characters/dog/model.json"), "utf8")) as {
   crops: Record<string, { crop: string; ptPerCropPx: number; anchorsCropPx: { ground: [number, number] } }>;
@@ -131,7 +123,7 @@ function sheet(view: string, before: Image, after: Image, out: string, rows: Row
   for (const row of rows) {
     const box: Box = view === "side.R" ? [-(row.box[0] + row.box[2]), row.box[1], row.box[2], row.box[3]] : row.box;
     const [bx, by, bw, bh] = box, w = Math.round(bw * row.zoom), h = Math.round(bh * row.zoom);
-    body += `<text x="${GAP}" y="${y + 15}" font-family="DejaVu Sans" font-size="14" fill="#3A2A20">${row.label}${row === PHONE ? "" : ` · ${row.zoom} px/pt`}</text>`;
+    body += `<text x="${GAP}" y="${y + 15}" font-family="DejaVu Sans" font-size="14" fill="#3A2A20">${row.label}${row === PHONE || row === PHONE_HEAD ? "" : ` · ${row.zoom} px/pt`}</text>`;
     y += LABEL;
     const s = sheetRegion(view, box);
     const px = (x: number) => Math.round((x - BOX.x) * SCALE), py = (v: number) => Math.round((v - BOX.y) * SCALE);
@@ -148,22 +140,27 @@ function sheet(view: string, before: Image, after: Image, out: string, rows: Row
   }
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${y}" viewBox="0 0 ${width} ${y}"><rect width="${width}" height="${y}" fill="#FFFFFF"/>` +
     `<text x="${GAP}" y="20" font-family="DejaVu Sans" font-size="16" font-weight="600" fill="#3A2A20">${view}: the fur pass's joins, the sheet | before (${BASE}) | now</text>` +
-    `<text x="${GAP}" y="38" font-family="DejaVu Sans" font-size="13" fill="#3A2A20">the audit's side defects #1 to #19 (qa/phase3/audit/defects.json); DECISIONS 235 to 241, 276 to 279</text>${body}</svg>`;
+    `<text x="${GAP}" y="38" font-family="DejaVu Sans" font-size="13" fill="#3A2A20">the fur pass's third round in profile (DECISIONS 298 to 301); with --audit, the audit's rows (235 to 241, 276 to 279)</text>${body}</svg>`;
   const png = PNG.sync.read(new Resvg(svg, { font: { loadSystemFonts: true, defaultFontFamily: "DejaVu Sans" } }).render().asPng());
   const rgb = new PNG({ width: png.width, height: png.height, colorType: 2 });
   png.data.copy(rgb.data);
   writeFileSync(out, PNG.sync.write(rgb, { colorType: 2 }));
 }
 
-const { values: opts, positionals } = parseArgs({ allowPositionals: true, options: { only: { type: "string" }, out: { type: "string" } } });
+const { values: opts, positionals } = parseArgs({ allowPositionals: true, options: { only: { type: "string" }, out: { type: "string" }, audit: { type: "boolean" } } });
 const views = positionals.length ? positionals : ["side.L", "side.R"];
 const words = opts.only?.split(",").filter(Boolean);
-const rows = [...ROWS, PHONE].filter((r) => !words || words.some((w) => r.label.includes(w)));
-const before = await baseSide();
-const { side } = (await import("../../../../characters/dog/src/views/side.ts")) as { side: (f: "L" | "R") => Drawn[] };
-for (const view of views) {
-  const f = view === "side.R" ? "R" : "L";
-  const out = join(opts.out ? resolve(opts.out) : here, view === "side.R" ? "joins.R.png" : "joins.png");
-  sheet(view, rest(view, before(f), SCALE), rest(view, side(f), SCALE), out, rows);
-  console.log(out);
+const rows = [...ROWS, ...(opts.audit ? AUDIT : []), PHONE_HEAD, PHONE].filter((r) => !words || words.some((w) => r.label.includes(w)));
+const base = baseSide();
+try {
+  const before = await base.side;
+  const { side } = (await import("../../../../characters/dog/src/views/side.ts")) as { side: (f: "L" | "R") => Drawn[] };
+  for (const view of views) {
+    const f = view === "side.R" ? "R" : "L";
+    const out = join(opts.out ? resolve(opts.out) : here, view === "side.R" ? "joins.R.png" : "joins.png");
+    sheet(view, rest(view, before(f), SCALE), rest(view, side(f), SCALE), out, rows);
+    console.log(out);
+  }
+} finally {
+  base.done();
 }
