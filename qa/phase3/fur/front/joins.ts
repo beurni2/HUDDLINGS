@@ -1,7 +1,7 @@
-// The front's joins sheet for the fur pass (docs/phase3-fur-plan.md, the front lane; DECISIONS 220 to 227, 267 to 271):
-// one row per join the audit names (qa/phase3/audit/defects.json, view "front"), each the sheet's crop | the base (8912ced,
-// before the fur kit's second round) | today's drawing, at one scale and 3 to 4 times the phone's 3 px/pt, labelled, a
-// row that names a box on master.hero.main showing the hero's crop of the same place first; and the face states drawn
+// The front's joins sheet for the fur pass (docs/phase3-fur-plan.md, the front lane; DECISIONS 220 to 227, 267 to 271,
+// 290 to 293): one row per join the audit names (qa/phase3/audit/defects.json, view "front"), each the sheet's crop | the
+// base (46011a2, the second round's merge, as it drew) | today's drawing, at one scale and 3 to 4 times the phone's 3
+// px/pt, labelled, a row that names a box on master.hero.main showing the hero's crop of the same place first; and the face states drawn
 // on the same parts (the raised ears and their temples, huffy's puffed head), before and after, each raised ear beside
 // its own panel (One ear perked levelled and scaled by its brows, DECISIONS 133; Lifted slightly by its record's scale
 // with its head's top on the model's, 146), the rest beside the turnaround crop. Each region is composited as the
@@ -12,7 +12,7 @@
 // The committed joins.png and states.png are its output reduced to 256 colours (PIL's median cut, no dither), 1 MB
 // and 0.5 MB instead of 3.4 and 1.3, so they open quickly on a phone.
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -25,7 +25,7 @@ import { composite } from "../../../../characters/draw/test/composite.ts";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = resolve(here, "../../../..");
-const BASE = "8912ced";
+const BASE = "46011a2";
 const { values: args } = parseArgs({ options: { out: { type: "string" }, only: { type: "string" } } });
 const out = resolve(args.out ?? here);
 
@@ -41,14 +41,18 @@ interface FrontModule {
 }
 type Box = [number, number, number, number];
 
-/** The front view as the base drew it: its source at fbbe6d3, its relative imports pointing at today's files (the recipes draw a view unchanged until it opts in, DECISIONS 210 to 219). */
+/**
+ * The front view as the base drew it: the base's own tree of the dog's source, its kit and its model (an archive of the
+ * base commit unpacked into a temporary folder, with this checkout's node_modules), so the before column is the base's
+ * drawing and not its front.ts on today's kit, which changes what a view draws though the view opts in to nothing (the
+ * third round's topknot hooks).
+ */
 async function baseFront(): Promise<FrontModule> {
-  const file = join(repo, "characters/dog/src/views/front.ts");
-  const src = execFileSync("git", ["show", `${BASE}:characters/dog/src/views/front.ts`], { cwd: repo, encoding: "utf8" })
-    .replace(/from "(\.\.?\/[^"]+)"/g, (_m, spec: string) => `from "${pathToFileURL(resolve(dirname(file), spec)).href}"`);
-  const path = join(mkdtempSync(join(tmpdir(), "front-base-")), "front.ts");
-  writeFileSync(path, src);
-  return (await import(pathToFileURL(path).href)) as FrontModule;
+  const dir = mkdtempSync(join(tmpdir(), "front-base-"));
+  const tar = execFileSync("git", ["archive", BASE, "characters/draw", "characters/dog/src", "characters/dog/model.json", "runtime-web/src", "package.json"], { cwd: repo, maxBuffer: 1 << 28 });
+  execFileSync("tar", ["-x", "-C", dir], { input: tar });
+  symlinkSync(join(repo, "node_modules"), join(dir, "node_modules"));
+  return (await import(pathToFileURL(join(dir, "characters/dog/src/views/front.ts")).href)) as FrontModule;
 }
 
 const rig = JSON.parse(readFileSync(join(repo, "characters/dog/src/rig.json"), "utf8")) as Rig;
@@ -62,6 +66,10 @@ function layersOf(drawn: Drawn[], states: Record<string, string>): { order: stri
   for (const d of drawn) if (!d.state && !pieces.has(d.part)) pieces.set(d.part, d.piece);
   // A part's rest drawing is its default state's where it has no plain one (the eyes' "open", the mouth's).
   for (const d of drawn) if (d.state && !pieces.has(d.part) && rig.parts.find((p) => p.name === d.part)?.regions["front"] === `${d.part}/front:${d.state}`) pieces.set(d.part, d.piece);
+  // The eyes and the mouth, which the rig gives no front region (the face library draws them), take the first state the
+  // view draws for them, its rest's (the eyes' and the mouth's "open", as the still draws them), so a region at phone
+  // size shows the face as the founder sees it.
+  for (const d of drawn) if (d.state && !pieces.has(d.part) && rig.parts.find((p) => p.name === d.part)?.regions["front"] === undefined) pieces.set(d.part, d.piece);
   for (const [part, state] of Object.entries(states)) {
     const s = drawn.find((d) => d.part === part && d.state === state);
     if (!s) throw new Error(`joins: no ${part}:${state} drawing`);
@@ -267,6 +275,7 @@ function write(title: string, rows: { row: Row; columns: Column[] }[], file: str
 
 /** Each join the audit names in front (defects.json #1 to #15), the dog's right side on the viewer's left. */
 const JOINS: Row[] = [
+  { label: "the whole dog at phone size (3 px/pt)", box: [-90, -172, 180, 176], zoom: 3 },
   { label: "#1, #4 the crown over the dog's right ear's root (zoom 10)", box: [-58, -152, 32, 26], zoom: 10 },
   { label: "#1, #4 the crown over the dog's left ear's root (zoom 10)", box: [24, -158, 30, 26], zoom: 10 },
   { label: "#4 the topknot, whole, beside the hero's (zoom 8)", box: [-34, -168, 60, 22], zoom: 8, hero: [100, 0, 140, 51.3] },
@@ -276,6 +285,7 @@ const JOINS: Row[] = [
   { label: "#6 the dog's left head patch: its hood, the cream strip and the root's tan (zoom 8)", box: [12, -144, 38, 36], zoom: 8 },
   { label: "#2 the dog's right cheek over its ear (zoom 10)", box: [-60, -108, 28, 46], zoom: 10 },
   { label: "#2 the dog's left cheek over its ear (zoom 10)", box: [32, -110, 28, 46], zoom: 10 },
+  { label: "#3 the chin over the collar at phone size, beside the hero's (3 px/pt)", box: [-56, -104, 112, 60], zoom: 3, hero: [128, 125, 162, 86.8] },
   { label: "#3 the chin over the collar, whole, beside the hero's (zoom 8)", box: [-34, -80, 68, 26], zoom: 8, hero: [92, 168, 176, 67.3] },
   { label: "#3, #7 the chin over the collar, the dog's right half (zoom 10)", box: [-44, -76, 40, 22], zoom: 10 },
   { label: "#3, #7 the chin over the collar, the dog's left half (zoom 10)", box: [4, -78, 40, 22], zoom: 10 },
@@ -284,6 +294,8 @@ const JOINS: Row[] = [
   { label: "#8, #9 the chest under the dog's right collar end (zoom 10)", box: [-40, -66, 40, 30], zoom: 10 },
   { label: "#8, #9 the chest under the dog's left collar end (zoom 10)", box: [0, -66, 40, 30], zoom: 10 },
   { label: "#10 the chest's V and the legs' inner edges (zoom 10)", box: [-16, -42, 32, 42], zoom: 10 },
+  { label: "#14 the slot between the front paws and its bar (zoom 14)", box: [-8, -14, 16, 15], zoom: 14 },
+  { label: "#7 the dog's left collar end under the jaw (zoom 12)", box: [18, -70, 18, 14], zoom: 12 },
   { label: "#12, #13 the dog's right elbow, leg edge and haunch (zoom 10)", box: [-56, -56, 30, 46], zoom: 10 },
   { label: "#12, #13 the dog's left elbow, leg edge and haunch (zoom 10)", box: [26, -56, 30, 46], zoom: 10 },
   { label: "#11, #14 the paws, whole, beside the hero's (zoom 6)", box: [-52, -24, 104, 26], zoom: 6, hero: [70, 318, 225, 56.3] },

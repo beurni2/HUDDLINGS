@@ -87,9 +87,9 @@
     "head.top": {
      "record": [64.83, 3.6],
      "held": false,
-     "found": [61.08, 5.08],
-     "errPt": 4.98,
-     "offsetPt": [-4.91, 0.85],
+     "found": [60.94, 5.13],
+     "errPt": 5.16,
+     "offsetPt": [-5.09, 0.88],
      "pass": true,
      "note": "reported, never held: the sheet draws the tuft differently in every panel"
     },
@@ -203,9 +203,9 @@
     "head.top": {
      "record": [119.36, 4.64],
      "held": false,
-     "found": [118.5, 5.62],
-     "errPt": 0.89,
-     "offsetPt": [-0.72, 0.53],
+     "found": [118.67, 5.67],
+     "errPt": 0.85,
+     "offsetPt": [-0.61, 0.59],
      "pass": true,
      "note": "reported, never held: the sheet draws the tuft differently in every panel"
     },
@@ -293,20 +293,20 @@
   }
  },
  "headGate": {
-  "headShiftPt": [0.0, 0.0],
-  "headIoU": 0.9924,
+  "headShiftPt": [0.0, 0.01],
+  "headIoU": 0.9923,
   "thresholdPt": 2.8,
   "rows": {
    "nose": {
-    "model": [-0.2, -91.6],
+    "model": [-0.2, -91.59],
     "found": [-0.68, -92.05],
     "errPt": 0.66,
     "pass": true
    },
    "eyes.middle": {
-    "model": [-1.2, -99.6],
+    "model": [-1.2, -99.59],
     "found": [-1.07, -98.15],
-    "errPt": 1.46,
+    "errPt": 1.45,
     "pass": true,
     "measuredBy": "each eye's parts' pixels in the ID pass"
    }
@@ -372,5 +372,5 @@
  "spacingsHeld": 0,
  "shapesHeld": 3,
  "pass": true,
- "summary": "pass: 4 anchors and 3 shapes held on master.expression.excited; head held (nose 0.66 pt, eyes.middle 1.46 pt); blush held (R 0.349, L 0.350; rest 0.29 to 0.43)"
+ "summary": "pass: 4 anchors and 3 shapes held on master.expression.excited; head held (nose 0.66 pt, eyes.middle 1.45 pt); blush held (R 0.349, L 0.350; rest 0.29 to 0.43)"
 }

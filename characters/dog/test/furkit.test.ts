@@ -12,18 +12,18 @@ import { PNG } from "pngjs";
 import type { Drawing } from "../../build/atlas.ts";
 import type { Rig } from "../../../runtime-web/src/format.ts";
 import { furEdge, type Lock } from "../../draw/fur.ts";
-import { decisionsOf, gateProblems, lineGate, LIMITS } from "../../draw/lint.ts";
+import { decisionsOf, gateProblems, lineGate, LIMITS, lint as lintAll, lintDrawing } from "../../draw/lint.ts";
 import { arc, fracAt, mirrorX, sample, smooth, spanPoints, v, type Node, type P, type Shape } from "../../draw/geom.ts";
 import { scopeIds, type Piece } from "../../draw/svg.ts";
 import { EAR, earEdge, earFur, type EarEdgeSpec } from "../src/parts/ear.ts";
-import { HEAD_FUR, headFur, type HeadFurSpec } from "../src/parts/headfur.ts";
-import { drawings } from "../src/drawings.ts";
-import { CONTACT_DEPTH, FREE_TAPER, litEdge, litPart, litRibbons, SOLE, UNDER_RUN, WEIGHT, type LitLine, type LitSpan } from "../src/parts/lines.ts";
+import { chinShadow, HEAD_FUR, headFur, type HeadFurSpec } from "../src/parts/headfur.ts";
+import { drawings, lint } from "../src/drawings.ts";
+import { BREAK, CONTACT_DEPTH, FREE_TAPER, LIFE, lineEnd, LIVE, litEdge, litPart, litRibbons, SOLE, UNDER_RUN, WEIGHT, type LifeClass, type LitLine, type LitSpan } from "../src/parts/lines.ts";
 import { brush, type Brush } from "../src/parts/marking.ts";
-import { BUN, bun, DOME_TOES, meridian, SOFT_TOES, toes, type BunSpec, type Dome } from "../src/parts/paw.ts";
-import { CRISP, topknot, type Curl } from "../src/parts/topknot.ts";
+import { BUN, bun, DOME_TOES, innerLinesIn, meridian, SOFT_TOES, toes, type BunSpec, type Dome } from "../src/parts/paw.ts";
+import { CRISP, curlShapes, hook, HOOK, topknot, tuck, type Curl } from "../src/parts/topknot.ts";
 import { groundShadow } from "../src/parts/shadow.ts";
-import { C, LINES } from "../src/palette.ts";
+import { C, LINES, palette } from "../src/palette.ts";
 import { mirrorPiece } from "../src/views/facing.ts";
 
 /** A plump part sitting on the ground, typed clockwise from its top: its lit upper left, its sole along the ground. */
@@ -506,6 +506,8 @@ test("counting only what shows (`shown`), the gate finds the front's head side b
     assert.match(found, /the edge of temple\.L shows (\d+\.\d\d) pt below full line width from \(42\.\d, -11[67]\.\d\)/, `${face}: the break the reviewers saw, found`);
     const pt = Number(/shows (\d+\.\d\d) pt/.exec(found)![1]);
     assert.ok(pt > 2 && pt < 4, `${face}: ${pt} pt bare, the reviewers' 2.2 pt and its free end's taper`);
+    // drawings.ts's own rules count only what shows (288): the build's lint finds the planted break too.
+    assert.match(gateProblems(drawn(true), lint).filter((p) => p.startsWith(`temple.L/front:${face}`)).join("\n"), /the edge of temple\.L shows \d+\.\d\d pt below full line width/, `${face}: drawings.ts's rules find it`);
   }
 });
 
@@ -647,7 +649,7 @@ const LOCKS: Curl[] = [
 ];
 const TUFT_PAINT = { fill: C.fur };
 
-test("a crisp topknot is 4 or 5 small locks in a crisp thin line, each lock's base tucked into a short soft stroke, never a dark sliver", () => {
+test("a crisp topknot is 4 or 5 small locks in a crisp thin line, each lock's line hooking on into the fur at its base, never a dark sliver", () => {
   assert.throws(() => topknot(LOCKS.slice(0, 3), TUFT_PAINT, { crisp: true }), /a crisp topknot is 4 or 5 small locks, not 3/);
   const today = topknot(LOCKS, TUFT_PAINT), crisp = topknot(LOCKS, TUFT_PAINT, { crisp: true });
   // The line's own soft edge (σ 0.3) is gone: the silhouette's side of each lock is its clip's own edge.
@@ -657,15 +659,19 @@ test("a crisp topknot is 4 or 5 small locks in a crisp thin line, each lock's ba
     assert.ok(l.span.taper.every((t) => t <= FREE_TAPER + 1e-9), `a lock's line tapers over ${l.span.taper} pt, more than a free end's ${FREE_TAPER}`);
     assert.ok(l.drawn[1] <= 1.4, `a lock's line is ${l.drawn[1]} pt at its widest: thin, at the band's light end`);
   }
-  // Each tuck: in the notch strokes' light tone, at the V full and round, thinning out toward its inner end, nothing
-  // past the V outside the lock.
-  assert.match(crisp.svg, new RegExp(`fill="${LINES.cream[1]}" opacity="${CRISP.tuck.opacity}" filter=`));
+  // Each hook (DECISIONS 286, which replaced 262's soft 1 pt tuck): the lock's line carried on in its own colour at that
+  // end, unblurred as the line is, an inner line; at the V full, thinning out toward its inner end, nothing past the V
+  // outside the lock.
+  const shapes = curlShapes(LOCKS);
+  const line0: LitSpan = { ...LOCKS[0]!.line, taper: [0.6, FREE_TAPER], most: CRISP.most };
+  const h = hook(shapes[0]!, line0, LOCKS[0]!.into![0]!, { blur: 0 });
+  assert.match(crisp.svg, new RegExp(`<path d="[^"]+" fill="${h.colour}"/>`), "the hook in the line's own colour, unblurred");
+  assert.doesNotMatch(crisp.svg, new RegExp(`opacity="${CRISP.tuck.opacity}" filter=`), "no soft tuck");
   const alpha = alphaOf(crisp, 16), dark = darknessOf(crisp, 16);
   const [v0, v1, v2] = LOCKS[0]!.into![0]!;
   const into = v.norm(v.sub(v1!, v0!)), near = v.add(v0!, v.mul(into, 0.7));
-  assert.ok(dark(near) > 8, `the tuck at the V is ${dark(near).toFixed(1)} L* darker than the fur`);
-  assert.ok(dark(v2!) < 0.5 * dark(near), `the tuck thins out toward its inner end: ${dark(v2!).toFixed(1)} L* there`);
-  assert.ok(lightness(LINES.cream[1]!) > lightness(LINES.cream[3]!), "its tone the ladder's light end");
+  assert.ok(dark(near) > 8, `the hook at the V is ${dark(near).toFixed(1)} L* darker than the fur`);
+  assert.ok(dark(v2!) < 0.5 * dark(near), `the hook thins out toward its inner end: ${dark(v2!).toFixed(1)} L* there`);
   assert.ok(alpha(v.sub(v0!, v.mul(into, 0.8))) < 0.1, `past the V outside the lock: alpha ${alpha(v.sub(v0!, v.mul(into, 0.8))).toFixed(2)}`);
 });
 
@@ -694,4 +700,292 @@ test("the fur kit's second round's entries stand, and a soft chin's bare bottom 
   const d = decisionsOf(readFileSync(new URL("../DECISIONS.md", import.meta.url), "utf8"));
   for (let n = 260; n <= 266; n++) assert.ok(d.entries.includes(n) && !d.replaced[n], `${n} is a current entry`);
   assert.ok(headFur(SOFT_CHIN).chins.every((c) => c.cites === undefined || (d.entries.includes(c.cites) && !d.replaced[c.cites])));
+});
+
+// The fur kit's third round (DECISIONS 284 to 289, the lead's L1 to L5): the line's life, its lit steps, the chin over
+// the collar, every stroke inside the silhouette an inner line, and the gate counting only what shows in every view.
+// Each option draws what it drew before until a view asks for it, but the inner lines' metas and the gate's `shown`.
+
+/** Round the paw from its right down under its sole and up its left side to its top, its lit top on the upper left. */
+const ROUND: LitSpan = { from: "right", to: "top", ends: ["join", "join"] };
+const living = (seed: number, life: LifeClass, extra: Partial<LitSpan> = {}): LitSpan => ({ ...ROUND, ...extra, weight: { seed, life, ...extra.weight } });
+const isTop = (p: P) => p[1] < -22 && p[0] < 0, isUnder = (p: P) => p[1] > -10 && p[1] < -3;
+/** Each polygon's fill, in the order drawn, and the samples of each span's ribbon between its joins' discs. */
+const fills = (svg: string) => [...svg.matchAll(/fill="(#[0-9A-Fa-f]{6})"/g)].map((m) => m[1]!);
+function bySpan(svg: string): { at: P; width: number; fill: string }[][] {
+  const out: { at: P; width: number; fill: string }[][] = [[]];
+  const points = (d: string) => [...d.matchAll(/(-?[\d.]+) (-?[\d.]+)/g)].map((p): P => [Number(p[1]), Number(p[2])]);
+  // A join's round cap: 16 points all the same distance from their middle.
+  const isDisc = (pts: P[]) => {
+    if (pts.length !== 16) return false;
+    const c = v.mul(pts.reduce((s, p) => v.add(s, p), [0, 0] as P), 1 / 16), r = pts.map((p) => v.len(v.sub(p, c)));
+    return Math.max(...r) - Math.min(...r) < 0.01;
+  };
+  const all = [...svg.matchAll(/<path fill="(#[0-9A-Fa-f]{6})" d="([^"]+)"\/>/g)];
+  all.forEach((m, k) => {
+    const pts = points(m[2]!);
+    if (isDisc(pts)) {
+      // A join's disc closes its span's ribbon; the next ribbon is the next span's.
+      if (out.at(-1)!.length && !(all[k + 1] && isDisc(points(all[k + 1]![2]!)))) out.push([]);
+      return;
+    }
+    const n = pts.length / 2;
+    for (let j = 0; j < n; j++) out.at(-1)!.push({ at: v.mul(v.add(pts[j]!, pts[pts.length - 1 - j]!), 0.5), width: v.len(v.sub(pts[j]!, pts[pts.length - 1 - j]!)), fill: m[1]! });
+  });
+  return out.filter((s) => s.length);
+}
+
+test("a living line is the same from its seed every build, uses the whole band, thin on its lit top and full where it turns under, and is today's line until a span asks for its life", () => {
+  assert.equal(litRibbons(paw, [{ ...ROUND, weight: { seed: 3 } }], "a").svg, litRibbons(paw, [{ ...ROUND, weight: { seed: 3, life: undefined } }], "a").svg, "no life, 260's weight as before");
+  const a = litRibbons(paw, [living(3, "legs")], "a", { reach: 1 });
+  assert.equal(a.svg, litRibbons(paw, [living(3, "legs")], "a", { reach: 1 }).svg, "the same seed, the same line in every build");
+  assert.notEqual(a.svg, litRibbons(paw, [living(4, "legs")], "a", { reach: 1 }).svg, "another seed, another line");
+  const top: number[] = [], down: number[] = [];
+  // Where the edge faces down, onto the ground: the paw's underside either side of the sole's middle.
+  const isDown = (p: P) => p[1] > -3 && Math.abs(p[0]) > 3;
+  for (const seed of [31, 32, 33, 34, 35, 36]) {
+    const r = litRibbons(paw, [living(seed, "legs")], "a", { reach: 1 });
+    const l = r.lines[0]!;
+    assert.ok(l.drawn[0] >= LIMITS.outer[0] - 1e-9 && l.drawn[1] <= LIMITS.outer[1] + 1e-9, `seed ${seed}: drawn ${l.drawn} pt, inside ${LIMITS.outer}`);
+    for (const [p, x] of widths(r.svg).slice(6, -6)) {
+      if (isTop(p)) top.push(x);
+      if (isDown(p)) down.push(x);
+    }
+  }
+  // 260's living weight kept a lit top to the band's lower half and swelled 0.45 of the band at most from its place: the
+  // living line takes the whole band, thin end on the lit top, full end where it faces the ground.
+  assert.ok(mean(top) < LIMITS.outer[0] + 0.25 * (LIMITS.outer[1] - LIMITS.outer[0]), `its lit top ${mean(top).toFixed(2)} pt: the band's thin end`);
+  assert.ok(mean(down) > LIMITS.outer[0] + 0.7 * (LIMITS.outer[1] - LIMITS.outer[0]), `facing the ground ${mean(down).toFixed(2)} pt: the band's full end`);
+  const under = down;
+  assert.ok(Math.max(...under, ...top) - Math.min(...under, ...top) > 0.5, "the band's whole 0.6 pt, all but its tapers' ends");
+});
+
+test("a living line's tone runs along it: into the lit steps on its lit top, darker than its depth where it swells full, the soles' least of all", () => {
+  const lit = new Set<string>([...LINES.lit.cream]);
+  for (const seed of [41, 42, 43]) {
+    const legs = bySpan(litRibbons(paw, [living(seed, "legs")], "a", { reach: 1 }).svg)[0]!;
+    const today = bySpan(litRibbons(paw, [{ ...ROUND, weight: { seed } }], "a", { reach: 1 }).svg)[0]!;
+    assert.ok(legs.filter((s) => isTop(s.at)).some((s) => lit.has(s.fill)), `seed ${seed}: its lit top reaches the lit steps`);
+    assert.ok(today.every((s) => LINES.cream.includes(s.fill)), "a line without its life never does");
+  }
+  // Where it swells past the band's middle (here typed full all along), darker than its depth: on the paw's right side,
+  // away from the light, where the depth is mid-ladder (by the ground it is already the darkest).
+  const full = bySpan(litRibbons(paw, [living(47, "legs", { weight: { seed: 47, life: "legs", swell: [{ at: [17, -12], to: 1 }] } })], "a", { reach: 1 }).svg)[0]!;
+  const plain = bySpan(litRibbons(paw, [{ ...ROUND, weight: { seed: 47 } }], "a", { reach: 1 }).svg)[0]!;
+  const side = (p: P) => p[0] > 14 && p[1] > -20 && p[1] < -6;
+  const L = (xs: { at: P; fill: string }[]) => mean(xs.filter((s) => side(s.at)).map((s) => lightness(s.fill)));
+  assert.ok(L(full) < L(plain) - 3, `full, L* ${L(full).toFixed(1)} against its depth's ${L(plain).toFixed(1)}`);
+  // How far its tone runs, by class: the soles' least (the hero's 8 L* to the legs' 24.6, LIFE.tone).
+  const spread = (life: LifeClass) => mean([51, 52, 53].map((seed) => {
+    const L = fills(litRibbons(paw, [living(seed, life)], "a", { reach: 1 }).svg).map(lightness);
+    return Math.max(...L) - Math.min(...L);
+  }));
+  assert.ok(LIFE.tone.soles < LIFE.tone.ears && LIFE.tone.ears < LIFE.tone.legs);
+  assert.ok(spread("soles") < spread("legs") - 3, `the soles' tone runs ${spread("soles").toFixed(1)} L*, the legs' ${spread("legs").toFixed(1)}`);
+});
+
+test("two living lines that join meet at one width and one tone, a short one never beads, and a free end tapers from its run's own width", () => {
+  // The paw's left side and its sole, two spans meeting at "left", each its own class and seed.
+  const [up, down] = bySpan(litRibbons(paw, [living(61, "legs", { from: "left", to: "top" }), living(62, "back", { from: "sole", to: "left" })], "a", { reach: 1 }).svg);
+  const a = up![0]!, b = down!.at(-1)!;
+  assert.ok(Math.abs(a.width - b.width) < 0.01, `at the join ${a.width.toFixed(3)} and ${b.width.toFixed(3)} pt`);
+  assert.equal(a.fill, b.fill, "at the join one tone");
+  // A span shorter than LIVE.short[0] takes no strokes: the same whatever its seed, never swelling between its ends.
+  const short = (seed: number) => bySpan(litRibbons(paw, [living(seed, "legs", { from: [-2.4, -29.8], to: [0, -30] })], "a", { reach: 1 }).svg)[0]!.map((s) => s.width);
+  const w = short(63), ends = Math.max(w[0]!, w.at(-1)!);
+  assert.deepEqual(short(64), w, "no strokes: the seed changes nothing");
+  assert.ok(Math.max(...w) <= ends + 0.01, `a ${LIVE.short[0]} pt span swells to ${Math.max(...w).toFixed(3)} pt between ends of ${w[0]!.toFixed(3)} and ${w.at(-1)!.toFixed(3)}`);
+  // Before a free end's taper the strokes have eased out: within its taper and LIVE.free.ease before it, the line
+  // never swells toward its end by more than its place may as the edge turns (0.05 pt, a sixth of a pixel at 3 px per
+  // pt; a stroke's swell is up to 0.24 pt).
+  for (const seed of [64, 65, 66, 67]) {
+    const s = bySpan(litRibbons(paw, [living(seed, "legs", { from: "sole", to: "top", ends: ["join", "free"] })], "a", { reach: 1 }).svg)[0]!;
+    let d = 0;
+    const tail = [s.at(-1)!];
+    for (let i = s.length - 2; i >= 0 && d < FREE_TAPER + LIVE.free.ease; i--) (d += v.len(v.sub(s[i]!.at, s[i + 1]!.at)), tail.unshift(s[i]!));
+    const rises = tail.slice(1).map((x, i) => x.width - tail[i]!.width);
+    assert.ok(Math.max(...rises) < 0.05, `seed ${seed}: the line swells by ${Math.max(...rises).toFixed(3)} pt within its last ${FREE_TAPER + LIVE.free.ease} pt`);
+  }
+});
+
+test("a typed swell sets where a living line is full along its span; off its span, outside 0 to 1 or without its life it throws", () => {
+  // Today's place is full under the sole and thin on the lit top: typed the other way round.
+  const typed = living(71, "legs", { weight: { seed: 71, life: "legs", swell: [{ at: [0, 0], to: 0 }, { at: [-14, -24], to: 1 }] } });
+  const w = widths(litRibbons(paw, [typed], "a", { reach: 1 }).svg);
+  const near = (q: P) => mean(w.filter(([p]) => v.len(v.sub(p, q)) < 2.5).map(([, x]) => x));
+  assert.ok(near([0, 0.5]) < 1.4, `under the sole ${near([0, 0.5]).toFixed(2)} pt`);
+  assert.ok(near([-14.5, -24.5]) > 1.6, `on the upper left ${near([-14.5, -24.5]).toFixed(2)} pt`);
+  assert.throws(() => litRibbons(paw, [living(71, "legs", { weight: { seed: 71, life: "legs", swell: [{ at: [30, 30], to: 1 }] } })], "a"), /a typed swell at \(30, 30\) lies \d+\.\d\d pt off its span/);
+  assert.throws(() => litRibbons(paw, [living(71, "legs", { weight: { seed: 71, life: "legs", swell: [{ at: [0, 0], to: 1.2 }] } })], "a"), /a typed swell is 0 to 1, not 1\.2/);
+  assert.throws(() => litRibbons(paw, [{ ...ROUND, weight: { seed: 71, swell: [{ at: [0, 0], to: 1 }] } }], "a"), /a typed swell is a living line's/);
+});
+
+test("a typed break cuts a lit run into two lines, each its own span to the gate, the gap bare and cited; it needs its line's life, a cite, a lit run and room from its ends", () => {
+  const decisions = decisionsOf(readFileSync(new URL("../DECISIONS.md", import.meta.url), "utf8"));
+  const all = (extra: Partial<LitSpan>): LitSpan => ({ from: 0, to: 1, ends: ["join", "join"], weight: { seed: 81, life: "head" }, ...extra });
+  const broken = all({ cites: 284, breaks: [{ at: [-14, -24], gap: 1.6 }] });
+  const r = litRibbons(paw, [broken], "a");
+  assert.equal(r.lines.length, 2, "the line in two pieces");
+  assert.deepEqual([r.lines[0]!.span.ends, r.lines[1]!.span.ends], [["join", "free"], ["free", "join"]]);
+  assert.deepEqual([r.lines[0]!.span.taper[1], r.lines[1]!.span.taper[0]], [BREAK.taper, BREAK.taper], "each tapering into the gap");
+  assert.ok(Math.abs(r.lines[0]!.span.bare![1] - (1.6 + 2 * BREAK.taper)) < 1e-9 && r.lines.every((l) => l.span.cites === 284), `the gap and its tapers, ${r.lines[0]!.span.bare} pt, cited`);
+  const view = (s: LitSpan): Drawing => ({ region: "tail/side.L", svg: "", anchor: [0, 0], meta: lineGate(litPart("tail", paw, { fill: C.fur }, [s])).meta });
+  assert.deepEqual(gateProblems([view(broken)], { rig, decisions }), [], "the gate takes the cited gap");
+  assert.match(gateProblems([view({ ...broken, cites: 9999 })], { rig, decisions }).join("\n"), /cites 9999, which is no DECISIONS entry/);
+  assert.deepEqual(gateProblems([view(all({ cites: 284, breaks: [{ at: [-14, -24], gap: BREAK.gap[1] }] }))], { rig, decisions }), [], "the longest gap is within its cite");
+  assert.throws(() => litRibbons(paw, [{ ...broken, cites: undefined }], "a"), /a span's breaks must cite/);
+  assert.throws(() => litRibbons(paw, [{ ...broken, weight: { seed: 81 } }], "a"), /a span's breaks are its living line's/);
+  assert.throws(() => litRibbons(paw, [all({ cites: 284, breaks: [{ at: [0, 0], gap: 1.6 }] })], "a"), /lies where the line is \d\.\d\d of the band full, not on a lit run/);
+  assert.throws(() => litRibbons(paw, [all({ cites: 284, breaks: [{ at: [-14, -24], gap: 3 }] })], "a"), /is 3 pt long, not 0\.4 to 2\.5/);
+  assert.throws(() => litRibbons(paw, [{ from: [-14, -24], to: "top", ends: ["free", "join"], weight: { seed: 81, life: "head" }, cites: 284, breaks: [{ at: [-13.5, -24.6], gap: 1 }] }], "a"), /within its taper of its span's end/);
+});
+
+test("the lit steps lie past each ladder's lightest, warm, within the sheet's own lit linework (litsteps.json), and only a living line reaches them", () => {
+  type Row = { on: string; panel: string; what: string; quartiles: { L: number[]; b: number[] } };
+  const rows = (JSON.parse(readFileSync(new URL("../../../qa/phase3/fur/recipes3/litsteps.json", import.meta.url), "utf8")) as Row[])
+    .filter((r) => r.panel.startsWith("master.turnaround") && !r.what.includes("not lit"));
+  for (const on of ["cream", "tan"] as const) {
+    const crops = rows.filter((r) => r.on === on), steps = LINES.lit[on].map(lightness);
+    const lo = lightness(LINES[on][0]!), hi = Math.max(...crops.map((r) => r.quartiles.L[2]!));
+    steps.forEach((L, i) => assert.ok(L > (i ? steps[i - 1]! : lo), `${on} step ${i}, L* ${L.toFixed(1)}: lighter than the one before it and the ladder's lightest, ${lo.toFixed(1)}`));
+    assert.ok(steps.at(-1)! <= hi + 0.5, `${on}: its lightest step, L* ${steps.at(-1)!.toFixed(1)}, within the crops' lit linework (upper quartile ${hi})`);
+    // Every crop's lit line lighter than the ladder has a step within 2.5 L* of its median.
+    for (const r of crops.filter((x) => x.quartiles.L[1]! > lo))
+      assert.ok(steps.some((L) => Math.abs(L - r.quartiles.L[1]!) < 2.5), `${on}: ${r.panel}'s ${r.what}, median L* ${r.quartiles.L[1]}, has a step near it`);
+    for (const r of crops) assert.ok(r.quartiles.b[1]! > 12, `${r.panel}'s ${r.what}: warm (b* ${r.quartiles.b[1]})`);
+    for (const hex of LINES.lit[on]) assert.ok(palette.includes(hex), `${hex} is in the palette`);
+  }
+});
+
+/** The test head's chin with three hair flicks of uneven length and spacing, leaning out (DECISIONS 287). */
+const FLICK_CHIN: HeadFurSpec = {
+  ...HEAD,
+  chin: { ...HEAD.chin!, scallops: [], soft: { wisps: [{ at: on(78), len: 1.6, width: 0.6, lean: -0.8 }, { at: on(96), len: 1, width: 0.5, lean: 0.75 }, { at: on(108), len: 2, width: 0.7, lean: 0.85 }], firm: [14, 14], flicks: true } },
+};
+/** The fringe of a head's fur laid over the fur's cream, as a piece. */
+const fringed = (h: ReturnType<typeof headFur>): Piece => {
+  const box: [number, number, number, number] = [-30, -75, 60, 25], f = h.fringe(undefined, box);
+  return { svg: `<rect x="-30" y="-75" width="60" height="25" fill="${C.fur}"/><defs>${f.defs}</defs>${f.body}`, box, meta: { shapes: [], lines: [] } };
+};
+
+test("hair flicks over the collar are longer than wide, of uneven lengths and spacing, and sharp; 261's wisps keep their own rules", () => {
+  const h = headFur(FLICK_CHIN);
+  assert.equal(h.tufts.chin.length, 3);
+  const soft = FLICK_CHIN.chin!.soft!;
+  const withWisps = (wisps: typeof soft.wisps) => headFur({ ...FLICK_CHIN, chin: { ...FLICK_CHIN.chin!, soft: { ...soft, wisps } } });
+  assert.throws(() => withWisps([{ ...soft.wisps[0]!, len: 0.6, width: 0.6 }, ...soft.wisps.slice(1)]), /wisp 0 hangs 0\.6 pt, not 1 to 4; wisp 0 is 1\.00 as long as it is wide, under 1\.1/);
+  assert.throws(() => withWisps([soft.wisps[0]!, { ...soft.wisps[1]!, len: 1.5 }, soft.wisps[2]!]), /wisps 0 and 1 differ by 6% in length, under 25%: a row/);
+  assert.throws(() => withWisps([{ ...soft.wisps[0]!, at: on(84) }, ...soft.wisps.slice(1)]), /the gaps after wisps 0 and 1 differ by \d+%, under 30%: evenly spaced/);
+  // Each flick hangs past the arc by about its length, to a sharp tip.
+  for (const [k, t] of h.tufts.chin.entries()) {
+    const out = v.len(v.sub(t.tip, [0, -100])) - 40, w = soft.wisps[k]!;
+    assert.ok(out > 0.6 * w.len && out < 1.3 * w.len, `flick ${k} hangs ${out.toFixed(2)} pt, typed ${w.len}`);
+  }
+  // 261's wisps, wider than long, are refused as flicks and still pass as wisps.
+  assert.throws(() => withWisps(SOFT_CHIN.chin!.soft!.wisps), /as long as it is wide, under 1\.1/);
+  assert.equal(headFur(SOFT_CHIN).tufts.chin.length, 3);
+});
+
+test("the chin's warm fur tone darkens the fur down to the collar with no line along it, its reach coming and going, and each flick a warm hair no wider than itself", () => {
+  const h = headFur(FLICK_CHIN), f = h.fringe(undefined, [-30, -75, 60, 25]);
+  assert.match(f.body, new RegExp(`fill="${C.softLine}" opacity="${HEAD_FUR.warm.opacity}"`), "the warm line's soft mix");
+  assert.doesNotMatch(f.body, new RegExp(C.furShade), "no cream feather over the edge (it read as a lighter strip)");
+  const dark = darknessOf(fringed(h), 16);
+  // Down the middle of the bare bottom (on(90), at (0, -60), its inside up): darker and darker to the edge, nothing past 2.5 pt in.
+  const at = (inside: number): P => [0, -60 - inside];
+  assert.ok(dark(at(0.2)) >= dark(at(0.6)) - 0.5 && dark(at(0.6)) >= dark(at(1.2)) - 0.5 && dark(at(1.2)) > dark(at(2.6)), `${[0.2, 0.6, 1.2, 2.6].map((d) => dark(at(d)).toFixed(1))} L* darker than the fur from 0.2 to 2.6 pt in`);
+  assert.ok(dark(at(0.4)) > 5 && dark(at(2.6)) < 1.5, `${dark(at(0.4)).toFixed(1)} L* at the edge, ${dark(at(2.6)).toFixed(1)} 2.6 pt in`);
+  // Its reach into the fur comes and goes along the bare bottom (the crop's, 1 pt above the edge: L* 62 to 95).
+  const reach = [64, 68, 72, 84, 88, 100, 112, 116].map((deg) => dark(on(deg, 39.3)));
+  assert.ok(Math.max(...reach) - Math.min(...reach) > 1.5, `0.7 pt in, ${reach.map((x) => x.toFixed(1))} L* darker along the chin`);
+  // Each flick: warm inside itself, and nothing of it past its tip (a hair no longer than itself).
+  for (const [k, t] of h.tufts.chin.entries()) {
+    const mid = v.mul(v.add(t.tip, t.root), 0.5), past = v.add(t.tip, v.mul(v.norm(v.sub(t.tip, t.root)), 0.9));
+    assert.ok(dark(mid) > 3, `flick ${k}: ${dark(mid).toFixed(1)} L* darker than the fur inside it`);
+    assert.ok(dark(past) < 1.5, `flick ${k}: ${dark(past).toFixed(1)} L* 0.9 pt past its tip`);
+  }
+  // With a colour, 261's fringe as before: a cream band, no warm tone.
+  assert.doesNotMatch(headFur(SOFT_CHIN).fringe(C.furShade, [-30, -75, 60, 25]).body, new RegExp(C.softLine));
+});
+
+test("the chin's contact crease lies on the collar right under the fur, the collar's dark rim, fading out within 2 pt", () => {
+  const h = headFur(FLICK_CHIN), box: [number, number, number, number] = [-30, -75, 60, 25];
+  const plain = chinShadow(h.head, on(60), on(120), C.collarLine, box, { width: 3.2, blur: 0.9, opacity: 0.6 });
+  const creased = chinShadow(h.head, on(60), on(120), C.collarLine, box, { width: 3.2, blur: 0.9, opacity: 0.6, crease: true });
+  assert.doesNotMatch(plain.svg, new RegExp(C.collarRim));
+  assert.match(creased.svg, new RegExp(`fill="${C.collarRim}" opacity="${HEAD_FUR.crease.opacity}"`));
+  // The crease alone (drawn after the shadow, its own definitions and stroke).
+  const alpha = alphaOf({ ...creased, svg: creased.svg.slice(creased.svg.lastIndexOf("<defs>")) }, 16);
+  // Below the edge in the middle of the chin (on(90), at (0, -60), the collar below it).
+  assert.ok(alpha([0, -59.5]) > 0.4, `0.5 pt onto the collar: alpha ${alpha([0, -59.5]).toFixed(2)}`);
+  assert.ok(alpha([0, -57.8]) < 0.1, `2.2 pt onto the collar: alpha ${alpha([0, -57.8]).toFixed(2)}`);
+  assert.ok(alpha([0, -61]) < 0.5 * alpha([0, -59.5]), "it lies on the collar's side of the edge");
+});
+
+test("a paw may show one toe line with the other hidden; a toe line along the dome is an inner line the lint reads", () => {
+  const dome: Dome = { centre: [0, -5], size: [9, 6] };
+  const one: P[][] = [[[-5, -1.2], [-5.5, -8]]], two: P[][] = [...one, [[5, -1.2], [5.5, -8]]];
+  assert.throws(() => toes({ lines: one, fade: [-1.2, -8], dome }), /a paw has two or three toe lines, not 1$/);
+  assert.throws(() => toes({ lines: [...two, [[0.1, -1.2], [0.1, -8]]], hidden: 1, fade: [-1.2, -8], dome }), /not 3 and 1 hidden/);
+  const shown = toes({ lines: one, hidden: 1, fade: [-1.2, -8], soft: true, width: 0.9, dome });
+  assert.deepEqual(innerLinesIn(shown.under), [{ kind: "inner", width: 0.9, where: "toe line", drawn: [0.9, 0.9] }]);
+  const both = toes({ lines: two, fade: [-1.2, -8], soft: true, width: 0.8, dome });
+  assert.equal(innerLinesIn(both.under).length, 2);
+  // A part painting them reports them, so the lint holds them to the inner band.
+  const part = litPart("front.L", paw, { fill: C.fur, under: both.under }, [ROUND]);
+  assert.equal(part.meta.lines.filter((l) => l.kind === "inner" && l.where === "toe line").length, 2);
+  assert.deepEqual(innerLinesIn(undefined), []);
+  // Planted wider than the inner band (a toe line typed 1.2 pt reports 1.2), the lint finds it.
+  const planted = { ...part.meta, lines: part.meta.lines.map((l) => (l.where === "toe line" ? { ...l, width: 1.2, drawn: [1.2, 1.2] as [number, number] } : l)) };
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="-20 -34 40 40">${part.svg}</svg>`;
+  assert.deepEqual(lintDrawing({ region: "front.L/front", anchor: [20, 34], svg, meta: part.meta }, { palette }).filter((p) => /toe line/.test(p)), []);
+  assert.match(lintDrawing({ region: "front.L/front", anchor: [20, 34], svg, meta: planted }, { palette }).join("\n"), /inner line 1\.2 pt in toe line is outside 0\.6 to 0\.9 pt/);
+});
+
+test("a tuck is an inner line, 0.6 to 0.9 pt, and a lock's hook carries its line on from its end in its colour", () => {
+  const pts: P[] = [[0, 0], [1, 1], [2, 1.5]];
+  assert.throws(() => tuck(pts, { width: 1 }), /a tuck is 1 pt, not an inner line's 0\.6 to 0\.9/);
+  assert.deepEqual(tuck(pts).line, { kind: "inner", width: LIMITS.inner[1], where: "tuck", drawn: [LIMITS.inner[1], LIMITS.inner[1]] });
+  const crisp = topknot(LOCKS, TUFT_PAINT, { crisp: true });
+  const hooks = crisp.meta.lines.filter((l) => l.where === "tuft hook");
+  assert.equal(hooks.length, LOCKS.reduce((n, c) => n + (c.into?.length ?? 0), 0), "one hook per typed `into`");
+  assert.ok(hooks.every((l) => l.kind === "inner" && l.width >= LIMITS.inner[0] && l.width <= LIMITS.inner[1]));
+  // The lint holds every hook to the inner band: planted at 262's 1 pt, or drawn past 0.9, it fails.
+  const asDrawing = (meta: Piece["meta"]): Drawing => ({ region: "tuft/front", anchor: [40, 175], meta,
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" width="80" height="40" viewBox="-40 -175 80 40">${crisp.svg}</svg>` });
+  const hookProblems = (meta: Piece["meta"]) => lintDrawing(asDrawing(meta), { palette }).filter((p) => /tuft hook/.test(p));
+  assert.deepEqual(hookProblems(crisp.meta), []);
+  const plant = (width: number, drawn: [number, number]) => ({ ...crisp.meta, lines: crisp.meta.lines.map((l) => (l.where === "tuft hook" ? { ...l, width, drawn } : l)) });
+  assert.match(hookProblems(plant(1, [1, 1])).join("\n"), /inner line 1 pt in tuft hook is outside 0\.6 to 0\.9 pt/);
+  assert.match(hookProblems(plant(0.9, [0.9, 1.05])).join("\n"), /inner line 0\.9 pt in tuft hook is drawn 0\.9 to 1\.05 pt wide, outside 0\.6 to 0\.9 pt/);
+  // It takes the line up where its taper has thinned to its width, from the line's own end at the V.
+  const shapes = curlShapes(LOCKS);
+  for (const k of [0, 1, 3]) {
+    const line: LitSpan = { ...LOCKS[k]!.line, taper: [0.6, FREE_TAPER], most: CRISP.most };
+    const h = hook(shapes[k]!, line, LOCKS[k]!.into![0]!, { blur: 0 });
+    const end = [0, 1].map((e) => lineEnd(shapes[k]!, line, e as 0 | 1, { blur: 0 })).sort((a, b) => v.len(v.sub(a.at, LOCKS[k]!.into![0]![0]!)) - v.len(v.sub(b.at, LOCKS[k]!.into![0]![0]!)))[0]!;
+    assert.equal(h.colour, end.colour, `lock ${k}: in its line's colour at that end`);
+    assert.ok(v.len(v.sub(h.pts[0]!, end.at)) <= HOOK.over * FREE_TAPER + LIMITS.inner[1], `lock ${k}: taken up ${v.len(v.sub(h.pts[0]!, end.at)).toFixed(2)} pt back from the line's end`);
+  }
+});
+
+test("a crisp topknot takes a living weight, each lock its own seed; from behind it is one tuft of two lobes", () => {
+  const plain = topknot(LOCKS, TUFT_PAINT, { crisp: true });
+  const weighed = topknot(LOCKS, TUFT_PAINT, { crisp: true, weight: { seed: 90, life: "head" } });
+  assert.notEqual(weighed.svg, plain.svg);
+  const ids = (svg: string) => svg.replace(/(id="|url\(#)([a-z]+)\d+/g, "$1$2");
+  assert.equal(ids(weighed.svg), ids(topknot(LOCKS, TUFT_PAINT, { crisp: true, weight: { seed: 90, life: "head" } }).svg), "the same seed, the same locks");
+  for (const l of weighed.meta.lines.filter((x) => x.kind === "outer") as LitLine[]) assert.ok(l.drawn[0] >= LIMITS.outer[0] - 1e-9 && l.drawn[1] <= LIMITS.outer[1] + 1e-9);
+  // From behind: one curl, its two lobes and the notch between them (one concave corner).
+  const lobes: Curl = { nodes: [[-10, -150], [-8, -157], [-3, -158], [0, -154], [3, -158], [8, -157], [10, -150]] as Node[], corners: [3], line: { from: [-10, -150], to: [10, -150], ends: ["under", "under"] } };
+  assert.doesNotThrow(() => topknot([lobes], { fill: C.fur }, { crisp: true, behind: true }));
+  assert.throws(() => topknot([lobes, lobes], { fill: C.fur }, { crisp: true, behind: true }), /one tuft of two lobes \(one curl, one notch between its lobes\), not 2 curls/);
+  assert.throws(() => topknot([{ ...lobes, corners: [] }], { fill: C.fur }, { crisp: true, behind: true }), /not 1 curls with 0 notches/);
+});
+
+test("the third round's entries stand; drawings.ts's lint counts only what shows in every view, and every view passes it", () => {
+  const d = decisionsOf(readFileSync(new URL("../DECISIONS.md", import.meta.url), "utf8"));
+  for (let n = 284; n <= 289; n++) assert.ok(d.entries.includes(n) && !d.replaced[n], `${n} is a current entry`);
+  assert.equal(lint.shown, true);
+  assert.deepEqual(lintAll(drawings(), lint), []);
 });

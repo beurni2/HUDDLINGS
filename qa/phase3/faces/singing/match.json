@@ -85,9 +85,9 @@
     "head.top": {
      "record": [62.23, 4.61],
      "held": false,
-     "found": [62.11, 3.54],
-     "errPt": 1.32,
-     "offsetPt": [0.12, -1.31],
+     "found": [62.25, 3.56],
+     "errPt": 1.28,
+     "offsetPt": [0.29, -1.25],
      "pass": true,
      "note": "reported, never held: the sheet draws the tuft differently in every panel"
     },
@@ -192,9 +192,9 @@
     "head.top": {
      "record": [67.84, 4.07],
      "held": false,
-     "found": [67.5, 7.11],
-     "errPt": 3.69,
-     "offsetPt": [-1.02, 3.54],
+     "found": [67.44, 7.13],
+     "errPt": 3.73,
+     "offsetPt": [-1.09, 3.57],
      "pass": true,
      "note": "reported, never held: the sheet draws the tuft differently in every panel"
     },
@@ -299,9 +299,9 @@
     "head.top": {
      "record": [123.5, 4.6],
      "held": false,
-     "found": [119.5, 2.6],
-     "errPt": 3.04,
-     "offsetPt": [-2.38, -1.88],
+     "found": [119.39, 2.61],
+     "errPt": 3.1,
+     "offsetPt": [-2.46, -1.89],
      "pass": true,
      "note": "reported, never held: the sheet draws the tuft differently in every panel"
     },
@@ -409,9 +409,9 @@
     "head.top": {
      "record": [100.71, 4.59],
      "held": false,
-     "found": [96.5, 4.67],
-     "errPt": 2.96,
-     "offsetPt": [-2.8, -0.96],
+     "found": [96.56, 4.89],
+     "errPt": 2.93,
+     "offsetPt": [-2.81, -0.8],
      "pass": true,
      "note": "reported, never held: the sheet draws the tuft differently in every panel"
     },
@@ -495,20 +495,20 @@
   }
  },
  "headGate": {
-  "headShiftPt": [0.0, 0.0],
-  "headIoU": 0.9924,
+  "headShiftPt": [0.0, 0.01],
+  "headIoU": 0.9923,
   "thresholdPt": 2.8,
   "rows": {
    "nose": {
-    "model": [-0.2, -91.6],
+    "model": [-0.2, -91.59],
     "found": [-0.67, -92.06],
     "errPt": 0.66,
     "pass": true
    },
    "eyes.middle": {
-    "model": [-1.2, -99.6],
+    "model": [-1.2, -99.59],
     "found": [-1.07, -98.15],
-    "errPt": 1.46,
+    "errPt": 1.45,
     "pass": true,
     "measuredBy": "each eye's parts' pixels in the ID pass"
    }
@@ -574,5 +574,5 @@
  "spacingsHeld": 0,
  "shapesHeld": 2,
  "pass": true,
- "summary": "pass: 2 anchors and 2 shapes held on master.expression.laughing; head held (nose 0.66 pt, eyes.middle 1.46 pt); blush held (R 0.349, L 0.350; rest 0.29 to 0.43)"
+ "summary": "pass: 2 anchors and 2 shapes held on master.expression.laughing; head held (nose 0.66 pt, eyes.middle 1.45 pt); blush held (R 0.349, L 0.350; rest 0.29 to 0.43)"
 }
