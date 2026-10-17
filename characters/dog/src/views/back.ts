@@ -93,10 +93,10 @@ function crossing(a: Shape, b: Shape, near: P): P {
 // -72.3 on the right, its line at x -37.3 to -37.8 from y -76 to -74 and 38.1 to
 // 38.8 on the right; 243). Each typed from its own crop.
 const earLNodes: Node[] = [[-28.4, -141.8], [-34.6, -144.6], [-38.6, -144.6], [-42, -143], [-43.8, -141], [-49.6, -135.1], [-56.6, -128.6], [-62.6, -120.2],
-  [-68.4, -114.4], [-73, -108.4], [-76.2, -101], [-77.4, -92.4], [-76.6, -87.4], [-73.4, -82.2], [-68.4, -77.2], [-61.8, -72.4], [-54, -69.6], [-47, -68.6],
+  [-68.2, -114.2], [-72.2, -108.6], [-75.8, -101.2], [-77.4, -92.4], [-76.6, -87.4], [-73.4, -82.2], [-68.4, -77.2], [-61.8, -72.4], [-54, -69.6], [-47, -68.6],
   [-41.6, -69.7], [-38.8, -71.6], [-37, -75.2], [-35.6, -88], [-34.4, -104], [-31.6, -126]];
-const earRNodes: Node[] = [[28.6, -142.6], [36.4, -145.2], [41, -145.4], [44, -143.4], [47.4, -140.6], [49.6, -138], [55.8, -131.5], [61.2, -124.6], [67, -118.8],
-  [72.2, -112.6], [75, -105.8], [76, -97], [75.6, -88.6], [72.8, -82.4], [67.8, -77], [61, -72.4], [53.4, -69.8], [47.4, -69], [42.8, -70.2],
+const earRNodes: Node[] = [[28.6, -142.6], [36.4, -145.2], [41, -145.4], [44, -143.4], [47.4, -140.6], [49.6, -138], [55.8, -131.5], [60.6, -124.6], [65.8, -118.8],
+  [70.2, -112.4], [74.4, -105], [77.3, -96.4], [76.8, -88.6], [73.4, -82.4], [67.8, -77], [61, -72.4], [53.4, -69.8], [47.4, -69], [42.8, -70.2],
   [39.7, -71.5], [37.8, -74.5], [36.2, -88], [35.4, -104], [31.8, -126]];
 /** The hem's three tips, from the outer side in: the small outer lock, the broad middle one, the inner one hanging lowest. */
 const HEM: Lock[] = [{ len: 1.3, width: 11.6, lean: 0.35, dip: 0.45 }, { len: 1.8, width: 17, lean: 0.15, dip: 0.3 }, { len: 1.4, width: 14.4, lean: 0.1 }];
@@ -107,8 +107,8 @@ function earOf(side: "L" | "R") {
   const base = smooth(R ? earRNodes : earLNodes);
   return earEdge({
     base,
-    steps: [{ from: R ? [70.6, -114.4] : [-70, -112.6], to: R ? [74.8, -106] : [-75.2, -104.6], lock: STEP_LOCK, tipRound: 0.35 }],
-    hem: { from: R ? [75.4, -87.6] : [-76.8, -88.2], to: R ? [42.2, -70.4] : [-41.6, -70.6], locks: HEM, tipRound: 0.4 },
+    steps: [{ from: R ? [69.4, -113.4] : [-69.4, -112.8], to: R ? [74.2, -105.2] : [-74.6, -104.8], lock: STEP_LOCK, tipRound: 0.35 }],
+    hem: { from: R ? [76.5, -87.6] : [-76.8, -88.2], to: R ? [42.2, -70.4] : [-41.6, -70.6], locks: HEM, tipRound: 0.4 },
     axis: [[k * 46, -140], [k * 54, -68]],
     // From behind the ear hangs behind the head: its line comes out from under the crown, where the crown's line joins
     // it (its start is set to that crossing below), and runs on under the head's side at its inner end.
@@ -547,8 +547,13 @@ function earPaint(side: "L" | "R"): Paint {
   return { ...paint, inner: [...(paint.inner ?? []), ...partings] };
 }
 
-/** An ear's line (earEdge's one span, DECISIONS 215, 244): from where the crown's line joins it, down its outer edge, round the hem's tips, and up its inner side under the head. */
-const earSpans = (side: "L" | "R"): LitSpan[] => [{ ...edges[side].span, from: JOIN[side] }];
+/**
+ * An ear's line (earEdge's one span, DECISIONS 215, 244): from where the crown's line joins it, down its outer edge, round
+ * the hem's tips, and up its inner side under the head; down the middle of its outer edge (y -112 to -86) no deeper than
+ * the sheet's there (its darkest L* 49 to 56 on both ears, where the deepening read 44 to 47), the hem's deep line as it was.
+ */
+const earMost = (p: P) => (p[1] > -112 && p[1] < -86 && Math.abs(p[0]) > 60 ? 0.1 : 1);
+const earSpans = (side: "L" | "R"): LitSpan[] => [{ ...edges[side].span, from: JOIN[side], most: earMost }];
 
 /**
  * The tail's cast shadow on the haunches (spec L396; on the tail's bone, clipped to the body): the tail's own shape
