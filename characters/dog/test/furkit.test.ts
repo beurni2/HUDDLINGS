@@ -657,3 +657,9 @@ test("a toe line along the paw's dome is the ball's meridian through its foot, r
   // Without a dome, the toe lines as before.
   assert.deepEqual(toes({ lines: [[[-5, -1.2], [-5.5, -8]], [[5, -1.2], [5.5, -8]]], fade: [-1.2, -8], soft: true }).inner!.length, 2);
 });
+
+test("the fur kit's second round's entries stand, and a soft chin's bare bottom cites one of them", () => {
+  const d = decisionsOf(readFileSync(new URL("../DECISIONS.md", import.meta.url), "utf8"));
+  for (let n = 260; n <= 266; n++) assert.ok(d.entries.includes(n) && !d.replaced[n], `${n} is a current entry`);
+  assert.ok(headFur(SOFT_CHIN).chins.every((c) => c.cites === undefined || (d.entries.includes(c.cites) && !d.replaced[c.cites])));
+});

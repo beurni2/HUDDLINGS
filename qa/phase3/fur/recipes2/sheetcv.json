@@ -1,0 +1,266 @@
+{
+ "hero": {
+  "legs": {
+   "min": 0.375,
+   "median": 0.461,
+   "max": 0.581
+  },
+  "back": {
+   "min": 0.27,
+   "median": 0.286,
+   "max": 0.302
+  },
+  "soles": {
+   "min": 0.168,
+   "median": 0.186,
+   "max": 0.213
+  },
+  "tail": {
+   "min": 0.313,
+   "median": 0.313,
+   "max": 0.313
+  }
+ },
+ "edges": [
+  {
+   "panel": "master/master.hero.main",
+   "class": "legs",
+   "kind": "line",
+   "box": [
+    134,
+    262,
+    156,
+    338
+   ],
+   "note": "the hero's right front leg against its haunch",
+   "widthPt": 1.358,
+   "widthCv": 0.386,
+   "ptPerPx": 0.4696
+  },
+  {
+   "panel": "master/master.hero.main",
+   "class": "legs",
+   "kind": "line",
+   "box": [
+    192,
+    282,
+    210,
+    346
+   ],
+   "note": "the hero's right front leg's inner edge",
+   "widthPt": 1.173,
+   "widthCv": 0.375,
+   "ptPerPx": 0.4696
+  },
+  {
+   "panel": "master/master.hero.main",
+   "class": "legs",
+   "kind": "line",
+   "box": [
+    212,
+    282,
+    230,
+    346
+   ],
+   "note": "the hero's left front leg's inner edge",
+   "widthPt": 1.154,
+   "widthCv": 0.581,
+   "ptPerPx": 0.4696
+  },
+  {
+   "panel": "master/master.hero.main",
+   "class": "legs",
+   "kind": "line",
+   "box": [
+    256,
+    256,
+    280,
+    330
+   ],
+   "note": "the hero's left front leg against its haunch",
+   "widthPt": 1.192,
+   "widthCv": 0.535,
+   "ptPerPx": 0.4696
+  },
+  {
+   "panel": "master/master.hero.main",
+   "class": "back",
+   "kind": "silhouette",
+   "box": [
+    258,
+    215,
+    300,
+    330
+   ],
+   "note": "the hero's left flank and haunch",
+   "widthPt": 1.174,
+   "widthCv": 0.27,
+   "ptPerPx": 0.4696
+  },
+  {
+   "panel": "master/master.hero.main",
+   "class": "back",
+   "kind": "line",
+   "box": [
+    70,
+    240,
+    104,
+    330
+   ],
+   "note": "the hero's right haunch over the tail",
+   "widthPt": 1.138,
+   "widthCv": 0.302,
+   "ptPerPx": 0.4696
+  },
+  {
+   "panel": "master/master.hero.main",
+   "class": "soles",
+   "kind": "silhouette",
+   "box": [
+    82,
+    350,
+    146,
+    372
+   ],
+   "note": "the hero's right front sole",
+   "widthPt": 1.222,
+   "widthCv": 0.213,
+   "ptPerPx": 0.4696
+  },
+  {
+   "panel": "master/master.hero.main",
+   "class": "soles",
+   "kind": "silhouette",
+   "box": [
+    155,
+    350,
+    205,
+    372
+   ],
+   "note": "the hero's middle sole",
+   "widthPt": 1.166,
+   "widthCv": 0.186,
+   "ptPerPx": 0.4696
+  },
+  {
+   "panel": "master/master.hero.main",
+   "class": "soles",
+   "kind": "silhouette",
+   "box": [
+    214,
+    350,
+    260,
+    372
+   ],
+   "note": "the hero's left front sole",
+   "widthPt": 1.171,
+   "widthCv": 0.168,
+   "ptPerPx": 0.4696
+  },
+  {
+   "panel": "master/master.hero.main",
+   "class": "tail",
+   "kind": "silhouette",
+   "box": [
+    5,
+    240,
+    76,
+    352
+   ],
+   "note": "the hero's tail plume",
+   "widthPt": 1.249,
+   "widthCv": 0.313,
+   "ptPerPx": 0.4696
+  },
+  {
+   "panel": "turnaround:side.L",
+   "class": "back",
+   "kind": "silhouette",
+   "box": [
+    60,
+    40,
+    190,
+    80
+   ],
+   "note": "side: the topline",
+   "widthPt": 1.356,
+   "widthCv": 0.331,
+   "ptPerPx": 0.7772
+  },
+  {
+   "panel": "turnaround:side.L",
+   "class": "tail",
+   "kind": "silhouette",
+   "box": [
+    150,
+    60,
+    215,
+    150
+   ],
+   "note": "side: the tail",
+   "widthPt": 1.372,
+   "widthCv": 0.313,
+   "ptPerPx": 0.7772
+  },
+  {
+   "panel": "turnaround:side.L",
+   "class": "soles",
+   "kind": "silhouette",
+   "box": [
+    10,
+    170,
+    160,
+    200
+   ],
+   "note": "side: the soles",
+   "widthPt": 1.356,
+   "widthCv": 0.244,
+   "ptPerPx": 0.7772
+  },
+  {
+   "panel": "turnaround:front",
+   "class": "legs",
+   "kind": "line",
+   "box": [
+    70,
+    150,
+    150,
+    210
+   ],
+   "note": "front: the front legs",
+   "widthPt": 1.451,
+   "widthCv": 0.253,
+   "ptPerPx": 0.7772
+  },
+  {
+   "panel": "turnaround:front",
+   "class": "soles",
+   "kind": "silhouette",
+   "box": [
+    50,
+    200,
+    170,
+    225
+   ],
+   "note": "front: the soles",
+   "widthPt": 1.521,
+   "widthCv": 0.228,
+   "ptPerPx": 0.7772
+  },
+  {
+   "panel": "turnaround:back",
+   "class": "back",
+   "kind": "silhouette",
+   "box": [
+    20,
+    90,
+    200,
+    190
+   ],
+   "note": "back: the shoulders and haunches",
+   "widthPt": 1.337,
+   "widthCv": 0.302,
+   "ptPerPx": 0.7847
+  }
+ ]
+}
