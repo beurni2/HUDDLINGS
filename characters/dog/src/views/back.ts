@@ -228,12 +228,16 @@ const lobeLock = (side: "L" | "R"): P[] => {
 
 // The topknot: two round fur lobes on the crown, as the sheet draws them from
 // behind, the left one a little the taller (the head's top, -164 at x -9.6),
-// their lines meeting in a V at the notch between them; each comes down to the
-// crown's line at its foot; its base lies on the crown, hidden.
+// the right one fuller on its outer side (its line still at y -161.5 by x 22,
+// dropping to the crown at x 23.6); their lines meeting in a V at the notch
+// between them; each comes down to the crown's line at its foot; its base lies
+// on the crown, hidden.
 const TUFT_NOTCH = 7;
+/** Where the right lobe's line comes down onto the crown's and joins it. */
+const TUFT_FOOT_R: P = [19.6, -155.8];
 const tuft = furSpan(smooth([[-16.6, -155.4], [-16.4, -158.6], [-14.6, -161.8], [-11.6, -163.8], [-8, -164.3], [-4.6, -163.4], [-1.8, -161], [2.4, -155.8],
-  [4.6, -159.4], [8.4, -162.2], [12.8, -163], [17, -162.8], [20.8, -161], [22.6, -158], [21.6, -155.6], [18.8, -155.7], [10, -150.6], [-4, -150.6],
-  [-13.6, -152.4]], { corners: [TUFT_NOTCH] }), [-16.6, -155.4], [18.8, -155.7]);
+  [4.6, -159.4], [8.4, -162.2], [12.8, -163], [17.6, -163.5], [21.4, -162.3], [23.7, -159.6], [23.8, -156.8], [22.4, -155.7], [19.6, -155.8], [10, -150.6],
+  [-4, -150.6], [-13.6, -152.4]], { corners: [TUFT_NOTCH] }), [-16.6, -155.4], TUFT_FOOT_R);
 
 // The body from behind: the shoulders come out from under the collar's ends
 // and run down and out, a lock stepping out a little under each collar end, to a
@@ -493,15 +497,17 @@ const rootGradient = (id: string, from: P, to: P) =>
 function headLinePiece(): Piece {
   const box = boxOf(head, 4);
   const r = litEdge(head, [...fur.spans(), ...sideSpans], "head.line", box, { reach: 0.5, crisp: true }), root = ribbons(head, rootLine, "head.line", 0.5);
-  // At each lock's tip the line curls in a little way under it, where the lock lies over the next, as the sheet draws
-  // it: a short inner stroke from the outline, tapering to nothing.
+  // Under each first lock's tip the outline itself curls back in, where the lock lies over the next, as the sheet draws
+  // it: from the notch between the two locks the line runs on in under the first lock, 4 to 6 pt, as dark as the
+  // outline there (the sheet's L* 64 to 77 along it, at y -150.3 from x -30.5 to -26 on the left and -148.3 to -149 from
+  // x 38 to 34 on the right), its start inside the outline's own ribbon, so it grows out of the line, never floats.
   const f = uid("blur");
-  const hooks = [[[-30.4, -153.6], [-29.2, -152.6], [-27.4, -152.2]], [[39.2, -150.4], [37.8, -149.8], [35.8, -149.8]]]
-    .map((pts) => tapered(curve(pts as P[], 6), 0.8, "inner", "crown lock", { taper: 1.2, tip: 0.15 }));
+  const hooks = [[[-31.7, -150.7], [-29.8, -150.5], [-27.6, -150.4], [-26.2, -150.7]], [[39.7, -148.1], [38, -148.5], [36, -148.5], [34.2, -149]]]
+    .map((pts) => tapered(curve(pts as P[], 6), 0.9, "inner", "crown lock", { taper: 1.2, tip: 0.15 }));
   // Each lower lobe's lowest lock, the head's side line carried on round it into the collar's end (243), tapering at both ends.
   const locks = (["L", "R"] as const).map((side) => tapered(lobeLock(side), 1.35, "outer", "lobe lock", { taper: 1.8, tip: 0.15 }));
   return piece(`<defs>${r.defs}${blur(f, pad(box, 2), 0.15)}${rootGradient(ROOT.R, [35.4, -152.4], [40.6, -148.4])}${lobeGradient(LOBE.L, "L")}${lobeGradient(LOBE.R, "R")}</defs>${r.body}` +
-    `<g filter="url(#${f})">${root.svg}</g><g fill="${C.softLine}" opacity="0.8" filter="url(#${f})">${hooks.map((h) => `<path d="${h.d}"/>`).join("")}</g>` +
+    `<g filter="url(#${f})">${root.svg}</g><g fill="${LINES.cream[1]}" filter="url(#${f})">${hooks.map((h) => `<path d="${h.d}"/>`).join("")}</g>` +
     locks.map((h, i) => `<path d="${h.d}" fill="url(#${LOBE[i ? "R" : "L"]})" filter="url(#${f})"/>`).join(""), box, {
     shapes: [{ name: "head.line", nodes: head.typed, segs: head.segs, outlined: [...r.outlined, ...root.outlined], fur: head.fur.map(([a, b]) => [fracAt(head, a), fracAt(head, b)]) }],
     lines: [...r.lines, ...root.lines, ...hooks.map((h) => h.line), ...locks.map((h) => h.line)],
@@ -567,17 +573,19 @@ function tailOnBody(): Piece {
 // with the locks clean the finder reads each root 4.8 and 8.9 pt low. The right band is typed from its own side of the crop,
 // which stands further out (the cream to 33.6 to 36.8 from y -132 to -120, 33.6 to
 // 34.4 down the side, 36.8 by -93), its tan deepening out to the side's line at x 41.
-const earShadowL: Node[] = [[-44, -146], [-36.4, -141.8], [-31.2, -141], [-30.2, -136.4], [-30.6, -132.4], [-33.6, -126.4], [-35.8, -121.2], [-32.8, -116.4], [-32.8, -109],
-  [-32.2, -102.6], [-33.2, -98], [-35.6, -92.6], [-37.4, -88.2], [-39.6, -85], [-46, -90], [-46, -130]];
-const earShadowR: Node[] = [[44, -146], [36.4, -141.8], [31.4, -141], [32.6, -136], [34.4, -132.4], [36, -126.4], [37.6, -121], [34.6, -116.4], [35, -109],
-  [34.6, -103], [35.4, -99], [36.8, -95.6], [37.6, -92.4], [38, -88.2], [39.6, -85], [46, -90], [46, -130]];
-const earShadow = { L: smooth(earShadowL), R: smooth(earShadowR) };
+const earShadowL: Node[] = [[-44, -146], [-36.4, -141.8], [-31.2, -141], [-30.2, -136.4], [-30.6, -132.4], [-33.6, -126.4], [-35.3, -122.4], [-36.5, -117.2],
+  [-33.1, -116.6], [-32.9, -113.4], [-32.8, -109], [-32.2, -102.6], [-33.2, -98], [-35.6, -92.6], [-37.4, -88.2], [-39.6, -85], [-46, -90], [-46, -130]];
+const earShadowR: Node[] = [[44, -146], [36.4, -141.8], [31.4, -141], [32.6, -136], [34.4, -132.4], [36, -126.4], [37.3, -122.2], [38.3, -117],
+  [34.7, -116.5], [34.7, -113.4], [35, -109], [34.6, -103], [35.4, -99], [36.8, -95.6], [37.6, -92.4], [38, -88.2], [39.6, -85], [46, -90], [46, -130]];
+/** The tuft's tip in each band's edge: the cream's lowest lock over the tan, its underside cut back in under it. */
+const TUFT_TIP = 7;
+const earShadow = { L: smooth(earShadowL, { corners: [TUFT_TIP] }), R: smooth(earShadowR, { corners: [TUFT_TIP] }) };
 /** Where each band is the ears' tan (at the side's line) and where it has paled to the head patches' tan. */
 const BAND = { L: [-39, -33], R: [41, 35] };
 function earOnHead(side: "L" | "R"): Piece {
   const s = earShadow[side], [x1, x2] = BAND[side];
   const box = boxOf(s, 0), g = uid("band"), f = uid("blur");
-  return piece(`<defs>${blur(f, pad(box, 3), 0.9)}<linearGradient id="${g}" gradientUnits="userSpaceOnUse" x1="${x1}" y1="0" x2="${x2}" y2="0">` +
+  return piece(`<defs>${blur(f, pad(box, 3), 0.6)}<linearGradient id="${g}" gradientUnits="userSpaceOnUse" x1="${x1}" y1="0" x2="${x2}" y2="0">` +
     `<stop offset="0" stop-color="${C.marking}"/><stop offset="1" stop-color="${C.patch}"/></linearGradient></defs>` +
     `<path d="${pathD(s.segs)}" fill="url(#${g})" opacity="0.95" filter="url(#${f})"/>`, pad(box, 3));
 }
@@ -612,13 +620,13 @@ export function back(): Drawn[] {
     inner: [
       { pts: [[-16.2, -156.4], [-14.6, -155.2], [-12.6, -154.8]], width: 0.85, colour: C.softLine },
       { pts: [[1.6, -157.2], [2.4, -155.2], [1.8, -153.4]], width: 0.8, colour: C.softLine, opacity: 0.9 },
-      { pts: [[22, -156.2], [20.6, -155.2], [18.2, -155]], width: 0.85, colour: C.softLine },
+      { pts: [[23.2, -156.4], [21.8, -155.3], [19.4, -155]], width: 0.85, colour: C.softLine },
     ],
     feather: { from: [0, -150.8], to: [0, -154.6] },
     // One line round both lobes and into the notch between them, from where the left lobe meets the crown's line to
     // where the right one does, joining it at each foot; its base on the crown unlined and feathered, as the sheet
     // draws it (242), cited by its length.
-  }, [{ from: [-16.6, -155.4], to: [18.8, -155.7], ends: ["join", "join"], cites: 242, bare: [0, along(tuft, [18.8, -155.7], [-16.6, -155.4]) + 0.5] }])));
+  }, [{ from: [-16.6, -155.4], to: TUFT_FOOT_R, ends: ["join", "join"], cites: 242, bare: [0, along(tuft, TUFT_FOOT_R, [-16.6, -155.4]) + 0.5] }])));
   add("body.back", lineGate(roomy(litPart("body.back", body, backPaint, bodySpans), 1)));
   // The saddle's left half, its edge brushed, a few darker strands in it following the back's round; its strip on the
   // left flank, inside the body's line; its right half over the spine above the tail.
