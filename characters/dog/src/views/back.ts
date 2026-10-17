@@ -13,7 +13,7 @@
 // down its sides by headFur(); the ears' edges by earEdge() and their paint by earFur(); the heels as small buns under
 // the haunches' notches; the tail's plume in typed clumps; the markings brushed; the collar's ends rounded; the ground
 // shadow by groundShadow(). Every drawing with a lit line is held by the line gate (lineGate()).
-import { CLUMPS, furEdge, furSpan, STEP, type Lock } from "../../../draw/fur.ts";
+import { CLUMPS, furEdge, furSpan, STEP, type FurRules, type Lock } from "../../../draw/fur.ts";
 import { arc, bbox, ellipse, fracAt, mirrorX, pathD, polyD, sample, smooth, v, type Node, type P, type Shape } from "../../../draw/geom.ts";
 import { ribbons, strokeOf, type DrawnLine, type Outline, type Stroke } from "../../../draw/line.ts";
 import { LIMITS, lineGate } from "../../../draw/lint.ts";
@@ -323,8 +323,9 @@ const HEEL = { L: { notch: bodyNodes[HEEL_NOTCH] as P, meet: bodyNodes[MEET] as 
 // (0.9, -33.8), then up its left side to the round head of the curl (its top at
 // y -49.6); down its right side the plume is one big round arc, the sheet's line
 // out at x 28.5 by y -37, 30.5 at -26 and 28.5 at -17, sweeping in to 22.5 at
-// -9.5 and down onto the ground by x 10, in five broad soft clumps, each lying
-// over the one below, its edge running on into the plume from the notch (246);
+// -9.5 and down onto the ground by x 10, in the sheet's four broad soft lobes,
+// each lying over the one below, its line hooking on into the plume from the
+// notch (246, 283);
 // its foot rests on the ground on the body's own line there, so the two read as
 // the one ground line the sheet draws under it, its middle dipping 0.5 pt below
 // it from x 0 to 8, as the sheet's lowest lobe does (its ground line at y -1
@@ -332,15 +333,24 @@ const HEEL = { L: { notch: bodyNodes[HEEL_NOTCH] as P, meet: bodyNodes[MEET] as 
 // the hook. Its top right is the sheet's arc (its line at x 24.5 by y -44).
 /** The pointed tuft at the hook's end, and the hook's inner bend over the saddle. */
 const TAIL_TIP = 0;
-/** The plume's right clumps (CLUMPS: broad soft lobes, uneven, never a repeat), low enough that the arc stays round. */
-const PLUME: Lock[] = [{ len: 1.5, width: 9.8, lean: 0.3, dip: 0.3 }, { len: 1.95, width: 9.9, lean: 0.4, dip: 0.3 }, { len: 1.45, width: 9.2, lean: 0.25, dip: 0.3 },
-  { len: 1.9, width: 9.4, lean: 0.45, dip: 0.3 }, { len: 1.5, width: 9.7, lean: 0.35 }];
+/**
+ * The plume's right side in the sheet's four lobes (DECISIONS 283): the crop's line notches at (28.6, -31.8), (27.7, -18)
+ * and (21, -7.5), so its lobes run 10.7, 14, 12.5 and 7 pt along the edge, uneven, never a repeat, broad and soft; the
+ * five clumps of 9.2 to 9.9 pt typed before notched it twice where the sheet does not, an even ripple.
+ */
+const PLUME: Lock[] = [{ len: 1.7, width: 10.7, lean: 0.3, dip: 0.35 }, { len: 2.2, width: 14.6, lean: 0.3, dip: 0.45 }, { len: 1.8, width: 11.6, lean: 0.5, dip: 0.55 },
+  { len: 1.2, width: 7, lean: 0.35 }];
+/**
+ * CLUMPS (213) as the back's plume needs them: its lobes up to 15 pt wide along the edge, where the rules' 10 pt (the
+ * tail-curve panel's and the profile's plume) refuses the back crop's 12.5 and 14; the rest of the rules as they are.
+ */
+const PLUME_RULES: FurRules = { ...CLUMPS, width: [4, 15] };
 /** Each clump of the plume: its tip, root and notches, for the shades and partings drawn inside it. */
 const tailLocks: { tip: P; root: P; notches: [P, P] }[] = [];
 const tail = furSpan(furEdge(smooth([[-9.8, -24.2], [-5.6, -28.4], [-1.4, -31.2], [0.9, -33.8], [0.8, -39.6], [2.6, -45], [7, -48.6], [13.6, -49.6],
   [21, -47.1], [25.8, -42.1], [28.4, -33.6], [29.5, -25.9], [28.5, -20.4], [25.4, -12.6], [20.6, -7.4], [15.6, -3.2], [9.6, -0.95], [4, -0.25], [-1.4, -0.8],
   [-6.4, -0.95], [-10.6, -6.8], [-12.2, -13.6], [-11.6, -19.6]], { corners: [TAIL_TIP] }),
-[25.8, -42.1], [15.6, -3.2], PLUME, 0.35, (tip, root, notches) => tailLocks.push({ tip, root, notches }), CLUMPS), [-9, -25.2], [-10.4, -21.6]);
+[25.8, -42.1], [15.6, -3.2], PLUME, 0.35, (tip, root, notches) => tailLocks.push({ tip, root, notches }), PLUME_RULES), [-9, -25.2], [-10.4, -21.6]);
 /**
  * The tail's root, where it leaves the rump (rig.json's tail pivot in this view): the middle of its tan root as it shows
  * from behind (phase 2's patch there centres on -5.7, -23.7), at the side view's root height (-23), on the tail.
@@ -432,17 +442,30 @@ const tailPaint: Paint = {
   // hook's inner bend, where the curl rolls over the saddle.
   shade: { multiply: C.furShadeBy, rim: { inset: 2, toLight: 3.4 }, shapes: ["M-12 -4 C-2 0 14 -1 28 -7 L28 1 L-12 1Z", ...tailShades], blur: 2 },
   highlight: { d: `${pathD(ellipse([8.6, -44], 7.6, 3.6, -8))} ${pathD(ellipse([-4, -12], 4.4, 6, 0))}`, colour: C.light, opacity: 0.4, blur: 2.8 },
-  inner: [
-    // Where each clump lies over the one below, its edge runs on a little way into the plume from the notch, as the
-    // sheet draws it, light and fading; and one fur stroke under the curl's top, where its lock lies over the plume.
-    ...tailLocks.map(({ notches, tip }) => {
-      const n = notches[0], into = v.norm(v.sub([10, -22], n)), towards = v.sub(tip, n);
-      const p1 = v.add(v.add(n, v.mul(towards, 0.3)), v.mul(into, 1.4)), p2 = v.add(v.add(n, v.mul(towards, 0.7)), v.mul(into, 2));
-      return { pts: curve([n, p1, p2], 6), width: 0.75, colour: C.softLine, opacity: 0.8 };
-    }),
-    { pts: curve([[23.2, -45.6], [21.9, -43.8], [21, -42.2]], 6), width: 0.7, colour: C.softLine, opacity: 0.7 },
-  ],
+  // One fur stroke under the curl's top, where its lock lies over the plume.
+  inner: [{ pts: curve([[23.2, -45.6], [21.9, -43.8], [21, -42.2]], 6), width: 0.7, colour: C.softLine, opacity: 0.7 }],
 };
+/**
+ * Where each of the plume's lobes lies over the one below, the sheet's line runs on past the notch into the plume, the
+ * upper lobe's own outline hooking in over the lower one's top and thinning out (DECISIONS 283): from the upper notch a
+ * short tick (the crop's line on 1 pt past it), from the middle one 3.5 pt down and in (to (24.5, -15.7) on the crop),
+ * and from the lowest a long hook, 5 pt, nearly level, in over the foot's lobe (to (16.7, -7.85)); each as dark and as
+ * wide as the outline it runs on from, starting 0.6 pt back up that outline inside its ribbon so it grows out of the
+ * line, never floats, and tapering out where it ends. Typed from each notch as laid out (`tailLocks`), so they move with
+ * the lobes. The faint partings 0.75 pt wide in the soft line that stood there read as nothing at phone size.
+ */
+const PLUME_HOOKS: { at: number; pts: P[]; tone: number }[] = [
+  { at: 0, pts: [[0.25, -0.55], [0, 0], [-0.8, 0.7], [-1.5, 1.5]], tone: 0 },
+  { at: 1, pts: [[0.35, -0.5], [0, 0], [-1, 0.6], [-2, 1.3], [-2.8, 2.1]], tone: 1 },
+  { at: 2, pts: [[0.55, -0.3], [0, 0], [-1.3, 0.35], [-2.9, 0.5], [-4.4, 0.6]], tone: 1 },
+];
+function plumeHooks(box: Box): Piece {
+  const hooks = PLUME_HOOKS.map(({ at, pts, tone }) => {
+    const n = tailLocks[at]!.notches[1];
+    return { ...tapered(curve(pts.map((p) => v.add(n, p)), 6), 1.3, "outer", "plume hook", { taper: 1.2, tip: 0.15 }), tone };
+  });
+  return piece(hooks.map((h) => `<path d="${h.d}" fill="${LINES.cream[h.tone]}"/>`).join(""), box, { shapes: [], lines: hooks.map((h) => h.line) });
+}
 /**
  * The tail's line (parts/lines.ts; DECISIONS 242, 246), where the sheet draws one, and as light as it draws it: from its
  * left side under the hook, over the hook's tip (the cream ladder's 0.3 there, the sheet's L* 59 to 61, where the tan
@@ -638,19 +661,31 @@ function tailOnBody(): Piece {
 // with the locks clean the finder reads each root 4.8 and 8.9 pt low. The right band is typed from its own side of the crop,
 // which stands further out (the cream to 33.6 to 36.8 from y -132 to -120, 33.6 to
 // 34.4 down the side, 36.8 by -93), its tan deepening out to the side's line at x 41.
-const earShadowL: Node[] = [[-44, -146], [-38.6, -143], [-33.8, -139.4], [-30.4, -137.6], [-30.6, -132.4], [-33.6, -126.4], [-35.3, -122.4], [-36.5, -117.2],
-  [-33.1, -116.6], [-32.9, -113.4], [-32.8, -109], [-32.2, -102.6], [-33.2, -98], [-35.6, -92.6], [-37.4, -88.2], [-39.6, -85], [-46, -90], [-46, -130]];
-const earShadowR: Node[] = [[44, -146], [37.8, -142.8], [33.8, -139.6], [31.2, -137.6], [34.4, -132.4], [36, -126.4], [37.3, -122.2], [38.3, -117],
-  [34.7, -116.5], [34.7, -113.4], [35, -109], [34.6, -103], [35.4, -99], [36.8, -95.6], [37.6, -92.4], [38, -88.2], [39.6, -85], [46, -90], [46, -130]];
-/** The tuft's tip in each band's edge: the cream's lowest lock over the tan, its underside cut back in under it. */
+const earShadowL: Node[] = [[-44, -146], [-38.6, -143], [-33.8, -139.4], [-30.4, -137.6], [-30.6, -132.4], [-33.9, -126.6], [-35.1, -123.2], [-35.5, -120.2],
+  [-34.2, -118.2], [-32.9, -116.2], [-32.7, -113.4], [-32.8, -109], [-32.2, -102.6], [-33.2, -98], [-35.6, -92.6], [-37.4, -88.2], [-39.6, -85], [-46, -90], [-46, -130]];
+const earShadowR: Node[] = [[44, -146], [37.8, -142.8], [33.8, -139.6], [31.2, -137.6], [34.4, -132.4], [35.2, -126.6], [36.4, -122.8], [37.3, -119.8],
+  [36.2, -117.6], [35.1, -115.9], [34.9, -113.4], [35, -109], [34.6, -103], [35.4, -99], [36.8, -95.6], [37.6, -92.4], [38, -88.2], [39.6, -85], [46, -90], [46, -130]];
+/**
+ * The tuft's tip in each band's edge (DECISIONS 282): the cream's lowest lock reaching out over the tan to a soft point
+ * at y -120.2 on the left and -119.8 on the right, its underside going back in along a diagonal over 4 pt, as the
+ * sheet's (where its b* crosses 20, the cream's edge stands at x -35.1 by y -120 and comes back in to -33.7 by -117.7
+ * and -32.7 by -116.1; on the right 37.1 by -119.3, 36.2 by -117.7 and 35.2 by -116.1), never the right-angled step
+ * typed before (its tip at y -117.2, 1.4 pt further out, its underside cut back in within 1 pt).
+ */
 const TUFT_TIP = 7;
 const earShadow = { L: smooth(earShadowL, { corners: [TUFT_TIP] }), R: smooth(earShadowR, { corners: [TUFT_TIP] }) };
+/**
+ * How soft each band's edge is, σ in points (282): the sheet's cream fades into the band over 2.5 to 4.5 pt (b* from 31
+ * to 14 over x -36.7 to -34.3 at y -122, 33 to 11 over -35.9 to -31.2 at -112), and with the tuft's underside a diagonal
+ * the edge can be as soft as that without smoothing the step away (the 0.6 that kept the right angle's corner read hard).
+ */
+const BAND_SOFT = 0.85;
 /** Where each band is the ears' tan (at the side's line) and where it has paled to the head patches' tan. */
 const BAND = { L: [-39, -33], R: [41, 35] };
 function earOnHead(side: "L" | "R"): Piece {
   const s = earShadow[side], [x1, x2] = BAND[side];
   const box = boxOf(s, 0), g = uid("band"), f = uid("blur");
-  return piece(`<defs>${blur(f, pad(box, 3), 0.6)}<linearGradient id="${g}" gradientUnits="userSpaceOnUse" x1="${x1}" y1="0" x2="${x2}" y2="0">` +
+  return piece(`<defs>${blur(f, pad(box, 3), BAND_SOFT)}<linearGradient id="${g}" gradientUnits="userSpaceOnUse" x1="${x1}" y1="0" x2="${x2}" y2="0">` +
     `<stop offset="0" stop-color="${C.marking}"/><stop offset="1" stop-color="${C.patch}"/></linearGradient></defs>` +
     `<path d="${pathD(s.segs)}" fill="url(#${g})" opacity="0.95" filter="url(#${f})"/>`, pad(box, 3));
 }
@@ -696,7 +731,8 @@ export function back(): Drawn[] {
     brushed("back.patch.L", body, saddleL, 0.4, 2401, backFlow, 26, 4))));
   add("back.patch.R", lineGate(join(litMarking("back.patch.R", onBody, saddleR, { fill: C.marking, blur: 0.4 }), brushed("back.patch.R", body, saddleR, 0.4, 2402, backFlow, 14, 1))));
   add("shadow.tail", tailOnBody());
-  add("tail", lineGate(litPart("tail", tail, tailPaint, tailSpans)));
+  const plume = litPart("tail", tail, tailPaint, tailSpans);
+  add("tail", lineGate(join(plume, plumeHooks(plume.box))));
   const onTail = { shape: tail, paint: tailPaint, spans: tailSpans };
   add("tail.base", lineGate(join(litMarking("tail.base", onTail, tailBase, { fill: C.patch, blur: 0.9, fade: { from: [-5, -21.8], to: [-4, -17.2] } }))));
   // The collar (the front's recipe, from behind): the band's blue, a lighter stripe along its top toward the light and
