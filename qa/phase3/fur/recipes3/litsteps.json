@@ -1,0 +1,405 @@
+[
+ {
+  "on": "cream",
+  "panel": "master.turnaround.side",
+  "what": "the plume's top and back",
+  "box": [
+   150,
+   133,
+   193,
+   165
+  ],
+  "tau": 11.0,
+  "px": 63,
+  "quartiles": {
+   "L": [
+    73.8,
+    76.8,
+    81.6
+   ],
+   "a": [
+    2.1,
+    4.0,
+    5.9
+   ],
+   "b": [
+    12.2,
+    15.9,
+    18.5
+   ]
+  },
+  "medianHex": "#D1BAA0"
+ },
+ {
+  "on": "cream",
+  "panel": "master.turnaround.side",
+  "what": "the crown and the topknot",
+  "box": [
+   28,
+   4,
+   132,
+   32
+  ],
+  "tau": 11.0,
+  "px": 105,
+  "quartiles": {
+   "L": [
+    67.9,
+    72.9,
+    77.5
+   ],
+   "a": [
+    4.2,
+    5.8,
+    8.0
+   ],
+   "b": [
+    16.0,
+    17.7,
+    19.4
+   ]
+  },
+  "medianHex": "#CAAE93"
+ },
+ {
+  "on": "cream",
+  "panel": "master.turnaround.front",
+  "what": "the crown and the topknot",
+  "box": [
+   60,
+   2,
+   160,
+   30
+  ],
+  "tau": 10.0,
+  "px": 107,
+  "quartiles": {
+   "L": [
+    68.9,
+    71.6,
+    75.7
+   ],
+   "a": [
+    3.6,
+    5.1,
+    7.9
+   ],
+   "b": [
+    14.8,
+    16.6,
+    18.6
+   ]
+  },
+  "medianHex": "#C4AB92"
+ },
+ {
+  "on": "cream",
+  "panel": "master.turnaround.three-quarter",
+  "what": "the crown and the topknot",
+  "box": [
+   60,
+   2,
+   170,
+   32
+  ],
+  "tau": 11.0,
+  "px": 122,
+  "quartiles": {
+   "L": [
+    65.1,
+    68.9,
+    72.6
+   ],
+   "a": [
+    5.6,
+    7.4,
+    8.6
+   ],
+   "b": [
+    16.3,
+    18.3,
+    19.5
+   ]
+  },
+  "medianHex": "#C1A288"
+ },
+ {
+  "on": "cream",
+  "panel": "master.turnaround.back",
+  "what": "the crown and the topknot",
+  "box": [
+   55,
+   4,
+   145,
+   30
+  ],
+  "tau": 9.0,
+  "px": 102,
+  "quartiles": {
+   "L": [
+    69.3,
+    70.2,
+    72.3
+   ],
+   "a": [
+    5.3,
+    6.0,
+    8.0
+   ],
+   "b": [
+    16.4,
+    17.7,
+    19.1
+   ]
+  },
+  "medianHex": "#C3A78C"
+ },
+ {
+  "on": "cream",
+  "panel": "master.turnaround.back",
+  "what": "the plume's top",
+  "box": [
+   110,
+   120,
+   150,
+   150
+  ],
+  "tau": 9.0,
+  "px": 25,
+  "quartiles": {
+   "L": [
+    60.6,
+    63.0,
+    66.6
+   ],
+   "a": [
+    6.2,
+    8.6,
+    8.9
+   ],
+   "b": [
+    14.0,
+    16.4,
+    21.9
+   ]
+  },
+  "medianHex": "#B2927C"
+ },
+ {
+  "on": "cream",
+  "panel": "master.hero.main",
+  "what": "the crown and the topknot",
+  "box": [
+   80,
+   5,
+   262,
+   50
+  ],
+  "tau": 9.0,
+  "px": 202,
+  "quartiles": {
+   "L": [
+    59.2,
+    62.7,
+    69.3
+   ],
+   "a": [
+    7.5,
+    11.1,
+    14.1
+   ],
+   "b": [
+    19.6,
+    23.1,
+    26.3
+   ]
+  },
+  "medianHex": "#B9906F"
+ },
+ {
+  "on": "cream",
+  "panel": "master.hero.main",
+  "what": "the plume's top",
+  "box": [
+   10,
+   245,
+   75,
+   300
+  ],
+  "tau": 9.0,
+  "px": 124,
+  "quartiles": {
+   "L": [
+    69.6,
+    73.5,
+    77.4
+   ],
+   "a": [
+    6.6,
+    8.7,
+    11.3
+   ],
+   "b": [
+    16.7,
+    18.6,
+    21.3
+   ]
+  },
+  "medianHex": "#D1AE93"
+ },
+ {
+  "on": "tan",
+  "panel": "master.turnaround.front",
+  "what": "the left ear's top",
+  "box": [
+   18,
+   40,
+   58,
+   72
+  ],
+  "tau": 10.0,
+  "px": 32,
+  "quartiles": {
+   "L": [
+    48.3,
+    50.1,
+    54.3
+   ],
+   "a": [
+    13.6,
+    15.3,
+    17.5
+   ],
+   "b": [
+    28.3,
+    30.2,
+    32.1
+   ]
+  },
+  "medianHex": "#9E6C44"
+ },
+ {
+  "on": "tan",
+  "panel": "master.turnaround.front",
+  "what": "the right ear's top",
+  "box": [
+   160,
+   30,
+   205,
+   68
+  ],
+  "tau": 10.0,
+  "px": 53,
+  "quartiles": {
+   "L": [
+    52.7,
+    53.7,
+    58.6
+   ],
+   "a": [
+    12.4,
+    14.6,
+    21.0
+   ],
+   "b": [
+    25.8,
+    27.4,
+    35.6
+   ]
+  },
+  "medianHex": "#A67652"
+ },
+ {
+  "on": "tan",
+  "panel": "master.turnaround.side",
+  "what": "the ear's top",
+  "box": [
+   85,
+   28,
+   150,
+   46
+  ],
+  "tau": 11.0,
+  "px": 21,
+  "quartiles": {
+   "L": [
+    55.6,
+    67.4,
+    71.5
+   ],
+   "a": [
+    6.6,
+    12.3,
+    14.4
+   ],
+   "b": [
+    20.1,
+    25.6,
+    27.3
+   ]
+  },
+  "medianHex": "#C99B77"
+ },
+ {
+  "on": "tan",
+  "panel": "master.turnaround.three-quarter",
+  "what": "the near ear's top",
+  "box": [
+   150,
+   28,
+   200,
+   60
+  ],
+  "tau": 11.0,
+  "px": 42,
+  "quartiles": {
+   "L": [
+    50.4,
+    62.4,
+    65.6
+   ],
+   "a": [
+    7.7,
+    9.4,
+    14.6
+   ],
+   "b": [
+    18.4,
+    22.3,
+    27.7
+   ]
+  },
+  "medianHex": "#B59070"
+ },
+ {
+  "on": "tan",
+  "panel": "master.turnaround.front",
+  "what": "the left ear's hem (not lit)",
+  "box": [
+   30,
+   160,
+   70,
+   200
+  ],
+  "tau": 10.0,
+  "px": 64,
+  "quartiles": {
+   "L": [
+    50.9,
+    55.1,
+    70.7
+   ],
+   "a": [
+    9.2,
+    14.0,
+    16.1
+   ],
+   "b": [
+    23.2,
+    25.7,
+    27.2
+   ]
+  },
+  "medianHex": "#A97A58"
+ }
+]

@@ -18,9 +18,10 @@
 // head (huffy's puffed head) passes its own outline and moves every typed place with it (`at`), and a state that
 // raises an ear off its temple (head.line's temple states) starts that side's cheek line lower (`raised`).
 import { furEdge, type FurRules, type Lock } from "../../../draw/fur.ts";
-import { fracAt, minRadius, sample, spanPoints, arc, v, type P, type Shape } from "../../../draw/geom.ts";
+import { arc, area, fracAt, minRadius, sample, spanPoints, v, type P, type Shape } from "../../../draw/geom.ts";
 import { strokeOf } from "../../../draw/line.ts";
 import { blur, pad, piece, uid, type Box, type Piece } from "../../../draw/svg.ts";
+import { C } from "../palette.ts";
 import type { LitSpan, SpanEnd } from "./lines.ts";
 
 /** The rows each place's fur must keep (DECISIONS 214, with 213's rules for locks). */
@@ -56,6 +57,37 @@ export const HEAD_FUR = {
      * (which head.line's line covers everywhere else) is covered.
      */
     fringe: { width: 1.4, offset: 0, blur: 0.35, opacity: 1 } },
+  /**
+   * The soft chin's wisps as hair flicks (DECISIONS 287, the lead's L3), with `flicks`: pointed hair flicks longer
+   * than wide, of uneven lengths, as master.hero.main draws its lower face's fur over the collar (each flick 2 to 4 of
+   * its px long and 1 to 1.5 wide at 0.47 pt per px: about 1 to 2 pt long on 0.5 to 0.7 pt at its root, leaning out
+   * and curving a little), and hair-fine in profile: 2 to 6 of them, each hanging `len` pt on `width` pt at its root,
+   * at least `ratio` as long as wide, its tip at most `tipRound` round, leaning `lean` along the fur's flow (its lean
+   * curving it), neighbours' lengths differing by `vary` or more and their gaps by `spacing`; 261's wisps, wider than
+   * long (1 to 1.6 pt on 2.4 to 3.6), read as tabs.
+   */
+  flick: { count: [2, 6] as [number, number], len: [1, 4] as [number, number], width: [0.5, 2.4] as [number, number], tipRound: 0.08, lean: [0.35, 0.9] as [number, number], ratio: 1.1, vary: 0.25, spacing: 0.3 },
+  /**
+   * The chin's warm fur tone where it meets the collar (DECISIONS 287, the lead's L3), fringe()'s default: the crop's
+   * faint line along the chin's bottom is no line but a band of the fur's warm tone just inside the edge, L* 89.8 to
+   * 84.5 to 75.7 (b* 14 to 23) over about 1.5 pt down to the edge on the front crop at x 0, and 86 to 77 to 73 (b* 15 to
+   * 21) on the hero at x -5: the warm line's soft mix (C.softLine, L* 71.5, b* 21.3) at `opacity` over the cream (L* 79
+   * and b* 17 at its darkest), a band `width` pt wide, softened by `blur` (σ, pt), whose outer side lies `over` pt past
+   * the head's edge, so the fur darkens all the way down to the collar as the crop's does (at x 0, 1.5 pt above the edge
+   * L* 84, 1 pt 81, 0.5 pt 68 where it meets the collar's dark) and covers the head's stencil edge there, which no line
+   * covers; a band whose outer side stopped at the edge, with a cream feather over the edge, left a lighter strip (L* 84
+   * at 0.5 pt, 80 at 1) that read as a line along the chin. Its width comes and goes by `vary` along the edge (seeded),
+   * as the crop's band does (1 pt above the edge, L* 62 to 95 from x -25 to 25), so it never reads as an even line.
+   * Round a hair flick it runs root to root and `past` pt on.
+   */
+  warm: { width: 1.3, opacity: 0.7, blur: 0.35, over: 0.35, past: 0.5, vary: 0.35 },
+  /**
+   * The contact crease on the collar right under the chin's fur (DECISIONS 287, the lead's L3; chinShadow()'s
+   * `crease`): the hero's L* 45 to 50 where the fur meets the collar, bluish (the collar's dark rim, C.collarRim, L*
+   * 50.3), a stroke `width` pt wide along the head's edge on the collar's side, softened by `blur`, so it fades out
+   * within 2 pt of the edge.
+   */
+  crease: { width: 1.1, blur: 0.4, opacity: 0.85 },
   /** The chin's corners, where the jaw turns under: at least this round. */
   cornerPt: 6,
   /** How far from the crown's typed join end the head's and the ear's outlines must cross, in points. */
@@ -163,6 +195,8 @@ export interface SoftChin {
    * or turned combs out to either side.
    */
   flow?: P;
+  /** Its wisps as pointed hair flicks, longer than wide and of uneven lengths, hair-fine in profile (HEAD_FUR.flick; DECISIONS 287). Left out, 261's wisps. */
+  flicks?: boolean;
 }
 
 export interface HeadFurSpec {
@@ -203,9 +237,11 @@ export interface HeadFur {
   soften(colour: string, box: Box, raised?: Partial<Record<Side, boolean>>): { defs: string; body: string };
   /**
    * A soft chin's fringe (DECISIONS 261): the cream feathered along the chin's unlined bottom and its wisps
-   * (HEAD_FUR.softChin.fringe), drawn in head.line under its lines; nothing for a chin that is lined all along.
+   * (HEAD_FUR.softChin.fringe) in `colour`, drawn in head.line under its lines; nothing for a chin that is lined all
+   * along. With no colour, the chin's warm fur tone (HEAD_FUR.warm, DECISIONS 287): a band of it just inside the edge,
+   * a little over it, its reach coming and going, and each hair flick warm inside its own outline.
    */
-  fringe(colour: string, box: Box): { defs: string; body: string };
+  fringe(colour: string | undefined, box: Box): { defs: string; body: string };
 }
 
 /** Where two closed outlines cross, every point, from their samples. */
@@ -276,9 +312,20 @@ function along(shape: Shape, p: P, d: number): P {
   return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
 }
 
+/**
+ * Which way line.ts's strokeOf `offset` (along each point's (−t_y, t_x)) runs into a shape, for points along its edge in
+ * path order: 1 or −1, from the shape's own turning (lines.ts's outward normal is (t_y, −t_x) on a shape whose area is
+ * positive), so a stretch that runs round a hair flick reads the same as one along the smooth arc.
+ */
+function inwardSign(shape: Shape): 1 | -1 {
+  return area(sample(shape.segs, 32)) > 0 ? 1 : -1;
+}
+
 /** Every way a soft chin breaks HEAD_FUR.softChin, in words (DECISIONS 261). */
 function softChinCheck(head: Shape, chin: Chin, at: (p: P) => P): string[] {
-  const rules = HEAD_FUR.softChin, wisps = chin.soft!.wisps, problems: string[] = [];
+  const flicks = !!chin.soft!.flicks;
+  // Hair flicks (DECISIONS 287) are held to their own rules, their neighbours told apart by their lengths alone.
+  const rules = flicks ? { ...HEAD_FUR.flick, light: HEAD_FUR.softChin.light } : HEAD_FUR.softChin, wisps = chin.soft!.wisps, problems: string[] = [];
   const within = (x: number, [lo, hi]: [number, number]) => x >= lo - 1e-9 && x <= hi + 1e-9;
   if (chin.scallops.length) problems.push("a soft chin has wisps, not scallops: leave `scallops` empty");
   if (!within(wisps.length, rules.count)) problems.push(`${wisps.length} wisps, not ${rules.count[0]} to ${rules.count[1]}`);
@@ -302,8 +349,9 @@ function softChinCheck(head: Shape, chin: Chin, at: (p: P) => P): string[] {
     if (i > 0 && s <= place[i - 1]!) problems.push(`wisp ${i} does not follow wisp ${i - 1} along the chin`);
     const next = wisps[i + 1];
     if (next) {
-      const differ = Math.max(Math.abs(w.len - next.len) / Math.max(w.len, next.len), Math.abs(w.width - next.width) / Math.max(w.width, next.width));
-      if (differ < rules.vary - 1e-9) problems.push(`wisps ${i} and ${i + 1} differ by ${(differ * 100).toFixed(0)}%, under ${rules.vary * 100}%: a row`);
+      const lengths = Math.abs(w.len - next.len) / Math.max(w.len, next.len);
+      const differ = flicks ? lengths : Math.max(lengths, Math.abs(w.width - next.width) / Math.max(w.width, next.width));
+      if (differ < rules.vary - 1e-9) problems.push(`wisps ${i} and ${i + 1} differ by ${(differ * 100).toFixed(0)}%${flicks ? " in length" : ""}, under ${rules.vary * 100}%: a row`);
     }
   });
   const gaps = place.slice(1).map((s, i) => s - place[i]!);
@@ -358,9 +406,11 @@ export function headFur(h: HeadFurSpec): HeadFur {
       if (problems.length) throw new Error(`headFur: the soft chin breaks its rules: ${problems.join("; ")}`);
       // Each wisp is laid on its own width either side of where it hangs (furEdge snaps its ends to its samples, so a
       // 2 pt wisp's laid width can differ from its typed one by a sample's length: softChinCheck holds the typed row).
+      // Hair flicks (DECISIONS 287) take their own sharper tips.
+      const tipRound = Math.min(soft.flicks ? HEAD_FUR.flick.tipRound : HEAD_FUR.softChin.tipRound, h.chin.tipRound);
       for (const w of soft.wisps) {
         const c = at(w.at);
-        head = furEdge(head, along(head, c, -w.width / 2), along(head, c, w.width / 2), [{ len: w.len, lean: w.lean }], Math.min(HEAD_FUR.softChin.tipRound, h.chin.tipRound), note(tufts.chin));
+        head = furEdge(head, along(head, c, -w.width / 2), along(head, c, w.width / 2), [{ len: w.len, lean: w.lean }], tipRound, note(tufts.chin));
       }
     } else head = furEdge(head, at(h.chin.from), at(h.chin.to), flowing(h.chin.scallops), h.chin.tipRound, note(tufts.chin), h.chin.profile ? HEAD_FUR.profileChin : HEAD_FUR.chin);
   }
@@ -443,18 +493,43 @@ export function headFur(h: HeadFurSpec): HeadFur {
     head, crown, cheeks, chin, chins, tufts, roots,
     fringe: (colour, box) => {
       if (!h.chin?.soft) return { defs: "", body: "" };
-      const f = uid("blur"), { width, offset, blur: sd, opacity } = HEAD_FUR.softChin.fringe;
-      const d = chins.slice(0, -1).map((p, i) => strokeOf(spanPoints(head, fracAt(head, p.to as P), fracAt(head, chins[i + 1]!.from as P)), width, { taper: 1.5, tip: 0.4, offset }).d);
+      const soft = h.chin.soft;
+      // Each bare stretch of the chin's edge: between its firm sides (and their strokes), from a side with no firm run,
+      // and round each wisp, wherever it hangs (a profile's lie on the jaw over the collar, behind the chin's line).
       const first = chins[0]!, last = chins.at(-1)!, ends = [at(h.chin.line.from), at(h.chin.line.to)];
-      // A side with no firm run leaves its stretch of the bottom bare from the line's own end.
-      if (h.chin.soft.firm[0] <= 0 && first.from !== ends[0]) d.unshift(strokeOf(spanPoints(head, fracAt(head, ends[0]!), fracAt(head, first.from as P)), width, { taper: 1.5, tip: 0.4, offset }).d);
-      if (h.chin.soft.firm[1] <= 0 && last.to !== ends[1]) d.push(strokeOf(spanPoints(head, fracAt(head, last.to as P), fracAt(head, ends[1]!)), width, { taper: 1.5, tip: 0.4, offset }).d);
-      // And round each wisp, wherever it hangs (a profile's lie on the jaw over the collar, behind the chin's line).
-      for (const w of h.chin.soft.wisps) {
-        const c = at(w.at);
-        d.push(strokeOf(spanPoints(head, fracAt(head, along(head, c, -1.5 * w.width)), fracAt(head, along(head, c, 1.5 * w.width))), width, { taper: 1.5, tip: 0.4, offset }).d);
+      const stretches: P[][] = chins.slice(0, -1).map((p, i) => spanPoints(head, fracAt(head, p.to as P), fracAt(head, chins[i + 1]!.from as P)));
+      if (soft.firm[0] <= 0 && first.from !== ends[0]) stretches.unshift(spanPoints(head, fracAt(head, ends[0]!), fracAt(head, first.from as P)));
+      if (soft.firm[1] <= 0 && last.to !== ends[1]) stretches.push(spanPoints(head, fracAt(head, last.to as P), fracAt(head, ends[1]!)));
+      // Hair flicks are each their own hair (DECISIONS 287): its outline, root to root and HEAD_FUR.warm.past on either
+      // side; 261's wisps a wisp and a half either side of where each hangs, in the bare stretches.
+      if (soft.flicks && tufts.chin.length !== soft.wisps.length) throw new Error(`headFur: ${tufts.chin.length} flicks laid for ${soft.wisps.length} typed`);
+      const hairs: { pts: P[]; width: number }[] = [];
+      soft.wisps.forEach((w, k) => {
+        if (soft.flicks) {
+          const [p, q] = tufts.chin[k]!.notches, ahead = between(head, p, q).forward;
+          hairs.push({ pts: spanPoints(head, fracAt(head, along(head, ahead ? p : q, -HEAD_FUR.warm.past)), fracAt(head, along(head, ahead ? q : p, HEAD_FUR.warm.past))), width: w.width });
+          return;
+        }
+        const c = at(w.at), reach = 1.5 * w.width;
+        stretches.push(spanPoints(head, fracAt(head, along(head, c, -reach)), fracAt(head, along(head, c, reach))));
+      });
+      const f = uid("blur");
+      if (colour !== undefined) {
+        const { width, offset, blur: sd, opacity } = HEAD_FUR.softChin.fringe;
+        const d = [...stretches, ...hairs.map((x) => x.pts)].map((pts) => strokeOf(pts, width, { taper: 1.5, tip: 0.4, offset }).d);
+        return { defs: blur(f, pad(box, 2), sd), body: `<path d="${d.join("")}" fill="${colour}" opacity="${opacity}" filter="url(#${f})"/>` };
       }
-      return { defs: blur(f, pad(box, 2), sd), body: `<path d="${d.join("")}" fill="${colour}" opacity="${opacity}" filter="url(#${f})"/>` };
+      // The warm fur tone (DECISIONS 287): a band of it just inside the edge, its outer side a little over the edge, so
+      // the fur darkens all the way down to the collar (no lighter strip between band and edge, which reads as a line)
+      // and no stencil step shows where no line covers the edge; its reach into the fur comes and goes along the edge
+      // (strokeOf's seeded `wobble`, `vary`), as the crop's does. Each hair flick takes the tone inside its own outline
+      // only, as wide as its root, so it reads as one warm hair, hair-fine, not a stroke as wide as the band.
+      const { width, opacity, blur: sd, over, vary } = HEAD_FUR.warm;
+      if (!stretches.length && !hairs.length) return { defs: "", body: "" };
+      const inward = inwardSign(head);
+      const band = stretches.map((pts, k) => strokeOf(pts, width, { taper: 1.5, tip: 0.3, offset: inward * (width / 2 - over), wobble: vary, seed: 31 + k }).d);
+      const hair = hairs.map((x) => strokeOf(x.pts, x.width, { taper: 0.5, tip: 0.2, offset: (inward * x.width) / 2 }).d);
+      return { defs: blur(f, pad(box, 2), sd), body: `<path d="${[...band, ...hair].join("")}" fill="${C.softLine}" opacity="${opacity}" filter="url(#${f})"/>` };
     },
     spans: (raised = {}) => [...crown, ...(h.cheeks ?? []).flatMap((c) => cheek(c, !!raised[c.side])), ...chins],
     soften: (colour, box, raised = {}) => {
@@ -472,9 +547,15 @@ export function headFur(h: HeadFurSpec): HeadFur {
  * band's own darker blue, soft, along under the chin's scalloped edge, centred on the head's own edge so only its lower
  * half shows below the fur. No dark rim: the chin's own line is its edge (214).
  */
-export function chinShadow(head: Shape, from: P, to: P, colour: string, box: Box, o = { width: 5, blur: 0.9, opacity: 0.45 }): Piece {
+export function chinShadow(head: Shape, from: P, to: P, colour: string, box: Box, o: { width: number; blur: number; opacity: number; crease?: boolean } = { width: 5, blur: 0.9, opacity: 0.45 }): Piece {
   const f = uid("blur");
   const chin = spanPoints(head, fracAt(head, from), fracAt(head, to));
   const d = strokeOf(chin, o.width, { taper: 4, tip: 1 }).d;
-  return piece(`<defs>${blur(f, pad(box, 2), o.blur)}</defs><path d="${d}" fill="${colour}" opacity="${o.opacity}" filter="url(#${f})"/>`, box);
+  const shadow = `<defs>${blur(f, pad(box, 2), o.blur)}</defs><path d="${d}" fill="${colour}" opacity="${o.opacity}" filter="url(#${f})"/>`;
+  if (!o.crease) return piece(shadow, box);
+  // The contact crease (DECISIONS 287): a narrow stroke of the collar's dark rim right under the fur, on the collar's
+  // side of the head's edge, fading out within 2 pt.
+  const { width, blur: sd, opacity } = HEAD_FUR.crease, g = uid("blur");
+  const crease = strokeOf(chin, width, { taper: 3, tip: 0.2, offset: (-inwardSign(head) * width) / 2 }).d;
+  return piece(`${shadow}<defs>${blur(g, pad(box, 2), sd)}</defs><path d="${crease}" fill="${C.collarRim}" opacity="${opacity}" filter="url(#${g})"/>`, box);
 }

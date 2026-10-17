@@ -68,6 +68,10 @@ panels (the hero, the stubby paws) and a reference ribbon:
     paw soles and haunch bottoms;
 (g) crispness: the 10-90% rise of the alpha across the outer edge from the
     plateau either side, held to the crisp reference ribbon's.
+Reported and never judged (each region's "advisory", dog DECISIONS 284): how
+the line's tone varies along it (tone_along), the sheet's on its crop and ours
+on the crop's grid (toneAlong), and ours at the hero's scale (toneAlongFine),
+for a lane to set beside the sheet's own figures read the same way on the hero.
 The thresholds per region are the sheet's own spread against perturbed copies
 of itself (linecal.py), never tuned to a render, and never finer than a
 measure's resolution; a share is never held finer than two pixels of its line,
@@ -155,6 +159,8 @@ SOLE_MIDDLE = 0.6  # the share of a sole's length in its middle, where the paw p
 RISE_REACH_PX = 5.0  # still px either side of an edge its alpha's rise is read over
 RISE_STEP = 0.5  # the least step in alpha across an edge for its rise to be read
 MIN_RISE_POINTS = 12  # profiles (every other point of the alpha's contour: about 5 pt of edge) before a region's rise is judged
+TONE_ALONG_PT = 1.5  # pt each way along a line its core L* is averaged over before its variation along the line is read
+ADVISORY = ("toneAlong", "toneAlongFine")  # each region's report-only measures: never in MEASURES, never judged
 OUTSIDE, GROUND, LEFT_OUT = "outside", "ground", "-"
 # The regions each panel-measured quantity holds, by class (fnmatch on the region's name).
 FUR_CLASSES = {"ear": ("ear.*|outside",), "cheek": ("ear.*|head.base",), "chin": ("collar|head.base",),
@@ -306,6 +312,24 @@ def line_map(rgb, tau, keep, radius=TOPHAT_PX):
     plain = skeleton & ~ndimage.binary_dilation(skeleton & (neighbours >= 3), disk(JUNCTION_PX))
     return {"lines": lines, "skeleton": skeleton, "strong": strong, "dark": dark, "plain": plain, "weak": weak, "faint": faint, "ink": ink, "soft": soft,
             "tophat": tophat, "L": L, "warm": warm}
+
+
+def tone_along(core, pts, k, least=MIN_WIDTH_PX):
+    """How a line's tone varies along it (advisory, never judged; dog DECISIONS 284): each skeleton pixel's core L*
+    (tone_map) averaged over the line's pixels within TONE_ALONG_PT of it (pixel and JPEG noise under that, a lit run or
+    a pressed one over it), then read over the region's line: its standard deviation (sdL), the spread from its darker
+    tenth to its lighter (spreadL, L* at the 90th centile less the 10th: how much lighter a lit run is than a pressed
+    one), its mean (meanL) and how many pixels it read (px). pts are the line's pixels (rows, cols) and core their core
+    L* (NaN where no warm line is near, left out); k is pt per px. None under least pixels."""
+    core = np.asarray(core, np.float64)
+    ok = ~np.isnan(core)
+    pts, core = np.asarray(pts)[ok], core[ok]
+    if len(pts) < least:
+        return None
+    hits = cKDTree(pts).query_ball_point(pts, TONE_ALONG_PT / k)
+    smooth = np.array([core[h].mean() for h in hits])
+    lo, hi = np.quantile(smooth, [0.1, 0.9])
+    return {"sdL": r(smooth.std(), 2), "spreadL": r(hi - lo, 2), "meanL": r(smooth.mean(), 1), "px": int(len(pts))}
 
 
 def tone_map(lines):
@@ -644,6 +668,11 @@ def compare(scene, sheet, ours):
         row = {"shiftPx": largest[:2], "piecesShiftPx": [p[:2] for p in piece_shifts],
                **measure_lines(scene, sheet, ours, s_pts, o_pts, hit_s, hit_o, d_s, maps, MIN_TONE_PX, marks=marks),
                "regionInkLog": r(np.log((ink_o + floor) / (ink_s + floor)))}
+        # Advisory (never judged): how each image's line varies in tone along itself in the region, where it runs alone,
+        # each read on its own line on the crop's grid.
+        s_alone, o_alone = s_pts[sheet["plain"][tuple(s_pts.T)]], o_pts[ours["plain"][tuple(o_pts.T)]]
+        row["toneAlong"] = {"sheet": tone_along(maps["core_s"][tuple(s_alone.T)], s_alone, scene.grid.k),
+                            "ours": tone_along(maps["core_o"][tuple(o_alone.T)], o_alone, scene.grid.k)}
         out[name] = row
         if "|" in name:
             s_x = across_lines(maps["normals"], edge_normals, nearest[tuple(at.T)], s_pts)
@@ -935,6 +964,7 @@ def width_stats(lines, band, names, ppp):
     out = {}
     if not len(pts):
         return out
+    core = tone_map(lines)[tuple(pts.T)]
     normals = orientation(lines["skeleton"])[tuple(pts.T)]
     found = widths(lines["tophat"], pts.astype(float), normals, reach=FINE_TOPHAT_PT * ppp * 1.5, step=0.25) / ppp
     plain = lines["plain"][tuple(pts.T)]
@@ -947,6 +977,10 @@ def width_stats(lines, band, names, ppp):
         alone = found[mine & plain]
         if len(alone) >= MIN_WIDTH_PX * ppp:
             row["widthCv"] = r(alone.std() / alone.mean())
+        # Advisory: the line's tone along it where it runs alone, at this scale (never judged).
+        along = tone_along(core[mine & plain], pts[mine & plain], 1 / ppp, MIN_WIDTH_PX * ppp)
+        if along:
+            row["toneAlongFine"] = along
         if name.endswith("|" + GROUND):
             x = pts[mine, 1]
             lo, hi = np.quantile(x, [(1 - SOLE_MIDDLE) / 2, (1 + SOLE_MIDDLE) / 2])
@@ -1063,8 +1097,10 @@ def judge(scene, grid_rows, fine_rows, calibration):
             rows[measure] = row
         extra = {k: values[k] for k in ("shiftPx", "piecesShiftPx", "sheetPx", "oursPx", "toneAt", "inkAt", "widthMedianPt", "furLengthPt") if k in values}
         failed = [m for m, row in rows.items() if row.get("pass") is False]
+        # Report-only measures ride beside the verdict and never change it.
+        advisory = {k: values[k] for k in ADVISORY if values.get(k) is not None}
         out[name] = {"what": what(name), "contact": base(name) in scene.contact, "calibrated": held[name]["calibrated"],
-                     "measures": rows, "detail": extra, "failed": failed, "pass": not failed}
+                     "measures": rows, "detail": extra, "failed": failed, "pass": not failed, **({"advisory": advisory} if advisory else {})}
     return out
 
 
