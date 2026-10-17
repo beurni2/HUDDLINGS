@@ -332,13 +332,15 @@ const CHEEK: Lock[] = [{ len: 2, width: 6.6, lean: 0.4, dip: 0.3, notch: 1 }, { 
 /** How light the left cheek's line lies in the notch between its wisps (a ceiling on its depth), easing back over `reach` pt. */
 const PINCH = { depth: 0.15, reach: 2.5 };
 const CHEEK_L: Lock[] = [{ len: 1.5, width: 4.6, lean: -0.6, dip: 0.3, notch: 1 }, { len: 2, width: 6.6, lean: -0.4 }];
-// The chin's middle over the collar: seven small low scallops of uneven size combed down and out from the middle, the
-// jaw's round sides plain; their notches shallow (0.1 to 0.2 pt), so the edge reads as the crop's soft arc with small
-// scallops (deeper ones, 0.25 to 0.35, read as a wavy ribbon at 10 times).
+// The chin's middle over the collar (x -16 to 16): seven small low scallops, as small as headFur's rules let them (0.8
+// to 1 pt out, 4.1 to 5.3 wide), combed down and out from the middle, the jaw's round sides plain on to x ±24; their
+// notches shallow (0.1 to 0.2 pt), so the edge reads as the crop's soft arc (its line's place off a smooth arc: 0.24 pt
+// rms). Seven scallops 1 to 1.6 pt out over x -24 to 24 read as a wavy ribbon of line at phone size (0.61 pt rms);
+// these read 0.51, the ripple finer and kept to the middle. Deeper notches (0.25 to 0.35) read wavy at 10 times.
 /** The chin's line at its deepest along the scallops (a ceiling on headFur's notch depth there, 0.55). */
 const CHIN_LINE = 0.3;
-const CHIN: Lock[] = [{ len: 1.3, width: 7.6, lean: -0.45, dip: 0.15 }, { len: 0.95, width: 6, lean: -0.2, dip: 0.2 }, { len: 1.5, width: 7.5, lean: -0.3, dip: 0.1 },
-  { len: 1.2, width: 7.4, lean: 0.05, dip: 0.15 }, { len: 1.6, width: 5.8, lean: 0.35, dip: 0.2 }, { len: 1.1, width: 7, lean: 0.2, dip: 0.1 }, { len: 1.35, width: 5.3, lean: 0.5 }];
+const CHIN: Lock[] = [{ len: 0.85, width: 5.3, lean: -0.45, dip: 0.15 }, { len: 0.8, width: 4.2, lean: -0.2, dip: 0.2 }, { len: 0.85, width: 5.3, lean: -0.3, dip: 0.1 },
+  { len: 0.8, width: 4.2, lean: 0.05, dip: 0.15 }, { len: 1, width: 4.1, lean: 0.35, dip: 0.2 }, { len: 0.85, width: 5.3, lean: 0.2, dip: 0.1 }, { len: 0.8, width: 4.2, lean: 0.5 }];
 
 /**
  * Each root's unlined stretch, where the ear's tan shows in the notch under the crown, in path order: `top` the crown's
@@ -408,7 +410,7 @@ function headOf(puff = 0): { head: Shape; fur: HeadFur; notches: Record<"R" | "L
       { side: "L", from: [44.6, -76.2], to: [45, -86.2], clumps: CHEEK_L, tipRound: 0.22,
         line: { from: [39.6, -70.4], to: [33.7, -129.4], ends: ["join", "free"], on: sideLadder, under: sideFace, most: pinch, gap: GAPS.L }, raised: [44.9, -113.8] },
     ],
-    chin: { from: [-24, -62.4], to: [24, -62.4], scallops: CHIN, tipRound: 0.15, line: { from: [-39.6, -70.4], to: [39.6, -70.4] }, corners: [[-39.6, -70.4], [39.6, -70.4]] },
+    chin: { from: [-16.3, -59.6], to: [16.3, -59.6], scallops: CHIN, tipRound: 0.15, line: { from: [-39.6, -70.4], to: [39.6, -70.4] }, corners: [[-39.6, -70.4], [39.6, -70.4]] },
   };
   const fur = headFur(spec);
   // Each row's notches between its wisps (not its two ends), in path order.
