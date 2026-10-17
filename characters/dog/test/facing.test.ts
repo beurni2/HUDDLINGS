@@ -207,7 +207,19 @@ interface LineSample {
   width: number;
 }
 const MIRROR = '<g transform="scale(-1 1)">';
-const TONES = new Map([...LINES.cream.map((c, i) => [c, i] as const), ...LINES.tan.map((c, i) => [c, i] as const)]);
+/** sRGB to CIE L*, to place the lit steps on their ladder's scale. */
+const lightness = (hex: string) => {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)) as [number, number, number];
+  const Y = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return Y > 216 / 24389 ? 116 * Math.cbrt(Y) - 16 : (Y * 24389) / 27;
+};
+/**
+ * Each line colour's place on its ladder, 0 (its lightest) to 10: and each lit step (palette.ts LINES.lit, DECISIONS
+ * 285) past the lightest, below 0, where lines.ts places it on the ladder's own L* scale, so a living line that thins
+ * into the lit steps on a lit edge (DECISIONS 284, 298) is still sampled, as the lightest of all.
+ */
+const TONES = new Map([...LINES.cream.map((c, i) => [c, i] as const), ...LINES.tan.map((c, i) => [c, i] as const),
+  ...(["cream", "tan"] as const).flatMap((on) => LINES.lit[on].map((c) => [c, (-10 * (lightness(c) - lightness(LINES[on][0]!))) / (lightness(LINES[on][0]!) - lightness(LINES[on][10]!))] as const))]);
 
 /**
  * Every lined edge's samples in a view's drawings, keyed by their centre. lines.ts draws each run of one tone as a
