@@ -755,13 +755,18 @@ function earPaint(F: Facing): Paint {
  * The ear's line (parts/ear.ts earEdge, DECISIONS 215): one span on the tan from where the head's outline goes under
  * it, down its back, round its hem, light at the top and deepening to the hem, and up its front to y -123, where it ends
  * in open fur; its top, feathered into the crown's fur, has none (DECISIONS 68, its length cited). Its depth at most
- * (210's `most`): near the light's own at the top (0.1, 1.2 pt), deepening down the ear to 0.3 at the hem and a little
- * more into each of the hem's notches, so it comes and goes with the locks and is thinnest and lightest at the top, as
- * the floppy-ears panel draws it and the crop's hem line (1.47 pt) is; the first, the recipe's 0.3 floor at the hem and
- * the light's depth above, drew the top of its back edge as heavy as its hem. A ceiling is the same in both facings, so
+ * (210's `most`): near the light's own at the top (0.1, 1.2 pt), deepening down the ear's top to 0.35 by y -110 and a
+ * little more into each of the hem's notches, so it is thinnest and lightest at the top, as the floppy-ears panel
+ * draws it, and comes and goes with the hem's locks; the first, the light's depth all the way up, drew the top of its
+ * back edge as heavy as its hem, and a ceiling deepening evenly all the way down left the back edge at y -113 lighter
+ * than the crop's (the line check's tone there 8.1 L* light). A ceiling is the same in both facings, so
  * it is kept above the lit side's own depth (0.1), and the light rule still lightens side.R's back edge (facing.test.ts).
  */
-const earSpans: LitSpan[] = [{ ...EAR_EDGE.span, most: (p: P) => 0.1 + 0.2 * Math.min(1, Math.max(0, (p[1] + 135) / 65)) ** 1.4 +
+const smoothstep = (x: number) => {
+  const t = Math.min(1, Math.max(0, x));
+  return t * t * (3 - 2 * t);
+};
+const earSpans: LitSpan[] = [{ ...EAR_EDGE.span, most: (p: P) => 0.1 + 0.25 * smoothstep((p[1] + 132) / 22) +
   0.15 * Math.max(0, ...EAR_EDGE.notches.map((n) => Math.exp(-((v.len(v.sub(p, n)) / 1.8) ** 2)))) }];
 
 /** The collar's loop band's back edge, from the band's top to its foot. */
@@ -816,10 +821,11 @@ export function side(facingSide: Side = "L"): Drawn[] {
   // the near paw, as dark as the crop's (L* 45 to 55 round the bun).
   add("front.R", lineGate(litPart("front.R", legFar, legFarPaint(F), [{ from: [-62.8, -37], to: [-63.2, -4.6], under: byHeight(0, 0.5, -16, -8), ground: "sole", ends: ["under", "under"] }])));
   // The chest's front edge over the far leg, from under the tag down to the near leg's wrist, where the near leg's line
-  // takes it on: a contact line (Q31), at most 0.3, the crop's light line there (0.4 read 2.8 L* darker and its ink
-  // 0.40 against the line check's 0.31); and the belly's foot on the ground in the small V between the near paw's heel
+  // takes it on: a contact line (Q31), at most 0.3 by the tag, the crop's light line there (0.4 read 2.8 L* darker and
+  // its ink 0.40 against the line check's 0.31), deepening to 0.4 where the near leg's line takes it on at the wrist (at
+  // 0.3 the near leg's top read too light, ink -1.24 against -0.97); and the belly's foot on the ground in the small V between the near paw's heel
   // and the hind paw's toe, from under the one to under the other, light as the crop's (L* about 72 there).
-  add("body.front", lineGate(roomy(litPart("body.front", chest, chestPaint(F), [{ from: WRIST, to: [-63.3, -42.4], contact: true, most: 0.3, ends: ["join", "under"] },
+  add("body.front", lineGate(roomy(litPart("body.front", chest, chestPaint(F), [{ from: WRIST, to: [-63.3, -42.4], contact: true, most: byHeight(0.3, 0.4, -36, -28), ends: ["join", "under"] },
     { from: [-29.8, -3], to: [-41.2, -2], most: 0.1, ends: ["under", "under"] }]), 1)));
   add("body.back", lineGate(roomy(litPart("body.back", back, backPaintF, backLinesF), 1)));
   // The saddle, its edge brushed along the back's curve, combed down and back, with a few darker strands in it
