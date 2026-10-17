@@ -465,7 +465,7 @@ const WRIST: P = [-56.6, -24.6];
 
 function legNearPaint(F: Facing): Paint {
   // In profile the sole lies flat on the ground; the toes show as the bun's round toe end and two faint toe lines
-  // rising from the sole behind it, where the crop's line map has them (x -60.6, 6.3 pt tall, and x -54.4, 4.7 pt), soft
+  // rising from the sole behind it, where the crop's line map has them (x -60.6, 6.2 pt tall, and x -54.4, 4.6 pt), soft
   // and light (parts/paw.ts `soft`, DECISIONS 216, 238), each curving forward over the bun's dome as it rises, as the
   // crop's do: never straight ticks that read as claws.
   const t = toes({ lines: [[[-60.2, -1.2], [-60.3, -3.4], [-60.8, -5.6], [-61.6, -7.4]], [[-54.2, -0.6], [-54.3, -2.4], [-54.8, -4.1], [-55.4, -5.2]]], fade: [-1, -8], width: 0.85, soft: true });
