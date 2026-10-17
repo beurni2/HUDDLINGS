@@ -8,7 +8,7 @@
    "head": "back"
   },
   "ppp": 3,
-  "sizePx": [511, 563],
+  "sizePx": [514, 563],
   "rootPx": [257, 517]
  },
  "view": "back",
@@ -41,19 +41,19 @@
  },
  "alignment": {
   "rootOnCropGroundPlusHalf": true,
-  "bestFitShiftPx": [0.07, 0.16],
-  "bestFitShiftPt": [0.06, 0.13],
-  "iouAtBestWholePixelShift": 0.9789,
+  "bestFitShiftPx": [0.01, 0.09],
+  "bestFitShiftPt": [0.0, 0.07],
+  "iouAtBestWholePixelShift": 0.9835,
   "thresholdPx": 2.0,
   "pass": true
  },
  "silhouette": {
-  "iou": 0.9789,
+  "iou": 0.9835,
   "threshold": 0.85,
   "groundShadowLeftOut": true,
   "pass": true,
-  "iouHeadAligned": 0.9697,
-  "headCentreOffsetPt": [1.01, -0.16]
+  "iouHeadAligned": 0.9835,
+  "headCentreOffsetPt": [0.02, -0.19]
  },
  "landmarks": {
   "thresholdPt": 2.8,
@@ -92,10 +92,10 @@
    },
    "ear.L.tip": {
     "how": "finder",
-    "found": [-47.9, -69.05],
+    "found": [-47.75, -69.05],
     "model": [-49.3, -68.3],
-    "errPt": 1.59,
-    "errShareOfHead": 0.017,
+    "errPt": 1.72,
+    "errShareOfHead": 0.018,
     "pass": true
    },
    "ear.R.root": {
@@ -108,10 +108,10 @@
    },
    "ear.R.tip": {
     "how": "finder",
-    "found": [48.34, -69.05],
+    "found": [48.67, -69.84],
     "model": [49.6, -69.8],
-    "errPt": 1.46,
-    "errShareOfHead": 0.016,
+    "errPt": 0.93,
+    "errShareOfHead": 0.01,
     "pass": true
    },
    "ground": {
@@ -141,7 +141,7 @@
     "heldTo": "#FFF4E8",
     "heldBy": "palette.fur",
     "deltaE2000": 0.0,
-    "pixels": 15684,
+    "pixels": 15728,
     "pass": true
    },
    "furShade": {
@@ -149,7 +149,7 @@
     "heldTo": "#FDE3C8",
     "heldBy": "palettePainted.furShade",
     "deltaE2000": 2.33,
-    "pixels": 1349,
+    "pixels": 1364,
     "pass": true
    },
    "ears": {
@@ -157,7 +157,7 @@
     "heldTo": "#D9A379",
     "heldBy": "palette.marking",
     "deltaE2000": 1.65,
-    "pixels": 6457,
+    "pixels": 6429,
     "pass": true
    },
    "bodyMarkings": {
@@ -228,7 +228,7 @@
    },
    "back.patch.R": {
     "part": "back.patch.R",
-    "shownPt2": 229.2,
+    "shownPt2": 225.6,
     "shows": true,
     "expected": true,
     "host": "body.back",
@@ -239,9 +239,9 @@
      "renderCentroidInSheetPatch": true,
      "sheetCentroidInRender": true,
      "advisory": {
-      "areaRatio": 0.971,
-      "centroidOffsetPt": [-0.09, -1.97],
-      "centroidDistancePt": 1.97
+      "areaRatio": 0.963,
+      "centroidOffsetPt": [-0.3, -2.03],
+      "centroidDistancePt": 2.05
      },
      "pass": true
     }
@@ -303,10 +303,10 @@
  },
  "advisory": {
   "edgeDistance": {
-   "meanRenderToSheetPt": 0.6,
-   "p95RenderToSheetPt": 1.6,
-   "meanSheetToRenderPt": 0.65,
-   "p95SheetToRenderPt": 1.75,
+   "meanRenderToSheetPt": 0.44,
+   "p95RenderToSheetPt": 1.11,
+   "meanSheetToRenderPt": 0.54,
+   "p95SheetToRenderPt": 1.11,
    "targetP95Pt": 2.0,
    "meetsTarget": true
   },
@@ -317,12 +317,12 @@
     "meetsTarget": true
    },
    "ear.L": {
-    "iou": 0.875,
+    "iou": 0.881,
     "target": 0.85,
     "meetsTarget": true
    },
    "ear.R": {
-    "iou": 0.821,
+    "iou": 0.822,
     "target": 0.85,
     "meetsTarget": false
    }
@@ -331,7 +331,7 @@
    "set": "3x",
    "pages": 2,
    "pageAreaPx": 6291456,
-   "allRegionsShare": 0.64,
+   "allRegionsShare": 0.639,
    "thisStillShare": 0.066
   }
  },
