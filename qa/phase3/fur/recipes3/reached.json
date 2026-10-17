@@ -1,0 +1,7413 @@
+{
+ "heroPtPerPx": 0.4696,
+ "hero": {
+  "edges": [
+   {
+    "class": "legs",
+    "kind": "line",
+    "box": [
+     134,
+     262,
+     156,
+     338
+    ],
+    "note": "the right front leg against its haunch",
+    "widthCv": 0.386,
+    "widthPt": 1.358,
+    "sdL": 7.15,
+    "spreadL": 18.17,
+    "meanL": 74.1
+   },
+   {
+    "class": "legs",
+    "kind": "line",
+    "box": [
+     192,
+     282,
+     210,
+     346
+    ],
+    "note": "the right front leg's inner edge",
+    "widthCv": 0.375,
+    "widthPt": 1.173,
+    "sdL": 10.6,
+    "spreadL": 34.4,
+    "meanL": 70.8
+   },
+   {
+    "class": "legs",
+    "kind": "line",
+    "box": [
+     212,
+     282,
+     230,
+     346
+    ],
+    "note": "the left front leg's inner edge",
+    "widthCv": 0.581,
+    "widthPt": 1.154,
+    "sdL": 11.09,
+    "spreadL": 29.2,
+    "meanL": 69.1
+   },
+   {
+    "class": "legs",
+    "kind": "line",
+    "box": [
+     256,
+     256,
+     280,
+     330
+    ],
+    "note": "the left front leg against its haunch",
+    "widthCv": 0.535,
+    "widthPt": 1.192,
+    "sdL": 8.45,
+    "spreadL": 19.91,
+    "meanL": 63.4
+   },
+   {
+    "class": "back",
+    "kind": "silhouette",
+    "box": [
+     258,
+     215,
+     300,
+     330
+    ],
+    "note": "the left flank and haunch",
+    "widthCv": 0.27,
+    "widthPt": 1.174,
+    "sdL": 7.08,
+    "spreadL": 18.45,
+    "meanL": 62.3
+   },
+   {
+    "class": "back",
+    "kind": "line",
+    "box": [
+     70,
+     240,
+     104,
+     330
+    ],
+    "note": "the right haunch over the tail",
+    "widthCv": 0.302,
+    "widthPt": 1.138,
+    "sdL": 11.09,
+    "spreadL": 28.81,
+    "meanL": 61.6
+   },
+   {
+    "class": "soles",
+    "kind": "silhouette",
+    "box": [
+     82,
+     350,
+     146,
+     372
+    ],
+    "note": "the right front sole",
+    "widthCv": 0.213,
+    "widthPt": 1.222,
+    "sdL": 7.25,
+    "spreadL": 7.96,
+    "meanL": 55.7
+   },
+   {
+    "class": "soles",
+    "kind": "silhouette",
+    "box": [
+     155,
+     350,
+     205,
+     372
+    ],
+    "note": "the middle sole",
+    "widthCv": 0.186,
+    "widthPt": 1.166,
+    "sdL": 4.32,
+    "spreadL": 12.16,
+    "meanL": 55.2
+   },
+   {
+    "class": "soles",
+    "kind": "silhouette",
+    "box": [
+     214,
+     350,
+     260,
+     372
+    ],
+    "note": "the left front sole",
+    "widthCv": 0.168,
+    "widthPt": 1.171,
+    "sdL": 5.24,
+    "spreadL": 7.16,
+    "meanL": 55.7
+   },
+   {
+    "class": "tail",
+    "kind": "silhouette",
+    "box": [
+     5,
+     240,
+     76,
+     352
+    ],
+    "note": "the tail's plume",
+    "widthCv": 0.313,
+    "widthPt": 1.249,
+    "sdL": 10.77,
+    "spreadL": 29.53,
+    "meanL": 70.1
+   },
+   {
+    "class": "ears",
+    "kind": "silhouette",
+    "box": [
+     5,
+     95,
+     100,
+     248
+    ],
+    "note": "the right ear: outer edge and hem",
+    "widthCv": 0.307,
+    "widthPt": 1.085,
+    "sdL": 5.32,
+    "spreadL": 7.8,
+    "meanL": 52.4
+   },
+   {
+    "class": "ears",
+    "kind": "silhouette",
+    "box": [
+     270,
+     40,
+     358,
+     205
+    ],
+    "note": "the left ear: outer edge and hem",
+    "widthCv": 0.328,
+    "widthPt": 1.101,
+    "sdL": 5.51,
+    "spreadL": 12.66,
+    "meanL": 53.2
+   },
+   {
+    "class": "head",
+    "kind": "silhouette",
+    "box": [
+     80,
+     20,
+     262,
+     70
+    ],
+    "note": "the crown and topknot",
+    "widthCv": 0.249,
+    "widthPt": 1.398,
+    "sdL": 6.09,
+    "spreadL": 14.82,
+    "meanL": 69.8
+   }
+  ],
+  "byClass": {
+   "legs": {
+    "widthCv": {
+     "min": 0.38,
+     "median": 0.46,
+     "max": 0.58,
+     "n": 4
+    },
+    "sdL": {
+     "min": 7.15,
+     "median": 9.52,
+     "max": 11.09,
+     "n": 4
+    },
+    "spreadL": {
+     "min": 18.17,
+     "median": 24.55,
+     "max": 34.4,
+     "n": 4
+    },
+    "meanL": {
+     "min": 63.4,
+     "median": 69.95,
+     "max": 74.1,
+     "n": 4
+    }
+   },
+   "back": {
+    "widthCv": {
+     "min": 0.27,
+     "median": 0.29,
+     "max": 0.3,
+     "n": 2
+    },
+    "sdL": {
+     "min": 7.08,
+     "median": 9.09,
+     "max": 11.09,
+     "n": 2
+    },
+    "spreadL": {
+     "min": 18.45,
+     "median": 23.63,
+     "max": 28.81,
+     "n": 2
+    },
+    "meanL": {
+     "min": 61.6,
+     "median": 61.95,
+     "max": 62.3,
+     "n": 2
+    }
+   },
+   "soles": {
+    "widthCv": {
+     "min": 0.17,
+     "median": 0.19,
+     "max": 0.21,
+     "n": 3
+    },
+    "sdL": {
+     "min": 4.32,
+     "median": 5.24,
+     "max": 7.25,
+     "n": 3
+    },
+    "spreadL": {
+     "min": 7.16,
+     "median": 7.96,
+     "max": 12.16,
+     "n": 3
+    },
+    "meanL": {
+     "min": 55.2,
+     "median": 55.7,
+     "max": 55.7,
+     "n": 3
+    }
+   },
+   "tail": {
+    "widthCv": {
+     "min": 0.31,
+     "median": 0.31,
+     "max": 0.31,
+     "n": 1
+    },
+    "sdL": {
+     "min": 10.77,
+     "median": 10.77,
+     "max": 10.77,
+     "n": 1
+    },
+    "spreadL": {
+     "min": 29.53,
+     "median": 29.53,
+     "max": 29.53,
+     "n": 1
+    },
+    "meanL": {
+     "min": 70.1,
+     "median": 70.1,
+     "max": 70.1,
+     "n": 1
+    }
+   },
+   "ears": {
+    "widthCv": {
+     "min": 0.31,
+     "median": 0.32,
+     "max": 0.33,
+     "n": 2
+    },
+    "sdL": {
+     "min": 5.32,
+     "median": 5.42,
+     "max": 5.51,
+     "n": 2
+    },
+    "spreadL": {
+     "min": 7.8,
+     "median": 10.23,
+     "max": 12.66,
+     "n": 2
+    },
+    "meanL": {
+     "min": 52.4,
+     "median": 52.8,
+     "max": 53.2,
+     "n": 2
+    }
+   },
+   "head": {
+    "widthCv": {
+     "min": 0.25,
+     "median": 0.25,
+     "max": 0.25,
+     "n": 1
+    },
+    "sdL": {
+     "min": 6.09,
+     "median": 6.09,
+     "max": 6.09,
+     "n": 1
+    },
+    "spreadL": {
+     "min": 14.82,
+     "median": 14.82,
+     "max": 14.82,
+     "n": 1
+    },
+    "meanL": {
+     "min": 69.8,
+     "median": 69.8,
+     "max": 69.8,
+     "n": 1
+    }
+   }
+  }
+ },
+ "crops": {
+  "front": {
+   "byClass": {
+    "legs": {
+     "sdL": {
+      "min": 0.85,
+      "median": 5.34,
+      "max": 7.76,
+      "n": 8
+     },
+     "spreadL": {
+      "min": 2.31,
+      "median": 10.56,
+      "max": 18.97,
+      "n": 8
+     },
+     "meanL": {
+      "min": 69.6,
+      "median": 74.15,
+      "max": 81.9,
+      "n": 8
+     }
+    },
+    "back": {
+     "sdL": {
+      "min": 4.59,
+      "median": 5.23,
+      "max": 5.87,
+      "n": 2
+     },
+     "spreadL": {
+      "min": 4.53,
+      "median": 9.68,
+      "max": 14.82,
+      "n": 2
+     },
+     "meanL": {
+      "min": 69.1,
+      "median": 69.35,
+      "max": 69.6,
+      "n": 2
+     }
+    },
+    "soles": {
+     "sdL": {
+      "min": 1.06,
+      "median": 2.71,
+      "max": 3.32,
+      "n": 3
+     },
+     "spreadL": {
+      "min": 2.41,
+      "median": 6.55,
+      "max": 8.52,
+      "n": 3
+     },
+     "meanL": {
+      "min": 64.3,
+      "median": 64.7,
+      "max": 65.4,
+      "n": 3
+     }
+    },
+    "ears": {
+     "sdL": {
+      "min": 5.28,
+      "median": 5.62,
+      "max": 5.95,
+      "n": 2
+     },
+     "spreadL": {
+      "min": 13.91,
+      "median": 14.27,
+      "max": 14.63,
+      "n": 2
+     },
+     "meanL": {
+      "min": 59.2,
+      "median": 60.5,
+      "max": 61.8,
+      "n": 2
+     }
+    },
+    "head": {
+     "sdL": {
+      "min": 3.14,
+      "median": 3.35,
+      "max": 3.57,
+      "n": 2
+     },
+     "spreadL": {
+      "min": 6.91,
+      "median": 7.54,
+      "max": 8.17,
+      "n": 2
+     },
+     "meanL": {
+      "min": 79.1,
+      "median": 81.2,
+      "max": 83.3,
+      "n": 2
+     }
+    }
+   },
+   "regions": [
+    {
+     "class": "back",
+     "region": "body.back|body.front",
+     "sdL": 4.59,
+     "spreadL": 4.53,
+     "meanL": 69.1,
+     "px": 10
+    },
+    {
+     "class": "legs",
+     "region": "body.back|front.L",
+     "sdL": 5.75,
+     "spreadL": 12.22,
+     "meanL": 75.5,
+     "px": 26
+    },
+    {
+     "class": "legs",
+     "region": "body.back|front.R",
+     "sdL": 4.93,
+     "spreadL": 8.9,
+     "meanL": 76.8,
+     "px": 18
+    },
+    {
+     "class": "legs",
+     "region": "body.back|hind.L",
+     "sdL": 3.35,
+     "spreadL": 5.48,
+     "meanL": 81.9,
+     "px": 14
+    },
+    {
+     "class": "legs",
+     "region": "body.back|hind.R",
+     "sdL": 7.76,
+     "spreadL": 18.97,
+     "meanL": 74.3,
+     "px": 12
+    },
+    {
+     "class": "back",
+     "region": "body.back|outside",
+     "sdL": 5.87,
+     "spreadL": 14.82,
+     "meanL": 69.6,
+     "px": 79
+    },
+    {
+     "class": "legs",
+     "region": "body.front|front.L",
+     "sdL": 6.96,
+     "spreadL": 12.76,
+     "meanL": 71.3,
+     "px": 22
+    },
+    {
+     "class": "legs",
+     "region": "body.front|front.R",
+     "sdL": 6.66,
+     "spreadL": 16.42,
+     "meanL": 74.0,
+     "px": 23
+    },
+    {
+     "class": "ears",
+     "region": "ear.L|outside",
+     "sdL": 5.95,
+     "spreadL": 14.63,
+     "meanL": 61.8,
+     "px": 110
+    },
+    {
+     "class": "ears",
+     "region": "ear.R|outside",
+     "sdL": 5.28,
+     "spreadL": 13.91,
+     "meanL": 59.2,
+     "px": 93
+    },
+    {
+     "class": "soles",
+     "region": "front.L|ground",
+     "sdL": 3.32,
+     "spreadL": 8.52,
+     "meanL": 64.7,
+     "px": 17
+    },
+    {
+     "class": "legs",
+     "region": "front.L|hind.L",
+     "sdL": 1.25,
+     "spreadL": 3.05,
+     "meanL": 70.9,
+     "px": 8
+    },
+    {
+     "class": "soles",
+     "region": "front.R|ground",
+     "sdL": 2.71,
+     "spreadL": 6.55,
+     "meanL": 65.4,
+     "px": 13
+    },
+    {
+     "class": "legs",
+     "region": "front.R|hind.R",
+     "sdL": 0.85,
+     "spreadL": 2.31,
+     "meanL": 69.6,
+     "px": 10
+    },
+    {
+     "class": "head",
+     "region": "head.base|outside",
+     "sdL": 3.57,
+     "spreadL": 6.91,
+     "meanL": 79.1,
+     "px": 65
+    },
+    {
+     "class": "soles",
+     "region": "hind.L|ground",
+     "sdL": 1.06,
+     "spreadL": 2.41,
+     "meanL": 64.3,
+     "px": 8
+    },
+    {
+     "class": "head",
+     "region": "tuft|outside",
+     "sdL": 3.14,
+     "spreadL": 8.17,
+     "meanL": 83.3,
+     "px": 69
+    }
+   ]
+  },
+  "threeQuarter.L": {
+   "byClass": {
+    "legs": {
+     "sdL": {
+      "min": 1.3,
+      "median": 5.5,
+      "max": 11.05,
+      "n": 5
+     },
+     "spreadL": {
+      "min": 2.7,
+      "median": 14.83,
+      "max": 27.22,
+      "n": 5
+     },
+     "meanL": {
+      "min": 65.9,
+      "median": 72.2,
+      "max": 80.8,
+      "n": 5
+     }
+    },
+    "back": {
+     "sdL": {
+      "min": 3.65,
+      "median": 4.12,
+      "max": 4.59,
+      "n": 2
+     },
+     "spreadL": {
+      "min": 9.37,
+      "median": 10.42,
+      "max": 11.47,
+      "n": 2
+     },
+     "meanL": {
+      "min": 63.5,
+      "median": 68.3,
+      "max": 73.1,
+      "n": 2
+     }
+    },
+    "soles": {
+     "sdL": {
+      "min": 1.34,
+      "median": 2.41,
+      "max": 3.47,
+      "n": 2
+     },
+     "spreadL": {
+      "min": 3.56,
+      "median": 6.27,
+      "max": 8.98,
+      "n": 2
+     },
+     "meanL": {
+      "min": 62.6,
+      "median": 63.2,
+      "max": 63.8,
+      "n": 2
+     }
+    },
+    "tail": {
+     "sdL": {
+      "min": 1.44,
+      "median": 5.51,
+      "max": 9.58,
+      "n": 2
+     },
+     "spreadL": {
+      "min": 3.81,
+      "median": 14.58,
+      "max": 25.36,
+      "n": 2
+     },
+     "meanL": {
+      "min": 56.1,
+      "median": 66.3,
+      "max": 76.5,
+      "n": 2
+     }
+    },
+    "ears": {
+     "sdL": {
+      "min": 5.19,
+      "median": 5.26,
+      "max": 5.33,
+      "n": 2
+     },
+     "spreadL": {
+      "min": 13.17,
+      "median": 13.17,
+      "max": 13.17,
+      "n": 2
+     },
+     "meanL": {
+      "min": 58.7,
+      "median": 60.6,
+      "max": 62.5,
+      "n": 2
+     }
+    },
+    "head": {
+     "sdL": {
+      "min": 3.04,
+      "median": 4.25,
+      "max": 5.47,
+      "n": 2
+     },
+     "spreadL": {
+      "min": 7.06,
+      "median": 7.92,
+      "max": 8.78,
+      "n": 2
+     },
+     "meanL": {
+      "min": 74.2,
+      "median": 77.35,
+      "max": 80.5,
+      "n": 2
+     }
+    }
+   },
+   "regions": [
+    {
+     "class": "legs",
+     "region": "body.back|front.L",
+     "sdL": 2.4,
+     "spreadL": 5.73,
+     "meanL": 76.7,
+     "px": 8
+    },
+    {
+     "class": "soles",
+     "region": "body.back|ground",
+     "sdL": 3.47,
+     "spreadL": 8.98,
+     "meanL": 62.6,
+     "px": 13
+    },
+    {
+     "class": "legs",
+     "region": "body.back|hind.L",
+     "sdL": 11.05,
+     "spreadL": 27.22,
+     "meanL": 72.2,
+     "px": 18
+    },
+    {
+     "class": "back",
+     "region": "body.back|outside",
+     "sdL": 4.59,
+     "spreadL": 11.47,
+     "meanL": 63.5,
+     "px": 55
+    },
+    {
+     "class": "tail",
+     "region": "body.back|tail",
+     "sdL": 1.44,
+     "spreadL": 3.81,
+     "meanL": 56.1,
+     "px": 23
+    },
+    {
+     "class": "legs",
+     "region": "body.front|front.R",
+     "sdL": 7.11,
+     "spreadL": 15.68,
+     "meanL": 80.8,
+     "px": 21
+    },
+    {
+     "class": "back",
+     "region": "body.front|outside",
+     "sdL": 3.65,
+     "spreadL": 9.37,
+     "meanL": 73.1,
+     "px": 23
+    },
+    {
+     "class": "ears",
+     "region": "ear.L|outside",
+     "sdL": 5.33,
+     "spreadL": 13.17,
+     "meanL": 58.7,
+     "px": 116
+    },
+    {
+     "class": "ears",
+     "region": "ear.R|outside",
+     "sdL": 5.19,
+     "spreadL": 13.17,
+     "meanL": 62.5,
+     "px": 103
+    },
+    {
+     "class": "legs",
+     "region": "front.L|front.R",
+     "sdL": 1.3,
+     "spreadL": 2.7,
+     "meanL": 65.9,
+     "px": 9
+    },
+    {
+     "class": "soles",
+     "region": "front.L|ground",
+     "sdL": 1.34,
+     "spreadL": 3.56,
+     "meanL": 63.8,
+     "px": 18
+    },
+    {
+     "class": "legs",
+     "region": "front.R|outside",
+     "sdL": 5.5,
+     "spreadL": 14.83,
+     "meanL": 70.9,
+     "px": 55
+    },
+    {
+     "class": "head",
+     "region": "head.base|outside",
+     "sdL": 5.47,
+     "spreadL": 7.06,
+     "meanL": 74.2,
+     "px": 70
+    },
+    {
+     "class": "tail",
+     "region": "tail|outside",
+     "sdL": 9.58,
+     "spreadL": 25.36,
+     "meanL": 76.5,
+     "px": 115
+    },
+    {
+     "class": "head",
+     "region": "tuft|outside",
+     "sdL": 3.04,
+     "spreadL": 8.78,
+     "meanL": 80.5,
+     "px": 79
+    }
+   ]
+  },
+  "side.L": {
+   "byClass": {
+    "legs": {
+     "sdL": {
+      "min": 1.27,
+      "median": 3.02,
+      "max": 8.83,
+      "n": 5
+     },
+     "spreadL": {
+      "min": 3.24,
+      "median": 6.71,
+      "max": 18.46,
+      "n": 5
+     },
+     "meanL": {
+      "min": 70.3,
+      "median": 74.0,
+      "max": 84.4,
+      "n": 5
+     }
+    },
+    "back": {
+     "sdL": {
+      "min": 3.98,
+      "median": 4.95,
+      "max": 5.91,
+      "n": 2
+     },
+     "spreadL": {
+      "min": 8.85,
+      "median": 11.93,
+      "max": 15.01,
+      "n": 2
+     },
+     "meanL": {
+      "min": 62.0,
+      "median": 73.0,
+      "max": 84.0,
+      "n": 2
+     }
+    },
+    "soles": {
+     "sdL": {
+      "min": 0.99,
+      "median": 1.77,
+      "max": 3.21,
+      "n": 3
+     },
+     "spreadL": {
+      "min": 2.45,
+      "median": 4.46,
+      "max": 8.44,
+      "n": 3
+     },
+     "meanL": {
+      "min": 63.1,
+      "median": 63.4,
+      "max": 64.7,
+      "n": 3
+     }
+    },
+    "tail": {
+     "sdL": {
+      "min": 2.49,
+      "median": 5.81,
+      "max": 9.13,
+      "n": 2
+     },
+     "spreadL": {
+      "min": 6.61,
+      "median": 13.57,
+      "max": 20.53,
+      "n": 2
+     },
+     "meanL": {
+      "min": 56.6,
+      "median": 67.65,
+      "max": 78.7,
+      "n": 2
+     }
+    },
+    "ears": {
+     "sdL": {
+      "min": 4.21,
+      "median": 4.21,
+      "max": 4.21,
+      "n": 1
+     },
+     "spreadL": {
+      "min": 11.04,
+      "median": 11.04,
+      "max": 11.04,
+      "n": 1
+     },
+     "meanL": {
+      "min": 59.0,
+      "median": 59.0,
+      "max": 59.0,
+      "n": 1
+     }
+    },
+    "head": {
+     "sdL": {
+      "min": 3.3,
+      "median": 5.48,
+      "max": 7.67,
+      "n": 2
+     },
+     "spreadL": {
+      "min": 9.21,
+      "median": 15.17,
+      "max": 21.12,
+      "n": 2
+     },
+     "meanL": {
+      "min": 74.5,
+      "median": 78.3,
+      "max": 82.1,
+      "n": 2
+     }
+    }
+   },
+   "regions": [
+    {
+     "class": "back",
+     "region": "body.back|body.front",
+     "sdL": 5.91,
+     "spreadL": 15.01,
+     "meanL": 84.0,
+     "px": 17
+    },
+    {
+     "class": "soles",
+     "region": "body.back|ground",
+     "sdL": 3.21,
+     "spreadL": 8.44,
+     "meanL": 63.1,
+     "px": 35
+    },
+    {
+     "class": "legs",
+     "region": "body.back|hind.L",
+     "sdL": 8.83,
+     "spreadL": 18.46,
+     "meanL": 84.4,
+     "px": 11
+    },
+    {
+     "class": "back",
+     "region": "body.back|outside",
+     "sdL": 3.98,
+     "spreadL": 8.85,
+     "meanL": 62.0,
+     "px": 25
+    },
+    {
+     "class": "tail",
+     "region": "body.back|tail",
+     "sdL": 2.49,
+     "spreadL": 6.61,
+     "meanL": 56.6,
+     "px": 23
+    },
+    {
+     "class": "legs",
+     "region": "body.front|front.L",
+     "sdL": 5.49,
+     "spreadL": 13.4,
+     "meanL": 80.3,
+     "px": 14
+    },
+    {
+     "class": "legs",
+     "region": "body.front|front.R",
+     "sdL": 2.32,
+     "spreadL": 5.6,
+     "meanL": 74.0,
+     "px": 8
+    },
+    {
+     "class": "ears",
+     "region": "ear.L|outside",
+     "sdL": 4.21,
+     "spreadL": 11.04,
+     "meanL": 59.0,
+     "px": 76
+    },
+    {
+     "class": "legs",
+     "region": "front.L|front.R",
+     "sdL": 1.27,
+     "spreadL": 3.24,
+     "meanL": 70.3,
+     "px": 18
+    },
+    {
+     "class": "soles",
+     "region": "front.L|ground",
+     "sdL": 1.77,
+     "spreadL": 4.46,
+     "meanL": 64.7,
+     "px": 16
+    },
+    {
+     "class": "legs",
+     "region": "front.R|outside",
+     "sdL": 3.02,
+     "spreadL": 6.71,
+     "meanL": 72.7,
+     "px": 34
+    },
+    {
+     "class": "head",
+     "region": "head.base|outside",
+     "sdL": 7.67,
+     "spreadL": 21.12,
+     "meanL": 74.5,
+     "px": 108
+    },
+    {
+     "class": "soles",
+     "region": "hind.L|ground",
+     "sdL": 0.99,
+     "spreadL": 2.45,
+     "meanL": 63.4,
+     "px": 9
+    },
+    {
+     "class": "tail",
+     "region": "tail|outside",
+     "sdL": 9.13,
+     "spreadL": 20.53,
+     "meanL": 78.7,
+     "px": 92
+    },
+    {
+     "class": "head",
+     "region": "tuft|outside",
+     "sdL": 3.3,
+     "spreadL": 9.21,
+     "meanL": 82.1,
+     "px": 64
+    }
+   ]
+  },
+  "back": {
+   "byClass": {
+    "legs": {
+     "sdL": {
+      "min": 3.7,
+      "median": 4.78,
+      "max": 5.85,
+      "n": 2
+     },
+     "spreadL": {
+      "min": 4.57,
+      "median": 8.45,
+      "max": 12.33,
+      "n": 2
+     },
+     "meanL": {
+      "min": 68.3,
+      "median": 68.6,
+      "max": 68.9,
+      "n": 2
+     }
+    },
+    "back": {
+     "sdL": {
+      "min": 4.93,
+      "median": 4.93,
+      "max": 4.93,
+      "n": 1
+     },
+     "spreadL": {
+      "min": 13.5,
+      "median": 13.5,
+      "max": 13.5,
+      "n": 1
+     },
+     "meanL": {
+      "min": 74.5,
+      "median": 74.5,
+      "max": 74.5,
+      "n": 1
+     }
+    },
+    "soles": {
+     "sdL": {
+      "min": 1.07,
+      "median": 1.07,
+      "max": 1.07,
+      "n": 1
+     },
+     "spreadL": {
+      "min": 2.99,
+      "median": 2.99,
+      "max": 2.99,
+      "n": 1
+     },
+     "meanL": {
+      "min": 63.3,
+      "median": 63.3,
+      "max": 63.3,
+      "n": 1
+     }
+    },
+    "tail": {
+     "sdL": {
+      "min": 2.94,
+      "median": 4.99,
+      "max": 7.04,
+      "n": 2
+     },
+     "spreadL": {
+      "min": 7.46,
+      "median": 12.6,
+      "max": 17.73,
+      "n": 2
+     },
+     "meanL": {
+      "min": 63.7,
+      "median": 68.75,
+      "max": 73.8,
+      "n": 2
+     }
+    },
+    "ears": {
+     "sdL": {
+      "min": 4.73,
+      "median": 4.87,
+      "max": 5.0,
+      "n": 2
+     },
+     "spreadL": {
+      "min": 12.32,
+      "median": 12.52,
+      "max": 12.72,
+      "n": 2
+     },
+     "meanL": {
+      "min": 60.5,
+      "median": 60.65,
+      "max": 60.8,
+      "n": 2
+     }
+    },
+    "head": {
+     "sdL": {
+      "min": 1.38,
+      "median": 3.48,
+      "max": 5.58,
+      "n": 2
+     },
+     "spreadL": {
+      "min": 3.55,
+      "median": 5.48,
+      "max": 7.41,
+      "n": 2
+     },
+     "meanL": {
+      "min": 79.5,
+      "median": 79.75,
+      "max": 80.0,
+      "n": 2
+     }
+    }
+   },
+   "regions": [
+    {
+     "class": "soles",
+     "region": "body.back|ground",
+     "sdL": 1.07,
+     "spreadL": 2.99,
+     "meanL": 63.3,
+     "px": 36
+    },
+    {
+     "class": "legs",
+     "region": "body.back|hind.L",
+     "sdL": 5.85,
+     "spreadL": 12.33,
+     "meanL": 68.9,
+     "px": 16
+    },
+    {
+     "class": "legs",
+     "region": "body.back|hind.R",
+     "sdL": 3.7,
+     "spreadL": 4.57,
+     "meanL": 68.3,
+     "px": 13
+    },
+    {
+     "class": "back",
+     "region": "body.back|outside",
+     "sdL": 4.93,
+     "spreadL": 13.5,
+     "meanL": 74.5,
+     "px": 110
+    },
+    {
+     "class": "tail",
+     "region": "body.back|tail",
+     "sdL": 7.04,
+     "spreadL": 17.73,
+     "meanL": 73.8,
+     "px": 87
+    },
+    {
+     "class": "ears",
+     "region": "ear.L|outside",
+     "sdL": 5.0,
+     "spreadL": 12.32,
+     "meanL": 60.5,
+     "px": 83
+    },
+    {
+     "class": "ears",
+     "region": "ear.R|outside",
+     "sdL": 4.73,
+     "spreadL": 12.72,
+     "meanL": 60.8,
+     "px": 95
+    },
+    {
+     "class": "head",
+     "region": "head.base|outside",
+     "sdL": 5.58,
+     "spreadL": 7.41,
+     "meanL": 79.5,
+     "px": 55
+    },
+    {
+     "class": "tail",
+     "region": "tail|ground",
+     "sdL": 2.94,
+     "spreadL": 7.46,
+     "meanL": 63.7,
+     "px": 12
+    },
+    {
+     "class": "head",
+     "region": "tuft|outside",
+     "sdL": 1.38,
+     "spreadL": 3.55,
+     "meanL": 80.0,
+     "px": 51
+    }
+   ]
+  }
+ },
+ "ours": {
+  "base": {
+   "back": {
+    "byClass": {
+     "legs": {
+      "sdL": null,
+      "spreadL": null,
+      "meanL": null,
+      "sheetSdL": {
+       "min": 6.42,
+       "median": 6.42,
+       "max": 6.42,
+       "n": 1
+      },
+      "sheetSpreadL": {
+       "min": 15.21,
+       "median": 15.21,
+       "max": 15.21,
+       "n": 1
+      },
+      "sheetMeanL": {
+       "min": 72.4,
+       "median": 72.4,
+       "max": 72.4,
+       "n": 1
+      },
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     "back": {
+      "sdL": {
+       "min": 4.52,
+       "median": 4.52,
+       "max": 4.52,
+       "n": 1
+      },
+      "spreadL": {
+       "min": 12.81,
+       "median": 12.81,
+       "max": 12.81,
+       "n": 1
+      },
+      "meanL": {
+       "min": 71.2,
+       "median": 71.2,
+       "max": 71.2,
+       "n": 1
+      },
+      "sheetSdL": {
+       "min": 4.99,
+       "median": 4.99,
+       "max": 4.99,
+       "n": 1
+      },
+      "sheetSpreadL": {
+       "min": 13.81,
+       "median": 13.81,
+       "max": 13.81,
+       "n": 1
+      },
+      "sheetMeanL": {
+       "min": 74.5,
+       "median": 74.5,
+       "max": 74.5,
+       "n": 1
+      },
+      "fineSdL": {
+       "min": 4.79,
+       "median": 4.79,
+       "max": 4.79,
+       "n": 1
+      },
+      "fineSpreadL": {
+       "min": 14.58,
+       "median": 14.58,
+       "max": 14.58,
+       "n": 1
+      },
+      "fineMeanL": {
+       "min": 66.0,
+       "median": 66.0,
+       "max": 66.0,
+       "n": 1
+      },
+      "widthCv": {
+       "min": 0.12,
+       "median": 0.12,
+       "max": 0.12,
+       "n": 1
+      }
+     },
+     "soles": {
+      "sdL": {
+       "min": 0.42,
+       "median": 1.17,
+       "max": 1.77,
+       "n": 3
+      },
+      "spreadL": {
+       "min": 1.02,
+       "median": 2.86,
+       "max": 5.13,
+       "n": 3
+      },
+      "meanL": {
+       "min": 64.5,
+       "median": 67.5,
+       "max": 69.1,
+       "n": 3
+      },
+      "sheetSdL": {
+       "min": 1.76,
+       "median": 1.76,
+       "max": 1.76,
+       "n": 1
+      },
+      "sheetSpreadL": {
+       "min": 4.2,
+       "median": 4.2,
+       "max": 4.2,
+       "n": 1
+      },
+      "sheetMeanL": {
+       "min": 64.3,
+       "median": 64.3,
+       "max": 64.3,
+       "n": 1
+      },
+      "fineSdL": {
+       "min": 1.01,
+       "median": 1.01,
+       "max": 1.01,
+       "n": 1
+      },
+      "fineSpreadL": {
+       "min": 2.0,
+       "median": 2.0,
+       "max": 2.0,
+       "n": 1
+      },
+      "fineMeanL": {
+       "min": 58.7,
+       "median": 58.7,
+       "max": 58.7,
+       "n": 1
+      },
+      "widthCv": {
+       "min": 0.08,
+       "median": 0.08,
+       "max": 0.08,
+       "n": 1
+      }
+     },
+     "tail": {
+      "sdL": {
+       "min": 0.58,
+       "median": 2.83,
+       "max": 5.08,
+       "n": 2
+      },
+      "spreadL": {
+       "min": 1.48,
+       "median": 7.25,
+       "max": 13.02,
+       "n": 2
+      },
+      "meanL": {
+       "min": 61.7,
+       "median": 66.85,
+       "max": 72.0,
+       "n": 2
+      },
+      "sheetSdL": {
+       "min": 4.32,
+       "median": 5.88,
+       "max": 7.43,
+       "n": 2
+      },
+      "sheetSpreadL": {
+       "min": 11.12,
+       "median": 14.68,
+       "max": 18.23,
+       "n": 2
+      },
+      "sheetMeanL": {
+       "min": 65.0,
+       "median": 69.05,
+       "max": 73.1,
+       "n": 2
+      },
+      "fineSdL": {
+       "min": 0.78,
+       "median": 3.3,
+       "max": 5.82,
+       "n": 2
+      },
+      "fineSpreadL": {
+       "min": 1.66,
+       "median": 6.98,
+       "max": 12.3,
+       "n": 2
+      },
+      "fineMeanL": {
+       "min": 59.1,
+       "median": 63.1,
+       "max": 67.1,
+       "n": 2
+      },
+      "widthCv": {
+       "min": 0.07,
+       "median": 0.14,
+       "max": 0.22,
+       "n": 2
+      }
+     },
+     "ears": {
+      "sdL": {
+       "min": 3.65,
+       "median": 4.0,
+       "max": 4.35,
+       "n": 2
+      },
+      "spreadL": {
+       "min": 8.94,
+       "median": 9.92,
+       "max": 10.9,
+       "n": 2
+      },
+      "meanL": {
+       "min": 57.9,
+       "median": 58.4,
+       "max": 58.9,
+       "n": 2
+      },
+      "sheetSdL": {
+       "min": 4.76,
+       "median": 4.89,
+       "max": 5.02,
+       "n": 2
+      },
+      "sheetSpreadL": {
+       "min": 12.47,
+       "median": 12.67,
+       "max": 12.87,
+       "n": 2
+      },
+      "sheetMeanL": {
+       "min": 60.4,
+       "median": 60.5,
+       "max": 60.6,
+       "n": 2
+      },
+      "fineSdL": {
+       "min": 3.92,
+       "median": 4.23,
+       "max": 4.55,
+       "n": 2
+      },
+      "fineSpreadL": {
+       "min": 9.36,
+       "median": 10.18,
+       "max": 10.99,
+       "n": 2
+      },
+      "fineMeanL": {
+       "min": 53.5,
+       "median": 53.9,
+       "max": 54.3,
+       "n": 2
+      },
+      "widthCv": {
+       "min": 0.12,
+       "median": 0.13,
+       "max": 0.14,
+       "n": 2
+      }
+     },
+     "head": {
+      "sdL": {
+       "min": 0.91,
+       "median": 1.79,
+       "max": 2.67,
+       "n": 2
+      },
+      "spreadL": {
+       "min": 2.35,
+       "median": 4.37,
+       "max": 6.39,
+       "n": 2
+      },
+      "meanL": {
+       "min": 73.6,
+       "median": 73.65,
+       "max": 73.7,
+       "n": 2
+      },
+      "sheetSdL": {
+       "min": 1.38,
+       "median": 2.69,
+       "max": 3.99,
+       "n": 2
+      },
+      "sheetSpreadL": {
+       "min": 3.55,
+       "median": 6.76,
+       "max": 9.97,
+       "n": 2
+      },
+      "sheetMeanL": {
+       "min": 79.4,
+       "median": 79.7,
+       "max": 80.0,
+       "n": 2
+      },
+      "fineSdL": {
+       "min": 1.22,
+       "median": 1.98,
+       "max": 2.74,
+       "n": 2
+      },
+      "fineSpreadL": {
+       "min": 2.29,
+       "median": 4.29,
+       "max": 6.28,
+       "n": 2
+      },
+      "fineMeanL": {
+       "min": 70.0,
+       "median": 70.4,
+       "max": 70.8,
+       "n": 2
+      },
+      "widthCv": {
+       "min": 0.06,
+       "median": 0.1,
+       "max": 0.14,
+       "n": 2
+      }
+     }
+    },
+    "regions": [
+     {
+      "class": "soles",
+      "region": "body.back|ground",
+      "sdL": 1.77,
+      "spreadL": 5.13,
+      "meanL": 64.5,
+      "sheetSdL": 1.76,
+      "sheetSpreadL": 4.2,
+      "sheetMeanL": 64.3,
+      "fineSdL": 1.01,
+      "fineSpreadL": 2.0,
+      "fineMeanL": 58.7,
+      "widthCv": 0.083
+     },
+     {
+      "class": "legs",
+      "region": "body.back|hind.L",
+      "sdL": null,
+      "spreadL": null,
+      "meanL": null,
+      "sheetSdL": 6.42,
+      "sheetSpreadL": 15.21,
+      "sheetMeanL": 72.4,
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     {
+      "class": "legs",
+      "region": "body.back|hind.R",
+      "sdL": null,
+      "spreadL": null,
+      "meanL": null,
+      "sheetSdL": null,
+      "sheetSpreadL": null,
+      "sheetMeanL": null,
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     {
+      "class": "back",
+      "region": "body.back|outside",
+      "sdL": 4.52,
+      "spreadL": 12.81,
+      "meanL": 71.2,
+      "sheetSdL": 4.99,
+      "sheetSpreadL": 13.81,
+      "sheetMeanL": 74.5,
+      "fineSdL": 4.79,
+      "fineSpreadL": 14.58,
+      "fineMeanL": 66.0,
+      "widthCv": 0.119
+     },
+     {
+      "class": "tail",
+      "region": "body.back|tail",
+      "sdL": 5.08,
+      "spreadL": 13.02,
+      "meanL": 72.0,
+      "sheetSdL": 7.43,
+      "sheetSpreadL": 18.23,
+      "sheetMeanL": 73.1,
+      "fineSdL": 5.82,
+      "fineSpreadL": 12.3,
+      "fineMeanL": 67.1,
+      "widthCv": 0.217
+     },
+     {
+      "class": "ears",
+      "region": "ear.L|outside",
+      "sdL": 4.35,
+      "spreadL": 10.9,
+      "meanL": 58.9,
+      "sheetSdL": 5.02,
+      "sheetSpreadL": 12.47,
+      "sheetMeanL": 60.4,
+      "fineSdL": 4.55,
+      "fineSpreadL": 10.99,
+      "fineMeanL": 54.3,
+      "widthCv": 0.144
+     },
+     {
+      "class": "ears",
+      "region": "ear.R|outside",
+      "sdL": 3.65,
+      "spreadL": 8.94,
+      "meanL": 57.9,
+      "sheetSdL": 4.76,
+      "sheetSpreadL": 12.87,
+      "sheetMeanL": 60.6,
+      "fineSdL": 3.92,
+      "fineSpreadL": 9.36,
+      "fineMeanL": 53.5,
+      "widthCv": 0.12
+     },
+     {
+      "class": "head",
+      "region": "head.base|outside",
+      "sdL": 2.67,
+      "spreadL": 6.39,
+      "meanL": 73.7,
+      "sheetSdL": 3.99,
+      "sheetSpreadL": 9.97,
+      "sheetMeanL": 79.4,
+      "fineSdL": 2.74,
+      "fineSpreadL": 6.28,
+      "fineMeanL": 70.8,
+      "widthCv": 0.136
+     },
+     {
+      "class": "soles",
+      "region": "hind.L|ground",
+      "sdL": 0.42,
+      "spreadL": 1.02,
+      "meanL": 69.1,
+      "sheetSdL": null,
+      "sheetSpreadL": null,
+      "sheetMeanL": null,
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     {
+      "class": "soles",
+      "region": "hind.R|ground",
+      "sdL": 1.17,
+      "spreadL": 2.86,
+      "meanL": 67.5,
+      "sheetSdL": null,
+      "sheetSpreadL": null,
+      "sheetMeanL": null,
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     {
+      "class": "tail",
+      "region": "tail|ground",
+      "sdL": 0.58,
+      "spreadL": 1.48,
+      "meanL": 61.7,
+      "sheetSdL": 4.32,
+      "sheetSpreadL": 11.12,
+      "sheetMeanL": 65.0,
+      "fineSdL": 0.78,
+      "fineSpreadL": 1.66,
+      "fineMeanL": 59.1,
+      "widthCv": 0.067
+     },
+     {
+      "class": "head",
+      "region": "tuft|outside",
+      "sdL": 0.91,
+      "spreadL": 2.35,
+      "meanL": 73.6,
+      "sheetSdL": 1.38,
+      "sheetSpreadL": 3.55,
+      "sheetMeanL": 80.0,
+      "fineSdL": 1.22,
+      "fineSpreadL": 2.29,
+      "fineMeanL": 70.0,
+      "widthCv": 0.056
+     }
+    ]
+   },
+   "front": {
+    "byClass": {
+     "legs": {
+      "sdL": {
+       "min": 0.8,
+       "median": 2.92,
+       "max": 6.83,
+       "n": 7
+      },
+      "spreadL": {
+       "min": 1.84,
+       "median": 4.87,
+       "max": 19.0,
+       "n": 7
+      },
+      "meanL": {
+       "min": 69.4,
+       "median": 72.4,
+       "max": 75.7,
+       "n": 7
+      },
+      "sheetSdL": {
+       "min": 0.85,
+       "median": 6.28,
+       "max": 8.97,
+       "n": 8
+      },
+      "sheetSpreadL": {
+       "min": 2.31,
+       "median": 12.04,
+       "max": 21.82,
+       "n": 8
+      },
+      "sheetMeanL": {
+       "min": 69.6,
+       "median": 74.0,
+       "max": 82.7,
+       "n": 8
+      },
+      "fineSdL": {
+       "min": 1.83,
+       "median": 4.01,
+       "max": 7.37,
+       "n": 7
+      },
+      "fineSpreadL": {
+       "min": 0.65,
+       "median": 6.89,
+       "max": 19.93,
+       "n": 7
+      },
+      "fineMeanL": {
+       "min": 64.5,
+       "median": 67.4,
+       "max": 69.9,
+       "n": 7
+      },
+      "widthCv": {
+       "min": 0.08,
+       "median": 0.14,
+       "max": 0.3,
+       "n": 7
+      }
+     },
+     "back": {
+      "sdL": {
+       "min": 2.01,
+       "median": 3.05,
+       "max": 4.09,
+       "n": 2
+      },
+      "spreadL": {
+       "min": 4.9,
+       "median": 7.63,
+       "max": 10.36,
+       "n": 2
+      },
+      "meanL": {
+       "min": 63.1,
+       "median": 63.65,
+       "max": 64.2,
+       "n": 2
+      },
+      "sheetSdL": {
+       "min": 5.12,
+       "median": 5.49,
+       "max": 5.86,
+       "n": 2
+      },
+      "sheetSpreadL": {
+       "min": 9.36,
+       "median": 12.09,
+       "max": 14.82,
+       "n": 2
+      },
+      "sheetMeanL": {
+       "min": 69.5,
+       "median": 70.45,
+       "max": 71.4,
+       "n": 2
+      },
+      "fineSdL": {
+       "min": 3.82,
+       "median": 4.79,
+       "max": 5.76,
+       "n": 2
+      },
+      "fineSpreadL": {
+       "min": 10.09,
+       "median": 11.53,
+       "max": 12.97,
+       "n": 2
+      },
+      "fineMeanL": {
+       "min": 60.2,
+       "median": 61.1,
+       "max": 62.0,
+       "n": 2
+      },
+      "widthCv": {
+       "min": 0.17,
+       "median": 0.25,
+       "max": 0.33,
+       "n": 2
+      }
+     },
+     "soles": {
+      "sdL": {
+       "min": 0.88,
+       "median": 2.36,
+       "max": 3.76,
+       "n": 4
+      },
+      "spreadL": {
+       "min": 2.14,
+       "median": 5.84,
+       "max": 9.76,
+       "n": 4
+      },
+      "meanL": {
+       "min": 62.2,
+       "median": 62.35,
+       "max": 62.9,
+       "n": 4
+      },
+      "sheetSdL": {
+       "min": 2.38,
+       "median": 2.79,
+       "max": 4.94,
+       "n": 4
+      },
+      "sheetSpreadL": {
+       "min": 5.8,
+       "median": 6.73,
+       "max": 11.34,
+       "n": 4
+      },
+      "sheetMeanL": {
+       "min": 65.3,
+       "median": 65.9,
+       "max": 66.3,
+       "n": 4
+      },
+      "fineSdL": {
+       "min": 4.79,
+       "median": 6.17,
+       "max": 7.78,
+       "n": 4
+      },
+      "fineSpreadL": {
+       "min": 4.62,
+       "median": 7.41,
+       "max": 10.19,
+       "n": 4
+      },
+      "fineMeanL": {
+       "min": 58.7,
+       "median": 59.55,
+       "max": 60.3,
+       "n": 4
+      },
+      "widthCv": {
+       "min": 0.09,
+       "median": 0.1,
+       "max": 0.12,
+       "n": 4
+      }
+     },
+     "ears": {
+      "sdL": {
+       "min": 4.69,
+       "median": 5.02,
+       "max": 5.34,
+       "n": 2
+      },
+      "spreadL": {
+       "min": 11.94,
+       "median": 12.67,
+       "max": 13.4,
+       "n": 2
+      },
+      "meanL": {
+       "min": 57.1,
+       "median": 57.6,
+       "max": 58.1,
+       "n": 2
+      },
+      "sheetSdL": {
+       "min": 5.43,
+       "median": 5.68,
+       "max": 5.93,
+       "n": 2
+      },
+      "sheetSpreadL": {
+       "min": 13.93,
+       "median": 14.27,
+       "max": 14.62,
+       "n": 2
+      },
+      "sheetMeanL": {
+       "min": 59.6,
+       "median": 60.8,
+       "max": 62.0,
+       "n": 2
+      },
+      "fineSdL": {
+       "min": 4.17,
+       "median": 4.48,
+       "max": 4.79,
+       "n": 2
+      },
+      "fineSpreadL": {
+       "min": 10.65,
+       "median": 11.48,
+       "max": 12.3,
+       "n": 2
+      },
+      "fineMeanL": {
+       "min": 53.3,
+       "median": 53.75,
+       "max": 54.2,
+       "n": 2
+      },
+      "widthCv": {
+       "min": 0.14,
+       "median": 0.14,
+       "max": 0.14,
+       "n": 2
+      }
+     },
+     "head": {
+      "sdL": {
+       "min": 1.45,
+       "median": 1.72,
+       "max": 1.99,
+       "n": 2
+      },
+      "spreadL": {
+       "min": 3.74,
+       "median": 4.03,
+       "max": 4.31,
+       "n": 2
+      },
+      "meanL": {
+       "min": 73.0,
+       "median": 73.55,
+       "max": 74.1,
+       "n": 2
+      },
+      "sheetSdL": {
+       "min": 3.14,
+       "median": 3.56,
+       "max": 3.98,
+       "n": 2
+      },
+      "sheetSpreadL": {
+       "min": 7.67,
+       "median": 7.92,
+       "max": 8.17,
+       "n": 2
+      },
+      "sheetMeanL": {
+       "min": 79.0,
+       "median": 81.15,
+       "max": 83.3,
+       "n": 2
+      },
+      "fineSdL": {
+       "min": 1.63,
+       "median": 1.93,
+       "max": 2.22,
+       "n": 2
+      },
+      "fineSpreadL": {
+       "min": 3.24,
+       "median": 4.38,
+       "max": 5.51,
+       "n": 2
+      },
+      "fineMeanL": {
+       "min": 69.8,
+       "median": 70.4,
+       "max": 71.0,
+       "n": 2
+      },
+      "widthCv": {
+       "min": 0.06,
+       "median": 0.07,
+       "max": 0.07,
+       "n": 2
+      }
+     }
+    },
+    "regions": [
+     {
+      "class": "back",
+      "region": "body.back|body.front",
+      "sdL": 2.01,
+      "spreadL": 4.9,
+      "meanL": 63.1,
+      "sheetSdL": 5.12,
+      "sheetSpreadL": 9.36,
+      "sheetMeanL": 71.4,
+      "fineSdL": 5.76,
+      "fineSpreadL": 12.97,
+      "fineMeanL": 62.0,
+      "widthCv": 0.327
+     },
+     {
+      "class": "legs",
+      "region": "body.back|front.L",
+      "sdL": 1.3,
+      "spreadL": 3.6,
+      "meanL": 73.8,
+      "sheetSdL": 7.02,
+      "sheetSpreadL": 19.84,
+      "sheetMeanL": 74.0,
+      "fineSdL": 4.01,
+      "fineSpreadL": 6.89,
+      "fineMeanL": 67.4,
+      "widthCv": 0.137
+     },
+     {
+      "class": "legs",
+      "region": "body.back|front.R",
+      "sdL": 3.83,
+      "spreadL": 4.87,
+      "meanL": 72.4,
+      "sheetSdL": 5.9,
+      "sheetSpreadL": 11.32,
+      "sheetMeanL": 74.9,
+      "fineSdL": 4.67,
+      "fineSpreadL": 7.97,
+      "fineMeanL": 67.3,
+      "widthCv": 0.214
+     },
+     {
+      "class": "soles",
+      "region": "body.back|ground",
+      "sdL": null,
+      "spreadL": null,
+      "meanL": null,
+      "sheetSdL": null,
+      "sheetSpreadL": null,
+      "sheetMeanL": null,
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     {
+      "class": "legs",
+      "region": "body.back|hind.L",
+      "sdL": 2.92,
+      "spreadL": 4.83,
+      "meanL": 74.1,
+      "sheetSdL": 1.88,
+      "sheetSpreadL": 4.85,
+      "sheetMeanL": 82.7,
+      "fineSdL": 2.25,
+      "fineSpreadL": 3.54,
+      "fineMeanL": 69.9,
+      "widthCv": 0.082
+     },
+     {
+      "class": "legs",
+      "region": "body.back|hind.R",
+      "sdL": 2.6,
+      "spreadL": 6.17,
+      "meanL": 72.2,
+      "sheetSdL": 8.97,
+      "sheetSpreadL": 21.82,
+      "sheetMeanL": 74.1,
+      "fineSdL": 1.83,
+      "fineSpreadL": 4.62,
+      "fineMeanL": 69.4,
+      "widthCv": 0.2
+     },
+     {
+      "class": "back",
+      "region": "body.back|outside",
+      "sdL": 4.09,
+      "spreadL": 10.36,
+      "meanL": 64.2,
+      "sheetSdL": 5.86,
+      "sheetSpreadL": 14.82,
+      "sheetMeanL": 69.5,
+      "fineSdL": 3.82,
+      "fineSpreadL": 10.09,
+      "fineMeanL": 60.2,
+      "widthCv": 0.175
+     },
+     {
+      "class": "legs",
+      "region": "body.front|front.L",
+      "sdL": 5.96,
+      "spreadL": 15.62,
+      "meanL": 70.2,
+      "sheetSdL": 6.96,
+      "sheetSpreadL": 12.76,
+      "sheetMeanL": 71.3,
+      "fineSdL": 6.98,
+      "fineSpreadL": 18.43,
+      "fineMeanL": 65.1,
+      "widthCv": 0.127
+     },
+     {
+      "class": "legs",
+      "region": "body.front|front.R",
+      "sdL": 6.83,
+      "spreadL": 19.0,
+      "meanL": 69.4,
+      "sheetSdL": 6.66,
+      "sheetSpreadL": 16.42,
+      "sheetMeanL": 74.0,
+      "fineSdL": 7.37,
+      "fineSpreadL": 19.93,
+      "fineMeanL": 64.5,
+      "widthCv": 0.138
+     },
+     {
+      "class": "ears",
+      "region": "ear.L|outside",
+      "sdL": 4.69,
+      "spreadL": 11.94,
+      "meanL": 57.1,
+      "sheetSdL": 5.93,
+      "sheetSpreadL": 14.62,
+      "sheetMeanL": 62.0,
+      "fineSdL": 4.17,
+      "fineSpreadL": 10.65,
+      "fineMeanL": 53.3,
+      "widthCv": 0.139
+     },
+     {
+      "class": "ears",
+      "region": "ear.R|outside",
+      "sdL": 5.34,
+      "spreadL": 13.4,
+      "meanL": 58.1,
+      "sheetSdL": 5.43,
+      "sheetSpreadL": 13.93,
+      "sheetMeanL": 59.6,
+      "fineSdL": 4.79,
+      "fineSpreadL": 12.3,
+      "fineMeanL": 54.2,
+      "widthCv": 0.141
+     },
+     {
+      "class": "soles",
+      "region": "front.L|ground",
+      "sdL": 0.88,
+      "spreadL": 2.19,
+      "meanL": 62.9,
+      "sheetSdL": 3.08,
+      "sheetSpreadL": 7.59,
+      "sheetMeanL": 65.3,
+      "fineSdL": 6.85,
+      "fineSpreadL": 4.62,
+      "fineMeanL": 59.8,
+      "widthCv": 0.096
+     },
+     {
+      "class": "legs",
+      "region": "front.L|hind.L",
+      "sdL": null,
+      "spreadL": null,
+      "meanL": null,
+      "sheetSdL": 3.95,
+      "sheetSpreadL": 9.35,
+      "sheetMeanL": 73.1,
+      "fineSdL": 2.54,
+      "fineSpreadL": 0.65,
+      "fineMeanL": 67.7,
+      "widthCv": 0.3
+     },
+     {
+      "class": "soles",
+      "region": "front.R|ground",
+      "sdL": 0.99,
+      "spreadL": 2.14,
+      "meanL": 62.2,
+      "sheetSdL": 2.51,
+      "sheetSpreadL": 5.8,
+      "sheetMeanL": 65.7,
+      "fineSdL": 7.78,
+      "fineSpreadL": 10.19,
+      "fineMeanL": 60.3,
+      "widthCv": 0.09
+     },
+     {
+      "class": "legs",
+      "region": "front.R|hind.R",
+      "sdL": 0.8,
+      "spreadL": 1.84,
+      "meanL": 75.7,
+      "sheetSdL": 0.85,
+      "sheetSpreadL": 2.31,
+      "sheetMeanL": 69.6,
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     {
+      "class": "head",
+      "region": "head.base|outside",
+      "sdL": 1.99,
+      "spreadL": 4.31,
+      "meanL": 73.0,
+      "sheetSdL": 3.98,
+      "sheetSpreadL": 7.67,
+      "sheetMeanL": 79.0,
+      "fineSdL": 2.22,
+      "fineSpreadL": 5.51,
+      "fineMeanL": 69.8,
+      "widthCv": 0.075
+     },
+     {
+      "class": "soles",
+      "region": "hind.L|ground",
+      "sdL": 3.73,
+      "spreadL": 9.5,
+      "meanL": 62.2,
+      "sheetSdL": 2.38,
+      "sheetSpreadL": 5.87,
+      "sheetMeanL": 66.3,
+      "fineSdL": 5.48,
+      "fineSpreadL": 7.0,
+      "fineMeanL": 59.3,
+      "widthCv": 0.107
+     },
+     {
+      "class": "soles",
+      "region": "hind.R|ground",
+      "sdL": 3.76,
+      "spreadL": 9.76,
+      "meanL": 62.5,
+      "sheetSdL": 4.94,
+      "sheetSpreadL": 11.34,
+      "sheetMeanL": 66.1,
+      "fineSdL": 4.79,
+      "fineSpreadL": 7.82,
+      "fineMeanL": 58.7,
+      "widthCv": 0.122
+     },
+     {
+      "class": "head",
+      "region": "tuft|outside",
+      "sdL": 1.45,
+      "spreadL": 3.74,
+      "meanL": 74.1,
+      "sheetSdL": 3.14,
+      "sheetSpreadL": 8.17,
+      "sheetMeanL": 83.3,
+      "fineSdL": 1.63,
+      "fineSpreadL": 3.24,
+      "fineMeanL": 71.0,
+      "widthCv": 0.063
+     }
+    ]
+   },
+   "side.L": {
+    "byClass": {
+     "legs": {
+      "sdL": {
+       "min": 0.89,
+       "median": 1.62,
+       "max": 2.35,
+       "n": 2
+      },
+      "spreadL": {
+       "min": 1.72,
+       "median": 2.67,
+       "max": 3.63,
+       "n": 2
+      },
+      "meanL": {
+       "min": 71.5,
+       "median": 72.9,
+       "max": 74.3,
+       "n": 2
+      },
+      "sheetSdL": {
+       "min": 1.27,
+       "median": 2.32,
+       "max": 4.13,
+       "n": 5
+      },
+      "sheetSpreadL": {
+       "min": 3.24,
+       "median": 5.6,
+       "max": 11.08,
+       "n": 5
+      },
+      "sheetMeanL": {
+       "min": 70.3,
+       "median": 74.0,
+       "max": 89.4,
+       "n": 5
+      },
+      "fineSdL": {
+       "min": 1.19,
+       "median": 1.32,
+       "max": 1.45,
+       "n": 2
+      },
+      "fineSpreadL": {
+       "min": 3.22,
+       "median": 3.32,
+       "max": 3.41,
+       "n": 2
+      },
+      "fineMeanL": {
+       "min": 67.4,
+       "median": 67.75,
+       "max": 68.1,
+       "n": 2
+      },
+      "widthCv": {
+       "min": 0.03,
+       "median": 0.05,
+       "max": 0.08,
+       "n": 2
+      }
+     },
+     "back": {
+      "sdL": {
+       "min": 1.27,
+       "median": 2.25,
+       "max": 3.23,
+       "n": 2
+      },
+      "spreadL": {
+       "min": 2.8,
+       "median": 5.46,
+       "max": 8.12,
+       "n": 2
+      },
+      "meanL": {
+       "min": 61.4,
+       "median": 74.0,
+       "max": 86.6,
+       "n": 2
+      },
+      "sheetSdL": {
+       "min": 4.66,
+       "median": 5.29,
+       "max": 5.93,
+       "n": 2
+      },
+      "sheetSpreadL": {
+       "min": 11.99,
+       "median": 13.66,
+       "max": 15.32,
+       "n": 2
+      },
+      "sheetMeanL": {
+       "min": 62.4,
+       "median": 73.55,
+       "max": 84.7,
+       "n": 2
+      },
+      "fineSdL": {
+       "min": 1.32,
+       "median": 2.99,
+       "max": 4.65,
+       "n": 2
+      },
+      "fineSpreadL": {
+       "min": 3.91,
+       "median": 8.27,
+       "max": 12.62,
+       "n": 2
+      },
+      "fineMeanL": {
+       "min": 57.3,
+       "median": 70.5,
+       "max": 83.7,
+       "n": 2
+      },
+      "widthCv": {
+       "min": 0.04,
+       "median": 0.06,
+       "max": 0.09,
+       "n": 2
+      }
+     },
+     "soles": {
+      "sdL": {
+       "min": 1.06,
+       "median": 1.28,
+       "max": 2.03,
+       "n": 4
+      },
+      "spreadL": {
+       "min": 2.28,
+       "median": 3.25,
+       "max": 5.28,
+       "n": 4
+      },
+      "meanL": {
+       "min": 63.5,
+       "median": 65.0,
+       "max": 65.3,
+       "n": 4
+      },
+      "sheetSdL": {
+       "min": 1.77,
+       "median": 3.19,
+       "max": 4.97,
+       "n": 3
+      },
+      "sheetSpreadL": {
+       "min": 4.46,
+       "median": 5.28,
+       "max": 8.44,
+       "n": 3
+      },
+      "sheetMeanL": {
+       "min": 63.1,
+       "median": 64.7,
+       "max": 65.5,
+       "n": 3
+      },
+      "fineSdL": {
+       "min": 1.12,
+       "median": 4.13,
+       "max": 5.37,
+       "n": 4
+      },
+      "fineSpreadL": {
+       "min": 1.31,
+       "median": 3.29,
+       "max": 9.24,
+       "n": 4
+      },
+      "fineMeanL": {
+       "min": 58.3,
+       "median": 60.45,
+       "max": 64.6,
+       "n": 4
+      },
+      "widthCv": {
+       "min": 0.09,
+       "median": 0.1,
+       "max": 0.12,
+       "n": 4
+      }
+     },
+     "tail": {
+      "sdL": {
+       "min": 0.93,
+       "median": 2.19,
+       "max": 3.37,
+       "n": 3
+      },
+      "spreadL": {
+       "min": 2.2,
+       "median": 5.12,
+       "max": 6.69,
+       "n": 3
+      },
+      "meanL": {
+       "min": 56.0,
+       "median": 57.8,
+       "max": 73.8,
+       "n": 3
+      },
+      "sheetSdL": {
+       "min": 2.49,
+       "median": 4.5,
+       "max": 6.51,
+       "n": 2
+      },
+      "sheetSpreadL": {
+       "min": 6.61,
+       "median": 12.07,
+       "max": 17.54,
+       "n": 2
+      },
+      "sheetMeanL": {
+       "min": 56.6,
+       "median": 68.35,
+       "max": 80.1,
+       "n": 2
+      },
+      "fineSdL": {
+       "min": 1.01,
+       "median": 2.37,
+       "max": 3.97,
+       "n": 3
+      },
+      "fineSpreadL": {
+       "min": 1.33,
+       "median": 6.13,
+       "max": 9.39,
+       "n": 3
+      },
+      "fineMeanL": {
+       "min": 51.1,
+       "median": 52.7,
+       "max": 69.7,
+       "n": 3
+      },
+      "widthCv": {
+       "min": 0.09,
+       "median": 0.11,
+       "max": 0.17,
+       "n": 3
+      }
+     },
+     "ears": {
+      "sdL": {
+       "min": 2.05,
+       "median": 2.05,
+       "max": 2.05,
+       "n": 1
+      },
+      "spreadL": {
+       "min": 5.18,
+       "median": 5.18,
+       "max": 5.18,
+       "n": 1
+      },
+      "meanL": {
+       "min": 60.0,
+       "median": 60.0,
+       "max": 60.0,
+       "n": 1
+      },
+      "sheetSdL": {
+       "min": 4.0,
+       "median": 4.0,
+       "max": 4.0,
+       "n": 1
+      },
+      "sheetSpreadL": {
+       "min": 10.61,
+       "median": 10.61,
+       "max": 10.61,
+       "n": 1
+      },
+      "sheetMeanL": {
+       "min": 58.8,
+       "median": 58.8,
+       "max": 58.8,
+       "n": 1
+      },
+      "fineSdL": {
+       "min": 1.39,
+       "median": 1.39,
+       "max": 1.39,
+       "n": 1
+      },
+      "fineSpreadL": {
+       "min": 3.19,
+       "median": 3.19,
+       "max": 3.19,
+       "n": 1
+      },
+      "fineMeanL": {
+       "min": 56.0,
+       "median": 56.0,
+       "max": 56.0,
+       "n": 1
+      },
+      "widthCv": {
+       "min": 0.1,
+       "median": 0.1,
+       "max": 0.1,
+       "n": 1
+      }
+     },
+     "head": {
+      "sdL": {
+       "min": 1.69,
+       "median": 3.04,
+       "max": 4.4,
+       "n": 2
+      },
+      "spreadL": {
+       "min": 4.47,
+       "median": 7.36,
+       "max": 10.24,
+       "n": 2
+      },
+      "meanL": {
+       "min": 71.6,
+       "median": 72.9,
+       "max": 74.2,
+       "n": 2
+      },
+      "sheetSdL": {
+       "min": 3.11,
+       "median": 5.48,
+       "max": 7.85,
+       "n": 2
+      },
+      "sheetSpreadL": {
+       "min": 7.91,
+       "median": 13.92,
+       "max": 19.93,
+       "n": 2
+      },
+      "sheetMeanL": {
+       "min": 75.2,
+       "median": 78.45,
+       "max": 81.7,
+       "n": 2
+      },
+      "fineSdL": {
+       "min": 1.92,
+       "median": 3.69,
+       "max": 5.47,
+       "n": 2
+      },
+      "fineSpreadL": {
+       "min": 3.27,
+       "median": 8.09,
+       "max": 12.9,
+       "n": 2
+      },
+      "fineMeanL": {
+       "min": 67.5,
+       "median": 69.25,
+       "max": 71.0,
+       "n": 2
+      },
+      "widthCv": {
+       "min": 0.07,
+       "median": 0.14,
+       "max": 0.2,
+       "n": 2
+      }
+     }
+    },
+    "regions": [
+     {
+      "class": "back",
+      "region": "body.back|body.front",
+      "sdL": 3.23,
+      "spreadL": 8.12,
+      "meanL": 86.6,
+      "sheetSdL": 5.93,
+      "sheetSpreadL": 15.32,
+      "sheetMeanL": 84.7,
+      "fineSdL": 4.65,
+      "fineSpreadL": 12.62,
+      "fineMeanL": 83.7,
+      "widthCv": 0.04
+     },
+     {
+      "class": "soles",
+      "region": "body.back|ground",
+      "sdL": 1.49,
+      "spreadL": 3.76,
+      "meanL": 65.3,
+      "sheetSdL": 3.19,
+      "sheetSpreadL": 8.44,
+      "sheetMeanL": 63.1,
+      "fineSdL": 1.12,
+      "fineSpreadL": 3.15,
+      "fineMeanL": 58.3,
+      "widthCv": 0.099
+     },
+     {
+      "class": "legs",
+      "region": "body.back|hind.L",
+      "sdL": null,
+      "spreadL": null,
+      "meanL": null,
+      "sheetSdL": 3.0,
+      "sheetSpreadL": 7.28,
+      "sheetMeanL": 89.4,
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     {
+      "class": "back",
+      "region": "body.back|outside",
+      "sdL": 1.27,
+      "spreadL": 2.8,
+      "meanL": 61.4,
+      "sheetSdL": 4.66,
+      "sheetSpreadL": 11.99,
+      "sheetMeanL": 62.4,
+      "fineSdL": 1.32,
+      "fineSpreadL": 3.91,
+      "fineMeanL": 57.3,
+      "widthCv": 0.088
+     },
+     {
+      "class": "tail",
+      "region": "body.back|tail",
+      "sdL": 0.93,
+      "spreadL": 2.2,
+      "meanL": 56.0,
+      "sheetSdL": 2.49,
+      "sheetSpreadL": 6.61,
+      "sheetMeanL": 56.6,
+      "fineSdL": 1.01,
+      "fineSpreadL": 1.33,
+      "fineMeanL": 51.1,
+      "widthCv": 0.106
+     },
+     {
+      "class": "legs",
+      "region": "body.front|front.L",
+      "sdL": null,
+      "spreadL": null,
+      "meanL": null,
+      "sheetSdL": 4.13,
+      "sheetSpreadL": 11.08,
+      "sheetMeanL": 82.2,
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     {
+      "class": "legs",
+      "region": "body.front|front.R",
+      "sdL": null,
+      "spreadL": null,
+      "meanL": null,
+      "sheetSdL": 2.32,
+      "sheetSpreadL": 5.6,
+      "sheetMeanL": 74.0,
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     {
+      "class": "back",
+      "region": "body.front|outside",
+      "sdL": null,
+      "spreadL": null,
+      "meanL": null,
+      "sheetSdL": null,
+      "sheetSpreadL": null,
+      "sheetMeanL": null,
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     {
+      "class": "ears",
+      "region": "ear.L|outside",
+      "sdL": 2.05,
+      "spreadL": 5.18,
+      "meanL": 60.0,
+      "sheetSdL": 4.0,
+      "sheetSpreadL": 10.61,
+      "sheetMeanL": 58.8,
+      "fineSdL": 1.39,
+      "fineSpreadL": 3.19,
+      "fineMeanL": 56.0,
+      "widthCv": 0.099
+     },
+     {
+      "class": "legs",
+      "region": "front.L|front.R",
+      "sdL": 0.89,
+      "spreadL": 1.72,
+      "meanL": 74.3,
+      "sheetSdL": 1.27,
+      "sheetSpreadL": 3.24,
+      "sheetMeanL": 70.3,
+      "fineSdL": 1.45,
+      "fineSpreadL": 3.22,
+      "fineMeanL": 67.4,
+      "widthCv": 0.076
+     },
+     {
+      "class": "soles",
+      "region": "front.L|ground",
+      "sdL": 1.06,
+      "spreadL": 2.75,
+      "meanL": 63.5,
+      "sheetSdL": 1.77,
+      "sheetSpreadL": 4.46,
+      "sheetMeanL": 64.7,
+      "fineSdL": 3.45,
+      "fineSpreadL": 1.31,
+      "fineMeanL": 60.1,
+      "widthCv": 0.091
+     },
+     {
+      "class": "legs",
+      "region": "front.L|hind.L",
+      "sdL": null,
+      "spreadL": null,
+      "meanL": null,
+      "sheetSdL": null,
+      "sheetSpreadL": null,
+      "sheetMeanL": null,
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     {
+      "class": "soles",
+      "region": "front.R|ground",
+      "sdL": 2.03,
+      "spreadL": 5.28,
+      "meanL": 65.0,
+      "sheetSdL": null,
+      "sheetSpreadL": null,
+      "sheetMeanL": null,
+      "fineSdL": 4.81,
+      "fineSpreadL": 9.24,
+      "fineMeanL": 64.6,
+      "widthCv": 0.12
+     },
+     {
+      "class": "legs",
+      "region": "front.R|outside",
+      "sdL": 2.35,
+      "spreadL": 3.63,
+      "meanL": 71.5,
+      "sheetSdL": 1.8,
+      "sheetSpreadL": 4.37,
+      "sheetMeanL": 73.9,
+      "fineSdL": 1.19,
+      "fineSpreadL": 3.41,
+      "fineMeanL": 68.1,
+      "widthCv": 0.031
+     },
+     {
+      "class": "head",
+      "region": "head.base|outside",
+      "sdL": 4.4,
+      "spreadL": 10.24,
+      "meanL": 71.6,
+      "sheetSdL": 7.85,
+      "sheetSpreadL": 19.93,
+      "sheetMeanL": 75.2,
+      "fineSdL": 5.47,
+      "fineSpreadL": 12.9,
+      "fineMeanL": 67.5,
+      "widthCv": 0.198
+     },
+     {
+      "class": "soles",
+      "region": "hind.L|ground",
+      "sdL": 1.07,
+      "spreadL": 2.28,
+      "meanL": 65.0,
+      "sheetSdL": 4.97,
+      "sheetSpreadL": 5.28,
+      "sheetMeanL": 65.5,
+      "fineSdL": 5.37,
+      "fineSpreadL": 3.43,
+      "fineMeanL": 60.8,
+      "widthCv": 0.105
+     },
+     {
+      "class": "tail",
+      "region": "tail|ground",
+      "sdL": 2.19,
+      "spreadL": 5.12,
+      "meanL": 57.8,
+      "sheetSdL": null,
+      "sheetSpreadL": null,
+      "sheetMeanL": null,
+      "fineSdL": 2.37,
+      "fineSpreadL": 6.13,
+      "fineMeanL": 52.7,
+      "widthCv": 0.086
+     },
+     {
+      "class": "tail",
+      "region": "tail|outside",
+      "sdL": 3.37,
+      "spreadL": 6.69,
+      "meanL": 73.8,
+      "sheetSdL": 6.51,
+      "sheetSpreadL": 17.54,
+      "sheetMeanL": 80.1,
+      "fineSdL": 3.97,
+      "fineSpreadL": 9.39,
+      "fineMeanL": 69.7,
+      "widthCv": 0.17
+     },
+     {
+      "class": "head",
+      "region": "tuft|outside",
+      "sdL": 1.69,
+      "spreadL": 4.47,
+      "meanL": 74.2,
+      "sheetSdL": 3.11,
+      "sheetSpreadL": 7.91,
+      "sheetMeanL": 81.7,
+      "fineSdL": 1.92,
+      "fineSpreadL": 3.27,
+      "fineMeanL": 71.0,
+      "widthCv": 0.075
+     }
+    ]
+   },
+   "side.R": {
+    "byClass": {
+     "legs": {
+      "sdL": {
+       "min": 1.29,
+       "median": 1.75,
+       "max": 2.2,
+       "n": 2
+      },
+      "spreadL": {
+       "min": 3.18,
+       "median": 3.36,
+       "max": 3.54,
+       "n": 2
+      },
+      "meanL": {
+       "min": 68.4,
+       "median": 69.65,
+       "max": 70.9,
+       "n": 2
+      },
+      "sheetSdL": {
+       "min": 1.27,
+       "median": 2.32,
+       "max": 4.13,
+       "n": 5
+      },
+      "sheetSpreadL": {
+       "min": 3.24,
+       "median": 5.6,
+       "max": 11.08,
+       "n": 5
+      },
+      "sheetMeanL": {
+       "min": 70.3,
+       "median": 74.0,
+       "max": 89.4,
+       "n": 5
+      },
+      "fineSdL": {
+       "min": 1.32,
+       "median": 1.52,
+       "max": 1.72,
+       "n": 2
+      },
+      "fineSpreadL": {
+       "min": 3.7,
+       "median": 4.05,
+       "max": 4.4,
+       "n": 2
+      },
+      "fineMeanL": {
+       "min": 63.5,
+       "median": 64.1,
+       "max": 64.7,
+       "n": 2
+      },
+      "widthCv": {
+       "min": 0.03,
+       "median": 0.06,
+       "max": 0.09,
+       "n": 2
+      }
+     },
+     "back": {
+      "sdL": {
+       "min": 1.14,
+       "median": 2.19,
+       "max": 3.24,
+       "n": 2
+      },
+      "spreadL": {
+       "min": 2.41,
+       "median": 5.28,
+       "max": 8.15,
+       "n": 2
+      },
+      "meanL": {
+       "min": 63.6,
+       "median": 75.1,
+       "max": 86.6,
+       "n": 2
+      },
+      "sheetSdL": {
+       "min": 4.66,
+       "median": 5.29,
+       "max": 5.93,
+       "n": 2
+      },
+      "sheetSpreadL": {
+       "min": 11.99,
+       "median": 13.66,
+       "max": 15.32,
+       "n": 2
+      },
+      "sheetMeanL": {
+       "min": 62.4,
+       "median": 73.55,
+       "max": 84.7,
+       "n": 2
+      },
+      "fineSdL": {
+       "min": 0.96,
+       "median": 2.84,
+       "max": 4.72,
+       "n": 2
+      },
+      "fineSpreadL": {
+       "min": 2.67,
+       "median": 7.75,
+       "max": 12.84,
+       "n": 2
+      },
+      "fineMeanL": {
+       "min": 59.6,
+       "median": 71.6,
+       "max": 83.6,
+       "n": 2
+      },
+      "widthCv": {
+       "min": 0.04,
+       "median": 0.06,
+       "max": 0.07,
+       "n": 2
+      }
+     },
+     "soles": {
+      "sdL": {
+       "min": 0.94,
+       "median": 1.18,
+       "max": 2.94,
+       "n": 4
+      },
+      "spreadL": {
+       "min": 2.06,
+       "median": 3.03,
+       "max": 7.91,
+       "n": 4
+      },
+      "meanL": {
+       "min": 62.5,
+       "median": 64.3,
+       "max": 65.6,
+       "n": 4
+      },
+      "sheetSdL": {
+       "min": 1.77,
+       "median": 3.17,
+       "max": 4.97,
+       "n": 3
+      },
+      "sheetSpreadL": {
+       "min": 4.46,
+       "median": 5.28,
+       "max": 8.39,
+       "n": 3
+      },
+      "sheetMeanL": {
+       "min": 63.1,
+       "median": 64.7,
+       "max": 65.5,
+       "n": 3
+      },
+      "fineSdL": {
+       "min": 1.32,
+       "median": 4.36,
+       "max": 5.34,
+       "n": 4
+      },
+      "fineSpreadL": {
+       "min": 1.35,
+       "median": 3.37,
+       "max": 9.21,
+       "n": 4
+      },
+      "fineMeanL": {
+       "min": 58.7,
+       "median": 60.4,
+       "max": 62.6,
+       "n": 4
+      },
+      "widthCv": {
+       "min": 0.09,
+       "median": 0.1,
+       "max": 0.12,
+       "n": 4
+      }
+     },
+     "tail": {
+      "sdL": {
+       "min": 0.81,
+       "median": 2.33,
+       "max": 3.96,
+       "n": 3
+      },
+      "spreadL": {
+       "min": 1.93,
+       "median": 5.5,
+       "max": 8.68,
+       "n": 3
+      },
+      "meanL": {
+       "min": 57.9,
+       "median": 63.2,
+       "max": 74.0,
+       "n": 3
+      },
+      "sheetSdL": {
+       "min": 2.49,
+       "median": 4.69,
+       "max": 6.88,
+       "n": 2
+      },
+      "sheetSpreadL": {
+       "min": 6.61,
+       "median": 12.27,
+       "max": 17.92,
+       "n": 2
+      },
+      "sheetMeanL": {
+       "min": 56.6,
+       "median": 68.4,
+       "max": 80.2,
+       "n": 2
+      },
+      "fineSdL": {
+       "min": 2.04,
+       "median": 2.68,
+       "max": 4.55,
+       "n": 3
+      },
+      "fineSpreadL": {
+       "min": 4.02,
+       "median": 6.93,
+       "max": 10.37,
+       "n": 3
+      },
+      "fineMeanL": {
+       "min": 52.9,
+       "median": 57.9,
+       "max": 70.3,
+       "n": 3
+      },
+      "widthCv": {
+       "min": 0.09,
+       "median": 0.14,
+       "max": 0.17,
+       "n": 3
+      }
+     },
+     "ears": {
+      "sdL": {
+       "min": 2.8,
+       "median": 2.8,
+       "max": 2.8,
+       "n": 1
+      },
+      "spreadL": {
+       "min": 7.4,
+       "median": 7.4,
+       "max": 7.4,
+       "n": 1
+      },
+      "meanL": {
+       "min": 61.2,
+       "median": 61.2,
+       "max": 61.2,
+       "n": 1
+      },
+      "sheetSdL": {
+       "min": 4.17,
+       "median": 4.17,
+       "max": 4.17,
+       "n": 1
+      },
+      "sheetSpreadL": {
+       "min": 11.18,
+       "median": 11.18,
+       "max": 11.18,
+       "n": 1
+      },
+      "sheetMeanL": {
+       "min": 58.4,
+       "median": 58.4,
+       "max": 58.4,
+       "n": 1
+      },
+      "fineSdL": {
+       "min": 2.2,
+       "median": 2.2,
+       "max": 2.2,
+       "n": 1
+      },
+      "fineSpreadL": {
+       "min": 5.63,
+       "median": 5.63,
+       "max": 5.63,
+       "n": 1
+      },
+      "fineMeanL": {
+       "min": 57.3,
+       "median": 57.3,
+       "max": 57.3,
+       "n": 1
+      },
+      "widthCv": {
+       "min": 0.1,
+       "median": 0.1,
+       "max": 0.1,
+       "n": 1
+      }
+     },
+     "head": {
+      "sdL": {
+       "min": 1.69,
+       "median": 2.98,
+       "max": 4.27,
+       "n": 2
+      },
+      "spreadL": {
+       "min": 4.69,
+       "median": 7.53,
+       "max": 10.37,
+       "n": 2
+      },
+      "meanL": {
+       "min": 71.1,
+       "median": 72.6,
+       "max": 74.1,
+       "n": 2
+      },
+      "sheetSdL": {
+       "min": 3.11,
+       "median": 5.48,
+       "max": 7.85,
+       "n": 2
+      },
+      "sheetSpreadL": {
+       "min": 7.91,
+       "median": 13.92,
+       "max": 19.93,
+       "n": 2
+      },
+      "sheetMeanL": {
+       "min": 75.2,
+       "median": 78.45,
+       "max": 81.7,
+       "n": 2
+      },
+      "fineSdL": {
+       "min": 2.12,
+       "median": 3.65,
+       "max": 5.18,
+       "n": 2
+      },
+      "fineSpreadL": {
+       "min": 3.9,
+       "median": 8.31,
+       "max": 12.72,
+       "n": 2
+      },
+      "fineMeanL": {
+       "min": 66.8,
+       "median": 69.05,
+       "max": 71.3,
+       "n": 2
+      },
+      "widthCv": {
+       "min": 0.08,
+       "median": 0.14,
+       "max": 0.19,
+       "n": 2
+      }
+     }
+    },
+    "regions": [
+     {
+      "class": "back",
+      "region": "body.back|body.front",
+      "sdL": 3.24,
+      "spreadL": 8.15,
+      "meanL": 86.6,
+      "sheetSdL": 5.93,
+      "sheetSpreadL": 15.32,
+      "sheetMeanL": 84.7,
+      "fineSdL": 4.72,
+      "fineSpreadL": 12.84,
+      "fineMeanL": 83.6,
+      "widthCv": 0.043
+     },
+     {
+      "class": "soles",
+      "region": "body.back|ground",
+      "sdL": 1.26,
+      "spreadL": 3.25,
+      "meanL": 65.6,
+      "sheetSdL": 3.17,
+      "sheetSpreadL": 8.39,
+      "sheetMeanL": 63.1,
+      "fineSdL": 1.32,
+      "fineSpreadL": 3.48,
+      "fineMeanL": 58.7,
+      "widthCv": 0.092
+     },
+     {
+      "class": "legs",
+      "region": "body.back|hind.R",
+      "sdL": null,
+      "spreadL": null,
+      "meanL": null,
+      "sheetSdL": 3.0,
+      "sheetSpreadL": 7.28,
+      "sheetMeanL": 89.4,
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     {
+      "class": "back",
+      "region": "body.back|outside",
+      "sdL": 1.14,
+      "spreadL": 2.41,
+      "meanL": 63.6,
+      "sheetSdL": 4.66,
+      "sheetSpreadL": 11.99,
+      "sheetMeanL": 62.4,
+      "fineSdL": 0.96,
+      "fineSpreadL": 2.67,
+      "fineMeanL": 59.6,
+      "widthCv": 0.07
+     },
+     {
+      "class": "tail",
+      "region": "body.back|tail",
+      "sdL": 0.81,
+      "spreadL": 1.93,
+      "meanL": 63.2,
+      "sheetSdL": 2.49,
+      "sheetSpreadL": 6.61,
+      "sheetMeanL": 56.6,
+      "fineSdL": 2.04,
+      "fineSpreadL": 4.02,
+      "fineMeanL": 57.9,
+      "widthCv": 0.14
+     },
+     {
+      "class": "legs",
+      "region": "body.front|front.L",
+      "sdL": null,
+      "spreadL": null,
+      "meanL": null,
+      "sheetSdL": 2.32,
+      "sheetSpreadL": 5.6,
+      "sheetMeanL": 74.0,
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     {
+      "class": "legs",
+      "region": "body.front|front.R",
+      "sdL": null,
+      "spreadL": null,
+      "meanL": null,
+      "sheetSdL": 4.13,
+      "sheetSpreadL": 11.08,
+      "sheetMeanL": 82.2,
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     {
+      "class": "back",
+      "region": "body.front|outside",
+      "sdL": null,
+      "spreadL": null,
+      "meanL": null,
+      "sheetSdL": null,
+      "sheetSpreadL": null,
+      "sheetMeanL": null,
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     {
+      "class": "ears",
+      "region": "ear.R|outside",
+      "sdL": 2.8,
+      "spreadL": 7.4,
+      "meanL": 61.2,
+      "sheetSdL": 4.17,
+      "sheetSpreadL": 11.18,
+      "sheetMeanL": 58.4,
+      "fineSdL": 2.2,
+      "fineSpreadL": 5.63,
+      "fineMeanL": 57.3,
+      "widthCv": 0.102
+     },
+     {
+      "class": "legs",
+      "region": "front.L|front.R",
+      "sdL": 1.29,
+      "spreadL": 3.18,
+      "meanL": 70.9,
+      "sheetSdL": 1.27,
+      "sheetSpreadL": 3.24,
+      "sheetMeanL": 70.3,
+      "fineSdL": 1.72,
+      "fineSpreadL": 4.4,
+      "fineMeanL": 63.5,
+      "widthCv": 0.092
+     },
+     {
+      "class": "soles",
+      "region": "front.L|ground",
+      "sdL": 2.94,
+      "spreadL": 7.91,
+      "meanL": 62.5,
+      "sheetSdL": null,
+      "sheetSpreadL": null,
+      "sheetMeanL": null,
+      "fineSdL": 5.21,
+      "fineSpreadL": 9.21,
+      "fineMeanL": 62.6,
+      "widthCv": 0.121
+     },
+     {
+      "class": "legs",
+      "region": "front.L|outside",
+      "sdL": 2.2,
+      "spreadL": 3.54,
+      "meanL": 68.4,
+      "sheetSdL": 1.76,
+      "sheetSpreadL": 4.32,
+      "sheetMeanL": 73.9,
+      "fineSdL": 1.32,
+      "fineSpreadL": 3.7,
+      "fineMeanL": 64.7,
+      "widthCv": 0.033
+     },
+     {
+      "class": "soles",
+      "region": "front.R|ground",
+      "sdL": 1.09,
+      "spreadL": 2.81,
+      "meanL": 63.5,
+      "sheetSdL": 1.77,
+      "sheetSpreadL": 4.46,
+      "sheetMeanL": 64.7,
+      "fineSdL": 3.51,
+      "fineSpreadL": 1.35,
+      "fineMeanL": 60.0,
+      "widthCv": 0.09
+     },
+     {
+      "class": "legs",
+      "region": "front.R|hind.R",
+      "sdL": null,
+      "spreadL": null,
+      "meanL": null,
+      "sheetSdL": null,
+      "sheetSpreadL": null,
+      "sheetMeanL": null,
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     {
+      "class": "head",
+      "region": "head.base|outside",
+      "sdL": 4.27,
+      "spreadL": 10.37,
+      "meanL": 71.1,
+      "sheetSdL": 7.85,
+      "sheetSpreadL": 19.93,
+      "sheetMeanL": 75.2,
+      "fineSdL": 5.18,
+      "fineSpreadL": 12.72,
+      "fineMeanL": 66.8,
+      "widthCv": 0.194
+     },
+     {
+      "class": "soles",
+      "region": "hind.R|ground",
+      "sdL": 0.94,
+      "spreadL": 2.06,
+      "meanL": 65.1,
+      "sheetSdL": 4.97,
+      "sheetSpreadL": 5.28,
+      "sheetMeanL": 65.5,
+      "fineSdL": 5.34,
+      "fineSpreadL": 3.25,
+      "fineMeanL": 60.8,
+      "widthCv": 0.102
+     },
+     {
+      "class": "tail",
+      "region": "tail|ground",
+      "sdL": 2.33,
+      "spreadL": 5.5,
+      "meanL": 57.9,
+      "sheetSdL": null,
+      "sheetSpreadL": null,
+      "sheetMeanL": null,
+      "fineSdL": 2.68,
+      "fineSpreadL": 6.93,
+      "fineMeanL": 52.9,
+      "widthCv": 0.085
+     },
+     {
+      "class": "tail",
+      "region": "tail|outside",
+      "sdL": 3.96,
+      "spreadL": 8.68,
+      "meanL": 74.0,
+      "sheetSdL": 6.88,
+      "sheetSpreadL": 17.92,
+      "sheetMeanL": 80.2,
+      "fineSdL": 4.55,
+      "fineSpreadL": 10.37,
+      "fineMeanL": 70.3,
+      "widthCv": 0.168
+     },
+     {
+      "class": "head",
+      "region": "tuft|outside",
+      "sdL": 1.69,
+      "spreadL": 4.69,
+      "meanL": 74.1,
+      "sheetSdL": 3.11,
+      "sheetSpreadL": 7.91,
+      "sheetMeanL": 81.7,
+      "fineSdL": 2.12,
+      "fineSpreadL": 3.9,
+      "fineMeanL": 71.3,
+      "widthCv": 0.076
+     }
+    ]
+   },
+   "threeQuarter.L": {
+    "byClass": {
+     "legs": {
+      "sdL": {
+       "min": 0.98,
+       "median": 1.52,
+       "max": 3.19,
+       "n": 4
+      },
+      "spreadL": {
+       "min": 2.53,
+       "median": 4.12,
+       "max": 8.47,
+       "n": 4
+      },
+      "meanL": {
+       "min": 69.6,
+       "median": 70.1,
+       "max": 72.5,
+       "n": 4
+      },
+      "sheetSdL": {
+       "min": 2.32,
+       "median": 2.37,
+       "max": 6.4,
+       "n": 3
+      },
+      "sheetSpreadL": {
+       "min": 3.74,
+       "median": 6.41,
+       "max": 14.04,
+       "n": 3
+      },
+      "sheetMeanL": {
+       "min": 64.9,
+       "median": 74.3,
+       "max": 82.3,
+       "n": 3
+      },
+      "fineSdL": {
+       "min": 1.5,
+       "median": 1.86,
+       "max": 7.59,
+       "n": 5
+      },
+      "fineSpreadL": {
+       "min": 2.56,
+       "median": 4.79,
+       "max": 21.57,
+       "n": 5
+      },
+      "fineMeanL": {
+       "min": 63.4,
+       "median": 67.4,
+       "max": 75.0,
+       "n": 5
+      },
+      "widthCv": {
+       "min": 0.07,
+       "median": 0.13,
+       "max": 0.3,
+       "n": 5
+      }
+     },
+     "back": {
+      "sdL": {
+       "min": 1.04,
+       "median": 2.18,
+       "max": 3.32,
+       "n": 2
+      },
+      "spreadL": {
+       "min": 2.78,
+       "median": 5.27,
+       "max": 7.77,
+       "n": 2
+      },
+      "meanL": {
+       "min": 64.4,
+       "median": 69.35,
+       "max": 74.3,
+       "n": 2
+      },
+      "sheetSdL": {
+       "min": 3.15,
+       "median": 4.13,
+       "max": 5.11,
+       "n": 2
+      },
+      "sheetSpreadL": {
+       "min": 7.79,
+       "median": 10.62,
+       "max": 13.44,
+       "n": 2
+      },
+      "sheetMeanL": {
+       "min": 63.5,
+       "median": 68.65,
+       "max": 73.8,
+       "n": 2
+      },
+      "fineSdL": {
+       "min": 1.59,
+       "median": 2.4,
+       "max": 3.2,
+       "n": 2
+      },
+      "fineSpreadL": {
+       "min": 4.33,
+       "median": 6.32,
+       "max": 8.3,
+       "n": 2
+      },
+      "fineMeanL": {
+       "min": 59.7,
+       "median": 65.15,
+       "max": 70.6,
+       "n": 2
+      },
+      "widthCv": {
+       "min": 0.1,
+       "median": 0.1,
+       "max": 0.1,
+       "n": 2
+      }
+     },
+     "soles": {
+      "sdL": {
+       "min": 0.9,
+       "median": 1.04,
+       "max": 2.44,
+       "n": 4
+      },
+      "spreadL": {
+       "min": 2.3,
+       "median": 2.47,
+       "max": 6.27,
+       "n": 4
+      },
+      "meanL": {
+       "min": 63.4,
+       "median": 64.3,
+       "max": 65.0,
+       "n": 4
+      },
+      "sheetSdL": {
+       "min": 1.34,
+       "median": 2.15,
+       "max": 4.66,
+       "n": 4
+      },
+      "sheetSpreadL": {
+       "min": 3.56,
+       "median": 6.15,
+       "max": 10.22,
+       "n": 4
+      },
+      "sheetMeanL": {
+       "min": 62.7,
+       "median": 64.65,
+       "max": 65.9,
+       "n": 4
+      },
+      "fineSdL": {
+       "min": 0.5,
+       "median": 4.95,
+       "max": 6.07,
+       "n": 4
+      },
+      "fineSpreadL": {
+       "min": 1.38,
+       "median": 3.06,
+       "max": 7.15,
+       "n": 4
+      },
+      "fineMeanL": {
+       "min": 58.5,
+       "median": 59.15,
+       "max": 60.3,
+       "n": 4
+      },
+      "widthCv": {
+       "min": 0.1,
+       "median": 0.12,
+       "max": 0.15,
+       "n": 4
+      }
+     },
+     "tail": {
+      "sdL": {
+       "min": 0.27,
+       "median": 1.3,
+       "max": 3.48,
+       "n": 3
+      },
+      "spreadL": {
+       "min": 0.75,
+       "median": 3.11,
+       "max": 6.49,
+       "n": 3
+      },
+      "meanL": {
+       "min": 56.1,
+       "median": 56.3,
+       "max": 71.9,
+       "n": 3
+      },
+      "sheetSdL": {
+       "min": 1.44,
+       "median": 3.06,
+       "max": 6.1,
+       "n": 3
+      },
+      "sheetSpreadL": {
+       "min": 3.81,
+       "median": 8.1,
+       "max": 13.92,
+       "n": 3
+      },
+      "sheetMeanL": {
+       "min": 56.1,
+       "median": 58.2,
+       "max": 80.0,
+       "n": 3
+      },
+      "fineSdL": {
+       "min": 0.61,
+       "median": 1.05,
+       "max": 3.7,
+       "n": 3
+      },
+      "fineSpreadL": {
+       "min": 1.51,
+       "median": 2.42,
+       "max": 6.79,
+       "n": 3
+      },
+      "fineMeanL": {
+       "min": 51.9,
+       "median": 52.5,
+       "max": 68.5,
+       "n": 3
+      },
+      "widthCv": {
+       "min": 0.07,
+       "median": 0.08,
+       "max": 0.11,
+       "n": 3
+      }
+     },
+     "ears": {
+      "sdL": {
+       "min": 3.63,
+       "median": 4.51,
+       "max": 5.39,
+       "n": 2
+      },
+      "spreadL": {
+       "min": 8.88,
+       "median": 11.14,
+       "max": 13.39,
+       "n": 2
+      },
+      "meanL": {
+       "min": 56.0,
+       "median": 57.6,
+       "max": 59.2,
+       "n": 2
+      },
+      "sheetSdL": {
+       "min": 5.29,
+       "median": 5.31,
+       "max": 5.34,
+       "n": 2
+      },
+      "sheetSpreadL": {
+       "min": 13.22,
+       "median": 13.36,
+       "max": 13.5,
+       "n": 2
+      },
+      "sheetMeanL": {
+       "min": 58.7,
+       "median": 60.7,
+       "max": 62.7,
+       "n": 2
+      },
+      "fineSdL": {
+       "min": 3.67,
+       "median": 4.54,
+       "max": 5.41,
+       "n": 2
+      },
+      "fineSpreadL": {
+       "min": 9.32,
+       "median": 10.91,
+       "max": 12.51,
+       "n": 2
+      },
+      "fineMeanL": {
+       "min": 52.7,
+       "median": 54.0,
+       "max": 55.3,
+       "n": 2
+      },
+      "widthCv": {
+       "min": 0.16,
+       "median": 0.17,
+       "max": 0.17,
+       "n": 2
+      }
+     },
+     "head": {
+      "sdL": {
+       "min": 1.43,
+       "median": 1.68,
+       "max": 1.93,
+       "n": 2
+      },
+      "spreadL": {
+       "min": 3.29,
+       "median": 4.04,
+       "max": 4.8,
+       "n": 2
+      },
+      "meanL": {
+       "min": 72.6,
+       "median": 72.7,
+       "max": 72.8,
+       "n": 2
+      },
+      "sheetSdL": {
+       "min": 2.95,
+       "median": 4.88,
+       "max": 6.82,
+       "n": 2
+      },
+      "sheetSpreadL": {
+       "min": 8.38,
+       "median": 10.04,
+       "max": 11.7,
+       "n": 2
+      },
+      "sheetMeanL": {
+       "min": 73.8,
+       "median": 77.1,
+       "max": 80.4,
+       "n": 2
+      },
+      "fineSdL": {
+       "min": 1.8,
+       "median": 2.06,
+       "max": 2.32,
+       "n": 2
+      },
+      "fineSpreadL": {
+       "min": 3.55,
+       "median": 4.67,
+       "max": 5.8,
+       "n": 2
+      },
+      "fineMeanL": {
+       "min": 69.0,
+       "median": 69.75,
+       "max": 70.5,
+       "n": 2
+      },
+      "widthCv": {
+       "min": 0.08,
+       "median": 0.08,
+       "max": 0.08,
+       "n": 2
+      }
+     }
+    },
+    "regions": [
+     {
+      "class": "back",
+      "region": "body.back|body.front",
+      "sdL": null,
+      "spreadL": null,
+      "meanL": null,
+      "sheetSdL": null,
+      "sheetSpreadL": null,
+      "sheetMeanL": null,
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     {
+      "class": "legs",
+      "region": "body.back|front.L",
+      "sdL": 1.23,
+      "spreadL": 3.49,
+      "meanL": 69.6,
+      "sheetSdL": null,
+      "sheetSpreadL": null,
+      "sheetMeanL": null,
+      "fineSdL": 1.86,
+      "fineSpreadL": 4.79,
+      "fineMeanL": 63.4,
+      "widthCv": 0.148
+     },
+     {
+      "class": "soles",
+      "region": "body.back|ground",
+      "sdL": 0.9,
+      "spreadL": 2.32,
+      "meanL": 63.4,
+      "sheetSdL": 2.73,
+      "sheetSpreadL": 7.8,
+      "sheetMeanL": 62.7,
+      "fineSdL": 0.5,
+      "fineSpreadL": 1.38,
+      "fineMeanL": 58.5,
+      "widthCv": 0.096
+     },
+     {
+      "class": "legs",
+      "region": "body.back|hind.L",
+      "sdL": 3.19,
+      "spreadL": 8.47,
+      "meanL": 70.5,
+      "sheetSdL": null,
+      "sheetSpreadL": null,
+      "sheetMeanL": null,
+      "fineSdL": 3.38,
+      "fineSpreadL": 5.58,
+      "fineMeanL": 67.4,
+      "widthCv": 0.134
+     },
+     {
+      "class": "back",
+      "region": "body.back|outside",
+      "sdL": 3.32,
+      "spreadL": 7.77,
+      "meanL": 64.4,
+      "sheetSdL": 5.11,
+      "sheetSpreadL": 13.44,
+      "sheetMeanL": 63.5,
+      "fineSdL": 3.2,
+      "fineSpreadL": 8.3,
+      "fineMeanL": 59.7,
+      "widthCv": 0.104
+     },
+     {
+      "class": "tail",
+      "region": "body.back|tail",
+      "sdL": 1.3,
+      "spreadL": 3.11,
+      "meanL": 56.3,
+      "sheetSdL": 1.44,
+      "sheetSpreadL": 3.81,
+      "sheetMeanL": 56.1,
+      "fineSdL": 1.05,
+      "fineSpreadL": 2.42,
+      "fineMeanL": 52.5,
+      "widthCv": 0.114
+     },
+     {
+      "class": "legs",
+      "region": "body.front|front.L",
+      "sdL": null,
+      "spreadL": null,
+      "meanL": null,
+      "sheetSdL": null,
+      "sheetSpreadL": null,
+      "sheetMeanL": null,
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     {
+      "class": "legs",
+      "region": "body.front|front.R",
+      "sdL": null,
+      "spreadL": null,
+      "meanL": null,
+      "sheetSdL": 6.4,
+      "sheetSpreadL": 14.04,
+      "sheetMeanL": 82.3,
+      "fineSdL": 7.59,
+      "fineSpreadL": 21.57,
+      "fineMeanL": 75.0,
+      "widthCv": 0.3
+     },
+     {
+      "class": "back",
+      "region": "body.front|outside",
+      "sdL": 1.04,
+      "spreadL": 2.78,
+      "meanL": 74.3,
+      "sheetSdL": 3.15,
+      "sheetSpreadL": 7.79,
+      "sheetMeanL": 73.8,
+      "fineSdL": 1.59,
+      "fineSpreadL": 4.33,
+      "fineMeanL": 70.6,
+      "widthCv": 0.104
+     },
+     {
+      "class": "ears",
+      "region": "ear.L|outside",
+      "sdL": 3.63,
+      "spreadL": 8.88,
+      "meanL": 56.0,
+      "sheetSdL": 5.29,
+      "sheetSpreadL": 13.22,
+      "sheetMeanL": 58.7,
+      "fineSdL": 3.67,
+      "fineSpreadL": 9.32,
+      "fineMeanL": 52.7,
+      "widthCv": 0.173
+     },
+     {
+      "class": "ears",
+      "region": "ear.R|outside",
+      "sdL": 5.39,
+      "spreadL": 13.39,
+      "meanL": 59.2,
+      "sheetSdL": 5.34,
+      "sheetSpreadL": 13.5,
+      "sheetMeanL": 62.7,
+      "fineSdL": 5.41,
+      "fineSpreadL": 12.51,
+      "fineMeanL": 55.3,
+      "widthCv": 0.164
+     },
+     {
+      "class": "legs",
+      "region": "front.L|front.R",
+      "sdL": 0.98,
+      "spreadL": 2.53,
+      "meanL": 69.7,
+      "sheetSdL": 2.37,
+      "sheetSpreadL": 3.74,
+      "sheetMeanL": 64.9,
+      "fineSdL": 1.65,
+      "fineSpreadL": 2.56,
+      "fineMeanL": 63.6,
+      "widthCv": 0.123
+     },
+     {
+      "class": "soles",
+      "region": "front.L|ground",
+      "sdL": 1.12,
+      "spreadL": 2.3,
+      "meanL": 65.0,
+      "sheetSdL": 1.34,
+      "sheetSpreadL": 3.56,
+      "sheetMeanL": 63.8,
+      "fineSdL": 5.01,
+      "fineSpreadL": 2.51,
+      "fineMeanL": 59.0,
+      "widthCv": 0.108
+     },
+     {
+      "class": "soles",
+      "region": "front.R|ground",
+      "sdL": 2.44,
+      "spreadL": 6.27,
+      "meanL": 64.7,
+      "sheetSdL": 4.66,
+      "sheetSpreadL": 10.22,
+      "sheetMeanL": 65.9,
+      "fineSdL": 4.89,
+      "fineSpreadL": 7.15,
+      "fineMeanL": 60.3,
+      "widthCv": 0.124
+     },
+     {
+      "class": "legs",
+      "region": "front.R|outside",
+      "sdL": 1.82,
+      "spreadL": 4.74,
+      "meanL": 72.5,
+      "sheetSdL": 2.32,
+      "sheetSpreadL": 6.41,
+      "sheetMeanL": 74.3,
+      "fineSdL": 1.5,
+      "fineSpreadL": 4.29,
+      "fineMeanL": 68.2,
+      "widthCv": 0.068
+     },
+     {
+      "class": "head",
+      "region": "head.base|outside",
+      "sdL": 1.93,
+      "spreadL": 4.8,
+      "meanL": 72.6,
+      "sheetSdL": 6.82,
+      "sheetSpreadL": 11.7,
+      "sheetMeanL": 73.8,
+      "fineSdL": 2.32,
+      "fineSpreadL": 5.8,
+      "fineMeanL": 69.0,
+      "widthCv": 0.083
+     },
+     {
+      "class": "soles",
+      "region": "hind.L|ground",
+      "sdL": 0.97,
+      "spreadL": 2.63,
+      "meanL": 63.9,
+      "sheetSdL": 1.56,
+      "sheetSpreadL": 4.5,
+      "sheetMeanL": 65.5,
+      "fineSdL": 6.07,
+      "fineSpreadL": 3.62,
+      "fineMeanL": 59.3,
+      "widthCv": 0.148
+     },
+     {
+      "class": "tail",
+      "region": "tail|ground",
+      "sdL": 0.27,
+      "spreadL": 0.75,
+      "meanL": 56.1,
+      "sheetSdL": 3.06,
+      "sheetSpreadL": 8.1,
+      "sheetMeanL": 58.2,
+      "fineSdL": 0.61,
+      "fineSpreadL": 1.51,
+      "fineMeanL": 51.9,
+      "widthCv": 0.07
+     },
+     {
+      "class": "tail",
+      "region": "tail|outside",
+      "sdL": 3.48,
+      "spreadL": 6.49,
+      "meanL": 71.9,
+      "sheetSdL": 6.1,
+      "sheetSpreadL": 13.92,
+      "sheetMeanL": 80.0,
+      "fineSdL": 3.7,
+      "fineSpreadL": 6.79,
+      "fineMeanL": 68.5,
+      "widthCv": 0.077
+     },
+     {
+      "class": "head",
+      "region": "tuft|outside",
+      "sdL": 1.43,
+      "spreadL": 3.29,
+      "meanL": 72.8,
+      "sheetSdL": 2.95,
+      "sheetSpreadL": 8.38,
+      "sheetMeanL": 80.4,
+      "fineSdL": 1.8,
+      "fineSpreadL": 3.55,
+      "fineMeanL": 70.5,
+      "widthCv": 0.076
+     }
+    ]
+   },
+   "threeQuarter.R": {
+    "byClass": {
+     "legs": {
+      "sdL": {
+       "min": 0.51,
+       "median": 1.44,
+       "max": 3.65,
+       "n": 4
+      },
+      "spreadL": {
+       "min": 1.4,
+       "median": 3.9,
+       "max": 9.96,
+       "n": 4
+      },
+      "meanL": {
+       "min": 68.7,
+       "median": 69.85,
+       "max": 70.5,
+       "n": 4
+      },
+      "sheetSdL": {
+       "min": 2.23,
+       "median": 2.38,
+       "max": 5.31,
+       "n": 4
+      },
+      "sheetSpreadL": {
+       "min": 3.74,
+       "median": 5.92,
+       "max": 13.39,
+       "n": 4
+      },
+      "sheetMeanL": {
+       "min": 64.9,
+       "median": 75.5,
+       "max": 82.4,
+       "n": 4
+      },
+      "fineSdL": {
+       "min": 1.12,
+       "median": 2.33,
+       "max": 8.9,
+       "n": 5
+      },
+      "fineSpreadL": {
+       "min": 3.06,
+       "median": 5.75,
+       "max": 24.62,
+       "n": 5
+      },
+      "fineMeanL": {
+       "min": 62.6,
+       "median": 64.9,
+       "max": 73.7,
+       "n": 5
+      },
+      "widthCv": {
+       "min": 0.09,
+       "median": 0.14,
+       "max": 0.31,
+       "n": 5
+      }
+     },
+     "back": {
+      "sdL": {
+       "min": 1.11,
+       "median": 2.6,
+       "max": 4.1,
+       "n": 2
+      },
+      "spreadL": {
+       "min": 3.15,
+       "median": 6.49,
+       "max": 9.83,
+       "n": 2
+      },
+      "meanL": {
+       "min": 66.3,
+       "median": 68.5,
+       "max": 70.7,
+       "n": 2
+      },
+      "sheetSdL": {
+       "min": 3.15,
+       "median": 4.13,
+       "max": 5.11,
+       "n": 2
+      },
+      "sheetSpreadL": {
+       "min": 7.79,
+       "median": 10.62,
+       "max": 13.44,
+       "n": 2
+      },
+      "sheetMeanL": {
+       "min": 63.5,
+       "median": 68.65,
+       "max": 73.8,
+       "n": 2
+      },
+      "fineSdL": {
+       "min": 1.61,
+       "median": 2.77,
+       "max": 3.92,
+       "n": 2
+      },
+      "fineSpreadL": {
+       "min": 4.64,
+       "median": 7.21,
+       "max": 9.79,
+       "n": 2
+      },
+      "fineMeanL": {
+       "min": 62.0,
+       "median": 64.25,
+       "max": 66.5,
+       "n": 2
+      },
+      "widthCv": {
+       "min": 0.1,
+       "median": 0.12,
+       "max": 0.15,
+       "n": 2
+      }
+     },
+     "soles": {
+      "sdL": {
+       "min": 0.39,
+       "median": 1.19,
+       "max": 1.81,
+       "n": 4
+      },
+      "spreadL": {
+       "min": 0.97,
+       "median": 2.99,
+       "max": 4.69,
+       "n": 4
+      },
+      "meanL": {
+       "min": 63.8,
+       "median": 64.15,
+       "max": 65.6,
+       "n": 4
+      },
+      "sheetSdL": {
+       "min": 1.34,
+       "median": 2.15,
+       "max": 4.66,
+       "n": 4
+      },
+      "sheetSpreadL": {
+       "min": 3.56,
+       "median": 6.15,
+       "max": 10.22,
+       "n": 4
+      },
+      "sheetMeanL": {
+       "min": 62.7,
+       "median": 64.65,
+       "max": 65.9,
+       "n": 4
+      },
+      "fineSdL": {
+       "min": 1.11,
+       "median": 4.83,
+       "max": 6.09,
+       "n": 4
+      },
+      "fineSpreadL": {
+       "min": 3.14,
+       "median": 3.33,
+       "max": 3.46,
+       "n": 4
+      },
+      "fineMeanL": {
+       "min": 59.1,
+       "median": 59.3,
+       "max": 59.4,
+       "n": 4
+      },
+      "widthCv": {
+       "min": 0.1,
+       "median": 0.12,
+       "max": 0.15,
+       "n": 4
+      }
+     },
+     "tail": {
+      "sdL": {
+       "min": 0.57,
+       "median": 2.26,
+       "max": 3.53,
+       "n": 3
+      },
+      "spreadL": {
+       "min": 1.52,
+       "median": 5.7,
+       "max": 6.49,
+       "n": 3
+      },
+      "meanL": {
+       "min": 56.1,
+       "median": 65.8,
+       "max": 72.0,
+       "n": 3
+      },
+      "sheetSdL": {
+       "min": 1.44,
+       "median": 3.3,
+       "max": 6.1,
+       "n": 3
+      },
+      "sheetSpreadL": {
+       "min": 3.81,
+       "median": 8.96,
+       "max": 13.92,
+       "n": 3
+      },
+      "sheetMeanL": {
+       "min": 56.1,
+       "median": 58.6,
+       "max": 80.0,
+       "n": 3
+      },
+      "fineSdL": {
+       "min": 0.67,
+       "median": 1.42,
+       "max": 3.85,
+       "n": 3
+      },
+      "fineSpreadL": {
+       "min": 1.78,
+       "median": 3.69,
+       "max": 7.15,
+       "n": 3
+      },
+      "fineMeanL": {
+       "min": 51.9,
+       "median": 62.0,
+       "max": 68.6,
+       "n": 3
+      },
+      "widthCv": {
+       "min": 0.08,
+       "median": 0.09,
+       "max": 0.11,
+       "n": 3
+      }
+     },
+     "ears": {
+      "sdL": {
+       "min": 4.16,
+       "median": 4.58,
+       "max": 5.01,
+       "n": 2
+      },
+      "spreadL": {
+       "min": 10.22,
+       "median": 11.1,
+       "max": 11.98,
+       "n": 2
+      },
+      "meanL": {
+       "min": 56.4,
+       "median": 57.35,
+       "max": 58.3,
+       "n": 2
+      },
+      "sheetSdL": {
+       "min": 5.29,
+       "median": 5.31,
+       "max": 5.34,
+       "n": 2
+      },
+      "sheetSpreadL": {
+       "min": 13.22,
+       "median": 13.36,
+       "max": 13.5,
+       "n": 2
+      },
+      "sheetMeanL": {
+       "min": 58.7,
+       "median": 60.7,
+       "max": 62.7,
+       "n": 2
+      },
+      "fineSdL": {
+       "min": 4.31,
+       "median": 4.68,
+       "max": 5.05,
+       "n": 2
+      },
+      "fineSpreadL": {
+       "min": 11.07,
+       "median": 11.18,
+       "max": 11.28,
+       "n": 2
+      },
+      "fineMeanL": {
+       "min": 53.2,
+       "median": 53.9,
+       "max": 54.6,
+       "n": 2
+      },
+      "widthCv": {
+       "min": 0.16,
+       "median": 0.17,
+       "max": 0.18,
+       "n": 2
+      }
+     },
+     "head": {
+      "sdL": {
+       "min": 2.06,
+       "median": 2.07,
+       "max": 2.08,
+       "n": 2
+      },
+      "spreadL": {
+       "min": 5.44,
+       "median": 5.49,
+       "max": 5.53,
+       "n": 2
+      },
+      "meanL": {
+       "min": 72.2,
+       "median": 72.45,
+       "max": 72.7,
+       "n": 2
+      },
+      "sheetSdL": {
+       "min": 2.95,
+       "median": 4.29,
+       "max": 5.63,
+       "n": 2
+      },
+      "sheetSpreadL": {
+       "min": 6.31,
+       "median": 7.35,
+       "max": 8.38,
+       "n": 2
+      },
+      "sheetMeanL": {
+       "min": 74.5,
+       "median": 77.45,
+       "max": 80.4,
+       "n": 2
+      },
+      "fineSdL": {
+       "min": 2.17,
+       "median": 2.48,
+       "max": 2.79,
+       "n": 2
+      },
+      "fineSpreadL": {
+       "min": 4.63,
+       "median": 5.77,
+       "max": 6.91,
+       "n": 2
+      },
+      "fineMeanL": {
+       "min": 68.6,
+       "median": 69.55,
+       "max": 70.5,
+       "n": 2
+      },
+      "widthCv": {
+       "min": 0.08,
+       "median": 0.08,
+       "max": 0.09,
+       "n": 2
+      }
+     }
+    },
+    "regions": [
+     {
+      "class": "back",
+      "region": "body.back|body.front",
+      "sdL": null,
+      "spreadL": null,
+      "meanL": null,
+      "sheetSdL": null,
+      "sheetSpreadL": null,
+      "sheetMeanL": null,
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     {
+      "class": "legs",
+      "region": "body.back|front.R",
+      "sdL": 0.51,
+      "spreadL": 1.4,
+      "meanL": 70.2,
+      "sheetSdL": 2.4,
+      "sheetSpreadL": 5.73,
+      "sheetMeanL": 76.7,
+      "fineSdL": 2.33,
+      "fineSpreadL": 5.75,
+      "fineMeanL": 64.9,
+      "widthCv": 0.18
+     },
+     {
+      "class": "soles",
+      "region": "body.back|ground",
+      "sdL": 1.33,
+      "spreadL": 3.18,
+      "meanL": 64.3,
+      "sheetSdL": 2.73,
+      "sheetSpreadL": 7.8,
+      "sheetMeanL": 62.7,
+      "fineSdL": 1.11,
+      "fineSpreadL": 3.14,
+      "fineMeanL": 59.4,
+      "widthCv": 0.095
+     },
+     {
+      "class": "legs",
+      "region": "body.back|hind.R",
+      "sdL": 3.65,
+      "spreadL": 9.96,
+      "meanL": 70.5,
+      "sheetSdL": null,
+      "sheetSpreadL": null,
+      "sheetMeanL": null,
+      "fineSdL": 4.08,
+      "fineSpreadL": 9.79,
+      "fineMeanL": 66.8,
+      "widthCv": 0.139
+     },
+     {
+      "class": "back",
+      "region": "body.back|outside",
+      "sdL": 4.1,
+      "spreadL": 9.83,
+      "meanL": 66.3,
+      "sheetSdL": 5.11,
+      "sheetSpreadL": 13.44,
+      "sheetMeanL": 63.5,
+      "fineSdL": 3.92,
+      "fineSpreadL": 9.79,
+      "fineMeanL": 62.0,
+      "widthCv": 0.097
+     },
+     {
+      "class": "tail",
+      "region": "body.back|tail",
+      "sdL": 2.26,
+      "spreadL": 5.7,
+      "meanL": 65.8,
+      "sheetSdL": 1.44,
+      "sheetSpreadL": 3.81,
+      "sheetMeanL": 56.1,
+      "fineSdL": 1.42,
+      "fineSpreadL": 3.69,
+      "fineMeanL": 62.0,
+      "widthCv": 0.112
+     },
+     {
+      "class": "legs",
+      "region": "body.front|front.L",
+      "sdL": null,
+      "spreadL": null,
+      "meanL": null,
+      "sheetSdL": 5.31,
+      "sheetSpreadL": 13.39,
+      "sheetMeanL": 82.4,
+      "fineSdL": 8.9,
+      "fineSpreadL": 24.62,
+      "fineMeanL": 73.7,
+      "widthCv": 0.306
+     },
+     {
+      "class": "legs",
+      "region": "body.front|front.R",
+      "sdL": null,
+      "spreadL": null,
+      "meanL": null,
+      "sheetSdL": null,
+      "sheetSpreadL": null,
+      "sheetMeanL": null,
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     {
+      "class": "back",
+      "region": "body.front|outside",
+      "sdL": 1.11,
+      "spreadL": 3.15,
+      "meanL": 70.7,
+      "sheetSdL": 3.15,
+      "sheetSpreadL": 7.79,
+      "sheetMeanL": 73.8,
+      "fineSdL": 1.61,
+      "fineSpreadL": 4.64,
+      "fineMeanL": 66.5,
+      "widthCv": 0.149
+     },
+     {
+      "class": "ears",
+      "region": "ear.L|outside",
+      "sdL": 5.01,
+      "spreadL": 11.98,
+      "meanL": 58.3,
+      "sheetSdL": 5.34,
+      "sheetSpreadL": 13.5,
+      "sheetMeanL": 62.7,
+      "fineSdL": 5.05,
+      "fineSpreadL": 11.07,
+      "fineMeanL": 54.6,
+      "widthCv": 0.159
+     },
+     {
+      "class": "ears",
+      "region": "ear.R|outside",
+      "sdL": 4.16,
+      "spreadL": 10.22,
+      "meanL": 56.4,
+      "sheetSdL": 5.29,
+      "sheetSpreadL": 13.22,
+      "sheetMeanL": 58.7,
+      "fineSdL": 4.31,
+      "fineSpreadL": 11.28,
+      "fineMeanL": 53.2,
+      "widthCv": 0.176
+     },
+     {
+      "class": "legs",
+      "region": "front.L|front.R",
+      "sdL": 1.19,
+      "spreadL": 3.05,
+      "meanL": 68.7,
+      "sheetSdL": 2.37,
+      "sheetSpreadL": 3.74,
+      "sheetMeanL": 64.9,
+      "fineSdL": 1.12,
+      "fineSpreadL": 3.06,
+      "fineMeanL": 62.6,
+      "widthCv": 0.13
+     },
+     {
+      "class": "soles",
+      "region": "front.L|ground",
+      "sdL": 1.81,
+      "spreadL": 4.69,
+      "meanL": 64.0,
+      "sheetSdL": 4.66,
+      "sheetSpreadL": 10.22,
+      "sheetMeanL": 65.9,
+      "fineSdL": 4.67,
+      "fineSpreadL": 3.45,
+      "fineMeanL": 59.4,
+      "widthCv": 0.125
+     },
+     {
+      "class": "legs",
+      "region": "front.L|outside",
+      "sdL": 1.69,
+      "spreadL": 4.75,
+      "meanL": 69.5,
+      "sheetSdL": 2.23,
+      "sheetSpreadL": 6.1,
+      "sheetMeanL": 74.3,
+      "fineSdL": 1.55,
+      "fineSpreadL": 4.43,
+      "fineMeanL": 64.7,
+      "widthCv": 0.089
+     },
+     {
+      "class": "soles",
+      "region": "front.R|ground",
+      "sdL": 0.39,
+      "spreadL": 0.97,
+      "meanL": 65.6,
+      "sheetSdL": 1.34,
+      "sheetSpreadL": 3.56,
+      "sheetMeanL": 63.8,
+      "fineSdL": 4.99,
+      "fineSpreadL": 3.2,
+      "fineMeanL": 59.2,
+      "widthCv": 0.106
+     },
+     {
+      "class": "head",
+      "region": "head.base|outside",
+      "sdL": 2.06,
+      "spreadL": 5.53,
+      "meanL": 72.2,
+      "sheetSdL": 5.63,
+      "sheetSpreadL": 6.31,
+      "sheetMeanL": 74.5,
+      "fineSdL": 2.79,
+      "fineSpreadL": 6.91,
+      "fineMeanL": 68.6,
+      "widthCv": 0.078
+     },
+     {
+      "class": "soles",
+      "region": "hind.R|ground",
+      "sdL": 1.05,
+      "spreadL": 2.79,
+      "meanL": 63.8,
+      "sheetSdL": 1.56,
+      "sheetSpreadL": 4.5,
+      "sheetMeanL": 65.5,
+      "fineSdL": 6.09,
+      "fineSpreadL": 3.46,
+      "fineMeanL": 59.1,
+      "widthCv": 0.149
+     },
+     {
+      "class": "tail",
+      "region": "tail|ground",
+      "sdL": 0.57,
+      "spreadL": 1.52,
+      "meanL": 56.1,
+      "sheetSdL": 3.3,
+      "sheetSpreadL": 8.96,
+      "sheetMeanL": 58.6,
+      "fineSdL": 0.67,
+      "fineSpreadL": 1.78,
+      "fineMeanL": 51.9,
+      "widthCv": 0.076
+     },
+     {
+      "class": "tail",
+      "region": "tail|outside",
+      "sdL": 3.53,
+      "spreadL": 6.49,
+      "meanL": 72.0,
+      "sheetSdL": 6.1,
+      "sheetSpreadL": 13.92,
+      "sheetMeanL": 80.0,
+      "fineSdL": 3.85,
+      "fineSpreadL": 7.15,
+      "fineMeanL": 68.6,
+      "widthCv": 0.086
+     },
+     {
+      "class": "head",
+      "region": "tuft|outside",
+      "sdL": 2.08,
+      "spreadL": 5.44,
+      "meanL": 72.7,
+      "sheetSdL": 2.95,
+      "sheetSpreadL": 8.38,
+      "sheetMeanL": 80.4,
+      "fineSdL": 2.17,
+      "fineSpreadL": 4.63,
+      "fineMeanL": 70.5,
+      "widthCv": 0.087
+     }
+    ]
+   }
+  },
+  "options": {
+   "back": {
+    "byClass": {
+     "legs": {
+      "sdL": null,
+      "spreadL": null,
+      "meanL": null,
+      "sheetSdL": {
+       "min": 6.42,
+       "median": 6.42,
+       "max": 6.42,
+       "n": 1
+      },
+      "sheetSpreadL": {
+       "min": 15.21,
+       "median": 15.21,
+       "max": 15.21,
+       "n": 1
+      },
+      "sheetMeanL": {
+       "min": 72.4,
+       "median": 72.4,
+       "max": 72.4,
+       "n": 1
+      },
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     "back": {
+      "sdL": {
+       "min": 7.28,
+       "median": 7.28,
+       "max": 7.28,
+       "n": 1
+      },
+      "spreadL": {
+       "min": 20.86,
+       "median": 20.86,
+       "max": 20.86,
+       "n": 1
+      },
+      "meanL": {
+       "min": 73.8,
+       "median": 73.8,
+       "max": 73.8,
+       "n": 1
+      },
+      "sheetSdL": {
+       "min": 4.99,
+       "median": 4.99,
+       "max": 4.99,
+       "n": 1
+      },
+      "sheetSpreadL": {
+       "min": 13.81,
+       "median": 13.81,
+       "max": 13.81,
+       "n": 1
+      },
+      "sheetMeanL": {
+       "min": 74.5,
+       "median": 74.5,
+       "max": 74.5,
+       "n": 1
+      },
+      "fineSdL": {
+       "min": 8.26,
+       "median": 8.26,
+       "max": 8.26,
+       "n": 1
+      },
+      "fineSpreadL": {
+       "min": 23.72,
+       "median": 23.72,
+       "max": 23.72,
+       "n": 1
+      },
+      "fineMeanL": {
+       "min": 69.7,
+       "median": 69.7,
+       "max": 69.7,
+       "n": 1
+      },
+      "widthCv": {
+       "min": 0.12,
+       "median": 0.12,
+       "max": 0.12,
+       "n": 1
+      }
+     },
+     "soles": {
+      "sdL": {
+       "min": 0.26,
+       "median": 0.31,
+       "max": 2.21,
+       "n": 3
+      },
+      "spreadL": {
+       "min": 0.62,
+       "median": 0.69,
+       "max": 5.06,
+       "n": 3
+      },
+      "meanL": {
+       "min": 59.5,
+       "median": 68.3,
+       "max": 69.3,
+       "n": 3
+      },
+      "sheetSdL": {
+       "min": 1.51,
+       "median": 1.51,
+       "max": 1.51,
+       "n": 1
+      },
+      "sheetSpreadL": {
+       "min": 4.04,
+       "median": 4.04,
+       "max": 4.04,
+       "n": 1
+      },
+      "sheetMeanL": {
+       "min": 64.2,
+       "median": 64.2,
+       "max": 64.2,
+       "n": 1
+      },
+      "fineSdL": {
+       "min": 1.53,
+       "median": 1.53,
+       "max": 1.53,
+       "n": 1
+      },
+      "fineSpreadL": {
+       "min": 3.57,
+       "median": 3.57,
+       "max": 3.57,
+       "n": 1
+      },
+      "fineMeanL": {
+       "min": 53.4,
+       "median": 53.4,
+       "max": 53.4,
+       "n": 1
+      },
+      "widthCv": {
+       "min": 0.04,
+       "median": 0.04,
+       "max": 0.04,
+       "n": 1
+      }
+     },
+     "tail": {
+      "sdL": {
+       "min": 1.06,
+       "median": 3.93,
+       "max": 6.8,
+       "n": 2
+      },
+      "spreadL": {
+       "min": 2.6,
+       "median": 8.72,
+       "max": 14.85,
+       "n": 2
+      },
+      "meanL": {
+       "min": 56.5,
+       "median": 64.9,
+       "max": 73.3,
+       "n": 2
+      },
+      "sheetSdL": {
+       "min": 2.87,
+       "median": 5.13,
+       "max": 7.4,
+       "n": 2
+      },
+      "sheetSpreadL": {
+       "min": 7.32,
+       "median": 12.83,
+       "max": 18.34,
+       "n": 2
+      },
+      "sheetMeanL": {
+       "min": 63.7,
+       "median": 68.45,
+       "max": 73.2,
+       "n": 2
+      },
+      "fineSdL": {
+       "min": 0.6,
+       "median": 4.15,
+       "max": 7.69,
+       "n": 2
+      },
+      "fineSpreadL": {
+       "min": 0.49,
+       "median": 9.96,
+       "max": 19.42,
+       "n": 2
+      },
+      "fineMeanL": {
+       "min": 53.9,
+       "median": 60.9,
+       "max": 67.9,
+       "n": 2
+      },
+      "widthCv": {
+       "min": 0.07,
+       "median": 0.15,
+       "max": 0.24,
+       "n": 2
+      }
+     },
+     "ears": {
+      "sdL": {
+       "min": 5.13,
+       "median": 5.46,
+       "max": 5.78,
+       "n": 2
+      },
+      "spreadL": {
+       "min": 11.67,
+       "median": 12.7,
+       "max": 13.73,
+       "n": 2
+      },
+      "meanL": {
+       "min": 57.9,
+       "median": 58.2,
+       "max": 58.5,
+       "n": 2
+      },
+      "sheetSdL": {
+       "min": 4.76,
+       "median": 4.89,
+       "max": 5.02,
+       "n": 2
+      },
+      "sheetSpreadL": {
+       "min": 12.47,
+       "median": 12.67,
+       "max": 12.87,
+       "n": 2
+      },
+      "sheetMeanL": {
+       "min": 60.4,
+       "median": 60.5,
+       "max": 60.6,
+       "n": 2
+      },
+      "fineSdL": {
+       "min": 5.73,
+       "median": 5.98,
+       "max": 6.23,
+       "n": 2
+      },
+      "fineSpreadL": {
+       "min": 13.66,
+       "median": 13.86,
+       "max": 14.06,
+       "n": 2
+      },
+      "fineMeanL": {
+       "min": 53.3,
+       "median": 53.5,
+       "max": 53.7,
+       "n": 2
+      },
+      "widthCv": {
+       "min": 0.15,
+       "median": 0.16,
+       "max": 0.16,
+       "n": 2
+      }
+     },
+     "head": {
+      "sdL": {
+       "min": 1.37,
+       "median": 2.71,
+       "max": 4.06,
+       "n": 2
+      },
+      "spreadL": {
+       "min": 2.62,
+       "median": 6.18,
+       "max": 9.73,
+       "n": 2
+      },
+      "meanL": {
+       "min": 77.5,
+       "median": 78.15,
+       "max": 78.8,
+       "n": 2
+      },
+      "sheetSdL": {
+       "min": 1.38,
+       "median": 2.69,
+       "max": 4.0,
+       "n": 2
+      },
+      "sheetSpreadL": {
+       "min": 3.55,
+       "median": 6.76,
+       "max": 9.96,
+       "n": 2
+      },
+      "sheetMeanL": {
+       "min": 79.3,
+       "median": 79.65,
+       "max": 80.0,
+       "n": 2
+      },
+      "fineSdL": {
+       "min": 1.77,
+       "median": 3.06,
+       "max": 4.35,
+       "n": 2
+      },
+      "fineSpreadL": {
+       "min": 3.58,
+       "median": 7.08,
+       "max": 10.59,
+       "n": 2
+      },
+      "fineMeanL": {
+       "min": 75.1,
+       "median": 75.8,
+       "max": 76.5,
+       "n": 2
+      },
+      "widthCv": {
+       "min": 0.04,
+       "median": 0.07,
+       "max": 0.09,
+       "n": 2
+      }
+     }
+    },
+    "regions": [
+     {
+      "class": "soles",
+      "region": "body.back|ground",
+      "sdL": 2.21,
+      "spreadL": 5.06,
+      "meanL": 59.5,
+      "sheetSdL": 1.51,
+      "sheetSpreadL": 4.04,
+      "sheetMeanL": 64.2,
+      "fineSdL": 1.53,
+      "fineSpreadL": 3.57,
+      "fineMeanL": 53.4,
+      "widthCv": 0.035
+     },
+     {
+      "class": "legs",
+      "region": "body.back|hind.L",
+      "sdL": null,
+      "spreadL": null,
+      "meanL": null,
+      "sheetSdL": 6.42,
+      "sheetSpreadL": 15.21,
+      "sheetMeanL": 72.4,
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     {
+      "class": "legs",
+      "region": "body.back|hind.R",
+      "sdL": null,
+      "spreadL": null,
+      "meanL": null,
+      "sheetSdL": null,
+      "sheetSpreadL": null,
+      "sheetMeanL": null,
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     {
+      "class": "back",
+      "region": "body.back|outside",
+      "sdL": 7.28,
+      "spreadL": 20.86,
+      "meanL": 73.8,
+      "sheetSdL": 4.99,
+      "sheetSpreadL": 13.81,
+      "sheetMeanL": 74.5,
+      "fineSdL": 8.26,
+      "fineSpreadL": 23.72,
+      "fineMeanL": 69.7,
+      "widthCv": 0.118
+     },
+     {
+      "class": "tail",
+      "region": "body.back|tail",
+      "sdL": 6.8,
+      "spreadL": 14.85,
+      "meanL": 73.3,
+      "sheetSdL": 7.4,
+      "sheetSpreadL": 18.34,
+      "sheetMeanL": 73.2,
+      "fineSdL": 7.69,
+      "fineSpreadL": 19.42,
+      "fineMeanL": 67.9,
+      "widthCv": 0.245
+     },
+     {
+      "class": "ears",
+      "region": "ear.L|outside",
+      "sdL": 5.78,
+      "spreadL": 13.73,
+      "meanL": 58.5,
+      "sheetSdL": 5.02,
+      "sheetSpreadL": 12.47,
+      "sheetMeanL": 60.4,
+      "fineSdL": 6.23,
+      "fineSpreadL": 14.06,
+      "fineMeanL": 53.7,
+      "widthCv": 0.157
+     },
+     {
+      "class": "ears",
+      "region": "ear.R|outside",
+      "sdL": 5.13,
+      "spreadL": 11.67,
+      "meanL": 57.9,
+      "sheetSdL": 4.76,
+      "sheetSpreadL": 12.87,
+      "sheetMeanL": 60.6,
+      "fineSdL": 5.73,
+      "fineSpreadL": 13.66,
+      "fineMeanL": 53.3,
+      "widthCv": 0.154
+     },
+     {
+      "class": "head",
+      "region": "head.base|outside",
+      "sdL": 4.06,
+      "spreadL": 9.73,
+      "meanL": 77.5,
+      "sheetSdL": 4.0,
+      "sheetSpreadL": 9.96,
+      "sheetMeanL": 79.3,
+      "fineSdL": 4.35,
+      "fineSpreadL": 10.59,
+      "fineMeanL": 75.1,
+      "widthCv": 0.09
+     },
+     {
+      "class": "soles",
+      "region": "hind.L|ground",
+      "sdL": 0.31,
+      "spreadL": 0.69,
+      "meanL": 69.3,
+      "sheetSdL": null,
+      "sheetSpreadL": null,
+      "sheetMeanL": null,
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     {
+      "class": "soles",
+      "region": "hind.R|ground",
+      "sdL": 0.26,
+      "spreadL": 0.62,
+      "meanL": 68.3,
+      "sheetSdL": null,
+      "sheetSpreadL": null,
+      "sheetMeanL": null,
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     {
+      "class": "tail",
+      "region": "tail|ground",
+      "sdL": 1.06,
+      "spreadL": 2.6,
+      "meanL": 56.5,
+      "sheetSdL": 2.87,
+      "sheetSpreadL": 7.32,
+      "sheetMeanL": 63.7,
+      "fineSdL": 0.6,
+      "fineSpreadL": 0.49,
+      "fineMeanL": 53.9,
+      "widthCv": 0.065
+     },
+     {
+      "class": "head",
+      "region": "tuft|outside",
+      "sdL": 1.37,
+      "spreadL": 2.62,
+      "meanL": 78.8,
+      "sheetSdL": 1.38,
+      "sheetSpreadL": 3.55,
+      "sheetMeanL": 80.0,
+      "fineSdL": 1.77,
+      "fineSpreadL": 3.58,
+      "fineMeanL": 76.5,
+      "widthCv": 0.041
+     }
+    ]
+   },
+   "front": {
+    "byClass": {
+     "legs": {
+      "sdL": {
+       "min": 0.88,
+       "median": 3.18,
+       "max": 12.67,
+       "n": 6
+      },
+      "spreadL": {
+       "min": 2.07,
+       "median": 5.12,
+       "max": 28.0,
+       "n": 6
+      },
+      "meanL": {
+       "min": 72.4,
+       "median": 75.9,
+       "max": 83.1,
+       "n": 6
+      },
+      "sheetSdL": {
+       "min": 0.85,
+       "median": 6.81,
+       "max": 8.97,
+       "n": 8
+      },
+      "sheetSpreadL": {
+       "min": 2.31,
+       "median": 14.59,
+       "max": 21.82,
+       "n": 8
+      },
+      "sheetMeanL": {
+       "min": 69.6,
+       "median": 74.0,
+       "max": 82.7,
+       "n": 8
+      },
+      "fineSdL": {
+       "min": 1.24,
+       "median": 6.2,
+       "max": 14.77,
+       "n": 7
+      },
+      "fineSpreadL": {
+       "min": 0.86,
+       "median": 9.42,
+       "max": 34.14,
+       "n": 7
+      },
+      "fineMeanL": {
+       "min": 67.1,
+       "median": 70.0,
+       "max": 81.3,
+       "n": 7
+      },
+      "widthCv": {
+       "min": 0.06,
+       "median": 0.13,
+       "max": 0.25,
+       "n": 7
+      }
+     },
+     "back": {
+      "sdL": {
+       "min": 2.98,
+       "median": 3.96,
+       "max": 4.93,
+       "n": 2
+      },
+      "spreadL": {
+       "min": 8.24,
+       "median": 11.88,
+       "max": 15.52,
+       "n": 2
+      },
+      "meanL": {
+       "min": 68.4,
+       "median": 68.6,
+       "max": 68.8,
+       "n": 2
+      },
+      "sheetSdL": {
+       "min": 5.12,
+       "median": 5.49,
+       "max": 5.86,
+       "n": 2
+      },
+      "sheetSpreadL": {
+       "min": 9.36,
+       "median": 12.09,
+       "max": 14.82,
+       "n": 2
+      },
+      "sheetMeanL": {
+       "min": 69.5,
+       "median": 70.45,
+       "max": 71.4,
+       "n": 2
+      },
+      "fineSdL": {
+       "min": 3.42,
+       "median": 4.45,
+       "max": 5.48,
+       "n": 2
+      },
+      "fineSpreadL": {
+       "min": 10.04,
+       "median": 12.98,
+       "max": 15.92,
+       "n": 2
+      },
+      "fineMeanL": {
+       "min": 65.1,
+       "median": 65.45,
+       "max": 65.8,
+       "n": 2
+      },
+      "widthCv": {
+       "min": 0.23,
+       "median": 0.25,
+       "max": 0.27,
+       "n": 2
+      }
+     },
+     "soles": {
+      "sdL": {
+       "min": 1.05,
+       "median": 4.0,
+       "max": 6.35,
+       "n": 4
+      },
+      "spreadL": {
+       "min": 2.76,
+       "median": 10.53,
+       "max": 16.64,
+       "n": 4
+      },
+      "meanL": {
+       "min": 57.3,
+       "median": 58.4,
+       "max": 59.4,
+       "n": 4
+      },
+      "sheetSdL": {
+       "min": 2.38,
+       "median": 2.79,
+       "max": 4.94,
+       "n": 4
+      },
+      "sheetSpreadL": {
+       "min": 5.8,
+       "median": 6.73,
+       "max": 11.34,
+       "n": 4
+      },
+      "sheetMeanL": {
+       "min": 65.3,
+       "median": 65.9,
+       "max": 66.3,
+       "n": 4
+      },
+      "fineSdL": {
+       "min": 6.06,
+       "median": 7.75,
+       "max": 9.2,
+       "n": 4
+      },
+      "fineSpreadL": {
+       "min": 4.27,
+       "median": 10.93,
+       "max": 22.93,
+       "n": 4
+      },
+      "fineMeanL": {
+       "min": 53.8,
+       "median": 55.45,
+       "max": 56.9,
+       "n": 4
+      },
+      "widthCv": {
+       "min": 0.09,
+       "median": 0.11,
+       "max": 0.13,
+       "n": 4
+      }
+     },
+     "ears": {
+      "sdL": {
+       "min": 6.56,
+       "median": 6.67,
+       "max": 6.79,
+       "n": 2
+      },
+      "spreadL": {
+       "min": 16.14,
+       "median": 17.11,
+       "max": 18.07,
+       "n": 2
+      },
+      "meanL": {
+       "min": 57.0,
+       "median": 57.5,
+       "max": 58.0,
+       "n": 2
+      },
+      "sheetSdL": {
+       "min": 5.43,
+       "median": 5.68,
+       "max": 5.93,
+       "n": 2
+      },
+      "sheetSpreadL": {
+       "min": 13.93,
+       "median": 14.27,
+       "max": 14.62,
+       "n": 2
+      },
+      "sheetMeanL": {
+       "min": 59.6,
+       "median": 60.8,
+       "max": 62.0,
+       "n": 2
+      },
+      "fineSdL": {
+       "min": 6.43,
+       "median": 6.51,
+       "max": 6.6,
+       "n": 2
+      },
+      "fineSpreadL": {
+       "min": 15.29,
+       "median": 16.8,
+       "max": 18.3,
+       "n": 2
+      },
+      "fineMeanL": {
+       "min": 53.1,
+       "median": 53.55,
+       "max": 54.0,
+       "n": 2
+      },
+      "widthCv": {
+       "min": 0.14,
+       "median": 0.14,
+       "max": 0.14,
+       "n": 2
+      }
+     },
+     "head": {
+      "sdL": {
+       "min": 1.37,
+       "median": 3.23,
+       "max": 5.08,
+       "n": 2
+      },
+      "spreadL": {
+       "min": 3.67,
+       "median": 8.09,
+       "max": 12.52,
+       "n": 2
+      },
+      "meanL": {
+       "min": 74.1,
+       "median": 75.25,
+       "max": 76.4,
+       "n": 2
+      },
+      "sheetSdL": {
+       "min": 3.14,
+       "median": 3.58,
+       "max": 4.01,
+       "n": 2
+      },
+      "sheetSpreadL": {
+       "min": 7.83,
+       "median": 8.0,
+       "max": 8.17,
+       "n": 2
+      },
+      "sheetMeanL": {
+       "min": 79.0,
+       "median": 81.15,
+       "max": 83.3,
+       "n": 2
+      },
+      "fineSdL": {
+       "min": 1.14,
+       "median": 3.59,
+       "max": 6.04,
+       "n": 2
+      },
+      "fineSpreadL": {
+       "min": 3.12,
+       "median": 9.23,
+       "max": 15.34,
+       "n": 2
+      },
+      "fineMeanL": {
+       "min": 70.8,
+       "median": 72.15,
+       "max": 73.5,
+       "n": 2
+      },
+      "widthCv": {
+       "min": 0.06,
+       "median": 0.06,
+       "max": 0.07,
+       "n": 2
+      }
+     }
+    },
+    "regions": [
+     {
+      "class": "back",
+      "region": "body.back|body.front",
+      "sdL": 2.98,
+      "spreadL": 8.24,
+      "meanL": 68.4,
+      "sheetSdL": 5.12,
+      "sheetSpreadL": 9.36,
+      "sheetMeanL": 71.4,
+      "fineSdL": 3.42,
+      "fineSpreadL": 10.04,
+      "fineMeanL": 65.1,
+      "widthCv": 0.235
+     },
+     {
+      "class": "legs",
+      "region": "body.back|front.L",
+      "sdL": 1.1,
+      "spreadL": 2.79,
+      "meanL": 76.4,
+      "sheetSdL": 7.01,
+      "sheetSpreadL": 19.82,
+      "sheetMeanL": 74.0,
+      "fineSdL": 4.57,
+      "fineSpreadL": 0.86,
+      "fineMeanL": 70.0,
+      "widthCv": 0.164
+     },
+     {
+      "class": "legs",
+      "region": "body.back|front.R",
+      "sdL": 4.89,
+      "spreadL": 6.66,
+      "meanL": 75.4,
+      "sheetSdL": 7.02,
+      "sheetSpreadL": 19.42,
+      "sheetMeanL": 74.4,
+      "fineSdL": 6.2,
+      "fineSpreadL": 9.42,
+      "fineMeanL": 69.9,
+      "widthCv": 0.253
+     },
+     {
+      "class": "soles",
+      "region": "body.back|ground",
+      "sdL": null,
+      "spreadL": null,
+      "meanL": null,
+      "sheetSdL": null,
+      "sheetSpreadL": null,
+      "sheetMeanL": null,
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     {
+      "class": "legs",
+      "region": "body.back|hind.L",
+      "sdL": 1.48,
+      "spreadL": 3.58,
+      "meanL": 82.4,
+      "sheetSdL": 1.88,
+      "sheetSpreadL": 4.85,
+      "sheetMeanL": 82.7,
+      "fineSdL": 5.8,
+      "fineSpreadL": 7.97,
+      "fineMeanL": 78.4,
+      "widthCv": 0.108
+     },
+     {
+      "class": "legs",
+      "region": "body.back|hind.R",
+      "sdL": 0.88,
+      "spreadL": 2.07,
+      "meanL": 83.1,
+      "sheetSdL": 8.97,
+      "sheetSpreadL": 21.82,
+      "sheetMeanL": 74.1,
+      "fineSdL": 1.24,
+      "fineSpreadL": 3.11,
+      "fineMeanL": 81.3,
+      "widthCv": 0.056
+     },
+     {
+      "class": "back",
+      "region": "body.back|outside",
+      "sdL": 4.93,
+      "spreadL": 15.52,
+      "meanL": 68.8,
+      "sheetSdL": 5.86,
+      "sheetSpreadL": 14.82,
+      "sheetMeanL": 69.5,
+      "fineSdL": 5.48,
+      "fineSpreadL": 15.92,
+      "fineMeanL": 65.8,
+      "widthCv": 0.27
+     },
+     {
+      "class": "legs",
+      "region": "body.front|front.L",
+      "sdL": 12.67,
+      "spreadL": 28.0,
+      "meanL": 72.9,
+      "sheetSdL": 6.96,
+      "sheetSpreadL": 12.76,
+      "sheetMeanL": 71.3,
+      "fineSdL": 14.77,
+      "fineSpreadL": 34.14,
+      "fineMeanL": 69.0,
+      "widthCv": 0.174
+     },
+     {
+      "class": "legs",
+      "region": "body.front|front.R",
+      "sdL": 10.01,
+      "spreadL": 27.07,
+      "meanL": 72.4,
+      "sheetSdL": 6.66,
+      "sheetSpreadL": 16.42,
+      "sheetMeanL": 74.0,
+      "fineSdL": 11.83,
+      "fineSpreadL": 31.85,
+      "fineMeanL": 67.1,
+      "widthCv": 0.13
+     },
+     {
+      "class": "ears",
+      "region": "ear.L|outside",
+      "sdL": 6.56,
+      "spreadL": 16.14,
+      "meanL": 57.0,
+      "sheetSdL": 5.93,
+      "sheetSpreadL": 14.62,
+      "sheetMeanL": 62.0,
+      "fineSdL": 6.43,
+      "fineSpreadL": 15.29,
+      "fineMeanL": 53.1,
+      "widthCv": 0.141
+     },
+     {
+      "class": "ears",
+      "region": "ear.R|outside",
+      "sdL": 6.79,
+      "spreadL": 18.07,
+      "meanL": 58.0,
+      "sheetSdL": 5.43,
+      "sheetSpreadL": 13.93,
+      "sheetMeanL": 59.6,
+      "fineSdL": 6.6,
+      "fineSpreadL": 18.3,
+      "fineMeanL": 54.0,
+      "widthCv": 0.136
+     },
+     {
+      "class": "soles",
+      "region": "front.L|ground",
+      "sdL": 1.85,
+      "spreadL": 4.89,
+      "meanL": 57.7,
+      "sheetSdL": 3.08,
+      "sheetSpreadL": 7.59,
+      "sheetMeanL": 65.3,
+      "fineSdL": 6.06,
+      "fineSpreadL": 5.75,
+      "fineMeanL": 53.8,
+      "widthCv": 0.112
+     },
+     {
+      "class": "legs",
+      "region": "front.L|hind.L",
+      "sdL": null,
+      "spreadL": null,
+      "meanL": null,
+      "sheetSdL": 3.95,
+      "sheetSpreadL": 9.35,
+      "sheetMeanL": 73.1,
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     {
+      "class": "soles",
+      "region": "front.R|ground",
+      "sdL": 1.05,
+      "spreadL": 2.76,
+      "meanL": 57.3,
+      "sheetSdL": 2.51,
+      "sheetSpreadL": 5.8,
+      "sheetMeanL": 65.7,
+      "fineSdL": 8.11,
+      "fineSpreadL": 4.27,
+      "fineMeanL": 54.7,
+      "widthCv": 0.11
+     },
+     {
+      "class": "legs",
+      "region": "front.R|hind.R",
+      "sdL": null,
+      "spreadL": null,
+      "meanL": null,
+      "sheetSdL": 0.85,
+      "sheetSpreadL": 2.31,
+      "sheetMeanL": 69.6,
+      "fineSdL": 8.96,
+      "fineSpreadL": 24.04,
+      "fineMeanL": 73.8,
+      "widthCv": 0.085
+     },
+     {
+      "class": "head",
+      "region": "head.base|outside",
+      "sdL": 5.08,
+      "spreadL": 12.52,
+      "meanL": 76.4,
+      "sheetSdL": 4.01,
+      "sheetSpreadL": 7.83,
+      "sheetMeanL": 79.0,
+      "fineSdL": 6.04,
+      "fineSpreadL": 15.34,
+      "fineMeanL": 73.5,
+      "widthCv": 0.055
+     },
+     {
+      "class": "soles",
+      "region": "hind.L|ground",
+      "sdL": 6.15,
+      "spreadL": 16.64,
+      "meanL": 59.4,
+      "sheetSdL": 2.38,
+      "sheetSpreadL": 5.87,
+      "sheetMeanL": 66.3,
+      "fineSdL": 7.39,
+      "fineSpreadL": 16.1,
+      "fineMeanL": 56.2,
+      "widthCv": 0.092
+     },
+     {
+      "class": "soles",
+      "region": "hind.R|ground",
+      "sdL": 6.35,
+      "spreadL": 16.17,
+      "meanL": 59.1,
+      "sheetSdL": 4.94,
+      "sheetSpreadL": 11.34,
+      "sheetMeanL": 66.1,
+      "fineSdL": 9.2,
+      "fineSpreadL": 22.93,
+      "fineMeanL": 56.9,
+      "widthCv": 0.132
+     },
+     {
+      "class": "head",
+      "region": "tuft|outside",
+      "sdL": 1.37,
+      "spreadL": 3.67,
+      "meanL": 74.1,
+      "sheetSdL": 3.14,
+      "sheetSpreadL": 8.17,
+      "sheetMeanL": 83.3,
+      "fineSdL": 1.14,
+      "fineSpreadL": 3.12,
+      "fineMeanL": 70.8,
+      "widthCv": 0.072
+     }
+    ]
+   },
+   "side.L": {
+    "byClass": {
+     "legs": {
+      "sdL": {
+       "min": 2.94,
+       "median": 3.58,
+       "max": 4.23,
+       "n": 2
+      },
+      "spreadL": {
+       "min": 7.67,
+       "median": 8.54,
+       "max": 9.42,
+       "n": 2
+      },
+      "meanL": {
+       "min": 77.8,
+       "median": 78.0,
+       "max": 78.2,
+       "n": 2
+      },
+      "sheetSdL": {
+       "min": 1.27,
+       "median": 2.32,
+       "max": 4.13,
+       "n": 5
+      },
+      "sheetSpreadL": {
+       "min": 3.24,
+       "median": 5.6,
+       "max": 11.08,
+       "n": 5
+      },
+      "sheetMeanL": {
+       "min": 70.3,
+       "median": 74.0,
+       "max": 89.4,
+       "n": 5
+      },
+      "fineSdL": {
+       "min": 3.51,
+       "median": 4.08,
+       "max": 4.65,
+       "n": 2
+      },
+      "fineSpreadL": {
+       "min": 9.89,
+       "median": 11.55,
+       "max": 13.22,
+       "n": 2
+      },
+      "fineMeanL": {
+       "min": 72.8,
+       "median": 74.3,
+       "max": 75.8,
+       "n": 2
+      },
+      "widthCv": {
+       "min": 0.04,
+       "median": 0.05,
+       "max": 0.06,
+       "n": 2
+      }
+     },
+     "back": {
+      "sdL": {
+       "min": 1.9,
+       "median": 2.56,
+       "max": 3.22,
+       "n": 2
+      },
+      "spreadL": {
+       "min": 3.3,
+       "median": 5.7,
+       "max": 8.09,
+       "n": 2
+      },
+      "meanL": {
+       "min": 59.4,
+       "median": 73.0,
+       "max": 86.6,
+       "n": 2
+      },
+      "sheetSdL": {
+       "min": 4.86,
+       "median": 5.39,
+       "max": 5.93,
+       "n": 2
+      },
+      "sheetSpreadL": {
+       "min": 14.23,
+       "median": 14.78,
+       "max": 15.32,
+       "n": 2
+      },
+      "sheetMeanL": {
+       "min": 62.8,
+       "median": 73.75,
+       "max": 84.7,
+       "n": 2
+      },
+      "fineSdL": {
+       "min": 2.19,
+       "median": 3.41,
+       "max": 4.62,
+       "n": 2
+      },
+      "fineSpreadL": {
+       "min": 4.09,
+       "median": 8.32,
+       "max": 12.56,
+       "n": 2
+      },
+      "fineMeanL": {
+       "min": 54.9,
+       "median": 69.3,
+       "max": 83.7,
+       "n": 2
+      },
+      "widthCv": {
+       "min": 0.04,
+       "median": 0.06,
+       "max": 0.08,
+       "n": 2
+      }
+     },
+     "soles": {
+      "sdL": {
+       "min": 1.0,
+       "median": 1.55,
+       "max": 3.0,
+       "n": 4
+      },
+      "spreadL": {
+       "min": 2.18,
+       "median": 4.13,
+       "max": 8.07,
+       "n": 4
+      },
+      "meanL": {
+       "min": 58.7,
+       "median": 61.5,
+       "max": 64.7,
+       "n": 4
+      },
+      "sheetSdL": {
+       "min": 1.77,
+       "median": 3.17,
+       "max": 4.97,
+       "n": 3
+      },
+      "sheetSpreadL": {
+       "min": 4.46,
+       "median": 5.28,
+       "max": 8.39,
+       "n": 3
+      },
+      "sheetMeanL": {
+       "min": 63.1,
+       "median": 64.7,
+       "max": 65.5,
+       "n": 3
+      },
+      "fineSdL": {
+       "min": 1.46,
+       "median": 4.32,
+       "max": 6.37,
+       "n": 4
+      },
+      "fineSpreadL": {
+       "min": 1.2,
+       "median": 3.28,
+       "max": 11.03,
+       "n": 4
+      },
+      "fineMeanL": {
+       "min": 54.5,
+       "median": 56.45,
+       "max": 59.6,
+       "n": 4
+      },
+      "widthCv": {
+       "min": 0.03,
+       "median": 0.1,
+       "max": 0.13,
+       "n": 4
+      }
+     },
+     "tail": {
+      "sdL": {
+       "min": 0.92,
+       "median": 1.87,
+       "max": 5.11,
+       "n": 3
+      },
+      "spreadL": {
+       "min": 2.68,
+       "median": 5.07,
+       "max": 12.3,
+       "n": 3
+      },
+      "meanL": {
+       "min": 54.4,
+       "median": 58.1,
+       "max": 78.4,
+       "n": 3
+      },
+      "sheetSdL": {
+       "min": 2.49,
+       "median": 4.71,
+       "max": 6.92,
+       "n": 2
+      },
+      "sheetSpreadL": {
+       "min": 6.61,
+       "median": 12.29,
+       "max": 17.98,
+       "n": 2
+      },
+      "sheetMeanL": {
+       "min": 56.6,
+       "median": 68.35,
+       "max": 80.1,
+       "n": 2
+      },
+      "fineSdL": {
+       "min": 0.87,
+       "median": 2.2,
+       "max": 6.35,
+       "n": 3
+      },
+      "fineSpreadL": {
+       "min": 1.81,
+       "median": 5.95,
+       "max": 16.28,
+       "n": 3
+      },
+      "fineMeanL": {
+       "min": 49.1,
+       "median": 52.8,
+       "max": 75.2,
+       "n": 3
+      },
+      "widthCv": {
+       "min": 0.07,
+       "median": 0.08,
+       "max": 0.17,
+       "n": 3
+      }
+     },
+     "ears": {
+      "sdL": {
+       "min": 2.85,
+       "median": 2.85,
+       "max": 2.85,
+       "n": 1
+      },
+      "spreadL": {
+       "min": 7.66,
+       "median": 7.66,
+       "max": 7.66,
+       "n": 1
+      },
+      "meanL": {
+       "min": 59.6,
+       "median": 59.6,
+       "max": 59.6,
+       "n": 1
+      },
+      "sheetSdL": {
+       "min": 4.08,
+       "median": 4.08,
+       "max": 4.08,
+       "n": 1
+      },
+      "sheetSpreadL": {
+       "min": 11.21,
+       "median": 11.21,
+       "max": 11.21,
+       "n": 1
+      },
+      "sheetMeanL": {
+       "min": 58.7,
+       "median": 58.7,
+       "max": 58.7,
+       "n": 1
+      },
+      "fineSdL": {
+       "min": 2.5,
+       "median": 2.5,
+       "max": 2.5,
+       "n": 1
+      },
+      "fineSpreadL": {
+       "min": 6.47,
+       "median": 6.47,
+       "max": 6.47,
+       "n": 1
+      },
+      "fineMeanL": {
+       "min": 55.6,
+       "median": 55.6,
+       "max": 55.6,
+       "n": 1
+      },
+      "widthCv": {
+       "min": 0.09,
+       "median": 0.09,
+       "max": 0.09,
+       "n": 1
+      }
+     },
+     "head": {
+      "sdL": {
+       "min": 1.76,
+       "median": 4.79,
+       "max": 7.82,
+       "n": 2
+      },
+      "spreadL": {
+       "min": 4.94,
+       "median": 12.09,
+       "max": 19.24,
+       "n": 2
+      },
+      "meanL": {
+       "min": 72.6,
+       "median": 73.5,
+       "max": 74.4,
+       "n": 2
+      },
+      "sheetSdL": {
+       "min": 3.11,
+       "median": 5.48,
+       "max": 7.85,
+       "n": 2
+      },
+      "sheetSpreadL": {
+       "min": 7.91,
+       "median": 13.92,
+       "max": 19.93,
+       "n": 2
+      },
+      "sheetMeanL": {
+       "min": 75.2,
+       "median": 78.45,
+       "max": 81.7,
+       "n": 2
+      },
+      "fineSdL": {
+       "min": 1.5,
+       "median": 5.34,
+       "max": 9.18,
+       "n": 2
+      },
+      "fineSpreadL": {
+       "min": 3.26,
+       "median": 13.08,
+       "max": 22.9,
+       "n": 2
+      },
+      "fineMeanL": {
+       "min": 69.2,
+       "median": 70.05,
+       "max": 70.9,
+       "n": 2
+      },
+      "widthCv": {
+       "min": 0.1,
+       "median": 0.16,
+       "max": 0.22,
+       "n": 2
+      }
+     }
+    },
+    "regions": [
+     {
+      "class": "back",
+      "region": "body.back|body.front",
+      "sdL": 3.22,
+      "spreadL": 8.09,
+      "meanL": 86.6,
+      "sheetSdL": 5.93,
+      "sheetSpreadL": 15.32,
+      "sheetMeanL": 84.7,
+      "fineSdL": 4.62,
+      "fineSpreadL": 12.56,
+      "fineMeanL": 83.7,
+      "widthCv": 0.039
+     },
+     {
+      "class": "soles",
+      "region": "body.back|ground",
+      "sdL": 1.55,
+      "spreadL": 4.1,
+      "meanL": 62.9,
+      "sheetSdL": 3.17,
+      "sheetSpreadL": 8.39,
+      "sheetMeanL": 63.1,
+      "fineSdL": 1.46,
+      "fineSpreadL": 3.95,
+      "fineMeanL": 56.4,
+      "widthCv": 0.031
+     },
+     {
+      "class": "legs",
+      "region": "body.back|hind.L",
+      "sdL": null,
+      "spreadL": null,
+      "meanL": null,
+      "sheetSdL": 3.0,
+      "sheetSpreadL": 7.28,
+      "sheetMeanL": 89.4,
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     {
+      "class": "back",
+      "region": "body.back|outside",
+      "sdL": 1.9,
+      "spreadL": 3.3,
+      "meanL": 59.4,
+      "sheetSdL": 4.86,
+      "sheetSpreadL": 14.23,
+      "sheetMeanL": 62.8,
+      "fineSdL": 2.19,
+      "fineSpreadL": 4.09,
+      "fineMeanL": 54.9,
+      "widthCv": 0.076
+     },
+     {
+      "class": "tail",
+      "region": "body.back|tail",
+      "sdL": 0.92,
+      "spreadL": 2.68,
+      "meanL": 54.4,
+      "sheetSdL": 2.49,
+      "sheetSpreadL": 6.61,
+      "sheetMeanL": 56.6,
+      "fineSdL": 0.87,
+      "fineSpreadL": 1.81,
+      "fineMeanL": 49.1,
+      "widthCv": 0.084
+     },
+     {
+      "class": "legs",
+      "region": "body.front|front.L",
+      "sdL": null,
+      "spreadL": null,
+      "meanL": null,
+      "sheetSdL": 4.13,
+      "sheetSpreadL": 11.08,
+      "sheetMeanL": 82.2,
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     {
+      "class": "legs",
+      "region": "body.front|front.R",
+      "sdL": null,
+      "spreadL": null,
+      "meanL": null,
+      "sheetSdL": 2.32,
+      "sheetSpreadL": 5.6,
+      "sheetMeanL": 74.0,
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     {
+      "class": "back",
+      "region": "body.front|outside",
+      "sdL": null,
+      "spreadL": null,
+      "meanL": null,
+      "sheetSdL": null,
+      "sheetSpreadL": null,
+      "sheetMeanL": null,
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     {
+      "class": "ears",
+      "region": "ear.L|outside",
+      "sdL": 2.85,
+      "spreadL": 7.66,
+      "meanL": 59.6,
+      "sheetSdL": 4.08,
+      "sheetSpreadL": 11.21,
+      "sheetMeanL": 58.7,
+      "fineSdL": 2.5,
+      "fineSpreadL": 6.47,
+      "fineMeanL": 55.6,
+      "widthCv": 0.091
+     },
+     {
+      "class": "legs",
+      "region": "front.L|front.R",
+      "sdL": 2.94,
+      "spreadL": 7.67,
+      "meanL": 78.2,
+      "sheetSdL": 1.27,
+      "sheetSpreadL": 3.24,
+      "sheetMeanL": 70.3,
+      "fineSdL": 4.65,
+      "fineSpreadL": 13.22,
+      "fineMeanL": 72.8,
+      "widthCv": 0.062
+     },
+     {
+      "class": "soles",
+      "region": "front.L|ground",
+      "sdL": 1.55,
+      "spreadL": 4.17,
+      "meanL": 58.7,
+      "sheetSdL": 1.77,
+      "sheetSpreadL": 4.46,
+      "sheetMeanL": 64.7,
+      "fineSdL": 3.31,
+      "fineSpreadL": 2.61,
+      "fineMeanL": 54.5,
+      "widthCv": 0.078
+     },
+     {
+      "class": "legs",
+      "region": "front.L|hind.L",
+      "sdL": null,
+      "spreadL": null,
+      "meanL": null,
+      "sheetSdL": null,
+      "sheetSpreadL": null,
+      "sheetMeanL": null,
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     {
+      "class": "soles",
+      "region": "front.R|ground",
+      "sdL": 3.0,
+      "spreadL": 8.07,
+      "meanL": 60.1,
+      "sheetSdL": null,
+      "sheetSpreadL": null,
+      "sheetMeanL": null,
+      "fineSdL": 6.37,
+      "fineSpreadL": 11.03,
+      "fineMeanL": 56.5,
+      "widthCv": 0.13
+     },
+     {
+      "class": "legs",
+      "region": "front.R|outside",
+      "sdL": 4.23,
+      "spreadL": 9.42,
+      "meanL": 77.8,
+      "sheetSdL": 1.73,
+      "sheetSpreadL": 4.28,
+      "sheetMeanL": 73.8,
+      "fineSdL": 3.51,
+      "fineSpreadL": 9.89,
+      "fineMeanL": 75.8,
+      "widthCv": 0.044
+     },
+     {
+      "class": "head",
+      "region": "head.base|outside",
+      "sdL": 7.82,
+      "spreadL": 19.24,
+      "meanL": 72.6,
+      "sheetSdL": 7.85,
+      "sheetSpreadL": 19.93,
+      "sheetMeanL": 75.2,
+      "fineSdL": 9.18,
+      "fineSpreadL": 22.9,
+      "fineMeanL": 69.2,
+      "widthCv": 0.216
+     },
+     {
+      "class": "soles",
+      "region": "hind.L|ground",
+      "sdL": 1.0,
+      "spreadL": 2.18,
+      "meanL": 64.7,
+      "sheetSdL": 4.97,
+      "sheetSpreadL": 5.28,
+      "sheetMeanL": 65.5,
+      "fineSdL": 5.33,
+      "fineSpreadL": 1.2,
+      "fineMeanL": 59.6,
+      "widthCv": 0.127
+     },
+     {
+      "class": "tail",
+      "region": "tail|ground",
+      "sdL": 1.87,
+      "spreadL": 5.07,
+      "meanL": 58.1,
+      "sheetSdL": null,
+      "sheetSpreadL": null,
+      "sheetMeanL": null,
+      "fineSdL": 2.2,
+      "fineSpreadL": 5.95,
+      "fineMeanL": 52.8,
+      "widthCv": 0.067
+     },
+     {
+      "class": "tail",
+      "region": "tail|outside",
+      "sdL": 5.11,
+      "spreadL": 12.3,
+      "meanL": 78.4,
+      "sheetSdL": 6.92,
+      "sheetSpreadL": 17.98,
+      "sheetMeanL": 80.1,
+      "fineSdL": 6.35,
+      "fineSpreadL": 16.28,
+      "fineMeanL": 75.2,
+      "widthCv": 0.165
+     },
+     {
+      "class": "head",
+      "region": "tuft|outside",
+      "sdL": 1.76,
+      "spreadL": 4.94,
+      "meanL": 74.4,
+      "sheetSdL": 3.11,
+      "sheetSpreadL": 7.91,
+      "sheetMeanL": 81.7,
+      "fineSdL": 1.5,
+      "fineSpreadL": 3.26,
+      "fineMeanL": 70.9,
+      "widthCv": 0.102
+     }
+    ]
+   },
+   "threeQuarter.L": {
+    "byClass": {
+     "legs": {
+      "sdL": {
+       "min": 1.09,
+       "median": 2.7,
+       "max": 7.14,
+       "n": 5
+      },
+      "spreadL": {
+       "min": 2.86,
+       "median": 7.0,
+       "max": 20.05,
+       "n": 5
+      },
+      "meanL": {
+       "min": 65.2,
+       "median": 70.5,
+       "max": 79.7,
+       "n": 5
+      },
+      "sheetSdL": {
+       "min": 2.32,
+       "median": 2.38,
+       "max": 6.4,
+       "n": 4
+      },
+      "sheetSpreadL": {
+       "min": 3.74,
+       "median": 6.07,
+       "max": 14.04,
+       "n": 4
+      },
+      "sheetMeanL": {
+       "min": 64.9,
+       "median": 75.5,
+       "max": 82.3,
+       "n": 4
+      },
+      "fineSdL": {
+       "min": 1.98,
+       "median": 2.98,
+       "max": 8.49,
+       "n": 5
+      },
+      "fineSpreadL": {
+       "min": 2.35,
+       "median": 7.98,
+       "max": 25.31,
+       "n": 5
+      },
+      "fineMeanL": {
+       "min": 57.7,
+       "median": 72.6,
+       "max": 76.7,
+       "n": 5
+      },
+      "widthCv": {
+       "min": 0.04,
+       "median": 0.13,
+       "max": 0.24,
+       "n": 5
+      }
+     },
+     "back": {
+      "sdL": {
+       "min": 4.31,
+       "median": 4.33,
+       "max": 4.36,
+       "n": 2
+      },
+      "spreadL": {
+       "min": 8.34,
+       "median": 9.38,
+       "max": 10.41,
+       "n": 2
+      },
+      "meanL": {
+       "min": 69.7,
+       "median": 74.7,
+       "max": 79.7,
+       "n": 2
+      },
+      "sheetSdL": {
+       "min": 3.36,
+       "median": 4.33,
+       "max": 5.29,
+       "n": 2
+      },
+      "sheetSpreadL": {
+       "min": 8.67,
+       "median": 11.24,
+       "max": 13.81,
+       "n": 2
+      },
+      "sheetMeanL": {
+       "min": 63.9,
+       "median": 68.7,
+       "max": 73.5,
+       "n": 2
+      },
+      "fineSdL": {
+       "min": 4.32,
+       "median": 4.93,
+       "max": 5.53,
+       "n": 2
+      },
+      "fineSpreadL": {
+       "min": 9.42,
+       "median": 11.5,
+       "max": 13.57,
+       "n": 2
+      },
+      "fineMeanL": {
+       "min": 66.5,
+       "median": 71.95,
+       "max": 77.4,
+       "n": 2
+      },
+      "widthCv": {
+       "min": 0.09,
+       "median": 0.09,
+       "max": 0.09,
+       "n": 2
+      }
+     },
+     "soles": {
+      "sdL": {
+       "min": 0.94,
+       "median": 1.27,
+       "max": 3.81,
+       "n": 4
+      },
+      "spreadL": {
+       "min": 2.33,
+       "median": 3.39,
+       "max": 8.67,
+       "n": 4
+      },
+      "meanL": {
+       "min": 58.1,
+       "median": 60.35,
+       "max": 61.5,
+       "n": 4
+      },
+      "sheetSdL": {
+       "min": 1.34,
+       "median": 2.15,
+       "max": 4.66,
+       "n": 4
+      },
+      "sheetSpreadL": {
+       "min": 3.56,
+       "median": 6.15,
+       "max": 10.22,
+       "n": 4
+      },
+      "sheetMeanL": {
+       "min": 62.7,
+       "median": 64.65,
+       "max": 65.9,
+       "n": 4
+      },
+      "fineSdL": {
+       "min": 0.72,
+       "median": 5.99,
+       "max": 6.97,
+       "n": 4
+      },
+      "fineSpreadL": {
+       "min": 1.91,
+       "median": 4.02,
+       "max": 14.25,
+       "n": 4
+      },
+      "fineMeanL": {
+       "min": 52.5,
+       "median": 55.5,
+       "max": 57.3,
+       "n": 4
+      },
+      "widthCv": {
+       "min": 0.03,
+       "median": 0.11,
+       "max": 0.12,
+       "n": 4
+      }
+     },
+     "tail": {
+      "sdL": {
+       "min": 0.52,
+       "median": 2.62,
+       "max": 7.1,
+       "n": 3
+      },
+      "spreadL": {
+       "min": 1.36,
+       "median": 7.12,
+       "max": 13.95,
+       "n": 3
+      },
+      "meanL": {
+       "min": 52.4,
+       "median": 56.0,
+       "max": 77.3,
+       "n": 3
+      },
+      "sheetSdL": {
+       "min": 1.44,
+       "median": 3.3,
+       "max": 6.1,
+       "n": 3
+      },
+      "sheetSpreadL": {
+       "min": 3.81,
+       "median": 8.96,
+       "max": 13.92,
+       "n": 3
+      },
+      "sheetMeanL": {
+       "min": 56.1,
+       "median": 58.6,
+       "max": 80.0,
+       "n": 3
+      },
+      "fineSdL": {
+       "min": 1.08,
+       "median": 2.49,
+       "max": 8.25,
+       "n": 3
+      },
+      "fineSpreadL": {
+       "min": 2.69,
+       "median": 6.65,
+       "max": 16.78,
+       "n": 3
+      },
+      "fineMeanL": {
+       "min": 47.5,
+       "median": 51.3,
+       "max": 74.8,
+       "n": 3
+      },
+      "widthCv": {
+       "min": 0.06,
+       "median": 0.08,
+       "max": 0.11,
+       "n": 3
+      }
+     },
+     "ears": {
+      "sdL": {
+       "min": 4.88,
+       "median": 5.78,
+       "max": 6.68,
+       "n": 2
+      },
+      "spreadL": {
+       "min": 11.26,
+       "median": 14.77,
+       "max": 18.28,
+       "n": 2
+      },
+      "meanL": {
+       "min": 54.9,
+       "median": 57.1,
+       "max": 59.3,
+       "n": 2
+      },
+      "sheetSdL": {
+       "min": 5.29,
+       "median": 5.31,
+       "max": 5.34,
+       "n": 2
+      },
+      "sheetSpreadL": {
+       "min": 13.22,
+       "median": 13.36,
+       "max": 13.5,
+       "n": 2
+      },
+      "sheetMeanL": {
+       "min": 58.7,
+       "median": 60.7,
+       "max": 62.7,
+       "n": 2
+      },
+      "fineSdL": {
+       "min": 5.25,
+       "median": 6.13,
+       "max": 7.01,
+       "n": 2
+      },
+      "fineSpreadL": {
+       "min": 13.8,
+       "median": 16.52,
+       "max": 19.24,
+       "n": 2
+      },
+      "fineMeanL": {
+       "min": 51.7,
+       "median": 53.55,
+       "max": 55.4,
+       "n": 2
+      },
+      "widthCv": {
+       "min": 0.14,
+       "median": 0.16,
+       "max": 0.17,
+       "n": 2
+      }
+     },
+     "head": {
+      "sdL": {
+       "min": 1.39,
+       "median": 3.42,
+       "max": 5.44,
+       "n": 2
+      },
+      "spreadL": {
+       "min": 3.14,
+       "median": 8.32,
+       "max": 13.51,
+       "n": 2
+      },
+      "meanL": {
+       "min": 72.9,
+       "median": 73.45,
+       "max": 74.0,
+       "n": 2
+      },
+      "sheetSdL": {
+       "min": 2.95,
+       "median": 4.88,
+       "max": 6.82,
+       "n": 2
+      },
+      "sheetSpreadL": {
+       "min": 8.38,
+       "median": 10.04,
+       "max": 11.7,
+       "n": 2
+      },
+      "sheetMeanL": {
+       "min": 73.8,
+       "median": 77.1,
+       "max": 80.4,
+       "n": 2
+      },
+      "fineSdL": {
+       "min": 1.66,
+       "median": 4.17,
+       "max": 6.69,
+       "n": 2
+      },
+      "fineSpreadL": {
+       "min": 3.59,
+       "median": 9.37,
+       "max": 15.14,
+       "n": 2
+      },
+      "fineMeanL": {
+       "min": 70.4,
+       "median": 70.6,
+       "max": 70.8,
+       "n": 2
+      },
+      "widthCv": {
+       "min": 0.08,
+       "median": 0.09,
+       "max": 0.1,
+       "n": 2
+      }
+     }
+    },
+    "regions": [
+     {
+      "class": "back",
+      "region": "body.back|body.front",
+      "sdL": null,
+      "spreadL": null,
+      "meanL": null,
+      "sheetSdL": null,
+      "sheetSpreadL": null,
+      "sheetMeanL": null,
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     {
+      "class": "legs",
+      "region": "body.back|front.L",
+      "sdL": 1.33,
+      "spreadL": 3.67,
+      "meanL": 65.2,
+      "sheetSdL": 2.4,
+      "sheetSpreadL": 5.73,
+      "sheetMeanL": 76.7,
+      "fineSdL": 1.98,
+      "fineSpreadL": 5.18,
+      "fineMeanL": 57.7,
+      "widthCv": 0.147
+     },
+     {
+      "class": "soles",
+      "region": "body.back|ground",
+      "sdL": 1.29,
+      "spreadL": 3.61,
+      "meanL": 58.1,
+      "sheetSdL": 2.73,
+      "sheetSpreadL": 7.8,
+      "sheetMeanL": 62.7,
+      "fineSdL": 0.72,
+      "fineSpreadL": 1.91,
+      "fineMeanL": 52.5,
+      "widthCv": 0.025
+     },
+     {
+      "class": "legs",
+      "region": "body.back|hind.L",
+      "sdL": 7.14,
+      "spreadL": 20.05,
+      "meanL": 75.0,
+      "sheetSdL": null,
+      "sheetSpreadL": null,
+      "sheetMeanL": null,
+      "fineSdL": 8.49,
+      "fineSpreadL": 25.31,
+      "fineMeanL": 72.6,
+      "widthCv": 0.133
+     },
+     {
+      "class": "back",
+      "region": "body.back|outside",
+      "sdL": 4.36,
+      "spreadL": 8.34,
+      "meanL": 69.7,
+      "sheetSdL": 5.29,
+      "sheetSpreadL": 13.81,
+      "sheetMeanL": 63.9,
+      "fineSdL": 4.32,
+      "fineSpreadL": 9.42,
+      "fineMeanL": 66.5,
+      "widthCv": 0.091
+     },
+     {
+      "class": "tail",
+      "region": "body.back|tail",
+      "sdL": 2.62,
+      "spreadL": 7.12,
+      "meanL": 56.0,
+      "sheetSdL": 1.44,
+      "sheetSpreadL": 3.81,
+      "sheetMeanL": 56.1,
+      "fineSdL": 2.49,
+      "fineSpreadL": 6.65,
+      "fineMeanL": 51.3,
+      "widthCv": 0.109
+     },
+     {
+      "class": "legs",
+      "region": "body.front|front.L",
+      "sdL": 3.01,
+      "spreadL": 7.08,
+      "meanL": 70.5,
+      "sheetSdL": null,
+      "sheetSpreadL": null,
+      "sheetMeanL": null,
+      "fineSdL": null,
+      "fineSpreadL": null,
+      "fineMeanL": null,
+      "widthCv": null
+     },
+     {
+      "class": "legs",
+      "region": "body.front|front.R",
+      "sdL": null,
+      "spreadL": null,
+      "meanL": null,
+      "sheetSdL": 6.4,
+      "sheetSpreadL": 14.04,
+      "sheetMeanL": 82.3,
+      "fineSdL": 7.48,
+      "fineSpreadL": 17.31,
+      "fineMeanL": 75.0,
+      "widthCv": 0.239
+     },
+     {
+      "class": "back",
+      "region": "body.front|outside",
+      "sdL": 4.31,
+      "spreadL": 10.41,
+      "meanL": 79.7,
+      "sheetSdL": 3.36,
+      "sheetSpreadL": 8.67,
+      "sheetMeanL": 73.5,
+      "fineSdL": 5.53,
+      "fineSpreadL": 13.57,
+      "fineMeanL": 77.4,
+      "widthCv": 0.09
+     },
+     {
+      "class": "ears",
+      "region": "ear.L|outside",
+      "sdL": 4.88,
+      "spreadL": 11.26,
+      "meanL": 54.9,
+      "sheetSdL": 5.29,
+      "sheetSpreadL": 13.22,
+      "sheetMeanL": 58.7,
+      "fineSdL": 5.25,
+      "fineSpreadL": 13.8,
+      "fineMeanL": 51.7,
+      "widthCv": 0.144
+     },
+     {
+      "class": "ears",
+      "region": "ear.R|outside",
+      "sdL": 6.68,
+      "spreadL": 18.28,
+      "meanL": 59.3,
+      "sheetSdL": 5.34,
+      "sheetSpreadL": 13.5,
+      "sheetMeanL": 62.7,
+      "fineSdL": 7.01,
+      "fineSpreadL": 19.24,
+      "fineMeanL": 55.4,
+      "widthCv": 0.167
+     },
+     {
+      "class": "legs",
+      "region": "front.L|front.R",
+      "sdL": 1.09,
+      "spreadL": 2.86,
+      "meanL": 70.5,
+      "sheetSdL": 2.37,
+      "sheetSpreadL": 3.74,
+      "sheetMeanL": 64.9,
+      "fineSdL": 2.18,
+      "fineSpreadL": 2.35,
+      "fineMeanL": 64.0,
+      "widthCv": 0.091
+     },
+     {
+      "class": "soles",
+      "region": "front.L|ground",
+      "sdL": 1.25,
+      "spreadL": 3.17,
+      "meanL": 60.0,
+      "sheetSdL": 1.34,
+      "sheetSpreadL": 3.56,
+      "sheetMeanL": 63.8,
+      "fineSdL": 5.27,
+      "fineSpreadL": 3.08,
+      "fineMeanL": 54.8,
+      "widthCv": 0.099
+     },
+     {
+      "class": "soles",
+      "region": "front.R|ground",
+      "sdL": 3.81,
+      "spreadL": 8.67,
+      "meanL": 61.5,
+      "sheetSdL": 4.66,
+      "sheetSpreadL": 10.22,
+      "sheetMeanL": 65.9,
+      "fineSdL": 6.97,
+      "fineSpreadL": 14.25,
+      "fineMeanL": 57.3,
+      "widthCv": 0.12
+     },
+     {
+      "class": "legs",
+      "region": "front.R|outside",
+      "sdL": 2.7,
+      "spreadL": 7.0,
+      "meanL": 79.7,
+      "sheetSdL": 2.32,
+      "sheetSpreadL": 6.41,
+      "sheetMeanL": 74.3,
+      "fineSdL": 2.98,
+      "fineSpreadL": 7.98,
+      "fineMeanL": 76.7,
+      "widthCv": 0.035
+     },
+     {
+      "class": "head",
+      "region": "head.base|outside",
+      "sdL": 5.44,
+      "spreadL": 13.51,
+      "meanL": 74.0,
+      "sheetSdL": 6.82,
+      "sheetSpreadL": 11.7,
+      "sheetMeanL": 73.8,
+      "fineSdL": 6.69,
+      "fineSpreadL": 15.14,
+      "fineMeanL": 70.8,
+      "widthCv": 0.08
+     },
+     {
+      "class": "soles",
+      "region": "hind.L|ground",
+      "sdL": 0.94,
+      "spreadL": 2.33,
+      "meanL": 60.7,
+      "sheetSdL": 1.56,
+      "sheetSpreadL": 4.5,
+      "sheetMeanL": 65.5,
+      "fineSdL": 6.71,
+      "fineSpreadL": 4.95,
+      "fineMeanL": 56.2,
+      "widthCv": 0.119
+     },
+     {
+      "class": "tail",
+      "region": "tail|ground",
+      "sdL": 0.52,
+      "spreadL": 1.36,
+      "meanL": 52.4,
+      "sheetSdL": 3.3,
+      "sheetSpreadL": 8.96,
+      "sheetMeanL": 58.6,
+      "fineSdL": 1.08,
+      "fineSpreadL": 2.69,
+      "fineMeanL": 47.5,
+      "widthCv": 0.064
+     },
+     {
+      "class": "tail",
+      "region": "tail|outside",
+      "sdL": 7.1,
+      "spreadL": 13.95,
+      "meanL": 77.3,
+      "sheetSdL": 6.1,
+      "sheetSpreadL": 13.92,
+      "sheetMeanL": 80.0,
+      "fineSdL": 8.25,
+      "fineSpreadL": 16.78,
+      "fineMeanL": 74.8,
+      "widthCv": 0.083
+     },
+     {
+      "class": "head",
+      "region": "tuft|outside",
+      "sdL": 1.39,
+      "spreadL": 3.14,
+      "meanL": 72.9,
+      "sheetSdL": 2.95,
+      "sheetSpreadL": 8.38,
+      "sheetMeanL": 80.4,
+      "fineSdL": 1.66,
+      "fineSpreadL": 3.59,
+      "fineMeanL": 70.4,
+      "widthCv": 0.096
+     }
+    ]
+   }
+  }
+ }
+}

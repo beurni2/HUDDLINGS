@@ -49,6 +49,8 @@ export const lint: LintRules = {
   // The line gate composites each view in the rig's draw order, and holds every cite to a current DECISIONS entry.
   rig,
   decisions: decisionsOf(readFileSync(new URL("../DECISIONS.md", import.meta.url), "utf8")),
+  // It counts a line only where it shows in the composite (DECISIONS 264), in every view (the lead's L5, DECISIONS 288).
+  shown: true,
   corners: {
     collar: "the band's narrow rounded ends tuck under the cheek fur (spec L394), and from behind its near-square ends sit in the neck's fur, as the turnarounds draw them",
     tag: "the heart's point, as the sheet draws it",
