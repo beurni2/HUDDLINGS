@@ -111,13 +111,14 @@ let chest = smooth([[-73, -59.6], [-60, -64], [-40, -64.5], [-24, -64], [-21, -5
   [-52, -3.5], [-53.6, -16.6], [-55.4, -20.4], [-58.4, -24], [-61.6, -27.4], [-65.4, -31], [-69.6, -34.3], [-74.6, -36.2], [-77.6, -38.9], [-78.7, -43],
   [-78.1, -47.6], [-75.8, -53.6]]);
 // Under the collar's end the chest's front edge steps out once (fur.ts's STEP), as the crop's line steps at y -45 to -50.
-// Its lower edge over the far leg is lined only from x -64.6 down into the slot, as the crop's line runs from (-66, -31)
-// to the slot, light where it comes out of the fur and deepening into the slot, with short fur strokes branching off it,
-// the crop's fluffy V (a row of tufts there read as a saw); from there up to its corner the crop leaves it unlined, the
-// chest's cream on the far leg's (DECISIONS 231). Lined from x -67.4 it drew a long dark diagonal the crop does not.
+// Its lower edge over the far leg is lined only from x -65.9 down into the slot, as the crop's line runs from (-66, -31)
+// to the slot, faint where it comes out of the fur (the crop's L* 81 to 85 there) and deepening into the slot (L* 62),
+// with short fur strokes branching off it, the crop's fluffy V (a row of tufts there read as a saw); from there up to its
+// corner the crop leaves it unlined, the chest's cream on the far leg's (DECISIONS 231). Lined from x -67.4 at an even
+// depth it drew a long dark diagonal the crop does not.
 chest = furEdge(chest, [-78.4, -42.8], [-77, -49.6], [{ len: 1, width: 7, lean: -0.4 }], 0.35, undefined, STEP);
-/** How deep the chest's lower edge's line may lie: light (0.18) where it comes out over the far leg (x -64.6), 0.45 in the slot (x -55). */
-const chestLower = (p: P) => 0.18 + 0.27 * Math.min(1, Math.max(0, (-p[0] - 64.6) / -9.6));
+/** How deep the chest's lower edge's line may lie: the ladder's lightest where it comes out over the far leg (x -65.9), 0.45 in the slot (x -55). */
+const chestLower = (p: P) => 0.45 * Math.min(1, Math.max(0, (-p[0] - 65.9) / -10.9));
 
 // The collar: the band round the neck from under the chin, where its rounded end shows, along the near side
 // to where it passes behind the near ear, as the sheet draws it: deepest (7.5 pt) under the near side of the chin,
@@ -691,7 +692,7 @@ const CHEST_SIDE: [P, P] = [[-21.4, -60.6], [-30.4, -24]];
  * Where the chest's lower edge's line ends, coming up out of the slot over the far leg: the crop leaves the edge from
  * here to its corner unlined, the chest's cream on the far leg's (DECISIONS 231).
  */
-const CHEST_LOWER_END: P = [-64.6, -29.9];
+const CHEST_LOWER_END: P = [-65.9, -31.3];
 
 /** The three-quarter view in a facing: threeQuarter.L as the crop draws it, or threeQuarter.R, its mirror lit from the top left (views/facing.ts). */
 export function threeQuarter(facingSide: Side = "L"): Drawn[] {
