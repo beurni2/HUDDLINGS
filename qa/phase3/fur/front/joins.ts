@@ -1,13 +1,14 @@
-// The front's joins sheet for the fur pass (docs/phase3-fur-plan.md, the front lane; DECISIONS 220 to 227): one row per
-// join the audit names (qa/phase3/audit/defects.json, view "front"), each the sheet's crop | the base (fbbe6d3, before
-// the lane) | today's drawing, at one scale and 3 to 4 times the phone's 3 px/pt, labelled; and the face states drawn
+// The front's joins sheet for the fur pass (docs/phase3-fur-plan.md, the front lane; DECISIONS 220 to 227, 267 to 271):
+// one row per join the audit names (qa/phase3/audit/defects.json, view "front"), each the sheet's crop | the base (8912ced,
+// before the fur kit's second round) | today's drawing, at one scale and 3 to 4 times the phone's 3 px/pt, labelled, a
+// row that names a box on master.hero.main showing the hero's crop of the same place first; and the face states drawn
 // on the same parts (the raised ears and their temples, huffy's puffed head), before and after, each raised ear beside
 // its own panel (One ear perked levelled and scaled by its brows, DECISIONS 133; Lifted slightly by its record's scale
 // with its head's top on the model's, 146), the rest beside the turnaround crop. Each region is composited as the
 // rest-frame tests composite a view (characters/draw/test/composite.ts), from the drawings themselves.
 //
 // node qa/phase3/fur/front/joins.ts [--out <folder>]   → <folder>/joins.png and <folder>/states.png (qa/phase3/fur/front/ by default)
-// node qa/phase3/fur/front/joins.ts --only <text> --out <folder>   → <folder>/peek.png: the rows whose label holds the text, for a quick look
+// node qa/phase3/fur/front/joins.ts --only <text> --out <folder>   → <folder>/peek.png: the rows (joins and states) whose label holds the text, for a quick look
 // The committed joins.png and states.png are its output reduced to 256 colours (PIL's median cut, no dither), 1 MB
 // and 0.5 MB instead of 3.4 and 1.3, so they open quickly on a phone.
 import { execFileSync } from "node:child_process";
@@ -24,7 +25,7 @@ import { composite } from "../../../../characters/draw/test/composite.ts";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = resolve(here, "../../../..");
-const BASE = "fbbe6d3";
+const BASE = "8912ced";
 const { values: args } = parseArgs({ options: { out: { type: "string" }, only: { type: "string" } } });
 const out = resolve(args.out ?? here);
 
@@ -150,6 +151,12 @@ function readPng(path: string): Image {
 
 const crop = model.crops["front"]!;
 const sheetImg = readPng(join(repo, "characters/dog/ref/panels/master", `${crop.crop}.png`));
+const heroImg = readPng(join(repo, "characters/dog/ref/panels/master/master.hero.main.png"));
+/** A box of the hero's pixels, cut to whole pixels. */
+function heroRegion([x, y, w, h]: Box) {
+  const ix = Math.floor(x), iy = Math.floor(y), iw = Math.ceil(x + w) - ix, ih = Math.ceil(y + h) - iy;
+  return { png: cut(heroImg, ix, iy, iw, ih), pw: iw, ph: ih, vb: [x - ix, y - iy, w, h] as Box };
+}
 
 type Pt = [number, number];
 /** A panel resampled (bilinear) over a model-space box at `zoom`, through the map from model points to its pixels. */
@@ -220,6 +227,8 @@ interface Row {
   box: Box;
   /** Output px per pt: 3 to 4 times the phone's 3. */
   zoom: number;
+  /** The same place on master.hero.main, in its pixels (the hero is not placeable on the model, so it is boxed by hand). */
+  hero?: Box;
 }
 interface Column {
   name: string;
@@ -258,14 +267,16 @@ function write(title: string, rows: { row: Row; columns: Column[] }[], file: str
 
 /** Each join the audit names in front (defects.json #1 to #15), the dog's right side on the viewer's left. */
 const JOINS: Row[] = [
-  { label: "#1, #4 the crown over the dog's right ear's root (zoom 10)", box: [-56, -156, 30, 26], zoom: 10 },
+  { label: "#1, #4 the crown over the dog's right ear's root (zoom 10)", box: [-58, -152, 32, 26], zoom: 10 },
   { label: "#1, #4 the crown over the dog's left ear's root (zoom 10)", box: [24, -158, 30, 26], zoom: 10 },
+  { label: "#4 the topknot, whole, beside the hero's (zoom 8)", box: [-34, -168, 60, 22], zoom: 8, hero: [100, 0, 140, 51.3] },
   { label: "#4 the topknot and the crown, the dog's right half (zoom 10)", box: [-38, -168, 40, 24], zoom: 10 },
   { label: "#4 the topknot and the crown, the dog's left half (zoom 10)", box: [-2, -168, 40, 24], zoom: 10 },
   { label: "#6 the dog's right head patch: its hood, the cream strip and the root's tan (zoom 8)", box: [-52, -142, 36, 36], zoom: 8 },
   { label: "#6 the dog's left head patch: its hood, the cream strip and the root's tan (zoom 8)", box: [12, -144, 38, 36], zoom: 8 },
   { label: "#2 the dog's right cheek over its ear (zoom 10)", box: [-60, -108, 28, 46], zoom: 10 },
   { label: "#2 the dog's left cheek over its ear (zoom 10)", box: [32, -110, 28, 46], zoom: 10 },
+  { label: "#3 the chin over the collar, whole, beside the hero's (zoom 8)", box: [-34, -80, 68, 26], zoom: 8, hero: [92, 168, 176, 67.3] },
   { label: "#3, #7 the chin over the collar, the dog's right half (zoom 10)", box: [-44, -76, 40, 22], zoom: 10 },
   { label: "#3, #7 the chin over the collar, the dog's left half (zoom 10)", box: [4, -78, 40, 22], zoom: 10 },
   { label: "#5 the dog's right ear: its outer edge and hem (zoom 10)", box: [-88, -120, 40, 60], zoom: 10 },
@@ -275,6 +286,7 @@ const JOINS: Row[] = [
   { label: "#10 the chest's V and the legs' inner edges (zoom 10)", box: [-16, -42, 32, 42], zoom: 10 },
   { label: "#12, #13 the dog's right elbow, leg edge and haunch (zoom 10)", box: [-56, -56, 30, 46], zoom: 10 },
   { label: "#12, #13 the dog's left elbow, leg edge and haunch (zoom 10)", box: [26, -56, 30, 46], zoom: 10 },
+  { label: "#11, #14 the paws, whole, beside the hero's (zoom 6)", box: [-52, -24, 104, 26], zoom: 6, hero: [70, 300, 225, 56.3] },
   { label: "#11, #14 the dog's right paws (zoom 10)", box: [-52, -24, 40, 26], zoom: 10 },
   { label: "#11, #14 the dog's left paws (zoom 10)", box: [12, -24, 40, 26], zoom: 10 },
   { label: "#15 the ground shadow (zoom 2)", box: [-82, -22, 164, 26], zoom: 2 },
@@ -287,6 +299,8 @@ const STATES: { label: string; states: Record<string, string>; review?: boolean;
   { label: "the dog's left ear perked, the temple and the head's side (zoom 8)", states: { "ear.L": "onePerked", "temple.L": "up", "head.line": "templeL" }, box: [24, -150, 32, 44], zoom: 8, panel: "perked" },
   { label: "both ears lifted beside Lifted slightly: ears lifted, temples up, head.line temples (phone size, 3 px/pt)", states: { "ear.L": "lifted", "ear.R": "lifted", "temple.L": "up", "temple.R": "up", "head.line": "temples" }, box: [-90, -184, 180, 80], zoom: 3, panel: "lifted" },
   { label: "both ears lifted, the dog's right temple and the head's side (zoom 8)", states: { "ear.L": "lifted", "ear.R": "lifted", "temple.L": "up", "temple.R": "up", "head.line": "temples" }, box: [-58, -150, 32, 44], zoom: 8, panel: "lifted" },
+  { label: "the build's composite of the dog's left ear perked alone, the resting head's notch under it (zoom 12)", states: { "ear.L": "onePerked" }, box: [24, -150, 26, 18], zoom: 12, panel: "perked" },
+  { label: "both ears lifted, the dog's left temple and the head's side (zoom 8)", states: { "ear.L": "lifted", "ear.R": "lifted", "temple.L": "up", "temple.R": "up", "head.line": "temples" }, box: [26, -150, 32, 44], zoom: 8, panel: "lifted" },
   { label: "the dog's left ear lifted beside Lifted slightly: ear.L lifted, temple.L up, head.line templeL (phone size, 3 px/pt)", states: { "ear.L": "lifted", "temple.L": "up", "head.line": "templeL" }, box: [-90, -184, 180, 80], zoom: 3, panel: "lifted" },
   { label: "huffy A: cheeks puffed, flat lids, pressed mouth (phone size, 3 px/pt)", states: { cheeks: "puffed", "eye.L": "flat", "eye.R": "flat", mouth: "pressed" }, box: [-90, -150, 180, 96], zoom: 3 },
   { label: "huffy B (review only): the head puffed, head.base and head.line (phone size, 3 px/pt)", states: { "head.base": "puffed", "head.line": "puffed", "eye.L": "flat", "eye.R": "flat", mouth: "pressed" }, review: true, box: [-90, -150, 180, 96], zoom: 3 },
@@ -296,19 +310,22 @@ const before = await baseFront();
 const after = (await import(pathToFileURL(join(repo, "characters/dog/src/views/front.ts")).href)) as FrontModule;
 const all = (m: FrontModule, review: boolean) => [...m.front(), ...m.faceStates(), ...(review ? m.reviewStates() : [])];
 const PANELS = { perked: perkedPanel(), lifted: liftedPanel() };
-const columns = (box: Box, zoom: number, versions: [string, Drawn[]][], states: Record<string, string> = {}, panel?: keyof typeof PANELS): Column[] => {
+const columns = (box: Box, zoom: number, versions: [string, Drawn[]][], states: Record<string, string> = {}, panel?: keyof typeof PANELS, hero?: Box): Column[] => {
   const w = Math.round(box[2] * zoom), h = Math.round(box[3] * zoom);
   const sheet = panel ? { name: panel === "perked" ? "One ear perked" : "Lifted slightly", ...panelRegion(PANELS[panel].img, PANELS[panel].toPanel, box, zoom) } : { name: "sheet", ...sheetRegion(box) };
-  return [sheet, ...versions.map(([name, drawn]) => ({ name, png: render(drawn, states, box, zoom), pw: w, ph: h, vb: [0, 0, w, h] as Box }))];
+  return [...(hero ? [{ name: "hero", ...heroRegion(hero) }] : []), sheet, ...versions.map(([name, drawn]) => ({ name, png: render(drawn, states, box, zoom), pw: w, ph: h, vb: [0, 0, w, h] as Box }))];
 };
 const rest: [string, Drawn[]][] = [["before", all(before, false)], ["after", all(after, false)]];
+const review: [string, Drawn[]][] = [["before", all(before, true)], ["after", all(after, true)]];
 if (args.only) {
-  const rows = JOINS.filter((r) => r.label.includes(args.only!));
-  write(`Front: ${args.only}`, rows.map((row) => ({ row, columns: columns(row.box, row.zoom, rest) })), join(out, "peek.png"));
+  const rows = JOINS.filter((r) => r.label.includes(args.only!)).map((row) => ({ row, columns: columns(row.box, row.zoom, rest, {}, undefined, row.hero) }));
+  const states = STATES.filter((s) => s.label.includes(args.only!)).map((s) => ({
+    row: { label: s.label, box: s.box, zoom: s.zoom }, columns: columns(s.box, s.zoom, s.review ? review : rest, s.states, s.panel),
+  }));
+  write(`Front: ${args.only}`, [...rows, ...states], join(out, "peek.png"));
   process.exit(0);
 }
-write("Front: the joins the audit names, sheet | before (fbbe6d3) | after", JOINS.map((row) => ({ row, columns: columns(row.box, row.zoom, rest) })), join(out, "joins.png"));
-const review: [string, Drawn[]][] = [["before", all(before, true)], ["after", all(after, true)]];
-write("Front: the face states on the fur pass's parts, sheet | before (fbbe6d3) | after", STATES.map((s) => ({
+write(`Front: the joins the audit names, [hero |] sheet | before (${BASE}) | after`, JOINS.map((row) => ({ row, columns: columns(row.box, row.zoom, rest, {}, undefined, row.hero) })), join(out, "joins.png"));
+write(`Front: the face states on the fur pass's parts, sheet | before (${BASE}) | after`, STATES.map((s) => ({
   row: { label: s.label, box: s.box, zoom: s.zoom }, columns: columns(s.box, s.zoom, s.review ? review : rest, s.states, s.panel),
 })), join(out, "states.png"));

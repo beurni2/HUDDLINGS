@@ -167,7 +167,7 @@ const embossed = [0.7, 0.44].map((k) => shift(symmetric(HEART.map(inset(k)), ins
 // rolled with the face.
 const earR: Node[] = [[-37.5, -141.4], [-29.4, -138.6], [-28.2, -132.4], [-40, -86], [-39.4, -73], [-41.4, -66.6], [-46.6, -64], [-52.6, -62.6],
   [-58.6, -63.1], [-65, -65.8], [-71, -69.4], [-76.2, -74.8], [-80.4, -82], [-81, -88.4], [-79.9, -94.6],
-  [-78.2, -100.2], [-73.6, -106.2], [-66.8, -111.6], [-60.8, -117.4], [-56, -125.6], [-50.6, -130.8], [-45.4, -135.2]];
+  [-78.2, -100.2], [-73.6, -106.2], [-66.8, -111.6], [-60.8, -117.4], [-56, -125.6], [-50.6, -130.8], [-45.4, -135.2], [-42.7, -136.9]];
 /** The right ear's node where the left ear's typed upper edge ends (its outer side, at y -82). */
 const EAR_SPLIT = earR.findIndex(([x, y]) => x === -80.4 && y === -82);
 /** The hem's notches are earEdge()'s now (DECISIONS 221): the typed outline has none. */
@@ -213,6 +213,12 @@ const EAR_STEP: Lock = { len: 0.7, width: 7.8, lean: -0.45 };
 const EAR_STEPS = { R: [[-78.8, -95.6], [-74.6, -102.2]] as [P, P], L: [[75.6, -102.2], [72.2, -108.8]] as [P, P] };
 /** Where each ear's line goes under the cheek, in model space: on under it at full width, its fade under the cheek's fur. */
 const EAR_UNDER = { R: [-38.8, -68] as P, L: [37.1, -71.6] as P };
+/**
+ * Where the right ear's line goes under the crown, in the head's frame (DECISIONS 267): just past where its outer edge
+ * goes under the overhang's tip, so it runs on under the head at full width and fades there, clear of the root's tight
+ * top (the left's runs on to the root's top, typed on its own below).
+ */
+const EAR_ROOT_R: P = [-41.6, -137.9];
 function earEdgeOf(side: "L" | "R") {
   const on = (p: P) => onEar(side, p), R = side === "R";
   const [a, b] = EAR_STEPS[side];
@@ -223,7 +229,7 @@ function earEdgeOf(side: "L" | "R") {
     axis: [on([-58, -124]), on([-60, -62])],
     // Seen from the front the ear hangs behind the head: its line runs on under the cheek at its foot and under the
     // crown at its root (DECISIONS 210).
-    line: R ? { from: EAR_UNDER.R, to: on([-38.6, -140.6]), ends: ["under", "under"] } : { from: on([-38.6, -140.6]), to: EAR_UNDER.L, ends: ["under", "under"] },
+    line: R ? { from: EAR_UNDER.R, to: on(EAR_ROOT_R), ends: ["under", "under"] } : { from: on([-38.6, -140.6]), to: EAR_UNDER.L, ends: ["under", "under"] },
   });
 }
 const EDGES = { R: earEdgeOf("R"), L: earEdgeOf("L") };
@@ -367,6 +373,17 @@ const ROOT_POINT = { R: { into: [-0.84, 0.55] as P, at: 1.1, r: [1.8, 0.9] }, L:
  * line runs on unbroken.
  */
 const GAPS = { R: [[-45.1, -86.8], [-44.4, -77.4]] as [P, P], L: [[44.4, -78.8], [44.7, -82]] as [P, P] };
+/**
+ * Where each cheek's line starts under a raised ear (head.line's temple states, DECISIONS 267), in the head's frame: the
+ * temple's outer edge bows out past the head's side above and comes back to it on its way under the head, and the
+ * cheek's line starts free on the head's side while the two are still 0.85 to 1.4 pt apart (y -118 on the left, -115.3
+ * on the right, placed), so its taper lies along the inside of the temple's line and it is at full width by where they
+ * come within 0.45 pt (y -116.6 and -113.6): the temple's line hands over to it with no thin stretch. A free start
+ * 1.8 to 3 pt lower, the temple's line by then under the head, left the head's side unlined for 3 pt from y -117 on the
+ * left and -114.8 on the right, in every face that raises an ear (the reviewers' 2.2 pt break; the gate counting only
+ * what shows, 264). A join there would meet no line in the build's composite of head.line's state alone (no temple).
+ */
+const RAISED = { R: [-45, -115.7] as P, L: [41.2, -118.05] as P };
 
 /**
  * The head's outline with its fur, and its lines (headFur()). `puff` swells each cheek's puff out sideways by up to
@@ -374,16 +391,16 @@ const GAPS = { R: [[-45.1, -86.8], [-44.4, -77.4]] as [P, P], L: [[44.4, -78.8],
  * fullest, about y -82, and not at all above the eyes' foot or under the jaw, so the crown, the temples and the chin
  * stay as they are; every typed place moves with it (headFur's `at`), so the puffed head's fur is the rest's.
  */
-function headOf(puff = 0): { head: Shape; fur: HeadFur; notches: Record<"R" | "L", { top: [P, P]; side: [P, P] }>; gaps: [P, P][] } {
+function headOf(puff = 0): { head: Shape; fur: HeadFur; notches: Record<"R" | "L", { top: [P, P]; side: [P, P] }>; gaps: [P, P][]; raised: Record<"R" | "L", P> } {
   const swell = ([x, y]: P): P => {
     const t = clamp01((y + 104) / 44), across = clamp01((Math.abs(x) - 22) / 14);
     return [x + Math.sign(x) * puff * Math.sin(Math.PI * t) ** 2 * across, y];
   };
   const at = (p: P) => cheekRoll(swell(p));
-  // The left overhang's tip is a lock of the crown's fur, as sharp as the sheet draws it (Q29; DECISIONS 89), where the
-  // crown's line runs on into the ear's.
-  const base = furSpan(smooth([...headHalf, [0, -58.4], ...leftHalf].map(([x, y]): Node => at([x, y])), { typed: headHalf.length + 1 + leftTemple.length }),
-    [39.4, -140.4], [40.2, -141.6]);
+  // Each overhang's tip is a lock of the crown's fur, as sharp as the sheet draws it (Q29; DECISIONS 89), where the
+  // crown's line runs on into the ear's: on the right, where the crown's line now reaches it (DECISIONS 267).
+  const base = furSpan(furSpan(smooth([...headHalf, [0, -58.4], ...leftHalf].map(([x, y]): Node => at([x, y])), { typed: headHalf.length + 1 + leftTemple.length }),
+    [-45.7, -135], [-44.8, -134.2]), [39.4, -140.4], [40.2, -141.6]);
   // The face's side over the ear: deep on the tan where it tucks over the ear (DECISIONS 7's #9E5C2C), down to the
   // puff's top (the crop's L* 37 to 50 at x -45.5 from y -92 to -85); round the left's puff the fur's own line, as dark
   // as the crop's there (L* 46 to 55 at x 47 to 48 from y -88 to -76), and on low on the cheek to the jaw (L* 47 to 50).
@@ -397,7 +414,7 @@ function headOf(puff = 0): { head: Shape; fur: HeadFur; notches: Record<"R" | "L
   const spec: HeadFurSpec = {
     base, at,
     crown: [
-      { side: "R", from: [-43.4, -134.05], to: [-35.2, -134.85], locks: CROWN_R, tipRound: 0.25, line: { from: [-24, -149.2], to: [-44, -137] }, ear: EDGES.R.shape },
+      { side: "R", from: [-43.4, -134.05], to: [-35.2, -134.85], locks: CROWN_R, tipRound: 0.25, line: { from: [-24, -149.2], to: [-46, -134.4] }, ear: EDGES.R.shape },
       { side: "L", from: [30.6, -139.2], to: [38.8, -140.4], locks: CROWN_L, tipRound: 0.25, line: { from: [41.2, -140.2], to: [19, -150.6] }, ends: ["join", "under"], ear: EDGES.L.shape },
     ],
     cheeks: [
@@ -406,9 +423,9 @@ function headOf(puff = 0): { head: Shape; fur: HeadFur; notches: Record<"R" | "L
       // front crop draws it. headFur frees the line where it borders the root's and the gap's unlined stretches and
       // cites each by its length (DECISIONS 214).
       { side: "R", from: [-45, -86.2], to: [-44.1, -75.4], clumps: CHEEK, tipRound: 0.22,
-        line: { from: [-39.9, -123.8], to: [-39.6, -70.4], ends: ["free", "join"], on: sideLadder, under: sideFace, gap: GAPS.R }, raised: [-46.2, -113.4] },
+        line: { from: [-39.9, -123.8], to: [-39.6, -70.4], ends: ["free", "join"], on: sideLadder, under: sideFace, gap: GAPS.R }, raised: RAISED.R },
       { side: "L", from: [44.6, -76.2], to: [45, -86.2], clumps: CHEEK_L, tipRound: 0.22,
-        line: { from: [39.6, -70.4], to: [33.7, -129.4], ends: ["join", "free"], on: sideLadder, under: sideFace, most: pinch, gap: GAPS.L }, raised: [44.9, -113.8] },
+        line: { from: [39.6, -70.4], to: [33.7, -129.4], ends: ["join", "free"], on: sideLadder, under: sideFace, most: pinch, gap: GAPS.L }, raised: RAISED.L },
     ],
     chin: { from: [-16.3, -59.6], to: [16.3, -59.6], scallops: CHIN, tipRound: 0.15, line: { from: [-39.6, -70.4], to: [39.6, -70.4] }, corners: [[-39.6, -70.4], [39.6, -70.4]] },
   };
@@ -416,7 +433,7 @@ function headOf(puff = 0): { head: Shape; fur: HeadFur; notches: Record<"R" | "L
   // Each row's notches between its wisps (not its two ends), in path order.
   for (let k = 0; k < fur.tufts.cheeks.length - 1; k++) if ((k + 1) % CHEEK.length !== 0) pinches.push(fur.tufts.cheeks[k]!.notches[1]);
   const placed = (n: { top: [P, P]; side: [P, P] }) => ({ top: n.top.map(at) as [P, P], side: n.side.map(at) as [P, P] });
-  return { head: fur.head, fur, notches: { R: placed(NOTCHES.R), L: placed(NOTCHES.L) }, gaps: [GAPS.R].map(([a, b]): [P, P] => [at(a), at(b)]) };
+  return { head: fur.head, fur, notches: { R: placed(NOTCHES.R), L: placed(NOTCHES.L) }, gaps: [GAPS.R].map(([a, b]): [P, P] => [at(a), at(b)]), raised: { R: at(RAISED.R), L: at(RAISED.L) } };
 }
 const HEAD = headOf();
 const head = HEAD.head;
@@ -1054,7 +1071,13 @@ const STARS: Star[] = [{ at: [-74.9, -41.3], size: [11.4, 14.4], turn: 0 }, { at
 const perkedR: Node[] = [[-10.4, -147.6], [-10.6, -159], [-12.2, -166], [-15.8, -171.8], [-20, -175], [-24.8, -176], [-29.6, -175.4], [-34.8, -173.2],
   [-39.6, -169], [-44, -164.8], [-48.4, -161.6], [-53.2, -157.6], [-57, -152.6], [-59, -147.4], [-58.4, -142], [-56, -137.8], [-52, -135.4], [-46.4, -134.4],
   [-41, -135.4], [-36.4, -138.6], [-31.4, -143], [-25, -148.2], [-18.4, -150.6], [-13, -151.8]];
-const perked = { R: smooth(rollN(perkedR)), L: smooth(rollN(mirrorX(perkedR))) };
+/**
+ * The left's underside, where it crosses the resting head's notch (the left notch lies higher, under the crown at y
+ * -140), 0.8 pt lower than the right's mirror, so its line shows whole below the notch's underside rather than as a
+ * sliver beside it (DECISIONS 267). Every face that perks the left ear covers it with the temple.
+ */
+const PERK_L_UNDER: Record<string, Node> = { "-41,-135.4": [-41, -134.6], "-36.4,-138.6": [-36.4, -137.8] };
+const perked = { R: smooth(rollN(perkedR)), L: smooth(rollN(mirrorX(perkedR.map((n) => PERK_L_UNDER[`${n[0]},${n[1]}`] ?? n)))) };
 const onPerk = (side: "L" | "R", p: P): P => rollP(side === "R" ? p : [-p[0], p[1]]);
 const perkD = (side: "L" | "R", d: string) => rollD(side === "R" ? d : mirrorD(d));
 /**

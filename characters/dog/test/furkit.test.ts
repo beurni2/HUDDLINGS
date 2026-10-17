@@ -456,7 +456,7 @@ test("today's views, gated whole, fail the line gate, and each right-facing view
   for (const view of ["threeQuarter", "side"]) assert.deepEqual(kinds(`${view}.R`), kinds(`${view}.L`), `${view}.R is held as ${view}.L`);
 });
 
-test("counting only what shows (`shown`), the gate finds the front's head side bare under temple.L's line in every face that raises the left ear (DECISIONS 264)", () => {
+test("counting only what shows (`shown`), the gate finds the front's head side bare under temple.L's line in every face that raises the left ear (DECISIONS 264, 267)", () => {
   // Each raised-ear face composited as it is drawn, every part's state under the face's own name, as the front lane's
   // gate script composites them (qa/phase3/fur/front/gate.ts).
   const front = drawings().filter((d) => d.region.split("/")[1]!.split(":")[0] === "front");
@@ -466,11 +466,43 @@ test("counting only what shows (`shown`), the gate finds the front's head side b
     listening: { "ear.L": "lifted", "ear.R": "lifted", "temple.L": "up", "temple.R": "up", "head.line": "temples" },
   };
   const decisions = decisionsOf(readFileSync(new URL("../DECISIONS.md", import.meta.url), "utf8"));
+  // The break the reviewers saw, planted back: the left cheek's line under a raised ear starting free where it started
+  // before the front lane's fix (267), 4.6 pt down the head's side at (43.7, -113.8), after temple.L's line has gone
+  // under head.base.
+  const planted = (d: Drawing): Drawing => {
+    const shape = d.meta!.shapes[0]!, pts = sample(shape.segs, 48), at = arc([...pts, pts[0]!]), total = at.at(-1)!;
+    const point = (f: number): P => {
+      const s = (((f % 1) + 1) % 1) * total, i = Math.max(0, at.findIndex((a) => a > s) - 1), t = (s - at[i]!) / (at[i + 1]! - at[i]! || 1);
+      const p = pts[i]!, q = pts[(i + 1) % pts.length]!;
+      return [p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t];
+    };
+    const near = (f: number, q: P) => Math.hypot(point(f)[0] - q[0], point(f)[1] - q[1]) < 1;
+    const nearest = pts.reduce((b, p, i) => (Math.hypot(p[0] - 43.7, p[1] + 113.8) < Math.hypot(pts[b]![0] - 43.7, pts[b]![1] + 113.8) ? i : b), 0);
+    const old = at[nearest]! / total;
+    let moved: { from: number; to: number } | undefined;
+    const lines = d.meta!.lines.map((l) => {
+      const s = (l as LitLine).span;
+      if (!s || !(s.ends[1] === "free" && near(s.to, [41.2, -118.05]))) return l;
+      moved = { from: s.from, to: s.to };
+      return { ...l, span: { ...s, to: old } };
+    });
+    assert.ok(moved, `${d.region}: the left cheek's line starts where 267 starts it`);
+    // The shape reports the run its line is drawn along: moved with it, or the gate reads the old run as a typed line.
+    const shapes = d.meta!.shapes.map((m) => ({ ...m, outlined: m.outlined.map(([a, b]): [number, number] => (a === moved!.from && b === moved!.to ? [a, old] : [a, b])) }));
+    return { ...d, meta: { ...d.meta!, shapes, lines } };
+  };
   for (const [face, parts] of Object.entries(FACES)) {
-    const drawn = [...front.filter((d) => !d.region.includes(":")), ...Object.entries(parts).map(([part, state]) => ({ ...front.find((d) => d.region === `${part}/front:${state}`)!, region: `${part}/front:${face}` }))];
-    const temple = (shown: boolean) => gateProblems(drawn, { rig, decisions, shown }).filter((p) => p.startsWith(`temple.L/front:${face}`));
-    assert.deepEqual(temple(false), [], `${face}: the first gate takes temple.L's line under head.base as lining the head's side`);
-    const found = temple(true).join("\n");
+    const drawn = (plant: boolean) => [...front.filter((d) => !d.region.includes(":")), ...Object.entries(parts).map(([part, state]) => {
+      const d = { ...front.find((x) => x.region === `${part}/front:${state}`)!, region: `${part}/front:${face}` };
+      return plant && part === "head.line" ? planted(d) : d;
+    })];
+    const temple = (plant: boolean, shown: boolean) => gateProblems(drawn(plant), { rig, decisions, shown }).filter((p) => p.startsWith(`temple.L/front:${face}`));
+    // As drawn, the cheek's line takes over from the temple's at full width (267): neither gate finds the head's side bare.
+    assert.deepEqual(temple(false, true), [], `${face}: the head's side is lined where it shows`);
+    assert.deepEqual(temple(false, false), [], `${face}: and the first gate agrees`);
+    // Planted, the first gate takes temple.L's line under head.base as lining the head's side; `shown` finds it bare.
+    assert.deepEqual(temple(true, false), [], `${face}: the first gate takes temple.L's line under head.base as lining the head's side`);
+    const found = temple(true, true).join("\n");
     assert.match(found, /the edge of temple\.L shows (\d+\.\d\d) pt below full line width from \(42\.\d, -11[67]\.\d\)/, `${face}: the break the reviewers saw, found`);
     const pt = Number(/shows (\d+\.\d\d) pt/.exec(found)![1]);
     assert.ok(pt > 2 && pt < 4, `${face}: ${pt} pt bare, the reviewers' 2.2 pt and its free end's taper`);
