@@ -731,11 +731,12 @@ const CHEST_SIDE: [P, P] = [[-21.4, -60.6], [-30.4, -24]];
  * Where the chest's lower edge's line ends, coming up out of the slot over the far leg, and how long it fades in from
  * there: the crop's line shows faintly from about x -69.6 (L* 86 to 90 against the fur's 94; 84 to 86 down to x -65.4,
  * 77 to 80 to x -61.6) and is dark only in the slot (62 to 68 from x -59.5), so it starts at x -67.6 and tapers over
- * 13 pt from there, at the ladder's lightest until x -62 (chestLower); from here to its corner the crop leaves the edge
+ * 18 pt from there, at the ladder's lightest until x -62 (chestLower); from here to its corner the crop leaves the edge
  * unlined, the chest's cream on the far leg's (DECISIONS 231, 274). Its first end, at x -65.9 at full width, read as a
- * line starting abruptly at L* 64; started at x -69.6 tapering over 9 pt, it was dark (L* 62) from x -65.
+ * line starting abruptly at L* 64; started at x -69.6 tapering over 9 pt, it was dark (L* 62) from x -65, and over 13 pt
+ * from x -67.6 still L* 65 at x -61.6 where the crop's is 80 (the ladder's lightest is L* 66 at full width).
  */
-const CHEST_LOWER_END: P = [-67.6, -32.7], CHEST_FADE = 13;
+const CHEST_LOWER_END: P = [-67.6, -32.7], CHEST_FADE = 18;
 
 /** The three-quarter view in a facing: threeQuarter.L as the crop draws it, or threeQuarter.R, its mirror lit from the top left (views/facing.ts). */
 export function threeQuarter(facingSide: Side = "L"): Drawn[] {
