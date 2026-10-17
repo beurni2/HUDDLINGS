@@ -6043,5 +6043,5 @@
  "advisory": true,
  "pass": false,
  "summary": "lines FAIL 27 of 67 regions: body.back|collar, body.back|front.L, body.back|hind.L, body.back|outside and 23 more; worst ear.R recall 0.065 (threshold 0.836); 2 regions uncalibrated (held to their view's median) and the parts' edges moved over 6% of the crop since the calibration: rerun linecal.py",
- "seconds": 1.39
+ "seconds": 1.86
 }

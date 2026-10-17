@@ -10,7 +10,7 @@
    "head": "front"
   },
   "ppp": 3,
-  "sizePx": [534, 570],
+  "sizePx": [536, 558],
   "rootPx": [269, 517]
  },
  "rest": {
@@ -103,18 +103,18 @@
     "eye.R": {
      "record": [46.12, 63.53],
      "held": false,
-     "found": [44.75, 63.98],
-     "errPt": 1.76,
-     "offsetPt": [-1.57, 0.8],
+     "found": [44.78, 63.97],
+     "errPt": 1.73,
+     "offsetPt": [-1.54, 0.78],
      "pass": true,
      "note": "reported: the panel turns the head, so the pair is held by its spacing and the eyes on the head"
     },
     "eye.L": {
      "record": [87.78, 69.96],
      "held": false,
-     "found": [84.76, 70.2],
-     "errPt": 3.72,
-     "offsetPt": [-3.62, 0.86],
+     "found": [84.68, 70.17],
+     "errPt": 3.81,
+     "offsetPt": [-3.72, 0.83],
      "pass": true,
      "note": "reported: the panel turns the head, so the pair is held by its spacing and the eyes on the head"
     }
@@ -123,27 +123,27 @@
     "eyes": {
      "held": true,
      "recordPt": [51.71, -0.01],
-     "foundPt": [49.67, 0.06],
-     "errPt": 2.05,
+     "foundPt": [49.53, 0.05],
+     "errPt": 2.18,
      "pass": true
     }
    },
    "shapes": {
     "eye.R": {
-     "areaPx": 222,
+     "areaPx": 226,
      "recordAreaPx": 228,
-     "areaPt2": 83.5,
-     "areaRatio": 0.974,
-     "iou": 0.829,
+     "areaPt2": 85.0,
+     "areaRatio": 0.991,
+     "iou": 0.816,
      "pass": true,
      "held": true
     },
     "eye.L": {
-     "areaPx": 226,
+     "areaPx": 227,
      "recordAreaPx": 243,
-     "areaPt2": 85.0,
-     "areaRatio": 0.93,
-     "iou": 0.869,
+     "areaPt2": 85.4,
+     "areaRatio": 0.934,
+     "iou": 0.873,
      "pass": true,
      "held": true
     }
@@ -197,18 +197,18 @@
     "eye.R": {
      "record": [75.23, 116.93],
      "held": false,
-     "found": [71.2, 116.87],
-     "errPt": 2.83,
-     "offsetPt": [-2.8, 0.43],
+     "found": [71.21, 116.87],
+     "errPt": 2.82,
+     "offsetPt": [-2.79, 0.43],
      "pass": true,
      "note": "reported: the panel turns the head, so the pair is held by its spacing and the eyes on the head"
     },
     "eye.L": {
      "record": [144.25, 128.54],
      "held": false,
-     "found": [140.73, 128.66],
-     "errPt": 2.48,
-     "offsetPt": [-2.43, 0.49],
+     "found": [140.68, 128.64],
+     "errPt": 2.51,
+     "offsetPt": [-2.46, 0.48],
      "pass": true,
      "note": "reported: the panel turns the head, so the pair is held by its spacing and the eyes on the head"
     }
@@ -217,8 +217,8 @@
     "eyes": {
      "held": true,
      "recordPt": [49.15, 0.01],
-     "foundPt": [49.53, 0.07],
-     "errPt": 0.38,
+     "foundPt": [49.48, 0.06],
+     "errPt": 0.33,
      "pass": true
     }
    },
@@ -233,11 +233,11 @@
      "held": true
     },
     "eye.L": {
-     "areaPx": 171,
+     "areaPx": 172,
      "recordAreaPx": 141,
-     "areaPt2": 84.3,
-     "areaRatio": 1.213,
-     "iou": 0.733,
+     "areaPt2": 84.8,
+     "areaRatio": 1.22,
+     "iou": 0.739,
      "pass": true,
      "held": true
     }

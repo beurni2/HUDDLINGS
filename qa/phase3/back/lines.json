@@ -4214,5 +4214,5 @@
  "advisory": true,
  "pass": false,
  "summary": "lines FAIL 16 of 47 regions: body.back|ground, body.back|outside, body.back|tail, collar|head.base and 12 more; worst hind.R|ground furCrossings10Pt 0.0 (threshold 0.643); the parts' edges moved over 3% of the crop since the calibration: rerun linecal.py",
- "seconds": 0.62
+ "seconds": 1.67
 }

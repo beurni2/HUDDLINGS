@@ -531,9 +531,9 @@
   "atlas": {
    "set": "3x",
    "pages": 2,
-   "pageAreaPx": 6291456,
-   "allRegionsShare": 0.676,
-   "thisStillShare": 0.137
+   "pageAreaPx": 8388608,
+   "allRegionsShare": 0.513,
+   "thisStillShare": 0.103
   }
  },
  "failed": [],

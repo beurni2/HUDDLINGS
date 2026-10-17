@@ -6261,5 +6261,5 @@
  "advisory": true,
  "pass": false,
  "summary": "lines FAIL 29 of 70 regions: body.back, body.back|body.front, body.back|ear.R, body.back|ground and 25 more; worst front.L|ground furCrossings10Pt 0.0 (threshold 0.643); 6 regions uncalibrated (held to their view's median) and the parts' edges moved over 6% of the crop since the calibration: rerun linecal.py",
- "seconds": 0.84
+ "seconds": 1.2
 }

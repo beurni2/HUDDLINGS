@@ -316,6 +316,14 @@ test("the crown's line joins the ear's where the two outlines cross, and the roo
   assert.ok(Math.abs(cheek.bare![1] - (h.roots[0]!.length + 0.5)) < 1e-9 && cheek.bare![0] === 0, `the cheek cites ${cheek.bare} pt`);
   assert.match(h.soften(C.fur, [-60, -160, 120, 120]).body, /<path d="M/, "the root's stretch is feathered");
   assert.equal(h.soften(C.fur, [-60, -160, 120, 120], { R: true }).body, "", "not under a raised ear");
+  // Under a raised ear the cheek's line ends lower, at `raised` (170°), free; its upper end here is its `to` (the line
+  // runs up toward the root, as a left cheek's does), so its jaw end still joins, and the stretch it cites runs from the
+  // crossing down to `raised`: the root's stretch and the head's edge from 170° (in the cheek's fur) to 195°.
+  const up = h.spans({ R: true }).find((s) => s.cites === 214)!;
+  assert.deepEqual(up.to, on(170));
+  assert.deepEqual(up.ends, ["join", "free"], "a raised side's line frees its jaw end instead of its upper end");
+  const upLength = h.roots[0]!.length + arc(spanPoints(h.head, fracAt(h.head, on(170)), fracAt(h.head, on(195)))).at(-1)!;
+  assert.ok(Math.abs(up.bare![1] - (upLength + 0.5)) < 0.6 && up.bare![0] === 0, `the raised cheek cites ${up.bare} pt, not [0, ${(upLength + 0.5).toFixed(2)}]`);
   // Without its ear, a crown root's line ends where it is typed and no stretch is cited.
   assert.deepEqual(headFur(HEAD).cheeks[0]!.cites, undefined);
   // An ear whose outline does not cross the head's near the typed join is refused.
