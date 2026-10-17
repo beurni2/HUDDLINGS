@@ -365,15 +365,19 @@ const onFlank = (p: P): "cream" | "tan" => (p[0] < -33 && p[1] > -55.5 && p[1] <
  * and the notch where the haunch's round begins, round the haunch to the heel's notch, where it meets the heel's line;
  * the haunch's underside over the heel unlined, as the sheet draws it (a notch, the heel's line running on round the
  * bun), cited by its length; and along the ground from heel to heel, the ground's dark under the middle of the run.
- * The shoulders' lines are the sheet's darker brown (its #87 to #8B grey there, L* 55), the haunches' the light's.
+ * The shoulders' lines are the sheet's darker brown (L* 47 to 58 on the left, 55 to 68 on the right; a floor of 0.3, where
+ * 0.45 read 42 to 50), the haunches' lighter than the light rule's, as the sheet's are (a ceiling: 65 to 71 on the left,
+ * 61 to 68 and 54 to 61 down the right's round; the rule's read 58 to 64 and 51 to 61).
  */
 const COLLAR_BODY = { L: crossing(body, collar, [-28.6, -63.2]), R: crossing(body, collar, [29.6, -63.2]) };
 const UNDERSIDE_PT = { L: along(body, HEEL.L.notch, HEEL.L.meet), R: along(body, HEEL.R.meet, HEEL.R.notch) };
-const shoulderUnder = (p: P) => (p[1] < -40 ? 0.45 : 0);
+const shoulderUnder = (p: P) => (p[1] < -40 ? 0.3 : 0);
+/** Round each haunch the sheet's line is lighter than the light rule's: L* 65 to 71 on the left, 60 to 72 down the right's round and 54 to 61 low on it. */
+const haunchMost = (p: P) => (p[1] < -40 || p[1] > -16 ? 1 : p[0] < 0 ? 0 : p[1] < -26 ? 0.1 : 0.3);
 const bodySpans: LitSpan[] = [
-  { from: COLLAR_BODY.L, to: HEEL.L.notch, ends: ["under", "join"], on: onFlank, under: shoulderUnder, cites: 245, bare: [0, UNDERSIDE_PT.L + 0.5] },
+  { from: COLLAR_BODY.L, to: HEEL.L.notch, ends: ["under", "join"], on: onFlank, under: shoulderUnder, most: haunchMost, cites: 245, bare: [0, UNDERSIDE_PT.L + 0.5] },
   { from: HEEL.L.meet, to: HEEL.R.meet, ends: ["join", "join"], ground: "sole", cites: 245, bare: [UNDERSIDE_PT.L + 0.5, UNDERSIDE_PT.R + 0.5] },
-  { from: HEEL.R.notch, to: COLLAR_BODY.R, ends: ["join", "under"], under: shoulderUnder, cites: 245, bare: [UNDERSIDE_PT.R + 0.5, 0] },
+  { from: HEEL.R.notch, to: COLLAR_BODY.R, ends: ["join", "under"], under: shoulderUnder, most: haunchMost, cites: 245, bare: [UNDERSIDE_PT.R + 0.5, 0] },
 ];
 
 const hindPaint: Paint = { fill: C.fur, shade: furShade(hipGroup, HIP_SHADE, [], { inset: 2.5, toLight: 4 }, 4.2) };
