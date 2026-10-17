@@ -116,14 +116,14 @@ let chest = smooth([[-73, -59.6], [-60, -64], [-40, -64.5], [-24, -64], [-21, -5
   [-52, -3.5], [-53.6, -16.6], [-55.4, -20.4], [-58.4, -24], [-61.6, -27.4], [-65.4, -31], [-69.6, -34.3], [-74.6, -36.2], [-77.6, -38.9], [-78.7, -43],
   [-78.1, -47.6], [-75.8, -53.6]]);
 // Under the collar's end the chest's front edge steps out once (fur.ts's STEP), as the crop's line steps at y -45 to -50.
-// Its lower edge over the far leg is lined only from x -65.9 down into the slot, as the crop's line runs from (-66, -31)
-// to the slot, faint where it comes out of the fur (the crop's L* 81 to 85 there) and deepening into the slot (L* 62),
-// with short fur strokes branching off it, the crop's fluffy V (a row of tufts there read as a saw); from there up to its
-// corner the crop leaves it unlined, the chest's cream on the far leg's (DECISIONS 231). Lined from x -67.4 at an even
-// depth it drew a long dark diagonal the crop does not.
+// Its lower edge over the far leg is lined from x -67.6 down into the slot, fading in along its length as the crop's line
+// does, faint where it comes out of the fur (the crop's L* 84 to 86 there, 77 to 80 down to x -61.6) and dark only in
+// the slot (L* 62), with short fur strokes branching down off it onto the far leg, the crop's fluffy V (a row of tufts
+// there read as a saw); from there up to its corner the crop leaves it unlined, the chest's cream on the far leg's
+// (DECISIONS 231, 274). Lined from x -67.4 at an even depth it drew a long dark diagonal the crop does not.
 chest = furEdge(chest, [-78.4, -42.8], [-77, -49.6], [{ len: 1, width: 7, lean: -0.4 }], 0.35, undefined, STEP);
-/** How deep the chest's lower edge's line may lie: the ladder's lightest where it comes out over the far leg (x -65.9), 0.45 in the slot (x -55). */
-const chestLower = (p: P) => 0.45 * Math.min(1, Math.max(0, (-p[0] - 65.9) / -10.9));
+/** How deep the chest's lower edge's line may lie: the ladder's lightest over the far leg down to x -62, 0.45 in the slot (x -57). */
+const chestLower = (p: P) => 0.45 * Math.min(1, Math.max(0, (-p[0] - 62) / -5));
 
 // The collar: the band round the neck from under the chin, where its rounded end shows, along the near side
 // to where it passes behind the near ear, as the sheet draws it: deepest (7.5 pt) under the near side of the chin,
@@ -205,7 +205,7 @@ const EAR_LINES: Record<"R" | "L", LitSpan> = { R: { ...EDGES.R.span, weight: { 
 // near side is one smooth S from under the overhang down over the near ear to the jaw, as the crop draws it.
 const headNodes: Node[] = [[-68.6, -149.6], [-11.2, -149.6], [-2.4, -144.2], [3.6, -136.8], [1.4, -135.6], [-17.4, -132], [-20.6, -127.6], [-13.6, -115.4],
   [-11.4, -105], [-14.6, -91], [-17.4, -70.2], [-22.4, -63.4], [-48, -58.4], [-73.5, -62.4], [-84.2, -68.6],
-  [-95.8, -79.8], [-97.6, -84], [-96.3, -88.9], [-98.2, -92.2], [-96.8, -96.2], [-91.2, -100.6], [-88.8, -121.6], [-79.6, -143.8]];
+  [-95.8, -79.8], [-98.1, -84.2], [-96.6, -88.9], [-98.8, -92.4], [-97.4, -96.6], [-91.2, -100.6], [-88.8, -121.6], [-79.6, -143.8]];
 /**
  * The overhang's tip over the near ear's root; where the face's near side leaves the overhang's underside, a concave
  * corner; and where the far cheek's puff comes out from under the side's line.
@@ -273,13 +273,14 @@ const tuftShapes = curlShapes(CURLS);
 // rises along the face's side into the near ear's root, a wedge of the crown's cream coming down between the hood
 // and that band to a point (x -20.2, y -106.2), as the sheet paints it. The far one is a small round hood over the far eye's outer top,
 // from the face's far side to about the eye's middle, running up the face's far side in a narrow band toward the far ear's
-// root; below the hood, beside the eye, the face is cream, as the sheet paints it. Each is typed with bleed
-// past the head's edge; the eyes cover what lies under them.
+// root, and down it beside the eye to the far cheek's puff (the crop's tan, L* 81 to 82, at x -87 to -89.5 from y -106
+// down to -101; the first pass left it cream there), so the puff's cream stands out against tan above as on the ear
+// beside it (DECISIONS 275). Each is typed with bleed past the head's edge; the eyes cover what lies under them.
 const patchL = smooth([[-46.4, -104.8], [-43.6, -110.4], [-38, -113.8], [-31, -115], [-26, -113.4], [-22.4, -108.6], [-20.2, -106.2], [-18, -112], [-17.4, -123],
   [-20.4, -127.4], [-14.8, -131.8], [-10, -128], [-8, -116], [-8, -100], [-11, -86], [-15, -79.6], [-21, -79.6], [-25.4, -82.4], [-27.6, -87], [-28.6, -95],
   [-33, -103.6], [-40, -105.6], [-44.6, -102.6]], { corners: [6] });
 const patchR = smooth([[-95, -140], [-89.6, -140.4], [-86.6, -136.4], [-84.8, -130.4], [-83, -126.4], [-79, -125], [-75.6, -122.6], [-73.4, -118.6],
-  [-73.4, -114.6], [-75.8, -111.6], [-80, -110.6], [-84.4, -111.6], [-88.6, -114.6], [-95, -118]]);
+  [-73.4, -114.6], [-75.8, -111.6], [-80, -110.6], [-84, -110.4], [-85.6, -106.8], [-86.4, -103], [-88, -101.2], [-92.4, -101], [-95, -106], [-95, -118]]);
 
 // The body's markings, each clipped to its part (L395). The near half of the saddle, a clear patch on the upper
 // back behind the near ear, as the sheet paints it: its top the back's line from x -9 down to x 10, its lower edge
@@ -389,6 +390,9 @@ const headPaint = (F: Facing): Paint => ({
     ["M-100 -172 L10 -172 L10 -140 L-100 -140Z", "M-30 -141 L10 -141 L10 -131 L-30 -131Z", "M-103 -101 L-88 -101 L-88 -80 L-103 -80Z",
       "M-52 -84 L-12 -84 L-12 -66.4 C-26 -64.6 -40 -64.4 -52 -65.6Z"], { inset: 3, toLight: 4.5 }),
   highlight: { d: headLight(F), colour: C.light, opacity: 0.4, blur: 4 },
+  // The far cheek's puff parts at its notch: a short soft stroke runs on into the puff from it, as the crop's does
+  // (x -97.2, y -91 to x -96, y -88.6), so its two lobes read as two clumps of fur (DECISIONS 275).
+  inner: [{ pts: [[-96.4, -89], [-95.5, -88], [-94.8, -86.9]], width: 0.7, colour: C.crownLine, opacity: 0.45 }],
   light: F.light,
 });
 
@@ -407,8 +411,9 @@ const rootBare = (from: P, to: P) => along(head, from, to) + 0.5;
  * two spans joined where the near temple state's line begins (NEAR_RAISED), so that state draws the lower span exactly as
  * the rest does. Each end by a root is free, and cites its root's stretch by its measured length (214).
  */
-const FAR_CHEEK: LitSpan = { from: [-88.4, -72.4], to: FAR_TOP, on: (p) => (p[1] < -80.5 ? "tan" : "cream"), under: (p) => (p[1] < -98 ? 0.3 : 0.1),
-  ends: ["join", "free"], cites: 214, bare: [0, rootBare(FAR_TOP, FAR_JOIN)], weight: { seed: 5023 } };
+const onPuff = (p: P) => p[1] < -80 && p[1] > -100.6;
+const FAR_CHEEK: LitSpan = { from: [-88.4, -72.4], to: FAR_TOP, on: (p) => (onPuff(p) || p[1] >= -80.5 ? "cream" : "tan"), under: (p) => (p[1] < -98 ? 0.3 : 0.1),
+  most: (p) => (onPuff(p) ? 0 : 1), ends: ["join", "free"], cites: 214, bare: [0, rootBare(FAR_TOP, FAR_JOIN)], weight: { seed: 5023, amount: 0.6 } };
 const nearOn = (p: P) => (p[1] < -69 ? "tan" : "cream"), nearUnder = (p: P) => (p[1] < -69 ? 0.3 : 0.15);
 const NEAR_UPPER: LitSpan = { from: NEAR_TOP, to: NEAR_RAISED, on: nearOn, under: nearUnder, ends: ["free", "join"], cites: 214, bare: [rootBare(NEAR_JOIN, NEAR_TOP), 0],
   weight: { seed: 5039, amount: 0.4 } };
@@ -653,11 +658,15 @@ function earPaint(side: "L" | "R", F: Facing): Paint {
 /**
  * The head's shadow on an ear (spec L396: cast by the head, so it turns with the head, clipped to the ear it falls on):
  * a soft band of the ear's tan in the fur's warm shade just outside the face's side where the ear goes under it, and,
- * on the near ear, under the crown's overhang across its root. Typed along the head's edge, its inner side under the head.
+ * on the near ear, under the crown's overhang across its root; on the far ear it runs on round the far cheek's puff to
+ * the ear's hem, as the crop darkens the ear all round the puff (L* about 50 against 60 beside it), so the puff's cream
+ * reads as a mass standing off the ear rather than by its line (DECISIONS 275). Typed along the head's edge, its inner
+ * side under the head.
  */
 function headShadow(side: "L" | "R"): Piece {
   const band: P[] = side === "R"
-    ? [[-78, -144.4], [-84.4, -128], [-87.4, -115], [-89, -102], [-91.6, -96.6], [-95.8, -98.2], [-93.4, -104], [-91.8, -116], [-89.4, -130], [-82.6, -145.4]]
+    ? [[-78, -144.4], [-84.4, -128], [-87.4, -115], [-89, -102], [-92, -97], [-95, -93.6], [-95, -88], [-94.6, -83], [-93.4, -79.6], [-98.4, -80.4],
+      [-99.6, -84.4], [-99, -88.6], [-100.2, -92], [-99, -96.4], [-95.4, -100.2], [-93.4, -104], [-91.8, -116], [-89.4, -130], [-82.6, -145.4]]
     : [[2, -137.6], [-18.2, -134.4], [-21.4, -129.6], [-16.4, -115], [-14.2, -104], [-16, -91], [-19.2, -78], [-17.6, -66.4], [-13.6, -66.2], [-14.6, -78],
       [-11.4, -91], [-9.4, -104], [-11.4, -115], [-15.8, -126.6], [-15.2, -129.8], [1.6, -132.4]];
   const shape = smooth(band);
@@ -712,10 +721,14 @@ const HIND_SOLE: P = [-9.87, -2.15], HIND_CROWN: P = [-11.4, -15.6];
 /** The chest's right side, where it lies on the haunch with no line (DECISIONS 231): from under the collar's near end to under the near leg. */
 const CHEST_SIDE: [P, P] = [[-21.4, -60.6], [-30.4, -24]];
 /**
- * Where the chest's lower edge's line ends, coming up out of the slot over the far leg: the crop leaves the edge from
- * here to its corner unlined, the chest's cream on the far leg's (DECISIONS 231).
+ * Where the chest's lower edge's line ends, coming up out of the slot over the far leg, and how long it fades in from
+ * there: the crop's line shows faintly from about x -69.6 (L* 86 to 90 against the fur's 94; 84 to 86 down to x -65.4,
+ * 77 to 80 to x -61.6) and is dark only in the slot (62 to 68 from x -59.5), so it starts at x -67.6 and tapers over
+ * 13 pt from there, at the ladder's lightest until x -62 (chestLower); from here to its corner the crop leaves the edge
+ * unlined, the chest's cream on the far leg's (DECISIONS 231, 274). Its first end, at x -65.9 at full width, read as a
+ * line starting abruptly at L* 64; started at x -69.6 tapering over 9 pt, it was dark (L* 62) from x -65.
  */
-const CHEST_LOWER_END: P = [-65.9, -31.3];
+const CHEST_LOWER_END: P = [-67.6, -32.7], CHEST_FADE = 13;
 
 /** The three-quarter view in a facing: threeQuarter.L as the crop draws it, or threeQuarter.R, its mirror lit from the top left (views/facing.ts). */
 export function threeQuarter(facingSide: Side = "L"): Drawn[] {
@@ -802,7 +815,11 @@ export function threeQuarter(facingSide: Side = "L"): Drawn[] {
       const t = toes({ lines: FAR_TOES, fade: [-4.15, -8.6], soft: true, width: 0.7, dome: FAR_DOME });
       return { under: `<defs><linearGradient id="${farTop}" gradientUnits="userSpaceOnUse" x1="0" y1="-33.4" x2="0" y2="-22">` +
         `<stop offset="0" stop-color="${C.fur}"/><stop offset="1" stop-color="${C.fur}" stop-opacity="0"/></linearGradient></defs>` +
-        `<rect x="-86" y="-48" width="34" height="26" fill="url(#${farTop})"/>` + t.under, inner: t.inner };
+        `<rect x="-86" y="-48" width="34" height="26" fill="url(#${farTop})"/>` + t.under,
+        // Short fur strokes branching down off the chest's lower edge toward the slot, the crop's fluffy V: they hang
+        // below the chest's edge, on the far leg (typed on the chest, its clip cut them away; DECISIONS 274).
+        inner: [...(t.inner ?? []), ...[[[-63.4, -29.6], [-62, -27.6], [-61.2, -25.4]], [[-60.4, -26.6], [-59, -24.8], [-58.2, -22.8]]]
+          .map((pts) => ({ pts: sample(smooth(pts as P[], { closed: false }).segs, 6, false), width: 0.8, colour: C.crownLine, opacity: 0.7 }))] };
     })(),
     light: F.light,
   }, [{ from: [-54.2, -9], to: [-77.2, -41.5], ground: "sole", ends: ["under", "under"], weight: { seed: 7121 } }])));
@@ -819,13 +836,10 @@ export function threeQuarter(facingSide: Side = "L"): Drawn[] {
     under: between(),
     // A few soft fur strokes down the chest's far side under the collar's end, as the sheet draws them.
     inner: [[[-72, -47.4], [-72.8, -43], [-72.4, -38.6]], [[-67.6, -45.6], [-68.6, -41.6], [-69.2, -37.8]]]
-      .map((pts) => ({ pts: sample(smooth(pts as P[], { closed: false }).segs, 6, false), width: 0.7, colour: C.crownLine, opacity: 0.4 }))
-      // Short fur strokes branching down off the chest's lower edge toward the slot, the crop's fluffy V.
-      .concat([[[-63.4, -30.2], [-62, -28], [-61.4, -25.8]], [[-60.2, -27.2], [-58.6, -25.2], [-57.8, -23]]]
-        .map((pts) => ({ pts: sample(smooth(pts as P[], { closed: false }).segs, 6, false), width: 0.7, colour: C.crownLine, opacity: 0.55 }))),
+      .map((pts) => ({ pts: sample(smooth(pts as P[], { closed: false }).segs, 6, false), width: 0.7, colour: C.crownLine, opacity: 0.4 })),
     light: F.light,
-  }, [{ from: [-53.7, -17], to: CHEST_LOWER_END, most: chestLower, ends: ["under", "free"], cites: 231, bare: [sideBare + 0.5, lowerBare + 0.5],
-    weight: { seed: 7159 } },
+  }, [{ from: [-53.7, -17], to: CHEST_LOWER_END, most: chestLower, ends: ["under", "free"], taper: [1.8, CHEST_FADE], cites: 231, bare: [sideBare + 0.5, lowerBare + 0.5],
+    weight: { seed: 7159, amount: 0.6 } },
     { from: [-77.6, -38.9], to: [-72.6, -58.6], ends: ["join", "under"], weight: { seed: 7151 } }]), 1)));
   // The jaw's shadow on the chest, cast by the head (spec L396): a soft band under the jaw's edge, about 3 pt deep,
   // falling on the chest beside the collar's ends (the collar hides the middle of it).
