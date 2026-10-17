@@ -455,6 +455,27 @@ test("today's views, gated whole, fail the line gate, and each right-facing view
   for (const view of ["threeQuarter", "side"]) assert.deepEqual(kinds(`${view}.R`), kinds(`${view}.L`), `${view}.R is held as ${view}.L`);
 });
 
+test("counting only what shows (`shown`), the gate finds the front's head side bare under temple.L's line in every face that raises the left ear (DECISIONS 264)", () => {
+  // Each raised-ear face composited as it is drawn, every part's state under the face's own name, as the front lane's
+  // gate script composites them (qa/phase3/fur/front/gate.ts).
+  const front = drawings().filter((d) => d.region.split("/")[1]!.split(":")[0] === "front");
+  const FACES: Record<string, Record<string, string>> = {
+    perkedL: { "ear.L": "onePerked", "temple.L": "up", "head.line": "templeL" },
+    liftedL: { "ear.L": "lifted", "temple.L": "up", "head.line": "templeL" },
+    listening: { "ear.L": "lifted", "ear.R": "lifted", "temple.L": "up", "temple.R": "up", "head.line": "temples" },
+  };
+  const decisions = decisionsOf(readFileSync(new URL("../DECISIONS.md", import.meta.url), "utf8"));
+  for (const [face, parts] of Object.entries(FACES)) {
+    const drawn = [...front.filter((d) => !d.region.includes(":")), ...Object.entries(parts).map(([part, state]) => ({ ...front.find((d) => d.region === `${part}/front:${state}`)!, region: `${part}/front:${face}` }))];
+    const temple = (shown: boolean) => gateProblems(drawn, { rig, decisions, shown }).filter((p) => p.startsWith(`temple.L/front:${face}`));
+    assert.deepEqual(temple(false), [], `${face}: the first gate takes temple.L's line under head.base as lining the head's side`);
+    const found = temple(true).join("\n");
+    assert.match(found, /the edge of temple\.L shows (\d+\.\d\d) pt below full line width from \(42\.\d, -11[67]\.\d\)/, `${face}: the break the reviewers saw, found`);
+    const pt = Number(/shows (\d+\.\d\d) pt/.exec(found)![1]);
+    assert.ok(pt > 2 && pt < 4, `${face}: ${pt} pt bare, the reviewers' 2.2 pt and its free end's taper`);
+  }
+});
+
 test("the dog's DECISIONS, as the line gate reads them: the fur pass's entries stand, and the entries they replace cannot be cited", () => {
   const d = decisionsOf(readFileSync(new URL("../DECISIONS.md", import.meta.url), "utf8"));
   for (let n = 210; n <= 219; n++) assert.ok(d.entries.includes(n) && !d.replaced[n], `${n} is a current entry`);
