@@ -88,7 +88,10 @@ const FRAME = rolledFrame(FC, ROLL_DEG);
 // DECISIONS 222), as the crop draws it: the flank runs down near straight (its edge at x -37.9 at y -43, -38.85 at -40),
 // turns in a notch at (-39.3, -39.2), and the haunch flares out below it (-40.85 at -38, -42.25 at -37, -43.45 at -36;
 // the left alike, its notch at (39.6, -39), a little quicker). The notch is a concave corner of the outline, never a
-// lock standing out of it: a 0.7 pt step lock there read as a knob, 1 to 1.5 pt outside the crop's flank.
+// lock standing out of it: a 0.7 pt step lock there read as a knob, 1 to 1.5 pt outside the crop's flank. The corners
+// split the outline's fit into runs, and the run under the belly lies 0.18 pt below its nodes at the slot between the
+// front paws (y -1.45 at x ±4 against -1.63), within the fit's 0.2 (a tighter fit shows the shoulder's top under the
+// collar's end as a 3.3 pt corner); the slot's line is at the ladder's lightest, so the lower edge reads as the crop's.
 const HAUNCH_NOTCH = 11;
 const backHalf = symmetric([[0, -54], [-17, -57.6], [-21.4, -61], [-25.2, -63], [-28.8, -61.8], [-30.6, -59.4], [-31.4, -56.6], [-33.4, -53], [-34.9, -50], [-36.4, -46.6], [-37.9, -43],
   [-39.3, -39.2], [-41.3, -37.6], [-43.6, -35.8], [-46.4, -33], [-48.8, -27.4], [-49.6, -21], [-49.2, -15.4], [-47.6, -10.6], [-44.4, -6.8], [-36, -4.8], [-20, -2.4]], [0, -1.6],
@@ -513,8 +516,10 @@ const backPaint: Paint = { fill: C.fur, shade: furShade(hipGroup) };
  */
 const backLines: LitSpan[] = [{ from: [-25.6, -63.3], to: [-47.4, -11], on: "tan", ends: ["under", "under"] },
   { from: [47.4, -11], to: [25.6, -63.3], on: (p: P) => (p[1] < -39.4 ? "tan" : "cream"), ends: ["under", "under"] },
-  // Its foot on the ground in the slot between the front paws, where the sheet closes the gap with a short dark line.
-  { from: [-4.14, -1.6], to: [4.14, -1.6], ends: ["join", "join"] }];
+  // Its foot on the ground in the slot between the front paws, where the sheet closes the gap with a short line, at the
+  // ladder's lightest: the crop's slot is a mid tan down to the ground (sRGB 172 to 182 at x -2 to 2, y -2.6 to -1.6),
+  // no darker than the tan above it, where the paws' lines beside it are dark (94 to 114).
+  { from: [-4.14, -1.6], to: [4.14, -1.6], ends: ["join", "join"], most: 0 }];
 /** The head's paint, its light group the head's outline (the rest's, or one drawn puffed) and the topknot's curls. */
 const headPaintOf = (head: Shape): Paint => ({
   fill: C.fur,
