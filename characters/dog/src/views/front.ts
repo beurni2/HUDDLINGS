@@ -5,9 +5,9 @@
 // hind paws); joins are feathered and carry no rim and no line.
 import { furEdge, furSpan, STEP, type Lock } from "../../../draw/fur.ts";
 import { lineGate } from "../../../draw/lint.ts";
-import { arc, bbox, ellipse, fracAt, mirrorX, pathD, polyD, rotate, sample, smooth, spanPoints, symmetric, v, type Node, type P, type Seg, type Shape } from "../../../draw/geom.ts";
-import { innerLine, mirrorSpans, strokeOf, type DrawnLine } from "../../../draw/line.ts";
-import { LIGHT, marking, part, soft, type Fade, type Paint } from "../../../draw/paint.ts";
+import { bbox, fracAt, mirrorX, pathD, polyD, rotate, sample, smooth, spanPoints, symmetric, v, type Node, type P, type Seg, type Shape } from "../../../draw/geom.ts";
+import { mirrorSpans, strokeOf, type DrawnLine } from "../../../draw/line.ts";
+import { LIGHT, marking, part, soft, type Paint } from "../../../draw/paint.ts";
 import { blur, filter, join, pad, piece, uid, type Box, type Piece } from "../../../draw/svg.ts";
 import { model } from "../model.ts";
 import { C, LINES } from "../palette.ts";
@@ -21,7 +21,7 @@ import { litEdge, litMarking, litPart, type LitSpan } from "../parts/lines.ts";
 import { curlShapes, topknot, type Curl } from "../parts/topknot.ts";
 import { earEdge, earFur } from "../parts/ear.ts";
 import { chinShadow, headFur, type HeadFur, type HeadFurSpec } from "../parts/headfur.ts";
-import { bun, lobed, toes } from "../parts/paw.ts";
+import { toes } from "../parts/paw.ts";
 import { brush, type Brush } from "../parts/marking.ts";
 import { groundShadow } from "../parts/shadow.ts";
 import { tagPaint } from "../parts/tag.ts";
@@ -32,12 +32,9 @@ export interface Drawn {
   piece: Piece;
 }
 
-const INNER = model.outline.innerPt;
 /** Lines on fur spans and small parts: lighter, and never under 1.2 pt (a thinner line is a question for the founder). */
 const THIN = 1.2;
 
-/** The same shape on the dog's other side. */
-const other = (nodes: Node[]) => smooth(mirrorX(nodes));
 /** Lit line spans typed for the dog's right side, mirrored for its left. */
 const litSide = (side: "L" | "R", spans: LitSpan[]) => (side === "R" ? spans : (mirrorSpans(spans) as LitSpan[]));
 /**
@@ -87,18 +84,20 @@ const FRAME = rolledFrame(FC, ROLL_DEG);
 // haunch to the hind paw, as the sheet draws it, the chest lying in front of
 // them a little inside it; the top lies under the chest and the collar. The
 // shoulders' fur breaks into a few small locks just below the collar.
-const backHalf = symmetric([[0, -54], [-17, -57.6], [-21.4, -61], [-25.2, -63], [-28.8, -61.8], [-30.6, -59.4], [-31.4, -56.6], [-33.4, -53], [-34.9, -50], [-36.4, -46.6], [-38.3, -43],
-  [-39.4, -40.4], [-40.8, -38.2], [-43.4, -36], [-46.4, -33], [-48.8, -27.4], [-49.6, -21], [-49.2, -15.4], [-47.6, -10.6], [-44.4, -6.8], [-36, -4.8], [-20, -2.4]], [0, -1.6]);
+// Each haunch bulges out of the flank from a small concave notch, where the shoulder's line meets it (audit front #13;
+// DECISIONS 222), as the crop draws it: the flank runs down near straight (its edge at x -37.9 at y -43, -38.85 at -40),
+// turns in a notch at (-39.3, -39.2), and the haunch flares out below it (-40.85 at -38, -42.25 at -37, -43.45 at -36;
+// the left alike, its notch at (39.6, -39), a little quicker). The notch is a concave corner of the outline, never a
+// lock standing out of it: a 0.7 pt step lock there read as a knob, 1 to 1.5 pt outside the crop's flank.
+const HAUNCH_NOTCH = 11;
+const backHalf = symmetric([[0, -54], [-17, -57.6], [-21.4, -61], [-25.2, -63], [-28.8, -61.8], [-30.6, -59.4], [-31.4, -56.6], [-33.4, -53], [-34.9, -50], [-36.4, -46.6], [-37.9, -43],
+  [-39.3, -39.2], [-41.3, -37.6], [-43.6, -35.8], [-46.4, -33], [-48.8, -27.4], [-49.6, -21], [-49.2, -15.4], [-47.6, -10.6], [-44.4, -6.8], [-36, -4.8], [-20, -2.4]], [0, -1.6],
+{ corners: [HAUNCH_NOTCH, 44 - HAUNCH_NOTCH] });
 // Under each collar's end one small low step of fur leaning down the shoulder's line (fur.ts's STEP, DECISIONS 213,
 // 222), as the crop draws it ("a thin, smooth brown line with one small fur step"), not a row of teeth.
 const SHOULDER: Lock[] = [{ len: 1, width: 5.2, lean: 0.45 }];
-// Each haunch bulges out of the flank from a small step of fur, where the shoulder's line meets it (audit front #13): one
-// broad low lock leaning down the edge, the edge stepping out below it (STEP).
-const HAUNCH: Lock[] = [{ len: 0.7, width: 4.6, lean: 0.35 }];
 const back = [
   (s: Shape) => furEdge(s, [-30.6, -59], [-32.8, -54.6], SHOULDER, 0.3, undefined, STEP),
-  (s: Shape) => furEdge(s, [-38.5, -42.4], [-40.7, -38.4], HAUNCH, 0.3, undefined, STEP),
-  (s: Shape) => furEdge(s, [40.7, -38.4], [38.5, -42.4], lefthandOf(HAUNCH), 0.3, undefined, STEP),
   (s: Shape) => furEdge(s, [32.8, -54.6], [30.6, -59], lefthandOf(SHOULDER), 0.3, undefined, STEP),
 ].reduce((s, f) => f(s), backHalf);
 
@@ -333,8 +332,10 @@ const CHEEK_L: Lock[] = [{ len: 1.5, width: 4.6, lean: -0.6, dip: 0.3, notch: 1 
 // The chin's middle over the collar: seven small low scallops of uneven size combed down and out from the middle, the
 // jaw's round sides plain; their notches shallow (0.1 to 0.2 pt), so the edge reads as the crop's soft arc with small
 // scallops (deeper ones, 0.25 to 0.35, read as a wavy ribbon at 10 times).
-const CHIN: Lock[] = [{ len: 1.25, width: 7.6, lean: -0.35, dip: 0.15 }, { len: 1, width: 6, lean: -0.25, dip: 0.2 }, { len: 1.25, width: 7.5, lean: -0.1, dip: 0.1 },
-  { len: 1.6, width: 7.4, dip: 0.15 }, { len: 0.95, width: 5.8, lean: 0.1, dip: 0.2 }, { len: 1.25, width: 7, lean: 0.25, dip: 0.1 }, { len: 0.9, width: 5.3, lean: 0.35 }];
+/** The chin's line at its deepest along the scallops (a ceiling on headFur's notch depth there, 0.55). */
+const CHIN_LINE = 0.3;
+const CHIN: Lock[] = [{ len: 1.3, width: 7.6, lean: -0.45, dip: 0.15 }, { len: 0.95, width: 6, lean: -0.2, dip: 0.2 }, { len: 1.5, width: 7.5, lean: -0.3, dip: 0.1 },
+  { len: 1.2, width: 7.4, lean: 0.05, dip: 0.15 }, { len: 1.6, width: 5.8, lean: 0.35, dip: 0.2 }, { len: 1.1, width: 7, lean: 0.2, dip: 0.1 }, { len: 1.35, width: 5.3, lean: 0.5 }];
 
 /**
  * Each root's unlined stretch, where the ear's tan shows in the notch under the crown, in path order: `top` the crown's
@@ -404,7 +405,7 @@ function headOf(puff = 0): { head: Shape; fur: HeadFur; notches: Record<"R" | "L
       { side: "L", from: [44.6, -76.2], to: [45, -86.2], clumps: CHEEK_L, tipRound: 0.22,
         line: { from: [39.6, -70.4], to: [33.7, -129.4], ends: ["join", "free"], on: sideLadder, under: sideFace, most: pinch, gap: GAPS.L }, raised: [44.9, -113.8] },
     ],
-    chin: { from: [-24, -62.4], to: [24, -62.4], scallops: CHIN, tipRound: 0.25, line: { from: [-39.6, -70.4], to: [39.6, -70.4] }, corners: [[-39.6, -70.4], [39.6, -70.4]] },
+    chin: { from: [-24, -62.4], to: [24, -62.4], scallops: CHIN, tipRound: 0.15, line: { from: [-39.6, -70.4], to: [39.6, -70.4] }, corners: [[-39.6, -70.4], [39.6, -70.4]] },
   };
   const fur = headFur(spec);
   // Each row's notches between its wisps (not its two ends), in path order.
@@ -470,8 +471,8 @@ const PATCH_SOFT = 0.7;
 // behind the hind paw, as the sheet paints it, never a wedge with a straight inner edge. The left half is a narrow
 // streak down the shoulder from under the collar's end, outside the front leg's line (the sheet's, x 36 to 41 from y
 // -47 to -32), running out to a point at the top of the haunch, whose round is cream.
-const saddleR = smooth([[-27, -64.2], [-31.6, -63.4], [-37.4, -55], [-43, -46], [-53, -36], [-54, -20], [-52, -10], [-44, -8], [-37, -12], [-34.6, -16],
-  [-34.6, -19.8], [-33.6, -24], [-32.4, -29], [-32.6, -34], [-33.4, -38.4], [-33.4, -41.8], [-32, -46.2], [-30.4, -51.4], [-29.4, -57]]);
+const saddleR = smooth([[-27, -64.2], [-31.6, -63.4], [-37.4, -55], [-43, -46], [-53, -36], [-54, -20], [-52, -10], [-44, -8], [-37, -12], [-36.6, -16],
+  [-40.6, -19.4], [-39.4, -23.4], [-37.8, -27.6], [-34.4, -31.4], [-32.6, -34], [-33.4, -38.4], [-33.4, -41.8], [-32, -46.2], [-30.4, -51.4], [-29.4, -57]]);
 const saddleL = smooth([[27, -64.2], [31.6, -63.4], [36.2, -55.6], [38.8, -47.4], [40.2, -41], [40.6, -36.2], [40.2, -32.4], [39.2, -29.6], [37.8, -31.8], [36.6, -36.8],
   [35, -44], [32.6, -51], [29.6, -57.6]]);
 
@@ -485,7 +486,7 @@ const saddleL = smooth([[27, -64.2], [31.6, -63.4], [36.2, -55.6], [38.8, -47.4]
 const saddleLTop = smooth([[27, -64.2], [31.6, -63.4], [36.2, -55.6], [38.8, -47.4], [39.8, -42], [37.6, -42], [35, -44], [32.6, -51], [29.6, -57.6]]);
 const SADDLE_BRUSH: Record<"R" | "L", Brush> = {
   R: { flow: [-0.35, 1], seed: 7301, edge: 26, out: [0.8, 2.2], in: [1.2, 2.6], width: [0.7, 1.1], colour: C.marking,
-    inside: { count: 5, length: [4, 7], colour: C.earDeep, opacity: 0.28, width: 0.8 } },
+    inside: { count: 6, length: [4, 7], colour: C.earDeep, opacity: 0.55, width: 0.9 } },
   L: { flow: [0.3, 1], seed: 7302, edge: 14, out: [0.6, 1.6], in: [1, 2], width: [0.6, 0.9], colour: C.marking,
     inside: { count: 0, length: [3, 5], colour: C.earDeep, opacity: 0.25, width: 0.7 } },
 };
@@ -541,7 +542,10 @@ function headLinePiece(up: { L: boolean; R: boolean } = { L: false, R: false }, 
   // Room for the feathered cream over the roots, which reaches 3.6 pt past the head (its offset, half its width and
   // three times its blur), so the region's canvas holds all of it.
   const box = pad([x0, y0, x1 - x0, y1 - y0], 4);
-  const r = litEdge(head, h.fur.spans(up), "head.line", box, { reach: 0.5, crisp: true });
+  // The chin's line lies lighter in its scallops' notches than headFur's rule (0.55) lays it, so the scallops break
+  // softly over the collar as the crop's fur points do, rather than ripple as one even wavy ribbon (audit front #3).
+  const spans = h.fur.spans(up).map((s) => (s === h.fur.chin ? { ...s, most: (p: P) => Math.min(typeof s.most === "function" ? s.most(p) : s.most ?? 1, CHIN_LINE) } : s));
+  const r = litEdge(head, spans, "head.line", box, { reach: 0.5, crisp: true });
   const f = uid("blur"), g = uid("blur"), k = uid("blur"), m = uid("blur");
   const along = (a: P, b: P, width: number, offset: number) => strokeOf(spanPoints(head, fracAt(head, a), fracAt(head, b)), width, { taper: 2, tip: 0.3, offset }).d;
   // Each root under the crown (DECISIONS 220), as the crop paints it: the crown's cream laid softly over the root's top,
@@ -728,6 +732,21 @@ function earSpans(side: "L" | "R"): LitSpan[] {
 }
 
 /**
+ * How deep each sole's line lies on the ground, at least, beyond the ground's own term (0.7, L* 51.5; DECISIONS 216,
+ * 223): the front crop draws its soles darkest where each toe line meets the sole (L* 36 to 41 at x ±8 to ±10 and ±18 to
+ * ±20), as light as the ground's term under the middle toe (51 at ±14 to ±16) and between the two elsewhere (44 to 50
+ * at ±22 to ±26), and the hind soles dark all along (40 to 47 from ±30 to ±42). The ladder's darkest tone is L* 44.
+ */
+const FRONT_TOE_X = [11.2, 20.8];
+function frontSole(p: P): number {
+  if (p[1] < -2.6) return 0;
+  const x = Math.abs(p[0]), toe = Math.min(...FRONT_TOE_X.map((t) => Math.abs(x - t)));
+  if (toe < 1.8) return 0.9;
+  if (x > 13 && x < 19) return 0;
+  return x > 4 && x < 28 ? 0.78 : 0;
+}
+const hindSole = (p: P) => (p[1] > -5.6 && Math.abs(p[0]) > 29 && Math.abs(p[0]) < 46 ? 0.87 : 0);
+/**
  * Between the front legs, under the chest's V, a warm tan down the slot, fading up into the V's cream with no edge
  * and deepening to a deep warm tan between the paws, as the sheet's does (L* 88 at y -22, 73 at -14 and 64 at -8):
  * its sides lie under the legs' inner lines, which now run up to the V (G7, DECISIONS 223). No line runs down its
@@ -769,7 +788,7 @@ export function front(): Drawn[] {
     // A bun closed all round where it shows, as the sheet draws it: its line comes out from behind the front paw over
     // its top, where it lies on the haunch, runs on unbroken down its outer side and under its sole to where it goes
     // behind the front paw again, deepening to the darkest where it sits on the ground (parts/lines.ts).
-    }, litSide(side, [{ from: [-28.9, -14.6], to: [-27.7, -5.4], ends: ["under", "under"], ground: "sole", most: (p: P) => (p[1] > -5 ? 1 : 0.4) }])), 6)));
+    }, litSide(side, [{ from: [-28.9, -14.6], to: [-27.7, -5.4], ends: ["under", "under"], ground: "sole", most: (p: P) => (p[1] > -5 ? 1 : p[1] < -16 ? 0.1 : 0.4), under: hindSole }])), 6)));
   }
   // Its canvas a point roomier than the chest, so the light group's shade, which reaches 13.7 pt past it, stays
   // inside the paint's reach when the chest's top lands on a whole point.
@@ -859,7 +878,7 @@ export function front(): Drawn[] {
       // own down the inner side, faint at the V and deep in the slot between the paws, as the crop's are (L* 60 to 70
       // at y -26, 45 to 50 below -12), and the ground's term under the sole's middle (DECISIONS 216, 223).
     }, litSide(side, [{ from: [-5.4, -30.6], to: [-35.1, -39.4], ends: ["free", "free"], ground: "sole", most: (p: P) => (p[1] > -4 ? 1 : Math.abs(p[0]) < 9 ? (p[1] > -12 ? 1 : p[1] > -20 ? 0.5 : 0) : 0.1),
-      under: (p: P) => (Math.abs(p[0]) < 9 && p[1] > -12 ? (p[1] > -8 ? 0.9 : 0.7) : 0), cites: 216, bare: [0, 45] }]))));
+      under: (p: P) => Math.max(frontSole(p), Math.abs(p[0]) < 9 && p[1] > -12 ? (p[1] > -8 ? 0.9 : 0.7) : 0), cites: 216, bare: [0, 45] }]))));
   }
   return out;
 }
