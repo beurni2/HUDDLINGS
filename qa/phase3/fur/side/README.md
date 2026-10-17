@@ -1,11 +1,14 @@
 # The side view's fur and joins
 
 - `joins.png` (side.L) and `joins.R.png` (side.R): one row per join the audit names in profile (side #1 to #19),
-  the crop, the base (fbbe6d3) and this branch side by side at 3.4 to 5 px per pt, then the whole dog at phone size.
-- `joins.ts`: draws them (`node qa/phase3/fur/side/joins.ts [side.L|side.R]`).
-- `gate.ts`: the line gate on both facings with every face state (`--all` holds every drawing, gated or not).
-- The sheet match and the line check: `qa/phase3/side.L/`, `qa/phase3/side.R/`; the face states:
-  `qa/phase3/faces/turned/side.L.png`, `side.R.png`. DECISIONS 235 to 241.
+  then the fur kit's second round's rows ("round 2: ..."), the crop, 8912ced (that round's base) and this branch
+  side by side at 3.4 to 10 px per pt, then the whole dog at phone size.
+- `joins.ts`: draws them (`node qa/phase3/fur/side/joins.ts [side.L|side.R] [--only <words>] [--out <folder>]`).
+- `gate.ts`: the line gate on both facings with every face state, counting every line and counting only what shows
+  (264; `--all` holds every drawing, gated or not).
+- The sheet match and the line check: `qa/phase3/side.L/`, `qa/phase3/side.R/` (`phone.png` the dog at phone size);
+  the face states and the turned ears: `qa/phase3/faces/turned/side.L.png`, `side.R.png`. DECISIONS 235 to 241 and,
+  for the kit's second round, 276 to 279.
 
 ## The look rounds, and the three weakest joins each named
 
@@ -33,3 +36,27 @@
     only; every cite at the gate's measure. Weakest, left: the crown's line even and at the cream's lightest yet
     heavier than the crop's broken one (the topknot's recipe, and the line rule's floor of 1.2 pt); the plume's and
     the back's outline even in width (the shared lane's width variation); the toe lines' pointed tops (paw.ts).
+
+## The fur kit's second round (against 8912ced), its look rounds and the three weakest joins each named
+
+Each round: `look.ts dog side.L side.R` (the sheet match green in both, the line check read), `gate.ts` (0
+problems), the joins zoomed beside the crop and the dog at phone size; DECISIONS 276 to 279 hold the numbers.
+
+1. Every span weighted; the soft chin; the crisp topknot as the recipe's domes; the toe lines on the bun's own ball.
+   Weakest: the topknot a row of scallops; the plume's tucks wedge-shaped chips beside its broken line; the thigh's
+   line still a spur off the hind paw.
+2. The tucks thin hooks; the thigh's fade a soft stroke; the topknot retyped. Weakest: the rump's line still wide and
+   light; the flick drawn over the front lock (two lines one over the other); the near paw's front toe line running
+   along the paw's outline.
+3. The rump at 0.35 of the band; the topknot four locks; the far paw on a ball. Weakest: the thigh too light (6.2
+   L*); the far paw's lines off the crop's (recall 0.6); the hind sole's tone.
+4. to 6. The far paw typed again; the plume's ceilings put back (the line-by-light rule); the forehead and nape at 0.4
+   of the band. Weakest: the head's outline heavy at the forehead; the plume's inside light; the ear's hem over the
+   back 1.76 pt wide.
+7. to 9. The ear and the far leg back to width by depth; the tucks 0.9 pt; the thigh's foot lighter and its fade
+   longer. Weakest: the near paw's front toe line still on the outline; the thigh's foot 3 to 5 L* darker than the
+   crop's; the near heel on the hind paw (the check's fit there moves a pixel).
+10. and 11. The paws' balls from the crop's line map (the near paw's lines upright, the hind's leaning back over their
+    tops); the near leg at the band's whole. Weakest, left: the plume's line darker than the crop's (the cream
+    ladder's lightest is L* 66, the crop's plume line 72 to 85); the topknot's locks domed, with dark ticks where
+    they meet, where the crop's hook open; the toe lines long and nearly straight where the crop's are short soft arcs.

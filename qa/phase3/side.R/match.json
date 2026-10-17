@@ -8,8 +8,8 @@
    "head": "side.R"
   },
   "ppp": 3,
-  "sizePx": [483, 560],
-  "rootPx": [166, 519]
+  "sizePx": [483, 559],
+  "rootPx": [166, 518]
  },
  "view": "side.R",
  "crop": "master.turnaround.side",
@@ -41,28 +41,28 @@
  },
  "alignment": {
   "rootOnCropGroundPlusHalf": true,
-  "bestFitShiftPx": [-0.26, 0.71],
-  "bestFitShiftPt": [-0.21, 0.55],
-  "iouAtBestWholePixelShift": 0.9643,
+  "bestFitShiftPx": [-0.19, 0.7],
+  "bestFitShiftPt": [-0.15, 0.54],
+  "iouAtBestWholePixelShift": 0.9646,
   "thresholdPx": 2.0,
   "pass": true
  },
  "silhouette": {
-  "iou": 0.9627,
+  "iou": 0.963,
   "threshold": 0.85,
   "groundShadowLeftOut": true,
   "pass": true,
-  "iouHeadAligned": 0.9608,
-  "headCentreOffsetPt": [-0.41, 0.12]
+  "iouHeadAligned": 0.9621,
+  "headCentreOffsetPt": [-0.34, 0.35]
  },
  "landmarks": {
   "thresholdPt": 2.8,
   "rows": {
    "collar": {
     "how": "finder",
-    "found": [41.57, -56.77],
+    "found": [41.32, -56.75],
     "model": [41.5, -57.0],
-    "errPt": 0.24,
+    "errPt": 0.31,
     "errShareOfHead": 0.003,
     "pass": true
    },
@@ -116,10 +116,10 @@
    },
    "head.top": {
     "how": "finder",
-    "found": [38.86, -164.78],
+    "found": [35.75, -164.0],
     "model": [37.7, -164.0],
-    "errPt": 1.4,
-    "errShareOfHead": 0.015,
+    "errPt": 1.95,
+    "errShareOfHead": 0.021,
     "pass": true
    },
    "mouth.R": {
@@ -199,7 +199,7 @@
     "heldTo": "#FFF4E8",
     "heldBy": "palette.fur",
     "deltaE2000": 0.0,
-    "pixels": 12946,
+    "pixels": 12908,
     "pass": true
    },
    "furShade": {
@@ -207,7 +207,7 @@
     "heldTo": "#FDE3C8",
     "heldBy": "palettePainted.furShade",
     "deltaE2000": 0.38,
-    "pixels": 1541,
+    "pixels": 1735,
     "pass": true
    },
    "eyes": {
@@ -231,7 +231,7 @@
     "heldTo": "#200C02",
     "heldBy": "palettePainted.eyeDark",
     "deltaE2000": 0.0,
-    "pixels": 74,
+    "pixels": 75,
     "pass": true
    },
    "ears": {
@@ -263,7 +263,7 @@
     "heldTo": "#7DB7E8",
     "heldBy": "palette.collar",
     "deltaE2000": 0.74,
-    "pixels": 426,
+    "pixels": 416,
     "pass": true
    },
    "tag": {
@@ -288,7 +288,7 @@
   "placeThresholdPt": 2.8,
   "cheeks": [
    {
-    "centrePx": [67.73, 123.3],
+    "centrePx": [67.73, 122.3],
     "centrePt": [60.06, -84.49],
     "level": 0.351,
     "peak": "#FCDDD1",
@@ -420,15 +420,15 @@
  "advisory": {
   "edgeDistance": {
    "meanRenderToSheetPt": 1.02,
-   "p95RenderToSheetPt": 2.73,
+   "p95RenderToSheetPt": 2.46,
    "meanSheetToRenderPt": 0.91,
-   "p95SheetToRenderPt": 2.2,
+   "p95SheetToRenderPt": 2.23,
    "targetP95Pt": 2.0,
    "meetsTarget": false
   },
   "partIoU": {
    "collar": {
-    "iou": 0.776,
+    "iou": 0.772,
     "target": 0.85,
     "meetsTarget": false
    },
@@ -447,7 +447,7 @@
    "set": "3x",
    "pages": 2,
    "pageAreaPx": 8388608,
-   "allRegionsShare": 0.513,
+   "allRegionsShare": 0.514,
    "thisStillShare": 0.068
   }
  },
