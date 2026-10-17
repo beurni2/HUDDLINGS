@@ -47,6 +47,22 @@ export interface LitSpan {
   cites?: number;
   /** With `cites`: how far past each end, in points, the sheet leaves the edge unlined, [before its start, after its end], which the cite lets through and no further. */
   bare?: [number, number];
+  /**
+   * Line weight that lives (DECISIONS 260): the line's width follows its own profile along the span instead of its
+   * depth, thick where the part presses or turns under (a sole, the bottom of a curve, under an overhang: the edge facing
+   * down, or deep), swelling through each turn, thin on the lit top and along long gentle runs, with a gentle wobble from
+   * the span's own fixed seed. Its tone still follows the light and the place, as without it. Left out, the width
+   * follows the depth as before.
+   */
+  weight?: Weight;
+}
+
+/** A span's living weight (DECISIONS 260). */
+export interface Weight {
+  /** The span's own seed for its wobble, typed once and never changed, so its line is the same in every build and every state and never shimmers. */
+  seed: number;
+  /** How much of the outer band (1.2 to 1.8 pt) it swells across, 0 to 1 (1 by default). */
+  amount?: number;
 }
 
 export interface LitOptions {
@@ -134,6 +150,84 @@ function soleWindow(ground: number[], at: number[]): number[] {
   return out;
 }
 
+/**
+ * The living weight's terms (DECISIONS 260), summed into how far the line swells across the outer band (0 at 1.2 pt,
+ * 1 at 1.8). Above all the edge's own way: thin where it faces the light and swelling as it turns away from it
+ * (`shade.away`) and down onto what it presses on or turns under (`shade.down`, from its outward normal's downward part,
+ * none at `from` and all at `to`), and under an overhang (`shade.under`, the span's own floor), raised to `curve`, up
+ * to `most` of the band. Over it the sheet's strokes: a seeded run of strokes `length` pt long, each full through its
+ * middle and thinning where the next takes over, swelling the line by up to a seeded share (`peak`) of `weight` about
+ * its place (less `centre` of it), only `lit` of that where the edge is fully lit, so a lit top stays at the band's thin
+ * end and the strokes swell most where the edge turns away; a swell through each turn (`turn`, full at a radius of
+ * `radius` pt or tighter, read over `reach` pt each way); less a little everywhere (`bias`); and a seeded wobble
+ * (`wobble`, its wavelengths in points and weights). Under the middle of a sole the whole swell scales down to `sole`
+ * of the band (at most 1.4 pt drawn, so the soft line renders within the sheet's 1.44 pt there).
+ */
+export const WEIGHT = {
+  shade: { away: 0.5, down: 0.75, from: -0.2, to: 0.8, under: 0.25, curve: 1, most: 0.45 },
+  stroke: { length: [5, 11] as [number, number], peak: [0.7, 1] as [number, number], weight: 0.9, centre: 0.1, lit: 0.6 },
+  turn: { weight: 0.2, radius: 4, reach: 1.2 },
+  bias: 0.1,
+  wobble: { amount: 0.06, waves: [[3.1, 1]] as [number, number][] },
+  sole: 0.33,
+};
+
+/** A fixed pseudo-random value in [0, 1) for a seed and a lattice point (an integer hash: the same in every build). */
+function lattice(seed: number, k: number): number {
+  let h = (Math.imul(seed | 0, 0x2c1b3c6d) ^ Math.imul(k | 0, 0x297a2d39)) >>> 0;
+  h = Math.imul(h ^ (h >>> 15), 0x85ebca6b) >>> 0;
+  h = Math.imul(h ^ (h >>> 13), 0xc2b2ae35) >>> 0;
+  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+}
+
+/** Smooth value noise along a line, -1 to 1, of one wavelength, from a fixed seed. */
+function noise(seed: number, s: number, wave: number): number {
+  const x = s / wave, k = Math.floor(x), t = x - k, u = t * t * (3 - 2 * t);
+  return 2 * (lattice(seed, k) * (1 - u) + lattice(seed, k + 1) * u) - 1;
+}
+
+/**
+ * How far a span's line swells across the band at each point, 0 to 1, under its living weight (DECISIONS 260), from the
+ * span's arc lengths, tangents and outward normals, the light and the place's floor at each point.
+ */
+function swellOf(weight: Weight, at: number[], tan: P[], out: P[], light: P, floor: number[], pressed: number[]): number[] {
+  const { shade, stroke, turn, wobble } = WEIGHT;
+  // The strokes: from a seeded place before the span's start, each a seeded length and peak, laid on to its end.
+  const length = at.at(-1)!;
+  const strokes: { from: number; to: number; peak: number }[] = [];
+  for (let k = 0, s = -lattice(weight.seed, 999) * stroke.length[1]; s < length; k++) {
+    const l = stroke.length[0] + (stroke.length[1] - stroke.length[0]) * lattice(weight.seed, 1000 + k);
+    strokes.push({ from: s, to: s + l, peak: stroke.peak[0] + (stroke.peak[1] - stroke.peak[0]) * lattice(weight.seed, 2000 + k) });
+    s += l;
+  }
+  // Each stroke full through its middle, thinning over its last quarter or so into the next.
+  const strokeAt = (s: number) => {
+    const k = strokes.find((x) => s >= x.from && s < x.to) ?? strokes.at(-1)!;
+    const e = Math.sin(Math.PI * Math.min(1, Math.max(0, (s - k.from) / (k.to - k.from))));
+    return k.peak * smoothstep((e - 0.25) / 0.55);
+  };
+  // How tightly the edge turns at each point, read over `turn.reach` either way: the angle it turns by over that length.
+  const turning = at.map((s, i) => {
+    let j0 = i, j1 = i;
+    while (j0 > 0 && s - at[j0]! < turn.reach) j0--;
+    while (j1 < at.length - 1 && at[j1]! - s < turn.reach) j1++;
+    const span = at[j1]! - at[j0]!;
+    if (span <= 0) return 0;
+    const a = tan[j0]!, b = tan[j1]!;
+    return Math.abs(Math.atan2(a[0] * b[1] - a[1] * b[0], a[0] * b[0] + a[1] * b[1])) / span;
+  });
+  return at.map((s, i) => {
+    const away = (1 - v.dot(out[i]!, light)) / 2;
+    const down = smoothstep((out[i]![1] - shade.from) / (shade.to - shade.from));
+    const shaded = shade.most * Math.min(1, shade.away * away + shade.down * down + shade.under * floor[i]!) ** shade.curve;
+    const tight = smoothstep(turning[i]! * turn.radius);
+    const wob = wobble.waves.reduce((sum, [wave, w], k) => sum + w * noise(weight.seed * 7 + k, s, wave), 0);
+    // Under the middle of a sole, where the paw presses, the whole swell scales down to `sole` of the band.
+    const x = Math.min(1, Math.max(0, shaded + stroke.weight * (strokeAt(s) - stroke.centre) * (stroke.lit + (1 - stroke.lit) * (shaded / shade.most)) + turn.weight * tight - WEIGHT.bias + wobble.amount * wob));
+    return x * (1 - (1 - WEIGHT.sole) * pressed[i]!);
+  });
+}
+
 const r3 = (n: number) => Math.round(n * 1000) / 1000;
 const xy = (p: P) => `${r3(p[0])} ${r3(p[1])}`;
 const poly = (pts: P[]) => pts.map((p, i) => `${i ? "L" : "M"}${xy(p)}`).join("") + "Z";
@@ -210,10 +304,18 @@ export function litRibbons(shape: Shape, spans: LitSpan[], where: string, o: Lit
     const phase = [(k * 2.39) % 6.28, (k * 4.11) % 6.28];
     const wobble = span.ground === "sole" ? SOLE.wobble : 0.06;
     const widthOf = span.ground === "sole" ? soleWidthAt : widthAt;
+    // A living weight sets the width from its own profile (DECISIONS 260); without one, the width follows the depth.
+    // Where the line lies along the ground it stays as fine as the sheet's there: under a sole's middle (`ground: "sole"`), or wherever the edge faces the ground.
+    const along = span.weight ? pts.map((p, i) => terms(p, out[i]!, light).ground) : [];
+    const pressed = span.ground === "sole" ? soleWindow(along, at) : along;
+    const swell = span.weight ? swellOf(span.weight, at, tan, out, light, pts.map((p) => under(p)), pressed) : undefined;
+    const band = LIMITS.outer[1] - LIMITS.outer[0];
     const w = d.map((di, i) => {
       const s = at[i]!;
       const e = Math.min(1, t0 > 0 ? s / t0 : 1, t1 > 0 ? (length - s) / t1 : 1);
-      const full = Math.min(LIMITS.outer[1], Math.max(LIMITS.outer[0], widthOf(di) * (1 + wobble * (0.6 * Math.sin(s / 9 + phase[0]!) + 0.4 * Math.sin(s / 3.7 + phase[1]!)))));
+      const full = swell
+        ? LIMITS.outer[0] + band * (span.weight!.amount ?? 1) * swell[i]!
+        : Math.min(LIMITS.outer[1], Math.max(LIMITS.outer[0], widthOf(di) * (1 + wobble * (0.6 * Math.sin(s / 9 + phase[0]!) + 0.4 * Math.sin(s / 3.7 + phase[1]!)))));
       return { full, e, shown: 0.15 + (full - 0.15) * e * e * (3 - 2 * e) };
     });
     // Clipped, the ribbon is twice the line and half of it shows; unclipped, it is the line, moved out to reach past the path.
@@ -253,6 +355,8 @@ export function litRibbons(shape: Shape, spans: LitSpan[], where: string, o: Lit
 
 /** The ribbons in a group with their soft edge, its filter's region over `box`. */
 function softened(r: { svg: string }, box: Box, sd: number): { defs: string; body: string } {
+  // No blur asked (a crisp line, DECISIONS 262): the ribbons as they are, inside the part's clip.
+  if (sd <= 0) return { defs: "", body: `<g>${r.svg}</g>` };
   const f = uid("blur");
   return { defs: blur(f, pad(box, 2), sd), body: `<g filter="url(#${f})">${r.svg}</g>` };
 }
