@@ -21,11 +21,12 @@ sys.path.insert(0, str(repo / "characters" / "sheetmatch"))
 import linematch as lm  # noqa: E402
 
 PANELS = repo / "characters" / "dog" / "ref" / "panels" / "master"
-# Boxes [x0, y0, x1, y1] in each panel's px, on lit runs of the outline over the cream (read beside a 10 px grid).
+# Boxes [x0, y0, x1, y1] in each panel's px, on lit runs of the outline over the cream (read beside a 10 px grid). The
+# side's back behind the ear ([128, 136, 150, 146]) holds no line to read: one skeleton px, the ear hem's (L* 51), the
+# topline there all but gone (DECISIONS 284's side `swell`).
 BOXES = (
     ("master.turnaround.side", "the plume's top and back", [150, 133, 193, 165]),
     ("master.turnaround.side", "the crown and the topknot", [28, 4, 132, 32]),
-    ("master.turnaround.side", "the back's top behind the ear", [128, 136, 150, 146]),
     ("master.turnaround.front", "the crown and the topknot", [60, 2, 160, 30]),
     ("master.turnaround.three-quarter", "the crown and the topknot", [60, 2, 170, 32]),
     ("master.turnaround.back", "the crown and the topknot", [55, 4, 145, 30]),

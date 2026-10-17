@@ -63,37 +63,6 @@
  },
  {
   "on": "cream",
-  "panel": "master.turnaround.side",
-  "what": "the back's top behind the ear",
-  "box": [
-   128,
-   136,
-   150,
-   146
-  ],
-  "tau": 11.0,
-  "px": 1,
-  "quartiles": {
-   "L": [
-    51.2,
-    51.2,
-    51.2
-   ],
-   "a": [
-    12.9,
-    12.9,
-    12.9
-   ],
-   "b": [
-    24.4,
-    24.4,
-    24.4
-   ]
-  },
-  "medianHex": "#9C7151"
- },
- {
-  "on": "cream",
   "panel": "master.turnaround.front",
   "what": "the crown and the topknot",
   "box": [
