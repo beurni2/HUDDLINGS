@@ -122,7 +122,7 @@ const chestLower = (p: P) => 0.18 + 0.27 * Math.min(1, Math.max(0, (-p[0] - 64.6
 // The collar: the band round the neck from under the chin, where its rounded end shows, along the near side
 // to where it passes behind the near ear, as the sheet draws it: deepest (7.5 pt) under the near side of the chin,
 // 6 pt toward its rounded end under the chin, then narrowing behind the near cheek to a rounded point tucked under
-// the jaw (x -22.6), where the back's line comes out from under it (DECISIONS 232, the crop's near end). Its top lies
+// the jaw (x -22.6), where the back's line comes out from under it (DECISIONS 231, the crop's near end). Its top lies
 // under the head's fur.
 const collar = smooth([[-74.2, -61.6], [-60, -63], [-45, -62], [-30, -63.6], [-25, -64.9], [-21.6, -64], [-20.6, -61.6], [-21.4, -58.8], [-24.4, -56.2],
   [-30, -53.6], [-37.6, -50.6], [-45.4, -49.2], [-52.6, -49.8], [-60.6, -51.4], [-67, -52.4], [-71.6, -54.8], [-74.6, -58.4]]);
@@ -340,7 +340,7 @@ const backPaint = (F: Facing): Paint => ({
 });
 /**
  * The back's line (parts/lines.ts), one line from where it comes out from under the jaw beside the collar's near end
- * (DECISIONS 232, the crop's back line starting at the collar's end) down the sloping back, where the saddle's tan
+ * (DECISIONS 231, the crop's back line starting at the collar's end) down the sloping back, where the saddle's tan
  * reaches it on the tan; round the rump, where the haunch lies over the tail, a contact line (DECISIONS 211), on the
  * tan where the rump's spot meets it (the sheet's #A35F32 there), on the cream in a facing with no rump spot
  * (threeQuarter.R); then along the haunch's underside on the ground, the ground's dark only under its middle (216),
@@ -699,8 +699,8 @@ export function threeQuarter(facingSide: Side = "L"): Drawn[] {
   const out: Drawn[] = [];
   const add = (name: string, p: Piece, state?: string) => out.push({ part: name, piece: p, ...(state ? { state } : {}) });
   // The ground shadow, by the dog's one shadow recipe (parts/shadow.ts, DECISIONS 218, 232): a broad soft oval from past
-  // the far paw to past the haunch's foot, as far as the crop's reaches (x -100 to 39, 20/255 under its card from 10.6 pt
-  // above the ground to 2 below), darkest where each paw and the haunch press.
+  // the far paw to past the haunch's foot, as far as the crop's reaches (x -100 to 39, where it lies 8/255 or more under
+  // its card, from 10.6 pt above the ground to 2 below), darkest where each paw and the haunch press.
   add("shadow", groundShadow({ reach: [-100, 39], presses: [{ x: -71, half: 11 }, { x: -44.6, half: 13 }, { x: -18, half: 10 }, { x: 2, half: 9 }] }));
   // Where each lobe of the plume tucks under the next, the crop's line runs on into the plume in a short flick.
   const centre: P = [31, -36];
@@ -715,7 +715,7 @@ export function threeQuarter(facingSide: Side = "L"): Drawn[] {
     light: F.light,
   };
   // One line round the plume, from where it comes out from behind the haunch, round the hook and every lobe and its
-  // foot, to where it goes back behind the haunch (DECISIONS 210, 233): light over the cream plume, as the crop's tail
+  // foot, to where it goes back behind the haunch (DECISIONS 210, 232): light over the cream plume, as the crop's tail
   // line is (the tail-curve panel's L* about 80), the outline's warmer brown on the tan root at its foot.
   const tanFoot = (p: P) => p[1] > -15.6 && p[0] < 31;
   const tailLines: LitSpan[] = [{ from: [11.4, -32.8], to: [11.6, -12.4], on: (p) => (tanFoot(p) ? "tan" : "cream"), most: (p) => (tanFoot(p) ? 1 : 0.3),
