@@ -6,9 +6,11 @@
 // no face; its cast shadows ride the bone that casts them, clipped to what they
 // fall on (L396); its outer lines are the line rule's (DECISIONS 74, 104); every
 // part that turns reaches under the part covering it
-// (L394); its placed landmarks lie on their own parts; the tail's foot rests on
-// the bottom's line, its shadow off that line (246); and its WebGL rest frame
-// is the resvg composite of its model-space drawings.
+// (L394); its placed landmarks lie on their own parts; each ear steps in under
+// its upper step on the crop's edge (303); its line lives, lit and pressed
+// (302); every stroke inside its outline is an inner line (304, 305); the
+// tail's foot rests on the bottom's line, its shadow off that line (246); and
+// its WebGL rest frame is the resvg composite of its model-space drawings.
 import { after, before, test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
@@ -24,6 +26,7 @@ import { buildPackage, readSource, writePackage } from "../../build/build.ts";
 import { restTransform, toBone } from "../../draw/frame.ts";
 import { scopeIds } from "../../draw/svg.ts";
 import { BOX, composite, type Layer } from "../../draw/test/composite.ts";
+import { LIMITS } from "../../draw/lint.ts";
 import { C, LINES } from "../src/palette.ts";
 import { back, landmarks, TAIL_ROOT } from "../src/views/back.ts";
 
@@ -290,6 +293,74 @@ test("the back view's head lies over each ear's inner foot down to the notch: no
     }
   }
   assert.equal(gaps.length, 0, `${gaps.length} points of ground between an ear and the head, from ${gaps.slice(0, 4).join(" ")}`);
+});
+
+/**
+ * Each ear's outer edge under its upper step, from y -125 to -116, on the crop (master.turnaround.back): where its line's
+ * outer edge lies along each row (the L* halfway between the card and the line's darkest there, read sub-pixel), [y, x].
+ */
+const SHEET_EAR_EDGE = {
+  L: [[-125, -57.6], [-124, -58.3], [-123, -59.25], [-122, -60.2], [-121, -61.35], [-120, -62.2], [-119, -63.3], [-118, -64.35], [-117, -65.4], [-116, -66.35]],
+  R: [[-125, 59.5], [-124, 59.85], [-123, 60.95], [-122, 61.9], [-121, 62.7], [-120, 63.7], [-119, 64.55], [-118, 65.45], [-117, 66.6], [-116, 67.4]],
+} as const;
+
+test("each of the back view's ears steps in under its upper step, on the crop's edge (DECISIONS 303)", () => {
+  // The crop's outer edge jogs in a second time a quarter of the way down each ear (at y -127, the step 244 left out):
+  // from there to y -116 it lies within 1 pt of the crop's, where 46011a2's left ear stood 1 to 1.85 pt out.
+  const scale = 4, r = rasters(scale);
+  for (const side of ["L", "R"] as const) {
+    const ear = r.get(`ear.${side}`)!, sx = side === "L" ? -1 : 1;
+    for (const [y, sheetX] of SHEET_EAR_EDGE[side]) {
+      let outer = NaN;
+      for (let x = Math.abs(sheetX) + 4; x >= Math.abs(sheetX) - 4; x -= 1 / (2 * scale)) {
+        if (alphaAt(ear, scale, [sx * x, y]) >= 0.5) {
+          outer = sx * x;
+          break;
+        }
+      }
+      assert.ok(Math.abs(outer - sheetX) <= 1, `ear.${side}'s outer edge at y ${y} is at x ${outer.toFixed(2)}, the crop's at ${sheetX}`);
+    }
+  }
+});
+
+test("the back view's line lives: light into the lit steps on its lit runs, dark where it presses (DECISIONS 284, 285, 302)", () => {
+  // Every lit span of the back carries its life (lines.ts's `life`, its swell typed from the crop), so the line's tone
+  // runs along it as the sheet's does: the crown's, the ears' tops, the haunches', the plume's right side reach the lit
+  // steps lighter than the ladders' lightest; the ground under the bottom and the plume's foot, and the ears' hems, the
+  // ladders' dark end. 46011a2's line held every lit run at the ladder's lightest or darker.
+  const fills = (name: string) => new Set([...pieces.get(name)!.svg.matchAll(/<path fill="(#[0-9A-F]{6})" d=/g)].map((m) => m[1]!));
+  const some = (name: string, tones: readonly string[], what: string) =>
+    assert.ok(tones.some((t) => fills(name).has(t)), `${name} draws ${what} in none of ${tones.join(", ")}`);
+  for (const name of ["head.line", "tuft", "body.back", "tail"]) some(name, LINES.lit.cream, "no lit run");
+  for (const name of ["ear.L", "ear.R"]) {
+    some(name, LINES.lit.tan, "no lit run on its upper edge");
+    some(name, LINES.tan.slice(6), "no full hem");
+  }
+  some("body.back", LINES.cream.slice(8), "no ground pressing at the band's dark end");
+  some("tail", LINES.cream.slice(7), "no foot pressing on the ground");
+  // Each ear's line breaks once under its upper step, where the crop's comes and goes: two pieces, the gap cited (302).
+  for (const name of ["ear.L", "ear.R"]) {
+    const outer = pieces.get(name)!.meta.lines.filter((l) => l.kind === "outer");
+    assert.equal(outer.length, 2, `${name}'s line is drawn in ${outer.length} pieces, not 2 (one break)`);
+  }
+});
+
+test("every stroke the back view draws inside its outline is an inner line, 0.6 to 0.9 pt (DECISIONS 286, 304, 305)", () => {
+  // The crown's four curls, the topknot's three hooks (the kit's crisp topknot from behind) and the plume's three hooks
+  // are the kit's tucks, each an inner line with its meta, which the lint holds to the spec's inner band (L506); the
+  // back's own copy of the tuck (tuckD) reported nothing, and the plume's hooks were 1.3 pt outer strokes.
+  const lines = drawn.flatMap((d) => d.piece.meta.lines.map((l) => ({ ...l, part: d.part })));
+  for (const l of lines.filter((x) => x.kind === "inner")) {
+    assert.ok(l.width >= LIMITS.inner[0] - 1e-9 && l.width <= LIMITS.inner[1] + 1e-9, `${l.part}'s ${l.where} is ${l.width} pt, outside the inner band`);
+  }
+  const count = (where: string) => lines.filter((l) => l.kind === "inner" && l.where === where).length;
+  assert.equal(count("head.line tuck"), 4, "the crown's curls are not four inner tucks");
+  assert.equal(count("tuft hook"), 3, "the topknot's feet and notch are not three inner hooks");
+  assert.equal(count("plume hook"), 3, "the plume's hooks are not three inner lines");
+  assert.ok(!lines.some((l) => l.kind === "outer" && /hook|tuck/.test(l.where)), "a hook or tuck is drawn as an outer line");
+  // The plume's hooks are drawn in the lit cream, a step lighter than the outline beside them (305).
+  const tail = pieces.get("tail")!.svg;
+  assert.ok(LINES.lit.cream.some((c) => tail.includes(`fill="${c}"`)), "the plume's hooks are not in the lit cream");
 });
 
 test("the back view's tail rests its foot on the bottom's line, and its cast shadow stays off that line (DECISIONS 246)", () => {

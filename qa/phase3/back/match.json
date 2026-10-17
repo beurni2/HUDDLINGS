@@ -41,19 +41,19 @@
  },
  "alignment": {
   "rootOnCropGroundPlusHalf": true,
-  "bestFitShiftPx": [0.01, 0.17],
-  "bestFitShiftPt": [0.01, 0.14],
-  "iouAtBestWholePixelShift": 0.9825,
+  "bestFitShiftPx": [0.01, 0.14],
+  "bestFitShiftPt": [0.0, 0.11],
+  "iouAtBestWholePixelShift": 0.982,
   "thresholdPx": 2.0,
   "pass": true
  },
  "silhouette": {
-  "iou": 0.9825,
+  "iou": 0.982,
   "threshold": 0.85,
   "groundShadowLeftOut": true,
   "pass": true,
   "iouHeadAligned": 0.9699,
-  "headCentreOffsetPt": [1.12, -0.51]
+  "headCentreOffsetPt": [1.11, -0.53]
  },
  "landmarks": {
   "thresholdPt": 2.8,
@@ -92,10 +92,10 @@
    },
    "ear.L.tip": {
     "how": "finder",
-    "found": [-47.48, -69.05],
+    "found": [-47.43, -69.05],
     "model": [-49.3, -68.3],
-    "errPt": 1.97,
-    "errShareOfHead": 0.021,
+    "errPt": 2.02,
+    "errShareOfHead": 0.022,
     "pass": true
    },
    "ear.R.root": {
@@ -108,10 +108,10 @@
    },
    "ear.R.tip": {
     "how": "finder",
-    "found": [48.45, -69.84],
+    "found": [48.67, -69.84],
     "model": [49.6, -69.8],
-    "errPt": 1.15,
-    "errShareOfHead": 0.012,
+    "errPt": 0.93,
+    "errShareOfHead": 0.01,
     "pass": true
    },
    "ground": {
@@ -141,7 +141,7 @@
     "heldTo": "#FFF4E8",
     "heldBy": "palette.fur",
     "deltaE2000": 0.0,
-    "pixels": 15701,
+    "pixels": 15698,
     "pass": true
    },
    "furShade": {
@@ -149,7 +149,7 @@
     "heldTo": "#FDE3C8",
     "heldBy": "palettePainted.furShade",
     "deltaE2000": 2.33,
-    "pixels": 1274,
+    "pixels": 1361,
     "pass": true
    },
    "ears": {
@@ -157,7 +157,7 @@
     "heldTo": "#D9A379",
     "heldBy": "palette.marking",
     "deltaE2000": 1.29,
-    "pixels": 6439,
+    "pixels": 6422,
     "pass": true
    },
    "bodyMarkings": {
@@ -305,7 +305,7 @@
   "edgeDistance": {
    "meanRenderToSheetPt": 0.48,
    "p95RenderToSheetPt": 1.11,
-   "meanSheetToRenderPt": 0.55,
+   "meanSheetToRenderPt": 0.56,
    "p95SheetToRenderPt": 1.11,
    "targetP95Pt": 2.0,
    "meetsTarget": true
@@ -317,7 +317,7 @@
     "meetsTarget": true
    },
    "ear.L": {
-    "iou": 0.878,
+    "iou": 0.881,
     "target": 0.85,
     "meetsTarget": true
    },
@@ -331,7 +331,7 @@
    "set": "3x",
    "pages": 2,
    "pageAreaPx": 8388608,
-   "allRegionsShare": 0.514,
+   "allRegionsShare": 0.52,
    "thisStillShare": 0.05
   }
  },
