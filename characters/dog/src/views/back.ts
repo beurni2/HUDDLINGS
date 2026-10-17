@@ -536,13 +536,15 @@ function earPaint(side: "L" | "R"): Paint {
     ear: ears[side], axis: [[-k * 48, -140], [-k * 56, -68]], deepen: [0.5, 1.15], locks, dips: [], light: lightD, under: [innerD], edge: edges[side],
   });
   // From each notch of the hem a parting rises into the ear between the two locks, up the ear's droop, in the ears' deep
-  // line, as the sheet draws it (DECISIONS 244): the outer lock's inner edge, the sheet's dark stroke 9 pt long straight
-  // up from its notch (x -70.4 from y -82 to -91 on the left, 70 from -81 to -90 on the right), and fainter ones 4 to 6
-  // pt long over the others.
+  // line, as the sheet draws it (DECISIONS 244): the outer lock's inner edge, the sheet's dark stroke straight up from its
+  // notch (x -70.5 from y -82 to -91 on the left, 69.9 from -81 to -90 on the right), and fainter ones 4 to 6 pt long
+  // over the others.
   const up = v.norm(v.sub([-k * 48, -140], [-k * 56, -68]));
   const partings = edges[side].notches.map((n, i) => {
-    const length = i === 0 ? 8.6 : 5.2;
-    return { pts: curve([n, v.add(n, v.mul(up, length / 2)), v.add(v.add(n, v.mul(up, length)), [k * 0.4, 0])], 6), width: i === 0 ? 0.9 : 0.8, colour: C.earLine, opacity: i === 0 ? 1 : 0.7 };
+    // The outer lock's inner edge runs straight up from its notch, leaning a little out, 11 pt (the sheet's at x -70.5
+    // and 69.9 up to y -91 on each ear, L* 44 by -83 fading to 62 by -91); the others follow the droop, 5.2 pt.
+    if (i === 0) return { pts: curve([n, v.add(n, [-k * 0.45, -5.5]), v.add(n, [-k * 0.7, -11])], 6), width: 0.9, colour: C.earLine, opacity: 1 };
+    return { pts: curve([n, v.add(n, v.mul(up, 2.6)), v.add(v.add(n, v.mul(up, 5.2)), [k * 0.4, 0])], 6), width: 0.8, colour: C.earLine, opacity: 0.7 };
   });
   return { ...paint, inner: [...(paint.inner ?? []), ...partings] };
 }
