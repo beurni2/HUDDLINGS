@@ -204,9 +204,11 @@ const SIDE = { L: { top: [-37.8, -120.6] as P, foot: [-38.3, -73.6] as P }, R: {
 const ROOT_PT = { L: along(head, JOIN.L, SIDE.L.top), R: along(head, SIDE.R.top, JOIN.R) };
 const LOBE_PT = { L: along(head, SIDE.L.foot, JAW.L), R: along(head, JAW.R, SIDE.R.foot) };
 const sideOn = "tan" as const;
+/** Low on the side, over the ear's foot, the sheet's line is lighter than the contact floor's (its L* 50 to 56 from y -83 to -79, ours had read 47 to 48). */
+const sideMost = (p: P) => (p[1] > -84 ? 0.2 : 1);
 const sideSpans: LitSpan[] = [
-  { from: SIDE.L.top, to: SIDE.L.foot, ends: ["free", "free"], on: sideOn, contact: true, cites: 243, bare: [ROOT_PT.L + 0.5, LOBE_PT.L + 0.5] },
-  { from: SIDE.R.foot, to: SIDE.R.top, ends: ["free", "free"], on: sideOn, contact: true, cites: 243, bare: [LOBE_PT.R + 0.5, ROOT_PT.R + 0.5] },
+  { from: SIDE.L.top, to: SIDE.L.foot, ends: ["free", "free"], on: sideOn, contact: true, most: sideMost, cites: 243, bare: [ROOT_PT.L + 0.5, LOBE_PT.L + 0.5] },
+  { from: SIDE.R.foot, to: SIDE.R.top, ends: ["free", "free"], on: sideOn, contact: true, most: sideMost, cites: 243, bare: [LOBE_PT.R + 0.5, ROOT_PT.R + 0.5] },
 ];
 /**
  * The lobe's lowest lock, lying over the neck's fur under it: the sheet carries the head's side line on round the lobe
@@ -414,8 +416,9 @@ const tailPaint: Paint = {
 };
 /**
  * The tail's line (parts/lines.ts; DECISIONS 242, 246), where the sheet draws one, and as light as it draws it: from its
- * left side under the hook, over the hook's tip, under the hook and up to the curl's inner bend, where the plume lies
- * over the saddle (the sheet's L* 52 to 60 there, the tan ladder's lightest); then none up the curl's left side above
+ * left side under the hook, over the hook's tip (the cream ladder's 0.3 there, the sheet's L* 59 to 61, where the tan
+ * ladder's lightest read 54), under the hook and up to the curl's inner bend, where the plume lies over the saddle (the
+ * sheet's L* 52 to 60 there, the tan ladder's lightest); then none up the curl's left side above
  * y -37.5 and round the curl's top over the saddle to x 21.6, where the sheet's cream meets the saddle's tan with no line
  * (its darkest within 3 L* of the tan's 71 to 74 at x 3 to 20, 67 up the curl's side); then from where the plume leaves
  * the saddle (x 21.6) down its right side in the cream ladder's lightest (the sheet's 66 to 75 above y -26), a little deeper
@@ -426,8 +429,10 @@ const tailPaint: Paint = {
  * Up its left side over the left haunch, from y -9.2 to -20.6, the sheet leaves the plume unlined too (its L* 83 to 95
  * there; its line fades in below, 72 by y -8). Two spans, each unlined stretch cited by its length (246).
  */
-const tailMost = (p: P) => (p[1] > -5 ? 1 : p[0] < 1.4 && p[1] < -24 ? 0 : p[1] < -26 ? 0 : 0.1);
-const tailOn = (p: P): "cream" | "tan" => (p[0] < 1.4 && p[1] < -24 ? "tan" : "cream");
+/** Over the saddle, the hook's underside in from its tip (x -7.5 on): the tan ladder's lightest. */
+const overSaddle = (p: P) => p[0] < 1.4 && p[0] > -7.5 && p[1] < -24;
+const tailMost = (p: P) => (p[1] > -5 ? 1 : overSaddle(p) ? 0 : p[0] < -7.5 && p[1] < -20 ? 0.3 : p[1] < -26 ? 0 : 0.1);
+const tailOn = (p: P): "cream" | "tan" => (overSaddle(p) ? "tan" : "cream");
 /** Where the sheet leaves the plume unlined: up its left side over the haunch, and over the saddle from the curl's side round its top. */
 const TAIL_SIDE: [P, P] = [[-11.1, -9.2], [-11.4, -20.6]];
 const TAIL_TOP: [P, P] = [[0.8, -37.5], [21.6, -46.5]];
@@ -507,12 +512,16 @@ function headLinePiece(): Piece {
   // outline there (the sheet's L* 64 to 77 along it, at y -150.3 from x -30.5 to -26 on the left and -148.3 to -149 from
   // x 38 to 34 on the right), its start inside the outline's own ribbon, so it grows out of the line, never floats.
   const f = uid("blur");
-  const hooks = [[[-31.7, -150.7], [-29.8, -150.5], [-27.6, -150.4], [-26.2, -150.7]], [[39.7, -148.1], [38, -148.5], [36, -148.5], [34.2, -149]]]
+  const hooks = [[[-31.7, -150.7], [-29.8, -150.5], [-27.6, -150.4], [-26.2, -150.7]], [[39.7, -148.1], [38, -148.5], [36, -148.5], [34.2, -149]],
+    // Under each lowest lock's tip, over the ear's root, the sheet's line curls in the same way along the lock's underside,
+    // 3 to 4 pt, then leaves the rest of the root's edge unlined (its L* 59 to 67 at x -40 to -38 and 42 to 43); on the
+    // right in the root's light tan, as the crown's line there (105).
+    [[-41.3, -143.9], [-40.2, -143.6], [-38.6, -143.1], [-37.4, -142.8]], [[43.6, -143.7], [42.6, -143.6], [41.2, -143.3], [40, -143]]]
     .map((pts) => tapered(curve(pts as P[], 6), 0.9, "inner", "crown lock", { taper: 1.2, tip: 0.15 }));
   // Each lower lobe's lowest lock, the head's side line carried on round it into the collar's end (243), tapering at both ends.
   const locks = (["L", "R"] as const).map((side) => tapered(lobeLock(side), 1.35, "outer", "lobe lock", { taper: 1.8, tip: 0.15 }));
   return piece(`<defs>${r.defs}${blur(f, pad(box, 2), 0.15)}${rootGradient(ROOT.R, [35.4, -152.4], [40.6, -148.4])}${lobeGradient(LOBE.L, "L")}${lobeGradient(LOBE.R, "R")}</defs>${r.body}` +
-    `<g filter="url(#${f})">${root.svg}</g><g fill="${LINES.cream[1]}" filter="url(#${f})">${hooks.map((h) => `<path d="${h.d}"/>`).join("")}</g>` +
+    `<g filter="url(#${f})">${root.svg}</g><g fill="${LINES.cream[1]}" filter="url(#${f})">${hooks.map((h, i) => `<path d="${h.d}"${i === 3 ? ` fill="${C.rootTan}"` : ""}/>`).join("")}</g>` +
     locks.map((h, i) => `<path d="${h.d}" fill="url(#${LOBE[i ? "R" : "L"]})" filter="url(#${f})"/>`).join(""), box, {
     shapes: [{ name: "head.line", nodes: head.typed, segs: head.segs, outlined: [...r.outlined, ...root.outlined], fur: head.fur.map(([a, b]) => [fracAt(head, a), fracAt(head, b)]) }],
     lines: [...r.lines, ...root.lines, ...hooks.map((h) => h.line), ...locks.map((h) => h.line)],
@@ -630,11 +639,12 @@ export function back(): Drawn[] {
     highlight: { d: `${pathD(ellipse([-8.6, -160.6], 4.6, 2.2, -10))} ${pathD(ellipse([11.4, -159.8], 4.6, 2, 6))}`, colour: C.light, opacity: 0.45, blur: 1.6 },
     // The lobes' lines curl in at their feet and into the notch between them, as the sheet draws them: at each foot the
     // curl runs on in under the lobe, 4 to 5 pt, to x -11 at y -154.3 and 18.6 at -155 (the sheet's L* 67 and 73 there,
-    // its right curl at -154.4, 0.6 pt below the lobe's base, which clips ours).
+    // its right curl at -154.4, 0.6 pt below the lobe's base, which clips ours), in the crown line's lightest tone, the
+    // sheet's curls being as dark as its line there (L* 66 to 69, where the soft line's 71.5 read 72 at x -12).
     inner: [
-      { pts: [[-16.2, -156.4], [-14.4, -155], [-12.2, -154.3], [-10.8, -154.2]], width: 0.85, colour: C.softLine },
+      { pts: [[-16.2, -156.4], [-14.4, -155], [-12.2, -154.3], [-10.8, -154.2]], width: 0.85, colour: LINES.cream[0]! },
       { pts: [[1.6, -157.2], [2.4, -155.2], [1.8, -153.4]], width: 0.8, colour: C.softLine, opacity: 0.9 },
-      { pts: [[23.4, -156.3], [22, -155.6], [20.2, -155.4], [18.6, -155]], width: 0.85, colour: C.softLine },
+      { pts: [[23.4, -156.3], [22, -155.6], [20.2, -155.4], [18.6, -155]], width: 0.85, colour: LINES.cream[0]! },
     ],
     feather: { from: [0, -150.8], to: [0, -154.6] },
     // One line round both lobes and into the notch between them, from where the left lobe meets the crown's line to
