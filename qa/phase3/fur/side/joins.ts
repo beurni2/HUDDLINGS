@@ -1,16 +1,19 @@
-// The side view's joins (the fur pass's side lane, DECISIONS 235 to 241): one row per join the audit names, each the
-// sheet's crop, the drawing at the pass's base (fbbe6d3, the "before") and the drawing now (the "after"), side by side
-// at one zoom, labelled; and the whole dog at phone size. For side.R the crop is the side crop mirrored (DECISIONS 2).
-// The base's drawing is its own source at fbbe6d3 (the view, its facing and its tag recipe, the lane's files), read from
-// git into a scratch folder, so "before" is always the base whatever this branch changes; the shared recipes it imports
-// draw as they did there unless a view opts in (DECISIONS 210 to 219).
+// The side view's joins (the fur pass's side lane, DECISIONS 235 to 241, and its second round, 276 to 279): one row per
+// join the audit names and per join this round's reviewers named, each the sheet's crop, the drawing at this round's
+// base (8912ced, the "before") and the drawing now, side by side at one zoom, labelled; and the whole dog at phone size.
+// For side.R the crop is the side crop mirrored (DECISIONS 2). The base's drawing is its own source at 8912ced (the view,
+// its facing and its tag recipe, the lane's files), read from git into a scratch folder, so "before" is always the base
+// whatever this branch changes; the shared recipes it imports draw as they did there unless a view opts in (DECISIONS
+// 210 to 219, 260 to 266).
 //
-// node qa/phase3/fur/side/joins.ts [side.L|side.R ...]   (writes qa/phase3/fur/side/joins.png and joins.R.png)
+// node qa/phase3/fur/side/joins.ts [side.L|side.R ...] [--only <word>,...] [--out <folder>]
+//   (writes joins.png and joins.R.png here, or into --out; --only keeps the rows whose label holds one of the words)
 import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { parseArgs } from "node:util";
 import { Resvg } from "@resvg/resvg-js";
 import { PNG } from "pngjs";
 import { BOX } from "../../../../characters/draw/test/composite.ts";
@@ -18,7 +21,7 @@ import { rest, type Drawn, type Image } from "../recipes/render.ts";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = resolve(here, "../../../..");
-const BASE = "fbbe6d3";
+const BASE = "8912ced";
 /** The lane's own files the base's drawing is read from at the base; every other import is the branch's own file. */
 const OWN = ["characters/dog/src/views/side.ts", "characters/dog/src/views/facing.ts", "characters/dog/src/parts/tag.ts"];
 /** The composites' scale, px/pt: every row is drawn down from it. */
@@ -63,6 +66,14 @@ const ROWS: Row[] = [
   { label: "the back's topline, the saddle and the rump over the tail (#17, #18)", box: [-24, -68, 50, 66], zoom: 3.4 },
   { label: "the tail's plume and its tan root (#15, #16)", box: [6, -66, 46, 62], zoom: 3.6 },
   { label: "the ground shadow (#19)", box: [-104, -16, 156, 18], zoom: 2 },
+  // This round's reviewers' joins, closer (DECISIONS 276 to 279).
+  { label: "round 2: the tail's outline, thin, light and broken (#15)", box: [8, -66, 42, 60], zoom: 7 },
+  { label: "round 2: the rump's contact line over the tail (#17)", box: [6, -42, 20, 40], zoom: 8 },
+  { label: "round 2: the jaw over the collar, no row of teeth (#6)", box: [-74, -72, 42, 18], zoom: 9 },
+  { label: "round 2: the topknot, crisp, with its flicked lock", box: [-72, -168, 72, 24], zoom: 7 },
+  { label: "round 2: the near front paw's toe lines, no claws (#9)", box: [-68, -16, 32, 17], zoom: 10 },
+  { label: "round 2: the hind paw's toe lines and the thigh's thin line (#11, #13)", box: [-36, -36, 26, 36], zoom: 9 },
+  { label: "round 2: the outline's weight along the back, the haunch and the chest", box: [-66, -68, 90, 70], zoom: 4 },
 ];
 const PHONE: Row = { label: "the whole dog at phone size (3 px/pt)", box: [-100, -170, 150, 176], zoom: 3 };
 
@@ -114,10 +125,10 @@ function panel(png: Buffer, pw: number, ph: number, view: [number, number, numbe
     `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="#C8C0B8" stroke-width="1"/>`;
 }
 
-function sheet(view: string, before: Image, after: Image, out: string): void {
+function sheet(view: string, before: Image, after: Image, out: string, rows: Row[]): void {
   const GAP = 10, LABEL = 20, TOP = 46;
   let y = TOP, width = 0, body = "";
-  for (const row of [...ROWS, PHONE]) {
+  for (const row of rows) {
     const box: Box = view === "side.R" ? [-(row.box[0] + row.box[2]), row.box[1], row.box[2], row.box[3]] : row.box;
     const [bx, by, bw, bh] = box, w = Math.round(bw * row.zoom), h = Math.round(bh * row.zoom);
     body += `<text x="${GAP}" y="${y + 15}" font-family="DejaVu Sans" font-size="14" fill="#3A2A20">${row.label}${row === PHONE ? "" : ` · ${row.zoom} px/pt`}</text>`;
@@ -127,7 +138,7 @@ function sheet(view: string, before: Image, after: Image, out: string): void {
     const sw = Math.round(bw * SCALE), sh = Math.round(bh * SCALE);
     const own = (img: Image) => cut(img, px(bx), py(by), sw, sh);
     let x = GAP;
-    for (const [name, png, pw, ph, vb] of [["sheet", s.png, s.pw, s.ph, s.vb], ["before (fbbe6d3)", own(before), sw, sh, [0, 0, sw, sh]], ["after", own(after), sw, sh, [0, 0, sw, sh]]] as const) {
+    for (const [name, png, pw, ph, vb] of [["sheet", s.png, s.pw, s.ph, s.vb], [`before (${BASE})`, own(before), sw, sh, [0, 0, sw, sh]], ["now", own(after), sw, sh, [0, 0, sw, sh]]] as const) {
       body += panel(png, pw, ph, vb as [number, number, number, number], x, y, w, h);
       body += `<text x="${x + 5}" y="${y + h - 6}" font-family="DejaVu Sans" font-size="12" fill="#7A6A5E">${name}</text>`;
       x += w + GAP;
@@ -136,20 +147,23 @@ function sheet(view: string, before: Image, after: Image, out: string): void {
     width = Math.max(width, x);
   }
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${y}" viewBox="0 0 ${width} ${y}"><rect width="${width}" height="${y}" fill="#FFFFFF"/>` +
-    `<text x="${GAP}" y="20" font-family="DejaVu Sans" font-size="16" font-weight="600" fill="#3A2A20">${view}: the fur pass's joins, the sheet | before | after</text>` +
-    `<text x="${GAP}" y="38" font-family="DejaVu Sans" font-size="13" fill="#3A2A20">the audit's side defects #1 to #19 (qa/phase3/audit/defects.json); DECISIONS 235 to 241</text>${body}</svg>`;
+    `<text x="${GAP}" y="20" font-family="DejaVu Sans" font-size="16" font-weight="600" fill="#3A2A20">${view}: the fur pass's joins, the sheet | before (${BASE}) | now</text>` +
+    `<text x="${GAP}" y="38" font-family="DejaVu Sans" font-size="13" fill="#3A2A20">the audit's side defects #1 to #19 (qa/phase3/audit/defects.json); DECISIONS 235 to 241, 276 to 279</text>${body}</svg>`;
   const png = PNG.sync.read(new Resvg(svg, { font: { loadSystemFonts: true, defaultFontFamily: "DejaVu Sans" } }).render().asPng());
   const rgb = new PNG({ width: png.width, height: png.height, colorType: 2 });
   png.data.copy(rgb.data);
   writeFileSync(out, PNG.sync.write(rgb, { colorType: 2 }));
 }
 
-const views = process.argv.slice(2).length ? process.argv.slice(2) : ["side.L", "side.R"];
+const { values: opts, positionals } = parseArgs({ allowPositionals: true, options: { only: { type: "string" }, out: { type: "string" } } });
+const views = positionals.length ? positionals : ["side.L", "side.R"];
+const words = opts.only?.split(",").filter(Boolean);
+const rows = [...ROWS, PHONE].filter((r) => !words || words.some((w) => r.label.includes(w)));
 const before = await baseSide();
 const { side } = (await import("../../../../characters/dog/src/views/side.ts")) as { side: (f: "L" | "R") => Drawn[] };
 for (const view of views) {
   const f = view === "side.R" ? "R" : "L";
-  const out = join(here, view === "side.R" ? "joins.R.png" : "joins.png");
-  sheet(view, rest(view, before(f), SCALE), rest(view, side(f), SCALE), out);
+  const out = join(opts.out ? resolve(opts.out) : here, view === "side.R" ? "joins.R.png" : "joins.png");
+  sheet(view, rest(view, before(f), SCALE), rest(view, side(f), SCALE), out, rows);
   console.log(out);
 }

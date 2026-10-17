@@ -1,6 +1,7 @@
 // The line gate (DECISIONS 219) on the side views, as the build's lint runs it: each view's rest drawings and face
 // states composited in rig.json's draw order, every drawing this lane has moved onto the fur pass's recipes held by it
-// (lineGate). With --all, every drawing is held as if it were gated, to list what is left unmoved.
+// (lineGate); and again counting a line only where it shows in the composite (LintRules.shown, DECISIONS 264), which
+// the build's lint does not set yet. With --all, every drawing is held as if it were gated, to list what is left unmoved.
 //
 // node qa/phase3/fur/side/gate.ts [--all]
 import { readFileSync } from "node:fs";
@@ -18,10 +19,13 @@ let total = 0;
 for (const f of ["L", "R"] as const) {
   const view = `side.${f}`;
   const drawn = [...side(f), ...sideFaces(f)];
-  const problems = gateProblems(drawn.map(({ part, state, piece }) => ({ region: `${part}/${view}${state ? `:${state}` : ""}`, svg: "", anchor: [0, 0] as [number, number],
-    meta: (all ? lineGate(piece) : piece).meta })), { rig, decisions });
-  total += problems.length;
-  console.log(`${view}: ${problems.length} problems${all ? " (every drawing held)" : ""}`);
-  for (const p of problems) console.log(`  ${p}`);
+  const held = drawn.map(({ part, state, piece }) => ({ region: `${part}/${view}${state ? `:${state}` : ""}`, svg: "", anchor: [0, 0] as [number, number],
+    meta: (all ? lineGate(piece) : piece).meta }));
+  for (const shown of [false, true]) {
+    const problems = gateProblems(held, { rig, decisions, shown });
+    total += problems.length;
+    console.log(`${view}: ${problems.length} problems${shown ? " counting only what shows (264)" : ""}${all ? " (every drawing held)" : ""}`);
+    for (const p of problems) console.log(`  ${p}`);
+  }
 }
 process.exit(total ? 1 : 0);
