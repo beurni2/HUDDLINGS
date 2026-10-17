@@ -348,8 +348,9 @@ test("each light typed by hand toward the light (Facing.lit) is, in .R, the .L l
   const head3 = middle("threeQuarter.L", "head.base"), FACE_MID = (-100.4 + -14.2) / 2;
   // For each .L drawing carrying such lights, the middle of each light placed again, in the order the drawing paints
   // them (DECISIONS 101): the ear's sheen, the plume's top (the tail and its marking), the forehead's or crown's light
-  // (the head, its patches and the topknot's three curls, which share the head's light; in three-quarter with the far
-  // cheek's), the tag's and the far paw's dome. Every other drawing's lights belong to their place and mirror with it.
+  // (the head, its patches and the topknot's curls, which share the head's light: three in profile, four in three-quarter,
+  // its crisp topknot's small flicked lock among them, DECISIONS 262, 272; in three-quarter with the far cheek's), the
+  // tag's and the far paw's dome. Every other drawing's lights belong to their place and mirror with it.
   const stated: Record<Kind, Record<string, number[]>> = {
     side: {
       "ear.L": [middle("side.L", "ear.L")], tail: [tail], "tail.base": [tail], "head.base": [head], "head.patch.L": [head], tuft: [head, head, head],
@@ -357,7 +358,7 @@ test("each light typed by hand toward the light (Facing.lit) is, in .R, the .L l
     },
     threeQuarter: {
       "ear.R": [middle("threeQuarter.L", "ear.R")], "head.base": [head3, FACE_MID], "head.patch.L": [head3, FACE_MID], "head.patch.R": [head3, FACE_MID],
-      tuft: [head3, FACE_MID, head3, FACE_MID, head3, FACE_MID], tag: [middle("threeQuarter.L", "tag")],
+      tuft: [head3, FACE_MID, head3, FACE_MID, head3, FACE_MID, head3, FACE_MID], tag: [middle("threeQuarter.L", "tag")],
     },
   };
   for (const kind of KINDS) {

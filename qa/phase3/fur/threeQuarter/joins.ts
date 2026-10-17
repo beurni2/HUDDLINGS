@@ -1,11 +1,13 @@
-// The three-quarter view's joins sheets for the fur pass (docs/phase3-fur-plan.md; DECISIONS 228 to 234): for each facing,
-// one row per join the audit names (qa/phase3/audit/defects.json, three-quarter D1 to D15), each the sheet's crop, the
-// base's drawing (fbbe6d3, before this lane) and this branch's, side by side, drawn at 10 px/pt and shown at 7 to 9 (2.3
+// The three-quarter view's joins sheets for the fur pass (docs/phase3-fur-plan.md; DECISIONS 228 to 234, 272 to 275): for
+// each facing, one row per join the audit names (qa/phase3/audit/defects.json, three-quarter D1 to D15), each the sheet's
+// crop, the base's drawing (8912ced, before the fur kit's second round) and this branch's, side by side, drawn at 10 px/pt and shown at 7 to 9 (2.3
 // to 3 times the phone's 3), and a last row of the whole dog at phone size. threeQuarter.R is held against the .L crop
 // mirrored (DECISIONS 2, 254).
 // Each view's rest drawings are composited as the rest-frame tests composite them (each part rendered by resvg in model
 // space, in rig.json's draw order, clip groups by the runtimes' stencil rule, at each part's rest alpha). It also prints
-// what the line gate (DECISIONS 219) finds in each facing, rest and face states, as the build's lint would.
+// what the line gate (DECISIONS 219) finds in each facing, rest and face states, as the build's lint would, and again
+// counting only what shows (LintRules.shown, DECISIONS 264), with each perked ear composited with its own temple state
+// (perkedL and perkedR, as the face clips draw them).
 //
 // node qa/phase3/fur/threeQuarter/joins.ts [--only <row label part>] [--gate]
 import { execFileSync } from "node:child_process";
@@ -22,7 +24,7 @@ import { composite } from "../../../../characters/draw/test/composite.ts";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = resolve(here, "../../../..");
-const BASE = "fbbe6d3";
+const BASE = "8912ced";
 const rig = JSON.parse(readFileSync(join(repo, "characters/dog/src/rig.json"), "utf8")) as Rig;
 const model = JSON.parse(readFileSync(join(repo, "characters/dog/model.json"), "utf8")) as {
   crops: Record<string, { crop: string; ptPerCropPx: number; anchorsCropPx: { ground: [number, number] } }>;
@@ -169,7 +171,7 @@ function sheet(title: string, facing: "L" | "R", before: Image, after: Image, ro
     const sw = Math.round(bw * SCALE), sh = Math.round(bh * SCALE);
     const own = (img: Image) => cut(img, px(bx), py(by), sw, sh);
     let x = GAP;
-    for (const [name, png, pw, ph, vb] of [["sheet", s.png, s.pw, s.ph, s.vb], [`before (${BASE})`, own(before), sw, sh, [0, 0, sw, sh]], ["after", own(after), sw, sh, [0, 0, sw, sh]]] as const) {
+    for (const [name, png, pw, ph, vb] of [["sheet", s.png, s.pw, s.ph, s.vb], [`before (${BASE})`, own(before), sw, sh, [0, 0, sw, sh]], ["now", own(after), sw, sh, [0, 0, sw, sh]]] as const) {
       body += panel(png, pw, ph, vb as [number, number, number, number], x, y, w, h);
       body += `<text x="${x + 5}" y="${y + h - 6}" font-family="DejaVu Sans" font-size="12" fill="#7A6A5E">${name}</text>`;
       x += w + GAP;
@@ -187,9 +189,20 @@ function sheet(title: string, facing: "L" | "R", before: Image, after: Image, ro
   writeFileSync(out, PNG.sync.write(rgb, { colorType: 2 }));
 }
 
-/** What the line gate finds in a facing: the rest and every face state, as the build's lint composites them. */
-function gate(view: string, drawn: Drawn[]): string[] {
-  return gateProblems(drawn.map(({ part, state, piece }) => ({ region: `${part}/${view}${state ? `:${state}` : ""}`, svg: "", anchor: [0, 0] as [number, number], meta: piece.meta })), { rig, decisions });
+/**
+ * What the line gate finds in a facing: the rest and every face state, as the build's lint composites them; and, with
+ * `shown`, counting only what shows (DECISIONS 264), each perked ear also composited with head.line's temple state on
+ * its side, as the face clips draw them (perkedL, perkedR).
+ */
+function gate(view: string, drawn: Drawn[], shown = false): string[] {
+  const own = drawn.map(({ part, state, piece }) => ({ region: `${part}/${view}${state ? `:${state}` : ""}`, svg: "", anchor: [0, 0] as [number, number], meta: piece.meta }));
+  const perked = shown
+    ? (["L", "R"] as const).flatMap((side) => [[`ear.${side}`, "onePerked"], ["head.line", `temple${side}`]].flatMap(([part, state]) => {
+      const d = drawn.find((x) => x.part === part && x.state === state);
+      return d ? [{ region: `${part}/${view}:perked${side}`, svg: "", anchor: [0, 0] as [number, number], meta: d.piece.meta }] : [];
+    }))
+    : [];
+  return gateProblems([...own, ...perked], { rig, decisions, ...(shown ? { shown: true } : {}) });
 }
 
 const arg = (name: string) => (process.argv.includes(name) ? process.argv[process.argv.indexOf(name) + 1] : undefined);
@@ -215,13 +228,15 @@ const base = gateOnly ? undefined : await baseView();
 for (const facing of facings) {
   const view = `threeQuarter.${facing}`;
   const drawn = [...now.threeQuarter(facing), ...now.threeQuarterFaces(facing)];
-  const problems = gate(view, drawn);
+  const problems = gate(view, drawn), shown = gate(view, drawn, true);
   console.log(`${view}: the line gate finds ${problems.length} problems`);
   for (const p of problems) console.log(`  ${p}`);
+  console.log(`${view}: counting only what shows, with the perked composites, ${shown.length} problems`);
+  for (const p of shown) console.log(`  ${p}`);
   if (gateOnly) continue;
   const before = baseRest(view, base!, facing), after = rest(view, now.threeQuarter(facing), SCALE);
   const rows = only ? ROWS.filter((r) => r.label.includes(only)) : [...ROWS, PHONE];
   const out = only ? join(tmpdir(), `tq-joins-${facing}.png`) : join(here, view, "joins.png");
-  sheet(`${view}: the joins, the sheet | before | after`, facing, before, after, rows, out);
+  sheet(`${view}: the joins, the sheet | before (${BASE}) | now`, facing, before, after, rows, out);
   console.log(`${view}: ${out}`);
 }
