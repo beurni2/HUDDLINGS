@@ -21,3 +21,15 @@
 8. The collar's rim smooth under the wisps; the fold softer; the perked ear's line; the head patch brushed. Weakest,
    left: the ear's hem line over the collar (inkLog 0.72, 1.75 pt wide against 1.47); the tail plume's even lumps and
    even line; the crown's line darker and more even than the crop's light, broken one (the topknot's recipe).
+9. (The review's round.) The thigh's line a thin soft curve, the cream's lightest, fading up over 10.8 pt; the plume's
+   back five pointed locks with each notch's tuck running on inside, the curl's hook the outline's own; the tail's
+   underside with no seam; the ear's hem a round U of four low tips, its line light over its top, its step a fork; the
+   patch and the ear's top one tan mass under three soft locks of the crown's cream; the forehead's "<" from each tip.
+   Weakest, left: the perked flap's comb of locks; the toe lines' ticks; the jaw's wisps as cream teeth on the collar.
+10. The perked flap by earEdge, its locks fanned; the toe lines curving over the bun; the chest's and hind paw's lines
+    lighter; the back of the head lined under the hanging ear (the relaxed and lowered ears bare it). Weakest, left:
+    the jaw's teeth; the tail's foot meeting the haunch at a corner; the ear's back edge too light at y -113.
+11. and 12. The jaw's four fine strands; the tail's foot rolling up the haunch's line; the ear's ceiling over its top
+    only; every cite at the gate's measure. Weakest, left: the crown's line even and at the cream's lightest yet
+    heavier than the crop's broken one (the topknot's recipe, and the line rule's floor of 1.2 pt); the plume's and
+    the back's outline even in width (the shared lane's width variation); the toe lines' pointed tops (paw.ts).
