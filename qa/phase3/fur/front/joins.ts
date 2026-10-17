@@ -286,7 +286,7 @@ const JOINS: Row[] = [
   { label: "#10 the chest's V and the legs' inner edges (zoom 10)", box: [-16, -42, 32, 42], zoom: 10 },
   { label: "#12, #13 the dog's right elbow, leg edge and haunch (zoom 10)", box: [-56, -56, 30, 46], zoom: 10 },
   { label: "#12, #13 the dog's left elbow, leg edge and haunch (zoom 10)", box: [26, -56, 30, 46], zoom: 10 },
-  { label: "#11, #14 the paws, whole, beside the hero's (zoom 6)", box: [-52, -24, 104, 26], zoom: 6, hero: [70, 300, 225, 56.3] },
+  { label: "#11, #14 the paws, whole, beside the hero's (zoom 6)", box: [-52, -24, 104, 26], zoom: 6, hero: [70, 318, 225, 56.3] },
   { label: "#11, #14 the dog's right paws (zoom 10)", box: [-52, -24, 40, 26], zoom: 10 },
   { label: "#11, #14 the dog's left paws (zoom 10)", box: [12, -24, 40, 26], zoom: 10 },
   { label: "#15 the ground shadow (zoom 2)", box: [-82, -22, 164, 26], zoom: 2 },
