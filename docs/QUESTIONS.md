@@ -65,6 +65,13 @@ Where the spec is silent or contradicts itself, I don't invent the answer. The q
 - **Decided: the recommended default.** a line where one part lies over another is a contact line: it keeps the sheet's darkness in both facings, like a contact shadow. The light rule lightens only the silhouette's outer edge.
 - **Answered:** founder, Oct 16, 2026, in the session: "Q29 to Q31 as recommended".
 
+### Q32. The sheet's outline varies more than the spec's 1.2 to 1.8 pt allows. Do I keep the band?
+- **The spec says:** L506 "Outline: a warm brown sampled from each sheet's linework, on each part's outer edge only, 1.2–1.8 pt wide at 164 pt height and slightly tapered where it ends"; L504 "The sheet is the model".
+- **Why it matters:** this is behind your "the edges don't match" note. The sheet's outline thins almost to nothing on lit tops, breaks in places and swells darker where parts press. Measured the way our line check measures ours, its width varies by 0.27 to 0.58 (coefficient of variation) on the legs, back and tail. A line held between 1.2 and 1.8 pt can reach about 0.2. Three fresh reviewers still read our outline as even at phone size.
+- **Decided: the default.** keep 1.2 to 1.8 pt and put the life inside it. The full band is used boldly: 1.2 pt on lit tops, 1.8 pt where parts press. The tone is lighter where lit and darker where pressed, as the sheet's is. Short tapered breaks go where the sheet's line comes and goes.
+- **The alternative:** widen the dog's outer band to about 0.9 to 2.2 pt, so the line can thin and swell as far as the sheet's. That changes a spec rule for every view.
+- **Answered:** founder, Oct 17, 2026, in the session, on the third round's images (`qa/phase3/fur/founder/`): "they are all good", with no widening asked.
+
 ## Needed before phase 1
 
 ### Q1. Which iPhone will measure the speed budgets?
@@ -75,15 +82,7 @@ Where the spec is silent or contradicts itself, I don't invent the answer. The q
 
 ## Needed by Gate A (the dog's look)
 
-Q2 and Q26 to Q31 are decided (above). At Gate A you approve the look itself and the new hungry and huffy faces, and answer Q32.
-
-### Q32. The sheet's outline varies more than the spec's 1.2 to 1.8 pt allows. Do I keep the band?
-- **The spec says:** L506 "Outline: a warm brown sampled from each sheet's linework, on each part's outer edge only, 1.2–1.8 pt wide at 164 pt height and slightly tapered where it ends"; L504 "The sheet is the model".
-- **Why it matters:** this is behind your "the edges don't match" note. The sheet's outline thins almost to nothing on lit tops, breaks in places and swells darker where parts press. Measured the way our line check measures ours, its width varies by 0.27 to 0.58 (coefficient of variation) on the legs, back and tail. A line held between 1.2 and 1.8 pt can reach about 0.2. Three fresh reviewers still read our outline as even at phone size.
-- **Default (taken now, reversible):** keep 1.2 to 1.8 pt and put the life inside it. The full band is used boldly: 1.2 pt on lit tops, 1.8 pt where parts press. The tone is lighter where lit and darker where pressed, as the sheet's is. Short tapered breaks go where the sheet's line comes and goes.
-- **The alternative:** widen the dog's outer band to about 0.9 to 2.2 pt, so the line can thin and swell as far as the sheet's. That changes a spec rule for every view.
-- **My recommendation:** the default. You judge it by eye at Gate A. If the line still reads even to you then, write "Q32: widen" and I'll widen it.
-- **Owner:** founder, by Gate A.
+None open: Q2 and Q26 to Q32 are decided (above). At Gate A you approve the look itself and pick the new hungry and huffy faces.
 
 ## Needed by phase 4 (the rig and Visual QA)
 

@@ -50,6 +50,7 @@ The critical path: one dog that feels alive under your finger before anything el
 - The eyes' catchlight as its own layer between the iris and the lid, moving with the iris at about half its travel and never leaving it (`QUESTIONS.md` Q28), the fraction chosen by a wedge render.
 - Rotation limits and the right-facing views: limits are set per bone and the legs' are asymmetric, so a .R clip that mirrors a valid .L swing is refused today. Before any clip keys a rotation in a .R view, the format gains a facing sign rule or per-view limits (`characters/dog/DECISIONS.md` 103 and 120); the legs' limits are never widened to get round it.
 - The pose library from the motion sheet, each pose passing its pose match (IoU 0.80). The motion poses' crop records (view, facing, scale, ground line, body centre, and a mask without props, motion lines or the neighbours' slivers) are added to the model approved at Gate A; only comparison data, never the look.
+- The line check (advisory): its inside regions leave out the crop's own silhouette edge, so a part a little off the crop no longer holds the sheet's outline inside it; then it is recalibrated on the parts as approved (`characters/dog/DECISIONS.md` 306).
 - Visual QA's checks, each proven by a clip with a planted failure: holes and seams, stretch, sliding and floating paws, snaps, even spacing, twinning, straight paths, dead holds, draw order, face, on-model, collar and tag, life, touch response, sound and haptic sync, parity, and approved frames (the goldens) from the first approved motion. A fast subset joins the pre-commit hook. Four of the checks may need narrowing (`QUESTIONS.md` Q3).
 
 **Phase 5, the demo, then the 16 core motions (about 1.5 weeks), ending at Gates B and C.**
@@ -139,7 +140,7 @@ In the order they come up. Weeks count from your `go`. Secrets go in GitHub (Set
 
 **Around week 3:** allow `commons.wikimedia.org` and `upload.wikimedia.org` for Muybridge's plates, needed in phase 4 (Edit the environment, Network access: https://code.claude.com/docs/en/cloud-environments#network-access), or upload the plates. Slow-motion video of a real puppy helps too, if you have some. Nothing else is needed; I work around the other blocked sites (`LIMITATIONS.md`).
 
-**Around week 3 to 4, at Gate A:** approve the dog's look: the views, the faces, the marking map and the collar blue; a first look at the new hungry and huffy faces; Q32 (the outline band). Q3 (four Visual QA checks) by phase 4.
+**Around week 3 to 4, at Gate A:** approve the dog's look: the views, the faces, the marking map and the collar blue; a first look at the new hungry and huffy faces. Q3 (four Visual QA checks) by phase 4.
 
 **Around week 5, at Gate B:** answer Q4 (temporary licensed sounds are fine for Gate B).
 
