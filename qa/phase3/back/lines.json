@@ -9,7 +9,7 @@
    "head": "back"
   },
   "ppp": 3,
-  "sizePx": [511, 561],
+  "sizePx": [514, 563],
   "rootPx": [257, 517]
  },
  "crop": "master.turnaround.back",
@@ -54,7 +54,7 @@
      "threshold": 0.468
     },
     "regionInkLog": {
-     "value": -0.857,
+     "value": -0.622,
      "threshold": 1.501,
      "pass": true
     },
@@ -92,9 +92,9 @@
     }
    },
    "detail": {
-    "shiftPx": [1, 0],
+    "shiftPx": [0, 0],
     "piecesShiftPx": [
-     [1, 0]
+     [0, 0]
     ],
     "sheetPx": 0,
     "oursPx": 0
@@ -138,7 +138,7 @@
      "threshold": null
     },
     "regionInkLog": {
-     "value": -0.415,
+     "value": 0.21,
      "threshold": 1.834,
      "pass": true
     },
@@ -148,7 +148,7 @@
      "pass": true
     },
     "lightSeamPt": {
-     "value": 0.0,
+     "value": 0.78,
      "threshold": 8.679,
      "pass": true
     },
@@ -183,7 +183,7 @@
      [1, 0]
     ],
     "sheetPx": 2,
-    "oursPx": 0
+    "oursPx": 2
    },
    "failed": [],
    "pass": true
@@ -263,7 +263,7 @@
    "detail": {
     "shiftPx": [1, 0],
     "sheetPx": 0,
-    "oursPx": 0,
+    "oursPx": 1,
     "inkAt": null
    },
    "failed": [],
@@ -290,9 +290,9 @@
      "pass": true
     },
     "weakPt": {
-     "value": 2.35,
+     "value": 0.0,
      "threshold": 1.962,
-     "pass": false
+     "pass": true
     },
     "extraPt": {
      "value": 0.0,
@@ -300,17 +300,17 @@
      "pass": true
     },
     "toneDelta": {
-     "value": 9.0,
+     "value": 5.6,
      "threshold": 4.667,
      "pass": false
     },
     "inkLog": {
-     "value": -0.497,
+     "value": -0.26,
      "threshold": 0.288,
-     "pass": false
+     "pass": true
     },
     "regionInkLog": {
-     "value": -0.112,
+     "value": -0.001,
      "threshold": 0.405,
      "pass": true
     },
@@ -323,27 +323,27 @@
      "threshold": null
     },
     "widthPt": {
-     "value": 1.303,
+     "value": 1.362,
      "threshold": 1.522,
      "pass": true
     },
     "soleMiddlePt": {
-     "value": 1.611,
+     "value": 1.481,
      "threshold": 1.444,
      "pass": false
     },
     "widthCv": {
-     "value": 0.195,
+     "value": 0.069,
      "threshold": 0.084,
-     "pass": true
-    },
-    "furRmsPt": {
-     "value": 0.043,
-     "threshold": 0.082,
      "pass": false
     },
+    "furRmsPt": {
+     "value": 0.239,
+     "threshold": 0.082,
+     "pass": true
+    },
     "furCrossings10Pt": {
-     "value": 0.0,
+     "value": 1.19,
      "threshold": 0.0,
      "pass": true
     },
@@ -353,25 +353,22 @@
     }
    },
    "detail": {
-    "shiftPx": [-1, 0],
+    "shiftPx": [3, 0],
     "piecesShiftPx": [
-     [-1, 0],
-     [-1, 0],
-     [-2, 1]
+     [0, 0],
+     [3, 0]
     ],
-    "sheetPx": 34,
-    "oursPx": 31,
-    "toneAt": [24.5, -2.4],
-    "inkAt": [24.5, -2.4],
-    "widthMedianPt": 1.594,
-    "furLengthPt": 14.0
+    "sheetPx": 61,
+    "oursPx": 62,
+    "toneAt": [-8.4, -1.6],
+    "inkAt": [37.1, -4.7],
+    "widthMedianPt": 1.425,
+    "furLengthPt": 42.0
    },
    "failed": [
-    "weakPt",
     "toneDelta",
-    "inkLog",
     "soleMiddlePt",
-    "furRmsPt"
+    "widthCv"
    ],
    "pass": false
   },
@@ -448,8 +445,8 @@
     }
    },
    "detail": {
-    "shiftPx": [-1, 0],
-    "sheetPx": 0,
+    "shiftPx": [3, 0],
+    "sheetPx": 1,
     "oursPx": 0,
     "inkAt": null
    },
@@ -462,8 +459,8 @@
    "calibrated": true,
    "measures": {
     "recall": {
-     "value": 1.0,
-     "threshold": 0.869,
+     "value": 0.833,
+     "threshold": 0.833,
      "pass": true
     },
     "precision": {
@@ -471,12 +468,12 @@
      "threshold": null
     },
     "gapPt": {
-     "value": 0.0,
+     "value": 1.89,
      "threshold": 1.962,
      "pass": true
     },
     "weakPt": {
-     "value": 0.78,
+     "value": 0.0,
      "threshold": 1.962,
      "pass": true
     },
@@ -486,17 +483,15 @@
      "pass": true
     },
     "toneDelta": {
-     "value": -3.7,
-     "threshold": 4.214,
-     "pass": true
+     "value": null,
+     "threshold": 4.214
     },
     "inkLog": {
-     "value": 0.326,
-     "threshold": 0.299,
-     "pass": false
+     "value": null,
+     "threshold": 0.299
     },
     "regionInkLog": {
-     "value": -0.337,
+     "value": -0.325,
      "threshold": 0.405,
      "pass": true
     },
@@ -506,12 +501,12 @@
      "pass": true
     },
     "lightSeamPt": {
-     "value": 2.54,
+     "value": 0.0,
      "threshold": 7.062,
      "pass": true
     },
     "widthPt": {
-     "value": 0.804,
+     "value": 1.22,
      "threshold": 1.474,
      "pass": true
     },
@@ -520,9 +515,8 @@
      "threshold": null
     },
     "widthCv": {
-     "value": 0.48,
-     "threshold": 0.135,
-     "pass": true
+     "value": null,
+     "threshold": 0.135
     },
     "furRmsPt": {
      "value": null,
@@ -538,20 +532,18 @@
     }
    },
    "detail": {
-    "shiftPx": [0, -2],
+    "shiftPx": [0, 0],
     "piecesShiftPx": [
-     [0, -2]
+     [0, 0]
     ],
-    "sheetPx": 22,
-    "oursPx": 5,
-    "toneAt": [-33.5, -3.9],
-    "inkAt": [-36.7, -4.7],
-    "widthMedianPt": 0.863
+    "sheetPx": 12,
+    "oursPx": 6,
+    "toneAt": null,
+    "inkAt": null,
+    "widthMedianPt": 1.305
    },
-   "failed": [
-    "inkLog"
-   ],
-   "pass": false
+   "failed": [],
+   "pass": true
   },
   "body.back|hind.L across": {
    "what": "the hind paw against the haunch: the lines across it (toe lines, notches, tufts)",
@@ -626,9 +618,9 @@
     }
    },
    "detail": {
-    "shiftPx": [0, -2],
-    "sheetPx": 1,
-    "oursPx": 0,
+    "shiftPx": [0, 0],
+    "sheetPx": 0,
+    "oursPx": 1,
     "inkAt": null
    },
    "failed": [],
@@ -640,23 +632,22 @@
    "calibrated": true,
    "measures": {
     "recall": {
-     "value": 1.0,
-     "threshold": 0.861,
-     "pass": true
+     "value": 0.875,
+     "threshold": null
     },
     "precision": {
      "value": 1.0,
      "threshold": null
     },
     "gapPt": {
-     "value": 0.0,
+     "value": 0.78,
      "threshold": 1.962,
      "pass": true
     },
     "weakPt": {
-     "value": 2.35,
+     "value": 0.0,
      "threshold": 1.962,
-     "pass": false
+     "pass": true
     },
     "extraPt": {
      "value": 0.0,
@@ -664,17 +655,15 @@
      "pass": true
     },
     "toneDelta": {
-     "value": -6.7,
-     "threshold": 4.784,
-     "pass": false
+     "value": null,
+     "threshold": 4.784
     },
     "inkLog": {
-     "value": -0.459,
-     "threshold": 0.309,
-     "pass": false
+     "value": null,
+     "threshold": 0.309
     },
     "regionInkLog": {
-     "value": -0.056,
+     "value": 0.007,
      "threshold": 0.405,
      "pass": true
     },
@@ -689,18 +678,16 @@
      "pass": true
     },
     "widthPt": {
-     "value": 0.748,
-     "threshold": 1.474,
-     "pass": true
+     "value": null,
+     "threshold": 1.474
     },
     "soleMiddlePt": {
      "value": null,
      "threshold": null
     },
     "widthCv": {
-     "value": 0.369,
-     "threshold": 0.135,
-     "pass": true
+     "value": null,
+     "threshold": 0.135
     },
     "furRmsPt": {
      "value": null,
@@ -716,22 +703,17 @@
     }
    },
    "detail": {
-    "shiftPx": [1, -2],
+    "shiftPx": [0, 0],
     "piecesShiftPx": [
-     [1, -2]
+     [0, 0]
     ],
-    "sheetPx": 19,
+    "sheetPx": 8,
     "oursPx": 6,
-    "toneAt": [34.7, -3.9],
-    "inkAt": [45.7, -14.1],
-    "widthMedianPt": 0.932
+    "toneAt": null,
+    "inkAt": null
    },
-   "failed": [
-    "weakPt",
-    "toneDelta",
-    "inkLog"
-   ],
-   "pass": false
+   "failed": [],
+   "pass": true
   },
   "body.back|hind.R across": {
    "what": "the hind paw against the haunch: the lines across it (toe lines, notches, tufts)",
@@ -739,7 +721,7 @@
    "calibrated": true,
    "measures": {
     "recall": {
-     "value": 1.0,
+     "value": null,
      "threshold": null
     },
     "precision": {
@@ -752,9 +734,8 @@
      "pass": true
     },
     "weakPt": {
-     "value": 0.0,
-     "threshold": 1.962,
-     "pass": true
+     "value": null,
+     "threshold": 1.962
     },
     "extraPt": {
      "value": 0.0,
@@ -807,9 +788,9 @@
     }
    },
    "detail": {
-    "shiftPx": [1, -2],
-    "sheetPx": 4,
-    "oursPx": 0,
+    "shiftPx": [0, 0],
+    "sheetPx": 2,
+    "oursPx": 2,
     "inkAt": null
    },
    "failed": [],
@@ -821,24 +802,24 @@
    "calibrated": true,
    "measures": {
     "recall": {
-     "value": 0.961,
+     "value": 1.0,
      "threshold": 0.9,
      "pass": true
     },
     "precision": {
-     "value": 0.974,
+     "value": 1.0,
      "threshold": 0.878,
      "pass": true
     },
     "gapPt": {
-     "value": 1.57,
+     "value": 0.0,
      "threshold": 1.962,
      "pass": true
     },
     "weakPt": {
-     "value": 5.01,
+     "value": 0.0,
      "threshold": 1.962,
-     "pass": false
+     "pass": true
     },
     "extraPt": {
      "value": 0.0,
@@ -846,17 +827,17 @@
      "pass": true
     },
     "toneDelta": {
-     "value": 12.9,
+     "value": -7.8,
      "threshold": 13.409,
      "pass": true
     },
     "inkLog": {
-     "value": -1.093,
+     "value": 0.602,
      "threshold": 0.605,
-     "pass": false
+     "pass": true
     },
     "regionInkLog": {
-     "value": -0.088,
+     "value": 0.087,
      "threshold": 0.405,
      "pass": true
     },
@@ -869,7 +850,7 @@
      "threshold": null
     },
     "widthPt": {
-     "value": 1.251,
+     "value": 1.3,
      "threshold": 1.474,
      "pass": true
     },
@@ -878,9 +859,9 @@
      "threshold": null
     },
     "widthCv": {
-     "value": 0.29,
+     "value": 0.116,
      "threshold": 0.135,
-     "pass": true
+     "pass": false
     },
     "furRmsPt": {
      "value": null,
@@ -891,26 +872,25 @@
      "threshold": null
     },
     "risePt": {
-     "value": 0.467,
+     "value": 0.433,
      "threshold": 0.697,
      "pass": true
     }
    },
    "detail": {
-    "shiftPx": [1, 0],
+    "shiftPx": [0, 0],
     "piecesShiftPx": [
-     [1, 0],
-     [1, 1]
+     [0, 0],
+     [0, 0]
     ],
-    "sheetPx": 129,
-    "oursPx": 115,
-    "toneAt": [39.4, -40.0],
-    "inkAt": [39.4, -40.0],
-    "widthMedianPt": 1.316
+    "sheetPx": 125,
+    "oursPx": 119,
+    "toneAt": [-36.7, -49.4],
+    "inkAt": [-36.7, -49.4],
+    "widthMedianPt": 1.348
    },
    "failed": [
-    "weakPt",
-    "inkLog"
+    "widthCv"
    ],
    "pass": false
   },
@@ -988,9 +968,9 @@
     }
    },
    "detail": {
-    "shiftPx": [1, 0],
-    "sheetPx": 4,
-    "oursPx": 1,
+    "shiftPx": [0, 0],
+    "sheetPx": 5,
+    "oursPx": 3,
     "inkAt": null
    },
    "failed": [],
@@ -1002,57 +982,57 @@
    "calibrated": true,
    "measures": {
     "recall": {
-     "value": 0.966,
+     "value": 0.976,
      "threshold": 0.849,
      "pass": true
     },
     "precision": {
-     "value": 0.808,
+     "value": 0.978,
      "threshold": 0.89,
-     "pass": false
+     "pass": true
     },
     "gapPt": {
-     "value": 1.57,
+     "value": 2.35,
      "threshold": 5.478,
      "pass": true
     },
     "weakPt": {
-     "value": 3.14,
+     "value": 0.0,
      "threshold": 1.962,
-     "pass": false
+     "pass": true
     },
     "extraPt": {
-     "value": 11.02,
+     "value": 0.0,
      "threshold": 1.962,
-     "pass": false
+     "pass": true
     },
     "toneDelta": {
-     "value": -5.9,
+     "value": 4.7,
      "threshold": 8.3,
      "pass": true
     },
     "inkLog": {
-     "value": 0.59,
+     "value": 0.639,
      "threshold": 0.473,
      "pass": false
     },
     "regionInkLog": {
-     "value": 0.393,
+     "value": 0.07,
      "threshold": 0.405,
      "pass": true
     },
     "hardSeamPt": {
-     "value": 0.0,
+     "value": 0.78,
      "threshold": 10.716,
      "pass": true
     },
     "lightSeamPt": {
-     "value": 0.78,
+     "value": 6.76,
      "threshold": 11.819,
      "pass": true
     },
     "widthPt": {
-     "value": 1.018,
+     "value": 1.258,
      "threshold": 1.549,
      "pass": true
     },
@@ -1061,7 +1041,7 @@
      "threshold": null
     },
     "widthCv": {
-     "value": 0.242,
+     "value": 0.234,
      "threshold": 0.157,
      "pass": true
     },
@@ -1081,19 +1061,15 @@
    "detail": {
     "shiftPx": [0, 0],
     "piecesShiftPx": [
-     [0, 0],
-     [-4, 0]
+     [0, 0]
     ],
-    "sheetPx": 116,
-    "oursPx": 104,
-    "toneAt": [30.0, -25.1],
-    "inkAt": [-9.2, -7.1],
-    "widthMedianPt": 1.366
+    "sheetPx": 126,
+    "oursPx": 92,
+    "toneAt": [2.6, -37.7],
+    "inkAt": [-10.0, -23.5],
+    "widthMedianPt": 1.398
    },
    "failed": [
-    "precision",
-    "weakPt",
-    "extraPt",
     "inkLog"
    ],
    "pass": false
@@ -1104,7 +1080,7 @@
    "calibrated": true,
    "measures": {
     "recall": {
-     "value": 0.929,
+     "value": 1.0,
      "threshold": 0.81,
      "pass": true
     },
@@ -1113,7 +1089,7 @@
      "threshold": null
     },
     "gapPt": {
-     "value": 0.78,
+     "value": 0.0,
      "threshold": 1.962,
      "pass": true
     },
@@ -1174,8 +1150,8 @@
    },
    "detail": {
     "shiftPx": [0, 0],
-    "sheetPx": 14,
-    "oursPx": 5,
+    "sheetPx": 21,
+    "oursPx": 7,
     "toneAt": null,
     "inkAt": null
    },
@@ -1256,9 +1232,9 @@
     }
    },
    "detail": {
-    "shiftPx": [-1, -1],
+    "shiftPx": [2, 0],
     "piecesShiftPx": [
-     [-1, -1]
+     [2, 0]
     ],
     "sheetPx": 0,
     "oursPx": 0
@@ -1272,7 +1248,7 @@
    "calibrated": true,
    "measures": {
     "recall": {
-     "value": 0.6,
+     "value": 0.714,
      "threshold": null
     },
     "precision": {
@@ -1302,12 +1278,12 @@
      "threshold": null
     },
     "regionInkLog": {
-     "value": -1.339,
+     "value": -0.682,
      "threshold": 0.914,
-     "pass": false
+     "pass": true
     },
     "hardSeamPt": {
-     "value": 3.27,
+     "value": 0.0,
      "threshold": 7.062,
      "pass": true
     },
@@ -1329,12 +1305,12 @@
      "threshold": 0.124
     },
     "furRmsPt": {
-     "value": 0.072,
+     "value": 0.074,
      "threshold": 0.175,
      "pass": false
     },
     "furCrossings10Pt": {
-     "value": 0.0,
+     "value": 0.187,
      "threshold": 0.868,
      "pass": false
     },
@@ -1344,16 +1320,15 @@
     }
    },
    "detail": {
-    "shiftPx": [-3, -3],
+    "shiftPx": [1, 0],
     "piecesShiftPx": [
-     [-3, -3]
+     [1, 0]
     ],
-    "sheetPx": 5,
-    "oursPx": 0,
-    "furLengthPt": 53.8
+    "sheetPx": 7,
+    "oursPx": 2,
+    "furLengthPt": 53.5
    },
    "failed": [
-    "regionInkLog",
     "furRmsPt",
     "furCrossings10Pt"
    ],
@@ -1373,7 +1348,7 @@
      "threshold": null
     },
     "gapPt": {
-     "value": 1.57,
+     "value": 0.0,
      "threshold": 3.948,
      "pass": true
     },
@@ -1432,9 +1407,9 @@
     }
    },
    "detail": {
-    "shiftPx": [-3, -3],
-    "sheetPx": 3,
-    "oursPx": 0,
+    "shiftPx": [1, 0],
+    "sheetPx": 2,
+    "oursPx": 1,
     "inkAt": null
    },
    "failed": [],
@@ -1446,7 +1421,7 @@
    "calibrated": true,
    "measures": {
     "recall": {
-     "value": 0.0,
+     "value": null,
      "threshold": null
     },
     "precision": {
@@ -1454,9 +1429,9 @@
      "threshold": null
     },
     "gapPt": {
-     "value": 2.35,
+     "value": 0.0,
      "threshold": 1.962,
-     "pass": false
+     "pass": true
     },
     "weakPt": {
      "value": null,
@@ -1476,9 +1451,9 @@
      "threshold": null
     },
     "regionInkLog": {
-     "value": -1.031,
+     "value": 0.011,
      "threshold": 0.987,
-     "pass": false
+     "pass": true
     },
     "hardSeamPt": {
      "value": null,
@@ -1509,25 +1484,22 @@
      "threshold": null
     },
     "risePt": {
-     "value": 0.517,
+     "value": 0.5,
      "threshold": 0.697,
      "pass": true
     }
    },
    "detail": {
-    "shiftPx": [-1, -3],
+    "shiftPx": [1, 0],
     "piecesShiftPx": [
-     [4, -3],
-     [-1, -3]
+     [1, 0],
+     [1, 0]
     ],
-    "sheetPx": 5,
+    "sheetPx": 0,
     "oursPx": 0
    },
-   "failed": [
-    "gapPt",
-    "regionInkLog"
-   ],
-   "pass": false
+   "failed": [],
+   "pass": true
   },
   "collar|outside across": {
    "what": "the collar's edge: the lines across it (toe lines, notches, tufts)",
@@ -1535,7 +1507,7 @@
    "calibrated": true,
    "measures": {
     "recall": {
-     "value": 0.0,
+     "value": null,
      "threshold": null
     },
     "precision": {
@@ -1543,12 +1515,12 @@
      "threshold": null
     },
     "gapPt": {
-     "value": 2.35,
+     "value": 0.0,
      "threshold": 1.962,
-     "pass": false
+     "pass": true
     },
     "weakPt": {
-     "value": 0.0,
+     "value": null,
      "threshold": null
     },
     "extraPt": {
@@ -1602,15 +1574,13 @@
     }
    },
    "detail": {
-    "shiftPx": [-1, -3],
-    "sheetPx": 5,
+    "shiftPx": [1, 0],
+    "sheetPx": 0,
     "oursPx": 0,
     "inkAt": null
    },
-   "failed": [
-    "gapPt"
-   ],
-   "pass": false
+   "failed": [],
+   "pass": true
   },
   "ear.L": {
    "what": "the ear's locks",
@@ -1618,15 +1588,16 @@
    "calibrated": true,
    "measures": {
     "recall": {
-     "value": 0.0,
-     "threshold": null
+     "value": 0.692,
+     "threshold": 0.831,
+     "pass": false
     },
     "precision": {
      "value": null,
      "threshold": null
     },
     "gapPt": {
-     "value": 5.49,
+     "value": 2.54,
      "threshold": 1.962,
      "pass": false
     },
@@ -1641,17 +1612,17 @@
      "pass": true
     },
     "toneDelta": {
-     "value": 11.8,
+     "value": 6.3,
      "threshold": 3.872,
      "pass": false
     },
     "inkLog": {
-     "value": -0.688,
+     "value": -0.217,
      "threshold": 0.419,
-     "pass": false
+     "pass": true
     },
     "regionInkLog": {
-     "value": -0.375,
+     "value": 0.301,
      "threshold": 0.458,
      "pass": true
     },
@@ -1664,6 +1635,196 @@
      "threshold": null
     },
     "widthPt": {
+     "value": 0.698,
+     "threshold": null
+    },
+    "soleMiddlePt": {
+     "value": null,
+     "threshold": null
+    },
+    "widthCv": {
+     "value": 0.172,
+     "threshold": null
+    },
+    "furRmsPt": {
+     "value": null,
+     "threshold": null
+    },
+    "furCrossings10Pt": {
+     "value": null,
+     "threshold": null
+    },
+    "risePt": {
+     "value": null,
+     "threshold": null
+    }
+   },
+   "detail": {
+    "shiftPx": [0, 1],
+    "piecesShiftPx": [
+     [0, 1]
+    ],
+    "sheetPx": 13,
+    "oursPx": 0,
+    "toneAt": [-70.4, -82.4],
+    "inkAt": [-70.4, -82.4],
+    "widthMedianPt": 0.903
+   },
+   "failed": [
+    "recall",
+    "gapPt",
+    "toneDelta"
+   ],
+   "pass": false
+  },
+  "ear.L|head.base": {
+   "what": "the cheek and crown over the ear",
+   "contact": true,
+   "calibrated": true,
+   "measures": {
+    "recall": {
+     "value": 0.955,
+     "threshold": 0.886,
+     "pass": true
+    },
+    "precision": {
+     "value": 1.0,
+     "threshold": 0.9,
+     "pass": true
+    },
+    "gapPt": {
+     "value": 1.57,
+     "threshold": 1.962,
+     "pass": true
+    },
+    "weakPt": {
+     "value": 0.0,
+     "threshold": 4.865,
+     "pass": true
+    },
+    "extraPt": {
+     "value": 0.0,
+     "threshold": 1.962,
+     "pass": true
+    },
+    "toneDelta": {
+     "value": 3.7,
+     "threshold": 9.031,
+     "pass": true
+    },
+    "inkLog": {
+     "value": 0.706,
+     "threshold": 0.78,
+     "pass": true
+    },
+    "regionInkLog": {
+     "value": 0.048,
+     "threshold": 0.405,
+     "pass": true
+    },
+    "hardSeamPt": {
+     "value": 0.0,
+     "threshold": 7.66,
+     "pass": true
+    },
+    "lightSeamPt": {
+     "value": 1.89,
+     "threshold": 7.062,
+     "pass": true
+    },
+    "widthPt": {
+     "value": 1.205,
+     "threshold": 1.698,
+     "pass": true
+    },
+    "soleMiddlePt": {
+     "value": null,
+     "threshold": null
+    },
+    "widthCv": {
+     "value": 0.16,
+     "threshold": 0.124,
+     "pass": true
+    },
+    "furRmsPt": {
+     "value": 0.318,
+     "threshold": 0.306,
+     "pass": true
+    },
+    "furCrossings10Pt": {
+     "value": 0.656,
+     "threshold": 0.548,
+     "pass": true
+    },
+    "risePt": {
+     "value": null,
+     "threshold": null
+    }
+   },
+   "detail": {
+    "shiftPx": [1, 0],
+    "piecesShiftPx": [
+     [1, 0]
+    ],
+    "sheetPx": 66,
+    "oursPx": 39,
+    "toneAt": [-35.9, -80.0],
+    "inkAt": [-37.5, -84.0],
+    "widthMedianPt": 1.362,
+    "furLengthPt": 76.2
+   },
+   "failed": [],
+   "pass": true
+  },
+  "ear.L|head.base across": {
+   "what": "the cheek and crown over the ear: the lines across it (toe lines, notches, tufts)",
+   "contact": true,
+   "calibrated": true,
+   "measures": {
+    "recall": {
+     "value": 1.0,
+     "threshold": null
+    },
+    "precision": {
+     "value": null,
+     "threshold": null
+    },
+    "gapPt": {
+     "value": 0.0,
+     "threshold": 1.962,
+     "pass": true
+    },
+    "weakPt": {
+     "value": 0.0,
+     "threshold": 1.962,
+     "pass": true
+    },
+    "extraPt": {
+     "value": 0.0,
+     "threshold": 1.962,
+     "pass": true
+    },
+    "toneDelta": {
+     "value": null,
+     "threshold": null
+    },
+    "inkLog": {
+     "value": null,
+     "threshold": null
+    },
+    "regionInkLog": {
+     "value": null,
+     "threshold": null
+    },
+    "hardSeamPt": {
+     "value": null,
+     "threshold": null
+    },
+    "lightSeamPt": {
+     "value": null,
+     "threshold": null
+    },
+    "widthPt": {
      "value": null,
      "threshold": null
     },
@@ -1690,203 +1851,8 @@
    },
    "detail": {
     "shiftPx": [1, 0],
-    "piecesShiftPx": [
-     [1, 0]
-    ],
-    "sheetPx": 9,
-    "oursPx": 0,
-    "toneAt": [-70.4, -87.1],
-    "inkAt": [-70.4, -87.1]
-   },
-   "failed": [
-    "gapPt",
-    "toneDelta",
-    "inkLog"
-   ],
-   "pass": false
-  },
-  "ear.L|head.base": {
-   "what": "the cheek and crown over the ear",
-   "contact": true,
-   "calibrated": true,
-   "measures": {
-    "recall": {
-     "value": 0.844,
-     "threshold": 0.886,
-     "pass": false
-    },
-    "precision": {
-     "value": 1.0,
-     "threshold": 0.875,
-     "pass": true
-    },
-    "gapPt": {
-     "value": 3.61,
-     "threshold": 1.962,
-     "pass": false
-    },
-    "weakPt": {
-     "value": 1.57,
-     "threshold": 4.865,
-     "pass": true
-    },
-    "extraPt": {
-     "value": 0.0,
-     "threshold": 1.962,
-     "pass": true
-    },
-    "toneDelta": {
-     "value": 15.2,
-     "threshold": 9.031,
-     "pass": false
-    },
-    "inkLog": {
-     "value": -0.476,
-     "threshold": 0.78,
-     "pass": true
-    },
-    "regionInkLog": {
-     "value": -0.182,
-     "threshold": 0.405,
-     "pass": true
-    },
-    "hardSeamPt": {
-     "value": 0.0,
-     "threshold": 7.66,
-     "pass": true
-    },
-    "lightSeamPt": {
-     "value": 8.63,
-     "threshold": 7.062,
-     "pass": false
-    },
-    "widthPt": {
-     "value": 1.319,
-     "threshold": 1.698,
-     "pass": true
-    },
-    "soleMiddlePt": {
-     "value": null,
-     "threshold": null
-    },
-    "widthCv": {
-     "value": 0.154,
-     "threshold": 0.124,
-     "pass": true
-    },
-    "furRmsPt": {
-     "value": 0.257,
-     "threshold": 0.306,
-     "pass": false
-    },
-    "furCrossings10Pt": {
-     "value": 1.049,
-     "threshold": 0.548,
-     "pass": true
-    },
-    "risePt": {
-     "value": null,
-     "threshold": null
-    }
-   },
-   "detail": {
-    "shiftPx": [1, 1],
-    "piecesShiftPx": [
-     [1, 1]
-    ],
-    "sheetPx": 64,
-    "oursPx": 16,
-    "toneAt": [-37.5, -76.9],
-    "inkAt": [-39.0, -96.5],
-    "widthMedianPt": 1.379,
-    "furLengthPt": 76.2
-   },
-   "failed": [
-    "recall",
-    "gapPt",
-    "toneDelta",
-    "lightSeamPt",
-    "furRmsPt"
-   ],
-   "pass": false
-  },
-  "ear.L|head.base across": {
-   "what": "the cheek and crown over the ear: the lines across it (toe lines, notches, tufts)",
-   "contact": true,
-   "calibrated": true,
-   "measures": {
-    "recall": {
-     "value": 0.833,
-     "threshold": null
-    },
-    "precision": {
-     "value": null,
-     "threshold": null
-    },
-    "gapPt": {
-     "value": 0.78,
-     "threshold": 1.962,
-     "pass": true
-    },
-    "weakPt": {
-     "value": 0.0,
-     "threshold": 1.962,
-     "pass": true
-    },
-    "extraPt": {
-     "value": 0.0,
-     "threshold": 1.962,
-     "pass": true
-    },
-    "toneDelta": {
-     "value": null,
-     "threshold": null
-    },
-    "inkLog": {
-     "value": null,
-     "threshold": null
-    },
-    "regionInkLog": {
-     "value": null,
-     "threshold": null
-    },
-    "hardSeamPt": {
-     "value": null,
-     "threshold": null
-    },
-    "lightSeamPt": {
-     "value": null,
-     "threshold": null
-    },
-    "widthPt": {
-     "value": null,
-     "threshold": null
-    },
-    "soleMiddlePt": {
-     "value": null,
-     "threshold": null
-    },
-    "widthCv": {
-     "value": null,
-     "threshold": null
-    },
-    "furRmsPt": {
-     "value": null,
-     "threshold": null
-    },
-    "furCrossings10Pt": {
-     "value": null,
-     "threshold": null
-    },
-    "risePt": {
-     "value": null,
-     "threshold": null
-    }
-   },
-   "detail": {
-    "shiftPx": [1, 1],
-    "sheetPx": 6,
-    "oursPx": 1,
+    "sheetPx": 8,
+    "oursPx": 3,
     "toneAt": null,
     "inkAt": null
    },
@@ -1899,21 +1865,22 @@
    "calibrated": true,
    "measures": {
     "recall": {
-     "value": 0.959,
+     "value": 1.0,
      "threshold": 0.894,
      "pass": true
     },
     "precision": {
-     "value": null,
-     "threshold": null
+     "value": 1.0,
+     "threshold": 0.892,
+     "pass": true
     },
     "gapPt": {
-     "value": 1.57,
+     "value": 0.0,
      "threshold": 1.962,
      "pass": true
     },
     "weakPt": {
-     "value": 1.57,
+     "value": 0.78,
      "threshold": 1.962,
      "pass": true
     },
@@ -1923,17 +1890,17 @@
      "pass": true
     },
     "toneDelta": {
-     "value": 8.6,
+     "value": -4.6,
      "threshold": 9.336,
      "pass": true
     },
     "inkLog": {
-     "value": 0.852,
+     "value": 1.104,
      "threshold": 0.973,
-     "pass": true
+     "pass": false
     },
     "regionInkLog": {
-     "value": 0.1,
+     "value": 0.535,
      "threshold": 0.745,
      "pass": true
     },
@@ -1946,7 +1913,7 @@
      "threshold": null
     },
     "widthPt": {
-     "value": 1.128,
+     "value": 1.172,
      "threshold": 1.401,
      "pass": true
     },
@@ -1955,40 +1922,43 @@
      "threshold": null
     },
     "widthCv": {
-     "value": 0.16,
+     "value": 0.104,
      "threshold": 0.153,
-     "pass": true
+     "pass": false
     },
     "furRmsPt": {
-     "value": 0.172,
+     "value": 0.227,
      "threshold": 0.135,
      "pass": true
     },
     "furCrossings10Pt": {
-     "value": 0.783,
+     "value": 0.889,
      "threshold": 0.141,
      "pass": true
     },
     "risePt": {
-     "value": 0.467,
+     "value": 0.433,
      "threshold": 0.697,
      "pass": true
     }
    },
    "detail": {
-    "shiftPx": [1, 0],
+    "shiftPx": [0, 1],
     "piecesShiftPx": [
-     [1, 0]
+     [0, 1]
     ],
-    "sheetPx": 148,
-    "oursPx": 1,
-    "toneAt": [-73.6, -80.8],
+    "sheetPx": 140,
+    "oursPx": 35,
+    "toneAt": [-60.2, -120.8],
     "inkAt": [-60.2, -121.6],
-    "widthMedianPt": 1.213,
-    "furLengthPt": 115.0
+    "widthMedianPt": 1.245,
+    "furLengthPt": 112.5
    },
-   "failed": [],
-   "pass": true
+   "failed": [
+    "inkLog",
+    "widthCv"
+   ],
+   "pass": false
   },
   "ear.L|outside across": {
    "what": "the ear's outer edge and hem: the lines across it (toe lines, notches, tufts)",
@@ -1996,7 +1966,7 @@
    "calibrated": true,
    "measures": {
     "recall": {
-     "value": 0.933,
+     "value": 1.0,
      "threshold": 0.8,
      "pass": true
     },
@@ -2005,7 +1975,7 @@
      "threshold": null
     },
     "gapPt": {
-     "value": 0.78,
+     "value": 0.0,
      "threshold": 1.962,
      "pass": true
     },
@@ -2020,8 +1990,9 @@
      "pass": true
     },
     "toneDelta": {
-     "value": null,
-     "threshold": 10.953
+     "value": 4.1,
+     "threshold": 10.953,
+     "pass": true
     },
     "inkLog": {
      "value": null,
@@ -2065,10 +2036,10 @@
     }
    },
    "detail": {
-    "shiftPx": [1, 0],
-    "sheetPx": 15,
-    "oursPx": 0,
-    "toneAt": null,
+    "shiftPx": [0, 1],
+    "sheetPx": 16,
+    "oursPx": 1,
+    "toneAt": [-71.2, -80.8],
     "inkAt": null
    },
    "failed": [],
@@ -2080,7 +2051,7 @@
    "calibrated": true,
    "measures": {
     "recall": {
-     "value": 0.0,
+     "value": 0.875,
      "threshold": null
     },
     "precision": {
@@ -2088,9 +2059,9 @@
      "threshold": null
     },
     "gapPt": {
-     "value": 7.26,
+     "value": 0.78,
      "threshold": 1.962,
-     "pass": false
+     "pass": true
     },
     "weakPt": {
      "value": 0.0,
@@ -2103,17 +2074,17 @@
      "pass": true
     },
     "toneDelta": {
-     "value": 11.1,
+     "value": 2.6,
      "threshold": 3.347,
-     "pass": false
+     "pass": true
     },
     "inkLog": {
-     "value": -0.922,
+     "value": -0.22,
      "threshold": 0.628,
-     "pass": false
+     "pass": true
     },
     "regionInkLog": {
-     "value": -0.459,
+     "value": 0.602,
      "threshold": 0.89,
      "pass": true
     },
@@ -2126,7 +2097,7 @@
      "threshold": null
     },
     "widthPt": {
-     "value": null,
+     "value": 0.886,
      "threshold": null
     },
     "soleMiddlePt": {
@@ -2134,7 +2105,7 @@
      "threshold": null
     },
     "widthCv": {
-     "value": null,
+     "value": 0.115,
      "threshold": null
     },
     "furRmsPt": {
@@ -2155,17 +2126,14 @@
     "piecesShiftPx": [
      [0, 0]
     ],
-    "sheetPx": 9,
+    "sheetPx": 8,
     "oursPx": 0,
-    "toneAt": [69.2, -81.6],
-    "inkAt": [69.2, -82.4]
+    "toneAt": [70.0, -83.2],
+    "inkAt": [70.0, -85.5],
+    "widthMedianPt": 0.93
    },
-   "failed": [
-    "gapPt",
-    "toneDelta",
-    "inkLog"
-   ],
-   "pass": false
+   "failed": [],
+   "pass": true
   },
   "ear.R|head.base": {
    "what": "the cheek and crown over the ear",
@@ -2173,23 +2141,24 @@
    "calibrated": true,
    "measures": {
     "recall": {
-     "value": 0.75,
+     "value": 0.985,
      "threshold": 0.872,
-     "pass": false
+     "pass": true
     },
     "precision": {
      "value": 1.0,
-     "threshold": null
+     "threshold": 0.875,
+     "pass": true
     },
     "gapPt": {
-     "value": 3.92,
+     "value": 0.78,
      "threshold": 1.962,
-     "pass": false
+     "pass": true
     },
     "weakPt": {
-     "value": 3.61,
+     "value": 0.0,
      "threshold": 1.962,
-     "pass": false
+     "pass": true
     },
     "extraPt": {
      "value": 0.0,
@@ -2197,17 +2166,17 @@
      "pass": true
     },
     "toneDelta": {
-     "value": 23.4,
+     "value": 3.7,
      "threshold": 4.939,
-     "pass": false
+     "pass": true
     },
     "inkLog": {
-     "value": -1.085,
+     "value": 0.557,
      "threshold": 0.852,
-     "pass": false
+     "pass": true
     },
     "regionInkLog": {
-     "value": -0.099,
+     "value": 0.117,
      "threshold": 0.405,
      "pass": true
     },
@@ -2217,12 +2186,12 @@
      "pass": true
     },
     "lightSeamPt": {
-     "value": 11.31,
+     "value": 2.54,
      "threshold": 8.626,
-     "pass": false
+     "pass": true
     },
     "widthPt": {
-     "value": 1.325,
+     "value": 1.229,
      "threshold": 1.698,
      "pass": true
     },
@@ -2231,17 +2200,17 @@
      "threshold": null
     },
     "widthCv": {
-     "value": 0.155,
+     "value": 0.131,
      "threshold": 0.124,
      "pass": true
     },
     "furRmsPt": {
-     "value": 0.263,
+     "value": 0.3,
      "threshold": 0.306,
      "pass": false
     },
     "furCrossings10Pt": {
-     "value": 0.656,
+     "value": 1.019,
      "threshold": 0.548,
      "pass": true
     },
@@ -2251,24 +2220,18 @@
     }
    },
    "detail": {
-    "shiftPx": [1, 2],
+    "shiftPx": [0, 0],
     "piecesShiftPx": [
-     [1, 2]
+     [0, 0]
     ],
-    "sheetPx": 64,
-    "oursPx": 9,
-    "toneAt": [38.6, -79.3],
-    "inkAt": [38.6, -79.3],
-    "widthMedianPt": 1.435,
-    "furLengthPt": 76.2
+    "sheetPx": 67,
+    "oursPx": 37,
+    "toneAt": [38.6, -80.0],
+    "inkAt": [37.1, -82.4],
+    "widthMedianPt": 1.338,
+    "furLengthPt": 78.5
    },
    "failed": [
-    "recall",
-    "gapPt",
-    "weakPt",
-    "toneDelta",
-    "inkLog",
-    "lightSeamPt",
     "furRmsPt"
    ],
    "pass": false
@@ -2279,18 +2242,18 @@
    "calibrated": true,
    "measures": {
     "recall": {
-     "value": 0.571,
+     "value": 0.909,
      "threshold": 0.803,
-     "pass": false
+     "pass": true
     },
     "precision": {
      "value": null,
      "threshold": null
     },
     "gapPt": {
-     "value": 2.35,
+     "value": 0.78,
      "threshold": 1.962,
-     "pass": false
+     "pass": true
     },
     "weakPt": {
      "value": 0.0,
@@ -2348,17 +2311,13 @@
     }
    },
    "detail": {
-    "shiftPx": [1, 2],
-    "sheetPx": 14,
-    "oursPx": 2,
-    "toneAt": null,
+    "shiftPx": [0, 0],
+    "sheetPx": 11,
+    "oursPx": 1,
     "inkAt": null
    },
-   "failed": [
-    "recall",
-    "gapPt"
-   ],
-   "pass": false
+   "failed": [],
+   "pass": true
   },
   "ear.R|outside": {
    "what": "the ear's outer edge and hem",
@@ -2366,22 +2325,22 @@
    "calibrated": true,
    "measures": {
     "recall": {
-     "value": 0.931,
+     "value": 1.0,
      "threshold": 0.893,
      "pass": true
     },
     "precision": {
      "value": 1.0,
-     "threshold": 0.833,
+     "threshold": 0.892,
      "pass": true
     },
     "gapPt": {
-     "value": 2.35,
+     "value": 0.0,
      "threshold": 1.962,
-     "pass": false
+     "pass": true
     },
     "weakPt": {
-     "value": 1.57,
+     "value": 0.0,
      "threshold": 1.962,
      "pass": true
     },
@@ -2391,17 +2350,17 @@
      "pass": true
     },
     "toneDelta": {
-     "value": 7.4,
+     "value": -7.3,
      "threshold": 4.687,
      "pass": false
     },
     "inkLog": {
-     "value": 1.155,
+     "value": 1.332,
      "threshold": 0.783,
      "pass": false
     },
     "regionInkLog": {
-     "value": 0.357,
+     "value": 0.513,
      "threshold": 0.999,
      "pass": true
     },
@@ -2414,7 +2373,7 @@
      "threshold": null
     },
     "widthPt": {
-     "value": 1.149,
+     "value": 1.194,
      "threshold": 1.401,
      "pass": true
     },
@@ -2423,17 +2382,17 @@
      "threshold": null
     },
     "widthCv": {
-     "value": 0.127,
+     "value": 0.099,
      "threshold": 0.153,
      "pass": false
     },
     "furRmsPt": {
-     "value": 0.178,
+     "value": 0.227,
      "threshold": 0.135,
      "pass": true
     },
     "furCrossings10Pt": {
-     "value": 0.626,
+     "value": 1.156,
      "threshold": 0.141,
      "pass": true
     },
@@ -2449,14 +2408,13 @@
      [-1, 0]
     ],
     "sheetPx": 130,
-    "oursPx": 12,
-    "toneAt": [72.4, -81.6],
+    "oursPx": 25,
+    "toneAt": [62.2, -120.8],
     "inkAt": [62.2, -120.8],
-    "widthMedianPt": 1.244,
-    "furLengthPt": 111.8
+    "widthMedianPt": 1.282,
+    "furLengthPt": 112.5
    },
    "failed": [
-    "gapPt",
     "toneDelta",
     "inkLog",
     "widthCv"
@@ -2470,7 +2428,8 @@
    "measures": {
     "recall": {
      "value": 1.0,
-     "threshold": null
+     "threshold": 0.8,
+     "pass": true
     },
     "precision": {
      "value": null,
@@ -2538,8 +2497,9 @@
    },
    "detail": {
     "shiftPx": [-1, 0],
-    "sheetPx": 6,
+    "sheetPx": 11,
     "oursPx": 0,
+    "toneAt": null,
     "inkAt": null
    },
    "failed": [],
@@ -2551,21 +2511,21 @@
    "calibrated": true,
    "measures": {
     "recall": {
-     "value": 0.143,
+     "value": 0.762,
      "threshold": 0.447,
-     "pass": false
+     "pass": true
     },
     "precision": {
-     "value": null,
+     "value": 1.0,
      "threshold": null
     },
     "gapPt": {
-     "value": 3.92,
+     "value": 1.57,
      "threshold": 6.039,
      "pass": true
     },
     "weakPt": {
-     "value": 1.57,
+     "value": 0.78,
      "threshold": 1.962,
      "pass": true
     },
@@ -2579,12 +2539,11 @@
      "threshold": 30.308
     },
     "inkLog": {
-     "value": -1.017,
-     "threshold": 1.117,
-     "pass": true
+     "value": null,
+     "threshold": 1.117
     },
     "regionInkLog": {
-     "value": -1.736,
+     "value": -1.041,
      "threshold": 0.746,
      "pass": false
     },
@@ -2597,7 +2556,7 @@
      "threshold": null
     },
     "widthPt": {
-     "value": null,
+     "value": 0.944,
      "threshold": null
     },
     "soleMiddlePt": {
@@ -2622,17 +2581,17 @@
     }
    },
    "detail": {
-    "shiftPx": [1, 1],
+    "shiftPx": [0, 1],
     "piecesShiftPx": [
-     [1, 1]
+     [0, 1]
     ],
-    "sheetPx": 28,
-    "oursPx": 1,
+    "sheetPx": 21,
+    "oursPx": 9,
     "toneAt": null,
-    "inkAt": [33.2, -148.3]
+    "inkAt": null,
+    "widthMedianPt": 0.98
    },
    "failed": [
-    "recall",
     "regionInkLog"
    ],
    "pass": false
@@ -2643,7 +2602,7 @@
    "calibrated": true,
    "measures": {
     "recall": {
-     "value": 0.958,
+     "value": 1.0,
      "threshold": 0.9,
      "pass": true
     },
@@ -2653,14 +2612,14 @@
      "pass": true
     },
     "gapPt": {
-     "value": 1.57,
+     "value": 0.0,
      "threshold": 1.962,
      "pass": true
     },
     "weakPt": {
-     "value": 4.02,
+     "value": 0.0,
      "threshold": 1.962,
-     "pass": false
+     "pass": true
     },
     "extraPt": {
      "value": 0.0,
@@ -2668,17 +2627,17 @@
      "pass": true
     },
     "toneDelta": {
-     "value": 9.8,
+     "value": -8.6,
      "threshold": 3.599,
      "pass": false
     },
     "inkLog": {
-     "value": -0.79,
+     "value": 0.431,
      "threshold": 0.362,
      "pass": false
     },
     "regionInkLog": {
-     "value": -0.02,
+     "value": 0.132,
      "threshold": 0.405,
      "pass": true
     },
@@ -2691,7 +2650,7 @@
      "threshold": null
     },
     "widthPt": {
-     "value": 1.292,
+     "value": 1.227,
      "threshold": 1.698,
      "pass": true
     },
@@ -2700,7 +2659,7 @@
      "threshold": null
     },
     "widthCv": {
-     "value": 0.098,
+     "value": 0.097,
      "threshold": 0.124,
      "pass": false
     },
@@ -2713,9 +2672,9 @@
      "threshold": null
     },
     "risePt": {
-     "value": 0.833,
+     "value": 0.5,
      "threshold": 0.697,
-     "pass": false
+     "pass": true
     }
    },
    "detail": {
@@ -2723,21 +2682,19 @@
     "piecesShiftPx": [
      [2, 1],
      [-1, 1],
-     [4, -3],
-     [-3, -3]
+     [1, 0],
+     [0, 0]
     ],
-    "sheetPx": 95,
-    "oursPx": 79,
-    "toneAt": [-28.8, -71.4],
-    "inkAt": [-28.8, -71.4],
-    "widthMedianPt": 1.339
+    "sheetPx": 88,
+    "oursPx": 82,
+    "toneAt": [-17.1, -155.4],
+    "inkAt": [-18.6, -155.4],
+    "widthMedianPt": 1.29
    },
    "failed": [
-    "weakPt",
     "toneDelta",
     "inkLog",
-    "widthCv",
-    "risePt"
+    "widthCv"
    ],
    "pass": false
   },
@@ -2748,8 +2705,7 @@
    "measures": {
     "recall": {
      "value": 1.0,
-     "threshold": 0.857,
-     "pass": true
+     "threshold": null
     },
     "precision": {
      "value": 1.0,
@@ -2761,7 +2717,7 @@
      "pass": true
     },
     "weakPt": {
-     "value": 1.89,
+     "value": 0.0,
      "threshold": 1.962,
      "pass": true
     },
@@ -2817,8 +2773,8 @@
    },
    "detail": {
     "shiftPx": [2, 1],
-    "sheetPx": 14,
-    "oursPx": 5,
+    "sheetPx": 6,
+    "oursPx": 4,
     "inkAt": null
    },
    "failed": [],
@@ -2830,21 +2786,22 @@
    "calibrated": true,
    "measures": {
     "recall": {
-     "value": 0.8,
-     "threshold": 0.867,
-     "pass": false
+     "value": 1.0,
+     "threshold": 0.9,
+     "pass": true
     },
     "precision": {
      "value": 1.0,
-     "threshold": null
+     "threshold": 0.867,
+     "pass": true
     },
     "gapPt": {
-     "value": 2.54,
+     "value": 0.0,
      "threshold": 1.962,
-     "pass": false
+     "pass": true
     },
     "weakPt": {
-     "value": 1.89,
+     "value": 0.78,
      "threshold": 1.962,
      "pass": true
     },
@@ -2854,17 +2811,17 @@
      "pass": true
     },
     "toneDelta": {
-     "value": 1.4,
+     "value": 4.9,
      "threshold": 3.185,
-     "pass": true
+     "pass": false
     },
     "inkLog": {
-     "value": 0.006,
+     "value": 0.297,
      "threshold": 0.339,
      "pass": true
     },
     "regionInkLog": {
-     "value": 0.045,
+     "value": 0.217,
      "threshold": 0.408,
      "pass": true
     },
@@ -2879,7 +2836,7 @@
      "pass": true
     },
     "widthPt": {
-     "value": 0.946,
+     "value": 1.013,
      "threshold": 1.698,
      "pass": true
     },
@@ -2909,15 +2866,14 @@
     "piecesShiftPx": [
      [0, 1]
     ],
-    "sheetPx": 15,
-    "oursPx": 9,
-    "toneAt": [20.6, -156.2],
-    "inkAt": [20.6, -156.2],
-    "widthMedianPt": 1.271
+    "sheetPx": 20,
+    "oursPx": 15,
+    "toneAt": [-11.6, -153.8],
+    "inkAt": [23.7, -155.4],
+    "widthMedianPt": 1.695
    },
    "failed": [
-    "recall",
-    "gapPt"
+    "toneDelta"
    ],
    "pass": false
   },
@@ -2996,7 +2952,7 @@
    },
    "detail": {
     "shiftPx": [0, 1],
-    "sheetPx": 4,
+    "sheetPx": 5,
     "oursPx": 1,
     "inkAt": null
    },
@@ -3010,13 +2966,12 @@
    "measures": {
     "recall": {
      "value": 1.0,
-     "threshold": 0.889,
+     "threshold": 0.846,
      "pass": true
     },
     "precision": {
      "value": 1.0,
-     "threshold": 0.9,
-     "pass": true
+     "threshold": null
     },
     "gapPt": {
      "value": 0.0,
@@ -3034,17 +2989,17 @@
      "pass": true
     },
     "toneDelta": {
-     "value": -10.5,
+     "value": -2.8,
      "threshold": 3.278,
-     "pass": false
+     "pass": true
     },
     "inkLog": {
-     "value": 0.36,
+     "value": -0.161,
      "threshold": 0.288,
-     "pass": false
+     "pass": true
     },
     "regionInkLog": {
-     "value": 0.472,
+     "value": -0.145,
      "threshold": 0.591,
      "pass": true
     },
@@ -3057,29 +3012,26 @@
      "threshold": null
     },
     "widthPt": {
-     "value": 1.509,
+     "value": 1.363,
      "threshold": 1.522,
      "pass": true
     },
     "soleMiddlePt": {
-     "value": 1.582,
+     "value": 1.392,
      "threshold": 1.444,
-     "pass": false
-    },
-    "widthCv": {
-     "value": 0.044,
-     "threshold": 0.084,
-     "pass": false
-    },
-    "furRmsPt": {
-     "value": 0.112,
-     "threshold": 0.085,
      "pass": true
     },
+    "widthCv": {
+     "value": null,
+     "threshold": 0.084
+    },
+    "furRmsPt": {
+     "value": null,
+     "threshold": 0.085
+    },
     "furCrossings10Pt": {
-     "value": 0.0,
-     "threshold": 0.643,
-     "pass": false
+     "value": null,
+     "threshold": 0.643
     },
     "risePt": {
      "value": null,
@@ -3087,25 +3039,18 @@
     }
    },
    "detail": {
-    "shiftPx": [0, -2],
+    "shiftPx": [0, -1],
     "piecesShiftPx": [
-     [0, -2]
+     [0, -1]
     ],
-    "sheetPx": 18,
-    "oursPx": 24,
-    "toneAt": [-39.8, -5.5],
-    "inkAt": [-39.0, -4.7],
-    "widthMedianPt": 1.566,
-    "furLengthPt": 15.0
+    "sheetPx": 13,
+    "oursPx": 8,
+    "toneAt": [-46.1, -9.4],
+    "inkAt": [-40.6, -5.5],
+    "widthMedianPt": 1.392
    },
-   "failed": [
-    "toneDelta",
-    "inkLog",
-    "soleMiddlePt",
-    "widthCv",
-    "furCrossings10Pt"
-   ],
-   "pass": false
+   "failed": [],
+   "pass": true
   },
   "hind.L|ground across": {
    "what": "the hind paw's sole: the lines across it (toe lines, notches, tufts)",
@@ -3180,9 +3125,9 @@
     }
    },
    "detail": {
-    "shiftPx": [0, -2],
+    "shiftPx": [0, -1],
     "sheetPx": 2,
-    "oursPx": 1,
+    "oursPx": 0,
     "inkAt": null
    },
    "failed": [],
@@ -3224,7 +3169,7 @@
      "threshold": null
     },
     "regionInkLog": {
-     "value": -0.327,
+     "value": 0.277,
      "threshold": 0.574,
      "pass": true
     },
@@ -3237,8 +3182,9 @@
      "threshold": null
     },
     "widthPt": {
-     "value": null,
-     "threshold": 1.474
+     "value": 1.42,
+     "threshold": 1.474,
+     "pass": true
     },
     "soleMiddlePt": {
      "value": null,
@@ -3262,12 +3208,13 @@
     }
    },
    "detail": {
-    "shiftPx": [1, 0],
+    "shiftPx": [0, 0],
     "piecesShiftPx": [
-     [1, 0]
+     [0, 0]
     ],
-    "sheetPx": 4,
-    "oursPx": 4
+    "sheetPx": 5,
+    "oursPx": 5,
+    "widthMedianPt": 1.467
    },
    "failed": [],
    "pass": true
@@ -3345,8 +3292,8 @@
     }
    },
    "detail": {
-    "shiftPx": [1, 0],
-    "sheetPx": 0,
+    "shiftPx": [0, 0],
+    "sheetPx": 1,
     "oursPx": 1,
     "inkAt": null
    },
@@ -3360,12 +3307,12 @@
    "measures": {
     "recall": {
      "value": 1.0,
-     "threshold": 0.9,
+     "threshold": 0.8,
      "pass": true
     },
     "precision": {
      "value": 1.0,
-     "threshold": 0.9,
+     "threshold": 0.8,
      "pass": true
     },
     "gapPt": {
@@ -3374,7 +3321,7 @@
      "pass": true
     },
     "weakPt": {
-     "value": 0.78,
+     "value": 0.0,
      "threshold": 1.962,
      "pass": true
     },
@@ -3384,17 +3331,17 @@
      "pass": true
     },
     "toneDelta": {
-     "value": -13.5,
+     "value": 0.1,
      "threshold": 3.0,
-     "pass": false
+     "pass": true
     },
     "inkLog": {
-     "value": 0.536,
+     "value": 0.109,
      "threshold": 0.288,
-     "pass": false
+     "pass": true
     },
     "regionInkLog": {
-     "value": 0.412,
+     "value": 0.145,
      "threshold": 0.878,
      "pass": true
     },
@@ -3407,22 +3354,21 @@
      "threshold": null
     },
     "widthPt": {
-     "value": 1.526,
+     "value": 1.4,
      "threshold": 1.522,
-     "pass": false
-    },
-    "soleMiddlePt": {
-     "value": 1.588,
-     "threshold": 1.444,
-     "pass": false
-    },
-    "widthCv": {
-     "value": 0.13,
-     "threshold": 0.084,
      "pass": true
     },
+    "soleMiddlePt": {
+     "value": 1.44,
+     "threshold": 1.444,
+     "pass": true
+    },
+    "widthCv": {
+     "value": null,
+     "threshold": 0.084
+    },
     "furRmsPt": {
-     "value": 0.118,
+     "value": 0.26,
      "threshold": 0.085,
      "pass": true
     },
@@ -3437,22 +3383,18 @@
     }
    },
    "detail": {
-    "shiftPx": [1, -2],
+    "shiftPx": [0, 0],
     "piecesShiftPx": [
-     [1, -2]
+     [0, 0]
     ],
-    "sheetPx": 20,
-    "oursPx": 23,
-    "toneAt": [37.9, -3.9],
-    "inkAt": [37.9, -3.9],
-    "widthMedianPt": 1.576,
-    "furLengthPt": 15.8
+    "sheetPx": 10,
+    "oursPx": 10,
+    "toneAt": [44.9, -8.6],
+    "inkAt": [44.9, -8.6],
+    "widthMedianPt": 1.424,
+    "furLengthPt": 4.0
    },
    "failed": [
-    "toneDelta",
-    "inkLog",
-    "widthPt",
-    "soleMiddlePt",
     "furCrossings10Pt"
    ],
    "pass": false
@@ -3530,9 +3472,9 @@
     }
    },
    "detail": {
-    "shiftPx": [1, -2],
+    "shiftPx": [0, 0],
     "sheetPx": 1,
-    "oursPx": 1,
+    "oursPx": 0,
     "inkAt": null
    },
    "failed": [],
@@ -3544,7 +3486,7 @@
    "calibrated": true,
    "measures": {
     "recall": {
-     "value": null,
+     "value": 1.0,
      "threshold": null
     },
     "precision": {
@@ -3574,7 +3516,7 @@
      "threshold": null
     },
     "regionInkLog": {
-     "value": -0.422,
+     "value": 0.177,
      "threshold": 0.479,
      "pass": true
     },
@@ -3612,12 +3554,12 @@
     }
    },
    "detail": {
-    "shiftPx": [1, -2],
+    "shiftPx": [0, 0],
     "piecesShiftPx": [
-     [1, -2]
+     [0, 0]
     ],
-    "sheetPx": 0,
-    "oursPx": 0
+    "sheetPx": 5,
+    "oursPx": 3
    },
    "failed": [],
    "pass": true
@@ -3695,8 +3637,8 @@
     }
    },
    "detail": {
-    "shiftPx": [1, -2],
-    "sheetPx": 0,
+    "shiftPx": [0, 0],
+    "sheetPx": 1,
     "oursPx": 0,
     "inkAt": null
    },
@@ -3709,8 +3651,8 @@
    "calibrated": true,
    "measures": {
     "recall": {
-     "value": 0.765,
-     "threshold": 0.882,
+     "value": 0.273,
+     "threshold": 0.818,
      "pass": false
     },
     "precision": {
@@ -3718,12 +3660,12 @@
      "threshold": null
     },
     "gapPt": {
-     "value": 1.57,
+     "value": 3.27,
      "threshold": 1.962,
-     "pass": true
+     "pass": false
     },
     "weakPt": {
-     "value": 1.57,
+     "value": 0.78,
      "threshold": 1.962,
      "pass": true
     },
@@ -3733,17 +3675,15 @@
      "pass": true
     },
     "toneDelta": {
-     "value": 13.9,
-     "threshold": 3.0,
-     "pass": false
+     "value": null,
+     "threshold": 3.0
     },
     "inkLog": {
-     "value": -0.19,
-     "threshold": 0.402,
-     "pass": true
+     "value": null,
+     "threshold": 0.402
     },
     "regionInkLog": {
-     "value": -1.621,
+     "value": -1.673,
      "threshold": 0.67,
      "pass": false
     },
@@ -3756,7 +3696,7 @@
      "threshold": null
     },
     "widthPt": {
-     "value": 0.679,
+     "value": null,
      "threshold": null
     },
     "soleMiddlePt": {
@@ -3764,7 +3704,7 @@
      "threshold": null
     },
     "widthCv": {
-     "value": 0.568,
+     "value": null,
      "threshold": null
     },
     "furRmsPt": {
@@ -3781,19 +3721,18 @@
     }
    },
    "detail": {
-    "shiftPx": [0, 0],
+    "shiftPx": [1, -1],
     "piecesShiftPx": [
-     [0, 0]
+     [1, -1]
     ],
-    "sheetPx": 17,
+    "sheetPx": 11,
     "oursPx": 0,
-    "toneAt": [18.2, -7.8],
-    "inkAt": [18.2, -7.8],
-    "widthMedianPt": 0.767
+    "toneAt": null,
+    "inkAt": null
    },
    "failed": [
     "recall",
-    "toneDelta",
+    "gapPt",
     "regionInkLog"
    ],
    "pass": false
@@ -3804,19 +3743,19 @@
    "calibrated": true,
    "measures": {
     "recall": {
-     "value": 1.0,
-     "threshold": 0.846,
-     "pass": true
+     "value": 0.875,
+     "threshold": 0.9,
+     "pass": false
     },
     "precision": {
      "value": 1.0,
-     "threshold": 0.857,
+     "threshold": 0.9,
      "pass": true
     },
     "gapPt": {
-     "value": 0.0,
+     "value": 2.35,
      "threshold": 1.962,
-     "pass": true
+     "pass": false
     },
     "weakPt": {
      "value": 0.0,
@@ -3829,15 +3768,17 @@
      "pass": true
     },
     "toneDelta": {
-     "value": null,
-     "threshold": 3.871
+     "value": 4.6,
+     "threshold": 3.871,
+     "pass": false
     },
     "inkLog": {
-     "value": null,
-     "threshold": 0.288
+     "value": 0.164,
+     "threshold": 0.288,
+     "pass": true
     },
     "regionInkLog": {
-     "value": 0.166,
+     "value": -0.033,
      "threshold": 0.405,
      "pass": true
     },
@@ -3850,19 +3791,19 @@
      "threshold": null
     },
     "widthPt": {
-     "value": 1.478,
+     "value": 1.378,
      "threshold": 1.522,
      "pass": true
     },
     "soleMiddlePt": {
-     "value": 1.515,
+     "value": 1.393,
      "threshold": 1.444,
-     "pass": false
+     "pass": true
     },
     "widthCv": {
-     "value": 0.077,
+     "value": 0.097,
      "threshold": 0.084,
-     "pass": false
+     "pass": true
     },
     "furRmsPt": {
      "value": null,
@@ -3878,20 +3819,21 @@
     }
    },
    "detail": {
-    "shiftPx": [0, 1],
+    "shiftPx": [2, -1],
     "piecesShiftPx": [
-     [0, 1],
-     [4, 0]
+     [2, -1],
+     [3, -1]
     ],
-    "sheetPx": 13,
-    "oursPx": 14,
-    "toneAt": null,
-    "inkAt": null,
-    "widthMedianPt": 1.52
+    "sheetPx": 24,
+    "oursPx": 20,
+    "toneAt": [10.4, -2.4],
+    "inkAt": [1.8, -0.8],
+    "widthMedianPt": 1.419
    },
    "failed": [
-    "soleMiddlePt",
-    "widthCv"
+    "recall",
+    "gapPt",
+    "toneDelta"
    ],
    "pass": false
   },
@@ -3968,8 +3910,8 @@
     }
    },
    "detail": {
-    "shiftPx": [0, 1],
-    "sheetPx": 0,
+    "shiftPx": [2, -1],
+    "sheetPx": 1,
     "oursPx": 0,
     "inkAt": null
    },
@@ -4012,9 +3954,9 @@
      "threshold": null
     },
     "regionInkLog": {
-     "value": -0.551,
+     "value": -0.677,
      "threshold": 0.614,
-     "pass": true
+     "pass": false
     },
     "hardSeamPt": {
      "value": null,
@@ -4058,8 +4000,10 @@
     "sheetPx": 0,
     "oursPx": 0
    },
-   "failed": [],
-   "pass": true
+   "failed": [
+    "regionInkLog"
+   ],
+   "pass": false
   },
   "tuft|outside": {
    "what": "the topknot",
@@ -4092,17 +4036,17 @@
      "pass": true
     },
     "toneDelta": {
-     "value": -5.9,
+     "value": -6.4,
      "threshold": 10.463,
      "pass": true
     },
     "inkLog": {
-     "value": 0.242,
+     "value": 0.169,
      "threshold": 0.883,
      "pass": true
     },
     "regionInkLog": {
-     "value": 0.094,
+     "value": 0.081,
      "threshold": 0.405,
      "pass": true
     },
@@ -4115,7 +4059,7 @@
      "threshold": null
     },
     "widthPt": {
-     "value": 1.242,
+     "value": 1.253,
      "threshold": 1.698,
      "pass": true
     },
@@ -4124,7 +4068,7 @@
      "threshold": null
     },
     "widthCv": {
-     "value": 0.046,
+     "value": 0.051,
      "threshold": 0.124,
      "pass": false
     },
@@ -4143,15 +4087,15 @@
     }
    },
    "detail": {
-    "shiftPx": [1, 0],
+    "shiftPx": [0, 1],
     "piecesShiftPx": [
-     [1, 0]
+     [0, 1]
     ],
     "sheetPx": 61,
     "oursPx": 59,
-    "toneAt": [8.0, -160.1],
-    "inkAt": [22.2, -159.3],
-    "widthMedianPt": 1.29
+    "toneAt": [8.8, -160.9],
+    "inkAt": [4.9, -157.7],
+    "widthMedianPt": 1.292
    },
    "failed": [
     "widthCv"
@@ -4168,7 +4112,7 @@
      "threshold": null
     },
     "precision": {
-     "value": 1.0,
+     "value": null,
      "threshold": null
     },
     "gapPt": {
@@ -4232,9 +4176,9 @@
     }
    },
    "detail": {
-    "shiftPx": [1, 0],
-    "sheetPx": 6,
-    "oursPx": 4,
+    "shiftPx": [0, 1],
+    "sheetPx": 8,
+    "oursPx": 3,
     "inkAt": null
    },
    "failed": [],
@@ -4243,38 +4187,32 @@
  },
  "failed": [
   "body.back|ground",
-  "body.back|hind.L",
-  "body.back|hind.R",
   "body.back|outside",
   "body.back|tail",
   "collar|head.base",
-  "collar|outside",
-  "collar|outside across",
   "ear.L",
-  "ear.L|head.base",
-  "ear.R",
+  "ear.L|outside",
   "ear.R|head.base",
-  "ear.R|head.base across",
   "ear.R|outside",
   "head.base",
   "head.base|outside",
   "head.base|tuft",
-  "hind.L|ground",
   "hind.R|ground",
   "tail",
   "tail|ground",
+  "tuft",
   "tuft|outside"
  ],
  "worst": {
-  "region": "collar|head.base",
+  "region": "hind.R|ground",
   "measure": "furCrossings10Pt",
   "value": 0.0,
-  "threshold": 0.868
+  "threshold": 0.643
  },
  "uncalibrated": [],
- "regionsMoved": 0.0,
+ "regionsMoved": 0.0337,
  "advisory": true,
  "pass": false,
- "summary": "lines FAIL 22 of 47 regions: body.back|ground, body.back|hind.L, body.back|hind.R, body.back|outside and 18 more; worst collar|head.base furCrossings10Pt 0.0 (threshold 0.868)",
- "seconds": 1.83
+ "summary": "lines FAIL 16 of 47 regions: body.back|ground, body.back|outside, body.back|tail, collar|head.base and 12 more; worst hind.R|ground furCrossings10Pt 0.0 (threshold 0.643); the parts' edges moved over 3% of the crop since the calibration: rerun linecal.py",
+ "seconds": 0.62
 }

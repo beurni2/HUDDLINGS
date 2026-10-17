@@ -6,7 +6,8 @@
 // no face; its cast shadows ride the bone that casts them, clipped to what they
 // fall on (L396); its outer lines are the line rule's (DECISIONS 74, 104); every
 // part that turns reaches under the part covering it
-// (L394); its placed landmarks lie on their own parts; and its WebGL rest frame
+// (L394); its placed landmarks lie on their own parts; the tail's foot rests on
+// the bottom's line, its shadow off that line (246); and its WebGL rest frame
 // is the resvg composite of its model-space drawings.
 import { after, before, test } from "node:test";
 import assert from "node:assert/strict";
@@ -238,6 +239,43 @@ test("the back view's head rests on the collar's ends: beside each end the groun
     }
   }
   assert.equal(gaps.length, 0, `the ground shows beside the collar's ends at ${gaps.slice(0, 4).join(" ")}`);
+});
+
+test("the back view's head lies over each ear's inner foot down to the notch: no ground shows between them (DECISIONS 243)", () => {
+  // On the sheet the head's cream lies over each ear's inner foot and the two stay one mass down to the notch under the
+  // head's lower lobe, which opens only below y -71.4 on the left and -72.3 on the right (the sheet's mask at |x| 36.5
+  // to 41), read here to within one of the crop's pixels (0.79 pt). An ear's foot that curves out from under the lobe
+  // higher up opens a slit of ground between them.
+  const scale = 4, r = rasters(scale), PX = 0.79;
+  const drawn = order.filter((n) => n !== "shadow").map((n) => r.get(n)!);
+  const gaps: string[] = [];
+  for (const [sx, notch] of [[-1, -71.4], [1, -72.3]] as const) {
+    for (let x = 34; x <= 44; x += 1 / scale) {
+      for (let y = -92; y <= notch - PX; y += 1 / scale) {
+        if (!drawn.some((png) => alphaAt(png, scale, [sx * x, y]) >= 0.5)) gaps.push(`(${(sx * x).toFixed(2)}, ${y.toFixed(2)})`);
+      }
+    }
+  }
+  assert.equal(gaps.length, 0, `${gaps.length} points of ground between an ear and the head, from ${gaps.slice(0, 4).join(" ")}`);
+});
+
+test("the back view's tail rests its foot on the bottom's line, and its cast shadow stays off that line (DECISIONS 246)", () => {
+  // The sheet draws one ground line under the tail's foot: the plume's lower edge lies on the body's bottom there, never
+  // above it with cream between (a doubled line) nor below it (out of the silhouette); and the tail's shadow on the
+  // haunches never pales the bottom's line under the foot.
+  const scale = 3, r = rasters(scale), tail = r.get("tail")!, body = r.get("body.back")!, shade = r.get("shadow.tail")!;
+  const lowest = (png: PNG, x: number) => {
+    for (let y = 2; y >= -12; y -= 1 / scale) if (alphaAt(png, scale, [x, y]) >= 0.5) return y;
+    return Number.NaN;
+  };
+  for (let x = -5; x <= 9; x += 1) {
+    const t = lowest(tail, x), b = lowest(body, x);
+    assert.ok(Math.abs(t - b) <= 0.6, `at x ${x} the tail's foot is at y ${t.toFixed(2)}, the bottom at ${b.toFixed(2)}`);
+  }
+  for (let x = -8; x <= 20; x += 1) {
+    const on = alphaAt(shade, scale, [x, lowest(body, x) - 0.8]);
+    assert.ok(on < 0.05, `the tail's shadow lies ${on.toFixed(2)} on the bottom's line at x ${x}`);
+  }
 });
 
 test("moving a pivot leaves the back view's rest frame where it was", () => {
