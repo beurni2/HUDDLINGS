@@ -17,7 +17,7 @@ Only the founder passes a gate (CLAUDE.md, spec section 5b). Each approval is re
 
 | Species | A · Look | B · Alive | C · Core | D · Full set |
 | --- | --- | --- | --- | --- |
-| Dog | not started | not started | not started | not started |
+| Dog | evidence ready, waiting for you (`qa/phase3/gateA/`, https://github.com/beurni2/HUDDLINGS/pull/5) | not started | not started | not started |
 | Kitty | not started | not started | not started | not started |
 | Bear | not started | not started | not started | not started |
 | Rabbit | not started | not started | not started | not started |
