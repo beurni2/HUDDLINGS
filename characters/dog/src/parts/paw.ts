@@ -11,6 +11,7 @@
 // toe lines rising 40 to 50% of the paw's height round the middle toe in the warm line at about half strength, never
 // darker than the outline. A view that does not ask for it draws its paws as before.
 import { polyD, sample, smooth, v, type Node, type P, type Shape } from "../../../draw/geom.ts";
+import type { DrawnLine } from "../../../draw/line.ts";
 import { LIMITS } from "../../../draw/lint.ts";
 import type { Paint } from "../../../draw/paint.ts";
 import { blur, pad, uid, type Box } from "../../../draw/svg.ts";
@@ -34,6 +35,26 @@ export interface Toes {
    * typed, as before.
    */
   dome?: Dome;
+  /**
+   * How many of the paw's toe lines lie out of sight (DECISIONS 287): a far paw turned away shows only one of its two or
+   * three, its other behind the near paw or round its far side (the three-quarter crop's far paw draws one faint toe
+   * line, at x -73.2), so `lines` and `hidden` together are the paw's two or three. Left out, none: every line shows.
+   */
+  hidden?: number;
+}
+
+/**
+ * The dome toe lines' inner-line metas (DECISIONS 286, the lead's L4: every stroke inside the silhouette an inner line
+ * the lint checks), keyed by the paint drawn for them: lines.ts's litPart reads back the metas of every set its part's
+ * `under` paint holds (innerLinesIn), wherever the view puts that paint, so they reach the lint with no change to the
+ * view or to paint.ts.
+ */
+const DOME_LINES = new Map<string, DrawnLine[]>();
+
+/** The inner-line metas of every set of dome toe lines drawn in `under` (DECISIONS 286). */
+export function innerLinesIn(under: string | undefined): DrawnLine[] {
+  if (!under) return [];
+  return [...DOME_LINES].filter(([drawn]) => under.includes(drawn)).flatMap(([, lines]) => lines);
 }
 
 /** A paw's ball as the crop draws it (DECISIONS 263): its centre, where the bun is fullest, and its half-width and half-height, in points. */
@@ -117,16 +138,20 @@ function domeToes(t: Toes, d: Dome): Pick<Paint, "under" | "inner"> {
   const box: Box = pad([Math.min(...xs), Math.min(...ys), Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)], width + 2);
   const id = uid("toe"), f = uid("blur");
   const stops = `<stop offset="0" stop-color="${C.warmLine}" stop-opacity="${SOFT_TOES.foot}"/><stop offset="1" stop-color="${C.warmLine}" stop-opacity="${SOFT_TOES.top}"/>`;
+  const drawn = `<path d="${lines.map((pts) => domeStroke(pts, width)).join("")}" fill="url(#${id})" filter="url(#${f})"/>`;
+  // Each line an inner line for the lint: full width between its round ends, which narrow it to DOME_TOES.foot and .top.
+  DOME_LINES.set(drawn, lines.map((): DrawnLine => ({ kind: "inner", width, where: "toe line", drawn: [width, width] })));
   return {
-    under: `<defs><linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="0" y1="${t.fade[0]}" x2="0" y2="${t.fade[1]}">${stops}</linearGradient>${blur(f, box, DOME_TOES.blur)}</defs>` +
-      `<path d="${lines.map((pts) => domeStroke(pts, width)).join("")}" fill="url(#${id})" filter="url(#${f})"/>`,
+    under: `<defs><linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="0" y1="${t.fade[0]}" x2="0" y2="${t.fade[1]}">${stops}</linearGradient>${blur(f, box, DOME_TOES.blur)}</defs>` + drawn,
     inner: [],
   };
 }
 
 /** A paw's toe lines as paint: their fading colour (under the shade, in `under`) and the lines (`inner`); along the paw's dome with `dome` (DECISIONS 263). */
 export function toes(t: Toes): Pick<Paint, "under" | "inner"> {
-  if (t.lines.length < 2 || t.lines.length > 3) throw new Error(`a paw has two or three toe lines, not ${t.lines.length}`);
+  const hidden = t.hidden ?? 0;
+  if (t.lines.length < 1 || t.lines.length + hidden < 2 || t.lines.length + hidden > 3)
+    throw new Error(`a paw has two or three toe lines, not ${t.lines.length}${hidden ? ` and ${hidden} hidden` : ""}`);
   if (t.dome) return domeToes(t, t.dome);
   const id = uid("toe");
   const stops = t.soft

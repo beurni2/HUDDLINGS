@@ -148,7 +148,25 @@ const ladder = (stops: string[], n: number) => Array.from({ length: n }, (_, k) 
 export const LINES = {
   cream: ladder([mix(C.warmLine, fur, 0.33), mix(C.warmLine, fur, 0.12), C.soleLine], 11),
   tan: ladder([C.earEdge, mix(C.warmLine, C.earLine, 0.5), mix(C.earLine, dark, 0.2)], 11),
+  /**
+   * The lit steps (DECISIONS 285, the lead's L2), lighter than each ladder's lightest, nearest it first: only a line that
+   * asks for its life (parts/lines.ts, a span's living weight with `life`) reaches them, so every other line keeps its
+   * colour. Sampled from the sheet's own lit linework (qa/phase3/fur/recipes3/litsteps.json: each lit run's core
+   * colour, as the line check reads a line's tone):
+   * - `cream`, over the cream: the crops' crowns, topknots and the profile's plume, their medians L* 68.9 to 76.8 and
+   *   the plume's upper quartile 81.6, a* 4 to 7.4 and b* 15.9 to 18.3 (#C1A288 to #D1BAA0), against the ladder's
+   *   lightest L* 66.3: the crown's light warm line (C.crownLine) toward the fur halfway into its own shade, 0.15 to 0.6
+   *   of the way in four even steps, L* 67.8, 72.5, 77.4 and 82, a* 6.9 to 5, b* 17 to 14.1 (the crops' medians at
+   *   their lightness within about 1.5 ΔE), a warm brown of the sheet's linework (spec L506);
+   * - `tan`, round the ears where the light falls on their tops: the profile's and the three-quarter's ear tops,
+   *   medians L* 67.4 and 62.4 (#C99B77, #B59070), against the tan ladder's lightest 54.6 (the front's ear tops are
+   *   darker, 50.1 and 53.7, and need none): the ears' outline toward the cream, 0.15 and 0.3 of the way, L* 61 and 67.4.
+   */
+  lit: {
+    cream: ladder([mix(C.crownLine, mix(fur, furShade, 0.5), 0.15), mix(C.crownLine, mix(fur, furShade, 0.5), 0.6)], 4),
+    tan: ladder([C.earEdge, mix(C.earEdge, fur, 0.3)], 3).slice(1),
+  },
 };
 
 /** Every colour a dog part may paint. */
-export const palette = [...new Set([...Object.values(C), ...LINES.cream, ...LINES.tan])];
+export const palette = [...new Set([...Object.values(C), ...LINES.cream, ...LINES.tan, ...LINES.lit.cream, ...LINES.lit.tan])];

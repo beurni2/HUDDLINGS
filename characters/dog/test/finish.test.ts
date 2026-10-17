@@ -46,7 +46,8 @@ function lab(hex: string): [number, number, number] {
 }
 
 test("the line ladders darken from lit to the ground, warm all through, and are the palette's", () => {
-  for (const [name, ladder] of Object.entries(LINES)) {
+  // The two ladders; their lit steps beyond the light end (DECISIONS 285) are held in furkit.test.ts.
+  for (const [name, ladder] of [["cream", LINES.cream], ["tan", LINES.tan]] as const) {
     assert.equal(ladder.length, 11, `${name} has ${ladder.length} tones`);
     const L = ladder.map((h) => lab(h)[0]);
     for (let k = 1; k < L.length; k++) assert.ok(L[k]! < L[k - 1]!, `${name}[${k}] ${ladder[k]} is no darker than ${ladder[k - 1]}`);
