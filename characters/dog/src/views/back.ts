@@ -211,8 +211,13 @@ const JOIN = { L: fur.crown[0]!.to as P, R: fur.crown[1]!.from as P };
  */
 const SIDE = { L: { top: [-37.8, -120.6] as P }, R: { top: widen([37.8, -120.6]) as P } };
 const ROOT_PT = { L: along(head, JOIN.L, SIDE.L.top), R: along(head, SIDE.R.top, JOIN.R) };
-/** Past the notch (|x| under 37.4, below y -78), the lobe's diagonal over the ground, off the ear's tan. */
-const onLobe = (p: P) => Math.abs(p[0]) < 37.4 && p[1] > -78;
+/**
+ * Past the notch, the lobe's diagonal over the ground, off the ear's tan: from |x| 36.4 in, below y -78. Through the
+ * corner itself the line stays the side's dark tan, as the sheet's does where the ear's foot line meets it (its grey
+ * 114 to 124 at x -37.5 from y -77 to -75); switched at |x| 37.4, the corner's 2 pt read as a pale gap between the
+ * side's line and the ear's foot line below it (our grey 144 to 158 there).
+ */
+const onLobe = (p: P) => Math.abs(p[0]) < 36.4 && p[1] > -78;
 const sideOn = (p: P): "cream" | "tan" => (onLobe(p) ? "cream" : "tan");
 /** Low on the side, over the ear's foot, the sheet's line is lighter than the contact floor's (its L* 50 to 56 from y -83 to -79, ours had read 47 to 48), and lighter again down the lobe's diagonal. */
 const sideMost = (p: P) => (onLobe(p) ? 0.1 : p[1] > -84 ? 0.2 : 1);
@@ -265,6 +270,12 @@ function tuckD(pts: P[]): string {
 }
 /** How much of the outer band the topknot's line swells across (260, 281): its thin end, as the crisp topknot's ceiling keeps its tone; at the whole band its feet's turns swelled into dark knots. */
 const TUFT_WEIGHT = 0.4;
+/**
+ * How much of the outer band the crown's line swells across (260, 280): the sheet's crown line is thin and light, L* 64
+ * to 77 and nearly gone beside the topknot's left foot (72.5 to 78.7 from x -22 to -17), lighter than the cream ladder's
+ * lightest (66.3); at the whole band the line check read it 10 L* dark there and 0.52 log of ink against 0.36.
+ */
+const CROWN_WEIGHT = 0.5;
 /** Tucks along each of `paths`, each in its colour, softened and faded as the crisp topknot's are, unclipped (a stroke clipped to a pointed V is a sliver). */
 function tuckPaths(paths: P[][], colour: (i: number) => string, box: Box): string {
   const f = uid("blur");
@@ -436,7 +447,9 @@ const tailShades = tailLocks.map(({ tip, notches }) => {
   const inward = v.norm(v.sub([12, -24], mid));
   const c = v.add(mid, v.mul(inward, 2.2));
   const ang = (Math.atan2(b[1] - tip[1], b[0] - tip[0]) * 180) / Math.PI;
-  return pathD(ellipse(c, 4.6, 1.9, ang));
+  // As long as its half of the lobe (the sheet's lobes, 7 to 14.6 pt along the edge, 283), so a broad lobe rounds as a
+  // broad one: at a fixed 4.6 pt the shade sat as a small smudge under each of the broader lobes.
+  return pathD(ellipse(c, Math.max(4.6, 0.8 * v.len(v.sub(b, tip))), 2.1, ang));
 });
 
 const tailPaint: Paint = {
@@ -561,7 +574,8 @@ const rootGradient = (id: string, from: P, to: P) =>
 
 function headLinePiece(): Piece {
   const box = boxOf(head, 4);
-  const r = litEdge(head, [...weighed(SEED.crown, fur.spans()), ...sideSpans], "head.line", box, { reach: 0.5, crisp: true }), root = ribbons(head, rootLine, "head.line", 0.5);
+  const crown = fur.spans().map((s, k): LitSpan => ({ ...s, weight: { seed: SEED.crown + k, amount: CROWN_WEIGHT } }));
+  const r = litEdge(head, [...crown, ...sideSpans], "head.line", box, { reach: 0.5, crisp: true }), root = ribbons(head, rootLine, "head.line", 0.5);
   // Under each first lock's tip the outline itself curls back in, where the lock lies over the next, as the sheet draws
   // it: from the notch between the two locks the line runs on in under the first lock, 4 to 6 pt, as dark as the
   // outline there (the sheet's L* 64 to 77 along it, at y -150.3 from x -30.5 to -26 on the left and -148.3 to -149 from
