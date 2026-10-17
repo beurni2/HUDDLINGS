@@ -148,7 +148,7 @@ const collar = smooth([[-26.4, -70.6], [-23, -72.1], [-18, -73.4], [-9, -74.6], 
 // (the viewer's left, the dog's left), mirrored, the right crown typed where the
 // sheet draws it.
 const headHalf: Node[] = [[0, -152.6], [-16.4, -155.6], [-26.4, -156.2], [-30.6, -153.8], [-32.4, -150.4], [-37.6, -147.8], [-41.6, -144],
-  [-38, -142.6], [-31.6, -140.4], [-33.2, -128.4], [-37.8, -119.8], [-39.4, -108], [-38.8, -88], [-38.2, -76.6], [-38, -71.6], [-31, -70.4], [-20, -63]];
+  [-37.6, -142.4], [-30.8, -138.8], [-33.2, -128.4], [-37.8, -119.8], [-39.4, -108], [-38.8, -88], [-38.2, -76.6], [-38, -71.6], [-31, -70.4], [-20, -63]];
 const HEAD_FOOT: Node = [0, -58.6];
 /** The notch between the crown's two locks, the lowest lock's tip, and the crescent under it (indices in headHalf). */
 const NOTCH = 4, CRESCENT = 8;
@@ -157,7 +157,7 @@ const NOTCH = 4, CRESCENT = 8;
  * line steps down to the second, short one, whose tip (44, -143.6) is where the ear comes out under it. Typed from
  * the crescent up; the rest of the right side is the left's mirror.
  */
-const rightCrown: Node[] = [[31.6, -140.6], [38.6, -142.6], [44, -143.6], [40.4, -147.8], [39.4, -150.6], [30.4, -155.4]];
+const rightCrown: Node[] = [[32, -139.5], [38.2, -142.5], [44, -143.6], [40.4, -147.8], [39.4, -150.6], [30.4, -155.4]];
 /**
  * Down the right ear the head's side stands further out than the left's mirror on the sheet (its line at x 40 to 40.8
  * from y -122 to -102, against -38 to -39.6 on the left; its cream out to 34.4 by y -129, against -32.4): pushed out
@@ -172,10 +172,11 @@ const headBase = smooth(headNodes, { typed: headHalf.length + 1 + rightCrown.len
 /**
  * Over each ear's root, from the lowest lock's tip in toward the crescent: two broad low locks combed down and out, as
  * short and as little leaning as the crown's rules let them (HEAD_FUR.crown), since the sheet's cream ends over the tan
- * there in a soft, nearly straight edge; narrower and longer, three to the right root, they read as white teeth on the
- * tan (DECISIONS 214, 243).
+ * there in a soft, nearly straight edge sloping down toward the crescent (x -37 to -30 from y -142.75 to -138.25 on the
+ * left; 33 to 35 at -139.6 to -140.1 on the right), the inner lock the longer; narrower and longer, three to the right
+ * root, they read as white teeth on the tan (DECISIONS 214, 243).
  */
-const CROWN: Lock[] = [{ len: 1.65, width: 5.6, lean: -0.4, dip: 0.4 }, { len: 1.3, width: 5, lean: -0.45 }];
+const CROWN: Lock[] = [{ len: 1.65, width: 6.4, lean: -0.4, dip: 0.4 }, { len: 2.15, width: 5.6, lean: -0.45 }];
 /** The right root is longer on the sheet (its crescent sits further in): its two locks broader, typed in its path's order, from the crescent out. */
 const CROWN_R: Lock[] = [{ len: 1.65, width: 6.45, lean: 0.4, dip: 0.4 }, { len: 2.1, width: 6.45, lean: 0.45 }];
 /** Where each lower lobe's edge goes under the collar's end. */
@@ -183,8 +184,8 @@ const JAW = { L: crossing(headBase, collar, [-29.6, -70.2]), R: crossing(headBas
 const fur = headFur({
   base: headBase,
   crown: [
-    { side: "L", from: [-41.6, -144], to: [-31.6, -140.4], locks: CROWN, tipRound: 0.25, line: { from: [-15.2, -155.7], to: [-41.6, -144] }, ear: ears.L },
-    { side: "R", from: [31.6, -140.6], to: [44, -143.6], locks: CROWN_R, tipRound: 0.25, line: { from: [44, -143.6], to: [15.2, -155.7] }, ends: ["join", "under"], ear: ears.R },
+    { side: "L", from: [-41.6, -144], to: [-30.8, -138.8], locks: CROWN, tipRound: 0.25, line: { from: [-15.2, -155.7], to: [-41.6, -144] }, ear: ears.L },
+    { side: "R", from: [32, -139.5], to: [44, -143.6], locks: CROWN_R, tipRound: 0.25, line: { from: [44, -143.6], to: [15.2, -155.7] }, ends: ["join", "under"], ear: ears.R },
   ],
 });
 // The crown's locks from each of the topknot's feet to the lowest tip are fur (the dog's head tuft, L508), lined as one span.
@@ -418,13 +419,13 @@ const tailPaint: Paint = {
  * as the sheet's one ground line there, as the bottom's own does: the ground's dark only under the middle of the foot,
  * the line thinner and more varied round it (L* 50 to 55 from x 0 to 13.5; at the line rule's full depth all along the
  * foot it read 10 L* dark and 0.2 pt wide, the line check's tone and width there); to its left side above the ground.
- * Up its left side over the left haunch, from y -7.4 to -20.6, the sheet leaves the plume unlined too (its L* 79 to 95
- * there). Two spans, each unlined stretch cited by its length (246).
+ * Up its left side over the left haunch, from y -9.2 to -20.6, the sheet leaves the plume unlined too (its L* 83 to 95
+ * there; its line fades in below, 72 by y -8). Two spans, each unlined stretch cited by its length (246).
  */
 const tailMost = (p: P) => (p[1] > -5 ? 1 : p[0] < 1.4 && p[1] < -24 ? 0 : p[1] < -26 ? 0 : 0.1);
 const tailOn = (p: P): "cream" | "tan" => (p[0] < 1.4 && p[1] < -24 ? "tan" : "cream");
 /** Where the sheet leaves the plume unlined: up its left side over the haunch, and over the saddle from the curl's side round its top. */
-const TAIL_SIDE: [P, P] = [[-10.4, -7.4], [-11.4, -20.6]];
+const TAIL_SIDE: [P, P] = [[-11.1, -9.2], [-11.4, -20.6]];
 const TAIL_TOP: [P, P] = [[0.8, -37.5], [21.6, -46.5]];
 const SIDE_PT = along(tail, TAIL_SIDE[0], TAIL_SIDE[1]), TOP_PT = along(tail, TAIL_TOP[0], TAIL_TOP[1]);
 const tailSpans: LitSpan[] = [
@@ -573,9 +574,9 @@ function tailOnBody(): Piece {
 // with the locks clean the finder reads each root 4.8 and 8.9 pt low. The right band is typed from its own side of the crop,
 // which stands further out (the cream to 33.6 to 36.8 from y -132 to -120, 33.6 to
 // 34.4 down the side, 36.8 by -93), its tan deepening out to the side's line at x 41.
-const earShadowL: Node[] = [[-44, -146], [-36.4, -141.8], [-31.2, -141], [-30.2, -136.4], [-30.6, -132.4], [-33.6, -126.4], [-35.3, -122.4], [-36.5, -117.2],
+const earShadowL: Node[] = [[-44, -146], [-38.6, -143], [-33.8, -139.4], [-30.4, -137.6], [-30.6, -132.4], [-33.6, -126.4], [-35.3, -122.4], [-36.5, -117.2],
   [-33.1, -116.6], [-32.9, -113.4], [-32.8, -109], [-32.2, -102.6], [-33.2, -98], [-35.6, -92.6], [-37.4, -88.2], [-39.6, -85], [-46, -90], [-46, -130]];
-const earShadowR: Node[] = [[44, -146], [36.4, -141.8], [31.4, -141], [32.6, -136], [34.4, -132.4], [36, -126.4], [37.3, -122.2], [38.3, -117],
+const earShadowR: Node[] = [[44, -146], [37.8, -142.8], [33.8, -139.6], [31.2, -137.6], [34.4, -132.4], [36, -126.4], [37.3, -122.2], [38.3, -117],
   [34.7, -116.5], [34.7, -113.4], [35, -109], [34.6, -103], [35.4, -99], [36.8, -95.6], [37.6, -92.4], [38, -88.2], [39.6, -85], [46, -90], [46, -130]];
 /** The tuft's tip in each band's edge: the cream's lowest lock over the tan, its underside cut back in under it. */
 const TUFT_TIP = 7;
