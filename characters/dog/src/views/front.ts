@@ -164,7 +164,7 @@ const embossed = [0.7, 0.44].map((k) => shift(symmetric(HEART.map(inset(k)), ins
 // tips (DECISIONS 215, 221). The right ear is typed in the head's frame and
 // rolled with the face.
 const earR: Node[] = [[-37.5, -141.4], [-29.4, -138.6], [-28.2, -132.4], [-40, -86], [-39.4, -73], [-41.4, -66.6], [-46.6, -64], [-52.6, -62.6],
-  [-58.6, -63.1], [-65, -65.8], [-71, -69.4], [-76.2, -74.8], [-80.4, -82], [-81, -88.4], [-80.4, -94.4],
+  [-58.6, -63.1], [-65, -65.8], [-71, -69.4], [-76.2, -74.8], [-80.4, -82], [-81, -88.4], [-79.9, -94.6],
   [-78.2, -100.2], [-73.6, -106.2], [-66.8, -111.6], [-60.8, -117.4], [-56, -125.6], [-50.6, -130.8], [-45.4, -135.2]];
 /** The right ear's node where the left ear's typed upper edge ends (its outer side, at y -82). */
 const EAR_SPLIT = earR.findIndex(([x, y]) => x === -80.4 && y === -82);
@@ -181,7 +181,7 @@ const lowerL = hangL([earR[0]!, ...earR.slice(1).reverse()]);
 // Above its middle the sheet draws the left ear's outer edge as one full convex arc, 3.5 to 4.7 pt outside the
 // mirror's (y -137 to -113): those nodes are typed where the sheet draws them, in model space, down to the outer
 // clump, where the sheet's edge turns in at (76.4, -78.6) and the hung edge takes over.
-const earL: Node[] = [lowerL[0]!, [42, -139.6], [51.4, -132.6], [58.2, -125], [64.6, -116], [71, -110], [75.6, -103.6], [78.6, -96], [79.6, -88], [78.8, -82],
+const earL: Node[] = [lowerL[0]!, [42, -139.6], [51.4, -132.6], [58.2, -125], [64.6, -116], [70.8, -110], [75, -103.8], [78.6, -96], [79.6, -88], [78.8, -82],
   [76.4, -78.6], ...lowerL.slice(earR.length - EAR_SPLIT + 2)];
 // Fitted closely (0.05 pt), so the fit keeps the lobes as round as the typed nodes make them.
 // The left ear's lower nodes are the right's in reverse after its 10 typed ones, so a notch at the right's node j is the left's 9 + EAR_SPLIT - j;
@@ -206,7 +206,7 @@ const reversedRow = (locks: Lock[]): Lock[] => locks.map((_, k) => {
 // high read as a knob), its tip at the lower end.
 const EAR_HEM: Lock[] = [{ len: 1.5, width: 9, lean: 0.2, dip: 0.45 }, { len: 1.9, width: 12, lean: 0.25, dip: 0.3 }, { len: 1.4, width: 8.5, lean: 0.3, dip: 0.4 },
   { len: 1.8, width: 10.5, lean: 0.35 }];
-const EAR_STEP: Lock = { len: 0.9, width: 7.8, lean: -0.45 };
+const EAR_STEP: Lock = { len: 0.7, width: 7.8, lean: -0.45 };
 /** The step's ends, lower then upper, where each ear's crop draws them (in model space, the ears placed). */
 const EAR_STEPS = { R: [[-78.8, -95.6], [-74.6, -102.2]] as [P, P], L: [[75.6, -102.2], [72.2, -108.8]] as [P, P] };
 /** Where each ear's line goes under the cheek, in model space: on under it at full width, its fade under the cheek's fur. */
@@ -263,7 +263,7 @@ const leftSide = ([x, y]: P): P => [x > 0 ? x - 2.4 * Math.min(1, Math.max(0, (y
  * at -73.9 and 41.9 at -70.9, where the right has turned in to -41.5 by -76.1); an offset in x by the head frame's y,
  * eased between the typed rows.
  */
-const LEFT_CHEEK: [number, number][] = [[-87, 0], [-84, 0.8], [-81, 1], [-78, 1.8], [-75, 2.4], [-72.5, 2.4], [-70.5, 1.2], [-68, 0]];
+const LEFT_CHEEK: [number, number][] = [[-87, 0], [-84, 0.8], [-81, 0.6], [-78, 0.6], [-75, 1.8], [-72.5, 2.4], [-70.5, 1.2], [-68, 0]];
 const leftPuff = ([x, y]: P): P => {
   if (x <= 0 || y <= LEFT_CHEEK[0]![0] || y >= LEFT_CHEEK.at(-1)![0]) return [x, y];
   const k = LEFT_CHEEK.findIndex(([at]) => at > y), [y0, d0] = LEFT_CHEEK[k - 1]!, [y1, d1] = LEFT_CHEEK[k]!;
@@ -322,8 +322,14 @@ const CROWN_R: Lock[] = [{ len: 1.25, width: 4.6, lean: -0.5, dip: 0.3 }, { len:
 const CROWN_L: Lock[] = [{ len: 1.2, width: 3.6, lean: 0.55, dip: 0.3 }, { len: 1.25, width: 4.6, lean: 0.5 }];
 // Each cheek's puff over the ear, as the crop draws it in the head's frame (alike on both sides): one full lobe, its
 // round at y -83 to -82 (x 46.5), and a small low one under a shallow notch (44.4 at -81, 44.5 down to -77), turning in
-// to the jaw by -76 (sharper or longer wisps read as teeth beside the sheet's round puff).
-const CHEEK: Lock[] = [{ len: 2.2, width: 6.6, lean: 0.3, dip: 0.4 }, { len: 1.5, width: 4, lean: 0.3 }];
+// to the jaw by -76 (sharper or longer wisps read as teeth beside the sheet's round puff). The small one lies combed
+// down along the edge (lean 0.6) and the notch between them is as shallow as headFur's rule lets it (0.3 pt): standing
+// out (lean 0.3) over a 0.4 pt notch, the two read as a W pinch at phone size, like lips in profile.
+const CHEEK: Lock[] = [{ len: 2, width: 6.6, lean: 0.4, dip: 0.3, notch: 1 }, { len: 1.5, width: 4.6, lean: 0.6 }];
+/** The left cheek's row, in its path's order (up from the jaw): the right's reversed, the notch's flow carried with it. */
+/** How light the left cheek's line lies in the notch between its wisps (a ceiling on its depth), easing back over `reach` pt. */
+const PINCH = { depth: 0.15, reach: 2.5 };
+const CHEEK_L: Lock[] = [{ len: 1.5, width: 4.6, lean: -0.6, dip: 0.3, notch: 1 }, { len: 2, width: 6.6, lean: -0.4 }];
 // The chin's middle over the collar: seven small low scallops of uneven size combed down and out from the middle, the
 // jaw's round sides plain; their notches shallow (0.1 to 0.2 pt), so the edge reads as the crop's soft arc with small
 // scallops (deeper ones, 0.25 to 0.35, read as a wavy ribbon at 10 times).
@@ -354,7 +360,7 @@ const ROOT_POINT = { R: { into: [-0.84, 0.55] as P, at: 1.1, r: [1.8, 0.9] }, L:
  * then 94 at y -82). The left's puff it lines all round (L* 46 to 55 at x 47 to 48 from y -88 to -76), so the left's
  * line runs on unbroken.
  */
-const GAPS = { R: [[-45.1, -86.8], [-44.4, -77.4]] as [P, P] };
+const GAPS = { R: [[-45.1, -86.8], [-44.4, -77.4]] as [P, P], L: [[44.4, -78.8], [44.7, -82]] as [P, P] };
 
 /**
  * The head's outline with its fur, and its lines (headFur()). `puff` swells each cheek's puff out sideways by up to
@@ -377,6 +383,11 @@ function headOf(puff = 0): { head: Shape; fur: HeadFur; notches: Record<"R" | "L
   // as the crop's there (L* 46 to 55 at x 47 to 48 from y -88 to -76), and on low on the cheek to the jaw (L* 47 to 50).
   const sideLadder = (p: P): "cream" | "tan" => (p[1] < -74 ? "tan" : "cream");
   const sideFace = (p: P) => (p[1] < -74 ? 0.6 : 0.1);
+  // The line lies light in the notch between a puff's two wisps (headFur's rule darkens each notch to 0.55), so the
+  // notch reads as a soft crease under the full lobe and not as a dark pinch (a W at phone size, like lips in profile).
+  // The notches are headFur's own, found once it has laid the wisps (the line is drawn after).
+  const pinches: P[] = [];
+  const pinch = (p: P) => Math.min(1, ...pinches.map((q) => PINCH.depth + (1 - PINCH.depth) * Math.min(1, Math.hypot(p[0] - q[0], p[1] - q[1]) / PINCH.reach)));
   const spec: HeadFurSpec = {
     base, at,
     crown: [
@@ -390,12 +401,14 @@ function headOf(puff = 0): { head: Shape; fur: HeadFur; notches: Record<"R" | "L
       // cites each by its length (DECISIONS 214).
       { side: "R", from: [-45, -86.2], to: [-44.1, -75.4], clumps: CHEEK, tipRound: 0.22,
         line: { from: [-39.9, -123.8], to: [-39.6, -70.4], ends: ["free", "join"], on: sideLadder, under: sideFace, gap: GAPS.R }, raised: [-46.2, -113.4] },
-      { side: "L", from: [44.6, -76.2], to: [45, -86.2], clumps: reversedRow(CHEEK), tipRound: 0.22,
-        line: { from: [39.6, -70.4], to: [33.7, -129.4], ends: ["join", "free"], on: sideLadder, under: sideFace }, raised: [44.9, -113.8] },
+      { side: "L", from: [44.6, -76.2], to: [45, -86.2], clumps: CHEEK_L, tipRound: 0.22,
+        line: { from: [39.6, -70.4], to: [33.7, -129.4], ends: ["join", "free"], on: sideLadder, under: sideFace, most: pinch, gap: GAPS.L }, raised: [44.9, -113.8] },
     ],
     chin: { from: [-24, -62.4], to: [24, -62.4], scallops: CHIN, tipRound: 0.25, line: { from: [-39.6, -70.4], to: [39.6, -70.4] }, corners: [[-39.6, -70.4], [39.6, -70.4]] },
   };
   const fur = headFur(spec);
+  // Each row's notches between its wisps (not its two ends), in path order.
+  for (let k = 0; k < fur.tufts.cheeks.length - 1; k++) if ((k + 1) % CHEEK.length !== 0) pinches.push(fur.tufts.cheeks[k]!.notches[1]);
   const placed = (n: { top: [P, P]; side: [P, P] }) => ({ top: n.top.map(at) as [P, P], side: n.side.map(at) as [P, P] });
   return { head: fur.head, fur, notches: { R: placed(NOTCHES.R), L: placed(NOTCHES.L) }, gaps: [GAPS.R].map(([a, b]): [P, P] => [at(a), at(b)]) };
 }
@@ -560,7 +573,19 @@ function headLinePiece(up: { L: boolean; R: boolean } = { L: false, R: false }, 
   // the ear's tan, where soften()'s band read as a pale halo round the wisps), and its wisps' rim lit whiter, as the
   // crop paints the puff's tufts.
   const gapEdge = h.gaps.map(([a, b]) => along(a, b, 1, -0.55)).join(""), gapRim = h.gaps.map(([a, b]) => along(a, b, 1.4, -1.5)).join("");
-  const puffs = `<path d="${gapEdge}" fill="${C.fur}" opacity="0.6" filter="url(#${f})"/><path d="${gapRim}" fill="${C.light}" opacity="0.55" filter="url(#${g})"/>`;
+  // Each puff's wisps flicked whiter along their middles, the crop's light tufts on the puff's rim: a soft stroke of the
+  // light from inside each wisp out toward its tip, stopping short of the edge so the line keeps it, and a shorter one
+  // beside it in the full lobe.
+  const lerp = (a: P, b: P, t: number): P => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+  const flicks = h.fur.tufts.cheeks.flatMap((t, i) => {
+    const one = strokeOf([lerp(t.root, t.tip, -0.6), lerp(t.root, t.tip, 0.7)], 1.1, { taper: 1, tip: 0.2 }).d;
+    // The full lobe: the right row's first wisp, the left's (reversed) last.
+    if (i !== 0 && i !== h.fur.tufts.cheeks.length - 1) return [one];
+    const side = lerp(t.notches[0], t.notches[1], 0.3);
+    return [one, strokeOf([lerp(side, t.tip, -0.4), lerp(side, t.tip, 0.55)], 0.9, { taper: 0.8, tip: 0.2 }).d];
+  }).join("");
+  const puffs = `<path d="${gapEdge}" fill="${C.fur}" opacity="0.6" filter="url(#${f})"/><path d="${gapRim}" fill="${C.light}" opacity="0.55" filter="url(#${g})"/>` +
+    `<path d="${flicks}" fill="${C.light}" opacity="0.7" filter="url(#${f})"/>`;
   return lineGate(piece(`<defs>${r.defs}${blur(f, pad(box, 2), 0.4)}${blur(g, pad(box, 2), 0.5)}${blur(k, pad(box, 2), 0.8)}${blur(m, pad(box, 2), 0.5)}</defs>${roots}${puffs}${r.body}`, box, {
     shapes: [{ name: "head.line", nodes: head.typed, segs: head.segs, outlined: r.outlined, fur: head.fur.map(([a, b]) => [fracAt(head, a), fracAt(head, b)]) }],
     lines: r.lines,
