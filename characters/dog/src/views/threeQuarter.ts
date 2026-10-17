@@ -21,7 +21,7 @@ import { browState, drawLid, foreshortened, TURNED_MOUTHS, turnedMouth, turnedSt
 import { litEdge, litMarking, litPart, withDefaults, type LitSpan } from "../parts/lines.ts";
 import { curlShapes, topknot, type Curl } from "../parts/topknot.ts";
 import { earEdge, earFur } from "../parts/ear.ts";
-import { bun, lobed, toes } from "../parts/paw.ts";
+import { bun, lobed, toes, type Dome } from "../parts/paw.ts";
 import { tagPaint } from "../parts/tag.ts";
 import { brush, strands } from "../parts/marking.ts";
 import { PUFF as CHEEK_PUFF, turnedCheeks, type TurnedPuff } from "../parts/cheeks.ts";
@@ -72,8 +72,12 @@ const back = smooth([[-36, -63], [-25, -66.5], [-17, -62], [-10, -55.3], [0.2, -
 // the heel and the paw is no wider than the leg at the wrist, so bun()'s 10 to 20% (the front-on stubby-paws panel)
 // does not hold for it (DECISIONS 230): its paw is typed by hand from the crop as the recipe's bun would draw it, its
 // sole three toe lobes (declared, lobed()) scalloping up 0.55 pt at each toe line (x -46.6 and -53.2, the crop's toe
-// lines), its toe lines the recipe's, rising 45% of the paw round the middle toe. Its top melts into the chest.
-const NEAR_TOES: P[][] = [[[-46.6, -2.25], [-46, -4.6], [-46.15, -6.7], [-46.9, -8.3]], [[-53.2, -2.25], [-53.8, -4.6], [-53.65, -6.7], [-52.9, -8.3]]];
+// lines), its toe lines the recipe's, rising round the middle toe along its ball (DECISIONS 263, 273): each from its
+// foot in the sole's notch up to its top, the ball's meridian through the foot, so the two bow out round the middle toe
+// as the crop's ")" and "(" do. Its top melts into the chest.
+const NEAR_TOES: P[][] = [[[-46.6, -2.25], [-46.9, -8.3]], [[-53.2, -2.25], [-52.9, -8.3]]];
+/** The near paw's ball under its toe lines: centred on the middle toe between them, as wide as the paw's toes. */
+const NEAR_DOME: Dome = { centre: [-49.9, -5.2], size: [8, 6] };
 const legLNodes: Node[] = [[-50, -47], [-38, -47.5], [-26, -45], [-21.4, -38], [-21.4, -31], [-23.2, -24.6], [-25.6, -18.2], [-28, -12], [-30.4, -7.4],
   [-32.8, -3.9], [-36.6, -1.9], [-41.6, -1.5], [-46.6, -2.05], [-50, -1.5], [-53.2, -2.05], [-56, -2], [-58.4, -3.9], [-59.4, -7.2], [-58.6, -11.2],
   [-56.8, -14.2], [-55, -16.2], [-54.6, -22], [-53.4, -29], [-51.2, -38]];
@@ -81,18 +85,17 @@ const legL = lobed(smooth(legLNodes, { corners: [12, 14, 20] }), [[[-32.8, -3.9]
 
 // The far front leg: behind the chest (spec L369), its outer edge the silhouette from under the chest's corner (y -35)
 // down, gently convex, to its wrist (y -19.8), where the bun swells out 5 pt to its toe end; its heel runs on behind
-// the near paw. Its inner side shows only in the slot beside the near leg, under the chest's lower edge. Its toe lines
-// rise at x -71.1 and -75.3, on the crop's (its toe lines faint at about -70 and -76, its sole line darkening at -72.3);
-// the lobe hidden behind the near paw is the broad one, and the outer lobe is kept 5.2 pt wide, so it turns no tighter
-// than the toe lobes' 2.5 pt (the lint's lobePt): the crop's darker spot at -78.5 is where the sole turns up into it.
-const FAR_BUN = bun({ leg: [[-53.6, -26], [-78.9, -26]], wrist: [[-54, -15.4], [-78.6, -19.8]], bulge: [0.4, 5.2], ground: -3.6, lobes: [0.6, 0.18, 0.22],
+// the near paw. Its inner side shows only in the slot beside the near leg, under the chest's lower edge. The crop draws
+// one faint toe line on it, at x -73.2 (L* about 85 from y -4.6 to -7.6), where its sole dips once, and a short branch
+// off the outline where its sole turns up into its outer side (x -79.5, y -8.5 to -7): so its sole is two lobes, the
+// broad one running on behind the near paw and the outer one 7.4 pt wide, and its toe lines rise from the one notch and
+// from where the outer toe turns up, along the paw's ball (DECISIONS 263, 273). Its two lines at x -71.1 and -75.3
+// read as two ticks where the crop has one faint line between them.
+const FAR_BUN = bun({ leg: [[-53.6, -26], [-78.9, -26]], wrist: [[-54, -15.4], [-78.6, -19.8]], bulge: [0.4, 5.2], ground: -3.6, lobes: [0.69, 0.31],
   scallop: 0.55, full: 0.42, rise: 0.45 });
-/**
- * Its toe lines bow away from the middle toe, as the panel draws them round it: bun() bows each away from the bun's own
- * middle, which here lies behind the near paw, so the nearer one (x -71.1) is turned to bow away from the visible middle
- * toe between the two.
- */
-const FAR_TOES = FAR_BUN.toes.map((t, i) => (i === 0 ? t.map(([x, y]): P => [2 * t[0]![0] - x, y]) : t));
+const FAR_TOES: P[][] = [[FAR_BUN.toes[0]![0]!, [-73.4, -7.9]], [[-79.5, -4.6], [-79.2, -7.4]]];
+/** The far paw's ball under its toe lines: centred on its middle toe between them. */
+const FAR_DOME: Dome = { centre: [-76.3, -6.4], size: [6, 5.5] };
 const legR = lobed(smooth([[-75.6, -50], [-61, -46], [-56.2, -36], [-53.6, -26], ...FAR_BUN.nodes, [-78.8, -25], [-78.5, -31], [-77.6, -38], [-76.6, -46]],
   { corners: [...FAR_BUN.notches.map((i) => i + 4), 4 + FAR_BUN.nodes.length - 1] }), FAR_BUN.lobes);
 
@@ -102,6 +105,8 @@ const legR = lobed(smooth([[-75.6, -50], [-61, -46], [-56.2, -36], [-53.6, -26],
 const HIND_BUN = bun({ leg: [[-7.6, -14], [-26.4, -14]], wrist: [[-7.4, -12.2], [-27, -12.4]], bulge: [0.6, 2.2], ground: -1.5, lobes: [0.36, 0.34, 0.3],
   scallop: 0.55, full: 0.5, rise: 0.45 });
 const hind = lobed(smooth([...HIND_BUN.nodes, [-24, -15.8], [-19.6, -16.9], [-14.6, -16.7], [-10, -15]], { corners: HIND_BUN.notches }), HIND_BUN.lobes);
+/** The hind paw's ball under its toe lines (DECISIONS 263, 273): centred on its middle toe between them. */
+const HIND_DOME: Dome = { centre: [-18.5, -4.7], size: [8, 5.5] };
 
 // The chest: from under the collar down to the paws, its front edge the silhouette from under the collar's end down to
 // its corner on the far leg's outer edge (y -35.4), where the far leg comes out from under it; its lower edge runs level
@@ -188,6 +193,8 @@ const EDGES = {
   }),
 };
 const ears = { R: EDGES.R.shape, L: EDGES.L.shape };
+/** Each ear's one line, with its living weight's seed (DECISIONS 260). */
+const EAR_LINES: Record<"R" | "L", LitSpan> = { R: { ...EDGES.R.span, weight: { seed: 4211 } }, L: { ...EDGES.L.span, weight: { seed: 4229 } } };
 
 // The head: the crown under the topknot; on the near side the crown's fur overhangs the near ear's root, and the
 // face's side runs down over the ear to the near cheek; the jaw lies along the collar's top from the near cheek
@@ -210,24 +217,27 @@ const headBase = smooth(headNodes, { corners: [OVERHANG, TEMPLE, PUFF] });
 // crop. Over the far ear's root, where the far side of the face meets the crown, two broad low locks of the crown's cream
 // lie over the ear's top, unlined and feathered; the crown's line runs down to where the head's outline crosses the far
 // ear's and runs on into the ear's own line. Over the near ear's root the overhang's underside hangs in two broad locks
-// combed down toward the face. The chin a rounded mass over the collar, its lower edge six small scallops of uneven
-// width (4.2 to 6.6 pt) and height (0.8 to 1.2 pt), the smallest the recipe allows.
+// combed down toward the face. The chin a rounded mass over the collar, its lower edge the soft chin (DECISIONS 261,
+// 272): the crop's smooth soft arc, broken by three fine wisps of different sizes, unevenly spaced, each leaning out
+// along the fur's flow away from the chin's middle (the near two where the crop's tufts poke down over the collar, x -29.5
+// and -42, the far one before the far jaw's line), its line firm only up each jaw and the bottom between them unlined
+// but for a soft fringe of the fur's shade (an even row of six scallops read as lace).
 // The cheeks are not headFur's: its cheek is a puff of 2 to 4 pointed wisps, as the front crop draws its cheeks, and this
 // crop draws neither cheek so (DECISIONS 228, Q30: the fur the sheet draws, nothing more). The far cheek's two lobes are
 // the outline's own rounds, and the near cheek is the face's smooth S; each is lined by one span of this view's, and
 // each root's unlined stretch is measured and feathered here as the builder measures and feathers its own (rootSpans).
 const CROWN_FAR: Lock[] = [{ len: 1.25, width: 3.8, lean: -0.5, dip: 0.4 }, { len: 1.6, width: 4.4, lean: -0.45 }];
 const CROWN_NEAR: Lock[] = [{ len: 1.8, width: 6.2, lean: 0.5, dip: 0.45 }, { len: 1.35, width: 5.2, lean: 0.55 }];
-const CHIN: Lock[] = [{ len: 0.9, width: 5.2, lean: -0.3, dip: 0.1 }, { len: 1.2, width: 6.6, lean: -0.2, dip: 0 }, { len: 0.95, width: 5.4, lean: -0.05, dip: 0.15 },
-  { len: 0.8, width: 4.2, lean: 0.1, dip: 0.05 }, { len: 1.1, width: 6.4, lean: 0.2, dip: 0.1 }, { len: 0.85, width: 4.8, lean: 0.3 }];
 const FUR = headFur({
   base: headBase,
   crown: [
     { side: "R", from: [-83.6, -135.4], to: [-80.5, -142.4], locks: CROWN_FAR, tipRound: 0.25, line: { from: [-79.7, -143.6], to: [-62, -150] }, ends: ["join", "under"], ear: ears.R },
     { side: "L", from: [-1.6, -135.2], to: [-12.8, -132.6], locks: CROWN_NEAR, tipRound: 0.25, line: { from: [-15, -149.6], to: [1.5, -135.5] }, ear: ears.L },
   ],
-  chin: { from: [-29.8, -61], to: [-66, -61.4], scallops: CHIN, tipRound: 0.25, line: { from: [-18.6, -64.4], to: [-88.4, -72.4], under: 0.15 },
-    corners: [[-18.8, -64.2], [-84.2, -68.6]] },
+  chin: { from: [-29.8, -61], to: [-66, -61.4], scallops: [], tipRound: 0.2, line: { from: [-18.6, -64.4], to: [-88.4, -72.4], under: 0.15 },
+    corners: [[-18.8, -64.2], [-84.2, -68.6]],
+    soft: { wisps: [{ at: [-29.5, -62], len: 1.6, width: 2.4, lean: -0.6 }, { at: [-42, -59.4], len: 1.1, width: 1.8, lean: -0.45 },
+      { at: [-62, -60.4], len: 1.9, width: 2.8, lean: 0.6 }], firm: [8, 21] } },
 });
 // The crown's fur where it overhangs the near ear's root is a lock of fur, its tip a fur span; so is the far cheek's puff,
 // its two lobes clumps of the cheek's fur, the notch between them tighter than the 4 pt corner rule as the crop draws it
@@ -242,9 +252,11 @@ const head = furSpan(furSpan(FUR.head, [3.2, -137.4], [0.4, -135.5]), [-95.8, -7
 // (y -164.5), its line dipping into the V at its left foot and running on down into the fur, its right side coming
 // down into the fur behind the right curl's start. Each curl's hidden foot lies in the crown, feathered into it.
 const CURLS: Curl[] = [
-  { nodes: [[-67.2, -153.8], [-65.4, -156.2], [-61.4, -157.8], [-56.6, -158.4], [-52.2, -157.6], [-48.8, -154.8], [-46.4, -151], [-50, -147.4], [-56, -148.2],
+  { nodes: [[-53.4, -157.2], [-51.4, -157.5], [-49.8, -157], [-48.4, -155], [-47.8, -152.6], [-48.4, -150.2], [-51, -149.4], [-53.6, -151], [-54, -154.4]],
+    line: { from: [-52.6, -157.5], to: [-48.6, -154.6], taper: [1.2, 1] } },
+  { nodes: [[-67.2, -153.8], [-65.4, -156.2], [-61.4, -157.8], [-56.6, -158.4], [-53.2, -157.9], [-51.6, -156.6], [-51, -153.6], [-52, -149.6], [-56, -148.2],
     [-61.4, -150.4], [-64.6, -151.8]],
-    line: { from: [-61.6, -150.4], to: [-48.8, -154.8], taper: [0.8, 1] }, tip: [[-66.6, -152.8], [-66.8, -154.8]] },
+    line: { from: [-61.6, -150.4], to: [-51.9, -157], taper: [0.8, 1.2] }, tip: [[-66.6, -152.8], [-66.8, -154.8]] },
   { nodes: [[-32, -152], [-30, -155.4], [-26.4, -157.2], [-21, -157.6], [-16.4, -156.6], [-13.4, -154.6], [-12.2, -152.4], [-11.4, -149.6], [-16.6, -147.6],
     [-24, -147], [-31, -148.4]],
     line: { from: [-30.4, -155.2], to: [-11.4, -149.8], taper: [1, 0.4] }, into: [[[-12.4, -152.3], [-15.6, -151.6], [-19.4, -151.1]]],
@@ -349,9 +361,10 @@ const backPaint = (F: Facing): Paint => ({
  * running on under the hind paw.
  */
 const backLines = (F: Facing): LitSpan[] => [
-  { from: [-22.6, -64.8], to: [13.1, -33.8], on: (p) => (p[0] > -18 && p[0] < 9.6 ? "tan" : "cream"), ends: ["under", "join"] },
-  { from: [13.1, -33.8], to: [12.7, -11.4], contact: true, on: (p) => (F.shows("rump.patch.L") && p[1] > -34.6 && p[1] < -14 ? "tan" : "cream"), ends: ["join", "join"] },
-  { from: [12.7, -11.4], to: HIND_SOLE, ground: "sole", ends: ["join", "under"] },
+  { from: [-22.6, -64.8], to: [13.1, -33.8], on: (p) => (p[0] > -18 && p[0] < 9.6 ? "tan" : "cream"), ends: ["under", "join"], weight: { seed: 3407 } },
+  { from: [13.1, -33.8], to: [12.7, -11.4], contact: true, on: (p) => (F.shows("rump.patch.L") && p[1] > -34.6 && p[1] < -14 ? "tan" : "cream"), ends: ["join", "join"],
+    weight: { seed: 3413 } },
+  { from: [12.7, -11.4], to: HIND_SOLE, ground: "sole", ends: ["join", "under"], weight: { seed: 3433 } },
 ];
 
 /** The face's middle across, halfway between the far cheek's puff (x -100.4) and the near face's side (x -14.2). */
@@ -395,10 +408,18 @@ const rootBare = (from: P, to: P) => along(head, from, to) + 0.5;
  * the rest does. Each end by a root is free, and cites its root's stretch by its measured length (214).
  */
 const FAR_CHEEK: LitSpan = { from: [-88.4, -72.4], to: FAR_TOP, on: (p) => (p[1] < -80.5 ? "tan" : "cream"), under: (p) => (p[1] < -98 ? 0.3 : 0.1),
-  ends: ["join", "free"], cites: 214, bare: [0, rootBare(FAR_TOP, FAR_JOIN)] };
+  ends: ["join", "free"], cites: 214, bare: [0, rootBare(FAR_TOP, FAR_JOIN)], weight: { seed: 5023 } };
 const nearOn = (p: P) => (p[1] < -69 ? "tan" : "cream"), nearUnder = (p: P) => (p[1] < -69 ? 0.3 : 0.15);
-const NEAR_UPPER: LitSpan = { from: NEAR_TOP, to: NEAR_RAISED, on: nearOn, under: nearUnder, ends: ["free", "join"], cites: 214, bare: [rootBare(NEAR_JOIN, NEAR_TOP), 0] };
-const NEAR_LOWER: LitSpan = { from: NEAR_RAISED, to: [-18.6, -64.4], on: nearOn, under: nearUnder, ends: ["join", "join"] };
+const NEAR_UPPER: LitSpan = { from: NEAR_TOP, to: NEAR_RAISED, on: nearOn, under: nearUnder, ends: ["free", "join"], cites: 214, bare: [rootBare(NEAR_JOIN, NEAR_TOP), 0],
+  weight: { seed: 5039, amount: 0.4 } };
+const NEAR_LOWER: LitSpan = { from: NEAR_RAISED, to: [-18.6, -64.4], on: nearOn, under: nearUnder, ends: ["join", "join"], weight: { seed: 5051, amount: 0.4 } };
+/**
+ * headFur's crown lines and the soft chin's firm sides, each with its living weight's seed (DECISIONS 260), typed once
+ * here so every state draws them alike.
+ */
+const CROWN_LINES: [LitSpan, LitSpan] = [{ ...FUR.crown[0]!, weight: { seed: 5003 } }, { ...FUR.crown[1]!, weight: { seed: 5011 } }];
+const CHIN_SEEDS = [5077, 5081];
+const CHIN_LINES: LitSpan[] = FUR.chins.map((c, i) => ({ ...c, weight: { seed: CHIN_SEEDS[i]!, amount: 0.6 } }));
 /**
  * Which ear is raised off its temple beside head.line: none at rest; the near one perked (the nape it uncovers lies
  * behind the face's side); or the far one perked, which leaves the far side of the head the silhouette from the crown down
@@ -408,8 +429,7 @@ type Temple = "rest" | "near" | "far";
 
 /**
  * head.line's spans, in one order in every state [the far crown's, the near crown's, the near cheek's two, the far
- * cheek's, the chin's], so every span a state does not change is drawn exactly as the rest draws it (the line rule wobbles
- * each span's width by its place in the list).
+ * cheek's, the chin's firm sides], so every span a state does not change is drawn exactly as the rest draws it.
  * - At rest each root's stretch is unlined and feathered over the ear's tan, as the crop paints it (214).
  * - The near ear perked (176): the near cheek's upper span is left out, shortened to its first step along the outline, and
  *   its lower span starts from open fur at NEAR_RAISED, its stretch up to the near crown's join cited by its length, as
@@ -419,17 +439,19 @@ type Temple = "rest" | "near" | "far";
  *   and the far cheek's line is the cream's own, since no ear lies under it.
  */
 function headSpans(temple: Temple): LitSpan[] {
-  const [farCrown, nearCrown] = FUR.crown as [LitSpan, LitSpan], chin = FUR.chin!;
+  const [farCrown, nearCrown] = CROWN_LINES, chin = CHIN_LINES;
   if (temple === "near") {
     const step = spanPoints(head, fracAt(head, NEAR_TOP), fracAt(head, NEAR_RAISED)).slice(0, 2) as [P, P];
-    return [farCrown, nearCrown, { ...NEAR_UPPER, from: step[0], to: step[1] },
-      { ...NEAR_LOWER, ends: ["free", "join"], cites: 214, bare: [rootBare(NEAR_JOIN, NEAR_RAISED), 0] }, FAR_CHEEK, chin];
+    // The near crown's line has no ear's line to join at the overhang's tip any more: it ends there in open fur, beside the
+    // underside's unlined stretch the near cheek's lower span cites (the gate counting what shows found it joining nothing).
+    return [farCrown, { ...nearCrown, ends: [nearCrown.ends![0], "free"], cites: 214, bare: [0, 0] }, { ...NEAR_UPPER, from: step[0], to: step[1] },
+      { ...NEAR_LOWER, ends: ["free", "join"], cites: 214, bare: [rootBare(NEAR_JOIN, NEAR_RAISED), 0] }, FAR_CHEEK, ...chin];
   }
   if (temple === "far") {
     const { cites: _c, bare: _b, ...far } = FAR_CHEEK;
-    return [{ ...farCrown, from: FAR_TOP, ends: ["join", "under"] }, nearCrown, NEAR_UPPER, NEAR_LOWER, { ...far, on: "cream", ends: ["join", "join"] }, chin];
+    return [{ ...farCrown, from: FAR_TOP, ends: ["join", "under"] }, nearCrown, NEAR_UPPER, NEAR_LOWER, { ...far, on: "cream", ends: ["join", "join"] }, ...chin];
   }
-  return [farCrown, nearCrown, NEAR_UPPER, NEAR_LOWER, FAR_CHEEK, chin];
+  return [farCrown, nearCrown, NEAR_UPPER, NEAR_LOWER, FAR_CHEEK, ...chin];
 }
 
 /**
@@ -461,8 +483,9 @@ function headLinePiece(F: Facing, temple: Temple = "rest"): Piece {
   const [x0, y0, x1, y1] = bbox(head.segs);
   const box = pad([x0, y0, x1 - x0, y1 - y0], 4);
   const r = litEdge(head, headSpans(temple), "head.line", box, { reach: 0.5, crisp: true, light: F.light });
-  const soft = softRoots(temple, box);
-  return lineGate(piece(`<defs>${r.defs}${soft.defs}</defs>${soft.body}${r.body}`, box, {
+  // The soft chin's fringe of the fur's shade along its unlined bottom and round its wisps (DECISIONS 261), under the lines.
+  const soft = softRoots(temple, box), fringe = FUR.fringe(C.furShade, box);
+  return lineGate(piece(`<defs>${r.defs}${soft.defs}${fringe.defs}</defs>${fringe.body}${soft.body}${r.body}`, box, {
     shapes: [{ name: "head.line", nodes: head.typed, segs: head.segs, outlined: r.outlined, fur: head.fur.map(([a, b]) => [fracAt(head, a), fracAt(head, b)]) }],
     lines: r.lines,
   }));
@@ -721,7 +744,7 @@ export function threeQuarter(facingSide: Side = "L"): Drawn[] {
   // line is (the tail-curve panel's L* about 80), the outline's warmer brown on the tan root at its foot.
   const tanFoot = (p: P) => p[1] > -15.6 && p[0] < 31;
   const tailLines: LitSpan[] = [{ from: [11.4, -32.8], to: [11.6, -12.4], on: (p) => (tanFoot(p) ? "tan" : "cream"), most: (p) => (tanFoot(p) ? 1 : 0.3),
-    ends: ["under", "under"] }];
+    ends: ["under", "under"], weight: { seed: 6217, amount: 0.55 } }];
   add("tail", lineGate(litPart("tail", tail, tailPaint, tailLines)));
   // The tail's tan root painted as a flame of brush strokes, as the sheet paints it (parts/marking.ts): darkest at the
   // root, a few darker strands radiating up along the plume's fur from the root, its edge brushed into the cream
@@ -760,9 +783,10 @@ export function threeQuarter(facingSide: Side = "L"): Drawn[] {
   add("hind.L", lineGate(roomy(litPart("hind.L", hind, {
     fill: C.fur,
     shade: furShade(hipGroup, [], ["M-34 -24 L-4 -24 L-4 -9 L-34 -9Z"]),
-    ...toes({ lines: HIND_BUN.toes, fade: HIND_BUN.fade, soft: true, width: 0.9 }),
+    ...toes({ lines: HIND_BUN.toes, fade: HIND_BUN.fade, soft: true, width: 0.8, dome: HIND_DOME }),
     light: F.light,
-  }, [{ from: HIND_SOLE, to: HIND_CROWN, ground: "sole", most: (p) => (p[1] < -12 ? 0.3 : 1), ends: ["join", "free"], cites: 230, bare: [0, hindBare + 0.5] }]), 6)));
+  }, [{ from: HIND_SOLE, to: HIND_CROWN, ground: "sole", most: (p) => (p[1] < -12 ? 0.3 : 1), ends: ["join", "free"], cites: 230, bare: [0, hindBare + 0.5],
+    weight: { seed: 7103 } }]), 6)));
   // The far front leg: the fur most of the way to its own warm shade (palette.ts, farFur), 6.2% darker than the
   // near leg; from where it comes out from under the chest it eases in from the fur over 11 pt, so the two join
   // with no edge. The sheet keeps it light: no rim of shade down its front, only a soft shade down its inner side
@@ -775,13 +799,13 @@ export function threeQuarter(facingSide: Side = "L"): Drawn[] {
     ...((): Pick<Paint, "under" | "inner"> => {
       // Two soft toe lines rising from the sole's notches round the middle toe (parts/paw.ts), with the gradient that
       // eases the far leg in from the fur.
-      const t = toes({ lines: FAR_TOES, fade: FAR_BUN.fade, soft: true, width: 0.9 });
+      const t = toes({ lines: FAR_TOES, fade: [-4.15, -8.6], soft: true, width: 0.7, dome: FAR_DOME });
       return { under: `<defs><linearGradient id="${farTop}" gradientUnits="userSpaceOnUse" x1="0" y1="-33.4" x2="0" y2="-22">` +
         `<stop offset="0" stop-color="${C.fur}"/><stop offset="1" stop-color="${C.fur}" stop-opacity="0"/></linearGradient></defs>` +
         `<rect x="-86" y="-48" width="34" height="26" fill="url(#${farTop})"/>` + t.under, inner: t.inner };
     })(),
     light: F.light,
-  }, [{ from: [-54.2, -9], to: [-77.2, -41.5], ground: "sole", ends: ["under", "under"] }])));
+  }, [{ from: [-54.2, -9], to: [-77.2, -41.5], ground: "sole", ends: ["under", "under"], weight: { seed: 7121 } }])));
   // The chest (DECISIONS 231): its front edge's line from its corner on the far leg, where it meets the far leg's own
   // line, up to under the collar's end; its lower edge's line from under the near leg up out of the slot, light, to
   // where it ends in the fur over the far leg; its right side, where it lies on the haunch, and its lower edge from that
@@ -800,8 +824,9 @@ export function threeQuarter(facingSide: Side = "L"): Drawn[] {
       .concat([[[-63.4, -30.2], [-62, -28], [-61.4, -25.8]], [[-60.2, -27.2], [-58.6, -25.2], [-57.8, -23]]]
         .map((pts) => ({ pts: sample(smooth(pts as P[], { closed: false }).segs, 6, false), width: 0.7, colour: C.crownLine, opacity: 0.55 }))),
     light: F.light,
-  }, [{ from: [-53.7, -17], to: CHEST_LOWER_END, most: chestLower, ends: ["under", "free"], cites: 231, bare: [sideBare + 0.5, lowerBare + 0.5] },
-    { from: [-77.6, -38.9], to: [-72.6, -58.6], ends: ["join", "under"] }]), 1)));
+  }, [{ from: [-53.7, -17], to: CHEST_LOWER_END, most: chestLower, ends: ["under", "free"], cites: 231, bare: [sideBare + 0.5, lowerBare + 0.5],
+    weight: { seed: 7159 } },
+    { from: [-77.6, -38.9], to: [-72.6, -58.6], ends: ["join", "under"], weight: { seed: 7151 } }]), 1)));
   // The jaw's shadow on the chest, cast by the head (spec L396): a soft band under the jaw's edge, about 3 pt deep,
   // falling on the chest beside the collar's ends (the collar hides the middle of it).
   const jawShade: P[] = [[-14, -68], [-26, -63.2], [-43, -59.6], [-62, -61.6], [-74, -64.2], [-82, -69], [-80, -64.4], [-72, -59.2], [-62, -56.4],
@@ -822,7 +847,7 @@ export function threeQuarter(facingSide: Side = "L"): Drawn[] {
   }));
   add("tag", tagPiece(F));
   for (const side of ["R", "L"] as const) {
-    add(`ear.${side}`, lineGate(litPart(`ear.${side}`, ears[side], earPaint(side, F), [EDGES[side].span])));
+    add(`ear.${side}`, lineGate(litPart(`ear.${side}`, ears[side], earPaint(side, F), [EAR_LINES[side]])));
     add(`shadow.head.${side}`, headShadow(side));
   }
   add("head.base", part("head.base", head, headPaintF));
@@ -836,7 +861,7 @@ export function threeQuarter(facingSide: Side = "L"): Drawn[] {
   add("nose", nose());
   add("mouth", mouth(), "open");
   add("head.line", headLinePiece(F));
-  add("tuft", topknot(CURLS, { fill: C.fur, highlight: { d: headLight(F), colour: C.light, opacity: 0.4, blur: 4 }, feather: { from: [-38, -146.2], to: [-38, -149.8] }, light: F.light }));
+  add("tuft", topknot(CURLS, { fill: C.fur, highlight: { d: headLight(F), colour: C.light, opacity: 0.4, blur: 4 }, feather: { from: [-38, -146.2], to: [-38, -149.8] }, light: F.light }, { crisp: true }));
   // The near front leg (DECISIONS 216, 230): its back edge shaded softly where it comes out from under the chest fur and
   // lined, as a contact line, only from y -22 down over the haunch to the paw, as the crop lines it (the stretch above
   // measured); the paw's line round its heel, sole (the ground's dark only under its middle) and toe end,
@@ -847,12 +872,12 @@ export function threeQuarter(facingSide: Side = "L"): Drawn[] {
   add("front.L", lineGate(litPart("front.L", legL, {
     fill: C.fur,
     shade: furShade(bodyGroup, [], ["M-70 -70 L-20 -70 L-20 -36 L-70 -36Z", "M-34 -40 L-18 -40 L-18 -16 L-34 -16Z"]),
-    ...toes({ lines: NEAR_TOES, fade: [-2.05, -8.3], soft: true, width: 0.9 }),
+    ...toes({ lines: NEAR_TOES, fade: [-2.05, -8.3], soft: true, width: 0.8, dome: NEAR_DOME }),
     feather: { from: [-40, -46], to: [-40, -38] },
     light: F.light,
-  }, [{ from: NEAR_BACK_LINE, to: heel, contact: true, most: nearBack, ends: ["free", "join"], cites: 230, bare: [backBare + 0.5, 0] },
-    { from: heel, to: toe, ground: "sole", under: (p) => (p[1] > -3.2 ? 0.55 : 0), ends: ["join", "join"] },
-    { from: toe, to: NEAR_FRONT_TOP, contact: true, ends: ["join", "free"], cites: 216, bare: [0, topBare + 0.5] }])));
+  }, [{ from: NEAR_BACK_LINE, to: heel, contact: true, most: nearBack, ends: ["free", "join"], cites: 230, bare: [backBare + 0.5, 0], weight: { seed: 7187, amount: 0.5 } },
+    { from: heel, to: toe, ground: "sole", under: (p) => (p[1] > -3.2 ? 0.55 : 0), ends: ["join", "join"], weight: { seed: 7193 } },
+    { from: toe, to: NEAR_FRONT_TOP, contact: true, ends: ["join", "free"], cites: 216, bare: [0, topBare + 0.5], weight: { seed: 7207 } }])));
   return F.finish(out);
 }
 
@@ -1083,8 +1108,8 @@ nape = furEdge(nape, [-7.4, -53.8], [-19.6, -60.4], [{ len: 0.9, w: 1.4, lean: 0
  */
 const NAPE_CORNER: P = [-6.6, -53];
 const NAPE_LINES: LitSpan[] = [
-  { from: [-1.4, -142.2], to: NAPE_CORNER, on: (p) => (p[1] < -100 ? "tan" : "cream"), ends: ["under", "join"] },
-  { from: NAPE_CORNER, to: [-23.2, -64.6], ends: ["join", "under"] },
+  { from: [-1.4, -142.2], to: NAPE_CORNER, on: (p) => (p[1] < -100 ? "tan" : "cream"), ends: ["under", "join"], weight: { seed: 8017 } },
+  { from: NAPE_CORNER, to: [-23.2, -64.6], ends: ["join", "under"], weight: { seed: 8039 } },
 ];
 
 function perkedEar(side: "L" | "R", F: Facing): Piece {
@@ -1109,8 +1134,10 @@ function perkedEar(side: "L" | "R", F: Facing): Piece {
   // Its line from beside the root over its top and round the free end back under it, on the tan: two spans meeting at
   // full width in the dip, each end running on under the head over its root (DECISIONS 210, 234), through the line gate.
   const spans: LitSpan[] = near
-    ? [{ from: [-19.2, -153], to: [20.8, -135.4], on: "tan", ends: ["under", "join"] }, { from: [20.8, -135.4], to: [-5, -145.3], on: "tan", ends: ["join", "under"] }]
-    : [{ from: [-60.6, -156], to: [-103.2, -137.6], on: "tan", ends: ["under", "join"] }, { from: [-103.2, -137.6], to: [-72, -147.3], on: "tan", ends: ["join", "under"] }];
+    ? [{ from: [-19.2, -153], to: [20.8, -135.4], on: "tan", ends: ["under", "join"], weight: { seed: 8111 } },
+      { from: [20.8, -135.4], to: [-5, -145.3], on: "tan", ends: ["join", "under"], weight: { seed: 8123 } }]
+    : [{ from: [-60.6, -156], to: [-103.2, -137.6], on: "tan", ends: ["under", "join"], weight: { seed: 8147 } },
+      { from: [-103.2, -137.6], to: [-72, -147.3], on: "tan", ends: ["join", "under"], weight: { seed: 8161 } }];
   const flap = lineGate(litPart(`ear.${side}`, shape, { ...paint, light: F.light }, spans));
   if (!near) return flap;
   const tan = uid("tan"), band = uid("band"), neck = uid("neck"), fade = uid("blur"), under = uid("blur");
