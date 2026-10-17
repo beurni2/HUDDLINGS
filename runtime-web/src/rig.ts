@@ -123,15 +123,24 @@ export interface DrawItem {
   rows: number;
   /** The index in the draw list of the part this one is clipped to. */
   clipTo?: number;
+  /** The part's alpha, 0 to 1: it multiplies the drawn colour, never a mask's cut (README, Rendering). */
+  alpha: number;
 }
 
 /** Sub-rows per control row when a bending part's grid is expanded (characters/format/README.md, Bending parts). */
 export const WARP_SUBDIVISIONS = 4;
 
-/** The region a part draws for a view and a state, or undefined when the part is not drawn in that view. */
+/**
+ * The region a part draws for a view and a state, or undefined when it draws nothing
+ * (README, Rig: parts): of "view:state" (the default state when no clip gives one),
+ * "view" and "view:defaultState", the first key present decides, and a null draws nothing.
+ */
 export function regionFor(part: Part, view: string, state: string | undefined): string | undefined {
-  if (state !== undefined && part.regions[`${view}:${state}`]) return part.regions[`${view}:${state}`];
-  return part.regions[view] ?? part.regions[`${view}:${part.defaultState ?? "open"}`];
+  const fallback = part.defaultState ?? "open";
+  for (const key of [`${view}:${state ?? fallback}`, view, `${view}:${fallback}`]) {
+    if (Object.hasOwn(part.regions, key)) return part.regions[key] ?? undefined;
+  }
+  return undefined;
 }
 
 /** The parts in drawing order for the current views and draw-order variant (a variant of another view is ignored). */
@@ -150,6 +159,8 @@ export interface FrameState {
   variant?: string;
   /** The channels of the fake turn's bone (yaw, pitch), when the rig has one. */
   turn?: Channels;
+  /** Each keyed part's alpha; a part left out draws at its rest alpha (the rig's, 1 by default). */
+  alpha?: Record<string, number>;
 }
 
 export interface TurnEffect {
@@ -211,7 +222,7 @@ export function drawList(c: CompiledRig, pose: Pose, atlas: AtlasSet, frame: Fra
     const v0 = region.y / page.height;
     const u1 = (region.x + region.w) / page.width;
     const v1 = (region.y + region.h) / page.height;
-    const item: DrawItem = { part: name, region: regionName, page: region.page, positions: [], uvs: [], columns: 1, rows: 1 };
+    const item: DrawItem = { part: name, region: regionName, page: region.page, positions: [], uvs: [], columns: 1, rows: 1, alpha: frame.alpha?.[name] ?? part.alpha ?? 1 };
     if (part.warp) {
       warpMesh(c, pose, part, frame.views, left, top, width, height, item);
       for (let r = 0; r <= item.rows; r++) {

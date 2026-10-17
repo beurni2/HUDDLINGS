@@ -49,6 +49,12 @@ export interface Frame {
   events: ClipEvent[];
 }
 
+/** What the clips key at one time, blended: each bone's channels and each part's alpha. */
+interface Sample {
+  bones: Record<string, Channels>;
+  alpha: Record<string, number>;
+}
+
 export class Player {
   readonly rig: CompiledRig;
   private clips: Map<string, Clip>;
@@ -118,10 +124,12 @@ export class Player {
     const springs: Record<string, number> = {};
     for (const s of this.springs) springs[this.rig.rig.bones[s.bone]!.name] = s.previousTheta + (s.theta - s.previousTheta) * alpha;
     const state = this.stateAt(t);
-    const channels = this.channelsAt(t);
+    const sample = this.sample(t);
+    const channels = sample.bones;
     const pose = evaluatePose(this.rig, { channels, springs, views: state.views });
     const turnBone = this.rig.rig.fakeTurn?.bone;
     if (turnBone) state.turn = channels[turnBone];
+    state.alpha = sample.alpha;
     const events = this.pending;
     if (this.mixer) events.push(...this.collectEvents(this.mixer, t));
     this.pending = [];
@@ -132,7 +140,12 @@ export class Player {
 
   /** The clip channels at time t, blended. It changes nothing, so a host may look ahead. */
   channelsAt(t: number): Record<string, Channels> {
-    return this.mixer ? this.evaluate(this.mixer, t) : {};
+    return this.sample(t).bones;
+  }
+
+  /** The clips' channels and part alphas at time t, blended. */
+  private sample(t: number): Sample {
+    return this.mixer ? this.evaluate(this.mixer, t) : { bones: {}, alpha: {} };
   }
 
   private checkTime(t: number): void {
@@ -140,7 +153,7 @@ export class Player {
     this.now = Math.max(this.now, t);
   }
 
-  private evaluate(m: Mixer, t: number): Record<string, Channels> {
+  private evaluate(m: Mixer, t: number): Sample {
     // Before its start a clip shows nothing of its own; the clip it replaces still plays.
     if (m.from && t < m.start) return this.evaluate(m.from, t);
     const local = localTime(m.clip, (t - m.start) * 1000);
@@ -153,13 +166,15 @@ export class Player {
       }
       out[bone] = ch;
     }
-    if (!m.from) return out;
+    const alpha: Record<string, number> = {};
+    for (const [part, keys] of Object.entries(m.clip.alpha ?? {})) alpha[part] = sampleKeys(keys, local);
+    if (!m.from) return { bones: out, alpha };
     const w = this.weight(m, t);
-    if (w >= 1) return out;
+    if (w >= 1) return { bones: out, alpha };
     const from = this.evaluate(m.from, t);
     const blended: Record<string, Channels> = {};
-    for (const bone of new Set([...Object.keys(from), ...Object.keys(out)])) {
-      const a = from[bone] ?? {};
+    for (const bone of new Set([...Object.keys(from.bones), ...Object.keys(out)])) {
+      const a = from.bones[bone] ?? {};
       const b = out[bone] ?? {};
       const ch: Channels = {};
       for (const name of CHANNELS) {
@@ -170,7 +185,15 @@ export class Player {
       }
       blended[bone] = ch;
     }
-    return blended;
+    // A part's alpha blends as a channel does, from or to its rest value: the rig's rest alpha, 1 by default.
+    const blendedAlpha: Record<string, number> = {};
+    for (const part of new Set([...Object.keys(from.alpha), ...Object.keys(alpha)])) {
+      const rest = this.rig.parts.get(part)?.alpha ?? 1;
+      const va = from.alpha[part] ?? rest;
+      const vb = alpha[part] ?? rest;
+      blendedAlpha[part] = va + (vb - va) * w;
+    }
+    return { bones: blended, alpha: blendedAlpha };
   }
 
   /** The blend weight of a clip over the one it replaces: easeInOut over its blend time. */

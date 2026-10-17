@@ -1,0 +1,8 @@
+{
+ "front": [["Chin over the collar", [150, 270, 370, 380]], ["Legs and paws", [60, 380, 460, 520]], ["Topknot", [150, 5, 360, 110]], ["Ear and cheek edge", [0, 80, 180, 340]]],
+ "threeQuarter.L": [["Chin over the collar", [120, 280, 340, 390]], ["Legs and paws", [60, 360, 470, 520]], ["Tail and rump", [380, 300, 530, 500]], ["Topknot", [150, 0, 380, 110]]],
+ "threeQuarter.R": [["Chin over the collar", [190, 280, 410, 390]], ["Legs and paws", [60, 360, 470, 520]], ["Tail and rump", [0, 300, 150, 500]], ["Topknot", [150, 0, 380, 110]]],
+ "side.L": [["Chin over the collar", [90, 270, 290, 400]], ["Legs and paws", [50, 360, 400, 520]], ["Tail and rump", [300, 290, 450, 500]], ["Topknot", [40, 0, 260, 120]]],
+ "side.R": [["Chin over the collar", [160, 270, 360, 400]], ["Legs and paws", [50, 360, 400, 520]], ["Tail and rump", [0, 290, 150, 500]], ["Topknot", [190, 0, 410, 120]]],
+ "back": [["Topknot", [110, 0, 350, 110]], ["Ear edge", [0, 60, 170, 340]], ["Tail plume", [120, 300, 340, 510]], ["Haunches and paws", [60, 380, 420, 520]]]
+}

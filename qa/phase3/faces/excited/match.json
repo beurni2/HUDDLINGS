@@ -1,0 +1,376 @@
+{
+ "species": "dog",
+ "preset": "excited",
+ "renderFaceRollDeg": -3.98,
+ "still": {
+  "still": "face_excited",
+  "clip": "face_excited",
+  "views": {
+   "body": "front",
+   "head": "front"
+  },
+  "ppp": 3,
+  "sizePx": [562, 558],
+  "rootPx": [289, 517]
+ },
+ "rest": {
+  "still": "still_front",
+  "clip": "still_front",
+  "views": {
+   "body": "front",
+   "head": "front"
+  },
+  "ppp": 3
+ },
+ "thresholds": {
+  "landmarkShareOfHead": 0.03,
+  "landmarkPt": 2.8,
+  "eyeAreaRatio": 1.9,
+  "eyeIoU": 0.58,
+  "mouthIoU": 0.35,
+  "mouthOpenRatio": 2.9,
+  "mouthOpenFloorShare": 0.25,
+  "padShareOfHead": 0.25,
+  "headBoxPt": [-70.0, -190.0, 70.0, -30.0],
+  "turnedShareOfHead": 0.03,
+  "reachShareOfHead": 0.08,
+  "touchShareOfHead": 0.05,
+  "topShareOfHead": 0.15,
+  "pinReachShareOfHead": 0.2,
+  "pinRounds": 4,
+  "pinSettledPx": 0.05,
+  "windowShareOfHead": 0.35,
+  "subsamples": 4,
+  "softL": [50, 70],
+  "endPx": 2.0,
+  "eyeMinPx": 20,
+  "noseCorePx": 5,
+  "openChroma": 30,
+  "openHue": 50,
+  "openL": 60,
+  "blushLevelTolerance": 0.05,
+  "blushMinPx": 6,
+  "blushLightLMin": 70,
+  "blushLightChromaMax": 30,
+  "blushLevelMin": 0.05,
+  "blushPlaceShareOfHead": 0.03,
+  "blushDeltaE2000Max": 3.0,
+  "blushRestingSpread": [0.29, 0.43]
+ },
+ "primary": "master.expression.excited",
+ "records": {
+  "master.expression.excited": {
+   "crop": "master.expression.excited",
+   "gating": true,
+   "ptPerCropPx": 1.23556,
+   "measureZoom": 2,
+   "rollDeg": -11.75,
+   "turnDeg": -7.77,
+   "padPx": 38,
+   "turned": false,
+   "turnAcrossPt": 0.01,
+   "drawn": {
+    "eyes": "happy",
+    "mouth": "open"
+   },
+   "heldTo": [
+    "eye.R",
+    "eye.L",
+    "mouth.R",
+    "mouth.L"
+   ],
+   "alignment": {
+    "pinnedOn": "nose",
+    "shiftFromModelPt": [0.41, 0.47]
+   },
+   "rows": {
+    "head.top": {
+     "record": [64.83, 3.6],
+     "held": false,
+     "found": [60.94, 5.13],
+     "errPt": 5.16,
+     "offsetPt": [-5.09, 0.88],
+     "pass": true,
+     "note": "reported, never held: the sheet draws the tuft differently in every panel"
+    },
+    "nose": {
+     "record": [67.85, 62.73],
+     "held": false,
+     "found": [67.85, 62.73],
+     "errPt": 0.0,
+     "offsetPt": [0.0, 0.0],
+     "pass": true,
+     "note": "the render is placed here"
+    },
+    "eye.R": {
+     "record": [46.04, 62.08],
+     "held": true,
+     "found": [46.51, 62.07],
+     "errPt": 0.58,
+     "offsetPt": [0.57, 0.11],
+     "pass": true
+    },
+    "eye.L": {
+     "record": [86.9, 53.58],
+     "held": true,
+     "found": [87.02, 53.66],
+     "errPt": 0.18,
+     "offsetPt": [0.12, 0.13],
+     "pass": true
+    },
+    "mouth.R": {
+     "record": [56.5, 70.29],
+     "held": true,
+     "found": [57.38, 71.08],
+     "errPt": 1.46,
+     "offsetPt": [0.86, 1.18],
+     "pass": true
+    },
+    "mouth.L": {
+     "record": [81.0, 65.67],
+     "held": true,
+     "found": [80.65, 66.29],
+     "errPt": 0.88,
+     "offsetPt": [-0.58, 0.66],
+     "pass": true
+    }
+   },
+   "spacing": {},
+   "shapes": {
+    "eye.R": {
+     "areaPx": 271,
+     "recordAreaPx": 259,
+     "areaPt2": 103.4,
+     "areaRatio": 1.046,
+     "iou": 0.866,
+     "pass": true,
+     "held": true
+    },
+    "eye.L": {
+     "areaPx": 270,
+     "recordAreaPx": 262,
+     "areaPt2": 103.0,
+     "areaRatio": 1.031,
+     "iou": 0.88,
+     "pass": true,
+     "held": true
+    },
+    "mouth": {
+     "areaPx": 838,
+     "recordAreaPx": 924,
+     "areaPt2": 319.8,
+     "areaRatio": 0.907,
+     "iou": 0.832,
+     "pass": true,
+     "openPx": 795,
+     "recordOpenPx": 815,
+     "openRatio": 0.981,
+     "redShare": 0.452,
+     "recordRedShare": 0.399,
+     "held": true
+    }
+   },
+   "anchorsHeld": 4,
+   "spacingsHeld": 0,
+   "shapesHeld": 3,
+   "pass": true
+  },
+  "expressions.expression.excited": {
+   "crop": "expressions.expression.excited",
+   "gating": false,
+   "ptPerCropPx": 0.68367,
+   "measureZoom": 1,
+   "rollDeg": -12.13,
+   "turnDeg": -8.15,
+   "padPx": 34,
+   "turned": false,
+   "turnAcrossPt": -0.79,
+   "drawn": {
+    "eyes": "happy",
+    "mouth": "open"
+   },
+   "heldTo": [
+    "eye.R",
+    "eye.L",
+    "mouth.R",
+    "mouth.L"
+   ],
+   "alignment": {
+    "pinnedOn": "nose",
+    "shiftFromModelPt": [0.46, 0.48]
+   },
+   "rows": {
+    "head.top": {
+     "record": [119.36, 4.64],
+     "held": false,
+     "found": [118.67, 5.67],
+     "errPt": 0.85,
+     "offsetPt": [-0.61, 0.59],
+     "pass": true,
+     "note": "reported, never held: the sheet draws the tuft differently in every panel"
+    },
+    "nose": {
+     "record": [131.42, 109.41],
+     "held": false,
+     "found": [131.42, 109.41],
+     "errPt": 0.0,
+     "offsetPt": [0.0, 0.0],
+     "pass": true,
+     "note": "the render is placed here"
+    },
+    "eye.R": {
+     "record": [92.43, 108.58],
+     "held": true,
+     "found": [93.0, 108.47],
+     "errPt": 0.4,
+     "offsetPt": [0.4, 0.01],
+     "pass": true
+    },
+    "eye.L": {
+     "record": [163.11, 93.38],
+     "held": true,
+     "found": [165.99, 92.8],
+     "errPt": 2.01,
+     "offsetPt": [2.01, 0.02],
+     "pass": true
+    },
+    "mouth.R": {
+     "record": [112.37, 122.84],
+     "held": true,
+     "found": [113.12, 124.92],
+     "errPt": 1.51,
+     "offsetPt": [0.2, 1.5],
+     "pass": true
+    },
+    "mouth.L": {
+     "record": [151.71, 114.33],
+     "held": true,
+     "found": [154.75, 115.7],
+     "errPt": 2.28,
+     "offsetPt": [1.84, 1.35],
+     "pass": true
+    }
+   },
+   "spacing": {},
+   "shapes": {
+    "eye.R": {
+     "areaPx": 222,
+     "recordAreaPx": 193,
+     "areaPt2": 103.8,
+     "areaRatio": 1.15,
+     "iou": 0.812,
+     "pass": true,
+     "held": true
+    },
+    "eye.L": {
+     "areaPx": 226,
+     "recordAreaPx": 177,
+     "areaPt2": 105.6,
+     "areaRatio": 1.277,
+     "iou": 0.752,
+     "pass": true,
+     "held": true
+    },
+    "mouth": {
+     "areaPx": 681,
+     "recordAreaPx": 652,
+     "areaPt2": 318.3,
+     "areaRatio": 1.044,
+     "iou": 0.857,
+     "pass": true,
+     "openPx": 645,
+     "recordOpenPx": 558,
+     "openRatio": 1.121,
+     "redShare": 0.467,
+     "recordRedShare": 0.366,
+     "held": true
+    }
+   },
+   "anchorsHeld": 4,
+   "spacingsHeld": 0,
+   "shapesHeld": 3,
+   "pass": true
+  }
+ },
+ "headGate": {
+  "headShiftPt": [0.0, 0.01],
+  "headIoU": 0.9923,
+  "thresholdPt": 2.8,
+  "rows": {
+   "nose": {
+    "model": [-0.2, -91.59],
+    "found": [-0.68, -92.05],
+    "errPt": 0.66,
+    "pass": true
+   },
+   "eyes.middle": {
+    "model": [-1.2, -99.59],
+    "found": [-1.07, -98.15],
+    "errPt": 1.45,
+    "pass": true,
+    "measuredBy": "each eye's parts' pixels in the ID pass"
+   }
+  },
+  "pass": true
+ },
+ "blush": {
+  "parts": [
+   "blush.L",
+   "blush.R"
+  ],
+  "restingSpread": [0.29, 0.43],
+  "heldTo": "#F7B3A6",
+  "thresholdDeltaE2000": 3.0,
+  "placeThresholdPt": 2.8,
+  "cheeks": [
+   {
+    "centrePx": [94.57, 122.83],
+    "centrePt": [-30.2, -84.08],
+    "level": 0.349,
+    "peak": "#FCDDD1",
+    "coreColour": "#F7B2A7",
+    "coreDeltaE2000": 0.82,
+    "levelPass": true,
+    "sheetBox": 0,
+    "pass": true,
+    "part": "blush.R"
+   },
+   {
+    "centrePx": [171.65, 117.28],
+    "centrePt": [29.7, -88.39],
+    "level": 0.35,
+    "peak": "#FCDDD1",
+    "coreColour": "#F7B2A7",
+    "coreDeltaE2000": 0.82,
+    "levelPass": true,
+    "sheetBox": 1,
+    "pass": true,
+    "part": "blush.L"
+   }
+  ],
+  "sheetBoxes": [
+   {
+    "boxPt": [-38.03, -89.0, -17.82, -76.56],
+    "cheek": 0,
+    "pass": true
+   },
+   {
+    "boxPt": [16.38, -92.1, 36.59, -79.67],
+    "cheek": 1,
+    "pass": true
+   }
+  ],
+  "sheetShowsBlush": true,
+  "sheetCheeks": 2,
+  "pass": true,
+  "measured": true,
+  "view": "front",
+  "crop": "master.turnaround.front",
+  "ptPerCropPx": 0.77725
+ },
+ "anchorsHeld": 4,
+ "spacingsHeld": 0,
+ "shapesHeld": 3,
+ "pass": true,
+ "summary": "pass: 4 anchors and 3 shapes held on master.expression.excited; head held (nose 0.66 pt, eyes.middle 1.45 pt); blush held (R 0.349, L 0.350; rest 0.29 to 0.43)"
+}

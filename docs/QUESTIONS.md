@@ -21,6 +21,57 @@ Where the spec is silent or contradicts itself, I don't invent the answer. The q
 - **Decided: the default.** Check it in two parts, on every render: the blush part's own colour within ΔE2000 3 of `#F7B3A6`, and the rendered cheek's level, fitted the same way `characters/refprep/palette.py` fits the sheet's, within the sheet's own spread at rest (29 to 43%) and at the level each clip asks for otherwise. Not a dominant colour against a composite: on a soft blush that is ill-defined, and at ΔE 3 it fails the sheet's cheeks too. `model.json` holds the resting level and the sheet's spread (`blush`).
 - **Answered:** founder, Oct 14, 2026, in the session: "Q25 default".
 
+### Q27. Two choices in the Faces check: how to hold faces whose panels turn the head, and whether an open mouth passes as cheeky
+- **The spec says:** L525 holds each face preset to "its expression-sheet panel" by "the landmark check on eyes and mouth"; L480-498 name Curious, Shy, Sleepy and Mischievous as those panels; a face preset keeps the front's head (the lead's decision for the Faces check).
+- **Why it matters:** (a) Both Curious panels, the only Shy and both Sleepy panels turn the head: their eyes sit 3.0 to 5.1 pt across from where the front puts them. Held by place against the nose, a correct curious or shy face on the front's head failed by 5 to 6 pt and could pass only with its eyes slid against its nose. (b) The master sheet's Cheeky, the lead's choice for mischievous and sly, draws the tongue out over a closed smile; the expression sheet's Mischievous draws an open mouth with the tongue in it. Every shape gate lets an open mouth pass Cheeky's mouth; only the share of deep red inside the mouth tells them apart (Cheeky 0.14, the open mouths 0.35 to 0.40, Mischievous 0.27, the face library's cheeky still 0.32).
+- **Decided: the default.** (a) each keeps its own panel, recorded as turned, where the eyes are held by their shapes and their spacing and their place is held on the render's own head; the alternative is to hold curious and shy to the master sheet's Happy, level and front-on, as proud is held to Content (sleepy has no level panel with closed eyes). (b) an open mouth may pass mischievous and sly; the deep-red share is reported in every mouth row and judged by eye. A gate on it would fail the expression sheet's own Mischievous and the face library's cheeky mouth. (`characters/dog/DECISIONS.md` 110 and 118.)
+- **Answered:** founder, Oct 16, 2026, in the session: "Q27 defaults are fine, carry on".
+
+### Q28. When the eyes glance aside or half close, does the catchlight ride the iris, as the sheets draw it, or stay fixed to the head, as the spec says?
+- **The spec says:** L459 "A side glance is gaze, not a state: the pupils move and the catchlights stay"; L509 "The catchlights stay fixed to the head while the pupils move, which keeps the gloss believable"; L504 "The sheet is the model".
+- **Why it matters:** the expression sheet's Side glance draws the catchlight on the iris, moved aside with it, and its Sleepy half-lid draws it lower on the iris under the lid. Fixed to the head, the catchlight would sit on the white in a side glance, or under the lid. It also decides phase 4's gaze: a catchlight fixed to the head needs the catchlight as its own layer over a moving iris.
+- **Decided: a middle way** (recommended in the session, not the default): the catchlight moves with the iris at about half the iris's travel, as a real eye's reflection lags its pupil, so the eye reads as a glossy ball in motion; it never leaves the dark of the iris and goes under the lid as the lid closes. In stills it sits on the iris as the sheets draw it, nearer the open eye's place by about half the iris's shift. Phase 4 draws it as its own layer between the iris and the lid, and sets the fraction (from 0.5) by a wedge render for the founder. `characters/dog/DECISIONS.md` 130.
+- **Answered:** founder, Oct 16, 2026, in the session: "Q28 middle way".
+
+### Q2. What does the dog use for the squeeze (`> <`) and sparkle eyes its sheets never draw?
+- **The spec says:** L452 "squeeze | the `> <` eyes of the kitty's and the bear's Excited"; L457 "sparkle | Sparkle (star highlight) | `show_off`, `celebrate`, proud"; L495 "ticklish | squeeze"; L504 "Add no fur details, markings, toes, claws or shapes the sheets do not show".
+- **Why it matters:** the dog's eye states are open, happy crescent, closed, sleepy, surprised and side glance. Ticklish (core motion 9) and proud call for eyes the dog sheets don't have.
+- **Default (not taken):** for the dog (and later the rabbit), squeeze becomes the happy crescents, as L482 already allows for excited, and sparkle becomes happy crescents with star particles beside the head, as the dog's Proud panel draws. At Gate A I also show a dog-style `> <` and star eye, labelled "not on the dog sheet", so you can choose.
+- **Decided: draw both for the dog, in the sister sheets' style** (recommended in the session). Squeeze is a dog `> <` drawn as the kitty's and the bear's Excited draw theirs, at the dog's eye size and line weight, used for ticklish and giggle fits; excited keeps the happy crescents its own panel draws. Sparkle is the open, glossy eye with its large catchlight a soft star and small yellow stars beside it, as both sister sheets' "Sparkle (star highlight)" draw it, used for `show_off`, `celebrate` and proud's second beat; proud's first beat stays the dog's Proud panel, crescents with stars round the head. Both are judged by eye beside the kitty's and the bear's panels (the dog's sheets draw neither). `characters/dog/DECISIONS.md` 200.
+- **Answered:** founder, Oct 16, 2026, in the session: "Q2 and Q26 as recommended".
+
+### Q26. The sheets draw one catchlight in each eye; the spec asks for two or three. Which do I follow?
+- **The spec says:** L446 "each eye (... two or three catchlights ...)"; L509 "one large catchlight high on the side toward the nose and one or two small ones, placed as the sheets draw them"; L504 "The sheet is the model".
+- **Why it matters:** the dog's turnaround, hero, glossy-eyes panel and expression sheet each draw one catchlight per open eye. A second small one makes the eyes glossier but less like the sheet.
+- **Default (not taken):** one catchlight, as the sheets draw it (`characters/dog/DECISIONS.md` 29). Adding the small ones is one line per eye.
+- **Decided: one large catchlight and one tiny one** (recommended in the session), as the kitty's and the bear's "Default (Large & Glossy)" eyes draw them: the tiny one about a quarter of the large one's size, just below it and toward the nose (first written here as the outer side; the sister sheets put it toward the nose, and the drawing follows them, as decided). Not three: a third reads as noise at 164 pt. The tiny one moves with the large one (Q28) and shows only where the iris does (none on closed or crescent eyes). `characters/dog/DECISIONS.md` 200.
+- **Answered:** founder, Oct 16, 2026, in the session: "Q2 and Q26 as recommended".
+
+### Q29. May fur-lock tips and toe lobes be tighter than the 4 pt corner rule, where the sheet draws them so?
+- **The spec says:** L510 "rounded silhouettes with no corner tighter than a 4 pt radius, except the kitty's ear tips"; L504 "The sheet is the model ... drop nothing they do show".
+- **Why it matters:** the sheet's ear lock tips, chin scallops and tail locks turn at about 0.7 to 1.5 pt, and the stubby-paws panel's toe lobes at about 3 pt. Held to 4 pt they come out blunt and bumpy, which is part of what you saw. The lint already lets fur spans through; the toe lobes are not fur.
+- **Decided: the recommended default.** follow the sheet for fur-lock tips and toe lobes only, as the sheet draws them; every other corner of the silhouette (head, body, ear, paw outline) keeps 4 pt or more. At phone size a soft 1 pt lock tip still reads rounded.
+- **Answered:** founder, Oct 16, 2026, in the session: "Q29 to Q31 as recommended".
+
+### Q30. The spec's list of where tufts go leaves out fur the sheet draws. Do I add what the sheet draws?
+- **The spec says:** L508 "tufts only where the sheets draw them: the dog's head tuft, cheeks and chest; ... the tail tips"; L504 "Add no fur details ... the sheets do not show, and drop nothing they do show".
+- **Why it matters:** the dog's sheet also draws feathered ear edges with lock tips at the hem, small scallops on the chin over the collar, and small fur bumps at the elbows and haunches. L508's list leaves them out; L504 says to drop nothing the sheets show.
+- **Decided: the recommended default.** draw them exactly as the sheet draws them, and nothing more: L508's own rule is "only where the sheets draw them", and its list reads as examples. Each species follows its own sheets.
+- **Answered:** founder, Oct 16, 2026, in the session: "Q29 to Q31 as recommended".
+
+### Q31. In the right-facing views, does a line where one part lies over another stay as dark as the sheet's?
+- **The spec says:** L507 "Light comes from the top left on every part and view"; L506 the outline "on each part's outer edge only"; the line-by-light rule (`characters/dog/DECISIONS.md` 74) lightens a line on its lit side.
+- **Why it matters:** in the .R views the light rule turns some overlap lines pale (the haunch over the tail in side.R, the tail in threeQuarter.R), so the two parts merge and the overlap goes flat, where the mirrored sheet keeps them dark.
+- **Decided: the recommended default.** a line where one part lies over another is a contact line: it keeps the sheet's darkness in both facings, like a contact shadow. The light rule lightens only the silhouette's outer edge.
+- **Answered:** founder, Oct 16, 2026, in the session: "Q29 to Q31 as recommended".
+
+### Q32. The sheet's outline varies more than the spec's 1.2 to 1.8 pt allows. Do I keep the band?
+- **The spec says:** L506 "Outline: a warm brown sampled from each sheet's linework, on each part's outer edge only, 1.2–1.8 pt wide at 164 pt height and slightly tapered where it ends"; L504 "The sheet is the model".
+- **Why it matters:** this is behind your "the edges don't match" note. The sheet's outline thins almost to nothing on lit tops, breaks in places and swells darker where parts press. Measured the way our line check measures ours, its width varies by 0.27 to 0.58 (coefficient of variation) on the legs, back and tail. A line held between 1.2 and 1.8 pt can reach about 0.2. Three fresh reviewers still read our outline as even at phone size.
+- **Decided: the default.** keep 1.2 to 1.8 pt and put the life inside it. The full band is used boldly: 1.2 pt on lit tops, 1.8 pt where parts press. The tone is lighter where lit and darker where pressed, as the sheet's is. Short tapered breaks go where the sheet's line comes and goes.
+- **The alternative:** widen the dog's outer band to about 0.9 to 2.2 pt, so the line can thin and swell as far as the sheet's. That changes a spec rule for every view.
+- **Answered:** founder, Oct 17, 2026, in the session, on the third round's images (`qa/phase3/fur/founder/`): "they are all good", with no widening asked.
+
 ## Needed before phase 1
 
 ### Q1. Which iPhone will measure the speed budgets?
@@ -31,17 +82,7 @@ Where the spec is silent or contradicts itself, I don't invent the answer. The q
 
 ## Needed by Gate A (the dog's look)
 
-### Q2. What does the dog use for the squeeze (`> <`) and sparkle eyes its sheets never draw?
-- **The spec says:** L452 "squeeze | the `> <` eyes of the kitty's and the bear's Excited"; L457 "sparkle | Sparkle (star highlight) | `show_off`, `celebrate`, proud"; L495 "ticklish | squeeze"; L504 "Add no fur details, markings, toes, claws or shapes the sheets do not show".
-- **Why it matters:** the dog's eye states are open, happy crescent, closed, sleepy, surprised and side glance. Ticklish (core motion 9) and proud call for eyes the dog sheets don't have.
-- **Default:** for the dog (and later the rabbit), squeeze becomes the happy crescents, as L482 already allows for excited, and sparkle becomes happy crescents with star particles beside the head, as the dog's Proud panel draws. At Gate A I also show a dog-style `> <` and star eye, labelled "not on the dog sheet", so you can choose.
-- **Owner:** founder
-
-### Q26. The sheets draw one catchlight in each eye; the spec asks for two or three. Which do I follow?
-- **The spec says:** L446 "each eye (... two or three catchlights ...)"; L509 "one large catchlight high on the side toward the nose and one or two small ones, placed as the sheets draw them"; L504 "The sheet is the model".
-- **Why it matters:** the dog's turnaround, hero, glossy-eyes panel and expression sheet each draw one catchlight per open eye. A second small one makes the eyes glossier but less like the sheet.
-- **Default:** one catchlight, as the sheets draw it (`characters/dog/DECISIONS.md` 29). Adding the small ones is one line per eye.
-- **Owner:** founder
+None open: Q2 and Q26 to Q32 are decided (above). At Gate A you approve the look itself and pick the new hungry and huffy faces.
 
 ## Needed by phase 4 (the rig and Visual QA)
 

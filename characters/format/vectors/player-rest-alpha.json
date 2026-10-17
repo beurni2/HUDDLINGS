@@ -1,0 +1,12833 @@
+{
+ "rig": {
+  "format": 1,
+  "species": "test",
+  "version": "0.1.0",
+  "height": 164,
+  "bones": [
+   {
+    "name": "root"
+   },
+   {
+    "name": "body",
+    "parent": "root",
+    "y": -4,
+    "rot": [
+     -30,
+     30
+    ],
+    "squash": [
+     0.93,
+     1.07
+    ],
+    "scale": [
+     1,
+     1.03
+    ]
+   },
+   {
+    "name": "head",
+    "parent": "body",
+    "y": -58,
+    "rot": [
+     -18,
+     18
+    ],
+    "yaw": [
+     -60,
+     60
+    ],
+    "pitch": [
+     -12,
+     12
+    ],
+    "views": {
+     "side.R": {
+      "x": 16,
+      "y": -56
+     }
+    }
+   },
+   {
+    "name": "ear.L",
+    "parent": "head",
+    "x": 34,
+    "y": -74,
+    "rot": [
+     -30,
+     30
+    ],
+    "spring": {
+     "hz": 3.2,
+     "damping": 0.45,
+     "com": [
+      0,
+      22
+     ],
+     "follow": 0.6,
+     "selfFollow": 0.5,
+     "inertia": 0.7
+    },
+    "views": {
+     "side.R": {
+      "x": -16,
+      "y": -78
+     }
+    }
+   },
+   {
+    "name": "ear.R",
+    "parent": "head",
+    "x": -34,
+    "y": -74,
+    "rot": [
+     -30,
+     30
+    ],
+    "spring": {
+     "hz": 3.2,
+     "damping": 0.45,
+     "com": [
+      0,
+      22
+     ],
+     "follow": 0.6,
+     "selfFollow": 0.5,
+     "inertia": 0.7
+    },
+    "views": {
+     "side.R": {
+      "x": -2,
+      "y": -74
+     }
+    }
+   },
+   {
+    "name": "collar",
+    "parent": "body",
+    "y": -60,
+    "views": {
+     "side.R": {
+      "x": 12,
+      "y": -58
+     }
+    }
+   },
+   {
+    "name": "tag",
+    "parent": "collar",
+    "y": 3,
+    "rot": [
+     -25,
+     25
+    ],
+    "spring": {
+     "hz": 2.5,
+     "damping": 0.35,
+     "com": [
+      0,
+      8
+     ],
+     "follow": 0.6,
+     "inertia": 1
+    },
+    "views": {
+     "side.R": {
+      "x": 6,
+      "y": 3
+     }
+    }
+   },
+   {
+    "name": "tail.1",
+    "parent": "body",
+    "x": 30,
+    "y": -16,
+    "rest": 25,
+    "rot": [
+     -30,
+     30
+    ],
+    "views": {
+     "side.R": {
+      "x": -46,
+      "y": -22,
+      "rest": -50
+     }
+    }
+   },
+   {
+    "name": "tail.2",
+    "parent": "tail.1",
+    "y": -20,
+    "rot": [
+     -30,
+     30
+    ],
+    "spring": {
+     "hz": 3,
+     "damping": 0.3,
+     "com": [
+      0,
+      -10
+     ],
+     "follow": 0.8,
+     "inertia": 1
+    }
+   },
+   {
+    "name": "tail.3",
+    "parent": "tail.2",
+    "y": -20,
+    "rot": [
+     -30,
+     30
+    ],
+    "spring": {
+     "hz": 3.5,
+     "damping": 0.3,
+     "com": [
+      0,
+      -10
+     ],
+     "follow": 0.8,
+     "inertia": 1
+    }
+   },
+   {
+    "name": "paw.L",
+    "parent": "body",
+    "x": 18,
+    "y": -3,
+    "views": {
+     "side.R": {
+      "x": 30,
+      "y": -3
+     }
+    }
+   },
+   {
+    "name": "paw.R",
+    "parent": "body",
+    "x": -18,
+    "y": -3,
+    "views": {
+     "side.R": {
+      "x": 40,
+      "y": -2
+     }
+    }
+   }
+  ],
+  "views": [
+   "front",
+   "side.R"
+  ],
+  "headBone": "head",
+  "parts": [
+   {
+    "name": "shadow",
+    "bone": "root",
+    "group": "body",
+    "regions": {
+     "front": "shadow/front",
+     "side.R": "shadow/side.R"
+    },
+    "alpha": 1
+   },
+   {
+    "name": "tail",
+    "bone": "tail.1",
+    "group": "body",
+    "regions": {
+     "front": "tail/front",
+     "side.R": "tail/side.R"
+    },
+    "warp": {
+     "chain": [
+      "tail.1",
+      "tail.2",
+      "tail.3"
+     ],
+     "columns": 1,
+     "rows": 5
+    },
+    "alpha": 0.5
+   },
+   {
+    "name": "body",
+    "bone": "body",
+    "group": "body",
+    "regions": {
+     "front": "body/front",
+     "side.R": "body/side.R"
+    }
+   },
+   {
+    "name": "collar",
+    "bone": "collar",
+    "group": "body",
+    "regions": {
+     "front": "collar/front",
+     "side.R": "collar/side.R"
+    }
+   },
+   {
+    "name": "tag",
+    "bone": "tag",
+    "group": "body",
+    "regions": {
+     "front": "tag/front",
+     "side.R": "tag/side.R"
+    }
+   },
+   {
+    "name": "paw.L",
+    "bone": "paw.L",
+    "group": "body",
+    "regions": {
+     "front": "paw.L/front",
+     "side.R": "paw.L/side.R"
+    }
+   },
+   {
+    "name": "paw.R",
+    "bone": "paw.R",
+    "group": "body",
+    "regions": {
+     "front": "paw.R/front",
+     "side.R": "paw.R/side.R"
+    }
+   },
+   {
+    "name": "ear.L",
+    "bone": "ear.L",
+    "group": "head",
+    "regions": {
+     "front": "ear.L/front",
+     "side.R": "ear.L/side.R"
+    }
+   },
+   {
+    "name": "ear.R",
+    "bone": "ear.R",
+    "group": "head",
+    "regions": {
+     "front": "ear.R/front",
+     "side.R": "ear.R/side.R"
+    }
+   },
+   {
+    "name": "head.base",
+    "bone": "head",
+    "group": "head",
+    "regions": {
+     "front": "head.base/front",
+     "side.R": "head.base/side.R"
+    },
+    "alpha": 0.6
+   },
+   {
+    "name": "head.marking",
+    "bone": "head",
+    "group": "head",
+    "clipTo": "head.base",
+    "regions": {
+     "front": "head.marking/front",
+     "side.R": "head.marking/side.R"
+    },
+    "alpha": 0.4
+   },
+   {
+    "name": "eye.L",
+    "bone": "head",
+    "group": "head",
+    "clipTo": "head.base",
+    "defaultState": "open",
+    "regions": {
+     "front:open": "eye.L/front:open",
+     "front:closed": "eye.L/front:closed"
+    },
+    "alpha": 0
+   },
+   {
+    "name": "eye.R",
+    "bone": "head",
+    "group": "head",
+    "clipTo": "head.base",
+    "defaultState": "open",
+    "regions": {
+     "front:open": "eye.R/front:open",
+     "front:closed": "eye.R/front:closed",
+     "side.R:open": "eye.R/side.R:open",
+     "side.R:closed": "eye.R/side.R:closed"
+    }
+   },
+   {
+    "name": "nose",
+    "bone": "head",
+    "group": "head",
+    "clipTo": "head.base",
+    "regions": {
+     "front": "nose/front",
+     "side.R": "nose/side.R"
+    },
+    "alpha": 0.75
+   }
+  ],
+  "drawOrder": {
+   "front": [
+    "shadow",
+    "tail",
+    "body",
+    "collar",
+    "tag",
+    "@head",
+    "paw.L",
+    "paw.R"
+   ],
+   "side.R": [
+    "shadow",
+    "paw.L",
+    "tail",
+    "body",
+    "collar",
+    "tag",
+    "@head",
+    "paw.R"
+   ],
+   "head.front": [
+    "ear.L",
+    "ear.R",
+    "head.base",
+    "head.marking",
+    "eye.L",
+    "eye.R",
+    "nose"
+   ],
+   "head.side.R": [
+    "ear.L",
+    "head.base",
+    "head.marking",
+    "eye.R",
+    "nose",
+    "ear.R"
+   ]
+  },
+  "drawOrderVariants": {
+   "front:pawsBack": [
+    "shadow",
+    "paw.L",
+    "paw.R",
+    "tail",
+    "body",
+    "collar",
+    "tag",
+    "@head"
+   ]
+  },
+  "fakeTurn": {
+   "bone": "head",
+   "yawDeg": 20,
+   "pitchDeg": 12,
+   "faceShift": 0.06,
+   "markingShift": 0.03,
+   "earShift": 0.03,
+   "nodShift": 0.05,
+   "farEyeNarrow": 0.06,
+   "views": {
+    "front": {
+     "size": [
+      92,
+      92
+     ]
+    }
+   },
+   "roles": {
+    "eye.L": "face",
+    "eye.R": "face",
+    "nose": "face",
+    "head.marking": "marking",
+    "ear.L": "ear",
+    "ear.R": "ear"
+   },
+   "farEye": {
+    "positive": "eye.L",
+    "negative": "eye.R"
+   }
+  }
+ },
+ "atlas": {
+  "name": "2x",
+  "scale": 2,
+  "pages": [
+   {
+    "file": "atlas@2x-0.png",
+    "scale": 2,
+    "width": 1024,
+    "height": 1024
+   }
+  ],
+  "regions": {
+   "head.base/front": {
+    "page": 0,
+    "x": 16,
+    "y": 16,
+    "w": 188,
+    "h": 188,
+    "anchorX": 94,
+    "anchorY": 186
+   },
+   "head.base/side.R": {
+    "page": 0,
+    "x": 220,
+    "y": 16,
+    "w": 180,
+    "h": 180,
+    "anchorX": 78,
+    "anchorY": 180
+   },
+   "body/front": {
+    "page": 0,
+    "x": 416,
+    "y": 16,
+    "w": 180,
+    "h": 140,
+    "anchorX": 90,
+    "anchorY": 134
+   },
+   "body/side.R": {
+    "page": 0,
+    "x": 612,
+    "y": 16,
+    "w": 220,
+    "h": 132,
+    "anchorX": 98,
+    "anchorY": 126
+   },
+   "tail/front": {
+    "page": 0,
+    "x": 848,
+    "y": 16,
+    "w": 32,
+    "h": 124,
+    "anchorX": 16,
+    "anchorY": 122
+   },
+   "tail/side.R": {
+    "page": 0,
+    "x": 896,
+    "y": 16,
+    "w": 32,
+    "h": 124,
+    "anchorX": 16,
+    "anchorY": 122
+   },
+   "ear.L/front": {
+    "page": 0,
+    "x": 944,
+    "y": 16,
+    "w": 56,
+    "h": 100,
+    "anchorX": 28,
+    "anchorY": 6
+   },
+   "ear.R/front": {
+    "page": 0,
+    "x": 16,
+    "y": 220,
+    "w": 56,
+    "h": 100,
+    "anchorX": 28,
+    "anchorY": 6
+   },
+   "ear.R/side.R": {
+    "page": 0,
+    "x": 88,
+    "y": 220,
+    "w": 56,
+    "h": 100,
+    "anchorX": 28,
+    "anchorY": 6
+   },
+   "ear.L/side.R": {
+    "page": 0,
+    "x": 160,
+    "y": 220,
+    "w": 52,
+    "h": 96,
+    "anchorX": 26,
+    "anchorY": 4
+   },
+   "paw.L/front": {
+    "page": 0,
+    "x": 228,
+    "y": 220,
+    "w": 52,
+    "h": 40,
+    "anchorX": 26,
+    "anchorY": 20
+   },
+   "paw.L/side.R": {
+    "page": 0,
+    "x": 296,
+    "y": 220,
+    "w": 52,
+    "h": 40,
+    "anchorX": 26,
+    "anchorY": 20
+   },
+   "paw.R/front": {
+    "page": 0,
+    "x": 364,
+    "y": 220,
+    "w": 52,
+    "h": 40,
+    "anchorX": 26,
+    "anchorY": 20
+   },
+   "paw.R/side.R": {
+    "page": 0,
+    "x": 432,
+    "y": 220,
+    "w": 52,
+    "h": 40,
+    "anchorX": 26,
+    "anchorY": 20
+   },
+   "tag/front": {
+    "page": 0,
+    "x": 500,
+    "y": 220,
+    "w": 32,
+    "h": 37,
+    "anchorX": 16,
+    "anchorY": 3
+   },
+   "tag/side.R": {
+    "page": 0,
+    "x": 548,
+    "y": 220,
+    "w": 28,
+    "h": 35,
+    "anchorX": 14,
+    "anchorY": 3
+   },
+   "shadow/side.R": {
+    "page": 0,
+    "x": 592,
+    "y": 220,
+    "w": 224,
+    "h": 28,
+    "anchorX": 100,
+    "anchorY": 14
+   },
+   "shadow/front": {
+    "page": 0,
+    "x": 16,
+    "y": 336,
+    "w": 184,
+    "h": 28,
+    "anchorX": 92,
+    "anchorY": 14
+   },
+   "eye.L/front:open": {
+    "page": 0,
+    "x": 216,
+    "y": 336,
+    "w": 28,
+    "h": 28,
+    "anchorX": -22,
+    "anchorY": 114
+   },
+   "eye.R/front:open": {
+    "page": 0,
+    "x": 260,
+    "y": 336,
+    "w": 28,
+    "h": 28,
+    "anchorX": 50,
+    "anchorY": 114
+   },
+   "eye.R/side.R:open": {
+    "page": 0,
+    "x": 304,
+    "y": 336,
+    "w": 28,
+    "h": 28,
+    "anchorX": -42,
+    "anchorY": 114
+   },
+   "head.marking/front": {
+    "page": 0,
+    "x": 348,
+    "y": 336,
+    "w": 248,
+    "h": 20,
+    "anchorX": 124,
+    "anchorY": 172
+   },
+   "head.marking/side.R": {
+    "page": 0,
+    "x": 612,
+    "y": 336,
+    "w": 248,
+    "h": 20,
+    "anchorX": 124,
+    "anchorY": 172
+   },
+   "collar/front": {
+    "page": 0,
+    "x": 876,
+    "y": 336,
+    "w": 116,
+    "h": 20,
+    "anchorX": 58,
+    "anchorY": 10
+   },
+   "collar/side.R": {
+    "page": 0,
+    "x": 16,
+    "y": 380,
+    "w": 100,
+    "h": 20,
+    "anchorX": 50,
+    "anchorY": 10
+   },
+   "nose/front": {
+    "page": 0,
+    "x": 132,
+    "y": 380,
+    "w": 20,
+    "h": 14,
+    "anchorX": 10,
+    "anchorY": 79
+   },
+   "nose/side.R": {
+    "page": 0,
+    "x": 168,
+    "y": 380,
+    "w": 18,
+    "h": 14,
+    "anchorX": -79,
+    "anchorY": 85
+   },
+   "eye.L/front:closed": {
+    "page": 0,
+    "x": 202,
+    "y": 380,
+    "w": 30,
+    "h": 8,
+    "anchorX": -21,
+    "anchorY": 102
+   },
+   "eye.R/front:closed": {
+    "page": 0,
+    "x": 248,
+    "y": 380,
+    "w": 30,
+    "h": 8,
+    "anchorX": 51,
+    "anchorY": 102
+   },
+   "eye.R/side.R:closed": {
+    "page": 0,
+    "x": 294,
+    "y": 380,
+    "w": 30,
+    "h": 8,
+    "anchorX": -41,
+    "anchorY": 102
+   }
+  }
+ },
+ "clips": [
+  {
+   "name": "rest",
+   "lengthMs": 1000,
+   "tracks": {
+    "head": {
+     "rot": [
+      [
+       0,
+       0
+      ],
+      [
+       1000,
+       8,
+       "linear"
+      ]
+     ]
+    }
+   }
+  },
+  {
+   "name": "glow",
+   "lengthMs": 900,
+   "alpha": {
+    "head.marking": [
+     [
+      0,
+      0
+     ],
+     [
+      400,
+      1,
+      "easeOut"
+     ]
+    ],
+    "eye.L": [
+     [
+      0,
+      1
+     ]
+    ],
+    "tail": [
+     [
+      0,
+      0.9
+     ],
+     [
+      600,
+      0.2
+     ]
+    ]
+   }
+  },
+  {
+   "name": "dim",
+   "lengthMs": 500,
+   "loop": true,
+   "alpha": {
+    "nose": [
+     [
+      0,
+      0.1
+     ],
+     [
+      250,
+      0.9
+     ],
+     [
+      500,
+      0.1
+     ]
+    ],
+    "head.base": [
+     [
+      0,
+      0.2
+     ]
+    ]
+   }
+  }
+ ],
+ "script": [
+  {
+   "play": "rest",
+   "t": 0
+  },
+  {
+   "frame": 0
+  },
+  {
+   "frame": 0.016666667
+  },
+  {
+   "frame": 0.029666667
+  },
+  {
+   "frame": 0.063
+  },
+  {
+   "frame": 0.071333333
+  },
+  {
+   "frame": 0.100333333
+  },
+  {
+   "frame": 0.117
+  },
+  {
+   "frame": 0.121
+  },
+  {
+   "frame": 0.137666667
+  },
+  {
+   "frame": 0.150666667
+  },
+  {
+   "frame": 0.184
+  },
+  {
+   "frame": 0.192333333
+  },
+  {
+   "frame": 0.221333333
+  },
+  {
+   "frame": 0.238
+  },
+  {
+   "frame": 0.242
+  },
+  {
+   "frame": 0.258666667
+  },
+  {
+   "frame": 0.271666667
+  },
+  {
+   "frame": 0.305
+  },
+  {
+   "frame": 0.313333333
+  },
+  {
+   "frame": 0.342333333
+  },
+  {
+   "frame": 0.359
+  },
+  {
+   "frame": 0.363
+  },
+  {
+   "frame": 0.379666667
+  },
+  {
+   "frame": 0.392666667
+  },
+  {
+   "frame": 0.426
+  },
+  {
+   "frame": 0.434333333
+  },
+  {
+   "frame": 0.463333333
+  },
+  {
+   "frame": 0.48
+  },
+  {
+   "frame": 0.484
+  },
+  {
+   "play": "glow",
+   "blendMs": 250,
+   "t": 0.5
+  },
+  {
+   "frame": 0.5
+  },
+  {
+   "frame": 0.500666667
+  },
+  {
+   "frame": 0.513666667
+  },
+  {
+   "frame": 0.547
+  },
+  {
+   "frame": 0.555333333
+  },
+  {
+   "frame": 0.584333333
+  },
+  {
+   "frame": 0.601
+  },
+  {
+   "frame": 0.605
+  },
+  {
+   "frame": 0.621666667
+  },
+  {
+   "frame": 0.634666667
+  },
+  {
+   "frame": 0.668
+  },
+  {
+   "frame": 0.676333333
+  },
+  {
+   "frame": 0.705333333
+  },
+  {
+   "frame": 0.722
+  },
+  {
+   "frame": 0.726
+  },
+  {
+   "frame": 0.742666667
+  },
+  {
+   "frame": 0.755666667
+  },
+  {
+   "frame": 0.789
+  },
+  {
+   "frame": 0.797333333
+  },
+  {
+   "frame": 0.826333333
+  },
+  {
+   "frame": 0.843
+  },
+  {
+   "frame": 0.847
+  },
+  {
+   "frame": 0.863666667
+  },
+  {
+   "frame": 0.876666667
+  },
+  {
+   "frame": 0.91
+  },
+  {
+   "frame": 0.918333333
+  },
+  {
+   "frame": 0.947333333
+  },
+  {
+   "frame": 0.964
+  },
+  {
+   "frame": 0.968
+  },
+  {
+   "frame": 0.984666667
+  },
+  {
+   "frame": 0.997666667
+  },
+  {
+   "frame": 1.031
+  },
+  {
+   "frame": 1.039333333
+  },
+  {
+   "frame": 1.068333333
+  },
+  {
+   "frame": 1.085
+  },
+  {
+   "frame": 1.089
+  },
+  {
+   "frame": 1.105666667
+  },
+  {
+   "frame": 1.118666667
+  },
+  {
+   "frame": 1.152
+  },
+  {
+   "frame": 1.160333333
+  },
+  {
+   "frame": 1.189333333
+  },
+  {
+   "play": "rest",
+   "blendMs": 300,
+   "t": 1.2
+  },
+  {
+   "frame": 1.2
+  },
+  {
+   "frame": 1.206
+  },
+  {
+   "frame": 1.21
+  },
+  {
+   "frame": 1.226666667
+  },
+  {
+   "frame": 1.239666667
+  },
+  {
+   "frame": 1.273
+  },
+  {
+   "frame": 1.281333333
+  },
+  {
+   "frame": 1.310333333
+  },
+  {
+   "frame": 1.327
+  },
+  {
+   "frame": 1.331
+  },
+  {
+   "frame": 1.347666667
+  },
+  {
+   "frame": 1.360666667
+  },
+  {
+   "frame": 1.394
+  },
+  {
+   "frame": 1.402333333
+  },
+  {
+   "frame": 1.431333333
+  },
+  {
+   "frame": 1.448
+  },
+  {
+   "frame": 1.452
+  },
+  {
+   "frame": 1.468666667
+  },
+  {
+   "frame": 1.481666667
+  },
+  {
+   "frame": 1.515
+  },
+  {
+   "frame": 1.523333333
+  },
+  {
+   "frame": 1.552333333
+  },
+  {
+   "frame": 1.569
+  },
+  {
+   "frame": 1.573
+  },
+  {
+   "frame": 1.589666667
+  },
+  {
+   "frame": 1.602666667
+  },
+  {
+   "frame": 1.636
+  },
+  {
+   "frame": 1.644333333
+  },
+  {
+   "frame": 1.673333333
+  },
+  {
+   "frame": 1.69
+  },
+  {
+   "frame": 1.694
+  },
+  {
+   "frame": 1.710666667
+  },
+  {
+   "frame": 1.723666667
+  },
+  {
+   "frame": 1.757
+  },
+  {
+   "frame": 1.765333333
+  },
+  {
+   "frame": 1.794333333
+  },
+  {
+   "frame": 1.811
+  },
+  {
+   "frame": 1.815
+  },
+  {
+   "frame": 1.831666667
+  },
+  {
+   "frame": 1.844666667
+  },
+  {
+   "frame": 1.878
+  },
+  {
+   "frame": 1.886333333
+  },
+  {
+   "play": "dim",
+   "blendMs": 0,
+   "t": 1.9
+  },
+  {
+   "frame": 1.9
+  },
+  {
+   "frame": 1.915333333
+  },
+  {
+   "frame": 1.932
+  },
+  {
+   "frame": 1.936
+  },
+  {
+   "frame": 1.952666667
+  },
+  {
+   "frame": 1.965666667
+  },
+  {
+   "frame": 1.999
+  },
+  {
+   "frame": 2.007333333
+  },
+  {
+   "frame": 2.036333333
+  },
+  {
+   "frame": 2.053
+  },
+  {
+   "frame": 2.057
+  },
+  {
+   "frame": 2.073666667
+  },
+  {
+   "frame": 2.086666667
+  },
+  {
+   "frame": 2.12
+  },
+  {
+   "frame": 2.128333333
+  },
+  {
+   "frame": 2.157333333
+  },
+  {
+   "frame": 2.174
+  },
+  {
+   "frame": 2.178
+  },
+  {
+   "frame": 2.194666667
+  },
+  {
+   "frame": 2.207666667
+  },
+  {
+   "frame": 2.241
+  },
+  {
+   "frame": 2.249333333
+  },
+  {
+   "frame": 2.278333333
+  },
+  {
+   "frame": 2.295
+  },
+  {
+   "frame": 2.299
+  },
+  {
+   "play": "glow",
+   "blendMs": 200,
+   "t": 2.3
+  },
+  {
+   "frame": 2.3
+  },
+  {
+   "frame": 2.315666667
+  },
+  {
+   "frame": 2.328666667
+  },
+  {
+   "frame": 2.362
+  },
+  {
+   "frame": 2.370333333
+  },
+  {
+   "frame": 2.399333333
+  },
+  {
+   "play": "rest",
+   "blendMs": 150,
+   "t": 2.4
+  },
+  {
+   "frame": 2.4
+  },
+  {
+   "frame": 2.416
+  },
+  {
+   "frame": 2.42
+  },
+  {
+   "frame": 2.436666667
+  },
+  {
+   "frame": 2.449666667
+  },
+  {
+   "frame": 2.483
+  },
+  {
+   "frame": 2.491333333
+  },
+  {
+   "frame": 2.520333333
+  },
+  {
+   "frame": 2.537
+  },
+  {
+   "frame": 2.541
+  },
+  {
+   "frame": 2.557666667
+  },
+  {
+   "frame": 2.570666667
+  },
+  {
+   "frame": 2.604
+  },
+  {
+   "frame": 2.612333333
+  },
+  {
+   "frame": 2.641333333
+  },
+  {
+   "frame": 2.658
+  },
+  {
+   "frame": 2.662
+  },
+  {
+   "frame": 2.678666667
+  },
+  {
+   "frame": 2.691666667
+  },
+  {
+   "frame": 2.725
+  },
+  {
+   "frame": 2.733333333
+  },
+  {
+   "frame": 2.762333333
+  },
+  {
+   "frame": 2.779
+  },
+  {
+   "frame": 2.783
+  },
+  {
+   "frame": 2.799666667
+  },
+  {
+   "frame": 2.812666667
+  },
+  {
+   "frame": 2.846
+  },
+  {
+   "frame": 2.854333333
+  },
+  {
+   "frame": 2.883333333
+  },
+  {
+   "frame": 2.9
+  },
+  {
+   "frame": 2.904
+  },
+  {
+   "frame": 2.920666667
+  },
+  {
+   "frame": 2.933666667
+  },
+  {
+   "frame": 2.967
+  },
+  {
+   "frame": 2.975333333
+  }
+ ],
+ "frames": [
+  {
+   "t": 0,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.016666667,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.029666667,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.063,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.071333333,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.100333333,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.117,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.121,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.137666667,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.150666667,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.184,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.192333333,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.221333333,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.238,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.242,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.258666667,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.271666667,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.305,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.313333333,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.342333333,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.359,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.363,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.379666667,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.392666667,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.426,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.434333333,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.463333333,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.48,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.484,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.5,
+   "alpha": {
+    "head.marking": 0.4,
+    "eye.L": 0,
+    "tail": 0.5
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.500666667,
+   "alpha": {
+    "head.marking": 0.39999997003784205,
+    "eye.L": 7.585196562967087e-8,
+    "tail": 0.500000030340786
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.500000030340786
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.39999997003784205
+    },
+    {
+     "part": "eye.L",
+     "alpha": 7.585196562967087e-8
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.513666667,
+   "alpha": {
+    "head.marking": 0.3998033292606623,
+    "eye.L": 0.0006534732330002926,
+    "tail": 0.5002613676700023
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5002613676700023
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.3998033292606623
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.0006534732330002926
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.547,
+   "alpha": {
+    "head.marking": 0.397679773147716,
+    "eye.L": 0.026578688000000072,
+    "tail": 0.5105957041743157
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5105957041743157
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.397679773147716
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.026578688000000072
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.555333333,
+   "alpha": {
+    "head.marking": 0.39827551410233203,
+    "eye.L": 0.04337110203099968,
+    "tail": 0.5172531907585827
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5172531907585827
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.39827551410233203
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.04337110203099968
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.584333333,
+   "alpha": {
+    "head.marking": 0.41666272230518053,
+    "eye.L": 0.1535457356607811,
+    "tail": 0.5602244715604838
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5602244715604838
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.41666272230518053
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.1535457356607811
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.601,
+   "alpha": {
+    "head.marking": 0.448090745717604,
+    "eye.L": 0.2637570559999999,
+    "tail": 0.60198014812245
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.60198014812245
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.448090745717604
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.2637570559999999
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.605,
+   "alpha": {
+    "head.marking": 0.45893526756249997,
+    "eye.L": 0.29635199999999984,
+    "tail": 0.6140936678
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.6140936678
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.45893526756249997
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.29635199999999984
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.621666667,
+   "alpha": {
+    "head.marking": 0.5212988973823146,
+    "eye.L": 0.4610571889746957,
+    "tail": 0.6736588700883105
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.6736588700883105
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.5212988973823146
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.4610571889746957
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.634666667,
+   "alpha": {
+    "head.marking": 0.5871127518318806,
+    "eye.L": 0.6072605805904399,
+    "tail": 0.7236795263195894
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.7236795263195894
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.5871127518318806
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.6072605805904399
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.668,
+   "alpha": {
+    "head.marking": 0.7477379745832962,
+    "eye.L": 0.8588497920000002,
+    "tail": 0.7907501990248449
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.7907501990248449
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.7477379745832962
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.8588497920000002
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.676333333,
+   "alpha": {
+    "head.marking": 0.7816544964342751,
+    "eye.L": 0.8976582054255596,
+    "tail": 0.7952635971268089
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.7952635971268089
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.7816544964342751
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.8976582054255596
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.705333333,
+   "alpha": {
+    "head.marking": 0.873677218581233,
+    "eye.L": 0.9771865689707331,
+    "tail": 0.7812116232830916
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.7812116232830916
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.873677218581233
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.9771865689707331
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.722,
+   "alpha": {
+    "head.marking": 0.909002263143616,
+    "eye.L": 0.994380288,
+    "tail": 0.7567207499614208
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.7567207499614208
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.909002263143616
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.994380288
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.726,
+   "alpha": {
+    "head.marking": 0.9158550592551039,
+    "eye.L": 0.996461056,
+    "tail": 0.7494802049446724
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.7494802049446724
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.9158550592551039
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.996461056
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.742666667,
+   "alpha": {
+    "head.marking": 0.9390925317187324,
+    "eye.L": 0.9998990411989523,
+    "tail": 0.7147383677996261
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.7147383677996261
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.9390925317187324
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.9998990411989523
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.755666667,
+   "alpha": {
+    "head.marking": 0.953019249746798,
+    "eye.L": 1,
+    "tail": 0.6833660045710517
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.6833660045710517
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.953019249746798
+    },
+    {
+     "part": "eye.L",
+     "alpha": 1
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.789,
+   "alpha": {
+    "head.marking": 0.9786307656250001,
+    "eye.L": 1,
+    "tail": 0.587105587037037
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.587105587037037
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.9786307656250001
+    },
+    {
+     "part": "eye.L",
+     "alpha": 1
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.797333333,
+   "alpha": {
+    "head.marking": 0.9830913702056759,
+    "eye.L": 1,
+    "tail": 0.5592506173325751
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5592506173325751
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.9830913702056759
+    },
+    {
+     "part": "eye.L",
+     "alpha": 1
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.826333333,
+   "alpha": {
+    "head.marking": 0.9937535525772436,
+    "eye.L": 1,
+    "tail": 0.4656868066635709
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.4656868066635709
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.9937535525772436
+    },
+    {
+     "part": "eye.L",
+     "alpha": 1
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.843,
+   "alpha": {
+    "head.marking": 0.997106359375,
+    "eye.L": 1,
+    "tail": 0.42004102037037044
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.42004102037037044
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.997106359375
+    },
+    {
+     "part": "eye.L",
+     "alpha": 1
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.847,
+   "alpha": {
+    "head.marking": 0.997673796875,
+    "eye.L": 1,
+    "tail": 0.40992581296296293
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.40992581296296293
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.997673796875
+    },
+    {
+     "part": "eye.L",
+     "alpha": 1
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.863666667,
+   "alpha": {
+    "head.marking": 0.9992505619419231,
+    "eye.L": 1,
+    "tail": 0.37111150839805884
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.37111150839805884
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.9992505619419231
+    },
+    {
+     "part": "eye.L",
+     "alpha": 1
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.876666667,
+   "alpha": {
+    "head.marking": 0.9998015046381366,
+    "eye.L": 1,
+    "tail": 0.3443992448952745
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.3443992448952745
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.9998015046381366
+    },
+    {
+     "part": "eye.L",
+     "alpha": 1
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.91,
+   "alpha": {
+    "head.marking": 1,
+    "eye.L": 1,
+    "tail": 0.288912962962963
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.288912962962963
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 1
+    },
+    {
+     "part": "eye.L",
+     "alpha": 1
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.918333333,
+   "alpha": {
+    "head.marking": 1,
+    "eye.L": 1,
+    "tail": 0.27771950488597574
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.27771950488597574
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 1
+    },
+    {
+     "part": "eye.L",
+     "alpha": 1
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.947333333,
+   "alpha": {
+    "head.marking": 1,
+    "eye.L": 1,
+    "tail": 0.2461250609331307
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.2461250609331307
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 1
+    },
+    {
+     "part": "eye.L",
+     "alpha": 1
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.964,
+   "alpha": {
+    "head.marking": 1,
+    "eye.L": 1,
+    "tail": 0.23260776296296304
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.23260776296296304
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 1
+    },
+    {
+     "part": "eye.L",
+     "alpha": 1
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.968,
+   "alpha": {
+    "head.marking": 1,
+    "eye.L": 1,
+    "tail": 0.22981440000000009
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.22981440000000009
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 1
+    },
+    {
+     "part": "eye.L",
+     "alpha": 1
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.984666667,
+   "alpha": {
+    "head.marking": 1,
+    "eye.L": 1,
+    "tail": 0.219886978702741
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.219886978702741
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 1
+    },
+    {
+     "part": "eye.L",
+     "alpha": 1
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 0.997666667,
+   "alpha": {
+    "head.marking": 1,
+    "eye.L": 1,
+    "tail": 0.2138917077517677
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.2138917077517677
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 1
+    },
+    {
+     "part": "eye.L",
+     "alpha": 1
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.031,
+   "alpha": {
+    "head.marking": 1,
+    "eye.L": 1,
+    "tail": 0.2042584500000001
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.2042584500000001
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 1
+    },
+    {
+     "part": "eye.L",
+     "alpha": 1
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.039333333,
+   "alpha": {
+    "head.marking": 1,
+    "eye.L": 1,
+    "tail": 0.20289437425895784
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.20289437425895784
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 1
+    },
+    {
+     "part": "eye.L",
+     "alpha": 1
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.068333333,
+   "alpha": {
+    "head.marking": 1,
+    "eye.L": 1,
+    "tail": 0.20041163410079055
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.20041163410079055
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 1
+    },
+    {
+     "part": "eye.L",
+     "alpha": 1
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.085,
+   "alpha": {
+    "head.marking": 1,
+    "eye.L": 1,
+    "tail": 0.20004375000000008
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.20004375000000008
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 1
+    },
+    {
+     "part": "eye.L",
+     "alpha": 1
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.089,
+   "alpha": {
+    "head.marking": 1,
+    "eye.L": 1,
+    "tail": 0.20001725370370382
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.20001725370370382
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 1
+    },
+    {
+     "part": "eye.L",
+     "alpha": 1
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.105666667,
+   "alpha": {
+    "head.marking": 1,
+    "eye.L": 1,
+    "tail": 0.2
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.2
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 1
+    },
+    {
+     "part": "eye.L",
+     "alpha": 1
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.118666667,
+   "alpha": {
+    "head.marking": 1,
+    "eye.L": 1,
+    "tail": 0.2
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.2
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 1
+    },
+    {
+     "part": "eye.L",
+     "alpha": 1
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.152,
+   "alpha": {
+    "head.marking": 1,
+    "eye.L": 1,
+    "tail": 0.2
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.2
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 1
+    },
+    {
+     "part": "eye.L",
+     "alpha": 1
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.160333333,
+   "alpha": {
+    "head.marking": 1,
+    "eye.L": 1,
+    "tail": 0.2
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.2
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 1
+    },
+    {
+     "part": "eye.L",
+     "alpha": 1
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.189333333,
+   "alpha": {
+    "head.marking": 1,
+    "eye.L": 1,
+    "tail": 0.2
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.2
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 1
+    },
+    {
+     "part": "eye.L",
+     "alpha": 1
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.2,
+   "alpha": {
+    "head.marking": 1,
+    "eye.L": 1,
+    "tail": 0.2
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.2
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 1
+    },
+    {
+     "part": "eye.L",
+     "alpha": 1
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.206,
+   "alpha": {
+    "head.marking": 0.9999808,
+    "eye.L": 0.999968,
+    "tail": 0.2000096
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.2000096
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.9999808
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.999968
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.21,
+   "alpha": {
+    "head.marking": 0.9999111111111111,
+    "eye.L": 0.9998518518518519,
+    "tail": 0.20004444444444447
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.20004444444444447
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.9999111111111111
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.9998518518518519
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.226666667,
+   "alpha": {
+    "head.marking": 0.9983144032289712,
+    "eye.L": 0.9971906720482854,
+    "tail": 0.20084279838551441
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.20084279838551441
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.9983144032289712
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.9971906720482854
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.239666667,
+   "alpha": {
+    "head.marking": 0.9944521513004675,
+    "eye.L": 0.9907535855007791,
+    "tail": 0.2027739243497663
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.2027739243497663
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.9944521513004675
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.9907535855007791
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.273,
+   "alpha": {
+    "head.marking": 0.9654207111111112,
+    "eye.L": 0.942367851851852,
+    "tail": 0.21728964444444443
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.21728964444444443
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.9654207111111112
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.942367851851852
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.281333333,
+   "alpha": {
+    "head.marking": 0.9521751972958286,
+    "eye.L": 0.9202919954930476,
+    "tail": 0.22391240135208573
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.22391240135208573
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.9521751972958286
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.9202919954930476
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.310333333,
+   "alpha": {
+    "head.marking": 0.8806100718639769,
+    "eye.L": 0.8010167864399613,
+    "tail": 0.2596949640680116
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.2596949640680116
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.8806100718639769
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.8010167864399613
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.327,
+   "alpha": {
+    "head.marking": 0.8179215111111111,
+    "eye.L": 0.6965358518518519,
+    "tail": 0.29103924444444446
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.29103924444444446
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.8179215111111111
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.6965358518518519
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.331,
+   "alpha": {
+    "head.marking": 0.8001696888888888,
+    "eye.L": 0.6669494814814814,
+    "tail": 0.2999151555555556
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.2999151555555556
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.8001696888888888
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.6669494814814814
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.347666667,
+   "alpha": {
+    "head.marking": 0.7137833495020676,
+    "eye.L": 0.5229722491701126,
+    "tail": 0.3431083252489662
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.3431083252489662
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.7137833495020676
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.5229722491701126
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.360666667,
+   "alpha": {
+    "head.marking": 0.6404432311961411,
+    "eye.L": 0.40073871866023514,
+    "tail": 0.37977838440192946
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.37977838440192946
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.6404432311961411
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.40073871866023514
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.394,
+   "alpha": {
+    "head.marking": 0.5058680888888891,
+    "eye.L": 0.17644681481481506,
+    "tail": 0.4470659555555555
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.4470659555555555
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.5058680888888891
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.17644681481481506
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.402333333,
+   "alpha": {
+    "head.marking": 0.482810723481636,
+    "eye.L": 0.13801787246939323,
+    "tail": 0.458594638259182
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.458594638259182
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.482810723481636
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.13801787246939323
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.431333333,
+   "alpha": {
+    "head.marking": 0.4287796415713844,
+    "eye.L": 0.04796606928564051,
+    "tail": 0.4856101792143078
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.4856101792143078
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4287796415713844
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.04796606928564051
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.448,
+   "alpha": {
+    "head.marking": 0.41249848888888896,
+    "eye.L": 0.020830814814814858,
+    "tail": 0.49375075555555553
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.49375075555555553
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.41249848888888896
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.020830814814814858
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.452,
+   "alpha": {
+    "head.marking": 0.40983040000000004,
+    "eye.L": 0.016383999999999954,
+    "tail": 0.4950848
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.4950848
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.40983040000000004
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.016383999999999954
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.468666667,
+   "alpha": {
+    "head.marking": 0.4027344328345416,
+    "eye.L": 0.004557388057569223,
+    "tail": 0.4986327835827292
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.4986327835827292
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4027344328345416
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.004557388057569223
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.481666667,
+   "alpha": {
+    "head.marking": 0.4005477365956379,
+    "eye.L": 0.0009128943260631184,
+    "tail": 0.49972613170218105
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.49972613170218105
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4005477365956379
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.0009128943260631184
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.515,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.523333333,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.552333333,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.569,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.573,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.589666667,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.602666667,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.636,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.644333333,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.673333333,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.69,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.694,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.710666667,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.723666667,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.757,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.765333333,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.794333333,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.811,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.815,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.831666667,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.844666667,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.878,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.886333333,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.9,
+   "alpha": {
+    "nose": 0.1,
+    "head.base": 0.2
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.2
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.1
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.915333333,
+   "alpha": {
+    "nose": 0.10073831153703444,
+    "head.base": 0.2
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.2
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.10073831153703444
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.932,
+   "alpha": {
+    "nose": 0.10671088640000002,
+    "head.base": 0.2
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.2
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.10671088640000002
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.936,
+   "alpha": {
+    "nose": 0.10955514880000003,
+    "head.base": 0.2
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.2
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.10955514880000003
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.952666667,
+   "alpha": {
+    "nose": 0.12991833751621787,
+    "head.base": 0.2
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.2
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.12991833751621787
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.965666667,
+   "alpha": {
+    "nose": 0.1579915708979355,
+    "head.base": 0.2
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.2
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.1579915708979355
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 1.999,
+   "alpha": {
+    "nose": 0.2987172352000012,
+    "head.base": 0.2
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.2
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.2987172352000012
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.007333333,
+   "alpha": {
+    "nose": 0.3532408713591325,
+    "head.base": 0.2
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.2
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.3532408713591325
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.036333333,
+   "alpha": {
+    "nose": 0.5992335921391468,
+    "head.base": 0.2
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.2
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.5992335921391468
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.053,
+   "alpha": {
+    "nose": 0.7130845696000002,
+    "head.base": 0.2
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.2
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.7130845696000002
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.057,
+   "alpha": {
+    "nose": 0.7352676864000002,
+    "head.base": 0.2
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.2
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.7352676864000002
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.073666667,
+   "alpha": {
+    "nose": 0.8089095957414723,
+    "head.base": 0.2
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.2
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.8089095957414723
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.086666667,
+   "alpha": {
+    "nose": 0.8479732156362901,
+    "head.base": 0.2
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.2
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.8479732156362901
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.12,
+   "alpha": {
+    "nose": 0.8944704000000001,
+    "head.base": 0.2
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.2
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.8944704000000001
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.128333333,
+   "alpha": {
+    "nose": 0.8979169184223763,
+    "head.base": 0.2
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.2
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.8979169184223763
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.157333333,
+   "alpha": {
+    "nose": 0.8999192329591619,
+    "head.base": 0.2
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.2
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.8999192329591619
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.174,
+   "alpha": {
+    "nose": 0.8971688448,
+    "head.base": 0.2
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.2
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.8971688448
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.178,
+   "alpha": {
+    "nose": 0.8955042304,
+    "head.base": 0.2
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.2
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.8955042304
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.194666667,
+   "alpha": {
+    "nose": 0.8817492551765864,
+    "head.base": 0.2
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.2
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.8817492551765864
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.207666667,
+   "alpha": {
+    "nose": 0.8607260570374677,
+    "head.base": 0.2
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.2
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.8607260570374677
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.241,
+   "alpha": {
+    "nose": 0.7456686591999991,
+    "head.base": 0.2
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.2
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.7456686591999991
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.249333333,
+   "alpha": {
+    "nose": 0.6992687560355982,
+    "head.base": 0.2
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.2
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.6992687560355982
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.278333333,
+   "alpha": {
+    "nose": 0.4688457511797566,
+    "head.base": 0.2
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.2
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.4688457511797566
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.295,
+   "alpha": {
+    "nose": 0.3370816000000001,
+    "head.base": 0.2
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.2
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.3370816000000001
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.299,
+   "alpha": {
+    "nose": 0.31100564480000004,
+    "head.base": 0.2
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.2
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.31100564480000004
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.3,
+   "alpha": {
+    "nose": 0.30480000000000074,
+    "head.base": 0.2,
+    "head.marking": 0.4,
+    "eye.L": 0,
+    "tail": 0.5
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.2
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.30480000000000074
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.315666667,
+   "alpha": {
+    "nose": 0.22385013835015655,
+    "head.base": 0.20076905930834818,
+    "head.marking": 0.39944811919835765,
+    "eye.L": 0.001922648270870402,
+    "tail": 0.5007689634711829
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5007689634711829
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.20076905930834818
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.39944811919835765
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.001922648270870402
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.22385013835015655
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.328666667,
+   "alpha": {
+    "nose": 0.18111804620234076,
+    "head.base": 0.20471152609028148,
+    "head.marking": 0.3976437629374555,
+    "eye.L": 0.011778815225703683,
+    "tail": 0.5047079291146636
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5047079291146636
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.20471152609028148
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.3976437629374555
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.011778815225703683
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.18111804620234076
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.362,
+   "alpha": {
+    "nose": 0.18735524611676252,
+    "head.base": 0.24766560000000065,
+    "head.marking": 0.3996006665405002,
+    "eye.L": 0.1191640000000016,
+    "tail": 0.5472974503249192
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5472974503249192
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.24766560000000065
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.3996006665405002
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.1191640000000016
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.18735524611676252
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.370333333,
+   "alpha": {
+    "nose": 0.21749218546901378,
+    "head.base": 0.2695846730847192,
+    "head.marking": 0.4069905141174725,
+    "eye.L": 0.17396168271179793,
+    "tail": 0.5688000854204102
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5688000854204102
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.2695846730847192
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4069905141174725
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.17396168271179793
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.21749218546901378
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.399333333,
+   "alpha": {
+    "nose": 0.418543264773793,
+    "head.base": 0.39602660543398593,
+    "head.marking": 0.48591171978610576,
+    "eye.L": 0.49006651358496495,
+    "tail": 0.689800100566722
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.689800100566722
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.39602660543398593
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.48591171978610576
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.49006651358496495
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.418543264773793
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.4,
+   "alpha": {
+    "nose": 0.42500000000000093,
+    "head.base": 0.4000000000000005,
+    "head.marking": 0.48906250000000046,
+    "eye.L": 0.5000000000000013,
+    "tail": 0.6935185185185191
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.6935185185185191
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.4000000000000005
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.48906250000000046
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.5000000000000013
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.42500000000000093
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.416,
+   "alpha": {
+    "nose": 0.5585537113286396,
+    "head.base": 0.48203465850880045,
+    "head.marking": 0.5695184955757131,
+    "eye.L": 0.7002321277534826,
+    "tail": 0.7659244683403313
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.7659244683403313
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.48203465850880045
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.5695184955757131
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.7002321277534826
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.5585537113286396
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.42,
+   "alpha": {
+    "nose": 0.5855931720969487,
+    "head.base": 0.4985709037037041,
+    "head.marking": 0.5893950648888895,
+    "eye.L": 0.7369457777777787,
+    "tail": 0.7782707256888891
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.7782707256888891
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.4985709037037041
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.5893950648888895
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.7369457777777787
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.5855931720969487
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.436666667,
+   "alpha": {
+    "nose": 0.6734691126567963,
+    "head.base": 0.5521610284032455,
+    "head.marking": 0.6586569537783671,
+    "eye.L": 0.8219773293598288,
+    "tail": 0.8015919948770369
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.8015919948770369
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.5521610284032455
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.6586569537783671
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.8219773293598288
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.6734691126567963
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.449666667,
+   "alpha": {
+    "nose": 0.7159422780228195,
+    "head.base": 0.5781998696654264,
+    "head.marking": 0.6840098195125983,
+    "eye.L": 0.8002947768641212,
+    "tail": 0.7853379150100306
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.7853379150100306
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.5781998696654264
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.6840098195125983
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.8002947768641212
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.7159422780228195
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.483,
+   "alpha": {
+    "nose": 0.749533371243338,
+    "head.base": 0.5996497425495704,
+    "head.marking": 0.5565775446619005,
+    "eye.L": 0.35558420822577486,
+    "tail": 0.6139848825817567
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.6139848825817567
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.5996497425495704
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.5565775446619005
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.35558420822577486
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.749533371243338
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.491333333,
+   "alpha": {
+    "nose": 0.7499615244988748,
+    "head.base": 0.5999688436347579,
+    "head.marking": 0.5095767398992909,
+    "eye.L": 0.23923189643078369,
+    "tail": 0.5739709854167563
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5739709854167563
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.5999688436347579
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.5095767398992909
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.23923189643078369
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.7499615244988748
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.520333333,
+   "alpha": {
+    "head.marking": 0.4157628462740023,
+    "eye.L": 0.030945142332532094,
+    "tail": 0.5080872657741244
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5080872657741244
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4157628462740023
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.030945142332532094
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.537,
+   "alpha": {
+    "head.marking": 0.40138611386742595,
+    "eye.L": 0.002603851851851857,
+    "tail": 0.5005922105611259
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5005922105611259
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.40138611386742595
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.002603851851851857
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.541,
+   "alpha": {
+    "head.marking": 0.40046413433350003,
+    "eye.L": 0.0008639999999999759,
+    "tail": 0.5001888277648
+   },
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5001888277648
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.40046413433350003
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0.0008639999999999759
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.557666667,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.570666667,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.604,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.612333333,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.641333333,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.658,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.662,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.678666667,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.691666667,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.725,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.733333333,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.762333333,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.779,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.783,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.799666667,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.812666667,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.846,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.854333333,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.883333333,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.9,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.904,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.920666667,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.933666667,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.967,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  },
+  {
+   "t": 2.975333333,
+   "alpha": {},
+   "items": [
+    {
+     "part": "shadow",
+     "alpha": 1
+    },
+    {
+     "part": "tail",
+     "alpha": 0.5
+    },
+    {
+     "part": "body",
+     "alpha": 1
+    },
+    {
+     "part": "collar",
+     "alpha": 1
+    },
+    {
+     "part": "tag",
+     "alpha": 1
+    },
+    {
+     "part": "ear.L",
+     "alpha": 1
+    },
+    {
+     "part": "ear.R",
+     "alpha": 1
+    },
+    {
+     "part": "head.base",
+     "alpha": 0.6
+    },
+    {
+     "part": "head.marking",
+     "alpha": 0.4
+    },
+    {
+     "part": "eye.L",
+     "alpha": 0
+    },
+    {
+     "part": "eye.R",
+     "alpha": 1
+    },
+    {
+     "part": "nose",
+     "alpha": 0.75
+    },
+    {
+     "part": "paw.L",
+     "alpha": 1
+    },
+    {
+     "part": "paw.R",
+     "alpha": 1
+    }
+   ]
+  }
+ ]
+}

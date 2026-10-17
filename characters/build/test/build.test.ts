@@ -6,7 +6,7 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, relative, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { PNG } from "pngjs";
 import { buildPackage, devFolder, packageFolder, pngChunks, readSource, SETS, writePackage } from "../build.ts";
 
@@ -16,7 +16,7 @@ const source = await readSource("test");
 const pkg = await buildPackage(source);
 
 test("the test character builds every atlas set with every region its rig uses", () => {
-  const used = new Set(source.rig.parts.flatMap((p) => Object.values(p.regions)));
+  const used = new Set(source.rig.parts.flatMap((p) => Object.values(p.regions).filter((r) => r !== null)));
   assert.deepEqual(pkg.atlas.sets.map((s) => s.name), SETS.map((s) => s.name));
   for (const set of pkg.atlas.sets) {
     assert.deepEqual(new Set(Object.keys(set.regions)), used, `set ${set.name}`);
@@ -82,6 +82,29 @@ test("development output goes to build/dev/<species>/, never into the folder the
   }
 });
 
+test("a species' face presets reach the Faces check as data, from its presets.ts, beside its landmarks", async () => {
+  // The Faces check holds each face clip's blush to the level its preset asks for (docs/QUESTIONS.md Q25); it reads
+  // them from build/dev/<species>/presets.json, so presets.ts stays their one source.
+  assert.equal(source.presets, undefined, "the test character has no presets.ts");
+  const dog = await readSource("dog");
+  const module = await import(pathToFileURL(join(repo, "characters/dog/src/presets.ts")).href);
+  assert.deepEqual(dog.presets, JSON.parse(JSON.stringify(module)));
+  const presets = dog.presets as { PRESETS: Record<string, { blush: number | null }> };
+  for (const [name, preset] of Object.entries(module.PRESETS as Record<string, { blush: number | null }>)) assert.equal(presets.PRESETS[name]!.blush, preset.blush, name);
+  const kit = await buildPackage({ ...source, landmarks: { front: { seat: [0, -20] } }, presets: dog.presets });
+  assert.deepEqual([...kit.data.keys()], ["presets.json"]);
+  assert.deepEqual(JSON.parse(kit.data.get("presets.json")!.toString("utf8")), dog.presets);
+  assert.ok(![...kit.files.keys()].some((f) => f.includes("presets")), "the presets never reach the package");
+  const dir = mkdtempSync(join(tmpdir(), "huddlings-build-"));
+  try {
+    writePackage(kit, join(dir, "package"), join(dir, "dev"));
+    assert.deepEqual(readdirSync(join(dir, "dev")).sort(), ["landmarks.json", "presets.json", "report.json"]);
+    assert.deepEqual(JSON.parse(readFileSync(join(dir, "dev", "presets.json"), "utf8")), dog.presets);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("the build refuses a region nobody draws, a drawing nobody uses, and a broken rig", async () => {
   const missing = { ...source, drawings: source.drawings.filter((d) => d.region !== "nose/front") };
   await assert.rejects(buildPackage(missing), /region nose\/front: the rig uses it but nothing draws it/);
@@ -89,4 +112,15 @@ test("the build refuses a region nobody draws, a drawing nobody uses, and a brok
   await assert.rejects(buildPackage(extra), /drawing spare: no part uses it/);
   const broken = { ...source, rig: { ...source.rig, drawOrder: { ...source.rig.drawOrder, front: ["ghost"] } } };
   await assert.rejects(buildPackage(broken), /unknown part ghost/);
+});
+
+test("a null region needs no drawing, and the atlas holds only the regions named", async () => {
+  // eye.R's closed state in front draws nothing: its drawing goes, and nothing asks for it.
+  const parts = source.rig.parts.map((p) => (p.name === "eye.R" ? { ...p, regions: { ...p.regions, "front:closed": null } } : p));
+  const built = await buildPackage({ ...source, rig: { ...source.rig, parts }, drawings: source.drawings.filter((d) => d.region !== "eye.R/front:closed") });
+  for (const set of built.atlas.sets) {
+    assert.equal(set.regions["eye.R/front:closed"], undefined, set.name);
+    assert.ok(set.regions["eye.R/front:open"], set.name);
+  }
+  assert.deepEqual(JSON.parse(built.files.get("rig.json")!.toString("utf8")).parts.find((p: { name: string }) => p.name === "eye.R").regions["front:closed"], null);
 });

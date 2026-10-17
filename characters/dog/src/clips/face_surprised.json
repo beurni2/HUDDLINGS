@@ -1,0 +1,8 @@
+{
+  "name": "face_surprised",
+  "lengthMs": 1000,
+  "views": { "body": [[0, "front"]], "head": [[0, "front"]] },
+  "states": { "eye.L": [[0, "wide"]], "eye.R": [[0, "wide"]], "mouth": [[0, "o"]], "brow.L": [[0, "raised"]], "brow.R": [[0, "raised"]], "ear.L": [[0, "lifted"]], "ear.R": [[0, "lifted"]], "temple.L": [[0, "up"]], "temple.R": [[0, "up"]], "head.line": [[0, "temples"]] },
+  "tracks": { "ear.L": { "rot": [[0, 0]] }, "ear.R": { "rot": [[0, 0]] } },
+  "events": [{ "at": 0, "type": "keyPose" }]
+}

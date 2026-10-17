@@ -1,0 +1,55 @@
+# Byte-identity against 8a410a7 (DECISIONS 289)
+
+## Every drawing (qa/phase3/fur/recipes3/hashes.ts at 8a410a7 and now): SVG, anchor and meta
+300 drawings at base, 300 now; 279 identical in svg, anchor and meta
+  front.L/front: meta changed
+  front.L/side.L: meta changed
+  front.L/threeQuarter.L: meta changed
+  front.L/threeQuarter.R: meta changed
+  front.R/front: meta changed
+  front.R/side.R: meta changed
+  front.R/threeQuarter.L: meta changed
+  front.R/threeQuarter.R: meta changed
+  head.line/back: svg changed
+  hind.L/front: meta changed
+  hind.L/side.L: meta changed
+  hind.L/threeQuarter.L: meta changed
+  hind.R/front: meta changed
+  hind.R/side.R: meta changed
+  hind.R/threeQuarter.R: meta changed
+  tuft/back: svg changed
+  tuft/front: svg, meta changed
+  tuft/side.L: svg, meta changed
+  tuft/side.R: svg, meta changed
+  tuft/threeQuarter.L: svg, meta changed
+  tuft/threeQuarter.R: svg, meta changed
+
+## The six rest stills and the 19 face stills (runtime-web/lab/look.ts): pixels that differ, and their box in model pt
+back: 456 px differ, x -41.7..44.3 y -157.0..-142.3
+faces/blissful: 390 px differ, x -31.3..22.7 y -156.3..-148.7
+faces/content: 390 px differ, x -31.3..22.7 y -156.3..-148.7
+faces/curious: 388 px differ, x -31.3..22.7 y -156.3..-148.7
+faces/excited: 390 px differ, x -31.3..22.7 y -156.3..-148.7
+faces/happy: 390 px differ, x -31.3..22.7 y -156.3..-148.7
+faces/huffy: 390 px differ, x -31.3..22.7 y -156.3..-148.7
+faces/hungry: 390 px differ, x -31.3..22.7 y -156.3..-148.7
+faces/laughing: 390 px differ, x -31.3..22.7 y -156.3..-148.7
+faces/listening: 390 px differ, x -31.3..22.7 y -156.3..-148.7
+faces/mischievous: 388 px differ, x -31.3..22.7 y -156.3..-148.7
+faces/neutral: 390 px differ, x -31.3..22.7 y -156.3..-148.7
+faces/proud: 390 px differ, x -31.3..22.7 y -156.3..-148.7
+faces/shy: 390 px differ, x -31.3..22.7 y -156.3..-148.7
+faces/singing: 390 px differ, x -31.3..22.7 y -156.3..-148.7
+faces/sleepy: 390 px differ, x -31.3..22.7 y -156.3..-148.7
+faces/sly: 388 px differ, x -31.3..22.7 y -156.3..-148.7
+faces/surprised: 390 px differ, x -31.3..22.7 y -156.3..-148.7
+faces/tender: 390 px differ, x -31.3..22.7 y -156.3..-148.7
+faces/ticklish: 390 px differ, x -31.3..22.7 y -156.3..-148.7
+front: 390 px differ, x -31.3..22.7 y -156.3..-148.7
+side.L: 569 px differ, x -60.7..-6.7 y -158.7..-150.3
+side.R: 571 px differ, x 6.7..60.7 y -158.7..-150.3
+threeQuarter.L: 215 px differ, x -49.7..-11.7 y -155.3..-150.3
+threeQuarter.R: 214 px differ, x 11.7..49.7 y -155.3..-150.3
+
+## The turned faces (qa/phase3/faces/turned/render.ts)
+1240 files now, 1240 at 8a410a7; 611 differ: the package (6 files) and 241 of 241 stills (every turned still shows the crisp topknot, tuft/front, side.L, side.R, threeQuarter.L and threeQuarter.R, whose SVG the lead's L4 changed, above).

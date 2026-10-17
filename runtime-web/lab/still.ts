@@ -3,14 +3,19 @@
 // by the WebGL runtime in three passes, with still.json to read them by:
 // - white.png and black.png: the frame on opaque white and black, so alpha is
 //   1 − (white − black)/255 and colour is black/alpha;
-// - ids.png: each part in its own flat ID colour wherever its alpha is at least
-//   half its region's own largest alpha, still clipped by its mask, on black
-//   (ids.ts), so soft parts (shadows, the blush) show too.
+// - ids.png: each part's footprint, never its level: a part at an alpha above 0 in
+//   its own flat ID colour wherever its texel's alpha is at least half its region's
+//   own largest texel alpha, and a part at 0 nowhere, still clipped by its mask's
+//   footprint, on black (ids.ts), so soft parts (shadows, the blush) show too; the
+//   level is white.png's and black.png's.
 // Model point (x, y) is at pixel rootPx + ppp·(x, y), pixel (i, j) covering
 // [i, i + 1) × [j, j + 1). The folder is replaced whole, and only once every
 // file is written; a canvas Chromium will not give at full size fails.
 //
 // node runtime-web/lab/still.ts --species <s> --still <clip> --ppp <n> --out <folder>
+// node runtime-web/lab/still.ts --package <folder> --still <clip> --still <clip>... --ppp <n> --out <folder>
+// --package draws any built package folder (build/characters/<s>/ by default);
+// with several --still, each goes into <out>/<clip>/, all from one Chromium.
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -115,24 +120,30 @@ export async function openStills(packageDir: string): Promise<Stills> {
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const { values: args } = parseArgs({
-    options: { species: { type: "string" }, still: { type: "string" }, ppp: { type: "string", default: "3" }, out: { type: "string" } },
+    options: {
+      species: { type: "string" }, package: { type: "string" }, still: { type: "string", multiple: true }, ppp: { type: "string", default: "3" }, out: { type: "string" },
+    },
   });
-  if (!args.species || !args.still || !args.out) {
+  if ((!args.species && !args.package) || !args.still?.length || !args.out) {
     console.error("usage: node runtime-web/lab/still.ts --species <s> --still <clip> --ppp <n> --out <folder>");
+    console.error("       node runtime-web/lab/still.ts --package <folder> --still <clip> [--still <clip>...] --ppp <n> --out <folder>");
     process.exit(2);
   }
-  const packageDir = join(repo, "build", "characters", args.species);
+  const packageDir = resolve(args.package ?? join(repo, "build", "characters", args.species!));
   if (!existsSync(join(packageDir, "package.json"))) {
-    console.error(`no package at ${packageDir}; build it first (node characters/build/build.ts ${args.species})`);
+    console.error(`no package at ${packageDir}; build it first (node characters/build/build.ts ${args.species ?? "<species>"})`);
     process.exit(1);
   }
   const stills = await openStills(packageDir);
   try {
     const set = await stills.load(Number(args.ppp));
-    const out = resolve(args.out);
-    const info = await stills.render(args.still, out);
-    console.log(`still ${info.still} of ${info.species} at ${info.ppp} px/pt from set ${set}: ${info.sizePx.join(" × ")} px, root at ${info.rootPx.join(", ")}, ` +
-      `${info.drawn.length} parts drawn (${await stills.device()}) into ${out}`);
+    const several = args.still.length > 1;
+    for (const name of args.still) {
+      const out = resolve(args.out, several ? name : "");
+      const info = await stills.render(name, out);
+      console.log(`still ${info.still} of ${info.species} at ${info.ppp} px/pt from set ${set}: ${info.sizePx.join(" × ")} px, root at ${info.rootPx.join(", ")}, ` +
+        `${info.drawn.length} parts drawn (${await stills.device()}) into ${out}`);
+    }
   } catch (error) {
     console.error(`still: ${(error as Error).message}`);
     process.exitCode = 1;

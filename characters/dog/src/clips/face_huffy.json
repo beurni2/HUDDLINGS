@@ -1,0 +1,8 @@
+{
+  "name": "face_huffy",
+  "lengthMs": 1000,
+  "views": { "body": [[0, "front"]], "head": [[0, "front"]] },
+  "states": { "eye.L": [[0, "flat"]], "eye.R": [[0, "flat"]], "mouth": [[0, "pressed"]], "brow.L": [[0, "neutral"]], "brow.R": [[0, "neutral"]], "ear.L": [[0, "neutral"]], "ear.R": [[0, "neutral"]], "cheeks": [[0, "puffed"]] },
+  "tracks": { "ear.L": { "rot": [[0, 0]] }, "ear.R": { "rot": [[0, 0]] } },
+  "events": [{ "at": 0, "type": "keyPose" }]
+}

@@ -1,11 +1,15 @@
-// Measures the two things the format contract pins WebGL to (characters/format/README.md,
-// Rendering; QUESTIONS.md E17), since Apple documents neither: which diagonal SpriteKit
-// splits a warp-grid cell along with subdivisionLevels 0, and how it filters between
-// mip levels. Each probe compares SpriteKit's pixels with exact predictions, writes
-// its numbers to build/parity/spritekit/probes.txt, and fails if SpriteKit does not
-// do what runtime-web/src/renderer.ts does. Measured on the iOS 26.2 simulator through
-// SKRenderer: cells split bottom-left to top-right, and no mipmaps used.
+// Measures the things the format contract pins WebGL to (characters/format/README.md,
+// Rendering; QUESTIONS.md E17), since Apple documents none of them: which diagonal SpriteKit
+// splits a warp-grid cell along with subdivisionLevels 0, how it filters between mip
+// levels, and how a sprite's alpha meets its texels and its crop mask. Each probe
+// compares SpriteKit's pixels with exact predictions, writes its numbers to
+// build/parity/spritekit/probes.txt, and fails if SpriteKit does not do what
+// runtime-web/src/renderer.ts does. Measured on the iOS 26.2 simulator through
+// SKRenderer: cells split bottom-left to top-right, and no mipmaps used; the alpha
+// probe joined in phase 3 and has not run on a Mac yet.
 #if canImport(SpriteKit) && canImport(Metal)
+import CompanionCore
+import CompanionSpriteKit
 import Foundation
 import ImageIO
 import Metal
@@ -254,6 +258,105 @@ final class RenderProbes: XCTestCase {
             note("probe: mipmaps, \(name): SpriteKit filters as \(filter)" + (filter == "LINEAR" ? ", using no mipmaps although asked to" : ""))
         }
         XCTAssertEqual(found["PNG page, one region"], webMipFilter, "SpriteKit filters the atlas's pages differently from the web renderer")
+    }
+
+    /// A part's alpha (README, Rendering), drawn through CompanionNode as the app draws it: the premultiplied
+    /// texel times the part's alpha, a mask faded to 0 still letting its whole group through, and a clipped
+    /// part's alpha fading only itself. Predicted from SpriteKit's own colours at alpha 1, so how this probe's
+    /// PNG is colour-managed cancels out (parity covers that); the web renderer's numbers for the same page
+    /// (runtime-web/test/renderer.test.ts) are noted beside them.
+    func testPartAlpha() throws {
+        let size = 128
+        let (offscreen, k) = try makeOffscreen(size)
+        // A page of three 16 × 16 regions 16 px apart, in straight alpha as a package stores it: opaque blue
+        // (the mask), opaque red (clipped to it), and (100, 200, 50) at alpha 128.
+        let width = 128, height = 16
+        var bytes = [UInt8](repeating: 0, count: width * height * 4)
+        for y in 0..<height {
+            for x in 0..<width {
+                let texel: [UInt8]
+                switch x {
+                case 0..<16: texel = [0, 0, 255, 255]
+                case 32..<48: texel = [255, 0, 0, 255]
+                case 64..<80: texel = [100, 200, 50, 128]
+                default: texel = [0, 0, 0, 0]
+                }
+                let i = 4 * (y * width + x)
+                bytes.replaceSubrange(i..<(i + 4), with: texel)
+            }
+        }
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent("alpha-probe-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let provider = try XCTUnwrap(CGDataProvider(data: Data(bytes) as CFData))
+        let image = try XCTUnwrap(CGImage(width: width, height: height, bitsPerComponent: 8, bitsPerPixel: 32, bytesPerRow: width * 4,
+                                          space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.last.rawValue),
+                                          provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent))
+        let destination = try XCTUnwrap(CGImageDestinationCreateWithURL(folder.appendingPathComponent("probe-0.png") as CFURL, UTType.png.identifier as CFString, 1, nil))
+        CGImageDestinationAddImage(destination, image, nil)
+        XCTAssertTrue(CGImageDestinationFinalize(destination))
+
+        // The anchors lay the parts out from the root: base over x 0 to 16 pt, spot over 8 to 24 (its right half
+        // outside base), soft over 32 to 48, each 16 pt tall below the root (y grows downward).
+        let decoder = JSONDecoder()
+        let set = try decoder.decode(AtlasSet.self, from: Data("""
+        { "name": "probe", "scale": 1, "pages": [ { "file": "probe-0.png", "scale": 1, "width": 128, "height": 16 } ],
+          "regions": { "base": { "page": 0, "x": 0, "y": 0, "w": 16, "h": 16, "anchorX": 0, "anchorY": 0 },
+                       "spot": { "page": 0, "x": 32, "y": 0, "w": 16, "h": 16, "anchorX": -8, "anchorY": 0 },
+                       "soft": { "page": 0, "x": 64, "y": 0, "w": 16, "h": 16, "anchorX": -32, "anchorY": 0 } } }
+        """.utf8))
+        let rig = try decoder.decode(Rig.self, from: Data("""
+        { "format": 1, "species": "probe", "height": 164, "bones": [ { "name": "root" } ], "views": ["front"],
+          "parts": [ { "name": "base", "bone": "root", "group": "body", "regions": { "front": "base" } },
+                     { "name": "spot", "bone": "root", "group": "body", "clipTo": "base", "regions": { "front": "spot" } },
+                     { "name": "soft", "bone": "root", "group": "body", "regions": { "front": "soft" } } ],
+          "drawOrder": { "front": ["base", "spot", "soft"] } }
+        """.utf8))
+        let compiled = compile(rig)
+        let views = Views(body: "front", head: "front")
+        let pose = evaluatePose(compiled, PoseInput(channels: [:], views: views))
+        let textures = try AtlasTextures(set: set, folder: folder)
+        // The root at (16, 80) pixels from the bottom-left corner, one character point to a pixel.
+        let ox = 16, oy = 80
+        func render(_ alpha: [String: Double]) throws -> [UInt8] {
+            let companion = CompanionNode(rig: rig, textures: textures, pointScale: CGFloat(1 / k))
+            companion.position = CGPoint(x: Double(ox) / k, y: Double(oy) / k)
+            try companion.show(drawList(compiled, pose, set, FrameState(views: views, alpha: alpha)))
+            return try draw(offscreen, k, [companion])
+        }
+        /// The mean colour over character points [x0, x1) × [4, 12), well inside each square.
+        func mean(_ pixels: [UInt8], _ x0: Int, _ x1: Int) -> [Double] {
+            var sum = [0.0, 0.0, 0.0], n = 0.0
+            for y in 4..<12 {
+                for x in x0..<x1 {
+                    let i = 4 * ((size - oy + y) * size + ox + x)
+                    for c in 0..<3 { sum[c] += Double(pixels[i + c]) }
+                    n += 1
+                }
+            }
+            return sum.map { $0 / n }
+        }
+        func expect(_ got: [Double], _ want: [Double], _ web: [Double], _ what: String) {
+            note(String(format: "probe: part alpha, %@: SpriteKit draws (%.1f, %.1f, %.1f), predicted (%.1f, %.1f, %.1f); the web renderer (%.1f, %.1f, %.1f)",
+                        what, got[0], got[1], got[2], want[0], want[1], want[2], web[0], web[1], web[2]))
+            XCTAssertTrue(zip(got, want).allSatisfy { abs($0.0 - $0.1) <= 2 }, "\(what): SpriteKit draws \(got), predicted \(want)")
+        }
+        let white = [255.0, 255, 255]
+        let plain = try render([:])
+        // At alpha 1: the mask, the clipped part over it (opaque, so its own colour), and a texel of alpha 128.
+        let blue = mean(plain, 2, 6), red = mean(plain, 10, 14), soft = mean(plain, 36, 44)
+        note(String(format: "probe: part alpha, at 1: a texel of alpha 128 draws (%.1f, %.1f, %.1f); the web renderer (177.2, 227.4, 152.1)", soft[0], soft[1], soft[2]))
+        // Over white a texel of premultiplied colour c and alpha a draws c + 255(1 − a) at 1, and c·p + 255(1 − a·p) at p.
+        let atAlpha = { (p: Double) in soft.map { 255 - p * (255 - $0) } }
+        let faded = try render(["spot": 0.5, "soft": 0.5])
+        expect(mean(faded, 2, 6), blue, [0, 0, 255], "the mask at 1")
+        expect(mean(faded, 10, 14), zip(red, blue).map { 0.5 * $0.0 + 0.5 * $0.1 }, [127.5, 0, 127.5], "a clipped part at 0.5 over its mask")
+        expect(mean(faded, 18, 22), white, white, "the clipped part outside its mask")
+        expect(mean(faded, 36, 44), atAlpha(0.5), [216.1, 241.2, 203.6], "a texel of alpha 128 at 0.5")
+        let hidden = try render(["base": 0])
+        expect(mean(hidden, 2, 6), white, white, "a mask at 0 draws nothing")
+        expect(mean(hidden, 10, 14), red, [255, 0, 0], "a mask at 0 still lets its group through")
+        expect(mean(hidden, 18, 22), white, white, "and still clips it")
     }
 }
 #endif

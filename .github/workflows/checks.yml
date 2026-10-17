@@ -111,11 +111,12 @@ jobs:
           retention-days: 14
 
   sheet-match:
-    # Spec section 5b, The sheet match, and the phase 3 plan (section 4): the
-    # dog built from its source, its front still rendered through the WebGL
-    # runtime and matched against the turnaround crop. The job fails when a
-    # gating check fails (look.ts exits 1) or anything errs (2). The evidence
-    # (compare.png, phone.png, match.json) is uploaded either way.
+    # Spec section 5b, The sheet match, and the phase 3 plan (sections 4 and
+    # 5): the dog built from its source, its front still rendered through the
+    # WebGL runtime and matched against the turnaround crop, and each face clip
+    # against its expression panels. The job fails when a gating check fails
+    # (look.ts exits 1) or anything errs (2). The evidence (compare.png,
+    # phone.png, beside.png, match.json) is uploaded either way.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -137,6 +138,46 @@ jobs:
         with:
           name: sheet-match-dog-front
           path: build/qa/front
+          retention-days: 14
+      # The Faces check (spec section 5b, L525): every face_<preset> clip the package holds against its primary
+      # expression panel, by place and by shape, and on its own head. It gates; a package with no face clip says so
+      # and passes. It runs even when the front fails, so both verdicts show.
+      - name: The faces against their expression panels
+        if: ${{ !cancelled() }}
+        run: node runtime-web/lab/look.ts dog --faces --qa build/qa
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: faces-dog
+          path: |
+            build/qa/faces/**/beside.png
+            build/qa/faces/**/match.json
+          if-no-files-found: ignore
+          retention-days: 14
+      # The line check (docs/phase3-fur-plan.md, B to E) in all six views, advisory until the lead makes it gating
+      # after the view lanes: look.ts runs it after each view's sheet match (lines.json, lines.png), lineaccept.py
+      # reports which of the plan's named defects still fail, the render plants are checked on these stills, and
+      # lineheld.py judges copies of the sheet the calibration never saw.
+      # Nothing here fails the job; the other views' sheet matches run here only to render their stills.
+      - name: The line check in every view (advisory)
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        run: |
+          node runtime-web/lab/look.ts dog front threeQuarter.L side.L back threeQuarter.R side.R --qa build/qa/lines || true
+          python3 characters/sheetmatch/lineaccept.py build/qa/lines --out build/qa/lines/acceptance.json
+          python3 characters/sheetmatch/lineplants.py dog --stills build/stills/dog --out build/qa/lines/plants || true
+          python3 characters/sheetmatch/lineheld.py dog --out build/qa/lines/heldout.json
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: lines-dog
+          path: |
+            build/qa/lines/**/lines.png
+            build/qa/lines/**/lines.json
+            build/qa/lines/acceptance.json
+            build/qa/lines/heldout.json
+            build/qa/lines/plants
+          if-no-files-found: ignore
           retention-days: 14
 
   swift-linux:

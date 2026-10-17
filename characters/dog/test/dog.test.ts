@@ -13,8 +13,11 @@ import { validate } from "../../../runtime-web/src/format.ts";
 import { compile, drawList, evaluatePose } from "../../../runtime-web/src/rig.ts";
 import { buildPackage, devFolder, packageFolder, readSource } from "../../build/build.ts";
 import { restTransform, toBone } from "../../draw/frame.ts";
-import { scopeIds } from "../../draw/svg.ts";
+import { scopeIds, type Piece } from "../../draw/svg.ts";
+import { BLUSH_REFERENCE } from "../src/presets.ts";
 import { front, landmarks } from "../src/views/front.ts";
+import { side } from "../src/views/side.ts";
+import { threeQuarter } from "../src/views/threeQuarter.ts";
 
 const json = (path: string) => JSON.parse(readFileSync(new URL(path, import.meta.url), "utf8"));
 const rig = json("../src/rig.json") as Rig;
@@ -73,8 +76,10 @@ test("the rig and its clips are sound, and the front order is spec L397's", () =
   const order = rig.drawOrder.front!.flatMap((e) => (e === "@head" ? rig.drawOrder["head.front"]! : [e]));
   const stages = [
     ["shadow"], ["tail"], ["body.back", "back.patch.R", "back.patch.L"], ["hind.L", "hind.R"], ["body.front", "shadow.chin"], ["collar", "shadow.chin.collar"], ["tag"],
-    ["ear.L", "ear.R"], ["head.base"], ["head.patch.L", "head.patch.R"], ["blush.L", "blush.R", "eye.L", "eye.R", "brow.L", "brow.R", "nose", "mouth"],
-    ["head.line"], ["tuft"], ["front.L", "front.R"],
+    // The temples a raised ear uncovers, on the head, drawn only beside a raised ear (DECISIONS 158).
+    ["ear.L", "ear.R"], ["temple.L", "temple.R"], ["head.base"], ["head.patch.L", "head.patch.R"], ["blush.L", "blush.R", "cheeks", "eye.L", "eye.R", "brow.L", "brow.R", "nose", "mouth"],
+    // The sparkle's stars (a face state's part beside the head, drawn only in that state) come last in the head.
+    ["head.line"], ["tuft"], ["stars"], ["front.L", "front.R"],
   ];
   assert.deepEqual(order, stages.flat());
 });
@@ -109,6 +114,38 @@ test("each placed landmark lies on its own part, the topmost there with alpha 0.
   for (const [name, p] of Object.entries(landmarks)) {
     const top = order.filter((part) => part !== "shadow" && alpha.get(part)?.(p)! >= 0.5).at(-1);
     assert.equal(top, owner[name], `${name} at (${p}) lies on ${top}`);
+  }
+});
+
+test("every view's blush is drawn at the reference level, its core the full printed pink, and rests at the resting level", () => {
+  // Spec L474 and Q25: a level is the printed pink's opacity over the fur; the parts are drawn at the reference level
+  // (presets.ts BLUSH_REFERENCE, their core at full #F7B3A6), and their rest alpha sets the resting level (DECISIONS 145, 160).
+  const drawn: [string, Piece][] = [
+    ...front().filter((d) => d.part.startsWith("blush.")).map((d): [string, Piece] => [`front ${d.part}`, d.piece]),
+    ...(["L", "R"] as const).flatMap((f) => [...threeQuarter(f), ...side(f)].filter((d) => d.part.startsWith("blush."))
+      .map((d, i): [string, Piece] => [`${i ? "side" : "threeQuarter"}.${f} ${d.part}`, d.piece])),
+  ];
+  assert.equal(drawn.length, 6);
+  for (const [name, p] of drawn) {
+    const [x, y, w, h] = p.box;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="${x} ${y} ${w} ${h}">${scopeIds(p.svg, "p")}</svg>`;
+    const png = PNG.sync.read(new Resvg(svg, { fitTo: { mode: "zoom", value: 3 } }).render().asPng());
+    let peak = 0, at = 0;
+    for (let i = 3; i < png.data.length; i += 4) if (png.data[i]! > peak) [peak, at] = [png.data[i]!, i - 3];
+    // The core within 2% of full strength, never past it, in the printed pink.
+    assert.ok(peak >= 0.98 * 255, `${name}'s core is at ${(peak / 255).toFixed(3)}, not full strength`);
+    const pink = [1, 3, 5].map((k) => parseInt((json("../model.json").palette.blush as string).slice(k, k + 2), 16));
+    const rgb = [0, 1, 2].map((c) => png.data[at + c]!);
+    assert.ok(rgb.every((c, k) => Math.abs(c - pink[k]!) <= 2), `${name}'s core is rgb(${rgb}), not the printed pink`);
+  }
+  // Planted: the blush drawn as before, the printed pink at 0.45 opacity blurred, peaks far below full strength.
+  const old = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="-20 -20 40 40"><defs><filter id="f" filterUnits="userSpaceOnUse" x="-20" y="-20" width="40" height="40"><feGaussianBlur stdDeviation="2.2"/></filter></defs>` +
+    `<ellipse rx="5.8" ry="3.6" fill="#F7B3A6" opacity="0.45" filter="url(#f)"/></svg>`;
+  const oldPng = PNG.sync.read(new Resvg(old, { fitTo: { mode: "zoom", value: 3 } }).render().asPng());
+  assert.ok(Math.max(...oldPng.data.filter((_, i) => i % 4 === 3)) < 0.5 * 255);
+  const resting = json("../model.json").blush.restingLevel as number;
+  for (const name of ["blush.L", "blush.R"]) {
+    assert.equal(rig.parts.find((p) => p.name === name)!.alpha, Math.round((resting / BLUSH_REFERENCE) * 1000) / 1000, `${name}'s rest alpha`);
   }
 });
 

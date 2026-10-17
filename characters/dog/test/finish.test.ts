@@ -1,8 +1,9 @@
 // Tests for the finish pass's shared recipes (DECISIONS 73 to 76, 78 to 84): every drawn view takes its eyes, its outer
 // line, its topknot, its ear paint, its paws' toe lines and its tag from characters/dog/src/parts/; the line darkens and fills out from where the light
 // falls to where the part meets the ground, on warm ladders with no grey; the eye's white is a crescent as wide as
-// its view asks on its outer side and none on the other, under one catchlight; and the topknot and the ears keep
-// their counts (3 to 5 curls, 4 to 7 locks over 2 or 3 clumps).
+// its view asks on its outer side and none on the other, under a large catchlight and a tiny one (Q26, DECISIONS 201); and the topknot and the ears keep
+// their counts (3 to 5 curls, 4 to 7 locks over 2 or 3 clumps, or over a hem of 3 or 4 tips where the view builds the
+// ear's edge, DECISIONS 215). A sole that takes the fur pass's ground term holds 216's pin instead of the darkest.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -11,7 +12,7 @@ import { LIMITS } from "../../draw/lint.ts";
 import type { Paint } from "../../draw/paint.ts";
 import { earFur } from "../src/parts/ear.ts";
 import { eye, eyeGeometry, type EyeSpec } from "../src/parts/eye.ts";
-import { litRibbons, type LitSpan } from "../src/parts/lines.ts";
+import { litRibbons, SOLE, type LitSpan } from "../src/parts/lines.ts";
 import { topknot, type Curl } from "../src/parts/topknot.ts";
 import { toes } from "../src/parts/paw.ts";
 import { tagPaint } from "../src/parts/tag.ts";
@@ -45,7 +46,8 @@ function lab(hex: string): [number, number, number] {
 }
 
 test("the line ladders darken from lit to the ground, warm all through, and are the palette's", () => {
-  for (const [name, ladder] of Object.entries(LINES)) {
+  // The two ladders; their lit steps beyond the light end (DECISIONS 285) are held in furkit.test.ts.
+  for (const [name, ladder] of [["cream", LINES.cream], ["tan", LINES.tan]] as const) {
     assert.equal(ladder.length, 11, `${name} has ${ladder.length} tones`);
     const L = ladder.map((h) => lab(h)[0]);
     for (let k = 1; k < L.length; k++) assert.ok(L[k]! < L[k - 1]!, `${name}[${k}] ${ladder[k]} is no darker than ${ladder[k - 1]}`);
@@ -77,6 +79,11 @@ test("the line is lightest and thinnest where the light falls, darkest and fulle
   assert.ok(l[1] <= 1.45, `the lit line swells to ${l[1]} pt`);
   assert.ok(g[0] >= 1.55, `the ground line thins to ${g[0]} pt`);
   for (const w of [...l, ...g]) assert.ok(w >= LIMITS.outer[0] && w <= LIMITS.outer[1], `a drawn width ${w} is outside the outer line's band`);
+  // A sole whose view asks for the fur pass's ground term (DECISIONS 216, replacing 74's and 79's soles-darkest pin
+  // there) is the sole tone under its middle, lighter than the darkest, and eases out toward its ends.
+  const sole = tones(litRibbons(ball, [{ from: [8, -2], to: [-8, -2], ground: "sole" }], "sole").svg, LINES.cream);
+  assert.equal(Math.max(...sole), Math.round(SOLE.depth * 10), `the sole's tones ${sole} do not peak at its own tone`);
+  assert.ok(Math.max(...sole) < Math.min(...groundTones), "the sole is as dark as the ground line it replaces");
 });
 
 test("a span's place deepens the line whatever the light, and a span on the tan takes the tan ladder", () => {
@@ -115,15 +122,16 @@ test("the eye's white is a crescent as wide as asked on its outer side, and none
   assert.ok(inIris(edge(round.white.at + 180)), "there is white on the nose's side too");
 });
 
-test("the eye has one catchlight, no strokes, and its lash line is an outer line", () => {
+// One large catchlight and one tiny one (docs/QUESTIONS.md Q26, decided by the founder Oct 16, 2026; DECISIONS 200, 201).
+test("the eye has one large and one tiny catchlight, no strokes, and its lash line is an outer line", () => {
   const p = eye(round);
-  assert.equal(p.svg.split(`fill="${C.light}"`).length - 1, 1, "the eye does not have exactly one catchlight");
+  assert.equal(p.svg.split(`fill="${C.light}"`).length - 1, 2, "the eye does not have exactly its large and its tiny catchlight");
   assert.ok(!/stroke=/.test(p.svg), "the eye strokes a ring or a ray");
   const [lid] = p.meta.lines;
   assert.ok(lid && lid.kind === "outer" && lid.width >= LIMITS.outer[0] && lid.width <= LIMITS.outer[1], "the lash line is not an outer line");
 });
 
-test("a topknot is 3 to 5 curls and an ear 4 to 7 locks over 2 or 3 clumps", () => {
+test("a topknot is 3 to 5 curls and an ear 4 to 7 locks over 2 or 3 clumps, or over a hem of 3 or 4 tips", () => {
   const curl: Curl = { nodes: [[0, -10], [5, -5], [0, 0], [-5, -5]], line: { from: [-5, -5], to: [5, -5] } };
   assert.throws(() => topknot([curl, curl], {} as Paint), /3 to 5 curls/);
   assert.throws(() => topknot(Array(6).fill(curl), {} as Paint), /3 to 5 curls/);
@@ -133,6 +141,11 @@ test("a topknot is 3 to 5 curls and an ear 4 to 7 locks over 2 or 3 clumps", () 
   assert.throws(() => earFur({ ...ear, locks: Array(8).fill(lock), dips: [[0, 0]] }), /4 to 7 locks/);
   assert.throws(() => earFur({ ...ear, locks: Array(5).fill(lock), dips: [] }), /2 or 3 clumps/);
   assert.throws(() => earFur({ ...ear, locks: Array(5).fill(lock), dips: [[0, 0], [1, 0], [2, 0]] }), /2 or 3 clumps/);
+  // An ear whose view builds its edge (DECISIONS 215, from the floppy-ears panel's 3 or 4 lock tips round the hem)
+  // counts the hem's tips instead: 3 or 4, whatever its dips (furkit.test checks the edge itself).
+  const edge = (tips: number) => ({ shape: ear.ear, span: { from: [0, 0] as P, to: [0, 0] as P }, tips: Array.from({ length: tips }, (_, k): P => [k - 2, 0]), notches: Array.from({ length: tips - 1 }, (_, k): P => [k - 1.5, -1]) });
+  assert.throws(() => earFur({ ...ear, locks: Array(5).fill(lock), dips: [], edge: edge(2) }), /3 or 4 lock tips, not 2/);
+  assert.throws(() => earFur({ ...ear, locks: Array(5).fill(lock), dips: [], edge: edge(5) }), /3 or 4 lock tips, not 5/);
 });
 
 test("the eye's rim is darker than the iris it rings, and the lower iris lightens down to its foot", () => {

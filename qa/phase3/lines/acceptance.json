@@ -1,0 +1,448 @@
+{
+ "defects": [
+  {
+   "view": "front",
+   "defect": "#2",
+   "saw": "the cheek over each ear: a hard, chipped, unlined wedge",
+   "regions": [
+    "ear.L|head.base",
+    "ear.R|head.base"
+   ],
+   "failing": [
+    {
+     "region": "ear.L|head.base",
+     "measure": "weakPt",
+     "value": 10.61,
+     "threshold": 2.121
+    },
+    {
+     "region": "ear.L|head.base across",
+     "measure": "recall",
+     "value": 0.579,
+     "threshold": 0.781
+    },
+    {
+     "region": "ear.R|head.base",
+     "measure": "weakPt",
+     "value": 8.59,
+     "threshold": 1.943
+    },
+    {
+     "region": "ear.R|head.base across",
+     "measure": "recall",
+     "value": 0.545,
+     "threshold": 0.818
+    }
+   ],
+   "caught": true
+  },
+  {
+   "view": "front",
+   "defect": "#3",
+   "saw": "the chin over the collar: a square block, no line, no scallops",
+   "regions": [
+    "collar|head.base"
+   ],
+   "failing": [
+    {
+     "region": "collar|head.base",
+     "measure": "regionInkLog",
+     "value": -1.241,
+     "threshold": 0.632
+    }
+   ],
+   "caught": true
+  },
+  {
+   "view": "front",
+   "defect": "#10",
+   "saw": "between the front legs: no chest V, the legs' inner edges unlined, a tan wedge",
+   "regions": [
+    "body.front|front.L",
+    "body.front|front.R",
+    "body.front"
+   ],
+   "failing": [
+    {
+     "region": "body.front|front.L",
+     "measure": "gapPt",
+     "value": 19.25,
+     "threshold": 1.943
+    },
+    {
+     "region": "body.front|front.R",
+     "measure": "gapPt",
+     "value": 15.87,
+     "threshold": 1.943
+    }
+   ],
+   "caught": true
+  },
+  {
+   "view": "front",
+   "defect": "#11",
+   "saw": "the front legs and paws: flat mittens, a heavy even line, toe ticks",
+   "regions": [
+    "front.L|ground",
+    "front.R|ground"
+   ],
+   "failing": [
+    {
+     "region": "front.L|ground",
+     "measure": "toneDelta",
+     "value": -12.5,
+     "threshold": 5.386
+    },
+    {
+     "region": "front.R|ground",
+     "measure": "toneDelta",
+     "value": -12.5,
+     "threshold": 4.952
+    }
+   ],
+   "caught": true
+  },
+  {
+   "view": "front",
+   "defect": "#12",
+   "saw": "the front legs' outer edges on the haunches: a cream seam, a line from mid-air",
+   "regions": [
+    "body.back|front.L",
+    "body.back|front.R"
+   ],
+   "failing": [
+    {
+     "region": "body.back|front.L",
+     "measure": "toneDelta",
+     "value": -10.0,
+     "threshold": 3.0
+    },
+    {
+     "region": "body.back|front.R",
+     "measure": "inkLog",
+     "value": -1.202,
+     "threshold": 0.288
+    }
+   ],
+   "caught": true
+  },
+  {
+   "view": "threeQuarter.L",
+   "defect": "D3",
+   "saw": "the near cheek over the near ear: the ear's inner line stops at eye level",
+   "regions": [
+    "ear.L|head.base"
+   ],
+   "failing": [
+    {
+     "region": "ear.L|head.base",
+     "measure": "inkLog",
+     "value": -2.084,
+     "threshold": 0.554
+    },
+    {
+     "region": "ear.L|head.base across",
+     "measure": "recall",
+     "value": 0.6,
+     "threshold": 0.8
+    }
+   ],
+   "caught": true
+  },
+  {
+   "view": "threeQuarter.L",
+   "defect": "D10",
+   "saw": "the far leg and the chest between the legs: peach-tan, a hard unlined diagonal",
+   "regions": [
+    "body.front|front.R",
+    "front.R",
+    "body.front"
+   ],
+   "failing": [
+    {
+     "region": "body.front|front.R",
+     "measure": "toneDelta",
+     "value": 16.0,
+     "threshold": 3.619
+    }
+   ],
+   "caught": true
+  },
+  {
+   "view": "threeQuarter.L",
+   "defect": "D12",
+   "saw": "the front paws: flat, a constant dark line, toe ticks, a cuff",
+   "regions": [
+    "front.L|ground",
+    "front.R|ground"
+   ],
+   "failing": [
+    {
+     "region": "front.L|ground",
+     "measure": "furCrossings10Pt",
+     "value": 0.0,
+     "threshold": 0.643
+    }
+   ],
+   "caught": true
+  },
+  {
+   "view": "threeQuarter.R",
+   "defect": "D3",
+   "saw": "the near cheek over the near ear: the ear's inner line stops at eye level",
+   "regions": [
+    "ear.R|head.base"
+   ],
+   "failing": [
+    {
+     "region": "ear.R|head.base",
+     "measure": "inkLog",
+     "value": -1.905,
+     "threshold": 0.554
+    },
+    {
+     "region": "ear.R|head.base across",
+     "measure": "recall",
+     "value": 0.6,
+     "threshold": 0.8
+    }
+   ],
+   "caught": true
+  },
+  {
+   "view": "threeQuarter.R",
+   "defect": "D10",
+   "saw": "the far leg and the chest between the legs: peach-tan, a hard unlined diagonal",
+   "regions": [
+    "body.front|front.L",
+    "front.L",
+    "body.front"
+   ],
+   "failing": [
+    {
+     "region": "body.front|front.L",
+     "measure": "toneDelta",
+     "value": 15.9,
+     "threshold": 3.619
+    }
+   ],
+   "caught": true
+  },
+  {
+   "view": "threeQuarter.R",
+   "defect": "D12",
+   "saw": "the front paws: flat, a constant dark line, toe ticks, a cuff",
+   "regions": [
+    "front.R|ground",
+    "front.L|ground"
+   ],
+   "failing": [
+    {
+     "region": "front.R|ground",
+     "measure": "furCrossings10Pt",
+     "value": 0.0,
+     "threshold": 0.643
+    }
+   ],
+   "caught": true
+  },
+  {
+   "view": "side.L",
+   "defect": "#9",
+   "saw": "the front paws: a heavy sole stroke open at the heel, claw ticks",
+   "regions": [
+    "front.L|ground",
+    "front.R|ground",
+    "front.L|front.R"
+   ],
+   "failing": [
+    {
+     "region": "front.L|ground",
+     "measure": "furCrossings10Pt",
+     "value": 0.0,
+     "threshold": 0.643
+    },
+    {
+     "region": "front.L|front.R",
+     "measure": "toneDelta",
+     "value": 11.0,
+     "threshold": 3.858
+    }
+   ],
+   "caught": true
+  },
+  {
+   "view": "side.L",
+   "defect": "#11",
+   "saw": "the near leg's back edge, the heel and the belly between the paws: an open unlined column",
+   "regions": [
+    "body.front|front.L",
+    "body.front|ground",
+    "front.L"
+   ],
+   "failing": [
+    {
+     "region": "body.front|front.L",
+     "measure": "gapPt",
+     "value": 7.73,
+     "threshold": 1.943
+    },
+    {
+     "region": "front.L",
+     "measure": "gapPt",
+     "value": 2.33,
+     "threshold": 1.943
+    }
+   ],
+   "caught": true
+  },
+  {
+   "view": "side.L",
+   "defect": "#12",
+   "saw": "the hind paw and the haunch on the ground: 10.7 pt unlined",
+   "regions": [
+    "body.back|ground",
+    "hind.L|ground"
+   ],
+   "failing": [
+    {
+     "region": "body.back|ground",
+     "measure": "inkLog",
+     "value": -2.113,
+     "threshold": 0.288
+    },
+    {
+     "region": "hind.L|ground",
+     "measure": "furCrossings10Pt",
+     "value": 0.0,
+     "threshold": 0.643
+    }
+   ],
+   "caught": true
+  },
+  {
+   "view": "side.R",
+   "defect": "#9",
+   "saw": "the front paws: a heavy sole stroke open at the heel, claw ticks",
+   "regions": [
+    "front.R|ground",
+    "front.L|ground",
+    "front.L|front.R"
+   ],
+   "failing": [
+    {
+     "region": "front.R|ground",
+     "measure": "furCrossings10Pt",
+     "value": 0.0,
+     "threshold": 0.643
+    },
+    {
+     "region": "front.L|front.R",
+     "measure": "toneDelta",
+     "value": 9.8,
+     "threshold": 3.858
+    }
+   ],
+   "caught": true
+  },
+  {
+   "view": "side.R",
+   "defect": "#11",
+   "saw": "the near leg's back edge, the heel and the belly between the paws: an open unlined column",
+   "regions": [
+    "body.front|front.R",
+    "body.front|ground",
+    "front.R"
+   ],
+   "failing": [
+    {
+     "region": "body.front|front.R",
+     "measure": "gapPt",
+     "value": 7.73,
+     "threshold": 1.943
+    },
+    {
+     "region": "front.R",
+     "measure": "gapPt",
+     "value": 3.11,
+     "threshold": 1.943
+    }
+   ],
+   "caught": true
+  },
+  {
+   "view": "side.R",
+   "defect": "#12",
+   "saw": "the hind paw and the haunch on the ground: 10.7 pt unlined",
+   "regions": [
+    "body.back|ground",
+    "hind.R|ground"
+   ],
+   "failing": [
+    {
+     "region": "body.back|ground",
+     "measure": "inkLog",
+     "value": -2.101,
+     "threshold": 0.288
+    },
+    {
+     "region": "hind.R|ground",
+     "measure": "furCrossings10Pt",
+     "value": 0.0,
+     "threshold": 0.643
+    }
+   ],
+   "caught": true
+  },
+  {
+   "view": "back",
+   "defect": "#6",
+   "saw": "the shoulders: no outline on the left, a tan smear, the right line broken",
+   "regions": [
+    "body.back|outside"
+   ],
+   "failing": [
+    {
+     "region": "body.back|outside",
+     "measure": "weakPt",
+     "value": 5.01,
+     "threshold": 1.962
+    }
+   ],
+   "caught": true
+  },
+  {
+   "view": "back",
+   "defect": "#7",
+   "saw": "the haunches on the ground: a flat, straight, dark line",
+   "regions": [
+    "body.back|ground",
+    "hind.L|ground",
+    "hind.R|ground"
+   ],
+   "failing": [
+    {
+     "region": "body.back|ground",
+     "measure": "toneDelta",
+     "value": 9.0,
+     "threshold": 4.667
+    },
+    {
+     "region": "hind.L|ground",
+     "measure": "furCrossings10Pt",
+     "value": 0.0,
+     "threshold": 0.643
+    },
+    {
+     "region": "hind.R|ground",
+     "measure": "furCrossings10Pt",
+     "value": 0.0,
+     "threshold": 0.643
+    }
+   ],
+   "caught": true
+  }
+ ],
+ "caught": 19,
+ "of": 19
+}

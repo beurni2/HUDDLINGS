@@ -1,0 +1,6 @@
+{
+  "name": "still_side.R",
+  "lengthMs": 1000,
+  "views": { "body": [[0, "side.R"]], "head": [[0, "side.R"]] },
+  "states": { "mouth": [[0, "smile"]] }
+}

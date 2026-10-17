@@ -4,9 +4,13 @@
 // order is the one the crop shows (the tail in front of the body, L298); it draws
 // exactly the markings phase 2 sighted on its crop, each clipped to its part, and
 // no face; its cast shadows ride the bone that casts them, clipped to what they
-// fall on (L396); every part that turns reaches under the part covering it
-// (L394); its placed landmarks lie on their own parts; and its WebGL rest frame
-// is the resvg composite of its model-space drawings.
+// fall on (L396); its outer lines are the line rule's (DECISIONS 74, 104); every
+// part that turns reaches under the part covering it
+// (L394); its placed landmarks lie on their own parts; each ear steps in under
+// its upper step on the crop's edge (303); its line lives, lit and pressed
+// (302); every stroke inside its outline is an inner line (304, 305); the
+// tail's foot rests on the bottom's line, its shadow off that line (246); and
+// its WebGL rest frame is the resvg composite of its model-space drawings.
 import { after, before, test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
@@ -22,6 +26,8 @@ import { buildPackage, readSource, writePackage } from "../../build/build.ts";
 import { restTransform, toBone } from "../../draw/frame.ts";
 import { scopeIds } from "../../draw/svg.ts";
 import { BOX, composite, type Layer } from "../../draw/test/composite.ts";
+import { LIMITS } from "../../draw/lint.ts";
+import { C, LINES } from "../src/palette.ts";
 import { back, landmarks, TAIL_ROOT } from "../src/views/back.ts";
 
 const VIEW = "back";
@@ -129,6 +135,22 @@ test("the back view draws the markings phase 2 sighted on its crop, each an over
   }
 });
 
+test("the back view's outer lines are the line rule's, as every view's, and its fills carry no grain (DECISIONS 104 to 106)", () => {
+  // Each lined part draws its line by parts/lines.ts: its ribbons are the ladders' tones.
+  const tones = new Set([...LINES.cream, ...LINES.tan]);
+  for (const name of ["body.back", "hind.L", "hind.R", "tail", "tuft", "ear.L", "ear.R", "head.line", "back.patch.L", "back.patch.R", "tail.base"]) {
+    const fills = [...pieces.get(name)!.svg.matchAll(/<path fill="(#[0-9A-F]{6})" d=/g)].map((m) => m[1]!);
+    assert.ok(fills.some((c) => tones.has(c)), `${name} draws no line by the line rule`);
+  }
+  // The only typed lines left: the collar's rim, as every view types it, and the crown's line over the right ear's root
+  // (105); over the left root the line is the rule's.
+  const src = readFileSync(new URL("../src/views/back.ts", import.meta.url), "utf8");
+  assert.equal(src.match(/\boutline: /g)?.length, 1, "a part other than the collar types its own outline");
+  assert.equal(src.match(/\bribbons\(/g)?.length, 1, "the back types a line other than the root's stretch");
+  assert.ok(!/\bgrain\(/.test(src), "the back's fills carry a fur grain");
+  for (const gone of ["haunchLine", "haunchShadeLine", "crownWarm", "earFootLine"]) assert.ok(!(gone in C), `palette.ts still holds ${gone}`);
+});
+
 test("the back view's cast shadows ride the bone that casts them, clipped to the part they fall on (L396)", () => {
   const casts: Record<string, [string, string]> = { "shadow.ear.L": ["ear.L", "head.base"], "shadow.ear.R": ["ear.R", "head.base"], "shadow.tail": ["tail", "body.back"] };
   for (const [name, [bone, on]] of Object.entries(casts)) {
@@ -206,20 +228,158 @@ test("the back view's ears come out from under the crown: above the crown's lowe
   }
 });
 
-test("the back view's head rests on the collar's ends: beside each end the ground shows only below the band's middle", () => {
-  // On the sheet the head's lower fur stays full down onto the collar, and the notch between the ear, the head and the
-  // shoulder opens only from y -71 (the band's ends run from -70 to -62): no gap above it beside either end.
-  const r = rasters(2);
+/**
+ * The sheet's line along each lower lobe's diagonal, from the notch under the ear's foot down into the collar's end: the
+ * darkest pixel of each of the crop's columns there (master.turnaround.back, read on its own pixel centres, 0.785 pt
+ * apart), [|x|, y] from the collar's end out to the notch; below it the sheet shows its card, not fur (DECISIONS 282).
+ */
+const SHEET_LOBE = {
+  L: [[28.84, -71.41], [29.62, -71.41], [30.41, -72.19], [32.76, -72.19], [33.55, -72.98], [34.33, -73.76], [35.11, -73.76], [36.68, -75.33]],
+  R: [[30.8, -71.41], [31.58, -72.19], [33.15, -72.19], [33.94, -72.98], [34.72, -72.98], [35.51, -73.76], [36.29, -74.55], [37.08, -75.33], [37.86, -76.11]],
+} as const;
+/** The column of each ear's foot line on the sheet, |x|, where the lobe's line meets it at the notch's top (the ear's line at x -37.47 from y -77 to -73, and at 38.65 by -74.55). */
+const SHEET_FOOT = { L: 37.47, R: 38.65 } as const;
+/**
+ * The sheet's lobe line's y at |x|: between its columns; the innermost's inside them; the outermost's on out to the ear's
+ * foot line, where the two meet at the top of the notch between them, to within one of the crop's pixels (0.79 pt) of
+ * it; and none past that, over the ear.
+ */
+const lobeLineAt = (side: "L" | "R", ax: number): number => {
+  const cols = SHEET_LOBE[side];
+  if (ax <= cols[0]![0]) return cols[0]![1];
+  for (let i = 1; i < cols.length; i++) {
+    const [x0, y0] = cols[i - 1]!, [x1, y1] = cols[i]!;
+    if (ax <= x1) return y0 + ((ax - x0) / (x1 - x0)) * (y1 - y0);
+  }
+  return ax < SHEET_FOOT[side] + 0.79 ? cols[cols.length - 1]![1] : Infinity;
+};
+
+test("the back view's head rests on the collar's ends: no ground above the lobe's line beside each end, and none of its fur below it", () => {
+  // On the sheet each lower lobe's edge runs down a diagonal from the notch under the ear's foot into the collar's end,
+  // its line the lobe's own edge: above it the head's fur is full down onto the collar, with no gap, and below it the
+  // sheet shows its card (its grey 238 and lighter from 1.6 pt under the line's darkest pixel), never a band of the
+  // head's fur ending in a flat edge (DECISIONS 282). Read to within one of the crop's pixels (0.79 pt) above the line,
+  // and from 2.4 pt below it (the line's half and the card's start, and a pixel).
+  const r = rasters(2), PX = 0.79;
+  const drawn = order.filter((n) => n !== "shadow").map((n) => r.get(n)!);
+  const gaps: string[] = [], fur: string[] = [];
+  for (const [side, sx] of [["L", -1], ["R", 1]] as const) {
+    for (let x = 30.4; x <= 36.6; x += 0.5) {
+      const line = lobeLineAt(side, x);
+      for (let y = -82; y <= line - PX; y += 0.5) {
+        if (!drawn.some((png) => alphaAt(png, 2, [sx * x, y]) >= 0.5)) gaps.push(`(${(sx * x).toFixed(1)}, ${y.toFixed(1)})`);
+      }
+      if (drawn.some((png) => alphaAt(png, 2, [sx * x, line + 2.4]) >= 0.5)) fur.push(`(${(sx * x).toFixed(1)}, ${(line + 2.4).toFixed(2)})`);
+    }
+  }
+  assert.equal(gaps.length, 0, `the ground shows above a lobe's line beside the collar's ends at ${gaps.slice(0, 4).join(" ")}`);
+  assert.equal(fur.length, 0, `the head's fur reaches below a lobe's line at ${fur.slice(0, 4).join(" ")}`);
+});
+
+test("the back view's head lies over each ear's inner foot down to the notch: no ground shows between them (DECISIONS 243, 282)", () => {
+  // On the sheet the head's cream lies over each ear's inner foot and the two stay one mass down to the notch under the
+  // head's lower lobe, which opens only below y -71.4 on the left and -72.3 on the right (the sheet's mask at |x| 36.5
+  // to 41), and beside the ear's foot below the lobe's line (SHEET_LOBE), read here to within one of the crop's pixels
+  // (0.79 pt). An ear's foot that curves out from under the lobe higher up opens a slit of ground between them.
+  const scale = 4, r = rasters(scale), PX = 0.79;
   const drawn = order.filter((n) => n !== "shadow").map((n) => r.get(n)!);
   const gaps: string[] = [];
-  for (const sx of [-1, 1]) {
-    for (let x = 30; x <= 37.6; x += 0.5) {
-      for (let y = -82; y <= -71.8; y += 0.5) {
-        if (!drawn.some((png) => alphaAt(png, 2, [sx * x, y]) >= 0.5)) gaps.push(`(${sx * x}, ${y})`);
+  for (const [side, sx, notch] of [["L", -1, -71.4], ["R", 1, -72.3]] as const) {
+    for (let x = 34; x <= 44; x += 1 / scale) {
+      const open = Math.min(notch, lobeLineAt(side, x));
+      for (let y = -92; y <= open - PX; y += 1 / scale) {
+        if (!drawn.some((png) => alphaAt(png, scale, [sx * x, y]) >= 0.5)) gaps.push(`(${(sx * x).toFixed(2)}, ${y.toFixed(2)})`);
       }
     }
   }
-  assert.equal(gaps.length, 0, `the ground shows beside the collar's ends at ${gaps.slice(0, 4).join(" ")}`);
+  assert.equal(gaps.length, 0, `${gaps.length} points of ground between an ear and the head, from ${gaps.slice(0, 4).join(" ")}`);
+});
+
+/**
+ * Each ear's outer edge under its upper step, from y -125 to -116, on the crop (master.turnaround.back): where its line's
+ * outer edge lies along each row (the L* halfway between the card and the line's darkest there, read sub-pixel), [y, x].
+ */
+const SHEET_EAR_EDGE = {
+  L: [[-125, -57.6], [-124, -58.3], [-123, -59.25], [-122, -60.2], [-121, -61.35], [-120, -62.2], [-119, -63.3], [-118, -64.35], [-117, -65.4], [-116, -66.35]],
+  R: [[-125, 59.5], [-124, 59.85], [-123, 60.95], [-122, 61.9], [-121, 62.7], [-120, 63.7], [-119, 64.55], [-118, 65.45], [-117, 66.6], [-116, 67.4]],
+} as const;
+
+test("each of the back view's ears steps in under its upper step, on the crop's edge (DECISIONS 303)", () => {
+  // The crop's outer edge jogs in a second time a quarter of the way down each ear (at y -127, the step 244 left out):
+  // from there to y -116 it lies within 1 pt of the crop's, where 46011a2's left ear stood 1 to 1.85 pt out.
+  const scale = 4, r = rasters(scale);
+  for (const side of ["L", "R"] as const) {
+    const ear = r.get(`ear.${side}`)!, sx = side === "L" ? -1 : 1;
+    for (const [y, sheetX] of SHEET_EAR_EDGE[side]) {
+      let outer = NaN;
+      for (let x = Math.abs(sheetX) + 4; x >= Math.abs(sheetX) - 4; x -= 1 / (2 * scale)) {
+        if (alphaAt(ear, scale, [sx * x, y]) >= 0.5) {
+          outer = sx * x;
+          break;
+        }
+      }
+      assert.ok(Math.abs(outer - sheetX) <= 1, `ear.${side}'s outer edge at y ${y} is at x ${outer.toFixed(2)}, the crop's at ${sheetX}`);
+    }
+  }
+});
+
+test("the back view's line lives: light into the lit steps on its lit runs, dark where it presses (DECISIONS 284, 285, 302)", () => {
+  // Every lit span of the back carries its life (lines.ts's `life`, its swell typed from the crop), so the line's tone
+  // runs along it as the sheet's does: the crown's, the ears' tops, the haunches', the plume's right side reach the lit
+  // steps lighter than the ladders' lightest; the ground under the bottom and the plume's foot, and the ears' hems, the
+  // ladders' dark end. 46011a2's line held every lit run at the ladder's lightest or darker.
+  const fills = (name: string) => new Set([...pieces.get(name)!.svg.matchAll(/<path fill="(#[0-9A-F]{6})" d=/g)].map((m) => m[1]!));
+  const some = (name: string, tones: readonly string[], what: string) =>
+    assert.ok(tones.some((t) => fills(name).has(t)), `${name} draws ${what} in none of ${tones.join(", ")}`);
+  for (const name of ["head.line", "tuft", "body.back", "tail"]) some(name, LINES.lit.cream, "no lit run");
+  for (const name of ["ear.L", "ear.R"]) {
+    some(name, LINES.lit.tan, "no lit run on its upper edge");
+    some(name, LINES.tan.slice(6), "no full hem");
+  }
+  some("body.back", LINES.cream.slice(8), "no ground pressing at the band's dark end");
+  some("tail", LINES.cream.slice(7), "no foot pressing on the ground");
+  // Each ear's line breaks once under its upper step, where the crop's comes and goes: two pieces, the gap cited (302).
+  for (const name of ["ear.L", "ear.R"]) {
+    const outer = pieces.get(name)!.meta.lines.filter((l) => l.kind === "outer");
+    assert.equal(outer.length, 2, `${name}'s line is drawn in ${outer.length} pieces, not 2 (one break)`);
+  }
+});
+
+test("every stroke the back view draws inside its outline is an inner line, 0.6 to 0.9 pt (DECISIONS 286, 304, 305)", () => {
+  // The crown's four curls, the topknot's three hooks (the kit's crisp topknot from behind) and the plume's three hooks
+  // are the kit's tucks, each an inner line with its meta, which the lint holds to the spec's inner band (L506); the
+  // back's own copy of the tuck (tuckD) reported nothing, and the plume's hooks were 1.3 pt outer strokes.
+  const lines = drawn.flatMap((d) => d.piece.meta.lines.map((l) => ({ ...l, part: d.part })));
+  for (const l of lines.filter((x) => x.kind === "inner")) {
+    assert.ok(l.width >= LIMITS.inner[0] - 1e-9 && l.width <= LIMITS.inner[1] + 1e-9, `${l.part}'s ${l.where} is ${l.width} pt, outside the inner band`);
+  }
+  const count = (where: string) => lines.filter((l) => l.kind === "inner" && l.where === where).length;
+  assert.equal(count("head.line tuck"), 4, "the crown's curls are not four inner tucks");
+  assert.equal(count("tuft hook"), 3, "the topknot's feet and notch are not three inner hooks");
+  assert.equal(count("plume hook"), 3, "the plume's hooks are not three inner lines");
+  assert.ok(!lines.some((l) => l.kind === "outer" && /hook|tuck/.test(l.where)), "a hook or tuck is drawn as an outer line");
+  // The plume's hooks are drawn in the lit cream, a step lighter than the outline beside them (305).
+  const tail = pieces.get("tail")!.svg;
+  assert.ok(LINES.lit.cream.some((c) => tail.includes(`fill="${c}"`)), "the plume's hooks are not in the lit cream");
+});
+
+test("the back view's tail rests its foot on the bottom's line, and its cast shadow stays off that line (DECISIONS 246)", () => {
+  // The sheet draws one ground line under the tail's foot: the plume's lower edge lies on the body's bottom there, never
+  // above it with cream between (a doubled line) nor below it (out of the silhouette); and the tail's shadow on the
+  // haunches never pales the bottom's line under the foot.
+  const scale = 3, r = rasters(scale), tail = r.get("tail")!, body = r.get("body.back")!, shade = r.get("shadow.tail")!;
+  const lowest = (png: PNG, x: number) => {
+    for (let y = 2; y >= -12; y -= 1 / scale) if (alphaAt(png, scale, [x, y]) >= 0.5) return y;
+    return Number.NaN;
+  };
+  for (let x = -5; x <= 9; x += 1) {
+    const t = lowest(tail, x), b = lowest(body, x);
+    assert.ok(Math.abs(t - b) <= 0.6, `at x ${x} the tail's foot is at y ${t.toFixed(2)}, the bottom at ${b.toFixed(2)}`);
+  }
+  for (let x = -8; x <= 20; x += 1) {
+    const on = alphaAt(shade, scale, [x, lowest(body, x) - 0.8]);
+    assert.ok(on < 0.05, `the tail's shadow lies ${on.toFixed(2)} on the bottom's line at x ${x}`);
+  }
 });
 
 test("moving a pivot leaves the back view's rest frame where it was", () => {

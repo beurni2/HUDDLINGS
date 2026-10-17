@@ -4,10 +4,12 @@ the character, and no part drawn by one runtime and not the other.
 
 python3 tools/qa/parity.py <web folder> <spritekit folder> <report folder>
 
-Each folder holds one subfolder per run (full and small, both required) of
-f0000.png ... frames, directly or in a frames/ folder (as runtime-web/lab/render.ts
-writes them). Both runtimes must have rendered the same frames, and every frame
-must show the character.
+Each folder holds one subfolder per run (full and small, both required) of PNG
+frames, directly or in a frames/ folder (as runtime-web/lab/render.ts writes a
+clip's), matched by name: f0000.png ... for a clip's frames, or one still per
+clip, still_front.png ... face_shy.png, as render.ts --stills writes the dog's.
+Both runtimes must have rendered the same frames, and every frame must show the
+character.
 
 "On the character": the SSIM map is averaged over the pixels either frame draws,
 grown by the SSIM window's radius, so an empty background cannot dilute a
@@ -22,11 +24,21 @@ blurred by half a pixel): edge softening makes only lines thinner than the
 patches, so none of those fail; a diagonal half-pixel shift at the small size
 already does. Missing shadow, tag and nose all fail at both sizes.
 
+A soft part's level can be wrong with neither the score nor a patch noticing: the
+dog's resting blush, the printed pink at 0.368 over the fur, differs from bare fur
+by about 25 at its strongest, so a runtime that drew none passed. Where the web run
+has a soft.json (render.ts --stills writes one: each soft part's footprint in each
+still), every soft part's level is fitted in both frames, in the same box, as
+palette.py fits a cheek's (the reddest tenth of the light pixels, as an opacity of
+the printed pink over the printed fur, model.json's palette), and the two must agree
+within SOFT_LEVEL_TOLERANCE (characters/dog/DECISIONS.md 191).
+
 Writes report.json, a sheet of the worst frames side by side (web | SpriteKit
 | difference) and an evidence strip per run (five frames, web above SpriteKit),
 and exits 1 on any failure. With PARITY_PRINT_EVIDENCE=1 the strips are also
 printed as base64 JPEG, for logs where artifacts cannot be fetched."""
 import base64
+import fnmatch
 import io
 import json
 import os
@@ -37,6 +49,10 @@ import numpy as np
 from PIL import Image
 from scipy import ndimage
 from skimage.metrics import structural_similarity
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "characters" / "refprep"))
+import palette  # noqa: E402
 
 THRESHOLD = 0.95
 RUNS = ("full", "small")
@@ -51,6 +67,14 @@ FAINT = 24
 FAINT_BLOB = 7
 # skimage's default SSIM window is 7 x 7.
 WINDOW_RADIUS = 3
+# How far apart the two runtimes' fitted levels of a soft part may be: the Faces check's own tolerance on the level a
+# face asks for (facematch.BLUSH_LEVEL_TOLERANCE). Measured on the dog: a quarter- or half-pixel shift or a half-pixel
+# blur moves a fitted level by 0.013 at most at full size and 0.038 at the small size; a resting blush drawn at 0.3 or
+# 0.45 for 0.368 moves it by 0.06 or more (DECISIONS.md 191).
+SOFT_LEVEL_TOLERANCE = 0.05
+# Each soft part's level is fitted as an opacity of one of model.json's palette colours over another: (part names,
+# the colour under it, its own colour). The blush is the sheet match's (match.py's BLUSH_PARTS, Q25).
+SOFT_FITS = ((("blush*",), "fur", "blush"),)
 
 
 def load(path):
@@ -124,10 +148,16 @@ def diagnose(a, b):
             "ssim if spritekit were flipped": round(float(flipped), 4), "mean colour difference where both draw": colour}
 
 
-def side_by_side(a, b):
+def side_by_side(a, b, boxes=()):
+    """Web | SpriteKit | their difference, with the box of each soft part whose levels are apart outlined on it, a pixel
+    outside, so the outline never hides the difference it frames."""
     diff = np.abs(a.astype(int) - b.astype(int)).sum(axis=2)
-    heat = np.clip(255 - diff * 4, 0, 255).astype(np.uint8)
-    return np.concatenate([a, b, np.stack([heat] * 3, axis=2)], axis=1)
+    heat = np.stack([np.clip(255 - diff * 4, 0, 255).astype(np.uint8)] * 3, axis=2)
+    h, w = diff.shape
+    for x0, y0, x1, y1 in boxes:
+        x0, y0, x1, y1 = max(x0 - 1, 0), max(y0 - 1, 0), min(x1 + 1, w - 1), min(y1 + 1, h - 1)
+        heat[y0:y1 + 1, [x0, x1]] = heat[[y0, y1], x0:x1 + 1] = (220, 0, 160)
+    return np.concatenate([a, b, heat], axis=1)
 
 
 def sheet_text(rows):
@@ -155,11 +185,69 @@ def frames(root, run):
 
 def frame_names(root, run):
     folder = frames(root, run)
-    return sorted(p.name for p in folder.glob("f*.png")) if folder.is_dir() else []
+    return sorted(p.name for p in folder.glob("*.png")) if folder.is_dir() else []
 
 
 def runs_in(root):
     return sorted(p.name for p in root.iterdir() if p.is_dir()) if root.is_dir() else []
+
+
+def soft_parts(web, run):
+    """The web run's soft.json (render.ts --stills), or None when it declares none, as the test dance's frames do."""
+    path = web / run / "soft.json"
+    return json.loads(path.read_text()) if path.is_file() else None
+
+
+def soft_level(img, box, under, over):
+    """A soft part's level in a frame: palette.blush's fit in the box [x0, y0, x1, y1] (inclusive pixel indices), or None
+    when the box holds no light pixel to fit."""
+    x0, y0, x1, y1 = box
+    crop = img[y0:y1 + 1, x0:x1 + 1]
+    lab = palette.sheets.to_lab(crop.reshape(-1, 3))
+    if not ((lab[:, 0] > palette.LIGHT_L_MIN) & (np.hypot(lab[:, 1], lab[:, 2]) < palette.LIGHT_CHROMA_MAX)).any():
+        return None
+    return palette.blush(crop, under, over)[0]
+
+
+def compare_soft(web, spritekit, run, declared, problems):
+    """Each soft part's level fitted in both frames, where both have the frame; returns the rows."""
+    model_path = ROOT / "characters" / str(declared.get("species")) / "model.json"
+    if not model_path.is_file():
+        problems.append(f"{run}: soft.json names the species {declared.get('species')!r}, which has no model.json for its colours")
+        return []
+    colours = json.loads(model_path.read_text())["palette"]
+    rows = []
+    for name, parts in sorted(declared.get("stills", {}).items()):
+        if not (frames(web, run) / name).is_file():
+            problems.append(f"{run}/{name}: soft.json names a still the web run does not hold")
+            continue
+        if not (frames(spritekit, run) / name).is_file():
+            continue  # already a problem: no SpriteKit frame
+        a, b = load(frames(web, run) / name), load(frames(spritekit, run) / name)
+        if a.shape != b.shape:
+            continue  # already a problem: sizes differ
+        for entry in parts:
+            part = entry["part"]
+            fit = next(((under, over) for patterns, under, over in SOFT_FITS if any(fnmatch.fnmatchcase(part, p) for p in patterns)), None)
+            if fit is None:
+                problems.append(f"{run}/{name}: {part} is soft, and parity has no fit for its level (SOFT_FITS)")
+                continue
+            under, over = colours[fit[0]], colours[fit[1]]
+            web_level, sk_level = (soft_level(img, entry["box"], under, over) for img in (a, b))
+            row = {"frame": name, "part": part, "box": entry["box"], "web": None if web_level is None else round(web_level, 3),
+                   "spritekit": None if sk_level is None else round(sk_level, 3)}
+            if web_level is None or sk_level is None:
+                side = "web" if web_level is None else "SpriteKit"
+                row["pass"] = False
+                problems.append(f"{run}/{name}: the {side} frame has no light pixel in {part}'s box {entry['box']} to fit its level on")
+            else:
+                row["difference"] = round(sk_level - web_level, 3)
+                row["pass"] = abs(sk_level - web_level) <= SOFT_LEVEL_TOLERANCE
+                if not row["pass"]:
+                    problems.append(f"{run}/{name}: {part}'s level is {web_level:.3f} on the web and {sk_level:.3f} in SpriteKit, "
+                                    f"more than {SOFT_LEVEL_TOLERANCE} apart")
+            rows.append(row)
+    return rows
 
 
 def compare_run(web, spritekit, run, problems):
@@ -193,18 +281,30 @@ def compare_run(web, spritekit, run, problems):
         if found:
             kind, box = found[0]
             problems.append(f"{run}/{name}: the runtimes disagree over {len(found)} patch(es), the first {kind} at {box} (x0, y0, x1, y1)")
+    declared = soft_parts(web, run)
+    soft = compare_soft(web, spritekit, run, declared, problems) if declared is not None else None
     if not scored:
         return None
     values = [s["ssim"] for s in scored]
-    worst = sorted(scored, key=lambda s: (not s["patches"], s["ssim"]))[:6]
-    return {"frames": len(scored), "min": min(values), "mean": round(float(np.mean(values)), 4),
-            "with patches": sum(1 for s in scored if s["patches"]), "worst": worst}
+    off = {r["frame"] for r in soft or () if not r["pass"]}
+    for s in scored:
+        if s["frame"] in off:
+            s["soft levels apart"] = [r["part"] for r in soft if r["frame"] == s["frame"] and not r["pass"]]
+    # A frame that fails comes first: by a patch or a soft part's level, then by its score.
+    worst = sorted(scored, key=lambda s: (not (s["patches"] or s["frame"] in off), s["ssim"]))[:6]
+    entry = {"frames": len(scored), "min": min(values), "mean": round(float(np.mean(values)), 4),
+             "with patches": sum(1 for s in scored if s["patches"]), "worst": worst}
+    if soft is not None:
+        differences = [abs(r["difference"]) for r in soft if "difference" in r]
+        entry["soft"] = {"tolerance": SOFT_LEVEL_TOLERANCE, "levels": len(soft), "apart": sum(not r["pass"] for r in soft),
+                         "largest difference": max(differences) if differences else None, "rows": soft}
+    return entry
 
 
 def main(web, spritekit, out):
     web, spritekit, out = Path(web), Path(spritekit), Path(out)
     out.mkdir(parents=True, exist_ok=True)
-    report = {"threshold": THRESHOLD, "runs": {}, "problems": []}
+    report = {"threshold": THRESHOLD, "softLevelTolerance": SOFT_LEVEL_TOLERANCE, "runs": {}, "problems": []}
     problems = report["problems"]
     for side, root in (("web", web), ("SpriteKit", spritekit)):
         for run in RUNS:
@@ -222,7 +322,19 @@ def main(web, spritekit, out):
         report["runs"][run] = entry
         print(f"parity: {run}: {entry['frames']} frames, SSIM on the character min {entry['min']:.4f}, mean {entry['mean']:.4f}, "
               f"frames with a part-sized disagreement: {entry['with patches']}")
-        rows = [side_by_side(load(frames(web, run) / w["frame"]), load(frames(spritekit, run) / w["frame"])) for w in entry["worst"]]
+        if "soft" in entry:
+            soft = entry["soft"]
+            largest = "none fitted" if soft["largest difference"] is None else f"the largest difference {soft['largest difference']:.3f}"
+            print(f"parity: {run}: soft parts' levels: {soft['levels']} fitted in both runtimes, {largest}, "
+                  f"{soft['apart']} more than {soft['tolerance']} apart")
+        else:
+            print(f"parity: {run}: soft parts' levels: none declared (no soft.json in the web run)")
+        apart = {}
+        for r in entry.get("soft", {}).get("rows", ()):
+            if not r["pass"]:
+                apart.setdefault(r["frame"], []).append(r["box"])
+        rows = [side_by_side(load(frames(web, run) / w["frame"]), load(frames(spritekit, run) / w["frame"]), apart.get(w["frame"], ()))
+                for w in entry["worst"]]
         Image.fromarray(np.concatenate(rows, axis=0)).save(out / f"{run}-worst.png")
         first = entry["worst"][0]["frame"]
         entry["diagnosis of " + first] = diagnose(load(frames(web, run) / first), load(frames(spritekit, run) / first))

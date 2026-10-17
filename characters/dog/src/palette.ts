@@ -61,10 +61,6 @@ export const C = {
   /** The outline warmed toward the ears' deep brown: the sheet's line round the haunches, the paws and under the
    * chin, #9F6D4A against the sheet's #A06D48 to #A36E4F there. */
   warmLine: mix(outline, mix(darken(multiply(marking, marking), 0.12), marking, 0.33), 0.4),
-  /** The line round the back view's haunches: the outline 35% of the way to the soft shadow, #B39479 against the
-   * sheet's #BB9370 to #BE997E. Only the back view still draws its own lines; it moves onto parts/lines.ts's rule
-   * (DECISIONS 74) before Gate A. */
-  haunchLine: mix(outline, need(printed, "shadow"), 0.35),
   /** The line under the paws' soles, the darkest of the outer lines, where the light is furthest: the warm line a
    * fifth of the way to the printed dark brown, #8B5E3F (L* 44) against the sheet's L* 37 to 51 under the paws
    * (#876144, #89644A, #9A7250 in front, #7F5338 to #855C3E in the turned views), whose soft line peaks lighter than
@@ -99,6 +95,8 @@ export const C = {
   tagShadeBy: mix(light, tag, 0.4),
   tagShine: mix(tag, light, 0.6),
   eyeWhite: mix(fur, light, 0.75),
+  /** The sleepy half-lid's fur at its edge: the head patches' pale tan under the fur's own warm shade. */
+  lidShade: multiply(need(painted, "markingLight"), furShadeBy),
   /** The eye's rim and lash line, darker than the iris it rings: the pupils' near-black 35% darker, #150801 (L* 3)
    * against the turnaround's #140405 to #180804 (L* 2 to 4) round an iris of L* 5 to 8. */
   eyeRim: darken(eyeDark, 0.35),
@@ -121,18 +119,10 @@ export const C = {
    * #BB7362 against the sheet's #BA7766. */
   tongueRim: mix(tongue, dark, 0.33),
   tongueShine: mix(tongue, light, 0.5),
-  // The back view's lines (DECISIONS 96), each from the colours above by a rule.
-  /** The crown's line from behind: the faint fluff line a quarter of the way to the ears' outline, #C09B7F (the
-   * sheet's crown line reads #C7A387 at its darkest at the crop's scale; the fluff line alone, #C6AC96, is greyer). */
-  crownWarm: mix(mix(outline, fur, 0.45), mix(darken(multiply(marking, marking), 0.12), marking, 0.33), 0.25),
-  /** The haunches' line on the side away from the light: a third of the way to the warm line, #AA876C (the sheet's
-   * right haunch reads #AF896F at its darkest at the crop's scale, its left #B79B85). */
-  haunchShadeLine: mix(mix(outline, need(printed, "shadow"), 0.35), mix(outline, mix(darken(multiply(marking, marking), 0.12), marking, 0.33), 0.4), 0.3),
-  /** Where the crown's line runs over an ear's root (DECISIONS 89): the crown's light warm line halfway to the
-   * printed tan, #C59B79 against the sheet's #C2A07B and #CAA27F there. */
+  /** Where the crown's line runs over an ear's root from behind (DECISIONS 89, 105), the one stretch of line neither
+   * ladder holds: the crown's light warm line halfway to the printed tan, #C59B79 against the sheet's #C2A07B and
+   * #CAA27F there. */
   rootTan: mix(mix(outline, fur, 0.3), marking, 0.5),
-  /** The ears' feet from behind: the ears' line halfway to the soles' line, #925936 against the sheet's #8E5837. */
-  earFootLine: mix(darken(multiply(marking, marking), 0.12), mix(mix(outline, mix(darken(multiply(marking, marking), 0.12), marking, 0.33), 0.4), dark, 0.3), 0.5),
 };
 
 /** Stops evenly spaced along a chain of colours, each pair mixed channel by channel. */
@@ -158,7 +148,25 @@ const ladder = (stops: string[], n: number) => Array.from({ length: n }, (_, k) 
 export const LINES = {
   cream: ladder([mix(C.warmLine, fur, 0.33), mix(C.warmLine, fur, 0.12), C.soleLine], 11),
   tan: ladder([C.earEdge, mix(C.warmLine, C.earLine, 0.5), mix(C.earLine, dark, 0.2)], 11),
+  /**
+   * The lit steps (DECISIONS 285, the lead's L2), lighter than each ladder's lightest, nearest it first: only a line that
+   * asks for its life (parts/lines.ts, a span's living weight with `life`) reaches them, so every other line keeps its
+   * colour. Sampled from the sheet's own lit linework (qa/phase3/fur/recipes3/litsteps.json: each lit run's core
+   * colour, as the line check reads a line's tone):
+   * - `cream`, over the cream: the crops' crowns, topknots and the profile's plume, their medians L* 68.9 to 76.8 and
+   *   the plume's upper quartile 81.6, a* 4 to 7.4 and b* 15.9 to 18.3 (#C1A288 to #D1BAA0), against the ladder's
+   *   lightest L* 66.3: the crown's light warm line (C.crownLine) toward the fur halfway into its own shade, 0.15 to 0.6
+   *   of the way in four even steps, L* 67.8, 72.5, 77.4 and 82, a* 6.9 to 5, b* 17 to 14.1 (the crops' medians at
+   *   their lightness within about 1.5 ΔE), a warm brown of the sheet's linework (spec L506);
+   * - `tan`, round the ears where the light falls on their tops: the profile's and the three-quarter's ear tops,
+   *   medians L* 67.4 and 62.4 (#C99B77, #B59070), against the tan ladder's lightest 54.6 (the front's ear tops are
+   *   darker, 50.1 and 53.7, and need none): the ears' outline toward the cream, 0.15 and 0.3 of the way, L* 61 and 67.4.
+   */
+  lit: {
+    cream: ladder([mix(C.crownLine, mix(fur, furShade, 0.5), 0.15), mix(C.crownLine, mix(fur, furShade, 0.5), 0.6)], 4),
+    tan: ladder([C.earEdge, mix(C.earEdge, fur, 0.3)], 3).slice(1),
+  },
 };
 
 /** Every colour a dog part may paint. */
-export const palette = [...new Set([...Object.values(C), ...LINES.cream, ...LINES.tan])];
+export const palette = [...new Set([...Object.values(C), ...LINES.cream, ...LINES.tan, ...LINES.lit.cream, ...LINES.lit.tan])];

@@ -14,7 +14,7 @@ import { Resvg } from "@resvg/resvg-js";
 import { PNG } from "pngjs";
 import type { AtlasSet, Clip, Rig } from "../../../runtime-web/src/format.ts";
 import { validate } from "../../../runtime-web/src/format.ts";
-import { compile, drawList, evaluatePose } from "../../../runtime-web/src/rig.ts";
+import { compile, drawList, evaluatePose, regionFor } from "../../../runtime-web/src/rig.ts";
 import { openStills, type StillInfo, type Stills } from "../../../runtime-web/lab/still.ts";
 import { buildPackage, readSource, writePackage } from "../../build/build.ts";
 import { restTransform, toBone } from "../../draw/frame.ts";
@@ -85,7 +85,8 @@ test("the side view's clip is sound and its order is the one read off the crop",
     ["body.front"], ["body.back", "back.patch.L", "rump.patch.L"], ["hind.L"], ["front.L"],
     // The collar over the neck, the tag over the legs' tops, the chin over the collar.
     ["collar"], ["tag"],
-    ["head.base", "head.patch.L", "blush.L", "eye.L", "brow.L", "nose", "mouth"], ["head.line"],
+    // The cheeks' slot after the blush, as every head has (DECISIONS 208, 234), draws nothing here yet: side.ts holds the profile's puff out.
+    ["head.base", "head.patch.L", "blush.L", "cheeks", "eye.L", "brow.L", "nose", "mouth"], ["head.line"],
     // The near ear lies over the head's side, its top under the topknot's fur.
     ["ear.L"], ["tuft"],
   ];
@@ -94,7 +95,9 @@ test("the side view's clip is sound and its order is the one read off the crop",
 
 test("the side view draws every part the crop shows, and the markings this facing shows, each clipped to its part", () => {
   const drawn = side().map((d) => d.part);
-  assert.deepEqual([...drawn].sort(), [...order()].sort(), "the view draws exactly the parts its order lists");
+  const resting = order().filter((p) => regionFor(rig.parts.find((q) => q.name === p)!, VIEW, undefined) !== undefined);
+  assert.deepEqual(order().filter((p) => !resting.includes(p)), ["cheeks"], "only the cheeks' slot draws nothing at rest");
+  assert.deepEqual([...drawn].sort(), [...resting].sort(), "the view draws exactly the parts its order lists");
   // The profile hides the far eye, ear, brow, cheek and hind paw, and the right side's patches.
   for (const hidden of ["eye.R", "ear.R", "brow.R", "blush.R", "hind.R", "head.patch.R", "back.patch.R"]) assert.ok(!drawn.includes(hidden), `${hidden} is drawn`);
   const parts = new Map(rig.parts.map((p) => [p.name, p]));
@@ -204,7 +207,7 @@ test("the WebGL still of the dog's side reproduces the resvg composite of its mo
   const pieces = new Map(side().map((d) => [d.part, d.piece]));
   const clipOf = (name: string) => rig.parts.find((p) => p.name === name)!.clipTo;
   assert.deepEqual([...info.drawn].sort(), [...pieces.keys()].sort(), "the still draws every drawing of the view");
-  const reference = composite(resvgLayers(info.drawn, pieces, clipOf, SCALE), W, Hpx);
+  const reference = composite(resvgLayers(info.drawn, pieces, clipOf, SCALE, (name) => rig.parts.find((p) => p.name === name)!.alpha), W, Hpx);
   const dx = info.rootPx[0] + SCALE * BOX.x, dy = info.rootPx[1] + SCALE * BOX.y;
   assert.ok(Number.isInteger(dx) && Number.isInteger(dy));
   const [w, h] = info.sizePx;

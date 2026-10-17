@@ -1,0 +1,9 @@
+{
+  "what": "the dog's atlas page shares: build/dev/dog/report.json's pageShare after node characters/build/build.ts dog, at the base, with the face library, with round 2's states (the lifted ear a side, head.line's three temple states, openWide), with the new faces (eager, flat and peekBack a side, o.tongue, pressed, tinySmile, the puffed cheeks), and after the review's fixes (the temples as parts of their own on the head, temple.L and temple.R, out of the raised ears' drawings)",
+  "before": { "commit": "06ddf1a", "2x": { "pages": ["2048×2048"], "share": 0.303 }, "3x": { "pages": ["2048×2048"], "share": 0.678 }, "small": { "pages": ["1024×1024"], "share": 0.307 } },
+  "after": { "2x": { "pages": ["2048×2048"], "share": 0.317 }, "3x": { "pages": ["2048×2048"], "share": 0.709 }, "small": { "pages": ["1024×1024"], "share": 0.322 } },
+  "round2": { "2x": { "pages": ["2048×2048"], "share": 0.35 }, "3x": { "pages": ["2048×2048", "2048×256"], "share": 0.697 }, "small": { "pages": ["1024×1024"], "share": 0.355 } },
+  "newFaces": { "2x": { "pages": ["2048×2048"], "share": 0.354 }, "3x": { "pages": ["2048×2048", "2048×512"], "share": 0.635 }, "small": { "pages": ["1024×1024"], "share": 0.36 } },
+  "reviewFixes": { "2x": { "pages": ["2048×2048"], "share": 0.352 }, "3x": { "pages": ["2048×2048", "2048×512"], "share": 0.632 }, "small": { "pages": ["1024×1024"], "share": 0.358 } },
+  "bytes3x": { "rgba": 16777216, "round2Rgba": 18874368, "budget": 25165824, "newFacesRgba": 20971520 }
+}
